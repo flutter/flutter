@@ -1038,10 +1038,6 @@ let package = Package(
     }
 
     group('parsePluginError', () {
-      const expectedGuidance =
-          'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file: '
-          'a target uses a path outside of the package root.';
-
       testWithoutContext('returns null for empty or null message', () {
         expect(
           SwiftPackageManager.parsePluginError(null, pluginNames: <String>['plugin_1']),
@@ -1068,7 +1064,13 @@ let package = Package(
           message,
           pluginNames: <String>['plugin_1'],
         );
-        expect(result, startsWith(expectedGuidance));
+        expect(
+          result,
+          startsWith(
+            'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file: '
+            'target "plugin_1" uses a path outside of the package root.',
+          ),
+        );
         expect(result, contains(kDisableSwiftPMInstructions));
       });
 
@@ -1081,7 +1083,10 @@ let package = Package(
               "  target 'plugin_1_helper' in package 'plugin_1' is outside the package root";
           expect(
             SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
-            startsWith(expectedGuidance),
+            startsWith(
+              'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file: '
+              'target "plugin_1_helper" uses a path outside of the package root.',
+            ),
           );
         },
       );

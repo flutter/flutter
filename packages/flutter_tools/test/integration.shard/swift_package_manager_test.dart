@@ -950,7 +950,7 @@ void main() {
 
     final guidedError =
         'Flutter plugin "${plugin.pluginName}" has an incorrectly configured Package.swift file: '
-        'a target uses a path outside of the package root.';
+        'target "${plugin.pluginName}" uses a path outside of the package root.';
     await SwiftPackageManagerUtils.buildApp(
       flutterBin,
       appDirectoryPath,

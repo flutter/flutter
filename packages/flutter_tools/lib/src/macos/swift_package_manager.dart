@@ -555,12 +555,14 @@ class SwiftPackageManager {
       // the package root. See https://github.com/flutter/flutter/issues/184021.
       //
       // Example: target 'plugin_a' in package 'plugin_a' is outside the package root
-      pattern: RegExp(r"target '[^']+' in package '(?<package>[^']+)' is outside the package root"),
+      pattern: RegExp(
+        r"target '(?<target>[^']+)' in package '(?<package>[^']+)' is outside the package root",
+      ),
       // Use package name as the plugin name (target name could be different).
       pluginName: (RegExpMatch match) => match.namedGroup('package'),
-      message: (String pluginName) =>
+      message: (String pluginName, RegExpMatch match) =>
           'Flutter plugin "$pluginName" has an incorrectly configured Package.swift file: '
-          'a target uses a path outside of the package root.\n'
+          'target "${match.namedGroup('target')}" uses a path outside of the package root.\n'
           "Swift Package Manager requires all of a target's sources and resources to be inside "
           'the package root (the directory containing Package.swift). Paths such as '
           '`path: "../Classes"` are not supported.\n'
@@ -582,7 +584,7 @@ class SwiftPackageManager {
         if (pluginName != null && pluginNames.contains(pluginName)) {
           // The plugin can't be fixed by the app developer, so always offer disabling Swift
           // Package Manager as a workaround.
-          return '${matcher.message(pluginName)}\n\n$kDisableSwiftPMInstructions';
+          return '${matcher.message(pluginName, match)}\n\n$kDisableSwiftPMInstructions';
         }
       }
     }
@@ -604,5 +606,9 @@ class _SwiftPMPluginErrorMatcher {
   final String? Function(RegExpMatch match) pluginName;
 
   /// Builds the guided error message for the plugin that caused the error.
-  final String Function(String pluginName) message;
+  ///
+  /// Receives the plugin name already extracted by the `pluginName` callback (and verified to be
+  /// one of the project's plugins), and the full [RegExpMatch] so the message can include other
+  /// details from the error, such as a target name.
+  final String Function(String pluginName, RegExpMatch match) message;
 }

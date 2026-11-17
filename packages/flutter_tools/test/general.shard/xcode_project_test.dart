@@ -778,7 +778,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
             throwsToolExit(
               message:
                   'Flutter plugin "plugin_a" has an incorrectly configured Package.swift file: '
-                  'a target uses a path outside of the package root.',
+                  'target "plugin_a" uses a path outside of the package root.',
             ),
           );
           // The raw Xcode error is still surfaced for context.
