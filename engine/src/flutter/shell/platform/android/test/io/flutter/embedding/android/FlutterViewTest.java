@@ -1411,6 +1411,35 @@ public class FlutterViewTest {
   }
 
   @Test
+  @Config(sdk = API_LEVELS.API_28)
+  public void flutterImageView_pauseAndResumeControlResizeSurfaceSwapping() {
+    final ImageReader initialReader = mock(ImageReader.class);
+    when(initialReader.getWidth()).thenReturn(100);
+    when(initialReader.getHeight()).thenReturn(100);
+    when(initialReader.getSurface()).thenReturn(mock(Surface.class));
+
+    final FlutterImageView imageView =
+        new FlutterImageView(ctx, initialReader, FlutterImageView.SurfaceKind.background);
+    final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
+    imageView.attachToRenderer(flutterRenderer);
+    clearInvocations(flutterRenderer);
+
+    imageView.pause();
+    imageView.resizeIfNeeded(200, 200);
+    verify(flutterRenderer, never()).swapSurface(any());
+
+    imageView.resume();
+    imageView.resizeIfNeeded(300, 300);
+    verify(flutterRenderer, times(1)).swapSurface(any());
+
+    imageView.detachFromRenderer();
+    clearInvocations(flutterRenderer);
+    imageView.resume();
+    imageView.resizeIfNeeded(400, 400);
+    verify(flutterRenderer, never()).swapSurface(any());
+  }
+
+  @Test
   public void flutterSurfaceView_GathersTransparentRegion() {
     final Region mockRegion = mock(Region.class);
     final FlutterSurfaceView surfaceView = new FlutterSurfaceView(ctx);

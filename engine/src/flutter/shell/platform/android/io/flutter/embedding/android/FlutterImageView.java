@@ -205,8 +205,12 @@ public class FlutterImageView extends View implements RenderSurface {
     isPaused = true;
   }
 
+  @Override
   public void resume() {
-    // Not supported.
+    if (!isAttachedToFlutterRenderer) {
+      return;
+    }
+    isPaused = false;
   }
 
   private boolean isActiveBackgroundSurface() {
@@ -319,6 +323,9 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   private void updateCurrentBitmap() {
+    if (currentImage == null) {
+      return;
+    }
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
       if (buffer == null) {
