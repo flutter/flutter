@@ -941,12 +941,12 @@ VkResult vkGetQueryPoolResults(VkDevice device,
   {
     Lock lock(mock_pool->mutex);
     const bool is_64_bit = (flags & VK_QUERY_RESULT_64_BIT) != 0;
+    const size_t write_size = is_64_bit ? sizeof(uint64_t) : sizeof(uint32_t);
     const size_t element_size =
-        stride > 0 ? static_cast<size_t>(stride)
-                   : (is_64_bit ? sizeof(uint64_t) : sizeof(uint32_t));
+        stride > 0 ? static_cast<size_t>(stride) : write_size;
     uint8_t* dst = static_cast<uint8_t*>(pData);
     for (uint32_t i = 0; i < queryCount; ++i) {
-      if ((i + 1) * element_size > dataSize) {
+      if (i * element_size + write_size > dataSize) {
         break;
       }
       uint32_t query_idx = firstQuery + i;

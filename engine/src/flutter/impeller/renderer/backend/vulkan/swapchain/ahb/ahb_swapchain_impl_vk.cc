@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_impl_vk.h"
 
+#include "fml/closure.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
