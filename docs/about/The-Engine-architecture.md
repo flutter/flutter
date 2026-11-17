@@ -187,7 +187,7 @@ If it is unavoidable for Dart code to perform expensive work, it is advised that
 this code be moved into a separate [Dart
 isolate](https://api.flutter.dev/flutter/dart-isolate/dart-isolate-library.html)
 (e.g. using the
-[`compute`](https://api.flutter.dev/flutter/foundation/compute-constant.html)
+[`compute`](https://api.flutter.dev/flutter/foundation/compute.html)
 method). Dart code executing on a non-root isolate executes on a thread from a
 Dart VM managed thread pool. This cannot cause jank in a Flutter application.
 Terminating the root isolate will also terminate all isolates spawned by that
