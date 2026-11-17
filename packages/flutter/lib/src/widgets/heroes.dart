@@ -550,7 +550,7 @@ class _HeroFlightManifest {
       return false;
     }
     final Rect? fromLocation = fromHeroLocation;
-    return fromLocation != null && fromLocation.isFinite;
+    return isDiverted || (fromLocation != null && fromLocation.isFinite);
   }
 
   @override
@@ -987,8 +987,8 @@ class HeroController extends NavigatorObserver {
       // Putting a route offstage changes its animation value to 1.0. Once this
       // frame completes, we'll know where the heroes in the `to` route are
       // going to end up, and the `to` route will go back onstage.
-      final bool shouldWaitForLayout = toRoute.animation!.value == 0.0;
-      toRoute.offstage = shouldWaitForLayout;
+      final shouldWaitForLayout = !hasValidSize;
+      toRoute.offstage = toRoute.animation!.value == 0.0;
       WidgetsBinding.instance.addPostFrameCallback((Duration value) {
         if (fromRoute.navigator == null || toRoute.navigator == null) {
           return;
