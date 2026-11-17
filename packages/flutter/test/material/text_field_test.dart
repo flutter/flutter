@@ -17588,6 +17588,67 @@ void main() {
       }),
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/159230.
+    testWidgets(
+      'Magnifier hides when dragging far past the end of the text and reappears on return',
+      (WidgetTester tester) async {
+        final TextEditingController controller = _textEditingController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: TextField(dragStartBehavior: DragStartBehavior.down, controller: controller),
+              ),
+            ),
+          ),
+        );
+
+        const testValue = 'abc def ghi';
+        await tester.enterText(find.byType(TextField), testValue);
+        await skipPastScrollingAnimation(tester);
+
+        // Tap at the end of the text to focus the field and place the cursor.
+        await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+        await tester.pumpAndSettle(kDoubleTapTimeout);
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, testValue.length);
+        expect(find.byType(Magnifier), findsNothing);
+
+        // Drag along the text to show the magnifier.
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 0));
+        await tester.pump();
+        await gesture.moveTo(textOffsetToPosition(tester, 5));
+        await tester.pump();
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, 5);
+        expect(find.byType(Magnifier), findsOneWidget);
+
+        // Drag inside the field, but far past the end of the text. The magnifier
+        // should hide.
+        final Offset endOfText = textOffsetToPosition(tester, testValue.length);
+        final Rect fieldRect = tester.getRect(find.byType(EditableText));
+        expect(fieldRect.right - endOfText.dx, greaterThan(200));
+        await gesture.moveTo(Offset(endOfText.dx + 200, endOfText.dy));
+        await tester.pump();
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, testValue.length);
+        expect(find.byType(TextMagnifier), findsOneWidget);
+        expect(find.byType(Magnifier), findsNothing);
+
+        // Drag back onto the text. The magnifier should reappear.
+        await gesture.moveTo(textOffsetToPosition(tester, 5));
+        await tester.pump();
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, 5);
+        expect(find.byType(Magnifier), findsOneWidget);
+
+        await gesture.up();
+        await tester.pump();
+        expect(find.byType(TextMagnifier), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+
     testWidgets(
       'Can long press to show, unshow, and update magnifier',
       (WidgetTester tester) async {

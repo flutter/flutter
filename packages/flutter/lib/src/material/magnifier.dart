@@ -17,6 +17,10 @@ import 'package:flutter/foundation.dart';
 /// - The focal point never contains anything out of the bounds of the text
 ///   field or other widget being magnified (the [MagnifierInfo.fieldBounds]).
 ///
+/// - The loupe is hidden while the gesture's _x_ coordinate is further from
+///   either end of the currently editing line than half of the width of the
+///   magnified content, and shown again once the gesture comes back.
+///
 /// - The focal point always remains aligned with the _y_ coordinate of the touch.
 ///
 /// - The loupe always remains on the screen.
@@ -91,6 +95,10 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
   Offset _extraFocalPointOffset = Offset.zero;
 
+  // Whether the magnifier is hidden because the gesture is too far from the
+  // current line.
+  bool _isHidden = false;
+
   @override
   void initState() {
     super.initState();
@@ -162,6 +170,14 @@ class _TextMagnifierState extends State<TextMagnifier> {
     final double horizontalMaxFocalPointEdgeInsets =
         (Magnifier.kDefaultMagnifierSize.width / 2) / Magnifier._magnification;
 
+    // Like the native Android magnifier, hide the magnifier when the gesture
+    // is too far from the current line, that is, further from either end of
+    // the line than half of the magnified content's width.
+    final double gestureX = selectionInfo.globalGesturePosition.dx;
+    final bool isGestureTooFarFromLine =
+        gestureX < selectionInfo.currentLineBoundaries.left - horizontalMaxFocalPointEdgeInsets ||
+        gestureX > selectionInfo.currentLineBoundaries.right + horizontalMaxFocalPointEdgeInsets;
+
     // Adjust the focal point horizontally such that none of the magnifier
     // ever points to anything out of bounds.
     final double newGlobalFocalPointX;
@@ -197,7 +213,11 @@ class _TextMagnifierState extends State<TextMagnifier> {
 
     Timer? positionShouldBeAnimated = _positionShouldBeAnimatedTimer;
 
-    if (_magnifierPosition != null && finalMagnifierPosition.dy != _magnifierPosition!.dy) {
+    // Don't animate the jump between lines if the magnifier was hidden, since
+    // it should reappear directly at its new position.
+    if (_magnifierPosition != null &&
+        !_isHidden &&
+        finalMagnifierPosition.dy != _magnifierPosition!.dy) {
       if (_positionShouldBeAnimatedTimer != null && _positionShouldBeAnimatedTimer!.isActive) {
         _positionShouldBeAnimatedTimer!.cancel();
       }
@@ -216,6 +236,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
       _magnifierPosition = finalMagnifierPosition;
       _positionShouldBeAnimatedTimer = positionShouldBeAnimated;
       _extraFocalPointOffset = focalPointAdjustmentForScreenBoundsAdjustment;
+      _isHidden = isGestureTooFarFromLine;
     });
   }
 
@@ -234,7 +255,10 @@ class _TextMagnifierState extends State<TextMagnifier> {
       duration: _positionShouldBeAnimated
           ? TextMagnifier.jumpBetweenLinesAnimationDuration
           : Duration.zero,
-      child: Magnifier(additionalFocalPointOffset: _extraFocalPointOffset),
+      child: Visibility(
+        visible: !_isHidden,
+        child: Magnifier(additionalFocalPointOffset: _extraFocalPointOffset),
+      ),
     );
   }
 }
