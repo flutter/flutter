@@ -207,6 +207,7 @@ public class PlatformChannel {
                       // An unsupported content format was requested. Return failure.
                       result.error(
                           "error", "No such clipboard content format: " + contentFormatName, null);
+                      break;
                     }
                   }
 

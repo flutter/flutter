@@ -230,4 +230,19 @@ public class PlatformChannelTest {
     verifyNoMoreInteractions(mockResult);
     verify(mockMessageHandler, never()).setPreferredOrientations(anyInt());
   }
+
+  @Test
+  public void platformChannel_repliesOnceToUnsupportedClipboardFormat() {
+    PlatformChannel fakePlatformChannel = newPlatformChannel();
+    PlatformChannel.PlatformMessageHandler mockMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(mockMessageHandler);
+
+    MethodChannel.Result mockResult =
+        invokeMethod(fakePlatformChannel, "Clipboard.getData", "text/html");
+
+    verify(mockResult).error(eq("error"), any(), any());
+    verifyNoMoreInteractions(mockResult);
+    verify(mockMessageHandler, never()).getClipboardData(any());
+  }
 }
