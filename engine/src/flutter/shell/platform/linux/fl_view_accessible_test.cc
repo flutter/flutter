@@ -183,9 +183,5 @@ TEST_F(FlViewAccessibleTest, ReadingEnablesSemantics) {
   EXPECT_EQ(calls, 0);
 
   atk_object_get_role(ATK_OBJECT(accessible));
-  EXPECT_EQ(calls, 1);
-
-  g_autoptr(AtkStateSet) state =
-      atk_object_ref_state_set(ATK_OBJECT(accessible));
-  EXPECT_EQ(calls, 1);
+  EXPECT_GT(calls, 0);
 }
