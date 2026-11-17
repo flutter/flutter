@@ -10,13 +10,45 @@ const _flutterRepo = 'flutter';
 const _originRemote = 'origin';
 const _upstreamRemote = 'upstream';
 const _forkRemote = 'fork';
+const _gitHubHosts = <String>{'github.com', 'ssh.github.com'};
+const _gitSuffix = '.git';
 
-/// Matches `<owner>/<repo>` in GitHub HTTPS and SSH remote URLs (optionally with a port).
-final _gitHubRepoPattern = RegExp(
-  r'github\.com(?::\d+)?[:/]([^/]+)/([^/]+?)(?:\.git)?/?$',
-  caseSensitive: false,
-);
 final _whitespacePattern = RegExp(r'\s+');
+
+/// Extracts `<owner>` and `<repo>` from a GitHub HTTPS or SSH remote [url].
+({String owner, String repo})? _parseGitHubRepo(String url) {
+  final String normalizedUrl;
+  if (!url.contains('://')) {
+    final int colonIndex = url.indexOf(':');
+    final int slashIndex = url.indexOf('/');
+    if (colonIndex <= 0 || (slashIndex != -1 && slashIndex < colonIndex)) {
+      return null;
+    }
+    normalizedUrl = 'ssh://${url.replaceFirst(':', '/')}';
+  } else {
+    normalizedUrl = url;
+  }
+
+  final Uri? uri = Uri.tryParse(normalizedUrl);
+  if (uri == null || !_gitHubHosts.contains(uri.host)) {
+    return null;
+  }
+
+  final segments = <String>[
+    for (final String segment in uri.pathSegments)
+      if (segment.isNotEmpty) segment,
+  ];
+  if (segments case [final String owner, final String rawRepo]) {
+    final String repo = rawRepo.toLowerCase().endsWith(_gitSuffix)
+        ? rawRepo.substring(0, rawRepo.length - _gitSuffix.length)
+        : rawRepo;
+    if (repo.isEmpty) {
+      return null;
+    }
+    return (owner: owner, repo: repo);
+  }
+  return null;
+}
 
 /// The remotes used to cherry-pick: `upstream` points at `flutter/flutter` and
 /// `fork` at `<forkOwner>/flutter`. `forkOwner` is empty when there is no fork
@@ -41,9 +73,9 @@ GitRemotes parseRemotes(String remoteOutput, {required String login}) {
     if (parts.length < 2) {
       continue;
     }
-    final RegExpMatch? match = _gitHubRepoPattern.firstMatch(parts[1]);
-    if (match != null && match.group(2)!.toLowerCase() == _flutterRepo) {
-      owners.putIfAbsent(parts[0], () => match.group(1)!);
+    if (_parseGitHubRepo(parts[1]) case (:final String owner, :final String repo)
+        when repo.toLowerCase() == _flutterRepo) {
+      owners.putIfAbsent(parts[0], () => owner);
     }
   }
 

@@ -84,14 +84,26 @@ vonarian\tgit@github.com:Vonarian/flutter.git (push)
 
     test('ignores non-flutter repositories and non-GitHub remotes', () {
       const remoteOutput = '''
+aempty\thttps://github.com/bkonyi/.git (fetch)
+aempty\thttps://github.com/bkonyi/.git (push)
+alocal\t/tmp/github.com/bkonyi/flutter.git (fetch)
+alocal\t/tmp/github.com/bkonyi/flutter.git (push)
+alookalike\tgit@notgithub.com:bkonyi/flutter.git (fetch)
+alookalike\tgit@notgithub.com:bkonyi/flutter.git (push)
+anested\thttps://github.com/bkonyi/extra/flutter.git (fetch)
+anested\thttps://github.com/bkonyi/extra/flutter.git (push)
 engine\tgit@github.com:bkonyi/engine.git (fetch)
 engine\tgit@github.com:bkonyi/engine.git (push)
+fork\thttps://notgithub.com/bkonyi/flutter.git (fetch)
+fork\thttps://notgithub.com/bkonyi/flutter.git (push)
 goog\thttps://flutter.googlesource.com/mirrors/flutter (fetch)
 goog\thttps://flutter.googlesource.com/mirrors/flutter (push)
 myfork\tgit@github.com:bkonyi/flutter.git (fetch)
 myfork\tgit@github.com:bkonyi/flutter.git (push)
 origin\tgit@github.com:flutter/flutter.git (fetch)
 origin\tgit@github.com:flutter/flutter.git (push)
+upstream\thttps://github.com/flutter/extra/flutter.git (fetch)
+upstream\thttps://github.com/flutter/extra/flutter.git (push)
 ''';
 
       expect(parseRemotes(remoteOutput, login: 'bkonyi'), (
