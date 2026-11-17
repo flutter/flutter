@@ -3831,7 +3831,12 @@ flutter:
         setupLocalizations(<String, String>{'en': singleMessageArbFileString});
 
         final String localizationsFile = getGeneratedFileContent();
-        expect(localizationsFile, contains("import 'package:material_ui/material_ui.dart';"));
+        expect(
+          localizationsFile,
+          contains(
+            "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;",
+          ),
+        );
         expect(
           localizationsFile,
           isNot(contains("import 'package:flutter_localizations/flutter_localizations.dart';")),
@@ -3862,7 +3867,12 @@ flutter:
       setupLocalizations(<String, String>{'en': singleMessageArbFileString});
 
       final String localizationsFile = getGeneratedFileContent();
-      expect(localizationsFile, contains("import 'package:cupertino_ui/cupertino_ui.dart';"));
+      expect(
+        localizationsFile,
+        contains(
+          "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;",
+        ),
+      );
       expect(
         localizationsFile,
         isNot(contains("import 'package:flutter_localizations/flutter_localizations.dart';")),

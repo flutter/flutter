@@ -1235,23 +1235,21 @@ class LocalizationsGenerator {
       logger: logger,
     );
     final Set<String> dependencies = flutterManifest?.dependencies ?? const <String>{};
-    final (
-      String localizationsPackageImport,
-      String defaultLocalizationsDelegates,
-    ) = switch (dependencies) {
-      _ when dependencies.contains(_kMaterialUiPackage) => (
-        "import 'package:material_ui/material_ui.dart';",
-        'GlobalMaterialLocalizations.delegates',
-      ),
-      _ when dependencies.contains(_kCupertinoUiPackage) => (
-        "import 'package:cupertino_ui/cupertino_ui.dart';",
-        'GlobalCupertinoLocalizations.delegates',
-      ),
-      _ => (
-        "import 'package:flutter_localizations/flutter_localizations.dart';",
-        'GlobalMaterialLocalizations.delegates',
-      ),
-    };
+    final String localizationsPackageImport;
+    final String defaultLocalizationsDelegates;
+    if (dependencies.contains(_kMaterialUiPackage)) {
+      localizationsPackageImport =
+          "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;";
+      defaultLocalizationsDelegates = 'GlobalMaterialLocalizations.delegates';
+    } else if (dependencies.contains(_kCupertinoUiPackage)) {
+      localizationsPackageImport =
+          "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;";
+      defaultLocalizationsDelegates = 'GlobalCupertinoLocalizations.delegates';
+    } else {
+      localizationsPackageImport =
+          "import 'package:flutter_localizations/flutter_localizations.dart';";
+      defaultLocalizationsDelegates = 'GlobalMaterialLocalizations.delegates';
+    }
 
     return fileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
