@@ -76,7 +76,6 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
-    recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
       final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
           .rasterizeToImageBitmaps(currentFrameSize, pictures);

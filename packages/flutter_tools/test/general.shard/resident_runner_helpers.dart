@@ -10,21 +10,25 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -40,6 +44,8 @@ HotRunner createHotRunner(
   required String target,
   Analytics? analytics,
   File? applicationBinary,
+  ApplicationPackageFactory? applicationPackageFactory,
+  AssetBundleFactory? assetBundleFactory,
   bool benchmarkMode = false,
   BuildSystem? buildSystem,
   BuildTargets? buildTargets,
@@ -58,15 +64,28 @@ HotRunner createHotRunner(
   ToolContext toolContext = const DelegatingToolContext(),
   Xcode? xcode,
 }) {
-  buildSystem ??= FlutterBuildSystem(
-    fileSystem: toolContext.fs,
-    logger: toolContext.logger,
-    platform: toolContext.platform,
-  );
+  final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+  buildSystem ??= FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform);
 
   return HotRunner(
     flutterDevices,
     analytics: analytics ?? const NoOpAnalytics(),
+    applicationPackageFactory:
+        applicationPackageFactory ??
+        FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
+          toolContext: toolContext,
+        ),
+    assetBundleFactory:
+        assetBundleFactory ??
+        AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: cache.flutterRoot,
+          logger: logger,
+          platform: platform,
+        ),
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
@@ -96,6 +115,8 @@ ColdRunner createColdRunner(
   required String target,
   Analytics? analytics,
   File? applicationBinary,
+  ApplicationPackageFactory? applicationPackageFactory,
+  AssetBundleFactory? assetBundleFactory,
   bool awaitFirstFrameWhenTracing = true,
   BuildSystem? buildSystem,
   BuildTargets? buildTargets,
@@ -106,16 +127,28 @@ ColdRunner createColdRunner(
   bool traceStartup = false,
   Xcode? xcode,
 }) {
+  final ToolContext(:Cache cache, :FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   return ColdRunner(
     flutterDevices,
     analytics: analytics ?? const NoOpAnalytics(),
-    buildSystem:
-        buildSystem ??
-        FlutterBuildSystem(
-          fileSystem: toolContext.fs,
-          logger: toolContext.logger,
-          platform: toolContext.platform,
+    applicationPackageFactory:
+        applicationPackageFactory ??
+        FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
+          toolContext: toolContext,
         ),
+    assetBundleFactory:
+        assetBundleFactory ??
+        AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: cache.flutterRoot,
+          logger: logger,
+          platform: platform,
+        ),
+    buildSystem:
+        buildSystem ?? FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform),
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
     target: target,
