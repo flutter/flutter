@@ -68,8 +68,10 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
+    required this._assetBundleFactory,
     required this._templateRenderer,
     required super.toolContext,
+    super.applicationPackages,
     this.nativeAssetsBuilder,
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
@@ -380,6 +382,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
 
+  final AssetBundleFactory _assetBundleFactory;
   final TemplateRenderer _templateRenderer;
   final FlutterTestRunner? _customTestRunner;
 
@@ -388,6 +391,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _customTestRunner ??
       FlutterTestRunner(
         analytics: analytics,
+        applicationPackageFactory: applicationPackages,
         templateRenderer: _templateRenderer,
         toolContext: toolContext,
       );
@@ -833,7 +837,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterHookResult? flutterHookResult,
   }) async {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle assetBundle = _assetBundleFactory.createBundle();
     final int build = await assetBundle.build(
       flutterHookResult: flutterHookResult,
       packageConfigPath: packageConfigPath,
