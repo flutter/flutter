@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
-import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
@@ -58,7 +55,6 @@ import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
 // Files in `isolated` are intentionally excluded from google3 tooling.
-import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
@@ -68,7 +64,6 @@ import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
 ///
@@ -87,7 +82,7 @@ Future<void> main(List<String> args) async {
     args[slashQuestionHelpIndex] = '-h';
   }
 
-  final String? commandName = findCommandName(args);
+  final String? commandName = FlutterCommandRunner.findCommandName(args);
   final doctor = commandName == 'doctor';
   final bool help =
       args.contains('-h') ||
@@ -155,52 +150,23 @@ Future<void> main(List<String> args) async {
     },
     buildTargets: const BuildTargetsImpl(),
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+    flutterHookRunner: FlutterHookRunnerNative(),
     muteCommandLogging: muteCommandLogging,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     overrides: <Type, Generator>{
       AnsiTerminal: () => terminal,
-      FlutterHookRunner: () => FlutterHookRunnerNative(),
       Logger: () => logger,
       OutputPreferences: () => outputPreferences,
       Stdio: () => stdio,
-      // The web runner is not supported in google3 because it depends
-      // on dwds.
-      WebRunnerFactory: () => DwdsWebRunnerFactory(),
     },
     preRunValidatorBuilder: PreRunValidator.new,
     shutdownHooks: shutdownHooks,
     templateRenderer: const MustacheTemplateRenderer(),
     verbose: verbose,
     verboseHelp: verboseHelp,
+    // The web runner is not supported in google3 because it depends on dwds.
+    webRunnerFactory: DwdsWebRunnerFactory(),
   );
-}
-
-/// The name of the command in `args`, or null if there isn't one.
-///
-/// Global options can come before the command, so it can't be found by
-/// position. A throwaway parser walks past them instead: trailing options are
-/// disabled, so parsing stops at the command and leaves it at the head of
-/// [ArgResults.rest]. `help` is the exception, since the command runner
-/// registers it on the parser itself and so reports it as a parsed command.
-@visibleForTesting
-String? findCommandName(List<String> args, {ToolContext? toolContext}) {
-  final ArgResults results;
-  try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
-  } on ArgParserException {
-    // The real parser will complain about these later.
-    return null;
-  }
-  return results.command?.name ?? results.rest.firstOrNull;
-}
-
-class _FallbackToolContext implements ToolContext {
-  @override
-  final OutputPreferences outputPreferences = OutputPreferences();
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 List<FlutterCommand> generateCommands({
@@ -227,11 +193,7 @@ List<FlutterCommand> generateCommands({
         ),
         VariableDumpMachineProjectValidator(toolContext: toolContext),
       ],
-      androidBuilder: AndroidGradleBuilder.fromContexts(
-        analytics: toolDependencies.analytics,
-        androidContext: toolDependencies.androidContext,
-        toolContext: toolContext,
-      ),
+      androidBuilder: toolDependencies.androidBuilder,
       suppressAnalytics: !toolDependencies.analytics.okToSend,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -246,23 +208,24 @@ List<FlutterCommand> generateCommands({
       xcode: toolDependencies.appleContext.xcode,
     ),
     AttachCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       toolContext: toolContext,
       xcode: toolDependencies.appleContext.xcode,
       verboseHelp: verboseHelp,
     ),
     BuildCommand(
-      androidBuilder: AndroidGradleBuilder.fromContexts(
-        analytics: toolDependencies.analytics,
-        androidContext: toolDependencies.androidContext,
-        toolContext: toolContext,
-      ),
+      androidBuilder: toolDependencies.androidBuilder,
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
       buildSystem: toolDependencies.buildSystem,
       extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
+      templatePathProvider: toolDependencies.templatePathProvider,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -286,6 +249,8 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      pub: toolDependencies.pub,
+      templatePathProvider: toolDependencies.templatePathProvider,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       extensionTemplateManager: extensionTemplateManager,
@@ -294,11 +259,16 @@ List<FlutterCommand> generateCommands({
     DaemonCommand(
       androidContext: toolDependencies.androidContext,
       androidWorkflow: toolDependencies.androidWorkflow,
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
       deviceManager: toolDependencies.deviceManager,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       hidden: !verboseHelp,
       toolContext: toolContext,
+      webRunnerFactory: toolDependencies.webRunnerFactory,
       xcode: toolDependencies.appleContext.xcode,
     ),
     DebugAdapterCommand(toolContext: toolContext, verboseHelp: verboseHelp),
@@ -316,10 +286,15 @@ List<FlutterCommand> generateCommands({
     ),
     DowngradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
     DriveCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
+      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     EmulatorsCommand(
       doctor: toolDependencies.doctor,
@@ -329,8 +304,15 @@ List<FlutterCommand> generateCommands({
     ),
     GenerateCommand(toolContext: toolContext),
     GenerateLocalizationsCommand(toolContext: toolContext),
-    InstallCommand(toolContext: toolContext, verboseHelp: verboseHelp),
-    LogsCommand(toolContext: toolContext),
+    InstallCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    LogsCommand(
+      applicationPackageFactory: toolDependencies.applicationPackageFactory,
+      toolContext: toolContext,
+    ),
     PackagesCommand(
       buildSystem: toolDependencies.buildSystem,
       toolContext: toolContext,
@@ -346,17 +328,24 @@ List<FlutterCommand> generateCommands({
     ),
     RunCommand(
       appleContext: toolDependencies.appleContext,
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
       toolContext: toolContext,
       androidContext: toolDependencies.androidContext,
       androidWorkflow: toolDependencies.androidWorkflow,
       deviceManager: toolDependencies.deviceManager,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       verboseHelp: verboseHelp,
+      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
     TestCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -364,8 +353,13 @@ List<FlutterCommand> generateCommands({
       nativeAssetsBuilder: nativeAssetsBuilder,
     ),
     WidgetPreviewCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
+      pub: toolDependencies.pub,
+      templatePathProvider: toolDependencies.templatePathProvider,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     ),

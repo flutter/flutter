@@ -4,6 +4,7 @@
 
 import imp
 import os
+import sys
 import unittest
 
 SKY_TOOLS = os.path.dirname(os.path.abspath(__file__))
@@ -70,6 +71,20 @@ class GNTestCase(unittest.TestCase):
     self.assertEqual(gn.parse_size('5KB'), 5 * 2**10)
     self.assertEqual(gn.parse_size('5MB'), 5 * 2**20)
     self.assertEqual(gn.parse_size('5GB'), 5 * 2**30)
+
+  @unittest.skipIf(sys.platform.startswith('win'), 'LTO GN args are not set on Windows')
+  def test_thin_lto(self):
+    release = ['--runtime-mode', 'release']
+    self.assertFalse(self._gn_args(release)['use_thin_lto'])
+    self.assertTrue(self._gn_args(release + ['--thin-lto'])['use_thin_lto'])
+    self.assertTrue(self._gn_args(release + ['--thin-lto'])['enable_lto'])
+    # ThinLTO has no effect when LTO is disabled.
+    no_lto_args = self._gn_args(release + ['--thin-lto', '--no-lto'])
+    self.assertFalse(no_lto_args['enable_lto'])
+    self.assertNotIn('use_thin_lto', no_lto_args)
+    unopt_args = self._gn_args(release + ['--thin-lto', '--unoptimized'])
+    self.assertFalse(unopt_args['enable_lto'])
+    self.assertNotIn('use_thin_lto', unopt_args)
 
 
 if __name__ == '__main__':
