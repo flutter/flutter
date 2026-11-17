@@ -1067,11 +1067,9 @@ class FakeXcode extends Fake implements Xcode {
 }
 
 class FakeArtifacts extends Fake implements Artifacts {
-  FakeArtifacts({FileSystem? fileSystem, this.sdkPath})
-    : _delegate = Artifacts.test(fileSystem: fileSystem);
+  FakeArtifacts({FileSystem? fileSystem}) : _delegate = Artifacts.test(fileSystem: fileSystem);
 
   final Artifacts _delegate;
-  final String? sdkPath;
 
   @override
   LocalEngineInfo? get localEngineInfo => _delegate.localEngineInfo;
@@ -1088,17 +1086,12 @@ class FakeArtifacts extends Fake implements Artifacts {
     TargetPlatform? platform,
     BuildMode? mode,
     EnvironmentType? environmentType,
-  }) {
-    if (artifact == Artifact.engineDartSdkPath && sdkPath != null) {
-      return sdkPath!;
-    }
-    return _delegate.getArtifactPath(
-      artifact,
-      platform: platform,
-      mode: mode,
-      environmentType: environmentType,
-    );
-  }
+  }) => _delegate.getArtifactPath(
+    artifact,
+    platform: platform,
+    mode: mode,
+    environmentType: environmentType,
+  );
 
   @override
   String getEngineType(TargetPlatform platform, [BuildMode? mode]) =>

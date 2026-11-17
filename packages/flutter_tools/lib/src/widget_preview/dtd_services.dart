@@ -98,9 +98,6 @@ class WidgetPreviewDtdServices {
     kWorkspaceAnalysisCompleteMethod,
   };
 
-  /// The name of the event sent from the analysis server for widget preview updates.
-  static const kLspWidgetPreviewEventKind = 'dart/textDocument/publishFlutterWidgetPreviews';
-
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //

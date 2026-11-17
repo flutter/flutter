@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
@@ -23,6 +25,8 @@ import 'package:watcher/watcher.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/test_flutter_command_runner.dart';
+import 'utils/preview_project.dart';
 
 const String _kProjectRootPath = '/project';
 const String _kDartFilePath = '/project/lib/foo.dart';
@@ -47,6 +51,33 @@ void main() {
     late List<String> detectedNonDartFileChanges;
     late LspPreviewDetector detector;
 
+    LspPreviewDetector createDetector({
+      WidgetPreviewDtdServices? dtdOverride,
+      FlutterProject? projectOverride,
+      Platform? platformOverride,
+      WatcherBuilder? watcherBuilderOverride,
+    }) {
+      return LspPreviewDetector(
+        dtd: dtdOverride ?? fakeDtd,
+        onChangeDetected: detectedChanges.add,
+        onPubspecChangeDetected: detectedPubspecChanges.add,
+        previewAnalytics: previewAnalytics,
+        project: projectOverride ?? project,
+        suppressAnalytics: false,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: logger,
+          platform: platformOverride ?? platform,
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
+        analysisServerFactory: () async => fakeAnalysisServer,
+        onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
+        watcherBuilder: watcherBuilderOverride ?? (_) => fakeWatcher,
+      );
+    }
+
     setUp(() async {
       fs = MemoryFileSystem.test();
       logger = BufferLogger.test();
@@ -65,25 +96,7 @@ void main() {
       detectedPubspecChanges = <String>[];
       detectedNonDartFileChanges = <String>[];
 
-      detector = LspPreviewDetector(
-        dtd: fakeDtd,
-        onChangeDetected: detectedChanges.add,
-        onPubspecChangeDetected: detectedPubspecChanges.add,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        suppressAnalytics: false,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
-          shutdownHooks: shutdownHooks,
-        ),
-        analysisServerFactory: () async => fakeAnalysisServer,
-        onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
-        watcherBuilder: (_) => fakeWatcher,
-      );
+      detector = createDetector();
       await detector.initialize();
     });
 
@@ -208,24 +221,7 @@ void main() {
       await detector.dispose();
 
       fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
-      detector = LspPreviewDetector(
-        dtd: fakeDtd,
-        onChangeDetected: detectedChanges.add,
-        onPubspecChangeDetected: detectedPubspecChanges.add,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        suppressAnalytics: false,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
-          shutdownHooks: shutdownHooks,
-        ),
-        analysisServerFactory: () async => fakeAnalysisServer,
-        watcherBuilder: (_) => fakeWatcher,
-      );
+      detector = createDetector();
       await detector.initialize();
 
       expect(detector.analysisServer, isNull);
@@ -241,11 +237,204 @@ void main() {
       expect(fakeDtd.waitForAnalysisCallCount, 2);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
+
+    testWithoutContext(
+      'handles Windows directory watcher unexpected close error and rethrows other watcher errors',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/173895.
+        await detector.dispose();
+
+        final windowsWatcher = FakeWatcher();
+        addTearDown(windowsWatcher.close);
+        detector = createDetector(
+          dtdOverride: FakeWidgetPreviewDtdServices(),
+          platformOverride: FakePlatform(operatingSystem: 'windows'),
+          watcherBuilderOverride: (_) => windowsWatcher,
+        );
+        await detector.initialize();
+
+        windowsWatcher.emitError(
+          const FileSystemException(
+            '${LspPreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix}: test',
+          ),
+        );
+        await pumpEventQueue();
+        expect(logger.traceText, contains(LspPreviewDetector.kWindowsFileWatcherRestartedMessage));
+
+        Future<List<Object>> collectUncaughtWatcherErrors({
+          required Platform testPlatform,
+          required FileSystemException exception,
+        }) async {
+          final unhandledErrors = <Object>[];
+          await runZonedGuarded(
+            () async {
+              final errorWatcher = FakeWatcher();
+              addTearDown(errorWatcher.close);
+              final LspPreviewDetector errorDetector = createDetector(
+                dtdOverride: FakeWidgetPreviewDtdServices(),
+                platformOverride: testPlatform,
+                watcherBuilderOverride: (_) => errorWatcher,
+              );
+              addTearDown(errorDetector.dispose);
+              await errorDetector.initialize();
+              errorWatcher.emitError(exception);
+              await pumpEventQueue();
+            },
+            (Object error, StackTrace _) {
+              unhandledErrors.add(error);
+            },
+          );
+          return unhandledErrors;
+        }
+
+        // Unrelated FileSystemExceptions on Windows must still be rethrown.
+        expect(
+          await collectUncaughtWatcherErrors(
+            testPlatform: FakePlatform(operatingSystem: 'windows'),
+            exception: const FileSystemException('Access denied'),
+          ),
+          <Matcher>[isA<FileSystemException>()],
+        );
+
+        // On non-Windows platforms, directory watcher closed errors must also be rethrown.
+        expect(
+          await collectUncaughtWatcherErrors(
+            testPlatform: FakePlatform(),
+            exception: const FileSystemException(
+              LspPreviewDetector.kDirectoryWatcherClosedUnexpectedlyPrefix,
+            ),
+          ),
+          <Matcher>[isA<FileSystemException>()],
+        );
+      },
+    );
+
+    testWithoutContext(
+      'ignores events in .widget_preview, ephemeralDirectories, and symlinked ephemeralDirectories',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/178317 and
+        // https://github.com/flutter/flutter/issues/189849.
+        await detector.dispose();
+
+        final Directory realProjectDir = fs.directory('/real_project')..createSync();
+        final FlutterProject realProject = FlutterProject.fromDirectoryTest(realProjectDir);
+        expect(realProject.ephemeralDirectories, isNotEmpty);
+
+        final Directory externalEphemeralTarget = fs.directory('/external_ephemeral')..createSync();
+        final Link symlinkedEphemeralLink = fs.link('/real_project/symlinked_ephemeral')
+          ..createSync(externalEphemeralTarget.path);
+        final ephemeralDirs = <Directory>{
+          ...realProject.ephemeralDirectories,
+          fs.directory(symlinkedEphemeralLink.path),
+        };
+
+        final ephemeralWatcher = FakeWatcher();
+        addTearDown(ephemeralWatcher.close);
+        detector = createDetector(
+          dtdOverride: FakeWidgetPreviewDtdServices(),
+          projectOverride: FakeFlutterProject(realProjectDir, ephemeralDirectories: ephemeralDirs),
+          watcherBuilderOverride: (_) => ephemeralWatcher,
+        );
+        await detector.initialize();
+
+        Future<void> emitOnEphemeralWatcher(String path) async {
+          ephemeralWatcher.emitEvent(WatchEvent(ChangeType.MODIFY, path));
+          await pumpEventQueue();
+          await detector.mutex.runGuarded(() async {});
+        }
+
+        await emitOnEphemeralWatcher('/real_project/.widget_preview/lib/main.dart');
+        for (final Directory dir in realProject.ephemeralDirectories) {
+          await emitOnEphemeralWatcher(fs.path.join(dir.path, 'generated.dart'));
+        }
+        await emitOnEphemeralWatcher('/real_project/symlinked_ephemeral/generated.dart');
+        await emitOnEphemeralWatcher('/external_ephemeral/generated.dart');
+
+        expect(detectedChanges, isEmpty);
+        expect(detectedPubspecChanges, isEmpty);
+        expect(detectedNonDartFileChanges, isEmpty);
+        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      },
+    );
+
+    testWithoutContext(
+      'resolves relative and symlinked project.directory to canonical path',
+      () async {
+        await detector.dispose();
+
+        final Directory realProjectDir = fs.directory('/canonical/my_app')
+          ..createSync(recursive: true);
+        final Directory workspaceDir = fs.directory('/workspace')..createSync();
+        fs.link('/workspace/linked_app').createSync(realProjectDir.path);
+        fs.currentDirectory = workspaceDir;
+
+        String? watchedPath;
+        final symlinkWatcher = FakeWatcher();
+        addTearDown(symlinkWatcher.close);
+        detector = createDetector(
+          dtdOverride: FakeWidgetPreviewDtdServices(),
+          projectOverride: FakeFlutterProject(fs.directory('linked_app')),
+          watcherBuilderOverride: (String path) {
+            watchedPath = path;
+            return symlinkWatcher;
+          },
+        );
+        await detector.initialize();
+
+        expect(detector.projectRoot.path, realProjectDir.path);
+        expect(watchedPath, realProjectDir.path);
+      },
+    );
+  });
+
+  group('$WidgetPreviewSubCommandBase.getRootProject', () {
+    testWithoutContext(
+      'resolves relative CLI paths and symlinked workspace roots to canonical directories',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory canonicalWorkspaceDir = fs.directory('/canonical/workspace')
+          ..createSync(recursive: true);
+        final workspace = WidgetPreviewWorkspace(workspaceRoot: canonicalWorkspaceDir);
+        await workspace.createWorkspaceProject(name: 'member_app');
+
+        final Directory canonicalScaffold = canonicalWorkspaceDir.childDirectory('.widget_preview')
+          ..createSync();
+        expect(canonicalScaffold, exists);
+
+        final Directory linksDir = fs.directory('/links')..createSync();
+        fs.link('/links/ws_link').createSync(canonicalWorkspaceDir.path);
+        fs.currentDirectory = linksDir;
+
+        final cleanCommand = WidgetPreviewCleanCommand(
+          toolContext: FakeToolContext(
+            fs: fs,
+            logger: logger,
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.any(),
+            projectFactory: FlutterProjectFactory(
+              config: FakeConfig(),
+              fileSystem: fs,
+              logger: logger,
+            ),
+            signals: FakeSignals(),
+          ),
+        );
+        await createTestCommandRunner(cleanCommand)
+            .run(<String>['clean', fs.path.join('ws_link', 'packages', 'member_app')]);
+
+        expect(canonicalScaffold, isNot(exists));
+        expect(
+          logger.statusText,
+          contains('Deleting widget preview scaffold at ${canonicalScaffold.path}.'),
+        );
+      },
+    );
   });
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject(this.directory);
+  FakeFlutterProject(this.directory, {this.ephemeralDirectories = const <Directory>{}});
 
   @override
   final Directory directory;
@@ -254,7 +443,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   void reloadManifest({Logger? logger, FileSystem? fs}) {}
 
   @override
-  Set<Directory> get ephemeralDirectories => const <Directory>{};
+  final Set<Directory> ephemeralDirectories;
 }
 
 class FakeWatcher extends Fake implements Watcher {
@@ -267,6 +456,9 @@ class FakeWatcher extends Fake implements Watcher {
   Future<void> get ready => Future<void>.value();
 
   void emitEvent(WatchEvent event) => _events.add(event);
+
+  void emitError(Object error, [StackTrace? stackTrace]) =>
+      _events.addError(error, stackTrace ?? StackTrace.current);
 
   Future<void> close() => _events.close();
 }

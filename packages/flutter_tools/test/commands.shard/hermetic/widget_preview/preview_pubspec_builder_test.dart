@@ -3,20 +3,23 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:flutter_tools/src/widget_preview/preview_pubspec_builder.dart';
-import 'package:test/test.dart';
 import 'package:test_api/fake.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/package_config.dart';
 import '../../../src/throwing_pub.dart';
+import 'utils/preview_project.dart';
 
 void main() {
   group('$PreviewPubspecBuilder', () {
@@ -74,7 +77,114 @@ void main() {
         ProcessManager: () => processManager,
       },
     );
+
+    testWithoutContext('populatePreviewPubspec regenerates workspace root scaffold pubspec and updates manifest hash on member pubspec change', () async {
+      const fakeSdkVersion = '2.1.0-dev.8.0.flutter-4312ae32';
+      final Directory workspaceDir = fileSystem.directory('/workspace')..createSync();
+      final workspace = WidgetPreviewWorkspace(workspaceRoot: workspaceDir);
+      final WidgetPreviewProject member = await workspace.createWorkspaceProject(name: 'member_a');
+
+      final FlutterProject workspaceRootProject = FlutterProject.fromDirectory(
+        workspaceDir,
+        logger: logger,
+      );
+      workspaceRootProject.widgetPreviewScaffold.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: widget_preview_scaffold
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+
+      final manifest = PreviewManifest(
+        logger: logger,
+        rootProject: workspaceRootProject,
+        fs: fileSystem,
+        cache: Cache.test(
+          processManager: processManager,
+          fileSystem: fileSystem,
+          platform: FakePlatform(version: fakeSdkVersion),
+        ),
+      )..generate();
+
+      final fakePub = _FakeRecordingPub();
+      final workspaceBuilder = PreviewPubspecBuilder(
+        logger: logger,
+        offline: true,
+        previewManifest: manifest,
+        pub: fakePub,
+        rootProject: workspaceRootProject,
+        verbose: false,
+      );
+
+      member.writePubspec('''
+${member.initialPubspecContents}
+flutter:
+  deferred-components:
+    - name: memberComponent
+      libraries:
+        - package:member_a/deferred.dart
+      assets:
+        - path: assets/deferred_asset.txt
+''');
+      expect(manifest.shouldRegeneratePubspec(), isTrue);
+
+      await workspaceBuilder.populatePreviewPubspec(updatedPubspecPath: member.pubspecAbsolutePath);
+
+      final File rootScaffoldPubspec = workspaceRootProject.widgetPreviewScaffold.childFile(
+        'pubspec.yaml',
+      );
+      expect(rootScaffoldPubspec, exists);
+      expect(rootScaffoldPubspec.readAsStringSync(), contains('memberComponent'));
+      expect(fakePub.interactiveArguments, hasLength(2));
+      expect(
+        fakePub.interactiveArguments.first,
+        containsAllInOrder(<String>[
+          '--directory',
+          workspaceRootProject.widgetPreviewScaffold.path,
+        ]),
+      );
+      expect(fakePub.getDirectories, <String>[workspaceRootProject.widgetPreviewScaffold.path]);
+      expect(manifest.shouldRegeneratePubspec(), isFalse);
+      expect(member.projectRoot.childDirectory('.widget_preview'), isNot(exists));
+    });
   });
+}
+
+class _FakeRecordingPub extends Fake implements Pub {
+  final interactiveArguments = <List<String>>[];
+  final getDirectories = <String>[];
+
+  @override
+  Future<void> interactively(
+    List<String> arguments, {
+    required String command,
+    required PubContext context,
+    PubOutputMode outputMode = PubOutputMode.all,
+    FlutterProject? project,
+    bool touchesPackageConfig = false,
+  }) async {
+    interactiveArguments.add(arguments);
+  }
+
+  @override
+  Future<void> get({
+    required PubContext context,
+    required FlutterProject project,
+    bool checkUpToDate = false,
+    bool enforceLockfile = false,
+    String? flutterRootOverride,
+    bool offline = false,
+    PubOutputMode outputMode = PubOutputMode.all,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool upgrade = false,
+  }) async {
+    getDirectories.add(project.directory.path);
+  }
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {

@@ -211,15 +211,6 @@ void runFlutterClean(Directory tempDir, [ProcessManager processManager = _proces
   processManager.runSync(<String>[flutterBin, 'clean'], workingDirectory: tempDir.path);
 }
 
-Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
-  if (platform.isWindows) {
-    // Give the slow Windows filesystem and analysis server plenty of time
-    // to finish subsequent analysis runs and rebuild the semantic model.
-    await Future<void>.delayed(const Duration(seconds: 2));
-  }
-  return dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
-}
-
 /// Polls DTD for widget previews until the [predicate] is met, or [timeout] is reached.
 ///
 /// If [predicate] is null, it defaults to waiting until the previews list is not empty.

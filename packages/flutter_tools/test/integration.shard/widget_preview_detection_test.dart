@@ -290,7 +290,7 @@ Widget myPartPreview() => Container();
       final FlutterWidgetPreviewDetails preview = previews.previews.first;
       if (preview.functionName != 'myPartPreview') {
         throw StateError(
-          r'Wrong preview function detected in Parts test! Found: ${preview.functionName}',
+          'Wrong preview function detected in Parts test! Found: ${preview.functionName}',
         );
       }
     });

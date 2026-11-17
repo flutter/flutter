@@ -122,7 +122,9 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
     } else {
       projectDir = fs.currentDirectory;
     }
-    final FlutterProject project = validateFlutterProjectForPreview(projectDir);
+    final FlutterProject project = validateFlutterProjectForPreview(
+      resolveDirectoryLinks(projectDir),
+    );
     final FlutterProject? workspaceRoot = project.workspaceRoot;
     if (workspaceRoot != null) {
       logger.printTrace('Found workspace root at ${workspaceRoot.directory.path}');
@@ -348,7 +350,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     widgetPreviewScaffold.createSync(recursive: true);
 
     if (generateScaffoldProject) {
-      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+      // WARNING: this log message is used by test/integration.shard/widget_preview_test_helpers.dart
       logger.printStatus(
         'Creating widget preview scaffolding at: ${widgetPreviewScaffold.absolute.path}',
       );
@@ -395,7 +397,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           'widget preview scaffold.',
         );
       }
-      await _previewPubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
+      await _previewPubspecBuilder.populatePreviewPubspec();
     }
 
     _copyHostWebDirToScaffold(widgetPreviewScaffold);
@@ -507,10 +509,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   Future<void> _onPubspecChangeDetected(String path) async {
     logger.printStatus('Triggering restart based on update to pubspec.yaml: $path');
-    await _previewPubspecBuilder.populatePreviewPubspec(
-      rootProject: rootProject,
-      updatedPubspecPath: path,
-    );
+    await _previewPubspecBuilder.populatePreviewPubspec(updatedPubspecPath: path);
     await _triggerReload(.hotRestart);
   }
 
@@ -606,7 +605,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           }
         }
 
-        // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+        // WARNING: this log message is used by test/integration.shard/widget_preview_test_helpers.dart
         logger.printStatus('Launching the Widget Preview Scaffold on ${device.displayName}...');
 
         final debuggingOptions = DebuggingOptions.enabled(
@@ -704,7 +703,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       throwToolExit(error.toString());
     }
 
-    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+    // WARNING: this log message is used by test/integration.shard/widget_preview_test_helpers.dart
     logger.printStatus('Done loading previews.');
 
     // Send an analytics event reporting how long it took for the widget previewer to start.

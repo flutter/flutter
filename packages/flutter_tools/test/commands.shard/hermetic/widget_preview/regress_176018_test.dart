@@ -93,7 +93,7 @@ dependencies:
 
       // Populate .dart_tool/widget_preview_scaffold/pubspec.yaml with the dependencies on the
       // local projects.
-      await pubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
+      await pubspecBuilder.populatePreviewPubspec();
       final yaml = loadYaml(
         rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync(),
       ) as YamlMap;

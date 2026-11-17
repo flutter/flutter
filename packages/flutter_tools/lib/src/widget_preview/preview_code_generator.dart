@@ -14,11 +14,11 @@ import 'dtd_types.dart';
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
 class PreviewCodeGenerator {
-  PreviewCodeGenerator({required this.fs, required this.widgetPreviewScaffoldProject});
+  PreviewCodeGenerator({required this.widgetPreviewScaffoldProject, required this.fs});
 
   final FileSystem fs;
 
-  /// The project for the widget preview scaffold found under `.dart_tool/` in the developer's
+  /// The project for the widget preview scaffold found under `.widget_preview/` in the developer's
   /// project.
   final FlutterProject widgetPreviewScaffoldProject;
 
@@ -100,7 +100,6 @@ class PreviewCodeGenerator {
     );
   }
 
-  // TODO(bkonyi): update generated example now that we're computing constants
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
   /// [update].
   ///
@@ -110,40 +109,31 @@ class PreviewCodeGenerator {
   /// An example of a formatted generated file containing previews from two files could be:
   ///
   /// ```dart
+  /// // ignore_for_file: implementation_imports
+  /// // ignore_for_file: no_leading_underscores_for_library_prefixes
+  ///
   /// import 'widget_preview.dart' as _i1;
-  /// import 'package:splash/foo.dart' as _i2;
-  /// import 'package:splash/main.dart' as _i3;
-  /// import 'package:flutter/widgets.dart' as _i4;
+  /// import 'utils.dart' as _i2;
+  /// import 'package:splash/foo.dart' as _i3;
+  /// import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
+  /// import 'package:splash/custom_previews.dart' as _i5;
   ///
   /// List<_i1.WidgetPreview> previews() => [
-  ///   _i1.WidgetPreview(height: 100.0, width: 10000.0, child: _i2.preview()),
-  ///   _i1.WidgetPreview(
-  ///     name: 'Foo',
-  ///     height: 50 + 20,
-  ///     width: 200.0,
-  ///     textScaleFactor: 2.0,
-  ///     child: _i3.preview(),
+  ///   _i2.buildWidgetPreview(
+  ///     packageName: 'splash',
+  ///     scriptUri: 'file:///path/to/splash/lib/foo.dart',
+  ///     line: 4,
+  ///     column: 1,
+  ///     previewFunction: () => _i3.preview(),
+  ///     transformedPreview: const _i4.Preview().transform(),
   ///   ),
-  ///   _i1.WidgetPreview(
-  ///     name: 'Baz',
-  ///     height: 50.0,
-  ///     width: 200.0,
-  ///     textScaleFactor: 3.0,
-  ///     child: _i2.stateInjector(_i3.preview()),
-  ///   ),
-  ///   _i1.WidgetPreview(name: 'Bar', child: _i4.Builder(builder: _i3.preview2())),
-  ///   _i1.WidgetPreview(name: 'Constructor preview', height: 50.0, width: 100.0, child: _i3.MyWidget()),
-  ///   _i1.WidgetPreview(
-  ///     name: 'Named constructor preview',
-  ///     height: 50.0,
-  ///     width: 100.0,
-  ///     child: _i3.MyWidget.preview(),
-  ///   ),
-  ///   _i1.WidgetPreview(
-  ///     name: 'Static preview',
-  ///     height: 50.0,
-  ///     width: 100.0,
-  ///     child: _i3.MyWidget.staticPreview(),
+  ///   ..._i2.buildMultiWidgetPreview(
+  ///     packageName: 'splash',
+  ///     scriptUri: 'file:///path/to/splash/lib/custom_previews.dart',
+  ///     line: 10,
+  ///     column: 1,
+  ///     previewFunction: () => _i5.multiPreview(),
+  ///     preview: const _i5.BrightnessPreview(name: 'Foo'),
   ///   ),
   /// ];
   /// ```
@@ -244,7 +234,7 @@ class PreviewCodeGenerator {
 }
 
 class PreviewPrefixedAllocator implements cb.Allocator {
-  static const _doNotPrefix = <String>{'dart:core'};
+  static const _doNotPrefix = ['dart:core'];
   static const _kImportPrefix = '_i';
   static const _kPackageSchemePrefix = 'package:';
   static const _kDartSchemePrefix = 'dart:';

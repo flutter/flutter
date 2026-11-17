@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
 
 void main() {
   group('$PreviewCodeGenerator', () {
@@ -33,7 +32,7 @@ void main() {
       );
     });
 
-    testUsingContext(
+    testWithoutContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)} for LSP updates',
       () async {
         final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
@@ -50,6 +49,7 @@ void main() {
             'package:flutter/src/widget_previews/widget_previews.dart': '_i4',
             'package:foo_project/src/custom_previews.dart': '_i5',
             'package:foo_project/src/error.dart': '_i6',
+            'package:foo_project/src/transitive_error.dart': '_i7',
           },
           previews: <FlutterWidgetPreviewDetails>[
             FlutterWidgetPreviewDetails(
@@ -88,11 +88,24 @@ void main() {
               scriptUri: Uri.file('/user/flutter_project/lib/src/error.dart'),
               libraryUri: Uri.parse('package:foo_project/src/error.dart'),
             ),
+            FlutterWidgetPreviewDetails(
+              functionName: 'transitiveErrorPreview',
+              hasError: false,
+              dependencyHasErrors: true,
+              isBuilder: false,
+              isMultiPreview: false,
+              packageName: 'foo_project',
+              position: const Position(character: 1, line: 8),
+              previewAnnotation: 'const _i4.Preview()',
+              scriptUri: Uri.file('/user/flutter_project/lib/src/transitive_error.dart'),
+              libraryUri: Uri.parse('package:foo_project/src/transitive_error.dart'),
+            ),
           ],
           scriptUris: <Uri>[
             Uri.file('/user/flutter_project/lib/foo.dart'),
             Uri.file('/user/flutter_project/lib/src/custom_previews.dart'),
             Uri.file('/user/flutter_project/lib/src/error.dart'),
+            Uri.file('/user/flutter_project/lib/src/transitive_error.dart'),
           ],
         );
 
@@ -108,6 +121,7 @@ import 'package:foo_project/foo.dart' as _i3;
 import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
 import 'package:foo_project/src/custom_previews.dart' as _i5;
 import 'package:foo_project/src/error.dart' as _i6;
+import 'package:foo_project/src/transitive_error.dart' as _i7;
 
 List<_i1.WidgetPreview> previews() => [
   _i2.buildWidgetPreview(
@@ -135,13 +149,41 @@ List<_i1.WidgetPreview> previews() => [
     functionName: 'errorPreview',
     dependencyHasErrors: false,
   ),
+  _i2.buildWidgetPreviewError(
+    packageName: 'foo_project',
+    scriptUri: 'file:///user/flutter_project/lib/src/transitive_error.dart',
+    line: 8,
+    column: 1,
+    packageUri: 'package:foo_project/src/transitive_error.dart',
+    functionName: 'transitiveErrorPreview',
+    dependencyHasErrors: true,
+  ),
 ];
 ''';
         expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
+
+        // Regenerate the generated file with no previews.
+        codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
+          const FlutterWidgetPreviews(
+            namespaces: <String, String>{},
+            previews: <FlutterWidgetPreviewDetails>[],
+            scriptUris: <Uri>[],
+          ),
+        );
+
+        const emptyGeneratedPreviewFileContents = '''
+// ignore_for_file: implementation_imports
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+
+import 'widget_preview.dart' as _i1;
+
+List<_i1.WidgetPreview> previews() => [];
+''';
+        expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
       },
     );
 
-    testUsingContext('ignores previews with null packageName for LSP updates', () async {
+    testWithoutContext('ignores previews with null packageName for LSP updates', () async {
       final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
         PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
       );
@@ -213,7 +255,7 @@ List<_i1.WidgetPreview> previews() => [
       expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
     });
 
-    testUsingContext(
+    testWithoutContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
       () async {
         final File generatedDtdConnectionInfoFile = project.widgetPreviewScaffold.childFile(

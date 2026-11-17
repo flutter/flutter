@@ -5,6 +5,18 @@
 import 'dart:async';
 import 'dart:collection';
 
+import '../base/file_system.dart';
+
+/// Resolves symbolic links in [directory] and returns an absolute [Directory],
+/// falling back to [Directory.absolute] if link resolution fails.
+Directory resolveDirectoryLinks(Directory directory) {
+  try {
+    return directory.fileSystem.directory(directory.resolveSymbolicLinksSync()).absolute;
+  } on FileSystemException {
+    return directory.absolute;
+  }
+}
+
 /// Convenience getters for examining [String] paths.
 extension StringExtension on String {
   static final RegExp _pathSeparator = RegExp(r'[/\\]');

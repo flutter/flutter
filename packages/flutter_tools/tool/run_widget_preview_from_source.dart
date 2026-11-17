@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 /// A helper script to reduce friction when iterating on the widget_preview_scaffold templates.
 ///
 /// This script operates on the CWD and:
-///  - Deletes .dart_tool/widget_preview_scaffold/
+///  - Deletes .widget_preview/
 ///  - Deletes the contents of $FLUTTER_ROOT/packages/flutter_tools/templates/widget_preview_scaffold/lib/
 ///  - Copies the contents of $FLUTTER_ROOT/dev/integration_tests/widget_preview_scaffold/lib/
 ///    to $FLUTTER_ROOT/packages/flutter_tools/templates/widget_preview_scaffold/lib/ with the

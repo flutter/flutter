@@ -104,10 +104,7 @@ class PreviewPubspecBuilder {
 
   PubOutputMode get _outputMode => verbose ? PubOutputMode.all : PubOutputMode.failuresOnly;
 
-  Future<void> populatePreviewPubspec({
-    required FlutterProject rootProject,
-    String? updatedPubspecPath,
-  }) async {
+  Future<void> populatePreviewPubspec({String? updatedPubspecPath}) async {
     final FlutterProject widgetPreviewScaffoldProject = rootProject.widgetPreviewScaffoldProject;
 
     // Overwrite the pubspec for the preview scaffold project to include assets
@@ -188,12 +185,6 @@ class PreviewPubspecBuilder {
       offline: offline,
       outputMode: _outputMode,
     );
-  }
-
-  void onPubspecChangeDetected(String path) {
-    // TODO(bkonyi): trigger hot reload or restart?
-    logger.printStatus('Changes to $path detected.');
-    populatePreviewPubspec(rootProject: rootProject, updatedPubspecPath: path);
   }
 
   @visibleForTesting
