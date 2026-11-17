@@ -228,7 +228,7 @@ are `run_tests.py`'s (`testRuns`), which on Linux keep
 `host_debug_unopt_impeller_tests` builder: no arguments of its own). That
 suite is 4,795 tests and ~35 minutes serial under Bazel; `run_tests.py`
 runs it through gtest-parallel, and Bazel's form of that is `shard_count`
-(`testShardCounts` in bazel_mapping.dart: ten shards), which works because
+(`testShardCounts` in bazel_mapping.dart: sixteen shards), which works because
 `xvfb_run.sh` hands Bazel's `TEST_TOTAL_SHARDS`/`TEST_SHARD_INDEX`/
 `TEST_SHARD_STATUS_FILE` to googletest under the `GTEST_*` names the
 in-tree copy reads (a suite under gtest-parallel, below, is split by the
