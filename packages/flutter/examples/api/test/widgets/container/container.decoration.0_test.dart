@@ -21,7 +21,7 @@ void main() {
 
       await tester.pumpWidget(const example.ContainerDecorationExampleApp());
 
-      for (final String key in <String>['gap-pitfall', 'gap-recommended']) {
+      for (final String key in <String>['outer-radius', 'inner-radius']) {
         expect(find.byKey(Key(key)), findsOneWidget);
       }
 
@@ -67,30 +67,29 @@ void main() {
       // outer 56-pixel radius around (76, 76), only reaches 76 - 56 / sqrt(2),
       // about (36.4, 36.4), so the band between the two curves shows the
       // background: a visible gap.
-      expect(cornerDiagonal('gap-pitfall'), contains(example.backgroundColor));
+      expect(cornerDiagonal('outer-radius'), contains(example.backgroundColor));
       expect(
-        pixelAt('gap-pitfall', const Offset(33.5, 33.5)),
+        pixelAt('outer-radius', const Offset(33.5, 33.5)),
         example.backgroundColor,
       );
-      // In the second tile, the child's 36-pixel corner radius matches the
-      // inside of the border exactly: no background shows through anywhere
-      // along the diagonal, and the gap midpoint is filled by the child.
+      // In the second tile, the child's 36-pixel corner radius aligns with
+      // the inside of the border: no unblended background gap appears along
+      // the diagonal, and the former gap midpoint is filled by the child.
       expect(
-        cornerDiagonal('gap-recommended'),
+        cornerDiagonal('inner-radius'),
         isNot(contains(example.backgroundColor)),
       );
       expect(
-        pixelAt('gap-recommended', const Offset(33.5, 33.5)),
+        pixelAt('inner-radius', const Offset(33.5, 33.5)),
         example.fillColor,
       );
       // The straight edges and the center are unaffected in both tiles.
-      for (final String key in <String>['gap-pitfall', 'gap-recommended']) {
+      for (final String key in <String>['outer-radius', 'inner-radius']) {
         expect(pixelAt(key, const Offset(10.0, 80.0)), example.borderColor);
         expect(pixelAt(key, const Offset(80.0, 80.0)), example.fillColor);
       }
     },
-    // [intended] Test relies on captureImage, which is not supported on web
-    // currently.
+    // [intended] captureImage is not supported on web.
     skip: !canCaptureImage,
   );
 }

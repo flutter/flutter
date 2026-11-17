@@ -76,7 +76,7 @@ class ContainerClipBehaviorExample extends StatelessWidget {
                   _Sample(
                     label: 'Border in the decoration',
                     child: Container(
-                      key: const Key('covered-pitfall'),
+                      key: const Key('background-border'),
                       width: sampleSize,
                       height: sampleSize,
                       clipBehavior: Clip.antiAlias,
@@ -96,7 +96,7 @@ class ContainerClipBehaviorExample extends StatelessWidget {
                   _Sample(
                     label: 'Border in the foregroundDecoration',
                     child: Container(
-                      key: const Key('covered-recommended'),
+                      key: const Key('foreground-border'),
                       width: sampleSize,
                       height: sampleSize,
                       clipBehavior: Clip.antiAlias,

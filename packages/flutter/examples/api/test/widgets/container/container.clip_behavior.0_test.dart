@@ -22,8 +22,8 @@ void main() {
       await tester.pumpWidget(const example.ContainerClipBehaviorExampleApp());
 
       for (final String key in <String>[
-        'covered-pitfall',
-        'covered-recommended',
+        'background-border',
+        'foreground-border',
       ]) {
         expect(find.byKey(Key(key)), findsOneWidget);
       }
@@ -59,20 +59,19 @@ void main() {
       // covers the border there, while in the second tile the
       // foreground-painted border stays visible.
       const Offset ringProbe = Offset(19.2, 19.2);
-      expect(pixelAt('covered-pitfall', ringProbe), example.fillColor);
-      expect(pixelAt('covered-recommended', ringProbe), example.borderColor);
+      expect(pixelAt('background-border', ringProbe), example.fillColor);
+      expect(pixelAt('foreground-border', ringProbe), example.borderColor);
       // On the straight edges the border is visible in both tiles: the child
       // only covers the border near the corners.
       for (final String key in <String>[
-        'covered-pitfall',
-        'covered-recommended',
+        'background-border',
+        'foreground-border',
       ]) {
         expect(pixelAt(key, const Offset(4.0, 80.0)), example.borderColor);
         expect(pixelAt(key, const Offset(80.0, 80.0)), example.fillColor);
       }
     },
-    // [intended] Test relies on captureImage, which is not supported on web
-    // currently.
+    // [intended] captureImage is not supported on web.
     skip: !canCaptureImage,
   );
 }

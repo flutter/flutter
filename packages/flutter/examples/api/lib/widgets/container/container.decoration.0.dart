@@ -80,7 +80,7 @@ class ContainerDecorationExample extends StatelessWidget {
                   _Sample(
                     label: 'Clipped to the outer radius',
                     child: Container(
-                      key: const Key('gap-pitfall'),
+                      key: const Key('outer-radius'),
                       width: sampleSize,
                       height: sampleSize,
                       decoration: BoxDecoration(
@@ -104,7 +104,7 @@ class ContainerDecorationExample extends StatelessWidget {
                   _Sample(
                     label: 'Clipped to the outer radius minus the border width',
                     child: Container(
-                      key: const Key('gap-recommended'),
+                      key: const Key('inner-radius'),
                       width: sampleSize,
                       height: sampleSize,
                       decoration: BoxDecoration(
