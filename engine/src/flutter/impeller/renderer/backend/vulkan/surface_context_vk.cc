@@ -63,6 +63,11 @@ std::shared_ptr<const IdleWaiter> SurfaceContextVK::GetIdleWaiter() const {
   return parent_->GetIdleWaiter();
 }
 
+std::shared_ptr<const GpuSubmissionTracker>
+SurfaceContextVK::GetSubmissionTracker() const {
+  return parent_->GetSubmissionTracker();
+}
+
 void SurfaceContextVK::Shutdown() {
   parent_->Shutdown();
 }

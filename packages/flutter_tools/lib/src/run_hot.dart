@@ -67,6 +67,8 @@ class HotRunner extends ResidentRunner {
   HotRunner(
     super.flutterDevices, {
     required super.analytics,
+    required super.applicationPackageFactory,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,

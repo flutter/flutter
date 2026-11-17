@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
@@ -22,6 +23,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -343,4 +345,65 @@ void main() {
       Logger: () => logger,
     },
   );
+
+  testWithoutContext('iOS builds fail when the install name does not fit', () async {
+    if (const LocalPlatform().isWindows) {
+      return; // Backslashes in commands, but we will never run these commands on Windows.
+    }
+    const barPath = '/build/native_assets/ios/bar.framework/bar';
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+      ),
+      const FakeCommand(
+        command: <String>['xcrun', 'otool', '-D', barPath],
+        stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'install_name_tool',
+          '-id',
+          '@rpath/bar.framework/bar',
+          '-change',
+          '@rpath/libbar.dylib',
+          '@rpath/bar.framework/bar',
+          barPath,
+        ],
+        exitCode: 1,
+        stderr:
+            "error: install_name_tool: changing install names or rpaths can't be redone for: "
+            '$barPath (for architecture arm64) because larger updated load commands do not fit '
+            '(the program must be relinked, and you may need to use -headerpad or '
+            '-headerpad_max_install_names)',
+      ),
+    ]);
+
+    await expectLater(
+      copyNativeCodeAssetsIOS(
+        Uri.directory('/build/native_assets/ios/'),
+        <Uri, List<FlutterCodeAsset>>{
+          Uri.file('bar.framework/bar'): <FlutterCodeAsset>[
+            FlutterCodeAsset(
+              codeAsset: CodeAsset(
+                package: 'bar',
+                name: 'bar.dart',
+                linkMode: DynamicLoadingBundled(),
+                file: Uri.file('arm64/libbar.dylib'),
+              ),
+              os: OS.iOS,
+              architecture: Architecture.arm64,
+            ),
+          ],
+        },
+        null,
+        BuildMode.debug,
+        fileSystem,
+        logger: logger,
+        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+      ),
+      throwsToolExit(message: 'larger updated load commands do not fit'),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
