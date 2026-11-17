@@ -189,6 +189,10 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   [self checkPartialScrollableTypeChangesWithHitTestOrder:3];
 }
 
+- (void)testPartialScrollableTypeChangesClearRetainedOldObjectChildren {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:4];
+}
+
 - (void)checkPartialScrollableTypeChangesWithHitTestOrder:(NSInteger)mode {
   flutter::MockDelegate mock_delegate;
   fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -261,11 +265,20 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       __weak SemanticsObject* oldList;
       @autoreleasepool {
         oldList = parentObject.children[0];
+        SemanticsObject* retainedOldList = mode == 4 ? oldList : nil;
         // The parent is unchanged and is intentionally absent from this partial update.
         bridge->UpdateSemantics({{2, list}}, actions);
+        if (mode == 4) {
+          XCTAssertNotNil(retainedOldList);
+          XCTAssertEqual(retainedOldList.children.count, 0u);
+          XCTAssertEqual(retainedOldList.childrenInHitTestOrder.count, 0u);
+          XCTAssertNil(retainedOldList.parent);
+          XCTAssertNotEqual([retainedOldList _accessibilityHitTest:point withEvent:nil], item);
+          XCTAssertEqual(item.parent, parentObject.children[0]);
+        }
       }
       SemanticsObject* newList = parentObject.children[0];
-      if (mode < 2) {
+      if (mode < 2 || mode == 4) {
         XCTAssertEqualObjects(
             parentObject.childrenInHitTestOrder,
             mode == 1 ? (@[ siblingObject, newList ]) : (@[ newList, siblingObject ]));
@@ -277,7 +290,7 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       XCTAssertEqual(newList.parent, parentObject);
       XCTAssertEqual(item.parent, newList);
       XCTAssertEqual([newList isKindOfClass:[FlutterScrollableSemanticsObject class]], scrollable);
-      if (mode < 2) {
+      if (mode < 2 || mode == 4) {
         XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
       }
       XCTAssertNil(oldList);

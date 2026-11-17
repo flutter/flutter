@@ -289,6 +289,7 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
   SemanticsObject* parent = oldObject.parent;
   NSUInteger positionInChildlist = [parent.children indexOfObjectIdenticalTo:oldObject];
   oldObject.children = @[];
+  oldObject.childrenInHitTestOrder = @[];
   [parent replaceChildAtIndex:positionInChildlist withChild:newObject];
   // Hit-test and traversal orders can differ, so match the old object by identity.
   [parent replaceChildInHitTestOrder:oldObject withChild:newObject];
