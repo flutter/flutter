@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
@@ -284,6 +285,57 @@ void main() {
       );
     },
   );
+
+  // Regression test for https://github.com/flutter/flutter/issues/196430
+  testWithoutContext('packages forward command inherits stdio by default', () async {
+    final toolContext = FakeToolContext(
+      fs: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      stdio: io.Stdio(),
+    );
+    fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+    final command = PackagesCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      toolContext: toolContext,
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['pub', 'outdated']);
+
+    expect(processManager.lastStartMode, io.ProcessStartMode.inheritStdio);
+  });
+
+  testWithoutContext(
+    'packages forward command pipes output when Pub.test instance is injected',
+    () async {
+      final fakeStdio = FakeStdio();
+      final toolContext = FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        stdio: fakeStdio,
+      );
+      final pub = Pub.test(
+        botDetector: const FakeBotDetector(false),
+        fileSystem: fileSystem,
+        flutterRoot: '',
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+        stdio: fakeStdio,
+      );
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+      final command = PackagesCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        pub: pub,
+        toolContext: toolContext,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['pub', 'outdated']);
+
+      expect(processManager.lastStartMode, io.ProcessStartMode.normal);
+    },
+  );
 }
 
 class _PubTestProcessManager extends Fake implements ProcessManager {
@@ -291,6 +343,7 @@ class _PubTestProcessManager extends Fake implements ProcessManager {
 
   final FileSystem fileSystem;
   List<String>? lastCommand;
+  io.ProcessStartMode? lastStartMode;
 
   @override
   bool canRun(Object? executable, {String? workingDirectory}) => true;
@@ -306,6 +359,7 @@ class _PubTestProcessManager extends Fake implements ProcessManager {
   }) async {
     final stringCommand = <String>[for (final e in command) e.toString()];
     lastCommand = stringCommand;
+    lastStartMode = mode;
     String? dir;
     const directoryFlagPrefix = '--directory=';
     for (final (index, arg) in stringCommand.indexed) {
