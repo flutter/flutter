@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -26,10 +27,10 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
@@ -242,10 +243,12 @@ void main() {
   late FakeMicrosoftEdgeDevice fakeMicrosoftEdgeDevice;
   late FakeCustomBrowserDevice fakeCustomBrowserDevice;
   late FakeWidgetPreviewScaffoldDtdServices fakeDtdServices;
+  late String flutterRoot;
 
   setUp(() async {
     Cache.disableLocking();
-    originalCwd = globals.fs.currentDirectory;
+    fs = LocalFileSystem.test(signals: Signals.test());
+    originalCwd = fs.currentDirectory;
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
@@ -256,7 +259,7 @@ void main() {
       stdio: mockStdio,
       verbose: false,
     );
-    fs = LocalFileSystem.test(signals: Signals.test());
+    flutterRoot = fs.path.absolute('..', '..');
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     platform = FakePlatform.fromPlatform(const LocalPlatform());
@@ -276,19 +279,13 @@ void main() {
       fs: MemoryFileSystem.test(),
       fakeFlutterVersion: FakeFlutterVersion(),
     );
-
-    // Most, but not all, tests will run some variant of "pub get" after creation,
-    // which in turn will check for the presence of the Flutter SDK root. Without
-    // this field set consistently, the order of the tests becomes important *or*
-    // you need to remember to set it everywhere.
-    Cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
   tearDown(() async {
     await shutdownHooks.runShutdownHooks(logger);
     tryToDelete(tempDir);
+    fs.currentDirectory = originalCwd;
     await fs.dispose();
-    globals.fs.currentDirectory = originalCwd;
   });
 
   Future<Directory> createRootProject() async {
@@ -300,11 +297,31 @@ void main() {
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) {
     return WidgetPreviewCommand(
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fs,
+        flutterRoot: flutterRoot,
+        logger: logger,
+        platform: platform,
+      ),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      pub: Pub.test(
+        flutterRoot: flutterRoot,
+        fileSystem: fs,
+        logger: logger,
+        processManager: loggingProcessManager,
+        botDetector: botDetector,
+        platform: platform,
+        stdio: mockStdio,
+      ),
+      templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
-        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+        cache: Cache.test(
+          flutterRoot: flutterRoot,
+          processManager: loggingProcessManager,
+          platform: platform,
+        ),
         fs: fs,
         logger: logger,
         os: OperatingSystemUtils(
@@ -315,7 +332,7 @@ void main() {
         ),
         platform: platform,
         processManager: loggingProcessManager,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs, config: FakeConfig()),
         shutdownHooks: shutdownHooks,
         terminal: FakeTerminal(),
       ),
@@ -380,6 +397,7 @@ void main() {
     final FlutterProject project = FlutterProjectFactory(
       logger: logger,
       fileSystem: fs,
+      config: FakeConfig(),
     ).fromDirectory(projectDir);
     final Directory scaffoldDir = (project.workspaceRoot ?? project).widgetPreviewScaffold;
     await analyzeProject(scaffoldDir.path);
@@ -429,6 +447,7 @@ void main() {
           FileSystem: () => fs,
           ProcessManager: () => loggingProcessManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -490,6 +509,7 @@ void main() {
             isWebEnabled: false,
           ),
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -546,6 +566,7 @@ resolution: workspace
           ProcessManager: () => loggingProcessManager,
           FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -572,6 +593,7 @@ resolution: workspace
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -595,6 +617,7 @@ resolution: workspace
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -648,6 +671,7 @@ resolution: workspace
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -677,6 +701,7 @@ resolution: workspace
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -702,6 +727,7 @@ resolution: workspace
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -787,6 +813,7 @@ List<_i1.WidgetPreview> previews() => [
           Analytics: () => fakeAnalytics,
           DeviceManager: () => fakeDeviceManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -847,6 +874,7 @@ List<_i1.WidgetPreview> previews() => [
           FileSystem: () => fs,
           ProcessManager: () => loggingProcessManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -897,6 +925,7 @@ List<_i1.WidgetPreview> previews() => [
           Analytics: () => fakeAnalytics,
           DeviceManager: () => fakeDeviceManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -931,6 +960,7 @@ List<_i1.WidgetPreview> previews() => [
           Analytics: () => fakeAnalytics,
           DeviceManager: () => fakeDeviceManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -967,6 +997,7 @@ List<_i1.WidgetPreview> previews() => [
           FileSystem: () => fs,
           ProcessManager: () => loggingProcessManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -999,6 +1030,7 @@ List<_i1.WidgetPreview> previews() => [
           Analytics: () => fakeAnalytics,
           DeviceManager: () => fakeDeviceManager,
           Pub: () => Pub.test(
+            flutterRoot: flutterRoot,
             fileSystem: fs,
             logger: logger,
             processManager: loggingProcessManager,
@@ -1054,6 +1086,7 @@ List<_i1.WidgetPreview> previews() => [
         DeviceManager: () => fakeDeviceManager,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -1080,6 +1113,7 @@ List<_i1.WidgetPreview> previews() => [
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -1107,6 +1141,7 @@ List<_i1.WidgetPreview> previews() => [
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -1132,6 +1167,7 @@ List<_i1.WidgetPreview> previews() => [
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,
@@ -1264,6 +1300,7 @@ List<_i1.WidgetPreview> previews() => [
         FileSystem: () => fs,
         ProcessManager: () => loggingProcessManager,
         Pub: () => Pub.test(
+          flutterRoot: flutterRoot,
           fileSystem: fs,
           logger: logger,
           processManager: loggingProcessManager,

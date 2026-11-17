@@ -261,7 +261,7 @@ void testMain() {
       final ImageSource source = (image as EngineImage).imageSource!;
 
       final recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
+      final EngineCanvas canvas = recorder.beginRecording(ui.Rect.largest);
       canvas.drawImage(image, ui.Offset.zero, ui.Paint());
 
       image.dispose();

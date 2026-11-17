@@ -32,6 +32,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../features.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
@@ -46,6 +47,7 @@ import 'ios_workflow.dart';
 import 'iproxy.dart';
 import 'lldb.dart';
 import 'mac.dart';
+import 'plist_parser.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
@@ -325,7 +327,11 @@ class IOSDevice extends Device {
     required this._xcodeDebug,
     required IProxy iProxy,
     required this._analytics,
+    required this._cocoaPods,
+    required this._mdnsVmServiceDiscovery,
+    required this._plistParser,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
     required this._templateRenderer,
     required ToolContext super.toolContext,
   }) : _iproxy = iProxy,
@@ -346,11 +352,15 @@ class IOSDevice extends Device {
   final String? _operatingSystemVersion;
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
+  final PlistParser _plistParser;
   final XcodeDebug _xcodeDebug;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iproxy;
   final TemplateRenderer _templateRenderer;
 
@@ -526,7 +536,9 @@ class IOSDevice extends Device {
   }) async {
     final ToolContext(
       :FileSystem fs,
+      :FlutterProjectFactory projectFactory,
       :Logger logger,
+      :ProcessUtils processUtils,
       shutdownHooks: ShutdownHooks defaultShutdownHooks,
     ) = toolContext;
     String? packageId;
@@ -545,14 +557,20 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
+        analytics: _analytics,
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
+        plistParser: _plistParser,
+        templateRenderer: _templateRenderer,
+        toolContext: toolContext,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
         targetOverride: mainPath,
         activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
-        toolContext: toolContext,
+        cocoaPods: _cocoaPods,
+        xcode: _xcode,
       );
       if (!buildResult.success) {
         logger.printError('Could not build the precompiled application for the device.');
@@ -562,7 +580,9 @@ class IOSDevice extends Device {
           fileSystem: fs,
           logger: logger,
           platform: FlutterDarwinPlatform.ios,
+          processUtils: processUtils,
           project: package.project.parent,
+          xcode: _xcode,
           device: this,
         );
         logger.printError('');
@@ -754,7 +774,7 @@ class IOSDevice extends Device {
         });
 
         // Get Dart VM Service URL with the device IP as the host.
-        localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+        localUri = await _mdnsVmServiceDiscovery.getVMServiceUriForLaunch(
           packageId,
           this,
           usesIpv6: debuggingOptions.ipv6,
@@ -835,7 +855,7 @@ class IOSDevice extends Device {
         // This is to prevent confusion if the project is later ran via Xcode
         // rather than the Flutter CLI.
         await updateGeneratedXcodeProperties(
-          project: FlutterProject.current(),
+          project: projectFactory.fromDirectory(fs.currentDirectory),
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           toolContext: toolContext,
@@ -958,7 +978,7 @@ class IOSDevice extends Device {
   }) async {
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
-    final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+    final Future<Uri?> vmUrlFromMDns = _mdnsVmServiceDiscovery.getVMServiceUriForLaunch(
       packageId,
       this,
       // If mDNS fails, don't throw if the URL may still be findable through
@@ -1353,6 +1373,7 @@ class IOSDevice extends Device {
         !isWirelesslyConnected;
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
+      mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
@@ -1428,9 +1449,9 @@ class IOSDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    for (final DeviceLogReader logReader in _logReaders.values) {
-      logReader.dispose();
-    }
+    await Future.wait(<Future<void>>[
+      for (final DeviceLogReader logReader in _logReaders.values) logReader.dispose(),
+    ]);
     _logReaders.clear();
     await _portForwarder?.dispose();
   }
@@ -1980,13 +2001,15 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   }
 
   @override
-  void dispose() {
-    for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
-      loggingSubscription.cancel();
-    }
+  Future<void> dispose() async {
+    final futures = <Future<void>>[
+      for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions)
+        loggingSubscription.cancel(),
+      ?_iosDeployDebugger?.detach(),
+      _coreDeviceLoggingSource.dispose(),
+    ];
     idevicesyslogProcess?.kill();
-    _iosDeployDebugger?.detach();
-    _coreDeviceLoggingSource.dispose();
+    await Future.wait(futures);
   }
 }
 
@@ -2058,12 +2081,14 @@ class CoreDeviceLoggingSource {
   String _debuggerLineHandler(String line) =>
       _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
-  void dispose() {
-    for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
-      loggingSubscription.cancel();
-    }
-    coreDeviceLauncher?.lldbLogForwarder.exit();
-    coreDeviceLauncher?.coreDeviceLogForwarder.exit();
+  Future<void> dispose() async {
+    final futures = <Future<void>>[
+      for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions)
+        loggingSubscription.cancel(),
+      ?coreDeviceLauncher?.lldbLogForwarder.exit(),
+      ?coreDeviceLauncher?.coreDeviceLogForwarder.exit(),
+    ];
+    await Future.wait(futures);
   }
 }
 

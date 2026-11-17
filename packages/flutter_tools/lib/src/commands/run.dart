@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../android/android_device.dart';
 import '../android/android_engine_cli_flags.dart';
 import '../android/android_workflow.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -26,7 +27,7 @@ import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../features.dart';
-import '../hook_runner.dart' show hookRunner;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -43,11 +44,14 @@ import 'daemon.dart';
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   RunCommandBase({
+    required this.assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
+    super.applicationPackages,
     super.outputPreferences,
+    super.deviceManager,
   }) {
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
@@ -58,7 +62,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       EngineRenderingFlagsBundle(includeTestFlag: true),
       WebServerOptionsBundle(),
     ]);
-    CommonOptions.nativeNullAssertions.addTo(argParser, hideOverride: !verboseHelp);
+    CommonOptions.nativeNullAssertions.addTo(argParser, hide: !verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.dartDefines,
       CommonOptions.dartDefineFromFile,
@@ -80,7 +84,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.vmserviceOutFile,
       DebuggingOptionDescriptors.disableServiceAuthCodes,
       DebuggingOptionDescriptors.disableServiceOriginCheck,
-      DebuggingOptionDescriptors.startPaused(defaultsTo: startPausedDefault),
+      _startPaused,
       DebuggingOptionDescriptors.dartFlags,
       DebuggingOptionDescriptors.endlessTraceBuffer,
       DebuggingOptionDescriptors.traceSystrace,
@@ -100,11 +104,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     ], verboseHelp: verboseHelp);
   }
 
+  late final _startPaused = FlagOptionDescriptor(
+    name: 'start-paused',
+    defaultsTo: startPausedDefault,
+    help: 'Start in a paused mode and wait for a debugger to connect.',
+  );
+
+  final AssetBundleFactory assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
@@ -210,7 +218,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: getValue(DebuggingOptionDescriptors.startPausedOption),
+        startPaused: getValue(_startPaused),
         disableServiceAuthCodes: disableServiceAuthCodes,
         disableServiceOriginCheck: disableServiceOriginCheck,
         cacheStartupProfile: cacheStartupProfile,
@@ -328,14 +336,19 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     required this.appleContext,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
     this._androidContext,
     this._androidWorkflow,
+    super.applicationPackages,
     this.deviceManager,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
     super.verboseHelp = false,
-  }) {
+  }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),
@@ -400,6 +413,9 @@ class RunCommand extends RunCommandBase {
   final AndroidWorkflow? _androidWorkflow;
   final AppleContext appleContext;
   final DeviceManager? deviceManager;
+  final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
 
   @override
   final name = 'run';
@@ -516,18 +532,16 @@ class RunCommand extends RunCommandBase {
 
     String? androidEmbeddingVersion;
     final hostLanguage = <String>[];
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FileSystem fs = toolContext.fs;
     if (anyAndroidDevices) {
-      final AndroidProject androidProject = projectFactory
-          .fromDirectory(fs.currentDirectory)
-          .android;
+      final AndroidProject androidProject = project.android;
       if (androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
       }
     }
     if (anyIOSDevices) {
-      final IosProject iosProject = projectFactory.fromDirectory(fs.currentDirectory).ios;
+      final IosProject iosProject = project.ios;
       if (iosProject.exists) {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
@@ -672,23 +686,28 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: getValue(BuildInfoOptions.outputDill),
         stayResident: stayResident,
         analytics: this.analytics,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: assetBundleFactory,
         nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
-        dartBuilder: hookRunner,
+        dartBuilder: _flutterHookRunner,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
         xcode: appleContext.xcode,
       );
     } else if (webMode) {
-      return webRunnerFactory!.createWebRunner(
+      return _webRunnerFactory!.createWebRunner(
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         analytics: this.analytics,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        flutterHookRunner: _flutterHookRunner,
         toolContext: toolContext,
         webDefines: extractWebDefines(),
       );
@@ -701,8 +720,10 @@ class RunCommand extends RunCommandBase {
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
       stayResident: stayResident,
-      dartBuilder: hookRunner,
+      dartBuilder: _flutterHookRunner,
       analytics: this.analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       toolContext: toolContext,
@@ -714,10 +735,15 @@ class RunCommand extends RunCommandBase {
   Daemon createMachineDaemon() {
     return Daemon.createMachineDaemon(
       analytics: this.analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
+      devtoolsLauncher: _devtoolsLauncher,
       featureFlags: featureFlags,
+      flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
+      webRunnerFactory: _webRunnerFactory,
       xcode: appleContext.xcode,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,

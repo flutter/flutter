@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -56,6 +57,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
           enableVmService: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -89,6 +91,7 @@ void main() {
           precompiledDillPath: 'example.dill',
           enableVmService: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -118,6 +121,7 @@ void main() {
         final testDevice = _UnstartableDevice();
         final logger = BufferLogger.test();
         final flutterPlatform = FlutterPlatform(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
@@ -126,6 +130,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -153,7 +158,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
       },
     );
 
@@ -165,6 +169,7 @@ void main() {
 
         final shutdownHooks = ShutdownHooks();
         final flutterPlatform = FlutterPlatform(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
@@ -173,6 +178,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -195,7 +201,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        ApplicationPackageFactory: () => _FakeApplicationPackageFactory(),
       },
     );
 
@@ -205,6 +210,7 @@ void main() {
           flutterTesterBinPath: 'abc',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -227,6 +233,7 @@ void main() {
             hostVmServicePort: 123,
           ),
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -262,6 +269,7 @@ void main() {
           capturedPlatform = platform;
         },
         buildInfo: BuildInfo.debug,
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -442,6 +450,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -503,6 +512,7 @@ void main() {
         addFlutterTesterDeviceExpectation();
 
         final flutterPlatform = FlutterPlatform(
+          applicationPackageFactory: _FakeApplicationPackageFactory(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
           flutterTesterBinPath: 'flutter_tester',
           enableVmService: false,
@@ -511,6 +521,7 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
+          templateRenderer: const MustacheTemplateRenderer(),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: BufferLogger.test(),
@@ -575,7 +586,6 @@ void main() {
               Device? device,
               Logger? logger,
             }) async => flutterVmService,
-        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
         Artifacts: () => artifacts,
       },
     );
@@ -604,6 +614,7 @@ void main() {
       Platform? platform,
     }) {
       return FlutterPlatform(
+        applicationPackageFactory: _FakeApplicationPackageFactory(),
         debuggingOptions: DebuggingOptions.disabled(.debug),
         flutterTesterBinPath: 'flutter_tester',
         enableVmService: false,
@@ -612,6 +623,7 @@ void main() {
         host: InternetAddress.anyIPv4,
         updateGoldens: false,
         buildInfo: .debug,
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fs,
           logger: logger,
@@ -642,7 +654,6 @@ void main() {
               Device? device,
               Logger? logger,
             }) async => _FakeFlutterVmService(),
-        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
         Artifacts: () => Artifacts.test(fileSystem: windows ? windowsFs : fileSystem),
       };
     }

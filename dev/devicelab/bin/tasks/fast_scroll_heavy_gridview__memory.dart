@@ -15,26 +15,11 @@ class FastScrollHeavyGridViewMemoryTest extends MemoryTest {
         '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
         'test_memory/heavy_gridview.dart',
         kPackageName,
+        requiresTapToStart: true,
       );
 
   @override
-  AndroidDevice? get device => super.device as AndroidDevice?;
-
-  @override
   int get iterationCount => 5;
-
-  @override
-  Future<void> useMemory() async {
-    await launchApp();
-    await recordStart();
-    await device!.shellExec('input', <String>['swipe', '50 1500 50 50 50']);
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    await device!.shellExec('input', <String>['swipe', '50 1500 50 50 50']);
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    await device!.shellExec('input', <String>['swipe', '50 1500 50 50 50']);
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    await recordEnd();
-  }
 }
 
 Future<void> main() async {
