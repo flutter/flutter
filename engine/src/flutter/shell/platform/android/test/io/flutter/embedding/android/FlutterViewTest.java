@@ -13,6 +13,8 @@ import static junit.framework.TestCase.assertSame;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -31,6 +33,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -1379,7 +1382,7 @@ public class FlutterViewTest {
 
   @Test
   @Config(sdk = API_LEVELS.API_28)
-  public void flutterImageView_resizePreservesPendingBitmapLatchAcrossRepeatedResizes() {
+  public void flutterImageView_acquireLatestImageReturnsFalseAfterResizeUntilNewFrame() {
     final ImageReader initialReader = mock(ImageReader.class);
     when(initialReader.getWidth()).thenReturn(100);
     when(initialReader.getHeight()).thenReturn(100);
@@ -1399,15 +1402,15 @@ public class FlutterViewTest {
     final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
     imageView.attachToRenderer(flutterRenderer);
 
-    // First resize (S1 -> S2) captures the bitmap from S1 and latches the pending frame.
+    // Resizing converts any pending pre-resize image into currentBitmap for onDraw(), but
+    // acquireLatestImage() must still return false until the resized ImageReader produces a frame.
     imageView.resizeIfNeeded(200, 200);
-    // Second resize (S2 -> S3) before a frame renders into S2 must preserve the latched bitmap.
     imageView.resizeIfNeeded(300, 300);
 
-    clearInvocations(imageView);
-    assertTrue(imageView.acquireLatestImage());
-    verify(imageView, times(1)).invalidate();
     assertFalse(imageView.acquireLatestImage());
+    final Canvas canvas = mock(Canvas.class);
+    imageView.onDraw(canvas);
+    verify(canvas, times(1)).drawBitmap(any(Bitmap.class), eq(0.0f), eq(0.0f), isNull());
   }
 
   @Test

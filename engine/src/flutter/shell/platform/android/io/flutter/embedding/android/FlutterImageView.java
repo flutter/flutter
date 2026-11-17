@@ -74,9 +74,6 @@ public class FlutterImageView extends View implements RenderSurface {
    */
   private boolean isPaused = false;
 
-  /** Whether a bitmap preserved across resize awaits consumption by {@link #acquireLatestImage}. */
-  private boolean hasPendingResizedBitmap = false;
-
   /**
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
    * the Flutter UI.
@@ -189,7 +186,6 @@ public class FlutterImageView extends View implements RenderSurface {
     acquireLatestImage();
     // Clear drawings.
     currentBitmap = null;
-    hasPendingResizedBitmap = false;
 
     // Close and clear the current image if any.
     closeCurrentImage();
@@ -233,19 +229,12 @@ public class FlutterImageView extends View implements RenderSurface {
     // 3. While the engine will also stop producing frames, there is a race condition.
     final Image newImage = imageReader.acquireLatestImage();
     if (newImage != null) {
-      hasPendingResizedBitmap = false;
       // Only close current image after acquiring valid new image
       closeCurrentImage();
       currentImage = newImage;
       invalidate();
-      return true;
     }
-    if (hasPendingResizedBitmap) {
-      hasPendingResizedBitmap = false;
-      invalidate();
-      return true;
-    }
-    return false;
+    return newImage != null;
   }
 
   /**
@@ -253,7 +242,6 @@ public class FlutterImageView extends View implements RenderSurface {
    * reattaching a reused {@code FlutterImageView} to the renderer.
    */
   void drainPendingImages() {
-    hasPendingResizedBitmap = false;
     final Image droppedImage = imageReader.acquireLatestImage();
     if (droppedImage != null) {
       droppedImage.close();
@@ -271,9 +259,9 @@ public class FlutterImageView extends View implements RenderSurface {
 
     // ImageReaders cannot be resized once created. Allocate the replacement first and, when active
     // as the background surface, move FlutterRenderer onto the new Surface before closing the old
-    // ImageReader so the raster thread is never left bound to a closed BufferQueue. Preserve the
-    // last acquired frame in currentBitmap and latch hasPendingResizedBitmap so
-    // acquireLatestImage() reports the retained frame even across back-to-back resizes.
+    // ImageReader so the raster thread is never left bound to a closed BufferQueue. Convert any
+    // pending Image to currentBitmap before closing its reader, while letting acquireLatestImage()
+    // return false until the resized ImageReader receives a matching-size frame.
     final ImageReader oldImageReader = imageReader;
     imageReader = createImageReader(width, height);
     if (isActiveBackgroundSurface()) {
@@ -287,7 +275,6 @@ public class FlutterImageView extends View implements RenderSurface {
     if (currentImage != null) {
       updateCurrentBitmap();
       closeCurrentImage();
-      hasPendingResizedBitmap = (currentBitmap != null);
     }
     oldImageReader.close();
   }
@@ -299,7 +286,6 @@ public class FlutterImageView extends View implements RenderSurface {
    * IllegalStateException}.
    */
   public void closeImageReader() {
-    hasPendingResizedBitmap = false;
     imageReader.close();
   }
 
