@@ -123,7 +123,7 @@ class StopwatchVisualizer {
   fml::Milliseconds GetFrameBudget() const { return frame_budget_; }
 
   const Stopwatch& stopwatch_;
-  fml::Milliseconds frame_budget_;
+  fml::Milliseconds frame_budget_{};
 };
 
 }  // namespace flutter

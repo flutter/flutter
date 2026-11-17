@@ -1,6 +1,8 @@
 package com.flutter.gradle
 
+import com.android.build.api.artifact.InAndOutDirectoryOperationRequest
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.artifact.TaskBasedOperation
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
@@ -30,11 +32,12 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.gradle.api.Action
-import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -89,6 +92,66 @@ class FlutterPluginTest {
     }
 
     @Test
+    fun `FlutterPlugin apply checks dependency versions before configuring project`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val mockApplicationExtension = setupMockApplicationExtension(project)
+        val mockComponentsExtension = setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(FlutterPluginUtils::class)
+        mockkStatic(DependencyVersionChecker::class)
+        every { DependencyVersionChecker.checkDependencyVersions(project) } just Runs
+
+        FlutterPlugin().apply(project)
+
+        verifyOrder {
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
+            DependencyVersionChecker.checkDependencyVersions(project)
+            project.tasks.register("javaVersion", PrintTask::class.java, any())
+            mockComponentsExtension.finalizeDsl(any<(Any) -> Unit>())
+            mockComponentsExtension.onVariants(any(), any<(Variant) -> Unit>())
+            mockApplicationExtension.defaultConfig
+            mockApplicationExtension.buildTypes
+        }
+    }
+
+    @Test
+    fun `FlutterPlugin apply rethrows DependencyValidationException and logs other exceptions`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(DependencyVersionChecker::class)
+
+        val validationException = DependencyValidationException("Unsupported AGP version")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws validationException
+
+        val thrown =
+            assertThrows<DependencyValidationException> {
+                FlutterPlugin().apply(project)
+            }
+        assertEquals(validationException, thrown)
+
+        val unexpectedException = IllegalStateException("Unexpected failure")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws unexpectedException
+
+        FlutterPlugin().apply(project)
+
+        verify {
+            project.logger.error(
+                "Warning: Flutter was unable to detect project Gradle, Java, " +
+                    "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                    unexpectedException
+            )
+        }
+    }
+
+    @Test
     fun `FlutterPlugin apply wires flutter embedding dependencies on all build types`(
         @TempDir tempDir: Path
     ) {
@@ -139,7 +202,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants registers compile and asset tasks and adds generated asset source directory`(
+    fun `onVariants registers compile and asset tasks and transforms the merged assets`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -154,8 +217,9 @@ class FlutterPluginTest {
         } returns mockCopyAssetsTaskProvider
 
         val onVariant = applyPluginCapturingVariantCallback(env)
-        val mockAssetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
-        onVariant(mockApplicationVariant(assetsSource = mockAssetsSource))
+        val variant = mockApplicationVariant()
+        val assetsTransform = stubAssetsTransform(variant, mockCopyAssetsTaskProvider)
+        onVariant(variant)
 
         verify {
             project.tasks.register("compileFlutterBuildDebug", FlutterTask::class.java, any())
@@ -163,30 +227,9 @@ class FlutterPluginTest {
         verify {
             project.tasks.register("copyFlutterAssetsDebug", CopyFlutterAssetsTask::class.java, any())
         }
-        verify {
-            mockAssetsSource.addGeneratedSourceDirectory(
-                mockCopyAssetsTaskProvider,
-                CopyFlutterAssetsTask::destinationDir
-            )
-        }
-    }
-
-    @Test
-    fun `onVariants throws GradleException when variant sources assets is null`(
-        @TempDir tempDir: Path
-    ) {
-        val env = setupTestProjectEnvironment(tempDir)
-
-        val onVariant = applyPluginCapturingVariantCallback(env)
-
-        val exception =
-            assertThrows<GradleException> {
-                onVariant(mockApplicationVariant(assetsSource = null))
-            }
-        assertContains(
-            exception.message!!,
-            "Flutter could not register its generated assets for variant 'debug'"
-        )
+        // A transform of the merged assets, not an assets source directory, because AGP filters
+        // assets source directories with ignoreAssetsPattern, which drops assets such as `.env`.
+        verify { assetsTransform.toTransform(SingleArtifact.ASSETS) }
     }
 
     @Test
@@ -258,16 +301,15 @@ class FlutterPluginTest {
         project.setCommandLineTasks(":app:assembleDemoStaging")
         val copyAssetsTaskProvider = project.stubTaskRegistration<CopyFlutterAssetsTask>("copyFlutterAssetsDebug")
         val copyJniLibsTaskProvider = project.stubTaskRegistration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
-        val assetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
         val jniLibsSource = mockk<SourceDirectories.Layered>(relaxed = true)
+        val variant = mockLibraryVariant(jniLibsSource = jniLibsSource)
+        val assetsTransform = stubAssetsTransform(variant, copyAssetsTaskProvider)
 
-        applyPluginToModuleCapturingVariantCallback(env)(
-            mockLibraryVariant(assetsSource = assetsSource, jniLibsSource = jniLibsSource)
-        )
+        applyPluginToModuleCapturingVariantCallback(env)(variant)
 
         val taskContainer = project.tasks
         verify { taskContainer.register("compileFlutterBuildDebug", FlutterTask::class.java, any()) }
-        verify { assetsSource.addGeneratedSourceDirectory(copyAssetsTaskProvider, CopyFlutterAssetsTask::destinationDir) }
+        verify { assetsTransform.toTransform(SingleArtifact.ASSETS) }
         verify { jniLibsSource.addGeneratedSourceDirectory(copyJniLibsTaskProvider, CopyFlutterJniLibsTask::destinationDir) }
         verify(exactly = 0) { taskContainer.register(any(), CopyFlutterApksTask::class.java, any()) }
         verify(exactly = 0) { taskContainer.configureEach(any<Action<in Task>>()) }
@@ -655,19 +697,15 @@ class FlutterPluginTest {
         flavorName: String? = null,
         productFlavors: List<Pair<String, String>> = emptyList(),
         minSdkApiLevel: Int = 21,
-        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
         outputs: List<VariantOutput> = emptyList()
     ): ApplicationVariant {
         val mockVariant = mockk<ApplicationVariant>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true)
         every { mockVariant.name } returns name
         every { mockVariant.buildType } returns buildType
         every { mockVariant.debuggable } returns debuggable
         every { mockVariant.flavorName } returns flavorName
         every { mockVariant.productFlavors } returns productFlavors
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
-        every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns assetsSource
         every { mockVariant.outputs } returns outputs
         return mockVariant
     }
@@ -678,7 +716,6 @@ class FlutterPluginTest {
         buildType: String = "debug",
         debuggable: Boolean = true,
         minSdkApiLevel: Int = 21,
-        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
         jniLibsSource: SourceDirectories.Layered? = mockk(relaxed = true)
     ): LibraryVariant {
         val mockVariant = mockk<LibraryVariant>(relaxed = true)
@@ -690,7 +727,6 @@ class FlutterPluginTest {
         every { mockVariant.productFlavors } returns emptyList()
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
         every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns assetsSource
         every { mockSources.jniLibs } returns jniLibsSource
         return mockVariant
     }
@@ -700,6 +736,26 @@ class FlutterPluginTest {
         val output: VariantOutput,
         val versionCode: Property<Int>
     )
+
+    /**
+     * Stubs [variant]'s artifacts so that [taskProvider] can only be wired as a transform from
+     * `mergedAssetsDir` to `destinationDir`, and returns the request to verify `toTransform` on.
+     */
+    private fun stubAssetsTransform(
+        variant: Variant,
+        taskProvider: TaskProvider<CopyFlutterAssetsTask>
+    ): InAndOutDirectoryOperationRequest<CopyFlutterAssetsTask> {
+        val operation = mockk<TaskBasedOperation<CopyFlutterAssetsTask>>()
+        val request = mockk<InAndOutDirectoryOperationRequest<CopyFlutterAssetsTask>>(relaxed = true)
+        every { variant.artifacts.use(taskProvider) } returns operation
+        every {
+            operation.wiredWithDirectories(
+                CopyFlutterAssetsTask::mergedAssetsDir,
+                CopyFlutterAssetsTask::destinationDir
+            )
+        } returns request
+        return request
+    }
 
     /** Stubs registering task [name] to return a relaxed provider, which is returned. */
     private inline fun <reified T : Task> Project.stubTaskRegistration(name: String): TaskProvider<T> {
@@ -768,6 +824,7 @@ class FlutterPluginTest {
         every { project.rootProject } returns project
         every { project.state.failure as Throwable? } returns null
         every { project.configurations.named("api") } returns mockk()
+        every { project.gradle.gradleVersion } returns DependencyVersionChecker.warnGradleVersion.toString()
 
         val flutterExtension = FlutterExtension()
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
@@ -839,6 +896,9 @@ class FlutterPluginTest {
     private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<Any, VariantBuilder, Variant> {
         val mockAndroidComponentsExtension =
             mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>(relaxed = true)
+        every {
+            mockAndroidComponentsExtension.pluginVersion
+        } returns DependencyVersionChecker.warnAGPVersion
         every {
             project.extensions.getByType(AndroidComponentsExtension::class.java)
         } returns (mockAndroidComponentsExtension as AndroidComponentsExtension<*, *, *>)

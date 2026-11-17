@@ -20,6 +20,7 @@ Future<void> testMain() async {
   test('Image constructor invokes onCreate once', () async {
     var onCreateInvokedCount = 0;
     ui.Image? createdImage;
+    addTearDown(() => ui.Image.onCreate = null);
     ui.Image.onCreate = (ui.Image image) {
       onCreateInvokedCount++;
       createdImage = image;
@@ -34,13 +35,12 @@ Future<void> testMain() async {
 
     expect(onCreateInvokedCount, 2);
     expect(createdImage, image2);
-
-    ui.Image.onCreate = null;
   });
 
   test('dispose() invokes onDispose once', () async {
     var onDisposeInvokedCount = 0;
     ui.Image? disposedImage;
+    addTearDown(() => ui.Image.onDispose = null);
     ui.Image.onDispose = (ui.Image image) {
       onDisposeInvokedCount++;
       disposedImage = image;
@@ -57,14 +57,21 @@ Future<void> testMain() async {
 
     expect(onDisposeInvokedCount, 2);
     expect(disposedImage, image2);
-
-    ui.Image.onDispose = null;
   });
 
   test('scaledImageSize scales to a target width with no target height', () {
     final BitmapSize? size = scaledImageSize(200, 100, 600, null);
     expect(size?.width, 600);
     expect(size?.height, 300);
+  });
+
+  test('scaledImageSize does not derive a side of 0 for a very thin image', () {
+    final BitmapSize? wide = scaledImageSize(4000, 1, 100, null);
+    expect(wide?.width, 100);
+    expect(wide?.height, 1);
+    final BitmapSize? tall = scaledImageSize(1, 4000, null, 100);
+    expect(tall?.width, 1);
+    expect(tall?.height, 100);
   });
 
   test('instantiateImageCodecFromBuffer dispose buffer', () async {
@@ -114,6 +121,10 @@ Future<void> testMain() async {
 
   test('instantiateImageCodecWithSize disposes temporary image', () async {
     final activeImages = <ui.Image>{};
+    addTearDown(() {
+      ui.Image.onCreate = null;
+      ui.Image.onDispose = null;
+    });
     ui.Image.onCreate = activeImages.add;
     ui.Image.onDispose = activeImages.remove;
 
@@ -137,6 +148,93 @@ Future<void> testMain() async {
 
     expect(activeImages.length, 0);
   });
+
+  test('instantiateImageCodecWithSize honors upscaling when requested', () async {
+    final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
+
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      imageBuffer,
+      getTargetSize: (int w, int h) => ui.TargetImageSize(width: w * 2, height: h * 2),
+    );
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+    expect(frameInfo.image.width, 20);
+    expect(frameInfo.image.height, 20);
+
+    frameInfo.image.dispose();
+    codec.dispose();
+  });
+
+  test('instantiateImageCodecWithSize upscales to a non-square size', () async {
+    final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
+
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      imageBuffer,
+      getTargetSize: (int w, int h) => const ui.TargetImageSize(width: 25, height: 15),
+    );
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+    expect(frameInfo.image.width, 25);
+    expect(frameInfo.image.height, 15);
+
+    frameInfo.image.dispose();
+    codec.dispose();
+  });
+
+  test('instantiateImageCodecWithSize upscales one side and downscales the other', () async {
+    final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
+
+    final ui.Codec codec = await ui.instantiateImageCodecWithSize(
+      imageBuffer,
+      getTargetSize: (int w, int h) => const ui.TargetImageSize(width: 25, height: 5),
+    );
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+    expect(frameInfo.image.width, 25);
+    expect(frameInfo.image.height, 5);
+
+    frameInfo.image.dispose();
+    codec.dispose();
+  });
+
+  test('ImageDescriptor.instantiateCodec honors upscaling when requested', () async {
+    final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
+    final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(imageBuffer);
+
+    final ui.Codec codec = await descriptor.instantiateCodec(targetWidth: 20, targetHeight: 20);
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+    expect(frameInfo.image.width, 20);
+    expect(frameInfo.image.height, 20);
+
+    frameInfo.image.dispose();
+    codec.dispose();
+    descriptor.dispose();
+    imageBuffer.dispose();
+  });
+
+  test('ImageDescriptor.instantiateCodec upscales from targetWidth alone', () async {
+    final ui.ImmutableBuffer imageBuffer = await _createImageBuffer();
+    final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(imageBuffer);
+
+    final ui.Codec codec = await descriptor.instantiateCodec(targetWidth: 30);
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+    expect(frameInfo.image.width, 30);
+    expect(frameInfo.image.height, 30);
+
+    frameInfo.image.dispose();
+    codec.dispose();
+    descriptor.dispose();
+    imageBuffer.dispose();
+  });
+}
+
+Future<ui.ImmutableBuffer> _createImageBuffer() async {
+  final ui.Image image = await _createImage();
+  final ByteData? imageData = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return ui.ImmutableBuffer.fromUint8List(imageData!.buffer.asUint8List());
 }
 
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);

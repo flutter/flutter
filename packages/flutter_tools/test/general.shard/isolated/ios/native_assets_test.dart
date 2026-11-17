@@ -7,15 +7,15 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -23,6 +23,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -57,7 +58,12 @@ void main() {
       overrides: <Type, Generator>{
         FeatureFlags: () =>
             TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      },
+      () async {
+        if (const LocalPlatform().isWindows) {
+          return; // Backslashes in commands, but we will never run these commands on Windows.
+        }
+        processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <Pattern>[
               'xcrun',
@@ -210,12 +216,7 @@ void main() {
               '/build/native_assets/ios/buz.framework',
             ],
           ),
-        ]),
-      },
-      () async {
-        if (const LocalPlatform().isWindows) {
-          return; // Backslashes in commands, but we will never run these commands on Windows.
-        }
+        ]);
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
         );
@@ -262,6 +263,8 @@ void main() {
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
+          logger: logger,
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
@@ -273,11 +276,15 @@ void main() {
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
-          targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/ios/'),
+          targetUri: projectUri.resolve(
+            '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/ios/',
+          ),
         );
         expect(
-          (globals.logger as BufferLogger).traceText,
+          logger.traceText,
           stringContainsInOrder(<String>[
             'Running build hooks for ios_arm64, ios_x64.',
             'Running build hooks for ios_arm64, ios_x64 done.',
@@ -321,17 +328,14 @@ void main() {
         ),
       ];
 
-      fatAssetTargetLocationsIOS(assets);
+      fatAssetTargetLocationsIOS(assets, logger: logger);
 
-      final fakeStdio = globals.stdio as FakeStdio;
       expect(
-        fakeStdio.writtenToStderr,
+        logger.errorText,
         contains(
-          contains(
-            'Code asset "package:bar/bar.dart" has different framework names for '
-            'different architectures. Picking "bar.framework" and '
-            'ignoring "bar_different.framework".',
-          ),
+          'Code asset "package:bar/bar.dart" has different framework names for '
+          'different architectures. Picking "bar.framework" and '
+          'ignoring "bar_different.framework".',
         ),
       );
     },
@@ -339,7 +343,67 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
-      Stdio: () => FakeStdio(),
     },
   );
+
+  testWithoutContext('iOS builds fail when the install name does not fit', () async {
+    if (const LocalPlatform().isWindows) {
+      return; // Backslashes in commands, but we will never run these commands on Windows.
+    }
+    const barPath = '/build/native_assets/ios/bar.framework/bar';
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['xcrun', 'lipo', '-create', '-output', barPath, 'arm64/libbar.dylib'],
+      ),
+      const FakeCommand(
+        command: <String>['xcrun', 'otool', '-D', barPath],
+        stdout: '$barPath (architecture arm64):\n@rpath/libbar.dylib',
+      ),
+      const FakeCommand(
+        command: <String>[
+          'xcrun',
+          'install_name_tool',
+          '-id',
+          '@rpath/bar.framework/bar',
+          '-change',
+          '@rpath/libbar.dylib',
+          '@rpath/bar.framework/bar',
+          barPath,
+        ],
+        exitCode: 1,
+        stderr:
+            "error: install_name_tool: changing install names or rpaths can't be redone for: "
+            '$barPath (for architecture arm64) because larger updated load commands do not fit '
+            '(the program must be relinked, and you may need to use -headerpad or '
+            '-headerpad_max_install_names)',
+      ),
+    ]);
+
+    await expectLater(
+      copyNativeCodeAssetsIOS(
+        Uri.directory('/build/native_assets/ios/'),
+        <Uri, List<FlutterCodeAsset>>{
+          Uri.file('bar.framework/bar'): <FlutterCodeAsset>[
+            FlutterCodeAsset(
+              codeAsset: CodeAsset(
+                package: 'bar',
+                name: 'bar.dart',
+                linkMode: DynamicLoadingBundled(),
+                file: Uri.file('arm64/libbar.dylib'),
+              ),
+              os: OS.iOS,
+              architecture: Architecture.arm64,
+            ),
+          ],
+        },
+        null,
+        BuildMode.debug,
+        fileSystem,
+        logger: logger,
+        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+      ),
+      throwsToolExit(message: 'larger updated load commands do not fit'),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
