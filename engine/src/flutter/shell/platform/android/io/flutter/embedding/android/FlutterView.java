@@ -1453,7 +1453,7 @@ public class FlutterView extends FrameLayout
       renderer.removeIsDisplayingFlutterUiListener(revertImageViewListener);
       revertImageViewListener = null;
     }
-    // If the restored surface was destroyed (e.g., Activity#onStop) while displaying UI, complete
+    // If the restored surface is unavailable (e.g., destroyed in Activity#onStop), complete
     // reversion immediately instead of waiting indefinitely for a first frame that cannot arrive.
     final boolean surfaceAvailable;
     if (renderSurface instanceof FlutterSurfaceView) {
@@ -1463,7 +1463,7 @@ public class FlutterView extends FrameLayout
     } else {
       surfaceAvailable = true;
     }
-    if (!surfaceAvailable && renderer.isDisplayingFlutterUi()) {
+    if (!surfaceAvailable) {
       renderer.stopRenderingToSurface();
       renderSurface.resume();
       flutterImageView.detachFromRenderer();
