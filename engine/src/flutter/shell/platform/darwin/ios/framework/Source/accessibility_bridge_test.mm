@@ -174,6 +174,22 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
 @implementation AccessibilityBridgeTest
 
 - (void)testPartialScrollableTypeChangesPreserveTouchHitTesting {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:0];
+}
+
+- (void)testPartialScrollableTypeChangesPreserveDifferentHitTestOrder {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:1];
+}
+
+- (void)testPartialScrollableTypeChangesLeaveAbsentHitTestChildUntouched {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:2];
+}
+
+- (void)testPartialScrollableTypeChangesLeaveNilHitTestOrderUntouched {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:3];
+}
+
+- (void)checkPartialScrollableTypeChangesWithHitTestOrder:(NSInteger)mode {
   flutter::MockDelegate mock_delegate;
   fml::MessageLoop::EnsureInitializedForCurrentThread();
   auto runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
@@ -199,8 +215,9 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   parent.id = 1;
   parent.rect = SkRect::MakeWH(440, 858);
   parent.transform = SkM44::Translate(0, 98 * scale, 0) * SkM44::Scale(scale, scale, 1);
-  parent.childrenInTraversalOrder = {2};
-  parent.childrenInHitTestOrder = {2};
+  parent.childrenInTraversalOrder = {2, 4};
+  parent.childrenInHitTestOrder =
+      mode == 1 ? std::vector<int32_t>{4, 2} : std::vector<int32_t>{2, 4};
   flutter::SemanticsNode list;
   list.id = 2;
   list.rect = SkRect::MakeWH(440, 858);
@@ -213,18 +230,31 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   leaf.id = 3;
   leaf.rect = SkRect::MakeXYWH(8, 400, 424, 200);
   leaf.label = "list item";
+  flutter::SemanticsNode sibling;
+  sibling.id = 4;
+  sibling.rect = SkRect::MakeXYWH(8, 0, 424, 40);
+  sibling.label = "sibling";
   flutter::CustomAccessibilityActionUpdates actions;
   SemanticsObjectContainer* rootContainer;
   SemanticsObject* parentObject;
   SemanticsObject* item;
   @autoreleasepool {
-    bridge->UpdateSemantics({{0, root}, {1, parent}, {2, list}, {3, leaf}}, actions);
+    bridge->UpdateSemantics({{0, root}, {1, parent}, {2, list}, {3, leaf}, {4, sibling}}, actions);
     rootContainer = view.accessibilityElements[0];
     parentObject = rootContainer.semanticsObject.children[0];
     item = parentObject.children[0].children[0];
   }
   CGPoint point = CGPointMake(220, 610);
   XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
+  SemanticsObject* siblingObject;
+  @autoreleasepool {
+    siblingObject = parentObject.children[1];
+  }
+  if (mode == 2) {
+    parentObject.childrenInHitTestOrder = @[ siblingObject ];
+  } else if (mode == 3) {
+    parentObject.childrenInHitTestOrder = nil;
+  }
   for (bool scrollable : {true, false, true}) {
     @autoreleasepool {
       list.flags.hasImplicitScrolling = scrollable;
@@ -235,11 +265,21 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
         bridge->UpdateSemantics({{2, list}}, actions);
       }
       SemanticsObject* newList = parentObject.children[0];
-      XCTAssertEqual(parentObject.childrenInHitTestOrder[0], newList);
+      if (mode < 2) {
+        XCTAssertEqualObjects(
+            parentObject.childrenInHitTestOrder,
+            mode == 1 ? (@[ siblingObject, newList ]) : (@[ newList, siblingObject ]));
+      } else if (mode == 2) {
+        XCTAssertEqualObjects(parentObject.childrenInHitTestOrder, @[ siblingObject ]);
+      } else {
+        XCTAssertNil(parentObject.childrenInHitTestOrder);
+      }
       XCTAssertEqual(newList.parent, parentObject);
       XCTAssertEqual(item.parent, newList);
       XCTAssertEqual([newList isKindOfClass:[FlutterScrollableSemanticsObject class]], scrollable);
-      XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
+      if (mode < 2) {
+        XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
+      }
       XCTAssertNil(oldList);
     }
   }

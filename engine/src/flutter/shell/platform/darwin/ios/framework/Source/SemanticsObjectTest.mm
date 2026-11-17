@@ -320,6 +320,7 @@ const float kFloatCompareEpsilon = 0.001;
   parent.childrenInHitTestOrder = @[ sibling, child ];
 
   [parent replaceChildAtIndex:0 withChild:replacement];
+  [parent replaceChildInHitTestOrder:child withChild:replacement];
 
   XCTAssertEqualObjects(parent.children, (@[ replacement, sibling ]));
   XCTAssertEqualObjects(parent.childrenInHitTestOrder, (@[ sibling, replacement ]));
@@ -340,6 +341,7 @@ const float kFloatCompareEpsilon = 0.001;
   parent.childrenInHitTestOrder = @[ sibling ];
 
   [parent replaceChildAtIndex:0 withChild:replacement];
+  [parent replaceChildInHitTestOrder:child withChild:replacement];
 
   XCTAssertEqualObjects(parent.children, (@[ replacement, sibling ]));
   XCTAssertEqualObjects(parent.childrenInHitTestOrder, (@[ sibling ]));
@@ -361,11 +363,36 @@ const float kFloatCompareEpsilon = 0.001;
   OCMReject([partialParent setChildrenInHitTestOrder:[OCMArg any]]);
 
   [parent replaceChildAtIndex:0 withChild:replacement];
+  [parent replaceChildInHitTestOrder:child withChild:replacement];
 
   XCTAssertEqualObjects(parent.children, @[ replacement ]);
   XCTAssertNil(parent.childrenInHitTestOrder);
   XCTAssertNil(child.parent);
   XCTAssertEqual(replacement.parent, parent);
+  OCMVerifyAll(partialParent);
+  [partialParent stopMocking];
+}
+
+- (void)testReplaceHitTestChildPreservesSnapshotsWithoutCallingSetter {
+  auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+  auto bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* replacement = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  NSMutableArray<SemanticsObject*>* input = [@[ child ] mutableCopy];
+  parent.childrenInHitTestOrder = input;
+  NSArray<SemanticsObject*>* snapshot = parent.childrenInHitTestOrder;
+  [input removeAllObjects];
+  id partialParent = OCMPartialMock(parent);
+  OCMReject([partialParent setChildrenInHitTestOrder:[OCMArg any]]);
+
+  [parent replaceChildInHitTestOrder:child withChild:replacement];
+
+  XCTAssertEqualObjects(parent.childrenInHitTestOrder, @[ replacement ]);
+  XCTAssertEqualObjects(snapshot, @[ child ]);
+  XCTAssertNil(child.parent);
+  XCTAssertNil(replacement.parent);
   OCMVerifyAll(partialParent);
   [partialParent stopMocking];
 }
