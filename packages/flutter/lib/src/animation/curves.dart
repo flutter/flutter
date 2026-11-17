@@ -136,7 +136,8 @@ class SawTooth extends Curve {
 
   @override
   double transformInternal(double t) {
-    return (t * count) % 1.0;
+    final double scaledT = t * count;
+    return scaledT - scaledT.truncateToDouble();
   }
 
   @override
@@ -1274,7 +1275,8 @@ double _bounce(double t) {
   if (t < 1.0 / 2.75) {
     return 7.5625 * t * t;
   } else if (t < 2 / 2.75) {
-    return t * (7.5625 * t - 8.25) + 3;
+    final double positionedT = t - 1.5 / 2.75;
+    return 7.5625 * positionedT * positionedT + 0.75;
   } else if (t < 2.5 / 2.75) {
     t -= 2.25 / 2.75;
     return 7.5625 * t * t + 0.9375;
@@ -1343,7 +1345,8 @@ class ElasticInCurve extends Curve {
   @override
   double transformInternal(double t) {
     final double s = period / 4.0;
-    return -math.pow(2.0, 10.0 * (t - 1.0)) * math.sin(((t - 1.0) - s) * (math.pi * 2.0) / period);
+    final double shiftedT = t - 1.0;
+    return -math.pow(2.0, 10.0 * shiftedT) * math.sin((shiftedT - s) * (math.pi * 2.0) / period);
   }
 
   @override
