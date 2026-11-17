@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 
 import '../android/android_builder.dart';
@@ -24,6 +24,7 @@ import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -45,6 +46,7 @@ class BuildCommand extends FlutterCommand {
     required AppleContext appleContext,
     required BuildSystem buildSystem,
     required FeatureFlags featureFlags,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     AndroidBuilder? androidBuilder,
@@ -58,7 +60,7 @@ class BuildCommand extends FlutterCommand {
       appleContext: appleContext,
       toolContext: toolContext,
     );
-    final AndroidBuilder effectiveAndroidBuilder =
+    final AndroidBuilder resolvedAndroidBuilder =
         androidBuilder ??
         AndroidGradleBuilder.fromContexts(
           analytics: analytics,
@@ -67,7 +69,7 @@ class BuildCommand extends FlutterCommand {
         );
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -76,7 +78,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -85,9 +87,10 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -97,6 +100,7 @@ class BuildCommand extends FlutterCommand {
       BuildIOSCommand(
         appleContext: appleContext,
         buildSystem: buildSystem,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -106,6 +110,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -115,6 +120,7 @@ class BuildCommand extends FlutterCommand {
         appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -123,8 +129,10 @@ class BuildCommand extends FlutterCommand {
       BuildSwiftPackage(
         analytics: analytics,
         buildSystem: buildSystem,
+        cocoaPods: appleContext.cocoaPods,
         codesign: codesign,
         featureFlags: featureFlags,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -136,12 +144,14 @@ class BuildCommand extends FlutterCommand {
       BuildIOSArchiveCommand(
         appleContext: appleContext,
         buildSystem: buildSystem,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildBundleCommand(
+        androidContext: androidContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
         toolContext: toolContext,
@@ -158,8 +168,10 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildMacosCommand(
+        appleContext: appleContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -200,8 +212,11 @@ class BuildCommand extends FlutterCommand {
             ),
           );
         } else {
+          final String extensionName = extensionBuildManager.extensionNameForBuildTarget(
+            target.name,
+          );
           toolContext.logger.printWarning(
-            'Skipping custom build target "${target.name}" because a subcommand with that name already exists.',
+            'Skipping custom build target "${target.name}" from extension "$extensionName" because a subcommand with that name already exists.',
           );
         }
       }
@@ -213,9 +228,6 @@ class BuildCommand extends FlutterCommand {
       addSubcommand(command);
     }
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final String name = 'build';
@@ -241,7 +253,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     required this.logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
+    required super.toolContext,
   }) {
     requiresPubspecYaml();
     CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
@@ -259,13 +271,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
     required this.target,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
@@ -279,9 +287,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   final ExtensionBuildTarget target;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => target.name;
 
   @override
@@ -289,7 +294,8 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs) = toolContext;
+    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
+        toolContext;
     final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
     final Directory outputDir = resolveExtensionOutputDir(
@@ -307,7 +313,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
     final ExtensionBuildResult result = await _buildManager.build(
       buildMode: buildInfo.mode,
-      flutterRoot: fs.directory(Cache.flutterRoot).uri,
+      flutterRoot: fs.directory(cache.flutterRoot).uri,
       mainPath: targetFile,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,

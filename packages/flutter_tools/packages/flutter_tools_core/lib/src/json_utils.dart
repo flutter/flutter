@@ -9,6 +9,11 @@ extension ExtensionUriValidation on Uri {
   /// trailing slash (`/`).
   bool get isValidDirectoryUri =>
       isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && path.endsWith('/');
+
+  /// Whether this URI is an absolute `file:` URI that does not end with a
+  /// trailing slash (`/`).
+  bool get isValidFileUri =>
+      isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && !path.endsWith('/');
 }
 
 /// Shared JSON deserialization utilities for Flutter tool extension models.
@@ -62,6 +67,32 @@ extension ExtensionJsonParsing on Map<String, Object?> {
         'Invalid "$key": expected Iterable<String>, got ${value.runtimeType}.',
       ),
     };
+  }
+
+  /// Extracts an optional set of unique [String]s from a JSON list at [key],
+  /// returning [defaultValue] if the key is missing or `null`, or throwing
+  /// a [FormatException] if the value is not an [Iterable], contains
+  /// non-[String] elements, or contains empty elements when [rejectEmpty] is
+  /// `true`.
+  ///
+  /// If [trim] is `true`, leading and trailing whitespace is stripped from each
+  /// string before checking [rejectEmpty].
+  Set<String> stringSet(
+    String key, {
+    Set<String> defaultValue = const <String>{},
+    bool rejectEmpty = false,
+    bool trim = false,
+  }) {
+    final Iterable<String> items = stringIterable(key, defaultValue: defaultValue);
+    final result = <String>{};
+    for (final item in items) {
+      final String value = trim ? item.trim() : item;
+      if (rejectEmpty && value.isEmpty) {
+        throw FormatException('Invalid "$key" element: expected non-empty String, got "$item".');
+      }
+      result.add(value);
+    }
+    return Set<String>.unmodifiable(result);
   }
 
   /// Extracts a required map of [String] keys to [String] values from this

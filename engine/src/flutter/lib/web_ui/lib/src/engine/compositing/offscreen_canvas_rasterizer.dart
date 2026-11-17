@@ -79,11 +79,10 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     if (displayCanvases.length != pictures.length) {
       throw ArgumentError('Called rasterize() with a different number of canvases and pictures.');
     }
-    recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
       final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
           .rasterizeToImageBitmaps(currentFrameSize, pictures);
-      for (var i = 0; i < displayCanvases.length; i++) {
+      for (var i = 0; i < bitmaps.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }
     } else {

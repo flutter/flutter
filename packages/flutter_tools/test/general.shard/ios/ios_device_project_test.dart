@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -44,6 +45,7 @@ flutter:
   ''');
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
+        logger: BufferLogger.test(),
       );
       final IOSDevice device = setUpIOSDevice(fileSystem);
 
@@ -63,6 +65,7 @@ flutter:
       fileSystem.directory('ios').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
+        logger: BufferLogger.test(),
       );
       final IOSDevice device = setUpIOSDevice(fileSystem);
 
@@ -81,6 +84,7 @@ flutter:
       fileSystem.file('pubspec.yaml').createSync();
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
+        logger: BufferLogger.test(),
       );
       final IOSDevice device = setUpIOSDevice(fileSystem);
 
@@ -111,10 +115,13 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     xcode: FakeXcode(),
     iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: FakeXcodeDebug(),
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     name: 'iPhone 1',
     sdkVersion: '13.3',
     cpuArch: .arm64,
@@ -124,6 +131,11 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: false,
+    mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+      analytics: const NoOpAnalytics(),
+      logger: logger,
+      platform: platform,
+    ),
     templateRenderer: FakeTemplateRenderer(),
   );
 }
