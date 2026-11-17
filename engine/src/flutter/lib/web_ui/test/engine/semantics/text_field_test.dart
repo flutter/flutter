@@ -146,9 +146,8 @@ void testMain() {
       expect(inputElement.autocomplete, 'email');
     });
 
-    // An obscured field is a password, so it declares that purpose before it
-    // is focused. Autofill hints only reach the engine on focus, and checkers
-    // read the attribute without focusing the field (WCAG 1.3.5).
+    // An obscured field without autofill hints is most likely a password, so
+    // it declares that purpose rather than `off` (WCAG 1.3.5).
     test('obscured field declares current-password before focus', () {
       final SemanticsObject node = createTextFieldSemantics(value: '', isObscured: true);
       final inputElement =
@@ -186,6 +185,67 @@ void testMain() {
       final inputElement =
           (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
       expect(inputElement.autocomplete, 'off');
+    });
+
+    // Autofill hints carried by semantics declare the field's purpose before
+    // it is focused, including for fields that can never be focused.
+    test('text field declares its autofill hint before focus', () {
+      final SemanticsObject node = createTextFieldSemantics(
+        value: '',
+        autofillHints: <String>['postalCode'],
+      );
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.autocomplete, 'postal-code');
+    });
+
+    test('obscured field declares its autofill hint over current-password', () {
+      final SemanticsObject node = createTextFieldSemantics(
+        value: '',
+        isObscured: true,
+        autofillHints: <String>['newPassword'],
+      );
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.autocomplete, 'new-password');
+    });
+
+    test('disabled field declares its autofill hint', () {
+      final SemanticsObject node = createTextFieldSemantics(
+        value: '',
+        isEnabled: false,
+        autofillHints: <String>['oneTimeCode'],
+      );
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.disabled, isTrue);
+      expect(inputElement.autocomplete, 'one-time-code');
+    });
+
+    test('autofill hint from semantics overrides the email input type', () {
+      final SemanticsObject node = createTextFieldSemantics(
+        value: '',
+        inputType: ui.SemanticsInputType.email,
+        autofillHints: <String>['username'],
+      );
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      expect(inputElement.autocomplete, 'username');
+    });
+
+    test('hint applied by the input connection is kept on semantics updates', () {
+      final SemanticsObject node = createTextFieldSemantics(
+        value: '',
+        autofillHints: <String>['name'],
+      );
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+      inputElement
+        ..name = 'given-name'
+        ..autocomplete = 'given-name';
+
+      createTextFieldSemantics(value: 'a', autofillHints: <String>['name']);
+      expect(inputElement.autocomplete, 'given-name');
     });
 
     test('renders a disabled text field', () {
@@ -1286,6 +1346,7 @@ SemanticsObject createTextFieldSemantics({
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.text,
+  List<String>? autofillHints,
 }) {
   final tester = SemanticsTester(owner());
   tester.updateNode(
@@ -1309,6 +1370,7 @@ SemanticsObject createTextFieldSemantics({
     textSelectionBase: textSelectionBase,
     textSelectionExtent: textSelectionExtent,
     inputType: inputType,
+    autofillHints: autofillHints,
   );
   tester.apply();
   return tester.getSemanticsObject(0);

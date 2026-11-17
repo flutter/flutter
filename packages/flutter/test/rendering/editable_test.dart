@@ -156,6 +156,26 @@ void main() {
     expect(config.inputType, SemanticsInputType.text);
   });
 
+  test('reports autofill hints in semantics', () {
+    const InlineSpan text = TextSpan(text: 'text');
+    final editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: text,
+    );
+    var config = SemanticsConfiguration();
+    editable.describeSemanticsConfiguration(config);
+    expect(config.autofillHints, isNull);
+
+    editable.autofillHints = <String>['newPassword'];
+    config = SemanticsConfiguration();
+    editable.describeSemanticsConfiguration(config);
+    expect(config.autofillHints, <String>['newPassword']);
+  });
+
   test('Reports the height of the first line when maxLines is 1', () {
     final InlineSpan multilineSpan = TextSpan(
       text: 'liiiiines\n' * 10,

@@ -1167,6 +1167,7 @@ class SemanticsData with Diagnosticable {
     required this.validationResult,
     required this.hitTestBehavior,
     required this.inputType,
+    this.autofillHints,
     required this.locale,
     required this.minValue,
     required this.maxValue,
@@ -1442,6 +1443,9 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
+  /// {@macro flutter.semantics.SemanticsConfiguration.autofillHints}
+  final List<String>? autofillHints;
+
   /// The locale for this semantics node.
   ///
   /// Assistive technologies uses this property to correctly interpret the
@@ -1606,6 +1610,7 @@ class SemanticsData with Diagnosticable {
         other.role == role &&
         other.validationResult == validationResult &&
         other.inputType == inputType &&
+        listEquals<String>(other.autofillHints, autofillHints) &&
         other.hitTestBehavior == hitTestBehavior &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
         setEquals<String>(controlsNodes, other.controlsNodes) &&
@@ -1647,6 +1652,7 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
+      autofillHints == null ? null : Object.hashAll(autofillHints!),
       hitTestBehavior,
       traversalParentIdentifier,
       traversalChildIdentifier,
@@ -3499,6 +3505,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _role != config.role ||
         _validationResult != config.validationResult ||
         _hitTestBehavior != config.hitTestBehavior ||
+        !listEquals<String>(_autofillHints, config._autofillHints) ||
         _traversalChildIdentifier != config._traversalChildIdentifier ||
         _traversalParentIdentifier != config._traversalParentIdentifier ||
         _minValue != config._minValue ||
@@ -3824,6 +3831,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsInputType get inputType => _inputType;
   SemanticsInputType _inputType = _kEmptyConfig.inputType;
 
+  /// {@macro flutter.semantics.SemanticsConfiguration.autofillHints}
+  List<String>? get autofillHints => _autofillHints;
+  List<String>? _autofillHints = _kEmptyConfig._autofillHints;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   /// Whether this node can perform the specific [CustomSemanticsAction]
@@ -3917,6 +3928,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _validationResult = config._validationResult;
     _hitTestBehavior = config._hitTestBehavior;
     _inputType = config._inputType;
+    _autofillHints = config._autofillHints;
     _locale = config.locale;
 
     _minValue = config.minValue;
@@ -3974,6 +3986,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsValidationResult validationResult = _validationResult;
     ui.SemanticsHitTestBehavior hitTestBehavior = _hitTestBehavior;
     SemanticsInputType inputType = _inputType;
+    List<String>? autofillHints = _autofillHints;
     final Locale? locale = _locale;
     final customSemanticsActionIds = <int>{};
     String? minValue = _minValue;
@@ -4039,6 +4052,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
         }
+        autofillHints ??= node._autofillHints;
         if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
           hitTestBehavior = node._hitTestBehavior;
         }
@@ -4138,6 +4152,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       validationResult: validationResult,
       hitTestBehavior: hitTestBehavior,
       inputType: inputType,
+      autofillHints: autofillHints,
       locale: locale,
       minValue: minValue,
       maxValue: maxValue,
@@ -4362,6 +4377,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       validationResult: data.validationResult,
       hitTestBehavior: data.hitTestBehavior,
       inputType: data.inputType,
+      autofillHints: data.autofillHints,
       locale: data.locale,
       minValue: data.minValue ?? '',
       maxValue: data.maxValue ?? '',
@@ -6914,6 +6930,22 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@template flutter.semantics.SemanticsConfiguration.autofillHints}
+  /// The autofill hints of a text field, such as `AutofillHints.newPassword`.
+  ///
+  /// This property is only used when this node represents a text field.
+  ///
+  /// Platforms that expose the purpose of an input to assistive technologies,
+  /// such as the `autocomplete` attribute on the web, use it to declare that
+  /// purpose before the field is focused.
+  /// {@endtemplate}
+  List<String>? get autofillHints => _autofillHints;
+  List<String>? _autofillHints;
+  set autofillHints(List<String>? value) {
+    _autofillHints = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// {@macro flutter.semantics.SemanticsProperties.maxValue}
   String? get maxValue => _maxValue;
   String? _maxValue;
@@ -7125,6 +7157,7 @@ class SemanticsConfiguration {
     if (_inputType == SemanticsInputType.none) {
       _inputType = child._inputType;
     }
+    _autofillHints ??= child._autofillHints;
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
@@ -7206,6 +7239,7 @@ class SemanticsConfiguration {
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
       .._inputType = _inputType
+      .._autofillHints = _autofillHints
       .._hitTestBehavior = _hitTestBehavior
       .._traversalChildIdentifier = _traversalChildIdentifier
       .._traversalParentIdentifier = _traversalParentIdentifier

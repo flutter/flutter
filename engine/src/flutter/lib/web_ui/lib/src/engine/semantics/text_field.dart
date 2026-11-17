@@ -11,6 +11,7 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../browser_detection.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../text_editing/autofill_hint.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
@@ -554,9 +555,9 @@ class SemanticTextField extends SemanticRole {
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
       if (!_isAutofillOwned) {
-        // Autofill hints reach the engine only when the field is focused.
-        // Declare the most common purpose until then, so the field is not
-        // exposed as `off` to assistive technologies and checkers.
+        // Declare the most common purpose so a password field without
+        // autofill hints is not exposed as `off`. Hints carried by semantics
+        // replace this in [_updateAutofillHint].
         input.autocomplete = 'current-password';
       }
     } else {
@@ -587,6 +588,20 @@ class SemanticTextField extends SemanticRole {
         default:
       }
     }
+    _updateAutofillHint(input);
+  }
+
+  /// Declares the field's purpose from the autofill hints carried by
+  /// semantics, so the hint is exposed before the field is ever focused.
+  ///
+  /// Once an autofill group or a text input connection applies its own hint,
+  /// [_isAutofillOwned] is true and that hint is kept.
+  void _updateAutofillHint(DomHTMLInputElement input) {
+    final List<String>? hints = semanticsObject.autofillHints;
+    if (hints == null || hints.isEmpty || _isAutofillOwned) {
+      return;
+    }
+    input.autocomplete = BrowserAutofillHints.instance.flutterToEngine(hints.first);
   }
 
   @override

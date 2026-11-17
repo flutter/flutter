@@ -1023,6 +1023,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required ui.SemanticsInputType inputType,
+    List<String>? autofillHints,
     required ui.Locale? locale,
     required String minValue,
     required String maxValue,

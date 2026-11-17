@@ -341,6 +341,7 @@ class SemanticsNodeUpdate {
     required this.validationResult,
     this.hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
     required this.inputType,
+    this.autofillHints,
     required this.locale,
     required this.minValue,
     required this.maxValue,
@@ -465,6 +466,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final List<String>? autofillHints;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.Locale? locale;
@@ -1717,6 +1721,10 @@ class SemanticsObject {
 
   late ui.SemanticsInputType inputType;
 
+  /// The autofill hints of a text field, as framework `AutofillHints` values
+  /// such as `newPassword`, or null if the field has none.
+  List<String>? autofillHints;
+
   /// List of nodes whose contents are controlled by this node.
   ///
   /// The list contains [identifier]s of those nodes.
@@ -2059,6 +2067,8 @@ class SemanticsObject {
     role = update.role;
 
     inputType = update.inputType;
+
+    autofillHints = update.autofillHints;
 
     if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
       controlsNodes = update.controlsNodes;

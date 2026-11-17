@@ -1075,6 +1075,24 @@ void main() {
     expect(config.hasBeenAnnotated, isTrue);
   });
 
+  test('SemanticsConfiguration autofillHints is copied and absorbed', () {
+    final config = SemanticsConfiguration();
+    expect(config.autofillHints, isNull);
+    expect(config.hasBeenAnnotated, isFalse);
+
+    config.autofillHints = <String>['newPassword'];
+    expect(config.hasBeenAnnotated, isTrue);
+    expect(config.copy().autofillHints, <String>['newPassword']);
+
+    final parent = SemanticsConfiguration();
+    parent.absorb(config);
+    expect(parent.autofillHints, <String>['newPassword']);
+
+    final annotated = SemanticsConfiguration()..autofillHints = <String>['username'];
+    annotated.absorb(config);
+    expect(annotated.autofillHints, <String>['username']);
+  });
+
   test('SemanticsConfiguration.copy() preserves hitTestBehavior', () {
     final config = SemanticsConfiguration()
       ..isSemanticBoundary = true

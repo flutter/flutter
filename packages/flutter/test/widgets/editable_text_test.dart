@@ -5479,6 +5479,40 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('EditableText exposes its autofill hints in semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    Widget buildEditableText(Iterable<String>? autofillHints) {
+      return MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          autofillHints: autofillHints,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildEditableText(const <String>[AutofillHints.newPassword]));
+    expect(
+      tester.getSemantics(find.byType(EditableText)).getSemanticsData().autofillHints,
+      <String>[AutofillHints.newPassword],
+    );
+
+    await tester.pumpWidget(buildEditableText(const <String>[AutofillHints.oneTimeCode]));
+    expect(
+      tester.getSemantics(find.byType(EditableText)).getSemanticsData().autofillHints,
+      <String>[AutofillHints.oneTimeCode],
+    );
+
+    await tester.pumpWidget(buildEditableText(null));
+    expect(tester.getSemantics(find.byType(EditableText)).getSemanticsData().autofillHints, isNull);
+
+    handle.dispose();
+  });
+
   testWidgets('password fields become obscured with the right semantics when set', (
     WidgetTester tester,
   ) async {

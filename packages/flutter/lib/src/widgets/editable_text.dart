@@ -6048,6 +6048,7 @@ class EditableTextState extends State<EditableText>
                                     textWidthBasis: widget.textWidthBasis,
                                     obscuringCharacter: widget.obscuringCharacter,
                                     obscureText: widget.obscureText,
+                                    autofillHints: widget.autofillHints?.toList(),
                                     offset: offset,
                                     rendererIgnoresPointer: widget.rendererIgnoresPointer,
                                     cursorWidth: widget.cursorWidth,
@@ -6185,6 +6186,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.locale,
     required this.obscuringCharacter,
     required this.obscureText,
+    this.autofillHints,
     required this.offset,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
@@ -6225,6 +6227,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final Locale? locale;
   final String obscuringCharacter;
   final bool obscureText;
+  final List<String>? autofillHints;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final ViewportOffset offset;
@@ -6279,6 +6282,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
+      autofillHints: autofillHints,
       textHeightBehavior: textHeightBehavior,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -6325,6 +6329,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
+      ..autofillHints = autofillHints
       ..cursorWidth = cursorWidth
       ..cursorHeight = cursorHeight
       ..cursorRadius = cursorRadius

@@ -313,6 +313,7 @@ class RenderEditable extends RenderBox
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
     this._obscureText = false,
+    this._autofillHints,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
@@ -583,6 +584,17 @@ class RenderEditable extends RenderBox
     }
     _obscureText = value;
     _cachedAttributedValue = null;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// {@macro flutter.semantics.SemanticsConfiguration.autofillHints}
+  List<String>? get autofillHints => _autofillHints;
+  List<String>? _autofillHints;
+  set autofillHints(List<String>? value) {
+    if (listEquals<String>(_autofillHints, value)) {
+      return;
+    }
+    _autofillHints = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -1376,6 +1388,9 @@ class RenderEditable extends RenderBox
       // The real value is typically set by EditableText.
       ..inputType = ui.SemanticsInputType.text;
 
+    if (autofillHints != null && autofillHints!.isNotEmpty) {
+      config.autofillHints = autofillHints;
+    }
     if (hasFocus && selectionEnabled) {
       config.onSetSelection = _handleSetSelection;
     }

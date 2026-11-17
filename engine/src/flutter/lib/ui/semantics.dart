@@ -1947,6 +1947,11 @@ abstract class SemanticsUpdateBuilder {
   /// to [SemanticsHitTestBehavior.transparent] to allow pointer events to pass
   /// through.
   ///
+  /// The `autofillHints` are the autofill hints of a text field, such as
+  /// `newPassword`. The web engine uses them to declare the purpose of the
+  /// field before it is focused. Other platforms ignore them, because they
+  /// receive autofill hints through the text input connection.
+  ///
   /// See also:
   ///
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/heading_role
@@ -1995,6 +2000,7 @@ abstract class SemanticsUpdateBuilder {
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
+    List<String>? autofillHints,
     required Locale? locale,
     required String minValue,
     required String maxValue,
@@ -2078,6 +2084,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
+    List<String>? autofillHints,
     required Locale? locale,
     required String minValue,
     required String maxValue,
