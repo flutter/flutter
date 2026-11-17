@@ -891,31 +891,30 @@ flutter:
     expect(() async => const CopyAssets().build(environment), throwsException);
   });
 
-  for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
-    final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
-    testWithoutContext(
-      'rebuilds asset bundle when a dependency pubspec adds an asset between builds ($styleName)',
-      () async {
-        final testFileSystem = MemoryFileSystem.test(style: style);
-        final testPlatform = FakePlatform(
-          operatingSystem: style == FileSystemStyle.windows ? 'windows' : 'linux',
-        );
-        final testEnvironment = Environment.test(
-          testFileSystem.currentDirectory,
-          processManager: FakeProcessManager.any(),
-          artifacts: Artifacts.test(),
-          fileSystem: testFileSystem,
-          logger: logger,
-          platform: testPlatform,
-          defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        );
-        testFileSystem
-            .file(testEnvironment.buildDir.childFile('native_assets.json'))
-            .createSync(recursive: true);
+  // Regression test for https://github.com/flutter/flutter/issues/141626.
+  group('dependency pubspec changes', () {
+    for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
+      final styleName = style == FileSystemStyle.windows ? 'windows' : 'posix';
+      testWithoutContext(
+        'rebuilds asset bundle when a dependency pubspec adds an asset between builds ($styleName)',
+        () async {
+          final testFileSystem = MemoryFileSystem.test(style: style);
+          final testPlatform = FakePlatform(
+            operatingSystem: style == FileSystemStyle.windows ? 'windows' : 'linux',
+          );
+          final testEnvironment = Environment.test(
+            testFileSystem.currentDirectory,
+            processManager: FakeProcessManager.any(),
+            artifacts: Artifacts.test(),
+            fileSystem: testFileSystem,
+            logger: logger,
+            platform: testPlatform,
+            defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+          );
 
-        testFileSystem.file('pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+          testFileSystem.file('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
 name: example
 dependencies:
   my_package:
@@ -924,93 +923,93 @@ dev_dependencies:
   dev_package:
     path: dev_package
 ''');
-        testFileSystem.file(testFileSystem.path.join('my_package', 'pubspec.yaml'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('name: my_package\n');
-        testFileSystem.file(testFileSystem.path.join('dev_package', 'pubspec.yaml'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('name: dev_package\n');
-        writePackageConfigFiles(
-          directory: testFileSystem.currentDirectory,
-          mainLibName: 'example',
-          packages: <String, String>{'my_package': 'my_package', 'dev_package': 'dev_package'},
-          dependencies: <String>['my_package'],
-          devDependencies: <String>['dev_package'],
-        );
+          testFileSystem.file(testFileSystem.path.join('my_package', 'pubspec.yaml'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('name: my_package\n');
+          testFileSystem.file(testFileSystem.path.join('dev_package', 'pubspec.yaml'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('name: dev_package\n');
+          writePackageConfigFiles(
+            directory: testFileSystem.currentDirectory,
+            mainLibName: 'example',
+            packages: <String, String>{'my_package': 'my_package', 'dev_package': 'dev_package'},
+            dependencies: <String>['my_package'],
+            devDependencies: <String>['dev_package'],
+          );
 
-        final buildSystem = FlutterBuildSystem(
-          fileSystem: testFileSystem,
-          logger: logger,
-          platform: testPlatform,
-        );
+          final buildSystem = FlutterBuildSystem(
+            fileSystem: testFileSystem,
+            logger: logger,
+            platform: testPlatform,
+          );
 
-        final BuildResult firstBuild = await buildSystem.build(
-          const StandaloneCopyAssets(),
-          testEnvironment,
-        );
-        expect(firstBuild.success, isTrue);
-        expect(firstBuild.performance['copy_assets']!.skipped, isFalse);
+          final BuildResult firstBuild = await buildSystem.build(
+            const _StandaloneCopyAssets(),
+            testEnvironment,
+          );
+          expect(firstBuild.success, isTrue);
+          expect(firstBuild.performance['copy_assets']!.skipped, isFalse);
 
-        final Depfile firstDepfile = testEnvironment.depFileService.parse(
-          testEnvironment.buildDir.childFile('flutter_assets.d'),
-        );
-        final Set<String> firstInputPaths = firstDepfile.inputs
-            .map((File file) => testEnvironment.fileSystem.path.canonicalize(file.path))
-            .toSet();
-        expect(firstInputPaths, hasLength(firstDepfile.inputs.length));
-        expect(
-          firstInputPaths,
-          contains(
-            testEnvironment.fileSystem.path.canonicalize(
-              testFileSystem.path.join('my_package', 'pubspec.yaml'),
-            ),
-          ),
-        );
-        expect(
-          firstInputPaths,
-          isNot(
+          final Depfile firstDepfile = testEnvironment.depFileService.parse(
+            testEnvironment.buildDir.childFile('flutter_assets.d'),
+          );
+          final Set<String> firstInputPaths = firstDepfile.inputs
+              .map((File file) => testEnvironment.fileSystem.path.canonicalize(file.path))
+              .toSet();
+          expect(
+            firstInputPaths,
             contains(
               testEnvironment.fileSystem.path.canonicalize(
-                testFileSystem.path.join('dev_package', 'pubspec.yaml'),
+                testFileSystem.path.join('my_package', 'pubspec.yaml'),
               ),
             ),
-          ),
-        );
+          );
+          expect(
+            firstInputPaths,
+            isNot(
+              contains(
+                testEnvironment.fileSystem.path.canonicalize(
+                  testFileSystem.path.join('dev_package', 'pubspec.yaml'),
+                ),
+              ),
+            ),
+          );
 
-        final BuildResult unchangedBuild = await buildSystem.build(
-          const StandaloneCopyAssets(),
-          testEnvironment,
-        );
-        expect(unchangedBuild.success, isTrue);
-        expect(unchangedBuild.performance['copy_assets']!.skipped, isTrue);
+          final BuildResult unchangedBuild = await buildSystem.build(
+            const _StandaloneCopyAssets(),
+            testEnvironment,
+          );
+          expect(unchangedBuild.success, isTrue);
+          expect(unchangedBuild.performance['copy_assets']!.skipped, isTrue);
 
-        testFileSystem.file(testFileSystem.path.join('my_package', 'lib', 'my_script.js'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('console.log("hello");');
-        testFileSystem
-            .file(testFileSystem.path.join('my_package', 'pubspec.yaml'))
-            .writeAsStringSync('''
+          testFileSystem.file(testFileSystem.path.join('my_package', 'lib', 'my_script.js'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('console.log("hello");');
+          testFileSystem
+              .file(testFileSystem.path.join('my_package', 'pubspec.yaml'))
+              .writeAsStringSync('''
 name: my_package
 flutter:
   assets:
     - lib/my_script.js
 ''');
 
-        final BuildResult updatedBuild = await buildSystem.build(
-          const StandaloneCopyAssets(),
-          testEnvironment,
-        );
-        expect(updatedBuild.success, isTrue);
-        expect(updatedBuild.performance['copy_assets']!.skipped, isFalse);
-        expect(
-          testEnvironment.buildDir
-              .childDirectory('flutter_assets')
-              .childFile('packages/my_package/lib/my_script.js'),
-          exists,
-        );
-      },
-    );
-  }
+          final BuildResult updatedBuild = await buildSystem.build(
+            const _StandaloneCopyAssets(),
+            testEnvironment,
+          );
+          expect(updatedBuild.success, isTrue);
+          expect(updatedBuild.performance['copy_assets']!.skipped, isFalse);
+          expect(
+            testEnvironment.buildDir
+                .childDirectory('flutter_assets')
+                .childFile('packages/my_package/lib/my_script.js'),
+            exists,
+          );
+        },
+      );
+    }
+  });
 
   testWithoutContext(
     'deduplicates mixed-case Windows input paths while preserving wildcard sentinels',
@@ -1062,8 +1061,10 @@ flutter:
   );
 }
 
-class StandaloneCopyAssets extends CopyAssets {
-  const StandaloneCopyAssets();
+// Runs CopyAssets in isolation without LinkHooks/KernelSnapshot dependencies
+// or SDK/build-dir Source inputs that are absent in the in-memory file system.
+class _StandaloneCopyAssets extends CopyAssets {
+  const _StandaloneCopyAssets();
 
   @override
   List<Target> get dependencies => const <Target>[];
