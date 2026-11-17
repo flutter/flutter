@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
@@ -22,39 +23,51 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
+import '../web/web_runner.dart';
 import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
     required this._analytics,
     required this._applicationPackageFactory,
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
     required this._toolContext,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
   });
 
   final Analytics _analytics;
   final ApplicationPackageFactory _applicationPackageFactory;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
   final ToolContext _toolContext;
+  final WebRunnerFactory? _webRunnerFactory;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
     if (web) {
       return WebDriverService(
         analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         dartSdkPath: _dartSdkPath,
+        flutterHookRunner: _flutterHookRunner,
         toolContext: _toolContext,
+        webRunnerFactory: _webRunnerFactory,
       );
     }
     return FlutterDriverService(

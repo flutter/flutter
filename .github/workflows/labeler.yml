@@ -143,6 +143,7 @@ jobs:
 
         echo "Converting PR #$PR_NUMBER to draft..."
         gh pr ready "$PR_NUMBER" -R "$REPO" --undo
+        gh pr edit "$PR_NUMBER" -R "$REPO" --add-label "waiting for response"
 
         COMMENT_BODY="This pull request has been moved to a draft state because the \`cla/google\` check failed. Once you have signed the CLA and the \`cla/google\` check is passing, please mark this pull request as **Ready for review**."
         ALREADY_COMMENTED=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" |
