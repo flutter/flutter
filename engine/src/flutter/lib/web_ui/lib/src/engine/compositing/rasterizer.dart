@@ -94,7 +94,6 @@ abstract class ViewRasterizer {
     if (_isDisposed) {
       // The view was disposed while preparing to draw. Don't submit the frame,
       // which would allocate new display canvases for the disposed view.
-      recorder?.recordRasterStart();
       recorder?.recordRasterFinish();
       return;
     }
