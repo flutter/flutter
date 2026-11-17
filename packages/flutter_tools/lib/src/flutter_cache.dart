@@ -31,6 +31,7 @@ class FlutterCache extends Cache {
     required super.osUtils,
     required Platform platform,
     required FlutterProjectFactory projectFactory,
+    required Pub Function() pub,
     super.flutterRoot,
     super.stdio,
   }) : super(logger: logger, platform: platform, artifacts: <ArtifactSet>[]) {
@@ -60,7 +61,7 @@ class FlutterCache extends Cache {
         // flutter root and pub must be lazily initialized to avoid accessing
         // before the version is determined.
         flutterRoot: () => flutterRoot,
-        pub: () => pub,
+        pub: pub,
         projectFactory: projectFactory,
       ),
     );

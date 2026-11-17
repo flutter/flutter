@@ -52,11 +52,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     required this.androidContext,
     required this.appleContext,
     required this.featureFlags,
+    required this.pub,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required super.toolContext,
     this.extensionTemplateManager,
     this.net,
-    this.pub,
     super.verboseHelp = false,
   });
 
@@ -65,7 +66,10 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   final ExtensionTemplateManager? extensionTemplateManager;
   final FeatureFlags featureFlags;
   final Net? net;
-  final Pub? pub;
+  final Pub pub;
+
+  @override
+  final TemplatePathProvider templatePathProvider;
 
   @override
   final TemplateRenderer templateRenderer;
@@ -290,7 +294,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
   Net get _netInstance => net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
-  Pub get _pubInstance => pub ?? Pub(featureFlags: featureFlags, toolContext: toolContext);
 
   /// Fetches the code for a sample from the Flutter docs website.
   Future<String?> _fetchSampleFromServer(String sampleId) async {
@@ -781,7 +784,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     if (shouldCallPubGet) {
       projectFactory.invalidate(relativeDir);
       final FlutterProject project = projectFactory.fromDirectory(relativeDir);
-      await _pubInstance.get(
+      await pub.get(
         context: pubContext,
         project: project,
         offline: offline,
@@ -813,6 +816,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           linuxPlatform: includeLinux,
           macOSPlatform: includeMacos || includeDarwin,
           plistParser: appleContext.plistParser,
+          templatePathProvider: templatePathProvider,
           templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,

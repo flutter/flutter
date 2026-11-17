@@ -10,7 +10,9 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../artifacts.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -24,13 +26,16 @@ import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../hook_runner.dart';
 import '../isolated/resident_web_runner.dart';
 import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
@@ -54,23 +59,33 @@ typedef ResidentRunnerFactory = ResidentRunner Function(
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DeviceManager deviceManager,
+    required Pub pub,
+    required TemplatePathProvider templatePathProvider,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+    ApplicationPackageFactory? applicationPackages,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    FlutterHookRunner? flutterHookRunner,
     @visibleForTesting ResidentRunnerFactory? residentRunnerFactoryOverride,
     bool verboseHelp = false,
-  }) {
+  }) : super(applicationPackages: applicationPackages) {
     addSubcommand(
       WidgetPreviewStartCommand(
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         deviceManager: deviceManager,
+        pub: pub,
+        templatePathProvider: templatePathProvider,
         toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
+        applicationPackages: applicationPackages,
         dtdServicesOverride: dtdServicesOverride,
+        flutterHookRunner: flutterHookRunner,
         residentRunnerFactoryOverride: residentRunnerFactoryOverride,
         verbose: verboseHelp,
       ),
@@ -93,7 +108,7 @@ class WidgetPreviewCommand extends FlutterCommand {
 }
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
-  WidgetPreviewSubCommandBase({required super.toolContext});
+  WidgetPreviewSubCommandBase({required super.toolContext, super.applicationPackages});
 
   FileSystem get fs => toolContext.fs;
   Logger get logger => toolContext.logger;
@@ -143,12 +158,17 @@ enum _PendingReload {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
     required this._deviceManager,
+    required this._pub,
+    required this.templatePathProvider,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+    super.applicationPackages,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    this._flutterHookRunner,
     @visibleForTesting this._residentRunnerFactoryOverride,
     this.verbose = false,
   }) {
@@ -231,9 +251,15 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final bool verbose;
 
+  @override
+  final TemplatePathProvider templatePathProvider;
+
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final DeviceManager _deviceManager;
+  final FlutterHookRunner? _flutterHookRunner;
+  final Pub _pub;
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
@@ -257,10 +283,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   late final _previewPubspecBuilder = PreviewPubspecBuilder(
     logger: logger,
-    verbose: verbose,
     offline: offline,
-    rootProject: rootProject,
     previewManifest: _previewManifest,
+    pub: _pub,
+    rootProject: rootProject,
+    verbose: verbose,
   );
 
   late final _previewDetector = PreviewDetector(
@@ -677,8 +704,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                 )
               : ResidentWebRunner(
                   flutterDevice,
+                  applicationPackageFactory: applicationPackages,
+                  assetBundleFactory: _assetBundleFactory,
                   buildSystem: _buildSystem,
                   buildTargets: _buildTargets,
+                  dartBuilder: _flutterHookRunner,
                   featureFlags: featureFlags,
                   toolContext: toolContext,
                   target: target,

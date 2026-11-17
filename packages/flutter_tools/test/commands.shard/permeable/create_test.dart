@@ -41,6 +41,7 @@ import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -4866,6 +4867,8 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
           featureFlags: runner.featureFlags,
+          pub: Pub(featureFlags: runner.featureFlags, toolContext: toolContext),
+          templatePathProvider: TemplatePathProvider(flutterRoot: toolContext.cache.flutterRoot),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
         ),
@@ -5028,6 +5031,7 @@ CreateCommand createCreateCommand({
   bool verboseHelp = false,
 }) {
   final ToolContext resolvedToolContext = toolContext ?? _createToolContext();
+  final FeatureFlags resolvedFeatureFlags = featureFlags ?? TestFlutterCommandRunner().featureFlags;
   final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
       resolvedToolContext;
   return CreateCommand(
@@ -5051,7 +5055,9 @@ CreateCommand createCreateCommand({
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),
-    featureFlags: featureFlags ?? TestFlutterCommandRunner().featureFlags,
+    featureFlags: resolvedFeatureFlags,
+    pub: pub ?? Pub(featureFlags: resolvedFeatureFlags, toolContext: resolvedToolContext),
+    templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext: resolvedToolContext,
     extensionTemplateManager: extensionTemplateManager,
@@ -5062,7 +5068,6 @@ CreateCommand createCreateCommand({
           logger: logger,
           platform: platform,
         ),
-    pub: pub,
     verboseHelp: verboseHelp,
   );
 }

@@ -22,6 +22,8 @@ import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -717,6 +719,12 @@ void main() {
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+          ),
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
           cocoaPods: FakeCocoaPods(),
@@ -759,6 +767,12 @@ void main() {
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         coreDeviceControl: FakeIOSCoreDeviceControl(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
         cocoaPods: FakeCocoaPods(),
@@ -812,6 +826,12 @@ void main() {
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           coreDeviceControl: coreDeviceControl,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: fakeAnalytics,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+          ),
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
           cocoaPods: FakeCocoaPods(),
@@ -1652,6 +1672,12 @@ void main() {
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
               coreDeviceControl: coreDeviceControl,
+              mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+                analytics: fakeAnalytics,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+              ),
+              templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
               xcodeDebug: FakeXcodeDebug(),
               analytics: fakeAnalytics,
               cocoaPods: FakeCocoaPods(),

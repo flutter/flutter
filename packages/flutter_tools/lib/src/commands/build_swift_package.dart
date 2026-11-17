@@ -67,6 +67,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._cocoaPods,
     required this._codesign,
     required this._featureFlags,
+    required this._templatePathProvider,
     required this._templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
@@ -116,6 +117,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final BuildSystem _buildSystem;
   final Xcode? _xcode;
   final Analytics _analytics;
+  final TemplatePathProvider _templatePathProvider;
   final TemplateRenderer _templateRenderer;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
@@ -210,6 +212,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     featureFlags: _featureFlags,
     flutterRoot: toolContext.cache.flutterRoot,
     project: project,
+    templatePathProvider: _templatePathProvider,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
     xcode: _xcode!,
@@ -1957,6 +1960,7 @@ class FlutterNativeIntegrationSwiftPackage {
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: _utils.templatePathProvider,
       templateRenderer: _utils.templateRenderer,
     );
     scriptsTemplate.render(scriptsDirectory, <String, Object>{
@@ -1982,6 +1986,7 @@ class FlutterNativeIntegrationSwiftPackage {
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: _utils.templatePathProvider,
       templateRenderer: _utils.templateRenderer,
     );
     toolsTemplate.render(sourcesDirectory, <String, Object>{}, printStatusWhenWriting: false);
@@ -1997,6 +2002,7 @@ class FlutterNativeIntegrationSwiftPackage {
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: _utils.templatePathProvider,
       templateRenderer: _utils.templateRenderer,
     );
 
@@ -2018,6 +2024,7 @@ class FlutterNativeIntegrationSwiftPackage {
         fileSystem: fileSystem,
         templateManifest: null,
         logger: logger,
+        templatePathProvider: _utils.templatePathProvider,
         templateRenderer: _utils.templateRenderer,
       );
       testsTemplate.render(testDirectory, <String, Object>{}, printStatusWhenWriting: false);
@@ -2175,6 +2182,7 @@ class BuildSwiftPackageUtils {
     required this.featureFlags,
     required this.flutterRoot,
     required this.project,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
     required this.xcode,
@@ -2186,6 +2194,7 @@ class BuildSwiftPackageUtils {
   final FeatureFlags featureFlags;
   final String flutterRoot;
   final FlutterProject project;
+  final TemplatePathProvider templatePathProvider;
   final TemplateRenderer templateRenderer;
   final ToolContext toolContext;
   final Xcode xcode;

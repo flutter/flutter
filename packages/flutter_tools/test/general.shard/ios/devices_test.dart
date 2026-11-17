@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -98,6 +99,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -128,6 +134,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -178,6 +189,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -208,6 +224,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -236,6 +257,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -264,6 +290,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -292,6 +323,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -320,6 +356,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -350,6 +391,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -380,6 +426,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -410,6 +461,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -440,6 +496,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -469,6 +530,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -496,6 +562,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -525,6 +596,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -555,6 +631,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -592,6 +673,11 @@ void main() {
               isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
+              mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+                analytics: const NoOpAnalytics(),
+                logger: logger,
+                platform: macPlatform,
+              ),
               templateRenderer: FakeTemplateRenderer(),
               xcode: FakeXcode(),
             );
@@ -689,6 +775,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -740,6 +831,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
@@ -773,6 +869,11 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
+            mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+              analytics: const NoOpAnalytics(),
+              logger: logger,
+              platform: macPlatform,
+            ),
             templateRenderer: FakeTemplateRenderer(),
             xcode: fakeXcode,
           );
@@ -808,6 +909,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
@@ -842,6 +948,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
@@ -880,6 +991,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
@@ -961,6 +1077,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -992,6 +1113,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -1334,6 +1460,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );

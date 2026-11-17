@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -82,12 +83,14 @@ void main() {
   group('daemon', () {
     late FakeDaemonStreams daemonStreams;
     late DaemonConnection daemonConnection;
+    late FakeApplicationPackageFactory applicationPackageFactory;
     setUp(() {
       BufferLogger bufferLogger;
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
       daemonStreams = FakeDaemonStreams();
       daemonConnection = DaemonConnection(daemonStreams: daemonStreams, logger: bufferLogger);
+      applicationPackageFactory = FakeApplicationPackageFactory();
     });
 
     tearDown(() async {
@@ -100,8 +103,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -121,8 +127,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(fs: fs),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -232,8 +241,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -258,8 +270,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -285,8 +300,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -305,8 +323,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -326,8 +347,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -358,8 +382,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -385,8 +412,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -410,8 +440,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -430,8 +463,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -450,8 +486,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -475,8 +514,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -493,8 +535,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -512,8 +557,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -538,8 +586,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -601,8 +652,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -620,8 +674,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -645,8 +702,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -674,8 +734,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -724,17 +787,15 @@ void main() {
     });
 
     group('device.startApp and .stopApp', () {
-      late FakeApplicationPackageFactory applicationPackageFactory;
-      setUp(() {
-        applicationPackageFactory = FakeApplicationPackageFactory();
-      });
-
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -805,7 +866,7 @@ void main() {
         expect(device.stopAppPackage, applicationPackage);
         final stopAppResult = stopAppResponse.data['result'] as bool?;
         expect(stopAppResult, true);
-      }, overrides: <Type, Generator>{ApplicationPackageFactory: () => applicationPackageFactory});
+      });
     });
 
     testUsingContext(
@@ -814,8 +875,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -889,8 +953,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -919,8 +986,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -939,8 +1009,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -959,8 +1032,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -981,8 +1057,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -1008,44 +1087,18 @@ void main() {
       expect(exposedUrl, equals(mappedUrl));
     });
 
-    testUsingContext(
-      'devtools.serve command should return host and port on success',
-      () async {
-        daemon = Daemon(
-          daemonConnection,
-          analytics: const NoOpAnalytics(),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
-          toolContext: const DelegatingToolContext(),
-          xcode: null,
-          notifyingLogger: notifyingLogger,
-          featureFlags: TestFeatureFlags(),
-        );
-
-        daemonStreams.inputs.add(
-          DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}),
-        );
-        final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(
-          (DaemonMessage response) => response.data['id'] == 0,
-        );
-        final result = response.data['result']! as Map<String, Object?>;
-        expect(result, isNotEmpty);
-        expect(result['host'], '127.0.0.1');
-        expect(result['port'], 1234);
-      },
-      overrides: <Type, Generator>{
-        DevtoolsLauncher: () =>
-            FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
-      },
-    );
-
-    testUsingContext('devtools.serve command should return null fields if null returned', () async {
+    testWithoutContext('devtools.serve command should return host and port on success', () async {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: const DelegatingToolContext(),
+        devtoolsLauncher: FakeDevtoolsLauncher(
+          serverAddress: DevToolsServerAddress('127.0.0.1', 1234),
+        ),
+        toolContext: FakeToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
         featureFlags: TestFeatureFlags(),
@@ -1059,9 +1112,39 @@ void main() {
       );
       final result = response.data['result']! as Map<String, Object?>;
       expect(result, isNotEmpty);
-      expect(result['host'], null);
-      expect(result['port'], null);
-    }, overrides: <Type, Generator>{DevtoolsLauncher: () => FakeDevtoolsLauncher()});
+      expect(result['host'], '127.0.0.1');
+      expect(result['port'], 1234);
+    });
+
+    testWithoutContext(
+      'devtools.serve command should return null fields if null returned',
+      () async {
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          toolContext: FakeToolContext(),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
+
+        daemonStreams.inputs.add(
+          DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}),
+        );
+        final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(
+          (DaemonMessage response) => response.data['id'] == 0,
+        );
+        final result = response.data['result']! as Map<String, Object?>;
+        expect(result, isNotEmpty);
+        expect(result['host'], null);
+        expect(result['port'], null);
+      },
+    );
 
     testUsingContext(
       'proxy.connect tries to connect to an ipv4 address and proxies the connection correctly',
@@ -1083,8 +1166,11 @@ void main() {
           daemon = Daemon(
             daemonConnection,
             analytics: const NoOpAnalytics(),
+            applicationPackageFactory: applicationPackageFactory,
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
             xcode: null,
             notifyingLogger: notifyingLogger,
@@ -1171,8 +1257,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -1205,8 +1294,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -1234,8 +1326,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(fs: fs),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -1276,8 +1371,11 @@ void main() {
       daemon = Daemon(
         daemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(fs: fs),
         xcode: null,
         notifyingLogger: notifyingLogger,
@@ -1336,8 +1434,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(fs: fs),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -1395,8 +1496,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(fs: fs),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -1450,8 +1554,11 @@ void main() {
         daemon = Daemon(
           daemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildSystem: buildSystem,
           buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: FakeToolContext(fs: fs),
           xcode: null,
           notifyingLogger: notifyingLogger,
@@ -1648,8 +1755,10 @@ void main() {
     testWithoutContext('has correct properties', () {
       final command = DaemonCommand(
         androidContext: FakeAndroidContext(),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
       );
@@ -1660,8 +1769,10 @@ void main() {
 
       final hiddenCommand = DaemonCommand(
         androidContext: FakeAndroidContext(),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: FakeToolContext(),
         xcode: null,
         hidden: true,
@@ -1962,3 +2073,5 @@ class FakeRestartableResidentRunner extends FakeResidentRunner {
     return OperationResult.ok;
   }
 }
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}

@@ -14,9 +14,7 @@ import 'android/android_workflow.dart';
 import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
 import 'android/java.dart';
-import 'application_package.dart';
 import 'artifacts.dart';
-import 'asset.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
@@ -39,12 +37,10 @@ import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
-import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'experimental/extension_manager.dart';
 import 'features.dart';
-import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
 import 'flutter_features.dart';
 import 'flutter_features_config.dart';
@@ -67,7 +63,6 @@ import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/unified_analytics.dart';
-import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
 import 'template.dart';
@@ -213,25 +208,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         androidSdkBuilder: () => globals.androidSdk,
         featureFlags: globals.featureFlags,
       ),
-      ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
-        androidSdk: globals.androidSdk,
-        plistParser: globals.plistParser,
-        toolContext: const _GlobalToolContext(),
-      ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
         cache: globals.cache,
         platform: globals.platform,
         operatingSystemUtils: globals.os,
       ),
-      AssetBundleFactory: () {
-        return AssetBundleFactory.defaultInstance(
-          logger: globals.logger,
-          fileSystem: globals.fs,
-          flutterRoot: globals.cache.flutterRoot,
-          platform: globals.platform,
-        );
-      },
       BuildSystem: () => FlutterBuildSystem(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -244,6 +226,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         osUtils: globals.os,
         projectFactory: globals.projectFactory,
+        pub: () => Pub(featureFlags: globals.featureFlags, toolContext: const _GlobalToolContext()),
         stdio: globals.stdio,
       ),
       CocoaPods: () => CocoaPods(
@@ -270,12 +253,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         flutterProjectFactory: globals.projectFactory,
       ),
       DevFSConfig: () => DevFSConfig(),
-      DevtoolsLauncher: () => DevtoolsServerLauncher(
-        processManager: globals.processManager,
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        botDetector: globals.botDetector,
-      ),
       Doctor: () => Doctor(
         analytics: globals.analytics,
         cache: globals.cache,
@@ -368,11 +345,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             ),
       MacOSWorkflow: () =>
           MacOSWorkflow(featureFlags: globals.featureFlags, platform: globals.platform),
-      MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
-        logger: globals.logger,
-        analytics: globals.analytics,
-        platform: globals.platform,
-      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -397,10 +369,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       ProcessUtils: () =>
           ProcessUtils(processManager: globals.processManager, logger: globals.logger),
-      Pub: () => Pub(featureFlags: globals.featureFlags, toolContext: const _GlobalToolContext()),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TemplatePathProvider: () => TemplatePathProvider(flutterRoot: globals.cache.flutterRoot),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -424,7 +394,15 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: globals.analytics,
+          logger: const _GlobalToolContext().logger,
+          platform: const _GlobalToolContext().platform,
+        ),
         plistParser: globals.plistParser,
+        templatePathProvider: TemplatePathProvider(
+          flutterRoot: const _GlobalToolContext().cache.flutterRoot,
+        ),
         templateRenderer: globals.templateRenderer,
         toolContext: const _GlobalToolContext(),
         xcode: globals.xcode!,

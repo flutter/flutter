@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -28,11 +29,14 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -67,7 +71,9 @@ void main() {
       final defaultCommand = RunCommand(
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       expect(defaultCommand.argParser.options['track-widget-creation']?.hide, isFalse);
@@ -78,7 +84,9 @@ void main() {
         verboseHelp: true,
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       expect(verboseCommand.argParser.options['track-widget-creation']?.hide, isFalse);
@@ -92,7 +100,9 @@ void main() {
         final command = RunCommand(
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
         );
         expect(
@@ -131,7 +141,9 @@ void main() {
         final command = RunCommand(
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
         );
         await expectLater(
@@ -159,7 +171,9 @@ void main() {
         final command = RunCommand(
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
         );
         await expectLater(
@@ -179,7 +193,9 @@ void main() {
         RunCommand(
           appleContext: FakeAppleContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           toolContext: const DelegatingToolContext(),
         ),
       );
@@ -351,7 +367,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
           );
           testDeviceManager.devices = <Device>[];
@@ -380,7 +398,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
           );
           final device = FakeDevice(isLocalEmulator: true);
@@ -464,7 +484,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(
@@ -550,7 +572,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
@@ -587,7 +611,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
@@ -650,7 +676,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
@@ -743,8 +771,11 @@ void main() {
               final command = RunCommand(
                 appleContext: FakeAppleContext(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+                assetBundleFactory: _FakeAssetBundleFactory(),
                 buildTargets: const BuildTargetsImpl(),
+                devtoolsLauncher: FakeDevtoolsLauncher(),
                 toolContext: const DelegatingToolContext(),
+                webRunnerFactory: fakeWebRunnerFactory,
               );
               final device = FakeDevice(
                 platformType: PlatformType.web,
@@ -774,7 +805,6 @@ void main() {
               ProcessManager: () => FakeProcessManager.any(),
               Stdio: () => FakeStdio(),
               Logger: () => MachineOutputLogger(parent: logger),
-              WebRunnerFactory: () => fakeWebRunnerFactory,
             },
           );
         });
@@ -904,7 +934,9 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
           );
@@ -1323,8 +1355,11 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
@@ -1342,7 +1377,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1352,8 +1386,11 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () => createTestCommandRunner(
@@ -1368,7 +1405,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1382,8 +1418,11 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1403,7 +1442,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1414,8 +1452,11 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () =>
@@ -1430,7 +1471,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1440,8 +1480,11 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1459,7 +1502,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1469,8 +1511,11 @@ void main() {
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1493,7 +1538,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -1533,8 +1577,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
@@ -1549,7 +1596,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1564,8 +1610,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
@@ -1580,7 +1629,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1600,8 +1648,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1628,7 +1679,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1643,8 +1693,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
@@ -1659,7 +1712,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1677,8 +1729,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1706,7 +1761,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1724,8 +1778,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
@@ -1750,7 +1807,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1761,8 +1817,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1790,7 +1849,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -1825,8 +1883,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
@@ -1844,7 +1905,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1854,8 +1914,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () =>
@@ -1870,7 +1933,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1880,8 +1942,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () =>
@@ -1896,7 +1961,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1906,8 +1970,11 @@ server:
           final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
             buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
@@ -1921,7 +1988,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -2080,7 +2146,9 @@ server:
       final command = RunCommand(
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2107,7 +2175,9 @@ server:
       final command = RunCommand(
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2172,7 +2242,9 @@ server:
       final command = RunCommand(
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2198,7 +2270,9 @@ server:
       final command = RunCommand(
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2224,7 +2298,9 @@ server:
       final command = RunCommand(
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: const DelegatingToolContext(),
       );
       await expectLater(
@@ -2423,8 +2499,10 @@ server:
   testWithoutContext('RunCommand registers --flavor, --track-widget-creation, and AndroidGradleOptionsBundle without AndroidBuildOptionsBundle flags', () {
     final command = RunCommand(
       appleContext: FakeAppleContext(),
+      assetBundleFactory: _FakeAssetBundleFactory(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
       toolContext: FakeToolContext(),
     );
 
@@ -2611,7 +2689,9 @@ class TestRunCommandForUsageValues extends RunCommand {
   }) : super(
          appleContext: appleContext ?? FakeAppleContext(),
          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+         assetBundleFactory: _FakeAssetBundleFactory(),
          buildTargets: const BuildTargetsImpl(),
+         devtoolsLauncher: FakeDevtoolsLauncher(),
          toolContext: toolContext ?? const DelegatingToolContext(),
        ) {
     this.devices = devices;
@@ -2639,7 +2719,9 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
     : super(
         appleContext: appleContext ?? FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
@@ -2667,7 +2749,9 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
     : super(
         appleContext: appleContext ?? FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
@@ -2708,7 +2792,9 @@ class DaemonCapturingRunCommand extends RunCommand {
     : super(
         appleContext: appleContext ?? FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
@@ -2728,6 +2814,13 @@ class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon)
     : super(
         analytics: const analytics.NoOpAnalytics(),
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: const DelegatingToolContext(),
+        ),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         featureFlags: TestFeatureFlags(),
@@ -2814,6 +2907,8 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   ResidentRunner createWebRunner(
     FlutterDevice device, {
     required analytics.Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
@@ -2821,6 +2916,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,
+    FlutterHookRunner? flutterHookRunner,
     bool machine = false,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
@@ -2831,4 +2927,14 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     lastWebDefines = webDefines;
     return FakeResidentRunner();
   }
+}
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: MemoryFileSystem.test(),
+    flutterRoot: '',
+    logger: BufferLogger.test(),
+    platform: FakePlatform(),
+  ).createBundle();
 }
