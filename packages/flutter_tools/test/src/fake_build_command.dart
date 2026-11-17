@@ -29,6 +29,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -54,6 +55,7 @@ BuildCommand createFakeBuildCommand({
   PlistParser? plistParser,
   ProcessManager? processManager,
   ProcessUtils? processUtils,
+  TemplatePathProvider? templatePathProvider,
   TemplateRenderer? templateRenderer,
   AnsiTerminal? terminal,
   ToolContext? toolContext,
@@ -144,11 +146,14 @@ BuildCommand createFakeBuildCommand({
     xcode: xcode ?? FakeXcode(),
     xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
   );
+  final Cache targetCache = cache ?? FakeCache();
+  final TemplatePathProvider targetTemplatePathProvider =
+      templatePathProvider ?? TemplatePathProvider(flutterRoot: targetCache.flutterRoot);
   final ToolContext targetToolContext =
       toolContext ??
       FakeToolContext(
         artifacts: artifacts ?? FakeArtifacts(),
-        cache: cache ?? FakeCache(),
+        cache: targetCache,
         config: config ?? FakeConfig(),
         fs: fs,
         flutterVersion: flutterVersion ?? FakeFlutterVersion(),
@@ -176,12 +181,17 @@ BuildCommand createFakeBuildCommand({
     appleContext: appleCtx,
     buildSystem: buildSystem ?? FakeBuildSystem(),
     featureFlags: targetFeatureFlags,
+    templatePathProvider: targetTemplatePathProvider,
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
     toolContext: targetToolContext,
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(toolContext: targetToolContext);
+      applicationPackageFactory ??
+      FakeIOSApplicationPackageFactory(
+        templatePathProvider: targetTemplatePathProvider,
+        toolContext: targetToolContext,
+      );
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -192,8 +202,9 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.toolContext});
+  FakeIOSApplicationPackageFactory({required this.templatePathProvider, required this.toolContext});
 
+  final TemplatePathProvider templatePathProvider;
   final ToolContext toolContext;
 
   @override
@@ -210,6 +221,12 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (!project.ios.exists) {
       return null;
     }
-    return BuildableIOSApp(project.ios, 'com.example.test', 'Runner', toolContext: toolContext);
+    return BuildableIOSApp(
+      project.ios,
+      'com.example.test',
+      'Runner',
+      templatePathProvider: templatePathProvider,
+      toolContext: toolContext,
+    );
   }
 }
