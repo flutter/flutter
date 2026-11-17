@@ -489,6 +489,44 @@ class Environment implements AndroidSdkProvider {
     this.engineVersion,
   });
 
+  static Directory _resolveDirectory(Directory directory) {
+    final FileSystem fileSystem = directory.fileSystem;
+    Directory current = directory.absolute;
+    final trailingSegments = <String>[];
+    var linkHops = 0;
+    while (!current.existsSync()) {
+      if (linkHops < 40 && fileSystem.isLinkSync(current.path)) {
+        linkHops++;
+        final String linkTarget = fileSystem.link(current.path).targetSync();
+        current = fileSystem
+            .directory(
+              fileSystem.path.isAbsolute(linkTarget)
+                  ? linkTarget
+                  : fileSystem.path.join(current.parent.path, linkTarget),
+            )
+            .absolute;
+        continue;
+      }
+      final Directory parent = current.parent;
+      if (parent.path == current.path) {
+        return fileSystem.directory(fileSystem.path.normalize(directory.absolute.path));
+      }
+      trailingSegments.add(fileSystem.path.basename(current.path));
+      current = parent;
+    }
+    String resolvedBase;
+    try {
+      resolvedBase = current.resolveSymbolicLinksSync();
+    } on FileSystemException {
+      resolvedBase = current.path;
+    }
+    return fileSystem.directory(
+      fileSystem.path.normalize(
+        fileSystem.path.joinAll(<String>[resolvedBase, ...trailingSegments.reversed]),
+      ),
+    );
+  }
+
   Environment copyWith({Directory? outputDir}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
@@ -630,6 +668,16 @@ class Environment implements AndroidSdkProvider {
   final bool generateDartPluginRegistry;
 
   late final depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
+
+  /// Returns [projectDir] with symlinks and relative segments resolved.
+  ///
+  /// Trailing segments that do not yet exist are preserved and normalized.
+  Directory get resolvedProjectDir => _resolveDirectory(projectDir);
+
+  /// Returns [outputDir] with symlinks and relative segments resolved.
+  ///
+  /// Trailing segments that do not yet exist are preserved and normalized.
+  Directory get resolvedOutputDir => _resolveDirectory(outputDir);
 }
 
 /// The result information from the build system.
@@ -911,14 +959,13 @@ void _deleteStaleOutputs({
   required Set<String> preservedOutputFilePaths,
   required Iterable<String> previousOutputs,
 }) {
-  String projectDirPath;
-  try {
-    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
-  } on FileSystemException {
-    projectDirPath = environment.projectDir.absolute.path;
-  }
   final String sharedHooksPath = fileSystem.path.canonicalize(
-    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
+    fileSystem.path.join(
+      environment.resolvedProjectDir.path,
+      '.dart_tool',
+      'hooks_runner',
+      'shared',
+    ),
   );
   for (final previousOutput in previousOutputs) {
     if (currentOutputs.containsKey(previousOutput)) {

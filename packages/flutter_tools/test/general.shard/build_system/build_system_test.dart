@@ -968,6 +968,35 @@ void main() {
       expect(sharedHookOutputFile, exists);
     },
   );
+
+  testWithoutContext('Environment resolves relative, symlinked, and uncreated projectDir and outputDir paths without mutating raw fields', () {
+    final fileSystem = MemoryFileSystem.test();
+    fileSystem.directory('/private/tmp/real_proj').createSync(recursive: true);
+    fileSystem.directory('/private/tmp/real_base').createSync(recursive: true);
+    fileSystem.link('/tmp_proj').createSync('/private/tmp/real_proj');
+    fileSystem.link('/tmp_base').createSync('/private/tmp/real_base');
+    fileSystem.link('/tmp_uncreated_out').createSync('/private/tmp/real_base/new_out');
+    fileSystem.currentDirectory = fileSystem.directory('/tmp_base');
+
+    final env = Environment.test(
+      fileSystem.currentDirectory,
+      projectDir: fileSystem.directory('/tmp_proj'),
+      outputDir: fileSystem.directory('rel_nested/out'),
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+    );
+
+    expect(env.projectDir.path, '/tmp_proj');
+    expect(env.outputDir.path, 'rel_nested/out');
+    expect(env.resolvedProjectDir.path, '/private/tmp/real_proj');
+    expect(env.resolvedOutputDir.path, '/private/tmp/real_base/rel_nested/out');
+
+    final Environment copied = env.copyWith(outputDir: fileSystem.directory('/tmp_uncreated_out'));
+    expect(copied.outputDir.path, '/tmp_uncreated_out');
+    expect(copied.resolvedOutputDir.path, '/private/tmp/real_base/new_out');
+  });
 }
 
 BuildSystem setUpBuildSystem(FileSystem fileSystem, {FakePlatform? platform, Logger? logger}) {
