@@ -122,7 +122,7 @@ class TextShadowCache {
   // Visible for testing.
   size_t GetCacheSizeForTesting() const { return entries_.size(); }
 
-  size_t GetCacheBytesForTesting() const { return GetCacheBytes(); }
+  size_t GetCacheBytesForTesting() const;
 
   /// Number of consecutive unused frames an entry survives: 2 seconds at
   /// 120 Hz, longer than one cycle of typical typing indicators.
@@ -143,8 +143,6 @@ class TextShadowCache {
     size_t byte_size = 0;
     Matrix key_matrix;
   };
-
-  size_t GetCacheBytes() const;
 
   size_t byte_budget_ = kDefaultByteBudget;
 

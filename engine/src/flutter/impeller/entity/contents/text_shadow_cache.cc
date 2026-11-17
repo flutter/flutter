@@ -5,7 +5,6 @@
 #include "impeller/entity/contents/text_shadow_cache.h"
 
 #include <algorithm>
-#include <utility>
 #include <vector>
 
 #include "impeller/entity/contents/content_context.h"
@@ -39,40 +38,44 @@ void TextShadowCache::MarkFrameStart() {
 }
 
 void TextShadowCache::MarkFrameEnd() {
-  for (auto& [key, data] : entries_) {
+  size_t cache_bytes = 0;
+  for (auto it = entries_.begin(); it != entries_.end();) {
+    TextShadowCacheData& data = it->second;
     data.unused_frame_count =
         data.used_this_frame ? 0 : data.unused_frame_count + 1;
+    if (data.unused_frame_count > kKeepAliveFrameCount) {
+      entries_.erase(it++);  // absl's erase() returns void.
+      continue;
+    }
+    cache_bytes += data.byte_size;
+    ++it;
   }
-  absl::erase_if(entries_, [](const auto& pair) {
-    return pair.second.unused_frame_count > kKeepAliveFrameCount;
-  });
 
-  size_t cache_bytes = GetCacheBytes();
   if (cache_bytes <= byte_budget_) {
     return;
   }
-  std::vector<std::pair<uint32_t, TextShadowCacheKey>> evictable;
-  for (const auto& [key, data] : entries_) {
-    if (!data.used_this_frame) {
-      evictable.emplace_back(data.unused_frame_count, key);
+
+  using Iterator = decltype(entries_)::iterator;
+  std::vector<Iterator> evictable;
+  evictable.reserve(entries_.size());
+  for (auto it = entries_.begin(); it != entries_.end(); ++it) {
+    if (!it->second.used_this_frame) {
+      evictable.push_back(it);
     }
   }
-  std::sort(evictable.begin(), evictable.end(),
-            [](const auto& a, const auto& b) { return a.first > b.first; });
-  for (const auto& [unused_frame_count, key] : evictable) {
+  std::sort(evictable.begin(), evictable.end(), [](Iterator a, Iterator b) {
+    return a->second.unused_frame_count > b->second.unused_frame_count;
+  });
+  for (Iterator it : evictable) {
     if (cache_bytes <= byte_budget_) {
       break;
-    }
-    auto it = entries_.find(key);
-    if (it == entries_.end()) {
-      continue;
     }
     cache_bytes -= it->second.byte_size;
     entries_.erase(it);
   }
 }
 
-size_t TextShadowCache::GetCacheBytes() const {
+size_t TextShadowCache::GetCacheBytesForTesting() const {
   size_t bytes = 0;
   for (const auto& [key, data] : entries_) {
     bytes += data.byte_size;
