@@ -1915,18 +1915,25 @@ class Transform extends SingleChildRenderObjectWidget {
   /// rasterized under the new matrix on each frame, preserving sharpness at
   /// different scales. The cost depends on how expensive the child is to
   /// rasterize at that scale or rotation, including its text, paths, and shadows.
-  /// With a non-null value, the child is rasterized at its untransformed size
-  /// into the offscreen buffer and the transform resamples that bitmap. This
-  /// adds offscreen rendering work on each frame, even for retained layers, and
-  /// scaling the bitmap up can reduce sharpness.
+  /// With a non-null value, the child is rasterized in its untransformed
+  /// coordinate system into an offscreen buffer, and the transform resamples
+  /// that bitmap. This can avoid scale-dependent rasterization work, such as
+  /// re-rasterizing text at different scales. Backends with a suitable raster
+  /// cache can also reuse the child bitmap across frames. Without such caching,
+  /// rendering the offscreen buffer adds work on each frame, even when
+  /// descendant layers are retained. Scaling the bitmap up can reduce sharpness.
   ///
   /// Leave this null (the default) when:
   ///
   ///  * The child is cheap to rasterize, such as solid colors or simple shapes.
   ///  * The transform is a pure translation, which needs no transform layer in
   ///    this mode but still uses the bitmap path with a non-null value.
-  ///  * The subtree contains platform views ([AndroidView], [UiKitView]), which
-  ///    cannot be rasterized into a bitmap by Flutter.
+  ///  * The subtree contains platform-composited views, such as [UiKitView],
+  ///    [AppKitView], [HtmlElementView], or Android views using hybrid
+  ///    composition ([AndroidView] and [AndroidViewSurface]). Their
+  ///    [PlatformViewLayer]s are composited by the platform rather than drawn
+  ///    into the offscreen buffer, so the [ImageFilter.matrix] transform does
+  ///    not apply to them.
   ///
   /// Consider a non-null value when a complex subtree is continuously scaled or
   /// rotated and profiling shows that raster time dominates the frame. See

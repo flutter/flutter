@@ -301,11 +301,14 @@ class MatrixTransition extends AnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
-  /// While the animation is running ([Animation.isAnimating]), this value is
-  /// passed to [Transform.filterQuality]. When the animation is stopped (either
-  /// in [AnimationStatus.dismissed] or [AnimationStatus.completed]), null is used
-  /// instead, so the [ImageFilterLayer] and its offscreen buffer are not kept in
-  /// the layer tree while nothing is moving.
+  /// {@template flutter.widgets.MatrixTransition.filterQuality}
+  /// When [Animation.isAnimating] is true, this value is passed to
+  /// [Transform.filterQuality]. When [Animation.isAnimating] is false (for
+  /// example, at rest in [AnimationStatus.dismissed] or
+  /// [AnimationStatus.completed]), null is used instead so the
+  /// [ImageFilterLayer] and its offscreen buffer are not kept in the layer tree
+  /// while idle.
+  /// {@endtemplate}
   ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;

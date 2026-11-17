@@ -1516,6 +1516,8 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
 
   /// The filter quality with which to apply the transform as a bitmap operation.
   ///
+  /// {@macro flutter.widgets.MatrixTransition.filterQuality}
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
@@ -1644,6 +1646,8 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
   final Alignment alignment;
 
   /// The filter quality with which to apply the transform as a bitmap operation.
+  ///
+  /// {@macro flutter.widgets.MatrixTransition.filterQuality}
   ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
