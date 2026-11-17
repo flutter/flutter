@@ -441,3 +441,33 @@ TEST_F(FlAccessibleNodeTest, SurvivesParentDestruction) {
   atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
                             ATK_XY_SCREEN);
 }
+
+// Checks that a parent's rect origin does not offset child extents, while
+// parent transforms do.
+TEST_F(FlAccessibleNodeTest, ParentRectOriginDoesNotOffsetChildExtents) {
+  g_autoptr(FlAccessibleNode) parent = fl_accessible_node_new(engine, 123, 0);
+  fl_accessible_node_set_extents(parent, 10, 50, 200, 200);
+  FlutterTransformation parent_transform = {1, 0, 0, 0, 1, 100, 0, 0, 1};
+  fl_accessible_node_set_transform(parent, &parent_transform);
+
+  g_autoptr(FlAccessibleNode) child = fl_accessible_node_new(engine, 123, 1);
+  fl_accessible_node_set_extents(child, 0, 0, 200, 100);
+  FlutterTransformation child_transform = {1, 0, 0, 0, 1, 100, 0, 0, 1};
+  fl_accessible_node_set_transform(child, &child_transform);
+  fl_accessible_node_set_parent(child, ATK_OBJECT(parent), 0);
+
+  gint x = 0, y = 0, width = 0, height = 0;
+  atk_component_get_extents(ATK_COMPONENT(parent), &x, &y, &width, &height,
+                            ATK_XY_PARENT);
+  EXPECT_EQ(x, 10);
+  EXPECT_EQ(y, 150);
+  EXPECT_EQ(width, 200);
+  EXPECT_EQ(height, 200);
+
+  atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
+                            ATK_XY_PARENT);
+  EXPECT_EQ(x, 0);
+  EXPECT_EQ(y, 200);
+  EXPECT_EQ(width, 200);
+  EXPECT_EQ(height, 100);
+}

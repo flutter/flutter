@@ -170,9 +170,9 @@ void fl_view_accessible_handle_update_semantics(
     fl_accessible_node_set_actions(atk_node, node->actions);
     fl_accessible_node_set_name(atk_node, node->label);
     fl_accessible_node_set_extents(
-        atk_node, node->rect.left + node->transform.transX,
-        node->rect.top + node->transform.transY,
+        atk_node, node->rect.left, node->rect.top,
         node->rect.right - node->rect.left, node->rect.bottom - node->rect.top);
+    fl_accessible_node_set_transform(atk_node, &node->transform);
     fl_accessible_node_set_value(atk_node, node->value);
     fl_accessible_node_set_text_selection(atk_node, node->text_selection_base,
                                           node->text_selection_extent);

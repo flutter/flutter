@@ -40,6 +40,8 @@ struct _FlAccessibleNodeClass {
                       gint y,
                       gint width,
                       gint height);
+  void (*set_transform)(FlAccessibleNode* node,
+                        const FlutterTransformation* transform);
   void (*set_flags)(FlAccessibleNode* node, FlutterSemanticsFlags* flags);
   void (*set_actions)(FlAccessibleNode* node, FlutterSemanticsAction actions);
   void (*set_value)(FlAccessibleNode* node, const gchar* value);
@@ -113,6 +115,17 @@ void fl_accessible_node_set_extents(FlAccessibleNode* node,
                                     gint y,
                                     gint width,
                                     gint height);
+
+/**
+ * fl_accessible_node_set_transform:
+ * @node: an #FlAccessibleNode.
+ * @transform: the transformation matrix from this node's coordinate space to
+ *             its parent's coordinate space.
+ *
+ * Sets the transform of this node.
+ */
+void fl_accessible_node_set_transform(FlAccessibleNode* node,
+                                      const FlutterTransformation* transform);
 
 /**
  * fl_accessible_node_set_flags:
