@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -22,7 +23,6 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 
@@ -84,6 +84,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -128,6 +129,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -158,6 +160,7 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -199,6 +202,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -239,6 +243,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -295,6 +300,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -370,6 +376,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: featureFlags,
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -421,9 +428,7 @@ void main() {
     final target = _SetCCompilerConfigTarget(
       packagesWithNativeAssetsResult: <String>['bar'],
       buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
-      fileSystem: fileSystem,
       logger: testLogger,
-      platform: platform,
       processManager: testProcessManager,
     );
 
@@ -432,6 +437,7 @@ void main() {
       targetPlatform: TargetPlatform.tester,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       logger: testLogger,
       buildRunner: target,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: fileSystem.directory(projectUri)),
@@ -452,9 +458,7 @@ void main() {
       final target = _SetCCompilerConfigTarget(
         packagesWithNativeAssetsResult: <String>['bar'],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
-        fileSystem: fileSystem,
         logger: testLogger,
-        platform: const LocalPlatform(),
         processManager: processManager,
       );
 
@@ -477,6 +481,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.linux_arm64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: target,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
@@ -506,6 +511,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: featureFlags,
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -534,6 +540,130 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       expect(staleFile, isNot(exists));
     },
   );
+
+  group('installCodeAssets manifest overwrite', () {
+    const exdev = 18;
+
+    Future<List<File>> runInstall({
+      required FileSystem fileSystem,
+      required Directory targetDirectory,
+      Uri? nativeAssetsFileUri,
+    }) {
+      return installCodeAssets(
+        dartHookResult: DartHooksResult.empty(),
+        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        targetPlatform: .tester,
+        projectUri: fileSystem.directory('/project').uri,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.empty(),
+        nativeAssetsFileUri:
+            nativeAssetsFileUri ??
+            targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename).uri,
+        targetUri: targetDirectory.uri,
+      );
+    }
+
+    testWithoutContext('overwrites existing native_assets.json in place without deleting it '
+        'while still deleting stale code assets '
+        '(regression test for https://github.com/flutter/flutter/issues/196121)', () async {
+      final exceptionHandler = FileExceptionHandler();
+      final errorHandlingFs = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
+      final Directory targetDirectory = errorHandlingFs.directory(
+        '/project/build/native_assets/macos',
+      )..createSync(recursive: true);
+      final File existingManifest = targetDirectory.childFile(
+        InstallCodeAssets.nativeAssetsFilename,
+      )..writeAsStringSync('{"stale": true}');
+      final File staleDylib = targetDirectory.childFile('libstale.dylib')
+        ..writeAsBytesSync(<int>[1, 2, 3]);
+
+      // Simulate macOS external volume failure if installCodeAssets attempts
+      // to unlink native_assets.json before overwriting it.
+      exceptionHandler.addError(
+        existingManifest,
+        FileSystemOp.delete,
+        FileSystemException(
+          'Deletion failed',
+          existingManifest.path,
+          const OSError('Cross-device link', exdev),
+        ),
+      );
+
+      await runInstall(
+        fileSystem: errorHandlingFs,
+        targetDirectory: targetDirectory,
+        nativeAssetsFileUri: existingManifest.uri,
+      );
+
+      expect(staleDylib, isNot(exists));
+      expect(existingManifest, exists);
+      expect(existingManifest.readAsStringSync(), isNot(contains('"stale"')));
+    });
+
+    testWithoutContext(
+      'replaces native_assets.json if it is a directory or symlink on disk',
+      () async {
+        final FileSystem fs = MemoryFileSystem.test();
+        final Directory targetDirectory = fs.directory('/project/build/native_assets/macos')
+          ..createSync(recursive: true);
+        final File manifestFile = targetDirectory.childFile(InstallCodeAssets.nativeAssetsFilename);
+
+        // Case 1: native_assets.json is unexpectedly a non-empty directory.
+        targetDirectory
+            .childDirectory(InstallCodeAssets.nativeAssetsFilename)
+            .childFile('unexpected.txt')
+            .createSync(recursive: true);
+
+        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
+        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
+
+        // Case 2: native_assets.json is a symlink.
+        manifestFile.deleteSync();
+        final File linkTarget = fs.file('/project/other.json')..writeAsStringSync('{}');
+        targetDirectory
+            .childLink(InstallCodeAssets.nativeAssetsFilename)
+            .createSync(linkTarget.path);
+
+        await runInstall(fileSystem: fs, targetDirectory: targetDirectory);
+        expect(fs.typeSync(manifestFile.path, followLinks: false), FileSystemEntityType.file);
+        expect(linkTarget.readAsStringSync(), '{}');
+      },
+    );
+
+    testWithoutContext('throws ToolExit when deleting a stale asset fails with EXDEV', () async {
+      final exceptionHandler = FileExceptionHandler();
+      final errorHandlingFs = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
+      final Directory targetDirectory = errorHandlingFs.directory(
+        '/project/build/native_assets/macos',
+      )..createSync(recursive: true);
+      final File staleDylib = targetDirectory.childFile('libstale.dylib')
+        ..writeAsBytesSync(<int>[1, 2, 3]);
+
+      exceptionHandler.addError(
+        staleDylib,
+        FileSystemOp.delete,
+        FileSystemException(
+          'Deletion failed',
+          staleDylib.path,
+          const OSError('Cross-device link', exdev),
+        ),
+      );
+
+      await expectLater(
+        () => runInstall(fileSystem: errorHandlingFs, targetDirectory: targetDirectory),
+        throwsToolExit(
+          message: 'A file system operation failed across different volumes or mount points.',
+        ),
+      );
+    });
+  });
 
   group('findRunPackageName', () {
     testWithoutContext('prefers direct root URI match over manifestAppName', () {
@@ -886,26 +1016,13 @@ environment:
 
 class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   _SetCCompilerConfigTarget({
-    required this.fileSystem,
     required this.logger,
-    required this.platform,
     required this.processManager,
     super.buildResult,
     super.packagesWithNativeAssetsResult,
-  }) : super(
-         visualStudio: VisualStudio(
-           toolContext: FakeToolContext(
-             fs: fileSystem,
-             logger: logger,
-             platform: platform,
-             processManager: processManager,
-           ),
-         ),
-       );
+  });
 
-  final FileSystem fileSystem;
   final Logger logger;
-  final Platform platform;
   final FakeProcessManager processManager;
 
   bool didSetCCompilerConfig = false;
