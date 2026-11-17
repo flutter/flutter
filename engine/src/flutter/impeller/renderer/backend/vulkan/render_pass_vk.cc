@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/device_buffer.h"
@@ -149,6 +150,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                            const RenderTarget& target,
                            std::shared_ptr<CommandBufferVK> command_buffer)
     : RenderPass(context, target), command_buffer_(std::move(command_buffer)) {
+  TRACE_EVENT0("impeller", "RenderPassVK::RenderPassVK");
   const ColorAttachment& color0 = render_target_.GetColorAttachment(0);
   color_image_vk_ = color0.texture;
   resolve_image_vk_ = color0.resolve_texture;
