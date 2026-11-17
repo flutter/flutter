@@ -3049,19 +3049,15 @@ void main() {
 
   group('Visual overflow and clipping', () {
     testWidgets('does not clip when every child fits', (WidgetTester tester) async {
-      late final TwoDimensionalChildBuilderDelegate delegate;
-      addTearDown(() => delegate.dispose());
-      await tester.pumpWidget(
-        simpleBuilderTest(
-          delegate: delegate = TwoDimensionalChildBuilderDelegate(
-            maxXIndex: 0,
-            maxYIndex: 0,
-            builder: (BuildContext context, ChildVicinity vicinity) {
-              return const SizedBox(width: 100, height: 100);
-            },
-          ),
-        ),
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox(width: 100, height: 100);
+        },
       );
+      addTearDown(delegate.dispose);
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
       await tester.pumpAndSettle();
 
       expect(
@@ -3085,20 +3081,16 @@ void main() {
     testWidgets('resets visual overflow when children fit after previously overflowing', (
       WidgetTester tester,
     ) async {
-      late TwoDimensionalChildBuilderDelegate delegate;
-      addTearDown(() => delegate.dispose());
-
-      await tester.pumpWidget(
-        simpleBuilderTest(
-          delegate: delegate = TwoDimensionalChildBuilderDelegate(
-            maxXIndex: 5,
-            maxYIndex: 5,
-            builder: (BuildContext context, ChildVicinity vicinity) {
-              return const SizedBox(width: 200, height: 200);
-            },
-          ),
-        ),
+      final delegate1 = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 5,
+        maxYIndex: 5,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox(width: 200, height: 200);
+        },
       );
+      addTearDown(delegate1.dispose);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate1));
       await tester.pumpAndSettle();
 
       expect(
@@ -3108,17 +3100,16 @@ void main() {
       );
 
       // Now update the delegate so all children fit.
-      await tester.pumpWidget(
-        simpleBuilderTest(
-          delegate: delegate = TwoDimensionalChildBuilderDelegate(
-            maxXIndex: 0,
-            maxYIndex: 0,
-            builder: (BuildContext context, ChildVicinity vicinity) {
-              return const SizedBox(width: 100, height: 100);
-            },
-          ),
-        ),
+      final delegate2 = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox(width: 100, height: 100);
+        },
       );
+      addTearDown(delegate2.dispose);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate2));
       await tester.pumpAndSettle();
 
       expect(
