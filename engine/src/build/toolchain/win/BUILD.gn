@@ -213,7 +213,6 @@ template("msvc_toolchain") {
       # E.g. "foo.dll":
       dllname = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       libname = "${dllname}.lib"  # e.g. foo.dll.lib
-      expname = "${dllname}.exp"
       pdbname = "${dllname}.pdb"
       rspfile = "${dllname}.rsp"
 
@@ -228,10 +227,15 @@ template("msvc_toolchain") {
       description = "LINK(DLL) {{output}}"
       outputs = [
         dllname,
-        expname,
         libname,
         pdbname,
       ]
+
+      # MSVC's link.exe writes an export file next to the import library.
+      # lld-link doesn't, so only declare it as an output for link.exe.
+      if (!toolchain_is_clang) {
+        outputs += [ "${dllname}.exp" ]
+      }
       link_output = libname
       depend_output = libname
 

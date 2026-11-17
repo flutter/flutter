@@ -53,7 +53,6 @@ void main() {
         '$windowsDesktopPath\\flutter_export.h',
         '$windowsDesktopPath\\flutter_messenger.h',
         '$windowsDesktopPath\\flutter_windows.dll',
-        '$windowsDesktopPath\\flutter_windows.dll.exp',
         '$windowsDesktopPath\\flutter_windows.dll.lib',
         '$windowsDesktopPath\\flutter_windows.dll.pdb',
         '$windowsDesktopPath\\flutter_plugin_registrar.h',
@@ -75,7 +74,6 @@ void main() {
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_export.h'), exists);
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_messenger.h'), exists);
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.dll'), exists);
-      expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.dll.exp'), exists);
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.dll.lib'), exists);
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.dll.pdb'), exists);
       expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_export.h'), exists);
@@ -112,7 +110,6 @@ void main() {
           '$windowsDesktopPath\\flutter_export.h',
           '$windowsDesktopPath\\flutter_messenger.h',
           '$windowsDesktopPath\\flutter_windows.dll',
-          '$windowsDesktopPath\\flutter_windows.dll.exp',
           '$windowsDesktopPath\\flutter_windows.dll.lib',
           '$windowsDesktopPath\\flutter_windows.dll.pdb',
           '$windowsDesktopPath\\flutter_plugin_registrar.h',
@@ -128,7 +125,6 @@ void main() {
           r'C:\windows\flutter\ephemeral\flutter_export.h',
           r'C:\windows\flutter\ephemeral\flutter_messenger.h',
           r'C:\windows\flutter\ephemeral\flutter_windows.dll',
-          r'C:\windows\flutter\ephemeral\flutter_windows.dll.exp',
           r'C:\windows\flutter\ephemeral\flutter_windows.dll.lib',
           r'C:\windows\flutter\ephemeral\flutter_windows.dll.pdb',
           r'C:\windows\flutter\ephemeral\flutter_plugin_registrar.h',
