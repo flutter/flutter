@@ -164,8 +164,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
     desc.compression_type = impeller::CompressionType::kLossless;
     desc.usage = impeller::TextureUsage::kRenderTarget;
 
-    auto wrapped_onscreen =
-        impeller::WrapTextureSourceVK(impeller_context_, desc, vk_image);
+    auto wrapped_onscreen = impeller::WrapTextureSourceVK(
+        impeller::ContextVK::Cast(*impeller_context_), desc, vk_image);
     if (!wrapped_onscreen) {
       return nullptr;
     }

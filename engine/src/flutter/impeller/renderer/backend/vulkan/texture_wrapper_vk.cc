@@ -20,12 +20,22 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
  public:
   WrappedTextureSourceVK(vk::Image image,
                          vk::UniqueImageView image_view,
-                         TextureDescriptor desc)
+                         TextureDescriptor desc,
+                         std::function<void()> cleanup)
       : TextureSourceVK(desc),
         image_(image),
-        image_view_(std::move(image_view)) {}
+        image_view_(std::move(image_view)),
+        cleanup_(std::move(cleanup)) {}
 
-  ~WrappedTextureSourceVK() override = default;
+  ~WrappedTextureSourceVK() override {
+    // Release framebuffers and image views before invoking cleanup, which may
+    // destroy the underlying VkImage.
+    ResetFrameData();
+    image_view_.reset();
+    if (cleanup_) {
+      cleanup_();
+    }
+  }
 
  private:
   vk::Image GetImage() const override { return image_; }
@@ -41,6 +51,7 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
 
   vk::Image image_;
   vk::UniqueImageView image_view_;
+  std::function<void()> cleanup_;
 
   WrappedTextureSourceVK(const WrappedTextureSourceVK&) = delete;
   WrappedTextureSourceVK& operator=(const WrappedTextureSourceVK&) = delete;
@@ -49,10 +60,11 @@ class WrappedTextureSourceVK final : public TextureSourceVK {
 }  // namespace
 
 std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
-    const std::shared_ptr<Context>& context,
+    const ContextVK& context,
     const TextureDescriptor& desc,
-    vk::Image image) {
-  if (!context || !image) {
+    vk::Image image,
+    std::function<void()> cleanup) {
+  if (!image) {
     return nullptr;
   }
 
@@ -67,7 +79,7 @@ std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
   view_info.image = image;
 
   auto [result, image_view] =
-      ContextVK::Cast(*context).GetDevice().createImageViewUnique(view_info);
+      context.GetDevice().createImageViewUnique(view_info);
   if (result != vk::Result::eSuccess) {
     FML_LOG(ERROR) << "Failed to create image view for wrapped image: "
                    << vk::to_string(result);
@@ -75,7 +87,7 @@ std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
   }
 
   return std::make_shared<WrappedTextureSourceVK>(image, std::move(image_view),
-                                                  desc);
+                                                  desc, std::move(cleanup));
 }
 
 }  // namespace impeller
