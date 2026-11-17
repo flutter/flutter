@@ -1,20 +1,21 @@
 ---
 name: shepherd-prs
 description: >
-  Automate shepherding, checking status, updating branches, and landing open PRs or approved third-party contributor PRs in the flutter/flutter repository using the gh CLI.
+  Automate shepherding, checking status, retriggering failed flutter-dashboard presubmit jobs, updating branches, and landing open PRs or approved third-party contributor PRs in the flutter/flutter repository.
 
   When to use:
   - When you need to check the status of open PRs or shepherded third-party PRs.
+  - When you need to inspect or retrigger failed flutter-dashboard (Cocoon) presubmit checks.
   - When you need to update stale branches or apply the 'autosubmit' label to land approved PRs.
 
   When not to use:
-  - Do not use for PRs that are not approved (unless they are your own and you want to check status).
+  - Do not use for PRs that are not approved (unless they are your own and you want to check status or retrigger failed checks).
   - Do not use for repositories other than flutter/flutter.
 ---
 
 # Shepherding Pull Requests Skill (`flutter/flutter`)
 
-This skill defines the canonical runbook for shepherding pull requests in the `flutter/flutter` repository using native GitHub CLI (`gh`) commands.
+This skill defines the canonical runbook for shepherding pull requests in the `flutter/flutter` repository using native GitHub CLI (`gh`) commands and `[dashboard_presubmit.dart](scripts/dashboard_presubmit.dart)`.
 
 ## 1. Checking PR Status
 
@@ -61,11 +62,11 @@ Before applying or re-applying the `autosubmit` label (`gh pr edit <number> --re
    * Check `reviews` in `gh pr view <number> --repo flutter/flutter --json reviews` to confirm the number of approvals from Flutter team members.
 
 4. **Verify All Status Checks Are 100% Passing**:
-   * The Flutter `autosubmit` bot automatically strips the `autosubmit` label whenever any CI check fails.
-   * Verify that all status checks are passing (`SUCCESS`/`pass`).
-   * If any check is flaky, failing, or pending a retry:
+   * The Flutter `autosubmit` bot automatically strips the `autosubmit` label whenever any blocking CI check fails.
+   * Verify that all status checks are passing (`SUCCESS`/`pass`), ignoring jobs marked `"Neutral"` on `flutter-dashboard` (suppressed flakes).
+   * If any blocking check is flaky, failing, or pending a retry:
      1. Do **NOT** apply the `autosubmit` label immediately.
-     2. Inform the user of the failing check and instruct them to retry it first.
+     2. Inspect and retrigger the failed job via `flutter-dashboard` following Section 4 (or inform the user and provide the `flutter-dashboard` presubmit URL if unauthenticated).
      3. Only apply the `autosubmit` label after all retried checks complete successfully:
         ```bash
         gh pr edit <number> --repo flutter/flutter --add-label autosubmit
@@ -77,13 +78,36 @@ Before applying or re-applying the `autosubmit` label (`gh pr edit <number> --re
 * If only one team member has approved a third-party PR and the `autosubmit` label is applied, the `autosubmit` bot will remove the label.
 * *Action*: Strictly verify via `gh pr view <number> --repo flutter/flutter --json reviews` that at least **2 team member approvals** are present before adding `autosubmit` so the bot doesn't remove it again. If only 1 approval exists, remind the user to request a second reviewer before applying the label.
 
-## 4. Failed Checks & Manual LUCI Re-runs
+## 4. Inspecting & Retriggering Failed `flutter-dashboard` Checks
 
-* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the GitHub API.
-* *Action*:
-  1. Print the exact LUCI Buildbucket link (e.g., `https://cr-buildbucket.appspot.com/build/<build_id>`) for the failing check.
-  2. Instruct the user to open the URL and click **Retry Build** on the LUCI page.
-  3. If a check continues to fail after manual retries, inspect the failure logs (`gh pr view <number> --repo flutter/flutter` or `flutter-pr-checks-finder`) and summarize the failure for the user.
+* **Never use raw LUCI Buildbucket `Retry Build` links (`https://cr-buildbucket.appspot.com/build/<build_id>`) or GitHub REST `rerequest` calls**:
+  * Raw Buildbucket retries omit `PresubmitUserData` and do **not** reset Cocoon's unified `Presubmit` / `Dashboard Checks` check-run in Firestore.
+  * GitHub's REST `POST .../check-runs/<id>/rerequest` on `Dashboard Checks` is ignored by Cocoon.
+  * Always inspect and retrigger failed presubmit jobs through `flutter-dashboard` (`flutter/cocoon`) using `[dashboard_presubmit.dart](scripts/dashboard_presubmit.dart)`.
+* **Step 1: Inspect Presubmit Guard Status, Suppressed Flakes & `.ci.yaml` Safety**:
+  ```bash
+  ./bin/dart .agents/skills/shepherd-prs/scripts/dashboard_presubmit.dart status --pr <number> --details
+  ```
+  * Jobs with status `"Neutral"` are **suppressed flakes** on `flutter-dashboard`; they do not block `Dashboard Checks` and must **not** be rerun.
+  * **`.ci.yaml` Stale-Branch Gotcha**: In `flutter/cocoon` (`RerunFailedJob` / `RerunAllFailedJobs`), Cocoon commits `attempt_number: N + 1` (`status: "New"`) to Firestore *before* calling `CiYamlFetcher.getCiYamlByCommit` against tip-of-tree `master`. If `ci.yaml validation` failed or `master` removed/renamed a builder in `.ci.yaml` since the PR's merge-base, rerunning permanently orphans the attempt in `"New"`. `[dashboard_presubmit.dart](scripts/dashboard_presubmit.dart)` checks both automatically and exits with code `2` when you must update the PR branch (`master` merge) instead of rerunning.
+* **Step 2: Retrigger Failed Jobs via CLI (`rerun`)**:
+  * Retrigger a single failed builder or all failed builders:
+    ```bash
+    ./bin/dart .agents/skills/shepherd-prs/scripts/dashboard_presubmit.dart rerun --pr <number> --builder "<job_name>"
+    ./bin/dart .agents/skills/shepherd-prs/scripts/dashboard_presubmit.dart rerun --pr <number> --all-failed
+    ```
+  * **One-Time Authentication Bootstrap (`login`)**: Cocoon's `/api/rerun-failed-job` and `/api/rerun-all-failed-jobs` endpoints (`presubmitAuthProvider` in `flutter/cocoon`) require `X-Flutter-IdToken` (a Firebase JWT for `flutter-dashboard` from either an `@google.com` Google Sign-In or a GitHub OAuth `flutter-dashboard` session with `flutter/flutter` write access; classic `ghp_` PATs from `gh auth token` are rejected).
+    * Contributors with `@google.com` `gcloud` access can cache a refreshable token (`0600` at `~/.config/flutter_dashboard/credentials.json`) once via:
+      ```bash
+      gcloud auth login
+      ./bin/dart .agents/skills/shepherd-prs/scripts/dashboard_presubmit.dart login
+      ```
+    * Contributors authenticated via GitHub OAuth on `flutter-dashboard` can supply `FLUTTER_DASHBOARD_ID_TOKEN` or cache their session refresh token via `FLUTTER_DASHBOARD_REFRESH_TOKEN=<token> ./bin/dart .agents/skills/shepherd-prs/scripts/dashboard_presubmit.dart login` (prefer environment variables over CLI flags so tokens do not appear in process arguments).
+* **Step 3: Unauthenticated Browser Fallback**:
+  * If CLI credentials are not configured (exit code `3`) or the user does not have `@google.com` `gcloud` access, print the `flutter-dashboard` presubmit URL so the user can retrigger failed jobs in their browser (or click **Re-run failed tests** on the GitHub `Dashboard Checks` check-run page):
+    `https://flutter-dashboard.appspot.com/#/presubmit?repo=flutter&sha=<commit_sha>`
+* **Step 4: Persistent Failures**:
+  * If a job fails again after retriggering, inspect the failure logs (`status --pr <number> --details` or `flutter-pr-checks-finder`) and summarize the root cause for the user rather than retrying repeatedly.
 
 ## 5. Stale Branch Updates, CICD Label & Token Scope
 
