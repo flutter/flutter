@@ -1264,7 +1264,7 @@ class _DecelerateCurve extends Curve {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
-    return t * (t - 2);
+    return t * (2 - t);
   }
 }
 
