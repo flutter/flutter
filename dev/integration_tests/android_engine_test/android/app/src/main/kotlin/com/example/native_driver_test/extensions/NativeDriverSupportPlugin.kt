@@ -6,11 +6,19 @@
 
 package com.example.android_engine_test.extensions
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
 import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import io.flutter.Log
+import io.flutter.embedding.android.FlutterImageView
+import io.flutter.embedding.android.FlutterSurfaceView
+import io.flutter.embedding.android.FlutterView
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -19,6 +27,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.platform.PlatformOverlayView
 
 class NativeDriverSupportPlugin :
     ActivityAware,
@@ -27,6 +36,7 @@ class NativeDriverSupportPlugin :
     private val tag = "NativeDriverSupportPlugin"
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
+    private var flutterEngine: FlutterEngine? = null
     private var flutterRenderer: FlutterRenderer? = null
     private var isFlutterUiDisplayed = false
     private val pendingDisplayResults = mutableListOf<MethodChannel.Result>()
@@ -50,6 +60,7 @@ class NativeDriverSupportPlugin :
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, "native_driver")
         channel.setMethodCallHandler(this)
+        flutterEngine = binding.flutterEngine
         flutterRenderer = binding.flutterEngine.renderer
         flutterRenderer?.addIsDisplayingFlutterUiListener(displayListener)
     }
@@ -58,6 +69,7 @@ class NativeDriverSupportPlugin :
         channel.setMethodCallHandler(null)
         flutterRenderer?.removeIsDisplayingFlutterUiListener(displayListener)
         flutterRenderer = null
+        flutterEngine = null
         isFlutterUiDisplayed = false
         for (result in pendingDisplayResults) {
             result.error("DETACHED", "Engine detached before frame was displayed", null)
@@ -144,10 +156,135 @@ class NativeDriverSupportPlugin :
                 pressUp.recycle()
                 result.success(null)
             }
+            "resize_flutter_view" -> {
+                val flutterView = findFlutterView(activity.window.decorView)
+                if (flutterView == null) {
+                    result.error("FLUTTER_VIEW_NOT_FOUND", "Could not locate FlutterView", null)
+                    return
+                }
+                val requestedHeight = call.argument<Int>("height")
+                val targetHeight =
+                    if (requestedHeight == null || requestedHeight <= 0) {
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    } else {
+                        requestedHeight
+                    }
+                val params =
+                    flutterView.layoutParams
+                        ?: ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            targetHeight
+                        )
+                val alreadyMatches =
+                    params.height == targetHeight &&
+                        (targetHeight <= 0 || flutterView.height == targetHeight)
+                if (alreadyMatches) {
+                    result.success(
+                        mapOf("width" to flutterView.width, "height" to flutterView.height)
+                    )
+                    return
+                }
+                params.height = targetHeight
+                flutterView.layoutParams = params
+                var completed = false
+                val listener =
+                    object : View.OnLayoutChangeListener {
+                        override fun onLayoutChange(
+                            v: View,
+                            left: Int,
+                            top: Int,
+                            right: Int,
+                            bottom: Int,
+                            oldLeft: Int,
+                            oldTop: Int,
+                            oldRight: Int,
+                            oldBottom: Int
+                        ) {
+                            if (completed) {
+                                return
+                            }
+                            completed = true
+                            v.removeOnLayoutChangeListener(this)
+                            result.success(mapOf("width" to v.width, "height" to v.height))
+                        }
+                    }
+                flutterView.addOnLayoutChangeListener(listener)
+                flutterView.requestLayout()
+            }
+            "get_hybrid_composition_state" -> {
+                val flutterView = findFlutterView(activity.window.decorView)
+                if (flutterView == null) {
+                    result.error("FLUTTER_VIEW_NOT_FOUND", "Could not locate FlutterView", null)
+                    return
+                }
+                var flutterSurfaceViewCount = 0
+                var surfaceAvailable = false
+                var flutterImageViewCount = 0
+                var overlayViewCount = 0
+                var mutatorViewCount = 0
+                var visibleMutatorViewCount = 0
+                for (i in 0 until flutterView.childCount) {
+                    when (val child = flutterView.getChildAt(i)) {
+                        is FlutterSurfaceView -> {
+                            flutterSurfaceViewCount++
+                            if (child.holder.surface?.isValid == true) {
+                                surfaceAvailable = true
+                            }
+                        }
+                        is PlatformOverlayView -> {
+                            overlayViewCount++
+                        }
+                        is FlutterImageView -> {
+                            flutterImageViewCount++
+                        }
+                        is FlutterMutatorView -> {
+                            mutatorViewCount++
+                            if (child.visibility == View.VISIBLE) {
+                                visibleMutatorViewCount++
+                            }
+                        }
+                    }
+                }
+                val engine = flutterEngine
+                val overlayLayerViewsCount =
+                    if (engine != null) getOverlayLayerViewsSize(engine) else -1
+                result.success(
+                    mapOf(
+                        "overlayLayerViewsCount" to overlayLayerViewsCount,
+                        "isDisplayingFlutterUi" to (flutterRenderer?.isDisplayingFlutterUi == true),
+                        "flutterSurfaceViewCount" to flutterSurfaceViewCount,
+                        "surfaceAvailable" to surfaceAvailable,
+                        "flutterImageViewCount" to flutterImageViewCount,
+                        "overlayViewCount" to overlayViewCount,
+                        "mutatorViewCount" to mutatorViewCount,
+                        "visibleMutatorViewCount" to visibleMutatorViewCount,
+                        "flutterViewWidth" to flutterView.width,
+                        "flutterViewHeight" to flutterView.height
+                    )
+                )
+            }
             else -> {
                 result.notImplemented()
             }
         }
+    }
+
+    @SuppressLint("VisibleForTesting")
+    private fun getOverlayLayerViewsSize(engine: FlutterEngine): Int = engine.platformViewsController.overlayLayerViews.size()
+
+    private fun findFlutterView(root: View): FlutterView? {
+        if (root is FlutterView) {
+            return root
+        }
+        if (root is ViewGroup) {
+            for (i in 0 until root.childCount) {
+                val match = findFlutterView(root.getChildAt(i))
+                if (match != null) {
+                    return match
+                }
+            }
+        }
+        return null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
