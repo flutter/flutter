@@ -1,6 +1,8 @@
 package com.flutter.gradle
 
+import com.android.build.api.artifact.InAndOutDirectoryOperationRequest
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.artifact.TaskBasedOperation
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
@@ -36,7 +38,6 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.gradle.api.Action
-import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -58,7 +59,6 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -202,7 +202,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants registers compile and asset tasks and adds generated asset source directory`(
+    fun `onVariants registers compile and asset tasks and transforms the merged assets`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -217,8 +217,9 @@ class FlutterPluginTest {
         } returns mockCopyAssetsTaskProvider
 
         val onVariant = applyPluginCapturingVariantCallback(env)
-        val mockAssetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
-        onVariant(mockApplicationVariant(assetsSource = mockAssetsSource))
+        val variant = mockApplicationVariant()
+        val assetsTransform = stubAssetsTransform(variant, mockCopyAssetsTaskProvider)
+        onVariant(variant)
 
         verify {
             project.tasks.register("compileFlutterBuildDebug", FlutterTask::class.java, any())
@@ -226,31 +227,9 @@ class FlutterPluginTest {
         verify {
             project.tasks.register("copyFlutterAssetsDebug", CopyFlutterAssetsTask::class.java, any())
         }
-        verify {
-            mockAssetsSource.addGeneratedSourceDirectory(
-                mockCopyAssetsTaskProvider,
-                CopyFlutterAssetsTask::destinationDir
-            )
-        }
-    }
-
-    @Test
-    fun `onVariants throws GradleException when variant sources assets is null`(
-        @TempDir tempDir: Path
-    ) {
-        val env = setupTestProjectEnvironment(tempDir)
-
-        val onVariant = applyPluginCapturingVariantCallback(env)
-
-        val exception =
-            assertThrows<GradleException> {
-                onVariant(mockApplicationVariant(assetsSource = null))
-            }
-        assertContains(
-            exception.message!!,
-            "Flutter could not register its generated assets for variant 'debug'"
-        )
-        assertTrue(exception.message!!.endsWith("https://github.com/flutter/flutter/issues"))
+        // A transform of the merged assets, not an assets source directory, because AGP filters
+        // assets source directories with ignoreAssetsPattern, which drops assets such as `.env`.
+        verify { assetsTransform.toTransform(SingleArtifact.ASSETS) }
     }
 
     @Test
@@ -322,16 +301,15 @@ class FlutterPluginTest {
         project.setCommandLineTasks(":app:assembleDemoStaging")
         val copyAssetsTaskProvider = project.stubTaskRegistration<CopyFlutterAssetsTask>("copyFlutterAssetsDebug")
         val copyJniLibsTaskProvider = project.stubTaskRegistration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
-        val assetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
         val jniLibsSource = mockk<SourceDirectories.Layered>(relaxed = true)
+        val variant = mockLibraryVariant(jniLibsSource = jniLibsSource)
+        val assetsTransform = stubAssetsTransform(variant, copyAssetsTaskProvider)
 
-        applyPluginToModuleCapturingVariantCallback(env)(
-            mockLibraryVariant(assetsSource = assetsSource, jniLibsSource = jniLibsSource)
-        )
+        applyPluginToModuleCapturingVariantCallback(env)(variant)
 
         val taskContainer = project.tasks
         verify { taskContainer.register("compileFlutterBuildDebug", FlutterTask::class.java, any()) }
-        verify { assetsSource.addGeneratedSourceDirectory(copyAssetsTaskProvider, CopyFlutterAssetsTask::destinationDir) }
+        verify { assetsTransform.toTransform(SingleArtifact.ASSETS) }
         verify { jniLibsSource.addGeneratedSourceDirectory(copyJniLibsTaskProvider, CopyFlutterJniLibsTask::destinationDir) }
         verify(exactly = 0) { taskContainer.register(any(), CopyFlutterApksTask::class.java, any()) }
         verify(exactly = 0) { taskContainer.configureEach(any<Action<in Task>>()) }
@@ -719,19 +697,15 @@ class FlutterPluginTest {
         flavorName: String? = null,
         productFlavors: List<Pair<String, String>> = emptyList(),
         minSdkApiLevel: Int = 21,
-        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
         outputs: List<VariantOutput> = emptyList()
     ): ApplicationVariant {
         val mockVariant = mockk<ApplicationVariant>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true)
         every { mockVariant.name } returns name
         every { mockVariant.buildType } returns buildType
         every { mockVariant.debuggable } returns debuggable
         every { mockVariant.flavorName } returns flavorName
         every { mockVariant.productFlavors } returns productFlavors
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
-        every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns assetsSource
         every { mockVariant.outputs } returns outputs
         return mockVariant
     }
@@ -742,7 +716,6 @@ class FlutterPluginTest {
         buildType: String = "debug",
         debuggable: Boolean = true,
         minSdkApiLevel: Int = 21,
-        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
         jniLibsSource: SourceDirectories.Layered? = mockk(relaxed = true)
     ): LibraryVariant {
         val mockVariant = mockk<LibraryVariant>(relaxed = true)
@@ -754,7 +727,6 @@ class FlutterPluginTest {
         every { mockVariant.productFlavors } returns emptyList()
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
         every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns assetsSource
         every { mockSources.jniLibs } returns jniLibsSource
         return mockVariant
     }
@@ -764,6 +736,26 @@ class FlutterPluginTest {
         val output: VariantOutput,
         val versionCode: Property<Int>
     )
+
+    /**
+     * Stubs [variant]'s artifacts so that [taskProvider] can only be wired as a transform from
+     * `mergedAssetsDir` to `destinationDir`, and returns the request to verify `toTransform` on.
+     */
+    private fun stubAssetsTransform(
+        variant: Variant,
+        taskProvider: TaskProvider<CopyFlutterAssetsTask>
+    ): InAndOutDirectoryOperationRequest<CopyFlutterAssetsTask> {
+        val operation = mockk<TaskBasedOperation<CopyFlutterAssetsTask>>()
+        val request = mockk<InAndOutDirectoryOperationRequest<CopyFlutterAssetsTask>>(relaxed = true)
+        every { variant.artifacts.use(taskProvider) } returns operation
+        every {
+            operation.wiredWithDirectories(
+                CopyFlutterAssetsTask::mergedAssetsDir,
+                CopyFlutterAssetsTask::destinationDir
+            )
+        } returns request
+        return request
+    }
 
     /** Stubs registering task [name] to return a relaxed provider, which is returned. */
     private inline fun <reified T : Task> Project.stubTaskRegistration(name: String): TaskProvider<T> {
