@@ -29,7 +29,8 @@ on:
     types: [requested, completed]
 
 # Declare default permissions as read only.
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   triage:
@@ -42,7 +43,8 @@ jobs:
     permissions:
       actions: read
       checks: read
-      contents: read
+      # Required by the convertPullRequestToDraft GraphQL mutation.
+      contents: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
