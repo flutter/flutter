@@ -246,6 +246,17 @@ public final class FlutterEngineFlags {
       new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
 
   /**
+   * Enables rendering with signed distance fields (SDFs) in Impeller.
+   *
+   * <p>SDF rendering produces higher quality anti-aliasing for shapes like rounded rectangles at
+   * the cost of additional GPU work.
+   *
+   * <p>Allowed in release so that developers can opt-in to SDF rendering in production. Settable
+   * via the command line and the manifest.
+   */
+  private static final Flag IMPELLER_USE_SDFS = new Flag("--impeller-use-sdfs", "EnableSDFs", true);
+
+  /**
    * Fake flag used for integration testing of the Android embedding processing engine flags.
    *
    * <p>Settable via the command line and the manifest.
@@ -479,6 +490,7 @@ public final class FlutterEngineFlags {
               TEST_FLAG,
               ENABLE_FLUTTER_GPU,
               IMPELLER_LAZY_SHADER_MODER,
+              IMPELLER_USE_SDFS,
               IMPELLER_OPENGL_GPU_TRACING,
               IMPELLER_VULKAN_GPU_TRACING,
               ENABLE_HCPP));

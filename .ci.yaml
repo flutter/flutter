@@ -590,9 +590,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # TODO(flutter/flutter#164140): Reduce timeout once customer
-      # tests are sharded.
-      test_timeout_secs: "3600" # Allows 60 minutes (up from 30 default)
 
   # The DevTools tests build DevTools from source and take as long as the rest
   # of the registry, and their test step only runs on Linux.
@@ -604,6 +601,19 @@ targets:
     timeout: 60
     properties:
       shard: customer_testing_devtools
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+
+  # Flame only runs its full test suites on Linux, where they take as long as
+  # the rest of the registry.
+  - name: Linux customer_testing_flame
+    enabled_branches:
+      - master
+    recipe: flutter/flutter_drone
+    # Timeout in minutes for the whole task.
+    timeout: 60
+    properties:
+      shard: customer_testing_flame
       tags: >
         ["framework", "hostonly", "shard", "linux"]
 
@@ -1501,7 +1511,6 @@ targets:
       subshard: "1_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1530,7 +1539,6 @@ targets:
       subshard: "2_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1559,7 +1567,6 @@ targets:
       subshard: "3_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1588,7 +1595,6 @@ targets:
       subshard: "4_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1617,7 +1623,6 @@ targets:
       subshard: "5_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1646,7 +1651,6 @@ targets:
       subshard: "6_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1675,7 +1679,6 @@ targets:
       subshard: "7_7"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "2700"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2377,7 +2380,6 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -3130,7 +3132,6 @@ targets:
   - name: Linux_pixel_7pro integration_ui_keyboard_inset_jump
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4131,7 +4132,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Mac dart_plugin_registry_test
     recipe: devicelab/devicelab_drone
@@ -5148,30 +5148,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
       shard: verify_binaries_pre_codesigned
 
-  - name: Mac web_tool_tests
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "goldctl", "version": "git_revision:7f66c9b9efb2826e72c61bb2f50cdc20b635dea7"}
-        ]
-      shard: web_tool_tests
-      subshard: "1_1"
-      tags: >
-        ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Mac web_tool_tests_1
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5184,7 +5161,6 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5194,7 +5170,6 @@ targets:
       - DEPS
 
   - name: Mac web_tool_tests_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -5207,7 +5182,6 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -6321,7 +6295,6 @@ targets:
       shard: customer_testing
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "2700" # Allows 45 minutes (up from 30 default)
 
   - name: Windows framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -7333,7 +7306,6 @@ targets:
       subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -7355,7 +7327,6 @@ targets:
       subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard"]
-      test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
     runIf:
     - dev/**
     - packages/flutter_tools/**
