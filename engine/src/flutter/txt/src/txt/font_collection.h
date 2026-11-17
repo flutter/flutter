@@ -6,7 +6,6 @@
 #define FLUTTER_TXT_SRC_TXT_FONT_COLLECTION_H_
 
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <set>
 #include <string>
@@ -28,9 +27,17 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
 
   ~FontCollection();
 
-  size_t GetFontManagersCount() const;
+  size_t GetFontManagersCount();
 
+  /// Eagerly resolves and installs the platform's default font manager.
+  ///
+  /// @see `DeferDefaultFontManager`
   void SetupDefaultFontManager(uint32_t font_initialization_data);
+
+  /// Records `font_initialization_data` and defers resolving the platform's
+  /// default font manager until first font usage.
+  ///
+  /// @see `SetupDefaultFontManager`
   void DeferDefaultFontManager(uint32_t font_initialization_data);
   void SetDefaultFontManager(sk_sp<SkFontMgr> font_manager);
   void SetAssetFontManager(sk_sp<SkFontMgr> font_manager);
@@ -48,9 +55,8 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   sk_sp<skia::textlayout::FontCollection> CreateSktFontCollection();
 
  private:
-  mutable std::mutex default_font_manager_mutex_;
-  mutable std::optional<uint32_t> default_font_manager_init_data_;
-  mutable sk_sp<SkFontMgr> default_font_manager_;
+  std::optional<uint32_t> default_font_manager_init_data_;
+  sk_sp<SkFontMgr> default_font_manager_;
   sk_sp<SkFontMgr> asset_font_manager_;
   sk_sp<SkFontMgr> dynamic_font_manager_;
   sk_sp<SkFontMgr> test_font_manager_;
@@ -59,9 +65,9 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   // An equivalent font collection usable by the Skia text shaper library.
   sk_sp<skia::textlayout::FontCollection> skt_collection_;
 
-  std::vector<sk_sp<SkFontMgr>> GetFontManagerOrder() const;
+  std::vector<sk_sp<SkFontMgr>> GetFontManagerOrder();
 
-  sk_sp<SkFontMgr> GetDefaultFontManager() const;
+  sk_sp<SkFontMgr> GetDefaultFontManager();
 
   FML_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
