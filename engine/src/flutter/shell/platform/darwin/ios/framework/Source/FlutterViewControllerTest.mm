@@ -1415,6 +1415,74 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   OCMVerifyAll(mockVC);
 }
 
+- (void)testViewportMetricsAreRoundedToIntegralPhysicalSize {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = realVC;
+
+  UIScreen* mockScreen = OCMClassMock([UIScreen class]);
+  CGFloat screenScale = 3;
+  OCMStub([mockScreen scale]).andReturn(screenScale);
+  OCMStub([mockVC flutterScreenIfViewLoaded]).andReturn(mockScreen);
+  OCMStub([mockVC stateIsForeground]).andReturn(NO);
+  // 606.3333333333333 * 3 is 1818.9999999999998.
+  UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 390.5, 606.3333333333333)];
+  OCMStub([mockVC view]).andReturn(view);
+
+  __block flutter::ViewportMetrics metrics;
+  OCMStub([mockEngine updateViewportMetrics:metrics])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        [invocation getArgument:&metrics atIndex:2];
+      });
+
+  [mockVC viewDidLayoutSubviews];
+
+  XCTAssertEqual(metrics.physical_width, 1172.0);
+  XCTAssertEqual(metrics.physical_height, 1819.0);
+  XCTAssertEqual(metrics.physical_min_width_constraint, 1172.0);
+  XCTAssertEqual(metrics.physical_max_width_constraint, 1172.0);
+  XCTAssertEqual(metrics.physical_min_height_constraint, 1819.0);
+  XCTAssertEqual(metrics.physical_max_height_constraint, 1819.0);
+}
+
+- (void)testViewportMetricsConstraintsAreRoundedWhenAutoResizable {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  id mockVC = OCMPartialMock(realVC);
+  mockEngine.viewController = realVC;
+
+  UIScreen* mockScreen = OCMClassMock([UIScreen class]);
+  CGFloat screenScale = 3;
+  OCMStub([mockScreen scale]).andReturn(screenScale);
+  OCMStub([mockVC flutterScreenIfViewLoaded]).andReturn(mockScreen);
+  OCMStub([mockVC stateIsForeground]).andReturn(NO);
+  UIView* view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 390.5, 606.3333333333333)];
+  OCMStub([mockVC view]).andReturn(view);
+
+  __block flutter::ViewportMetrics metrics;
+  OCMStub([mockEngine updateViewportMetrics:metrics])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        [invocation getArgument:&metrics atIndex:2];
+      });
+
+  [mockVC setAutoResizable:YES];
+  [mockVC viewDidLayoutSubviews];
+
+  XCTAssertEqual(metrics.physical_min_width_constraint, 1172.0);
+  XCTAssertEqual(metrics.physical_max_width_constraint, 1172.0);
+  XCTAssertEqual(metrics.physical_min_height_constraint, 1819.0);
+  XCTAssertEqual(metrics.physical_max_height_constraint, 1819.0);
+}
+
 - (void)testViewDidLayoutSubviewsUpdatesEngineDisplays {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
