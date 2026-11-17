@@ -478,16 +478,15 @@ void testMain() {
       });
 
       test('context loss after dispose does not replace the canvas', () async {
-        // The onscreen canvas keeps its context loss listener after dispose,
-        // so only the disposed check in onContextLost prevents a new canvas
-        // from being acquired.
         final surface = CkOnscreenSurface(OnscreenCanvasProvider());
         await surface.initialized;
         surface.setSize(const BitmapSize(100, 100));
         final DomEventTarget disposedCanvas = surface.canvas;
         surface.dispose();
 
-        await surface.triggerContextLoss();
+        // Simulate an event or callback that was queued before disposal.
+        disposedCanvas.dispatchEvent(createDomEvent('Event', 'webglcontextlost'));
+        surface.onContextLost();
         await Future<void>.delayed(const Duration(milliseconds: 50));
         expect(identical(surface.canvas, disposedCanvas), isTrue);
       });
