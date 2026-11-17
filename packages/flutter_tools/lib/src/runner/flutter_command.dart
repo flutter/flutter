@@ -184,6 +184,7 @@ abstract final class FlutterCommandCategory {
 abstract class FlutterCommand extends Command<void> {
   FlutterCommand({
     required this.toolContext,
+    this._applicationPackages,
     this.verboseHelp = false,
     this._outputPreferences,
     DeviceManager? deviceManager,
@@ -1317,7 +1318,7 @@ abstract class FlutterCommand extends Command<void> {
     project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
 
     if (shouldRunPub) {
-      await pub.get(
+      await runner!.pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,
         checkUpToDate: cachePubGet,
@@ -1382,6 +1383,7 @@ abstract class FlutterCommand extends Command<void> {
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
+      templatePathProvider: commandRunner.templatePathProvider,
       templateRenderer: commandRunner.templateRenderer,
     );
   }
@@ -1486,9 +1488,8 @@ abstract class FlutterCommand extends Command<void> {
     return help;
   }
 
-  // TODO(bkonyi): Remove once commands using ApplicationPackageFactory are migrated to explicit dependency injection, https://github.com/flutter/flutter/issues/47161.
-  ApplicationPackageFactory? get applicationPackages =>
-      _applicationPackages ?? ApplicationPackageFactory.instance;
+  ApplicationPackageFactory get applicationPackages =>
+      _applicationPackages ?? runner!.applicationPackageFactory;
   set applicationPackages(ApplicationPackageFactory? value) {
     _applicationPackages = value;
   }

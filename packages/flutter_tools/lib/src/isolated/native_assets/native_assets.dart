@@ -883,6 +883,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
           codesignIdentity,
           buildMode,
           fileSystem,
+          logger: logger,
           processUtils: processUtils,
         );
       } else {
