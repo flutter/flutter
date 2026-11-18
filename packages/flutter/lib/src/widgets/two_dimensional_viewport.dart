@@ -1808,6 +1808,18 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     _clipRectLayer.layer = null;
     super.dispose();
   }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _hasVisualOverflow ? Offset.zero & viewportDimension : null;
+    }
+  }
 }
 
 /// A delegate used by [RenderTwoDimensionalViewport] to manage its children.

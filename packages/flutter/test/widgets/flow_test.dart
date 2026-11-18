@@ -217,4 +217,64 @@ void main() {
     );
     expect(tester.getSize(find.byType(Flow)), Size.zero);
   });
+
+  testWidgets('Flow clips the semantics rect of an overflowing child', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    Widget buildFlow(Clip clipBehavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Flow(
+              delegate: _TranslateFlowDelegate(const Offset(0, 50)),
+              clipBehavior: clipBehavior,
+              children: <Widget>[
+                Semantics(
+                  label: 'target',
+                  container: true,
+                  child: const SizedBox(width: 100, height: 100),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Only the top half of the target is inside the clip.
+    await tester.pumpWidget(buildFlow(Clip.hardEdge));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    // Without clipping, the whole target is visible.
+    await tester.pumpWidget(buildFlow(Clip.none));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 100),
+    );
+
+    handle.dispose();
+  });
+}
+
+class _TranslateFlowDelegate extends FlowDelegate {
+  _TranslateFlowDelegate(this.offset);
+
+  final Offset offset;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (var i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, transform: Matrix4.translationValues(offset.dx, offset.dy, 0.0));
+    }
+  }
+
+  @override
+  bool shouldRepaint(_TranslateFlowDelegate oldDelegate) => offset != oldDelegate.offset;
 }

@@ -1898,6 +1898,56 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), Size.zero);
   });
+
+  testWidgets('Text clips the semantics rect of an overflowing inline widget', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    Widget buildText(TextOverflow overflow) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: Text.rich(
+              TextSpan(
+                children: <InlineSpan>[
+                  const WidgetSpan(child: SizedBox(width: 100, height: 50)),
+                  WidgetSpan(
+                    child: Semantics(
+                      label: 'target',
+                      container: true,
+                      child: const SizedBox(width: 100, height: 100),
+                    ),
+                  ),
+                ],
+              ),
+              overflow: overflow,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Only the top half of the target is inside the clip.
+    await tester.pumpWidget(buildText(TextOverflow.clip));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    // Without clipping, the whole target is visible.
+    await tester.pumpWidget(buildText(TextOverflow.visible));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 100),
+    );
+
+    handle.dispose();
+  });
 }
 
 Future<void> _pumpTextWidget({

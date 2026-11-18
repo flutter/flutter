@@ -132,7 +132,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   late final CurvedAnimation _animation;
 
   final SizeTween _sizeTween = SizeTween();
-  late bool _hasVisualOverflow;
+  bool _hasVisualOverflow = false;
   double? _lastValue;
 
   /// The state this size animation is in.
@@ -425,5 +425,17 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _controller.dispose();
     _animation.dispose();
     super.dispose();
+  }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        return _hasVisualOverflow ? Offset.zero & size : null;
+    }
   }
 }

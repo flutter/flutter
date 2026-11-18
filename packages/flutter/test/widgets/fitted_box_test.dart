@@ -567,6 +567,56 @@ void main() {
     );
     expect(tester.getSize(find.byType(FittedBox)), Size.zero);
   });
+
+  testWidgets('FittedBox clips the semantics rect of an overflowing child', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    Widget buildFittedBox(Clip clipBehavior) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: FittedBox(
+              fit: BoxFit.none,
+              alignment: Alignment.topLeft,
+              clipBehavior: clipBehavior,
+              child: Column(
+                children: <Widget>[
+                  const SizedBox(width: 100, height: 50),
+                  Semantics(
+                    label: 'target',
+                    container: true,
+                    child: const SizedBox(width: 100, height: 100),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Only the top half of the target is inside the clip.
+    await tester.pumpWidget(buildFittedBox(Clip.hardEdge));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    // Without clipping, the whole target is visible.
+    await tester.pumpWidget(buildFittedBox(Clip.none));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 100),
+    );
+
+    handle.dispose();
+  });
 }
 
 List<Type> getLayers() {

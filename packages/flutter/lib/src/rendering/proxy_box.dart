@@ -3051,6 +3051,22 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
+  Rect? describeApproximatePaintClip(RenderObject child) {
+    switch (clipBehavior) {
+      case Clip.none:
+        return null;
+      case Clip.hardEdge:
+      case Clip.antiAlias:
+      case Clip.antiAliasWithSaveLayer:
+        if (!paintsChild(child as RenderBox)) {
+          return null;
+        }
+        _updatePaintData();
+        return _hasVisualOverflow! ? Offset.zero & size : null;
+    }
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<BoxFit>('fit', fit));

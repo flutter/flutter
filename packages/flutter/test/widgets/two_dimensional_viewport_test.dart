@@ -3045,6 +3045,55 @@ void main() {
         }
       }
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('TwoDimensionalViewport clips the semantics rect of an overflowing child', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 1,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          if (vicinity == const ChildVicinity(xIndex: 0, yIndex: 1)) {
+            return Semantics(
+              label: 'target',
+              container: true,
+              child: const SizedBox(width: 200, height: 200),
+            );
+          }
+          return const SizedBox(width: 200, height: 200);
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      Widget buildViewport(Clip clipBehavior) {
+        return TestWidgetsApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 200, maxHeight: 300),
+              child: SimpleBuilderTableView(clipBehavior: clipBehavior, delegate: delegate),
+            ),
+          ),
+        );
+      }
+
+      // Only the top half of the second 200x200 child is inside the 200x300 clip.
+      await tester.pumpWidget(buildViewport(Clip.hardEdge));
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('target')).rect,
+        const Rect.fromLTRB(0, 0, 200, 100),
+      );
+
+      // Without clipping, the whole child is visible.
+      await tester.pumpWidget(buildViewport(Clip.none));
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('target')).rect,
+        const Rect.fromLTRB(0, 0, 200, 200),
+      );
+
+      handle.dispose();
+    });
   });
 }
 
