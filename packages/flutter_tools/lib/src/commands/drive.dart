@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../android/android_device.dart';
-import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -21,12 +20,14 @@ import '../device.dart';
 import '../drive/drive_service.dart';
 import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import '../web/web_options.dart';
+import '../web/web_runner.dart';
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -51,13 +52,18 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
+    super.applicationPackages,
+    this._flutterHookRunner,
     @visibleForTesting this._flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
+    this._webRunnerFactory,
   }) {
     requiresPubspecYaml();
 
@@ -216,7 +222,10 @@ class DriveCommand extends RunCommandBase {
     return true;
   }
 
+  final DevtoolsLauncher _devtoolsLauncher;
   FlutterDriverFactory? _flutterDriverFactory;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -357,12 +366,15 @@ class DriveCommand extends RunCommandBase {
 
     _flutterDriverFactory ??= FlutterDriverFactory(
       analytics: analytics,
-      applicationPackageFactory: ApplicationPackageFactory.instance!,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       dartSdkPath: toolContext.artifacts.getArtifactPath(.engineDartBinary),
-      devtoolsLauncher: DevtoolsLauncher.instance!,
+      devtoolsLauncher: _devtoolsLauncher,
+      flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
+      webRunnerFactory: _webRunnerFactory,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 

@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../android/android_device.dart';
 import '../android/android_engine_cli_flags.dart';
 import '../android/android_workflow.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -26,7 +27,7 @@ import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../features.dart';
-import '../hook_runner.dart' show hookRunner;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../ios/devices.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -43,10 +44,12 @@ import 'daemon.dart';
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   RunCommandBase({
+    required this.assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required super.toolContext,
     required super.verboseHelp,
+    super.applicationPackages,
     super.outputPreferences,
     super.deviceManager,
   }) {
@@ -107,6 +110,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     help: 'Start in a paused mode and wait for a debugger to connect.',
   );
 
+  final AssetBundleFactory assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
 
@@ -332,12 +336,17 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     required this.appleContext,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
     this._androidContext,
     this._androidWorkflow,
+    super.applicationPackages,
     this.deviceManager,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
     super.verboseHelp = false,
   }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
@@ -404,6 +413,9 @@ class RunCommand extends RunCommandBase {
   final AndroidWorkflow? _androidWorkflow;
   final AppleContext appleContext;
   final DeviceManager? deviceManager;
+  final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
 
   @override
   final name = 'run';
@@ -674,23 +686,28 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: getValue(BuildInfoOptions.outputDill),
         stayResident: stayResident,
         analytics: this.analytics,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: assetBundleFactory,
         nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
-        dartBuilder: hookRunner,
+        dartBuilder: _flutterHookRunner,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
         toolContext: toolContext,
         xcode: appleContext.xcode,
       );
     } else if (webMode) {
-      return webRunnerFactory!.createWebRunner(
+      return _webRunnerFactory!.createWebRunner(
         flutterDevices.single,
         target: targetFile,
         flutterProject: flutterProject,
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         analytics: this.analytics,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        flutterHookRunner: _flutterHookRunner,
         toolContext: toolContext,
         webDefines: extractWebDefines(),
       );
@@ -703,8 +720,10 @@ class RunCommand extends RunCommandBase {
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
       stayResident: stayResident,
-      dartBuilder: hookRunner,
+      dartBuilder: _flutterHookRunner,
       analytics: this.analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       toolContext: toolContext,
@@ -716,10 +735,15 @@ class RunCommand extends RunCommandBase {
   Daemon createMachineDaemon() {
     return Daemon.createMachineDaemon(
       analytics: this.analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
+      devtoolsLauncher: _devtoolsLauncher,
       featureFlags: featureFlags,
+      flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
+      webRunnerFactory: _webRunnerFactory,
       xcode: appleContext.xcode,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
