@@ -5,6 +5,7 @@
 import 'asset.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
+import 'features.dart';
 import 'project.dart';
 
 typedef TestCompilerNativeAssetsBuildResult = ({
@@ -15,13 +16,22 @@ typedef TestCompilerNativeAssetsBuildResult = ({
 /// An interface to enable overriding native assets build logic in other
 /// build systems.
 abstract class TestCompilerNativeAssetsBuilder {
-  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext});
+  Future<Uri?> build(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  });
 
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
     BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
   }) async => (
-    nativeAssetsManifest: await build(buildInfo, toolContext: toolContext),
+    nativeAssetsManifest: await build(
+      buildInfo,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
+    ),
     flutterHookResult: null,
   );
 

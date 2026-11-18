@@ -27,7 +27,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
@@ -176,12 +175,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    // Uses plain `test` and the production `runInContext` on purpose, like
-    // `executable.dart`: the crash report runs `flutter doctor`, and
-    // `doctor.dart` still reads `AndroidValidator` and
-    // `AndroidLicenseValidator` through `context.get`, which only
-    // `runInContext`'s fallbacks provide. `_NoContext.run` would drop them.
-    test('error handling crash report (synchronous crash)', () async {
+    testWithoutContext('error handling crash report (synchronous crash)', () async {
       final completer = Completer<void>();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         analytics: fakeAnalytics,
@@ -197,17 +191,15 @@ void main() {
         runZonedGuarded<Future<void>?>(
           () {
             unawaited(
-              runInContext<int>(
-                () => runner.run(
-                  <String>['crash'],
-                  (ToolDependencies toolDependencies) => <FlutterCommand>[
-                    CrashingFlutterCommand(toolContext: toolDependencies.toolContext),
-                  ],
-                  // This flutterVersion disables crash reporting.
-                  flutterVersion: '[user-branch]/',
-                  reportCrashes: true,
-                  toolDependencies: toolDependencies,
-                ),
+              runner.run(
+                <String>['crash'],
+                (ToolDependencies toolDependencies) => <FlutterCommand>[
+                  CrashingFlutterCommand(toolContext: toolDependencies.toolContext),
+                ],
+                // This flutterVersion disables crash reporting.
+                flutterVersion: '[user-branch]/',
+                reportCrashes: true,
+                toolDependencies: toolDependencies,
               ),
             );
             return null;
@@ -402,9 +394,7 @@ void main() {
     // does, this test might fail to catch a regression of
     // https://github.com/flutter/flutter/issues/56406.
     final commandCompleter = Completer<void>();
-    // Uses plain `test` and the production `runInContext` for the same reason
-    // as the synchronous crash test.
-    test('error handling crash report (asynchronous crash)', () async {
+    testWithoutContext('error handling crash report (asynchronous crash)', () async {
       final completer = Completer<void>();
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         artifacts: Artifacts.test(),
@@ -420,21 +410,19 @@ void main() {
         runZonedGuarded<Future<void>?>(
           () {
             unawaited(
-              runInContext<int>(
-                () => runner.run(
-                  <String>['crash'],
-                  (ToolDependencies toolDependencies) => <FlutterCommand>[
-                    CrashingFlutterCommand(
-                      asyncCrash: true,
-                      completer: commandCompleter,
-                      toolContext: toolDependencies.toolContext,
-                    ),
-                  ],
-                  // This flutterVersion disables crash reporting.
-                  flutterVersion: '[user-branch]/',
-                  reportCrashes: true,
-                  toolDependencies: toolDependencies,
-                ),
+              runner.run(
+                <String>['crash'],
+                (ToolDependencies toolDependencies) => <FlutterCommand>[
+                  CrashingFlutterCommand(
+                    asyncCrash: true,
+                    completer: commandCompleter,
+                    toolContext: toolDependencies.toolContext,
+                  ),
+                ],
+                // This flutterVersion disables crash reporting.
+                flutterVersion: '[user-branch]/',
+                reportCrashes: true,
+                toolDependencies: toolDependencies,
               ),
             );
             return null;
@@ -508,9 +496,7 @@ void main() {
       expect(exceptionEvents, hasLength(1));
     });
 
-    // Uses plain `test` and the production `runInContext` for the same reason
-    // as the synchronous crash test.
-    test('create local report', () async {
+    testWithoutContext('create local report', () async {
       // Since crash reporting calls the doctor, which checks for the devtools
       // version file in the cache, write a version file to the memory fs.
       final Directory devtoolsDir = fileSystem.directory(
@@ -544,17 +530,15 @@ void main() {
         runZonedGuarded<Future<void>?>(
           () {
             unawaited(
-              runInContext<int>(
-                () => runner.run(
-                  <String>['crash'],
-                  (ToolDependencies toolDependencies) => <FlutterCommand>[
-                    CrashingFlutterCommand(toolContext: toolDependencies.toolContext),
-                  ],
-                  // This flutterVersion disables crash reporting.
-                  flutterVersion: '[user-branch]/',
-                  reportCrashes: true,
-                  toolDependencies: toolDependencies,
-                ),
+              runner.run(
+                <String>['crash'],
+                (ToolDependencies toolDependencies) => <FlutterCommand>[
+                  CrashingFlutterCommand(toolContext: toolDependencies.toolContext),
+                ],
+                // This flutterVersion disables crash reporting.
+                flutterVersion: '[user-branch]/',
+                reportCrashes: true,
+                toolDependencies: toolDependencies,
               ),
             );
             return null;
@@ -626,9 +610,7 @@ void main() {
         inTestSetup = false;
       });
 
-      // Uses plain `test` and the production `runInContext` for the same
-      // reason as the synchronous crash test.
-      test('create local report in temporary directory', () async {
+      testWithoutContext('create local report in temporary directory', () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
         final Directory devtoolsDir = fileSystem.directory(
@@ -665,17 +647,15 @@ void main() {
           runZonedGuarded<Future<void>?>(
             () {
               unawaited(
-                runInContext<int>(
-                  () => runner.run(
-                    <String>['crash'],
-                    (ToolDependencies toolDependencies) => <FlutterCommand>[
-                      CrashingFlutterCommand(toolContext: toolDependencies.toolContext),
-                    ],
-                    // This flutterVersion disables crash reporting.
-                    flutterVersion: '[user-branch]/',
-                    reportCrashes: true,
-                    toolDependencies: toolDependencies,
-                  ),
+                runner.run(
+                  <String>['crash'],
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[
+                    CrashingFlutterCommand(toolContext: toolDependencies.toolContext),
+                  ],
+                  // This flutterVersion disables crash reporting.
+                  flutterVersion: '[user-branch]/',
+                  reportCrashes: true,
+                  toolDependencies: toolDependencies,
                 ),
               );
               return null;
@@ -896,10 +876,7 @@ void main() {
         javaEvaluations = 0;
       });
 
-      // Uses plain `test` because `generateCommands` builds `CreateCommand`,
-      // which reads `featureFlags` via `context.get`, and `_NoContext.run`
-      // drops the `AppContext` `overrides` that `runner.run` installs.
-      test('does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands', () async {
+      testWithoutContext('does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands', () async {
         late final _DeviceManagerRecordingFlutterCommand command;
         final ToolDependencies toolDependencies = await _bootstrapForTest(
           androidSdkBuilder: () {
@@ -968,8 +945,7 @@ void main() {
         xcdeviceEvaluations = 0;
       });
 
-      // Uses plain `test` for the same reason as the Android laziness test.
-      test('does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands', () async {
+      testWithoutContext('does not eagerly evaluate CocoaPodsValidator, IOSSimulatorUtils, or XCDevice during bootstrap or generateCommands', () async {
         late final _DeviceManagerRecordingFlutterCommand command;
         final ToolDependencies toolDependencies = await _bootstrapForTest(
           cocoapodsValidatorBuilder: () {

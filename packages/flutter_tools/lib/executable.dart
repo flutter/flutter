@@ -49,7 +49,6 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
-import 'src/context_runner.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
@@ -142,37 +141,33 @@ Future<void> main(List<String> args) async {
     webRunnerFactory: DwdsWebRunnerFactory(),
   );
 
-  // `runInContext` still supplies the validator fallbacks that `doctor.dart`
-  // reads via `context.get` (such as `AndroidValidator`) until it's deleted.
-  await runInContext<int>(
-    () => runner.run(
-      args,
-      (ToolDependencies toolDependencies) {
-        final ToolDependencies(
-          :ExtensionManager? extensionManager,
-          :FeatureFlags featureFlags,
-          toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
-        ) = toolDependencies;
-        final ExtensionManager manager = extensionManager!;
-        final templateManager = ExtensionTemplateManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          fileSystem: fs,
-          flutterRoot: cache.flutterRoot,
-          logger: logger,
-        );
-        return generateCommands(
-          toolDependencies: toolDependencies,
-          verboseHelp: verboseHelp,
-          verbose: verbose,
-          extensionTemplateManager: templateManager,
-        );
-      },
-      muteCommandLogging: muteCommandLogging,
-      toolDependencies: toolDependencies,
-      verbose: verbose,
-      verboseHelp: verboseHelp,
-    ),
+  await runner.run(
+    args,
+    (ToolDependencies toolDependencies) {
+      final ToolDependencies(
+        :ExtensionManager? extensionManager,
+        :FeatureFlags featureFlags,
+        toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
+      ) = toolDependencies;
+      final ExtensionManager manager = extensionManager!;
+      final templateManager = ExtensionTemplateManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
+        logger: logger,
+      );
+      return generateCommands(
+        toolDependencies: toolDependencies,
+        verboseHelp: verboseHelp,
+        verbose: verbose,
+        extensionTemplateManager: templateManager,
+      );
+    },
+    muteCommandLogging: muteCommandLogging,
+    toolDependencies: toolDependencies,
+    verbose: verbose,
+    verboseHelp: verboseHelp,
   );
 }
 
@@ -198,7 +193,7 @@ List<FlutterCommand> generateCommands({
           logger: logger,
           processManager: processManager,
         ),
-        VariableDumpMachineProjectValidator(toolContext: toolContext),
+        VariableDumpMachineProjectValidator(featureFlags: featureFlags, toolContext: toolContext),
       ],
       androidBuilder: toolDependencies.androidBuilder,
       suppressAnalytics: !toolDependencies.analytics.okToSend,
@@ -256,6 +251,7 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      featureFlags: featureFlags,
       pub: toolDependencies.pub,
       templatePathProvider: toolDependencies.templatePathProvider,
       templateRenderer: const MustacheTemplateRenderer(),
@@ -286,6 +282,7 @@ List<FlutterCommand> generateCommands({
       verboseHelp: verboseHelp,
     ),
     DoctorCommand(
+      androidContext: toolDependencies.androidContext,
       doctor: toolDependencies.doctor,
       extensionManager: toolDependencies.extensionManager,
       toolContext: toolContext,
@@ -364,13 +361,14 @@ List<FlutterCommand> generateCommands({
       assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      deviceManager: toolDependencies.deviceManager,
       flutterHookRunner: toolDependencies.flutterHookRunner,
       pub: toolDependencies.pub,
       templatePathProvider: toolDependencies.templatePathProvider,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     ),
-    UpgradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    UpgradeCommand(featureFlags: featureFlags, toolContext: toolContext, verboseHelp: verboseHelp),
     SymbolizeCommand(toolContext: toolContext),
     // Development-only commands. These are always hidden,
     IdeConfigCommand(toolContext: toolContext),

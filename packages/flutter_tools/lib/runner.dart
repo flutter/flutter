@@ -80,9 +80,6 @@ import 'src/windows/windows_workflow.dart';
 /// Runs the Flutter tool with support for the specified list of [commands].
 ///
 /// Every [toolDependencies] value is registered in the zone unconditionally.
-/// Validator fallbacks still read by `doctor.dart` (such as `AndroidValidator`)
-/// aren't registered here: they still come from the `runInContext` fallbacks
-/// that the caller installs.
 Future<int> run(
   List<String> args,
   List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
