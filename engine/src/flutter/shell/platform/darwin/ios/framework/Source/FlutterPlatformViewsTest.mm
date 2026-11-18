@@ -2407,6 +2407,143 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
 }
 
+- (void)testClipRRect_perCornerRadii {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params.
+  flutter::MutatorsStack stack;
+
+  // Layer tree always pushes a screen scale factor to the stack.
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+
+  // Push a clip rrect whose top left and bottom right corners are rounded, and whose other two
+  // corners are square.
+  flutter::DlRoundingRadii radii = {
+      .top_left = flutter::DlSize(8, 8),
+      .bottom_right = flutter::DlSize(4, 4),
+  };
+  flutter::DlRoundRect rrect =
+      flutter::DlRoundRect::MakeRectRadii(flutter::DlRect::MakeXYWH(2, 2, 16, 16), radii);
+  stack.PushClipRRect(rrect);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(20, 20), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  // Verify the pixels in the rounded corners are clipped.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(2, 2) onView:flutterView], 0);
+  XCTAssertNotEqual([self alphaOfPoint:CGPointMake(17, 17) onView:flutterView], 255);
+  // Verify the top left corner has the larger radius, and the bottom right corner the smaller one.
+  // A corner of radius 8 clips the pixel diagonally inward from the corner pixel, and a corner of
+  // radius 4 doesn't.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(3, 3) onView:flutterView], 0);
+  XCTAssertGreaterThan([self alphaOfPoint:CGPointMake(16, 16) onView:flutterView], 0);
+  // Verify the pixels in the square corners are not clipped.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(17, 2) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(2, 17) onView:flutterView], 255);
+  // Verify the centre of the clip rect is visible, and a pixel outside the clip rect is not.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(10, 10) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(1, 1) onView:flutterView], 0);
+}
+
+- (void)testClipRRect_ellipticalRadii {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params.
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack.
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  // Push a clip rrect whose corners are all 8 wide and 2 high.
+  flutter::DlRoundRect rrect =
+      flutter::DlRoundRect::MakeRectXY(flutter::DlRect::MakeXYWH(2, 2, 16, 16), 8, 2);
+  stack.PushClipRRect(rrect);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(20, 20), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  // Verify the corners are wider than they are high.
+  // The pixel to the right of the top left corner pixel is outside the corner's curve, and the
+  // pixel below it is inside it. If the radii were swapped, it would be the other way round.
+  XCTAssertLessThan([self alphaOfPoint:CGPointMake(3, 2) onView:flutterView],
+                    [self alphaOfPoint:CGPointMake(2, 3) onView:flutterView]);
+  // Verify the centre of the clip rect is visible, and a pixel outside the clip rect is not.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(10, 10) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(1, 1) onView:flutterView], 0);
+}
+
 - (void)testClipPath {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
