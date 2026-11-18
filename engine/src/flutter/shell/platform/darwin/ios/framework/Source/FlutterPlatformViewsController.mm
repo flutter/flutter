@@ -70,10 +70,10 @@ static void ResetAnchor(CALayer* layer) {
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
 
-/// The device pixel ratio of the current frame.
+/// The number of physical pixels per point in the current frame.
 ///
 /// This state is only modified on the raster thread.
-@property(nonatomic, assign) double devicePixelRatio;
+@property(nonatomic, assign) CGFloat devicePixelRatio;
 
 /// The task runner for posting tasks to the platform thread.
 @property(nonatomic, readonly) FlutterFMLTaskRunner* platformTaskRunner;
@@ -421,7 +421,7 @@ static void ResetAnchor(CALayer* layer) {
   self.gestureRecognizersBlockingPoliciesByType[factoryId] = @(gestureRecognizerBlockingPolicy);
 }
 
-- (void)beginFrameWithSize:(DlISize)frameSize devicePixelRatio:(double)devicePixelRatio {
+- (void)beginFrameWithSize:(DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio {
   FML_DCHECK(devicePixelRatio > 0);
   [self resetFrameState];
   self.frameSize = frameSize;
@@ -482,7 +482,8 @@ static void ResetAnchor(CALayer* layer) {
   CGRect frame =
       CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
                  CGRectGetWidth(self.flutterView.bounds), CGRectGetHeight(self.flutterView.bounds));
-  clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame screenScale:devicePixelRatio];
+  clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame
+                                             devicePixelRatio:devicePixelRatio];
 }
 
 - (void)applyMutators:(NSArray<FlutterPlatformViewMutator*>*)mutators

@@ -48,8 +48,8 @@ NS_ASSUME_NONNULL_BEGIN
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
 /// @brief Mark the beginning of a frame and record the size of the onscreen and the device pixel
-/// ratio.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize devicePixelRatio:(double)devicePixelRatio;
+/// ratio (the number of physical pixels per point).
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///

@@ -4182,16 +4182,16 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 - (void)testFlutterClippingMaskViewPoolReuseViewsAfterRecycle {
   FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
   FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   [pool insertViewToPoolIfNeeded:view1];
   [pool insertViewToPoolIfNeeded:view2];
   CGRect newRect = CGRectMake(0, 0, 10, 10);
   FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:newRect
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   FlutterClippingMaskView* view4 = [pool getMaskViewWithFrame:newRect
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   // view3 and view4 should randomly get either of view1 and view2.
   NSSet* set1 = [NSSet setWithObjects:view1, view2, nil];
   NSSet* set2 = [NSSet setWithObjects:view3, view4, nil];
@@ -4203,11 +4203,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 - (void)testFlutterClippingMaskViewPoolAllocsNewMaskViewsAfterReachingCapacity {
   FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
   FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:CGRectZero
-                                                  screenScale:[UIScreen mainScreen].scale];
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   XCTAssertNotEqual(view1, view3);
   XCTAssertNotEqual(view2, view3);
 }
@@ -4217,7 +4217,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   @autoreleasepool {
     FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
     FlutterClippingMaskView* view = [pool getMaskViewWithFrame:CGRectZero
-                                                   screenScale:[UIScreen mainScreen].scale];
+                                              devicePixelRatio:[UIScreen mainScreen].scale];
     weakView = view;
     XCTAssertNotNil(weakView);
   }
