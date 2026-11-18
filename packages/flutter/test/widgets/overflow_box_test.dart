@@ -72,6 +72,7 @@ void main() {
         // against the laid-out ones while debugCheckIntrinsicSizes is on.
         final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
         debugCheckIntrinsicSizes = true;
+        addTearDown(() => debugCheckIntrinsicSizes = checkIntrinsicSizes);
         final cases = <({BoxConstraints incoming, OverflowBox box})>[
           (
             incoming: const BoxConstraints(maxWidth: 400, maxHeight: 400),
@@ -121,7 +122,6 @@ void main() {
           final RenderBox box = tester.renderObject(find.byType(OverflowBox));
           expect(box.getDryLayout(testCase.incoming), box.size);
         }
-        debugCheckIntrinsicSizes = checkIntrinsicSizes;
       },
     );
 
