@@ -328,6 +328,8 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required this._analytics,
     required this._cocoaPods,
+    required this._featureFlags,
+    required this._mdnsVmServiceDiscovery,
     required this._plistParser,
     required this._xcode,
     required this._xcodeProjectInterpreter,
@@ -352,9 +354,11 @@ class IOSDevice extends Device {
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   final PlistParser _plistParser;
   final XcodeDebug _xcodeDebug;
   final Xcode _xcode;
@@ -558,6 +562,7 @@ class IOSDevice extends Device {
         analytics: _analytics,
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
+        featureFlags: _featureFlags,
         plistParser: _plistParser,
         templateRenderer: _templateRenderer,
         toolContext: toolContext,
@@ -772,7 +777,7 @@ class IOSDevice extends Device {
         });
 
         // Get Dart VM Service URL with the device IP as the host.
-        localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+        localUri = await _mdnsVmServiceDiscovery.getVMServiceUriForLaunch(
           packageId,
           this,
           usesIpv6: debuggingOptions.ipv6,
@@ -976,7 +981,7 @@ class IOSDevice extends Device {
   }) async {
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
-    final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+    final Future<Uri?> vmUrlFromMDns = _mdnsVmServiceDiscovery.getVMServiceUriForLaunch(
       packageId,
       this,
       // If mDNS fails, don't throw if the URL may still be findable through
@@ -1148,7 +1153,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = _xcode.currentVersion;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && _featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1371,6 +1376,7 @@ class IOSDevice extends Device {
         !isWirelesslyConnected;
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
+      mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,

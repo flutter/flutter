@@ -48,6 +48,7 @@ void main() {
       expect(
         await WindowsDevices(
           analytics: const NoOpAnalytics(),
+          featureFlags: TestFeatureFlags(),
           windowsWorkflow: WindowsWorkflow(
             featureFlags: TestFeatureFlags(),
             platform: FakePlatform(operatingSystem: 'windows'),
@@ -68,6 +69,7 @@ void main() {
     expect(
       await WindowsDevices(
         analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         windowsWorkflow: WindowsWorkflow(
           featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           platform: FakePlatform(operatingSystem: 'windows'),
@@ -194,6 +196,7 @@ void main() {
         ]);
         final device = WindowsDevice(
           analytics: fakeAnalytics,
+          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           toolContext: FakeToolContext(
             cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: r'C:\flutter'),
             fs: fileSystem,
@@ -254,6 +257,7 @@ WindowsDevice setUpWindowsDevice({
 }) {
   return WindowsDevice(
     analytics: const NoOpAnalytics(),
+    featureFlags: TestFeatureFlags(isWindowsEnabled: true),
     toolContext: FakeToolContext(
       fs: fileSystem ?? MemoryFileSystem.test(),
       logger: logger ?? BufferLogger.test(),

@@ -9,6 +9,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
+import '../application_package.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -24,7 +26,7 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../features.dart';
-import '../hook_runner.dart' show hookRunner;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -64,10 +66,14 @@ import 'daemon.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
     required this._xcode,
+    super.applicationPackages,
+    this._flutterHookRunner,
     HotRunnerFactory? hotRunnerFactory,
     super.verboseHelp = false,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
@@ -126,6 +132,9 @@ class AttachCommand extends FlutterCommand {
         'This parameter is case-insensitive.',
   );
 
+  final AssetBundleFactory _assetBundleFactory;
+  final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
   final HotRunnerFactory _hotRunnerFactory;
   final ToolContext _toolContext;
   final BuildSystem _buildSystem;
@@ -308,15 +317,19 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         logger: logger,
       ),
       analytics: analytics,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: _assetBundleFactory,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
+      devtoolsLauncher: _devtoolsLauncher,
+      flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
       xcode: _xcode,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
-      featureFlags: featureFlags,
+      featureFlags: this.runner!.featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -386,8 +399,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             dillOutputPath: getValue(BuildInfoOptions.outputDill),
             nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
             analytics: analytics,
+            applicationPackageFactory: applicationPackages,
+            assetBundleFactory: _assetBundleFactory,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
+            dartBuilder: _flutterHookRunner,
+            featureFlags: runner!.featureFlags,
             toolContext: toolContext,
             xcode: _xcode,
           )
@@ -395,10 +412,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
-            dartBuilder: hookRunner,
+            dartBuilder: _flutterHookRunner,
             analytics: analytics,
+            applicationPackageFactory: applicationPackages,
+            assetBundleFactory: _assetBundleFactory,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
+            featureFlags: runner!.featureFlags,
             toolContext: toolContext,
             xcode: _xcode,
           );
@@ -479,14 +499,18 @@ class HotRunnerFactory {
   HotRunner build(
     List<FlutterDevice> devices, {
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required String target,
     required ToolContext toolContext,
     required Xcode? xcode,
     File? applicationBinary,
     bool benchmarkMode = false,
+    FlutterHookRunner? dartBuilder,
     String? dillOutputPath,
     bool hostIsIde = false,
     String? nativeAssetsYamlFile,
@@ -495,9 +519,12 @@ class HotRunnerFactory {
   }) => HotRunner(
     devices,
     analytics: analytics,
+    applicationPackageFactory: applicationPackageFactory,
+    assetBundleFactory: assetBundleFactory,
     buildSystem: buildSystem,
     buildTargets: buildTargets,
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags,
     target: target,
     toolContext: toolContext,
     xcode: xcode,
@@ -508,7 +535,7 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
-    dartBuilder: hookRunner,
+    dartBuilder: dartBuilder,
   );
 }
 
