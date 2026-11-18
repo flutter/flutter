@@ -70,7 +70,10 @@
 - (instancetype)initWithCapacity:(NSInteger)capacity;
 
 // Reuse a maskView from the pool, or allocate a new one.
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame;
+//
+// `screenScale` is the number of physical pixels per point that the mask view converts its clips
+// with.
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
 
 // Insert the `maskView` into the pool.
 - (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView;

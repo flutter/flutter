@@ -196,7 +196,7 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
 
 @interface FlutterClippingMaskView ()
 
-// A `CATransform3D` matrix represnts a scale transform that revese UIScreen.scale.
+// A `CATransform3D` matrix that represents a scale transform that reverses the screen scale.
 //
 // The transform matrix passed in clipRect/clipRRect/clipPath methods are in device coordinate
 // space. The transfrom matrix concats `reverseScreenScale` to create a transform matrix in the iOS
@@ -420,15 +420,15 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
   return self;
 }
 
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
   FML_DCHECK(self.pool.count <= self.capacity);
   if (self.pool.count == 0) {
     // The pool is empty, alloc a new one.
-    return [[FlutterClippingMaskView alloc] initWithFrame:frame
-                                              screenScale:UIScreen.mainScreen.scale];
+    return [[FlutterClippingMaskView alloc] initWithFrame:frame screenScale:screenScale];
   }
   FlutterClippingMaskView* maskView = [self.pool anyObject];
   maskView.frame = frame;
+  maskView.reverseScreenScale = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
   [maskView reset];
   [self.pool removeObject:maskView];
   return maskView;
