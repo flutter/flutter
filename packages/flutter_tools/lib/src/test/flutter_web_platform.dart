@@ -119,6 +119,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required TemplateRenderer templateRenderer,
     required this._toolContext,
     TestTimeRecorder? testTimeRecorder,
+    this._browserManager,
   }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
@@ -211,6 +212,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
     bool updateGoldens = false,
+    @visibleForTesting BrowserManager? browserManager,
   }) async {
     final shelf.Server server = await serverFactory();
     final FileSystem fs = toolContext.fs;
@@ -242,6 +244,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       useWasm: useWasm,
       crossOriginIsolation: crossOriginIsolation,
       testTimeRecorder: testTimeRecorder,
+      browserManager: browserManager,
     );
   }
 
@@ -596,16 +599,34 @@ window.\$dartLoader.loader.nextAttempt();
       _logger.printTrace('Loading test suite $relativePath.');
     }
     final PoolResource lockResource = await _suiteLock.request();
+    var lockReleased = false;
+    void releaseSuiteLock() {
+      if (lockReleased) {
+        return;
+      }
+      lockReleased = true;
+      lockResource.release();
+    }
+
+    if (_closed) {
+      releaseSuiteLock();
+      throw StateError('Load called on a closed FlutterWebPlatform');
+    }
 
     final Runtime browser = platform.runtime;
     try {
       _browserManager ??= await _launchBrowser(browser);
     } on Error catch (_) {
+      releaseSuiteLock();
       await _suiteLock.close();
+      rethrow;
+    } on Object {
+      releaseSuiteLock();
       rethrow;
     }
 
     if (_closed) {
+      releaseSuiteLock();
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
@@ -646,7 +667,7 @@ window.\$dartLoader.loader.nextAttempt();
           if (timeoutCompleter != null && !timeoutCompleter.isCompleted) {
             timeoutCompleter.completeWithToolExit(
               'Test suite $relativePath timed out after 3 minutes (stalled CanvasKit WASM fetch or unresponsive browser). '
-              'Exiting to prevent LUCI bot hanging.',
+              'Failing this suite so the remaining suites can run.',
             );
           }
         }
@@ -658,6 +679,7 @@ window.\$dartLoader.loader.nextAttempt();
       watchdogTimer3m?.cancel();
     }
 
+    final cancelLoad = Completer<void>.sync();
     final RunnerSuite suite;
     try {
       final Future<RunnerSuite> loadFuture = _browserManager!.load(
@@ -665,12 +687,13 @@ window.\$dartLoader.loader.nextAttempt();
         suiteUrl,
         suiteConfig,
         message,
-        onDone: () async {
-          lockResource.release();
+        onDone: () {
+          releaseSuiteLock();
           if (_logger.isVerbose) {
             _logger.printTrace('Test suite $relativePath finished.');
           }
         },
+        cancel: cancelLoad.future,
       );
 
       if (!_config.pauseAfterLoad && timeoutCompleter != null) {
@@ -681,11 +704,22 @@ window.\$dartLoader.loader.nextAttempt();
       } else {
         suite = await loadFuture;
       }
+    } on Object {
+      // A stalled iframe never closes its suite channel, so onDone never runs.
+      // Close the iframe and release the lock here, or every later load() waits
+      // on it forever.
+      if (!cancelLoad.isCompleted) {
+        cancelLoad.complete();
+      }
+      releaseSuiteLock();
+      rethrow;
     } finally {
       cancelWatchdogs();
     }
 
     if (_closed) {
+      unawaited(suite.close());
+      releaseSuiteLock();
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
 
@@ -1062,23 +1096,30 @@ class BrowserManager {
     Uri url,
     SuiteConfiguration suiteConfig,
     Object message, {
-    Future<void> Function()? onDone,
+    required void Function() onDone,
+    required Future<void> cancel,
   }) async {
+    final int suiteID = _suiteID++;
     url = url.replace(
       fragment: Uri.encodeFull(
         jsonEncode(<String, Object>{
           'metadata': suiteConfig.metadata.serialize(),
           'browser': _runtime.identifier,
+          // Give each suite load a unique fragment URL so host.dart's window
+          // message listener does not collide if the same file is reloaded
+          // after a pre-'port' stall.
+          'id': suiteID,
         }),
       ),
     );
 
-    final int suiteID = _suiteID++;
     RunnerSuiteController? controller;
+    var iframeClosed = false;
     void closeIframe() {
-      if (_closed) {
+      if (_closed || iframeClosed) {
         return;
       }
+      iframeClosed = true;
       _controllers.remove(controller);
       _channel.sink.add(<String, Object>{'command': 'closeSuite', 'id': suiteID});
     }
@@ -1092,7 +1133,7 @@ class BrowserManager {
         handleDone: (EventSink<Object?> sink) {
           closeIframe();
           sink.close();
-          onDone!();
+          onDone();
         },
       ),
     );
@@ -1104,12 +1145,25 @@ class BrowserManager {
       'channel': suiteChannelID,
     });
 
+    void closeSuiteChannel() {
+      closeIframe();
+      if (!_closed) {
+        unawaited(suiteChannel.sink.close());
+      }
+    }
+
+    unawaited(cancel.then((_) => closeSuiteChannel()));
+
     try {
+      final _BrowserEnvironment environment = await _environment;
+      if (_closed || iframeClosed) {
+        throw StateError('Suite load canceled for $path.');
+      }
       controller = deserializeSuite(
         path,
         SuitePlatform(Runtime.chrome),
         suiteConfig,
-        await _environment,
+        environment,
         suiteChannel,
         message,
       );
@@ -1118,7 +1172,7 @@ class BrowserManager {
       return await controller.suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
-      closeIframe();
+      closeSuiteChannel();
       rethrow;
     }
   }

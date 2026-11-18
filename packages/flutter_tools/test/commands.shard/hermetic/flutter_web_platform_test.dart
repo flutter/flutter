@@ -9,6 +9,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -24,6 +25,7 @@ import 'package:flutter_tools/src/web/module_metadata.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/backend.dart';
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
@@ -62,6 +64,34 @@ class _RecordingChromiumLauncher extends ChromiumLauncher {
   }) async {
     lastWebBrowserFlags = List<String>.from(webBrowserFlags);
     throw const _TestBrowserLaunchException();
+  }
+}
+
+/// A fake [ChromiumLauncher] that delegates [launch] failures to [onLaunch].
+class _ThrowingChromiumLauncher extends ChromiumLauncher {
+  _ThrowingChromiumLauncher({
+    required super.fileSystem,
+    required super.platform,
+    required super.processManager,
+    required super.operatingSystemUtils,
+    required super.browserFinder,
+    required super.logger,
+    required this.onLaunch,
+  });
+
+  final FutureOr<Never> Function(int callCount) onLaunch;
+  int launchCount = 0;
+
+  @override
+  Future<Chromium> launch(
+    String url, {
+    bool headless = false,
+    int? debugPort,
+    bool skipCheck = false,
+    Directory? cacheDir,
+    List<String> webBrowserFlags = const <String>[],
+  }) async {
+    return await onLaunch(++launchCount);
   }
 }
 
@@ -126,6 +156,13 @@ class FakeServer implements shelf.Server {
   @override
   Uri get url => Uri.parse('');
 }
+
+typedef _WebPlatformHarness = ({
+  FlutterWebPlatform webPlatform,
+  MultiChannel<Object?> hostChannel,
+  List<Map<String, Object?>> hostMessages,
+  Completer<int> exitCode,
+});
 
 void main() {
   late FileSystem fileSystem;
@@ -715,4 +752,442 @@ void main() {
       expect(logger.errorText, isNot(contains('exited unexpectedly')));
     });
   });
+
+  Future<FlutterWebPlatform> startPlatformWithLauncher(
+    ChromiumLauncher chromiumLauncher, {
+    BrowserManager? browserManager,
+  }) {
+    return FlutterWebPlatform.start(
+      tempDir.path,
+      buildDirectory: fileSystem.directory('build'),
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        '',
+        packageConfigPath: '.dart_tool/package_config.json',
+        treeShakeIcons: false,
+      ),
+      chromiumLauncher: chromiumLauncher,
+      crossOriginIsolation: false,
+      flutterProject: FlutterProject.fromDirectoryTest(tempDir),
+      flutterTesterBinPath: artifacts.getArtifactPath(Artifact.flutterTester),
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        cache: FakeCache(fileSystem: fileSystem, flutterRoot: fileSystem.directory('flutter').path),
+        fs: fileSystem,
+        logger: logger,
+        processManager: processManager,
+      ),
+      useWasm: true,
+      webMemoryFS: WebMemoryFS(),
+      webRenderer: WebRendererMode.canvaskit,
+      serverFactory: () async => FakeServer(),
+      testPackageUri: Uri.parse('test'),
+      templateRenderer: const MustacheTemplateRenderer(),
+      browserManager: browserManager,
+    );
+  }
+
+  _WebPlatformHarness createWebPlatformHarness(FakeAsync time) {
+    final exitCode = Completer<int>();
+    final controller = StreamChannelController<Object?>();
+    final hostChannel = MultiChannel<Object?>(
+      controller.local.cast<String>().transform(jsonDocument),
+    );
+    final hostMessages = <Map<String, Object?>>[];
+    hostChannel.stream.listen((Object? message) {
+      hostMessages.add(message! as Map<String, Object?>);
+    });
+
+    final BrowserManager manager = createBrowserManager(
+      controller,
+      FakeProcess(exitCode: exitCode.future),
+    );
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      logger: logger,
+    );
+    late FlutterWebPlatform webPlatform;
+    startPlatformWithLauncher(chromiumLauncher, browserManager: manager).then((
+      FlutterWebPlatform value,
+    ) {
+      webPlatform = value;
+    });
+    time.flushMicrotasks();
+    return (
+      webPlatform: webPlatform,
+      hostChannel: hostChannel,
+      hostMessages: hostMessages,
+      exitCode: exitCode,
+    );
+  }
+
+  VirtualChannel<Object?> suiteChannelForLoad(
+    MultiChannel<Object?> hostChannel,
+    List<Map<String, Object?>> hostMessages,
+    int suiteId,
+  ) {
+    final Map<String, Object?> loadMsg = hostMessages.singleWhere(
+      (Map<String, Object?> m) => m['command'] == 'loadSuite' && m['id'] == suiteId,
+    );
+    final Uri suiteUrl = Uri.parse(loadMsg['url']! as String);
+    final fragment = jsonDecode(Uri.decodeFull(suiteUrl.fragment)) as Map<String, Object?>;
+    expect(fragment['id'], suiteId);
+    return hostChannel.virtualChannel((loadMsg['channel']! as num).toInt());
+  }
+
+  Map<String, Object?> suiteSuccessMessage() {
+    return <String, Object?>{
+      'type': 'success',
+      'root': <String, Object?>{
+        'type': 'group',
+        'name': '',
+        'metadata': Metadata().serialize(),
+        'entries': <Object?>[],
+      },
+    };
+  }
+
+  testWithoutContext(
+    'FlutterWebPlatform.load releases _suiteLock and closes stalled iframe on 3m timeout',
+    () {
+      FakeAsync().run((FakeAsync time) {
+        final _WebPlatformHarness harness = createWebPlatformHarness(time);
+
+        Object? firstError;
+        harness.webPlatform
+            .load(
+              tempDir.childDirectory('test').childFile('stalled_test.dart').path,
+              SuitePlatform(Runtime.chrome),
+              SuiteConfiguration.empty,
+              <String, Object?>{},
+            )
+            .then<void>((_) {}, onError: (Object error) => firstError = error);
+        time.flushMicrotasks();
+
+        final VirtualChannel<Object?> firstSuiteChannel = suiteChannelForLoad(
+          harness.hostChannel,
+          harness.hostMessages,
+          0,
+        );
+
+        time.elapse(const Duration(seconds: 45));
+        expect(logger.statusText, contains('Chrome Web Test Timeout Diagnostic'));
+        expect(firstError, isNull);
+
+        time.elapse(const Duration(minutes: 2, seconds: 15));
+        expect(
+          firstError,
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains('Failing this suite so the remaining suites can run.'),
+          ),
+        );
+        expect(logger.errorText, contains('Hard timeout of 3 minutes reached for test suite'));
+        expect(
+          harness.hostMessages.where(
+            (Map<String, Object?> m) => m['command'] == 'closeSuite' && m['id'] == 0,
+          ),
+          hasLength(1),
+        );
+
+        // Late frames sent by the stalled iframe before Chrome processes
+        // closeSuite must be ignored because suiteChannel was closed on timeout.
+        // deserializeSuite wraps suiteChannel in a nested MultiChannel whose
+        // default channel 0 carries load messages.
+        final firstRemoteChannel = MultiChannel<Object?>(firstSuiteChannel);
+        firstRemoteChannel.sink.add(suiteSuccessMessage());
+        firstRemoteChannel.sink.add(<String, Object?>{
+          'type': 'error',
+          'error': <String, Object?>{
+            'type': 'StateError',
+            'toString': 'Bad state: late error',
+            'message': 'late error',
+            'supertype': null,
+            'stackChain': '',
+          },
+        });
+        time.flushMicrotasks();
+
+        // Next suite must acquire _suiteLock immediately rather than deadlocking.
+        RunnerSuite? secondSuite;
+        Object? secondError;
+        harness.webPlatform
+            .load(
+              tempDir.childDirectory('test').childFile('healthy_test.dart').path,
+              SuitePlatform(Runtime.chrome),
+              SuiteConfiguration.empty,
+              <String, Object?>{},
+            )
+            .then<void>(
+              (RunnerSuite suite) => secondSuite = suite,
+              onError: (Object error) => secondError = error,
+            );
+        time.flushMicrotasks();
+
+        final VirtualChannel<Object?> secondSuiteChannel = suiteChannelForLoad(
+          harness.hostChannel,
+          harness.hostMessages,
+          1,
+        );
+        MultiChannel<Object?>(secondSuiteChannel).sink.add(suiteSuccessMessage());
+        time.flushMicrotasks();
+
+        expect(secondError, isNull);
+        expect(secondSuite, isNotNull);
+
+        // A delayed channel close from the stalled suite must not double-release
+        // _suiteLock or send a duplicate closeSuite command.
+        firstSuiteChannel.sink.close();
+        time.flushMicrotasks();
+        expect(
+          harness.hostMessages.where(
+            (Map<String, Object?> m) => m['command'] == 'closeSuite' && m['id'] == 0,
+          ),
+          hasLength(1),
+        );
+
+        secondSuite!.close();
+        harness.webPlatform.close();
+        time.flushMicrotasks();
+        harness.exitCode.complete(0);
+        time.flushMicrotasks();
+      });
+    },
+  );
+
+  testWithoutContext('FlutterWebPlatform.load releases _suiteLock when suite load fails', () {
+    FakeAsync().run((FakeAsync time) {
+      final _WebPlatformHarness harness = createWebPlatformHarness(time);
+
+      Object? firstError;
+      harness.webPlatform
+          .load(
+            tempDir.childDirectory('test').childFile('failing_test.dart').path,
+            SuitePlatform(Runtime.chrome),
+            SuiteConfiguration.empty,
+            <String, Object?>{},
+          )
+          .then<void>((_) {}, onError: (Object error) => firstError = error);
+      time.flushMicrotasks();
+
+      final VirtualChannel<Object?> firstSuiteChannel = suiteChannelForLoad(
+        harness.hostChannel,
+        harness.hostMessages,
+        0,
+      );
+      MultiChannel<Object?>(firstSuiteChannel).sink
+          .add(<String, Object?>{'type': 'loadException', 'message': 'boom'});
+      time.flushMicrotasks();
+
+      expect(firstError.toString(), contains('boom'));
+      expect(
+        harness.hostMessages.where(
+          (Map<String, Object?> m) => m['command'] == 'closeSuite' && m['id'] == 0,
+        ),
+        hasLength(1),
+      );
+
+      // Confirm cancelWatchdogs() cleared the 45s and 3m timers for the failed suite.
+      time.elapse(const Duration(minutes: 3));
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+
+      RunnerSuite? secondSuite;
+      harness.webPlatform
+          .load(
+            tempDir.childDirectory('test').childFile('healthy_test.dart').path,
+            SuitePlatform(Runtime.chrome),
+            SuiteConfiguration.empty,
+            <String, Object?>{},
+          )
+          .then<void>((RunnerSuite suite) => secondSuite = suite);
+      time.flushMicrotasks();
+
+      final VirtualChannel<Object?> secondSuiteChannel = suiteChannelForLoad(
+        harness.hostChannel,
+        harness.hostMessages,
+        1,
+      );
+      MultiChannel<Object?>(secondSuiteChannel).sink.add(suiteSuccessMessage());
+      time.flushMicrotasks();
+
+      expect(secondSuite, isNotNull);
+
+      firstSuiteChannel.sink.close();
+      secondSuite!.close();
+      harness.webPlatform.close();
+      time.flushMicrotasks();
+      harness.exitCode.complete(0);
+      time.flushMicrotasks();
+    });
+  });
+
+  testWithoutContext(
+    'FlutterWebPlatform.load releases _suiteLock when _launchBrowser throws Exception',
+    () async {
+      final launcher = _ThrowingChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+        logger: logger,
+        onLaunch: (_) => throw const _TestBrowserLaunchException(),
+      );
+      final FlutterWebPlatform webPlatform = await startPlatformWithLauncher(launcher);
+
+      await expectLater(
+        webPlatform.load(
+          tempDir.childDirectory('test').childFile('first_test.dart').path,
+          SuitePlatform(Runtime.chrome),
+          SuiteConfiguration.empty,
+          <String, Object?>{},
+        ),
+        throwsA(isA<_TestBrowserLaunchException>()),
+      );
+      await expectLater(
+        webPlatform.load(
+          tempDir.childDirectory('test').childFile('second_test.dart').path,
+          SuitePlatform(Runtime.chrome),
+          SuiteConfiguration.empty,
+          <String, Object?>{},
+        ),
+        throwsA(isA<_TestBrowserLaunchException>()),
+      );
+      expect(launcher.launchCount, 2);
+
+      await webPlatform.close();
+    },
+  );
+
+  testWithoutContext('FlutterWebPlatform.load releases _suiteLock before closing pool when _launchBrowser throws Error', () async {
+    final launcher = _ThrowingChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+      logger: logger,
+      onLaunch: (_) => throw StateError('launch failed'),
+    );
+    final FlutterWebPlatform webPlatform = await startPlatformWithLauncher(launcher);
+
+    await expectLater(
+      webPlatform.load(
+        tempDir.childDirectory('test').childFile('first_test.dart').path,
+        SuitePlatform(Runtime.chrome),
+        SuiteConfiguration.empty,
+        <String, Object?>{},
+      ),
+      throwsA(isA<StateError>()),
+    );
+    await expectLater(
+      webPlatform.load(
+        tempDir.childDirectory('test').childFile('second_test.dart').path,
+        SuitePlatform(Runtime.chrome),
+        SuiteConfiguration.empty,
+        <String, Object?>{},
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(launcher.launchCount, 1);
+
+    await webPlatform.close();
+  });
+
+  testWithoutContext(
+    'FlutterWebPlatform.load releases _suiteLock if closed while load completes',
+    () {
+      FakeAsync().run((FakeAsync time) {
+        final _WebPlatformHarness harness = createWebPlatformHarness(time);
+
+        Object? firstError;
+        harness.webPlatform
+            .load(
+              tempDir.childDirectory('test').childFile('first_test.dart').path,
+              SuitePlatform(Runtime.chrome),
+              SuiteConfiguration.empty,
+              <String, Object?>{},
+            )
+            .then<void>((_) {}, onError: (Object error) => firstError = error);
+        time.flushMicrotasks();
+
+        Object? queuedError;
+        harness.webPlatform
+            .load(
+              tempDir.childDirectory('test').childFile('queued_test.dart').path,
+              SuitePlatform(Runtime.chrome),
+              SuiteConfiguration.empty,
+              <String, Object?>{},
+            )
+            .then<void>((_) {}, onError: (Object error) => queuedError = error);
+        time.flushMicrotasks();
+
+        final VirtualChannel<Object?> firstSuiteChannel = suiteChannelForLoad(
+          harness.hostChannel,
+          harness.hostMessages,
+          0,
+        );
+        // Close the platform while first load is in-flight and second load is
+        // queued on _suiteLock.request().
+        harness.webPlatform.close();
+        MultiChannel<Object?>(firstSuiteChannel).sink.add(suiteSuccessMessage());
+        time.flushMicrotasks();
+
+        expect(firstError, isA<StateError>());
+        expect(queuedError, isA<StateError>());
+
+        firstSuiteChannel.sink.close();
+        harness.exitCode.complete(0);
+        time.flushMicrotasks();
+      });
+    },
+  );
+
+  testWithoutContext(
+    'FlutterWebPlatform.load does not launch browser for queued load after close',
+    () async {
+      final launchGate = Completer<void>();
+      final launcher = _ThrowingChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: (Platform platform, FileSystem filesystem) => 'chrome',
+        logger: logger,
+        onLaunch: (_) async {
+          await launchGate.future;
+          throw const _TestBrowserLaunchException();
+        },
+      );
+      final FlutterWebPlatform webPlatform = await startPlatformWithLauncher(launcher);
+
+      final Future<RunnerSuite> firstLoad = webPlatform.load(
+        tempDir.childDirectory('test').childFile('first_test.dart').path,
+        SuitePlatform(Runtime.chrome),
+        SuiteConfiguration.empty,
+        <String, Object?>{},
+      );
+      final Future<RunnerSuite> queuedLoad = webPlatform.load(
+        tempDir.childDirectory('test').childFile('queued_test.dart').path,
+        SuitePlatform(Runtime.chrome),
+        SuiteConfiguration.empty,
+        <String, Object?>{},
+      );
+      // Let firstLoad reach _launchBrowser and queuedLoad wait on _suiteLock.
+      await Future<void>.delayed(Duration.zero);
+      await webPlatform.close();
+
+      launchGate.complete();
+
+      await expectLater(firstLoad, throwsA(isA<_TestBrowserLaunchException>()));
+      await expectLater(queuedLoad, throwsA(isA<StateError>()));
+      expect(launcher.launchCount, 1);
+    },
+  );
 }
