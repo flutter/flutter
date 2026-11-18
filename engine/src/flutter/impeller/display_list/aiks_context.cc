@@ -12,7 +12,8 @@ AiksContext::AiksContext(
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
     std::optional<std::shared_ptr<RenderTargetAllocator>>
-        render_target_allocator)
+        render_target_allocator,
+    HostBuffer::Lifetime host_buffer_lifetime)
     : context_(std::move(context)) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -21,7 +22,8 @@ AiksContext::AiksContext(
   content_context_ = std::make_unique<ContentContext>(
       context_, std::move(typographer_context),
       render_target_allocator.has_value() ? render_target_allocator.value()
-                                          : nullptr);
+                                          : nullptr,
+      host_buffer_lifetime);
   if (!content_context_->IsValid()) {
     return;
   }

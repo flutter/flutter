@@ -854,7 +854,8 @@ void ContentContext::WarmDefaultPipelines(const Context& context) {
 ContentContext::ContentContext(
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
-    std::shared_ptr<RenderTargetAllocator> render_target_allocator)
+    std::shared_ptr<RenderTargetAllocator> render_target_allocator,
+    HostBuffer::Lifetime host_buffer_lifetime)
     : context_(std::move(context)),
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
@@ -869,7 +870,8 @@ ContentContext::ContentContext(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
           context_->GetCapabilities()->GetMinimumUniformAlignment(),
-          context_->GetSubmissionTracker())),
+          context_->GetSubmissionTracker(),
+          host_buffer_lifetime)),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -886,7 +888,7 @@ ContentContext::ContentContext(
           ? HostBuffer::Create(
                 context_->GetResourceAllocator(), context_->GetIdleWaiter(),
                 context_->GetCapabilities()->GetMinimumUniformAlignment(),
-                context_->GetSubmissionTracker())
+                context_->GetSubmissionTracker(), host_buffer_lifetime)
           : data_host_buffer_;
   {
     TextureDescriptor desc;

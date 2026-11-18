@@ -10,12 +10,8 @@
 
 namespace impeller {
 
-QueueVK::QueueVK(QueueIndexVK index,
-                 vk::Queue queue,
-                 std::shared_ptr<Mutex> device_queue_mutex)
-    : device_queue_mutex_(std::move(device_queue_mutex)),
-      index_(index),
-      queue_(queue) {}
+QueueVK::QueueVK(QueueIndexVK index, vk::Queue queue)
+    : index_(index), queue_(queue) {}
 
 QueueVK::~QueueVK() = default;
 
@@ -25,19 +21,16 @@ const QueueIndexVK& QueueVK::GetIndex() const {
 
 vk::Result QueueVK::Submit(const vk::SubmitInfo& submit_info,
                            const vk::Fence& fence) const {
-  Lock device_lock(*device_queue_mutex_);
   Lock lock(queue_mutex_);
   return queue_.submit(submit_info, fence);
 }
 
 vk::Result QueueVK::Submit(const vk::Fence& fence) const {
-  Lock device_lock(*device_queue_mutex_);
   Lock lock(queue_mutex_);
   return queue_.submit({}, fence);
 }
 
 vk::Result QueueVK::Present(const vk::PresentInfoKHR& present_info) {
-  Lock device_lock(*device_queue_mutex_);
   Lock lock(queue_mutex_);
   return queue_.presentKHR(present_info);
 }
@@ -48,7 +41,6 @@ void QueueVK::InsertDebugMarker(std::string_view label) const {
   }
   vk::DebugUtilsLabelEXT label_info;
   label_info.pLabelName = label.data();
-  Lock device_lock(*device_queue_mutex_);
   Lock lock(queue_mutex_);
   queue_.insertDebugUtilsLabelEXT(label_info);
 }
@@ -63,13 +55,10 @@ QueuesVK::QueuesVK(std::shared_ptr<QueueVK> graphics_queue,
       transfer_queue(std::move(transfer_queue)) {}
 
 // static
-QueuesVK QueuesVK::FromEmbedderQueue(
-    vk::Queue queue,
-    uint32_t queue_family_index,
-    std::shared_ptr<Mutex> device_queue_mutex) {
+QueuesVK QueuesVK::FromEmbedderQueue(vk::Queue queue,
+                                     uint32_t queue_family_index) {
   auto graphics_queue = std::make_shared<QueueVK>(
-      QueueIndexVK{.family = queue_family_index, .index = 0}, queue,
-      device_queue_mutex);
+      QueueIndexVK{.family = queue_family_index, .index = 0}, queue);
 
   return QueuesVK(graphics_queue, graphics_queue, graphics_queue);
 }
@@ -78,15 +67,13 @@ QueuesVK QueuesVK::FromEmbedderQueue(
 QueuesVK QueuesVK::FromQueueIndices(const vk::Device& device,
                                     QueueIndexVK graphics,
                                     QueueIndexVK compute,
-                                    QueueIndexVK transfer,
-                                    std::shared_ptr<Mutex> device_queue_mutex) {
+                                    QueueIndexVK transfer) {
   auto vk_graphics = device.getQueue(graphics.family, graphics.index);
   auto vk_compute = device.getQueue(compute.family, compute.index);
   auto vk_transfer = device.getQueue(transfer.family, transfer.index);
 
   // Always set up the graphics queue.
-  auto graphics_queue =
-      std::make_shared<QueueVK>(graphics, vk_graphics, device_queue_mutex);
+  auto graphics_queue = std::make_shared<QueueVK>(graphics, vk_graphics);
   ContextVK::SetDebugName(device, vk_graphics, "ImpellerGraphicsQ");
 
   // Setup the compute queue if its different from the graphics queue.
@@ -94,8 +81,7 @@ QueuesVK QueuesVK::FromQueueIndices(const vk::Device& device,
   if (compute == graphics) {
     compute_queue = graphics_queue;
   } else {
-    compute_queue =
-        std::make_shared<QueueVK>(compute, vk_compute, device_queue_mutex);
+    compute_queue = std::make_shared<QueueVK>(compute, vk_compute);
     ContextVK::SetDebugName(device, vk_compute, "ImpellerComputeQ");
   }
 
@@ -107,8 +93,7 @@ QueuesVK QueuesVK::FromQueueIndices(const vk::Device& device,
   } else if (transfer == compute) {
     transfer_queue = compute_queue;
   } else {
-    transfer_queue =
-        std::make_shared<QueueVK>(transfer, vk_transfer, device_queue_mutex);
+    transfer_queue = std::make_shared<QueueVK>(transfer, vk_transfer);
     ContextVK::SetDebugName(device, vk_transfer, "ImpellerTransferQ");
   }
 

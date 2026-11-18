@@ -30,9 +30,7 @@ struct QueueIndexVK {
 ///
 class QueueVK {
  public:
-  QueueVK(QueueIndexVK index,
-          vk::Queue queue,
-          std::shared_ptr<Mutex> device_queue_mutex);
+  QueueVK(QueueIndexVK index, vk::Queue queue);
 
   ~QueueVK();
 
@@ -48,7 +46,6 @@ class QueueVK {
   void InsertDebugMarker(std::string_view label) const;
 
  private:
-  const std::shared_ptr<Mutex> device_queue_mutex_;
   mutable Mutex queue_mutex_;
 
   const QueueIndexVK index_;
@@ -75,14 +72,12 @@ struct QueuesVK {
            std::shared_ptr<QueueVK> transfer_queue);
 
   static QueuesVK FromEmbedderQueue(vk::Queue queue,
-                                    uint32_t queue_family_index,
-                                    std::shared_ptr<Mutex> device_queue_mutex);
+                                    uint32_t queue_family_index);
 
   static QueuesVK FromQueueIndices(const vk::Device& device,
                                    QueueIndexVK graphics,
                                    QueueIndexVK compute,
-                                   QueueIndexVK transfer,
-                                   std::shared_ptr<Mutex> device_queue_mutex);
+                                   QueueIndexVK transfer);
 
   bool IsValid() const;
 };

@@ -733,10 +733,16 @@ class Rasterizer final : public SnapshotDelegate,
         return snapshot_surface->GetAiksContext();
       }
     }
-    // Other backends can construct an AiksContext directly.
+    // A headless Vulkan context submits through the command queue, which keeps
+    // each referenced buffer alive until the submission fence signals.
     if (auto context = impeller_context_->GetContext()) {
+      const auto lifetime =
+          context->GetBackendType() == impeller::Context::BackendType::kVulkan
+              ? impeller::HostBuffer::Lifetime::kRetainInCommandBuffer
+              : impeller::HostBuffer::Lifetime::kWaitForIdle;
       return std::make_shared<impeller::AiksContext>(
-          context, impeller::TypographerContextSkia::Make());
+          context, impeller::TypographerContextSkia::Make(), std::nullopt,
+          lifetime);
     }
 #endif
     return nullptr;
@@ -745,6 +751,19 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotController::Delegate|
   const std::unique_ptr<SnapshotSurfaceProducer>& GetSnapshotSurfaceProducer()
       const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    // Android supplies a producer even when the selected Vulkan backend
+    // cannot create a snapshot surface. Select the headless context in that
+    // case.
+    if (snapshot_surface_producer_ && impeller_context_) {
+      if (auto context = impeller_context_->GetContext();
+          context && context->GetBackendType() ==
+                         impeller::Context::BackendType::kVulkan) {
+        static const std::unique_ptr<SnapshotSurfaceProducer> kNoProducer;
+        return kNoProducer;
+      }
+    }
+#endif
     return snapshot_surface_producer_;
   }
 

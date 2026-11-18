@@ -33,6 +33,38 @@ TEST_P(HostBufferTest, IdleWaiter) {
   }
 }
 
+TEST_P(HostBufferTest, RetainInCommandBufferTransfersBufferOwnership) {
+  auto mock_idle_waiter = std::make_shared<MockIdleWaiter>();
+  std::shared_ptr<const DeviceBuffer> pointer_buffer;
+  std::shared_ptr<const DeviceBuffer> callback_buffer;
+  std::weak_ptr<const DeviceBuffer> backing_buffer;
+  EXPECT_CALL(*mock_idle_waiter, WaitIdle()).Times(0);
+  {
+    auto buffer = HostBuffer::Create(
+        GetContext()->GetResourceAllocator(), mock_idle_waiter, 256, nullptr,
+        HostBuffer::Lifetime::kRetainInCommandBuffer);
+
+    auto pointer_view = buffer->EmplaceUniform(0.0f);
+    ASSERT_TRUE(pointer_view);
+    pointer_buffer = pointer_view.TakeBuffer();
+    ASSERT_NE(pointer_buffer, nullptr);
+    backing_buffer = pointer_buffer;
+
+    auto callback_view =
+        buffer->Emplace(32u, 0u, [](uint8_t* data) { data[0] = 0; });
+    ASSERT_TRUE(callback_view);
+    callback_buffer = callback_view.TakeBuffer();
+    ASSERT_NE(callback_buffer, nullptr);
+    EXPECT_EQ(pointer_buffer, callback_buffer);
+  }
+
+  EXPECT_FALSE(backing_buffer.expired());
+
+  pointer_buffer.reset();
+  callback_buffer.reset();
+  EXPECT_TRUE(backing_buffer.expired());
+}
+
 TEST_P(HostBufferTest, CanEmplace) {
   struct Length2 {
     uint8_t pad[2];

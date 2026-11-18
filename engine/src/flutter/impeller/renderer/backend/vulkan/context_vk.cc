@@ -141,7 +141,6 @@ ContextVK::ContextVK(const Flags& flags)
 
 ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
-    Lock device_lock(*device_holder_->GetQueueHostMutex());
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
   if (command_pool_recycler_) {
@@ -484,13 +483,12 @@ void ContextVK::Setup(DeviceSelection selection) {
     queues = QueuesVK::FromQueueIndices(device_holder->device.get(),  //
                                         graphics_queue.value(),       //
                                         compute_queue.value(),        //
-                                        transfer_queue.value(),       //
-                                        device_holder->GetQueueHostMutex());
+                                        transfer_queue.value()        //
+    );
   } else {
     queues =
         QueuesVK::FromEmbedderQueue(settings.embedder_data->queue,
-                                    settings.embedder_data->queue_family_index,
-                                    device_holder->GetQueueHostMutex());
+                                    settings.embedder_data->queue_family_index);
   }
   if (!queues.IsValid()) {
     VALIDATION_LOG << "Could not fetch device queues.";
