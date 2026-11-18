@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/convert.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -76,6 +77,7 @@ void main() {
     environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -93,6 +95,7 @@ void main() {
       fileSystem.currentDirectory,
       buildDir: buildDir,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -509,7 +512,7 @@ void main() {
     barTarget.dependencies.add(fooTarget);
     fooTarget.dependencies.add(barTarget);
 
-    expect(() => checkCycles(barTarget), throwsA(isA<CycleException>()));
+    expect(() => checkCycles(barTarget, environment), throwsA(isA<CycleException>()));
   });
 
   testWithoutContext(
@@ -563,6 +566,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a'),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -571,6 +575,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('b'),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -583,6 +588,7 @@ void main() {
     final environmentA = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -591,6 +597,7 @@ void main() {
     final environmentB = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -654,6 +661,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('a/b/c/d'),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -794,6 +802,7 @@ void main() {
         outputDir: fileSystem.directory('output'),
         defines: <String, String>{'config': 'debug'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
@@ -803,6 +812,7 @@ void main() {
         outputDir: fileSystem.directory('output'),
         defines: <String, String>{'config': 'profile'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
@@ -920,6 +930,7 @@ void main() {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
