@@ -73,11 +73,15 @@ Future<String> createProject(
   arguments ??= <String>['--no-pub'];
   final String projectPath = temp.fileSystem.path.join(temp.path, name);
   final ToolContext resolvedToolContext = toolContext ?? DelegatingToolContext(fs: temp.fileSystem);
+  final FeatureFlags resolvedFeatureFlags =
+      TestFlutterCommandRunner._defaultFromContext<FeatureFlags>() ?? TestFeatureFlags();
   final Pub resolvedPub =
-      TestFlutterCommandRunner._defaultFromContext<Pub>() ?? Pub(toolContext: resolvedToolContext);
+      TestFlutterCommandRunner._defaultFromContext<Pub>() ??
+      Pub(featureFlags: resolvedFeatureFlags, toolContext: resolvedToolContext);
   final command = CreateCommand(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
+    featureFlags: resolvedFeatureFlags,
     pub: resolvedPub,
     templatePathProvider: _DeferredTestTemplatePathProvider(resolvedToolContext),
     templateRenderer: const MustacheTemplateRenderer(),
@@ -87,7 +91,7 @@ Future<String> createProject(
     command,
     null,
     resolvedToolContext,
-    null,
+    resolvedFeatureFlags,
     resolvedPub,
   );
   await runner.run(<String>['create', ...arguments, projectPath]);
