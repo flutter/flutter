@@ -184,8 +184,7 @@ abstract class ChromiumDevice extends WebDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
-    await portForwarder?.dispose();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
 
   /// Attempts to read the Chromium browser version from the versioned
@@ -403,7 +402,7 @@ class WebDevices extends PollingDeviceDiscovery {
   final FeatureFlags _featureFlags;
 
   @override
-  bool get canListAnything => featureFlags.isWebEnabled;
+  bool get canListAnything => _featureFlags.isWebEnabled;
 
   @override
   Future<List<Device>> pollingGetDevices({
@@ -530,7 +529,6 @@ class WebServerDevice extends WebDevice {
 
   @override
   Future<void> dispose() async {
-    _logReader?.dispose();
-    await portForwarder?.dispose();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
 }

@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../application_package.dart';
+import '../asset.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -23,14 +24,14 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
+import '../features.dart' show FeatureFlags;
 import '../flutter_plugins.dart';
-import '../hook_runner.dart' show hookRunner;
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
@@ -38,11 +39,11 @@ import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
 import 'devfs_web.dart';
+import 'mustache_template.dart';
 import 'web_expression_compiler.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
@@ -51,12 +52,16 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
   ResidentRunner createWebRunner(
     FlutterDevice device, {
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,
+    FlutterHookRunner? flutterHookRunner,
     bool machine = false,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
@@ -66,15 +71,19 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     return ResidentWebRunner(
       device,
       analytics: analytics,
+      applicationPackageFactory: applicationPackageFactory,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
+      dartBuilder: flutterHookRunner,
       debuggingOptions: debuggingOptions,
+      featureFlags: featureFlags,
       flutterProject: flutterProject,
-      toolContext: toolContext,
       machine: machine,
       platformArgs: platformArgs,
       stayResident: stayResident,
       target: target,
+      toolContext: toolContext,
       urlTunneller: urlTunneller,
       webDefines: webDefines,
     );
@@ -92,11 +101,15 @@ class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
     FlutterDevice device, {
     required super.analytics,
+    required super.applicationPackageFactory,
+    required super.assetBundleFactory,
     required super.buildSystem,
     required super.buildTargets,
     required super.debuggingOptions,
+    required super.featureFlags,
     required this.flutterProject,
     required super.toolContext,
+    super.dartBuilder,
     super.machine = false,
     this.platformArgs = const <String, Object?>{},
     super.projectRootPath,
@@ -108,7 +121,6 @@ class ResidentWebRunner extends ResidentRunner {
          <FlutterDevice>[device],
          target: target ?? toolContext.fs.path.join('lib', 'main.dart'),
          xcode: null,
-         dartBuilder: hookRunner,
        );
 
   final UrlTunneller? _urlTunneller;
@@ -235,11 +247,10 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<void>? appStartedCompleter,
     String? route,
   }) async {
-    final ApplicationPackage? package = await ApplicationPackageFactory.instance!
-        .getPackageForPlatform(
-          TargetPlatform.web_javascript,
-          buildInfo: debuggingOptions.buildInfo,
-        );
+    final ApplicationPackage? package = await applicationPackageFactory.getPackageForPlatform(
+      TargetPlatform.web_javascript,
+      buildInfo: debuggingOptions.buildInfo,
+    );
     if (package == null) {
       logger.printStatus('This application is not configured to build on the web.');
       logger.printStatus('To add web support to a project, run `flutter create .`.');
@@ -309,6 +320,12 @@ class ResidentWebRunner extends ResidentRunner {
         if (debuggingOptions.buildInfo.isDebug && !useWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
+          sendDdcCompileAnalytics(
+            deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
+            command: 'run',
+            succeeded: report.success,
+            analytics: analytics,
+          );
           if (!report.success) {
             logger.printError('Failed to compile application.');
             appFailedToStart();
@@ -321,13 +338,13 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: analytics,
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            featureFlags: featureFlags,
             toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -481,13 +498,13 @@ class ResidentWebRunner extends ResidentRunner {
             analytics: analytics,
             buildSystem: buildSystem,
             buildTargets: buildTargets,
+            featureFlags: featureFlags,
             toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
             webDefines: _webDefines,
           );
@@ -686,6 +703,8 @@ class ResidentWebRunner extends ResidentRunner {
       await injectBuildTimePluginFilesForWebPlatform(
         flutterProject,
         destination: _generatedEntrypointDirectory!,
+        logger: logger,
+        templateRenderer: const MustacheTemplateRenderer(),
       );
       // The below works because `injectBuildTimePluginFiles` is configured to write
       // the web_plugin_registrant.dart file alongside the generated main.dart
@@ -707,7 +726,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion = determineLanguageVersion(
         fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot!,
+        cache.flutterRoot,
       );
 
       final String entrypoint = main_dart.generateMainDartFile(
@@ -726,7 +745,9 @@ class ResidentWebRunner extends ResidentRunner {
     required bool resetCompiler,
   }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
-    final bool rebuildBundle = assetBundle.needsBuild();
+    final bool rebuildBundle = assetBundle.needsBuild(
+      manifestPath: flutterProject.pubspecFile.path,
+    );
     if (rebuildBundle) {
       logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
@@ -735,6 +756,7 @@ class ResidentWebRunner extends ResidentRunner {
           environment: environment,
           logger: logger,
         ),
+        manifestPath: flutterProject.pubspecFile.path,
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
@@ -872,6 +894,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );

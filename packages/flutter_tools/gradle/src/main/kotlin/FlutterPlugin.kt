@@ -474,15 +474,17 @@ class FlutterPlugin : Plugin<Project> {
                 )
 
         /**
-         * Registers the tasks that stage Flutter's assets for [variant], and declares the
-         * directory they stage into as a generated assets source directory.
+         * Registers the task that adds Flutter's assets to [variant]'s merged assets, as a
+         * transform of AGP's `SingleArtifact.ASSETS`. AGP packages the transformed assets, which is
+         * what puts `flutter_assets` into the APK or AAR.
          *
          * The assets are produced by [compileTaskProvider], the `flutter assemble` task registered
          * by [registerFlutterCompileTask]. That task also produces the Dart code and native
          * libraries, so it is registered by the caller rather than here.
          *
-         * AGP then merges and packages that directory like any other assets source, which is what
-         * puts `flutter_assets` into the APK.
+         * Flutter's assets are not registered as an assets source directory, because AGP filters
+         * those with `androidResources.ignoreAssetsPattern`, whose default drops valid Flutter
+         * assets such as `.env` (https://github.com/flutter/flutter/issues/196444).
          */
         private fun registerFlutterAssetTasks(
             project: Project,
@@ -504,19 +506,12 @@ class FlutterPlugin : Plugin<Project> {
                         )
                     )
                 }
-            // Fail at configuration rather than silently build an APK or AAR without Flutter assets.
-            val assetSources =
-                variant.sources.assets
-                    ?: throw GradleException(
-                        "Flutter could not register its generated assets for variant " +
-                            "'${variant.name}' because the Android Gradle Plugin did not " +
-                            "expose an assets source set for it. Please file an issue at " +
-                            "https://github.com/flutter/flutter/issues."
-                    )
-            assetSources.addGeneratedSourceDirectory(
-                copyFlutterAssetsTaskProvider,
-                CopyFlutterAssetsTask::destinationDir
-            )
+            variant.artifacts
+                .use(copyFlutterAssetsTaskProvider)
+                .wiredWithDirectories(
+                    CopyFlutterAssetsTask::mergedAssetsDir,
+                    CopyFlutterAssetsTask::destinationDir
+                ).toTransform(SingleArtifact.ASSETS)
         }
 
         /**
@@ -648,8 +643,8 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * The module ships its assets as a generated assets source of its own variants, so it
-         * does not need the host app's project name.
+         * The module adds its assets to the merged assets of its own variants, so it does not
+         * need the host app's project name.
          */
         private fun warnIfHostAppProjectNameIsSet(project: Project) {
             if (project.providers.gradleProperty(PROP_HOST_APP_PROJECT_NAME).isPresent) {
@@ -667,8 +662,8 @@ class FlutterPlugin : Plugin<Project> {
          *
          * Skipped with `force-version-code-ignoring-abi`. Outputs without an ABI filter are left
          * unchanged. An `onVariants` block in the app's build script runs after this one, so a
-         * value it sets wins. See "Setting per-ABI or per-variant versionCode" in
-         * docs/platforms/android/website-page-draft.md.
+         * value it sets wins. See the "Flutter Gradle Plugin uses the Android Gradle Plugin
+         * Variant API" breaking-change page (https://github.com/flutter/website/pull/14053).
          *
          * TODO(reidbaker): Link to the docs.flutter.dev page once it is published.
          * https://github.com/flutter/flutter/issues/193713

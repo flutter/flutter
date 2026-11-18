@@ -339,6 +339,7 @@ if (enable_unittests) {
       "//flutter/assets",
       "//flutter/common/graphics",
       "//flutter/display_list/testing:display_list_testing",
+      "//flutter/impeller/renderer/testing:mocks",
       "//flutter/shell/common:base64",
       "//flutter/shell/profiling:profiling_unittests",
       "//flutter/shell/version",

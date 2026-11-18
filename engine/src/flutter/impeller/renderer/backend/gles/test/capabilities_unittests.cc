@@ -127,5 +127,63 @@ TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
   EXPECT_TRUE(capabilities->SupportsTextureArrays());
 }
 
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsIsZeroWithoutExtension) {
+  auto mock_gles = MockGLES::Init();
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 0);
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsWithKHRExtension) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*mock_gles_impl,
+          GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(3));
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                    //
+      "GL_KHR_parallel_shader_compile",  //
+  };
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), extensions);
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  const auto& capabilities = gl.GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 3);
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsWithARBExtension) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*mock_gles_impl,
+          GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(3));
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                    //
+      "GL_ARB_parallel_shader_compile",  //
+  };
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), extensions);
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  const auto& capabilities = gl.GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 3);
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsReportsImplementationMaximum) {
+  // The initial value of the limit, 0xFFFFFFFF, reads back as -1.
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*mock_gles_impl,
+          GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(-1));
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                    //
+      "GL_KHR_parallel_shader_compile",  //
+  };
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), extensions);
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  const auto& capabilities = gl.GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), -1);
+}
+
 }  // namespace testing
 }  // namespace impeller

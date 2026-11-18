@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -71,7 +72,6 @@ void main() {
     });
 
     test('constructor validates file:// directory URIs ending with slash', () {
-      expect((null as Uri?).isValidDirectoryUri, isFalse);
       expect(Uri.directory('/path/to/my_app').isValidDirectoryUri, isTrue);
       expect(
         () => ExtensionFlutterProject(
@@ -218,6 +218,25 @@ void main() {
       expect(base, isNot(equals(differentDependencies)));
       expect(base, isNot(equals(differentAppName)));
       expect(base.hashCode, isNot(equals(differentAppName.hashCode)));
+    });
+  });
+
+  group('ExtensionUriValidation', () {
+    test('isValidDirectoryUri returns true only for directory-terminated absolute file URIs', () {
+      expect(Uri.directory('/path/to/my_app').isValidDirectoryUri, isTrue);
+      expect(Uri.file('/path/to/my_app').isValidDirectoryUri, isFalse);
+      expect(Uri.parse('https://example.com/dir/').isValidDirectoryUri, isFalse);
+    });
+
+    test('isValidFileUri returns true only for non-directory absolute file URIs', () {
+      expect(Uri.parse('file:///path/to/app').isValidFileUri, isTrue);
+      expect(Uri(scheme: 'file').isValidFileUri, isFalse);
+      expect(Uri.parse('file:').isValidFileUri, isFalse);
+      expect(Uri.parse('file:///').isValidFileUri, isFalse);
+      expect(Uri.parse('file:///path/to/dir/').isValidFileUri, isFalse);
+      expect(Uri.parse('relative/app').isValidFileUri, isFalse);
+      expect(Uri.parse('/absolute/without/scheme').isValidFileUri, isFalse);
+      expect(Uri.parse('https://example.com/app').isValidFileUri, isFalse);
     });
   });
 }

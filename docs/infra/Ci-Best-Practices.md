@@ -74,6 +74,18 @@ Please coordinate with the Google team that administrates the repository before
 using the `revert` label, as it may not be appropriate to use in all cases, and
 could cause confusion if used incorrectly.
 
+The label only works for PRs whose merge commit contains
+`.github/workflows/revert-trigger.yml` (added in
+[#195536](https://github.com/flutter/flutter/pull/195536)). To revert a PR
+merged before that, or to retry a revert, someone with write access can start
+the same workflow manually after adding the `reason for revert:` comment, either
+from the [Actions tab](https://github.com/flutter/flutter/actions/workflows/revert.yml)
+("Run workflow") or with the `gh` CLI:
+
+```sh
+gh workflow run revert.yml -R flutter/flutter -f pr_number=<PR number>
+```
+
 ## Prefer re-running test suites over re-triggering all tests
 
 <img
