@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/exit.dart';
@@ -132,7 +133,10 @@ void main() {
       'cache lock is held during pub get',
       () async {
         final flutterCommand = DummyFlutterCommandWithPub();
-        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        final runner = TestFlutterCommandRunner(
+          pub: lockCheckingPub,
+          toolContext: flutterCommand.toolContext,
+        )..addCommand(flutterCommand);
         await runner.run(<String>['dummypub']);
 
         expect(lockCheckingPub.pubGetCalled, isTrue);
@@ -149,7 +153,6 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         Cache: () => lockTrackingCache,
-        Pub: () => lockCheckingPub,
       },
     );
 
@@ -2293,8 +2296,10 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
   _TestRunCommandThatOnlyValidates({required super.toolContext, super.deviceManager})
     : super(
         appleContext: FakeAppleContext(),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
       );
 
   @override
@@ -2308,6 +2313,8 @@ class _TestRunCommandThatOnlyValidates extends RunCommand {
   @override
   bool get shouldRunPub => false;
 }
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
 
 class FakeFeature extends Feature {
   const FakeFeature({required super.name, super.runtimeId, required this.enabled});

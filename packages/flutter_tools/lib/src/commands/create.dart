@@ -33,6 +33,7 @@ import '../ios/code_signing.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import 'create_base.dart';
 
 const kPlatformHelp =
@@ -46,10 +47,12 @@ class CreateCommand extends FlutterCommand with CreateBase {
   CreateCommand({
     required this.androidContext,
     required this.appleContext,
+    required this.featureFlags,
+    required this.pub,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required super.toolContext,
     this.net,
-    this.pub,
     super.verboseHelp = false,
   }) {
     addPubOptions(parser: argParser);
@@ -172,8 +175,12 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   final AndroidContext androidContext;
   final AppleContext appleContext;
+  final FeatureFlags featureFlags;
   final Net? net;
-  final Pub? pub;
+  final Pub pub;
+
+  @override
+  final TemplatePathProvider templatePathProvider;
 
   @override
   final TemplateRenderer templateRenderer;
@@ -204,7 +211,6 @@ class CreateCommand extends FlutterCommand with CreateBase {
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
   Net get _netInstance => net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
-  Pub get _pubInstance => pub ?? Pub(toolContext: toolContext);
 
   /// Fetches the code for a sample from the Flutter docs website.
   Future<String?> _fetchSampleFromServer(String sampleId) async {
@@ -595,7 +601,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
     if (shouldCallPubGet) {
       projectFactory.invalidate(relativeDir);
       final FlutterProject project = projectFactory.fromDirectory(relativeDir);
-      await _pubInstance.get(
+      await pub.get(
         context: pubContext,
         project: project,
         offline: offline,
@@ -627,6 +633,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           linuxPlatform: includeLinux,
           macOSPlatform: includeMacos || includeDarwin,
           plistParser: appleContext.plistParser,
+          templatePathProvider: templatePathProvider,
           templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
@@ -667,7 +674,10 @@ class CreateCommand extends FlutterCommand with CreateBase {
         _printNoPluginMessage(logger: logger);
       }
 
-      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      final List<String> platformsToWarn = _getPlatformWarningList(
+        requestedPlatforms,
+        featureFlags: featureFlags,
+      );
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
@@ -704,7 +714,10 @@ $commandsToRun
 Your $application code is in $relativeAppMain.
 ''');
       // Show warning if any selected platform is not enabled
-      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      final List<String> platformsToWarn = _getPlatformWarningList(
+        requestedPlatforms,
+        featureFlags: featureFlags,
+      );
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
@@ -1187,7 +1200,10 @@ For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 }
 
 // returns a list disabled, but requested platforms
-List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+List<String> _getPlatformWarningList(
+  List<String> requestedPlatforms, {
+  required FeatureFlags featureFlags,
+}) {
   final platformsToWarn = <String>[
     if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled) 'web',
     if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled) 'macos',

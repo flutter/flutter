@@ -119,6 +119,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterOverlayView.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
+    "framework/Source/FlutterPlatformViewLayer.h",
+    "framework/Source/FlutterPlatformViewLayer.m",
     "framework/Source/FlutterPlatformViews.mm",
     "framework/Source/FlutterPlatformViewsController.h",
     "framework/Source/FlutterPlatformViewsController.mm",
@@ -186,6 +188,8 @@ source_set("flutter_framework_source") {
     "platform_message_handler_ios.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
+    "platform_view_layer_conversion.h",
+    "platform_view_layer_conversion.mm",
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
   ]
@@ -332,6 +336,7 @@ if (enable_ios_unittests) {
       "framework/Source/availability_version_check_test.mm",
       "platform_message_handler_ios_test.mm",
       "platform_view_ios_test.mm",
+      "platform_view_layer_conversion_test.mm",
     ]
     deps = [
       ":InternalFlutterSwift",
