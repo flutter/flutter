@@ -25,12 +25,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '_selectable_text_group.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'indexed_stack.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'selection_container.dart';
 import 'view.dart';
 import 'widget_span.dart';
 
@@ -6518,7 +6520,8 @@ class Flow extends MultiChildRenderObjectWidget {
 /// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a context
 /// that is below the [SelectionArea] or [SelectableRegion] in the widget tree.
 /// This enables users to select the text in [RichText]s with mice or touch
-/// events.
+/// events. The text and the content of its [WidgetSpan]s are selected
+/// together, the same way as in a [Text].
 ///
 /// If the same build method creates both the [SelectionArea] and the
 /// [RichText], use a [Builder] so that [SelectionContainer.maybeOf] is called
@@ -6596,11 +6599,24 @@ class RichText extends MultiChildRenderObjectWidget {
        ),
        textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
        super(
-         children: WidgetSpan.extractFromInlineSpan(
+         children: _extractChildren(
            text,
            _effectiveTextScalerFrom(textScaler, textScaleFactor),
+           selectionRegistrar,
          ),
        );
+
+  static List<Widget> _extractChildren(
+    InlineSpan text,
+    TextScaler textScaler,
+    SelectionRegistrar? selectionRegistrar,
+  ) {
+    final List<Widget> children = WidgetSpan.extractFromInlineSpan(text, textScaler);
+    if (selectionRegistrar == null) {
+      return children;
+    }
+    return <Widget>[for (final Widget child in children) _RichTextSelectionScope(child: child)];
+  }
 
   static TextScaler _effectiveTextScalerFrom(TextScaler textScaler, double textScaleFactor) {
     return switch ((textScaler, textScaleFactor)) {
@@ -6715,6 +6731,18 @@ class RichText extends MultiChildRenderObjectWidget {
     return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
   }
 
+  // The paragraph registers its selectables with the group that the element
+  // registers with selectionRegistrar, so that they are selected like Text.
+  SelectionRegistrar? _paragraphRegistrar(BuildContext context) {
+    if (selectionRegistrar == null || context is! _RichTextElement) {
+      return selectionRegistrar;
+    }
+    return context._selectionGroup!.delegate;
+  }
+
+  @override
+  MultiChildRenderObjectElement createElement() => _RichTextElement(this);
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6731,7 +6759,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
       locale: _effectiveLocale(context),
-      registrar: selectionRegistrar,
+      registrar: _paragraphRegistrar(context),
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
     );
@@ -6753,7 +6781,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textHeightBehavior = textHeightBehavior
       ..hyphens = hyphens
       ..locale = _effectiveLocale(context)
-      ..registrar = selectionRegistrar
+      ..registrar = _paragraphRegistrar(context)
       ..selectionColor = selectionColor
       ..devicePixelRatio = _getDevicePixelRatio(context);
   }
@@ -6797,6 +6825,63 @@ class RichText extends MultiChildRenderObjectWidget {
       ),
     );
     properties.add(EnumProperty<Hyphens>('hyphens', hyphens, defaultValue: Hyphens.manual));
+  }
+}
+
+class _RichTextElement extends MultiChildRenderObjectElement {
+  _RichTextElement(RichText super.widget);
+
+  SelectableTextGroup? _selectionGroup;
+
+  void _updateSelectionGroup(RichText widget) {
+    if (widget.selectionRegistrar == null) {
+      _selectionGroup?.registrar = null;
+      return;
+    }
+    _selectionGroup ??= SelectableTextGroup(() => renderObject as RenderParagraph);
+    _selectionGroup!.registrar = widget.selectionRegistrar;
+  }
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    _updateSelectionGroup(widget as RichText);
+    super.mount(parent, newSlot);
+  }
+
+  @override
+  void update(RichText newWidget) {
+    _updateSelectionGroup(newWidget);
+    super.update(newWidget);
+  }
+
+  @override
+  void unmount() {
+    super.unmount();
+    _selectionGroup?.dispose();
+    _selectionGroup = null;
+  }
+}
+
+// Registers the selectables of a WidgetSpan child with the group of its
+// RichText, so that they are ordered and selected with the paragraph.
+class _RichTextSelectionScope extends StatelessWidget {
+  const _RichTextSelectionScope({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    SelectionRegistrar? registrar;
+    context.visitAncestorElements((Element element) {
+      if (element is _RichTextElement) {
+        registrar = element._selectionGroup?.delegate;
+      }
+      return false;
+    });
+    if (registrar == null) {
+      return child;
+    }
+    return SelectionRegistrarScope(registrar: registrar!, child: child);
   }
 }
 

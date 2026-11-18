@@ -4211,6 +4211,234 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
     }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
+    group('RichText registered directly with the region', () {
+      // Regression tests for https://github.com/flutter/flutter/issues/196903.
+      // The RichText must select like Text.rich with the same spans.
+      const richTextKey = Key('richText');
+      SelectedContent? selectedContent;
+
+      Future<RenderParagraph> pumpRichText(
+        WidgetTester tester,
+        List<InlineSpan> children, {
+        double? width,
+      }) async {
+        selectedContent = null;
+        Widget richText = Builder(
+          builder: (BuildContext context) {
+            return RichText(
+              key: richTextKey,
+              selectionRegistrar: SelectionContainer.maybeOf(context),
+              selectionColor: const Color(0x660000FF),
+              text: TextSpan(style: DefaultTextStyle.of(context).style, children: children),
+            );
+          },
+        );
+        if (width != null) {
+          richText = SizedBox(width: width, child: richText);
+        }
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: _selectableRegion(
+              onSelectionChanged: (SelectedContent? content) => selectedContent = content,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('Before'),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[richText, const Text('Side')],
+                  ),
+                  const Text('After'),
+                ],
+              ),
+            ),
+          ),
+        );
+        return tester.renderObject<RenderParagraph>(find.byKey(richTextKey));
+      }
+
+      RenderParagraph paragraphOf(WidgetTester tester, String text) {
+        return tester.renderObject<RenderParagraph>(
+          find.descendant(of: find.text(text), matching: find.byType(RichText)),
+        );
+      }
+
+      Future<TestGesture> tripleClick(WidgetTester tester, Offset position) async {
+        final TestGesture gesture = await tester.startGesture(
+          position,
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await gesture.down(position);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await gesture.down(position);
+        await tester.pumpAndSettle();
+        return gesture;
+      }
+
+      Future<void> tripleClickAndRelease(WidgetTester tester, Offset position) async {
+        final TestGesture gesture = await tripleClick(tester, position);
+        await gesture.up();
+        await tester.pump();
+      }
+
+      void expectNeighborsNotSelected(WidgetTester tester) {
+        for (final text in <String>['Before', 'Side', 'After']) {
+          expect(paragraphOf(tester, text).selections, isEmpty, reason: text);
+        }
+      }
+
+      const issueSpans = <InlineSpan>[
+        TextSpan(text: 'Intro\nHello world '),
+        WidgetSpan(child: SizedBox(key: Key('box'), width: 20, height: 10)),
+        TextSpan(text: ' foo bar '),
+        WidgetSpan(child: Text('inline')),
+        TextSpan(text: ' baz'),
+      ];
+
+      // The second paragraph of issueSpans spans offsets 6 to 33.
+      void expectSecondIssueParagraphSelected(WidgetTester tester, RenderParagraph paragraph) {
+        expect(paragraph.selections, const <TextSelection>[
+          TextSelection(baseOffset: 6, extentOffset: 18),
+          TextSelection(baseOffset: 19, extentOffset: 28),
+          TextSelection(baseOffset: 29, extentOffset: 33),
+        ]);
+        expect(paragraphOf(tester, 'inline').selections, const <TextSelection>[
+          TextSelection(baseOffset: 0, extentOffset: 6),
+        ]);
+        expectNeighborsNotSelected(tester);
+        expect(selectedContent?.plainText, 'Hello world  foo bar inline baz');
+      }
+
+      for (final (String position, int offset) in <(String, int)>[
+        ('before the placeholders', 14),
+        ('between the placeholders', 21),
+        ('after the placeholders', 31),
+      ]) {
+        testWidgets('triple click $position selects the whole paragraph', (
+          WidgetTester tester,
+        ) async {
+          final RenderParagraph paragraph = await pumpRichText(tester, issueSpans);
+          await tripleClickAndRelease(tester, textOffsetToPosition(paragraph, offset));
+          expectSecondIssueParagraphSelected(tester, paragraph);
+        });
+      }
+
+      testWidgets('triple click on a placeholder without text selects the whole paragraph', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, issueSpans);
+        await tripleClickAndRelease(tester, tester.getCenter(find.byKey(const Key('box'))));
+        expectSecondIssueParagraphSelected(tester, paragraph);
+      });
+
+      testWidgets('triple click on a placeholder with text selects only that text', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, issueSpans);
+        await tripleClickAndRelease(tester, tester.getCenter(find.text('inline')));
+        expect(paragraph.selections, isEmpty);
+        expect(selectedContent?.plainText, 'inline');
+      });
+
+      testWidgets('triple click selects only the paragraph that is clicked', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, issueSpans);
+        await tripleClickAndRelease(tester, textOffsetToPosition(paragraph, 2));
+        expect(paragraph.selections, const <TextSelection>[
+          TextSelection(baseOffset: 0, extentOffset: 6),
+        ]);
+        expect(paragraphOf(tester, 'inline').selections, isEmpty);
+        expectNeighborsNotSelected(tester);
+        expect(selectedContent?.plainText, 'Intro\n');
+      });
+
+      testWidgets('triple click then drag backward keeps the clicked paragraph', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, issueSpans);
+        final TestGesture gesture = await tripleClick(tester, textOffsetToPosition(paragraph, 21));
+        await gesture.moveTo(tester.getCenter(find.text('Before')));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        expect(selectedContent?.plainText, 'BeforeIntro\nHello world  foo bar inline baz');
+      });
+
+      testWidgets('triple click on a wrapped paragraph does not select a Text beside it', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, const <InlineSpan>[
+          TextSpan(text: 'aaa bbb ccc ddd eee fff ggg '),
+          WidgetSpan(child: Text('W1')),
+          TextSpan(text: ' hhh iii jjj kkk lll mmm nnn ooo '),
+          WidgetSpan(child: Text('W2')),
+          TextSpan(text: ' ppp qqq rrr'),
+        ], width: 160);
+        await tripleClickAndRelease(tester, textOffsetToPosition(paragraph, 2));
+        expectNeighborsNotSelected(tester);
+        expect(
+          selectedContent?.plainText,
+          'aaa bbb ccc ddd eee fff ggg W1 hhh iii jjj kkk lll mmm nnn ooo W2 ppp qqq rrr',
+        );
+      });
+
+      testWidgets('triple click keeps the order of a placeholder before a line break', (
+        WidgetTester tester,
+      ) async {
+        RenderParagraph paragraph = await pumpRichText(tester, const <InlineSpan>[
+          TextSpan(text: 'Hello world '),
+          WidgetSpan(child: SizedBox(width: 10, height: 10)),
+          TextSpan(text: '\nNext line'),
+        ]);
+        await tripleClickAndRelease(tester, textOffsetToPosition(paragraph, 2));
+        expect(selectedContent?.plainText, 'Hello world \n');
+
+        paragraph = await pumpRichText(tester, const <InlineSpan>[
+          TextSpan(text: 'Hello world '),
+          WidgetSpan(child: Text('trail')),
+          TextSpan(text: '\nNext line'),
+        ]);
+        await tripleClickAndRelease(tester, textOffsetToPosition(paragraph, 2));
+        expect(selectedContent?.plainText, 'Hello world trail\n');
+      });
+
+      testWidgets('triple click selects a placeholder at the end of the text', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, const <InlineSpan>[
+          TextSpan(text: 'one '),
+          WidgetSpan(child: Text('mid')),
+          TextSpan(text: ' two '),
+          WidgetSpan(child: Text('last')),
+        ]);
+        await tripleClickAndRelease(tester, textOffsetToPosition(paragraph, 1));
+        expect(selectedContent?.plainText, 'one mid two last');
+        expectNeighborsNotSelected(tester);
+      });
+
+      testWidgets('triple click on empty space after the last line selects that paragraph', (
+        WidgetTester tester,
+      ) async {
+        final RenderParagraph paragraph = await pumpRichText(tester, const <InlineSpan>[
+          TextSpan(text: 'A very long first line here\nHi '),
+          WidgetSpan(child: Text('x')),
+          TextSpan(text: ' end'),
+        ]);
+        await tripleClickAndRelease(
+          tester,
+          paragraph.localToGlobal(Offset(paragraph.size.width - 2, paragraph.size.height - 4)),
+        );
+        expect(selectedContent?.plainText, 'Hi x end');
+      });
+    });
+
     testWidgets(
       'widget span is ignored if it does not contain text - non Apple',
       (WidgetTester tester) async {
