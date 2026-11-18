@@ -14,6 +14,7 @@ import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
+import 'template.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/application_package.dart';
@@ -39,16 +40,21 @@ class PrebuiltExtensionApplicationPackage extends ExtensionApplicationPackage
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
-    required this._androidSdk,
-    required this._featureFlags,
-    required this._plistParser,
+    required this._androidSdkBuilder,
+    required this._plistParserBuilder,
+    required this._templatePathProvider,
     required this._toolContext,
+    this._featureFlags,
   });
 
-  final AndroidSdk? _androidSdk;
-  final FeatureFlags _featureFlags;
-  final PlistParser _plistParser;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  final FeatureFlags? _featureFlags;
+  final PlistParser Function() _plistParserBuilder;
+  final TemplatePathProvider _templatePathProvider;
   final ToolContext _toolContext;
+
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
+  late final PlistParser _plistParser = _plistParserBuilder();
 
   FlutterProject _currentProject() {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
@@ -81,6 +87,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             ? await IOSApp.fromIosProject(
                 _currentProject().ios,
                 buildInfo,
+                templatePathProvider: _templatePathProvider,
                 toolContext: _toolContext,
               )
             : IOSApp.fromPrebuiltApp(
@@ -116,7 +123,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(_currentProject().windows, toolContext: _toolContext)
             : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
-      case .unsupported when _featureFlags.isToolExtensionsEnabled:
+      case .unsupported when _featureFlags?.isToolExtensionsEnabled ?? false:
         // TODO(bkonyi): Replace with device-scoped DeviceService.resolveApplication
         // once available so unsupported built-in architectures are not routed here.
         final String id = _currentProject().manifest.appName;

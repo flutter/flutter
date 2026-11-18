@@ -111,6 +111,7 @@ void main() {
   testWithoutContext('CustomDevice defaults', () async {
     final device = CustomDevice(
       config: testConfig,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -378,6 +379,7 @@ void main() {
       final logger = BufferLogger.test();
       final device = CustomDevice(
         config: testConfig,
+        featureFlags: TestFeatureFlags(),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
@@ -410,6 +412,7 @@ void main() {
     expect(
       CustomDevice(
         config: testConfig,
+        featureFlags: TestFeatureFlags(),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
@@ -427,6 +430,7 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -508,6 +512,7 @@ void main() {
         name: 'testname',
         device: CustomDevice(
           config: testConfig,
+          featureFlags: TestFeatureFlags(),
           analytics: const NoOpAnalytics(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const NoOpBuildTargets(),
@@ -551,6 +556,7 @@ void main() {
       name: 'testname',
       device: CustomDevice(
         config: testConfigNonForwarding,
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
@@ -721,6 +727,7 @@ void main() {
     // finally start actually testing things
     final device = CustomDevice(
       config: config,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -758,6 +765,7 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -786,6 +794,7 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig.copyWith(explicitScreenshotCommand: true),
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -804,6 +813,7 @@ void main() {
   testWithoutContext('CustomDevice returns correct target platform', () async {
     final device = CustomDevice(
       config: testConfig.copyWith(platform: TargetPlatform.linux_x64),
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),

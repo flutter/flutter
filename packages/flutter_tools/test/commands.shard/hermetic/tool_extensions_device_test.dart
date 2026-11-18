@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
@@ -521,7 +522,7 @@ flutter:
               ExtensionDevices(
                 extensionBuildManager: ExtensionBuildManager(
                   extensionManager: logsExtensionManager!,
-                  featureFlags: featureFlags,
+                  featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
                   logger: testLogger,
                 ),
                 extensionManager: logsExtensionManager!,
@@ -633,9 +634,10 @@ flutter:
             .writeAsStringSync('name: custom_embedder_app\n');
         final logger = BufferLogger.test();
         final factory = FlutterApplicationPackageFactory(
-          androidSdk: null,
+          androidSdkBuilder: () => null,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          plistParser: FakePlistParser(),
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -670,9 +672,10 @@ flutter:
         );
 
         final disabledFactory = FlutterApplicationPackageFactory(
-          androidSdk: null,
+          androidSdkBuilder: () => null,
           featureFlags: TestFeatureFlags(),
-          plistParser: FakePlistParser(),
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(
             fs: fileSystem,
             logger: logger,
@@ -710,9 +713,10 @@ flutter:
           ),
         );
         final packageFactory = FlutterApplicationPackageFactory(
-          androidSdk: null,
+          androidSdkBuilder: () => null,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          plistParser: FakePlistParser(),
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: toolContext,
         );
         final fakeVm = vm_service.VM(
