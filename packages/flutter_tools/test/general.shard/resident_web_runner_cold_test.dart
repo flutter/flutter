@@ -77,6 +77,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -123,6 +124,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.all(BuildResult(success: false)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -166,6 +168,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.error(Exception('foo')),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -208,6 +211,7 @@ name: my_app
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
@@ -256,6 +260,7 @@ name: my_app
           BuildResult(success: false),
         ]),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           fs: fileSystem,
           systemClock: SystemClock.fixed(DateTime(0, 0, 0)),

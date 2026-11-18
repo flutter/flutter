@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
@@ -51,6 +52,7 @@ HotRunner createHotRunner(
   BuildTargets? buildTargets,
   FlutterHookRunner? dartBuilder,
   String? dillOutputPath,
+  FeatureFlags? featureFlags,
   bool hostIsIde = false,
   HotRunnerConfig? hotRunnerConfig,
   bool machine = false,
@@ -89,6 +91,7 @@ HotRunner createHotRunner(
     buildSystem: buildSystem,
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     target: target,
     toolContext: toolContext,
     xcode: xcode,
@@ -121,6 +124,7 @@ ColdRunner createColdRunner(
   BuildSystem? buildSystem,
   BuildTargets? buildTargets,
   FlutterHookRunner? dartBuilder,
+  FeatureFlags? featureFlags,
   bool machine = false,
   bool stayResident = true,
   ToolContext toolContext = const DelegatingToolContext(),
@@ -151,6 +155,7 @@ ColdRunner createColdRunner(
         buildSystem ?? FlutterBuildSystem(fileSystem: fs, logger: logger, platform: platform),
     buildTargets: buildTargets ?? const BuildTargetsImpl(),
     debuggingOptions: debuggingOptions,
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     target: target,
     toolContext: toolContext,
     xcode: xcode,
