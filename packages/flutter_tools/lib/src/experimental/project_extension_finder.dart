@@ -10,6 +10,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../dart/package_map.dart';
+import '../project.dart';
 
 /// Metadata for a project-scoped tool extension discovered via the project's
 /// `.dart_tool/package_config.json` and the extension package's
@@ -85,19 +86,25 @@ class ProjectExtensionFinder {
 
   static const String _kExtensionDirectoryName = 'extension';
   static const String _kPubspecFileName = 'pubspec.yaml';
+  static const String _kWorkspaceKey = 'workspace';
   static const _kDependencyKeys = <String>['dependencies', 'dev_dependencies'];
 
   final FileSystem _fileSystem;
   final Logger _logger;
 
   /// Discovers tool extensions starting from [startDirectory] (if null, falls back to
-  /// `fileSystem.currentDirectory`).
+  /// `fileSystem.currentDirectory`), sorted deterministically by package name.
   ///
   /// Returns an empty list if `.dart_tool/package_config.json` does not exist
   /// yet, without caching failure so subsequent calls after `pub.get()` succeed.
   /// Only extensions declared in the active project's or workspace root's
-  /// direct `dependencies` or `dev_dependencies` are returned.
+  /// direct `dependencies` or `dev_dependencies` are returned. When
+  /// [includeWorkspaceMembers] is `true` and the search directory is a Pub
+  /// workspace root (`pubspec.yaml` containing a `workspace:` list), direct
+  /// dependencies across all `workspace:` member `pubspec.yaml` files are
+  /// unioned as well.
   Future<List<DiscoveredProjectExtension>> findProjectExtensions({
+    bool includeWorkspaceMembers = false,
     Directory? startDirectory,
   }) async {
     final Directory searchDir = startDirectory ?? _fileSystem.currentDirectory;
@@ -115,6 +122,7 @@ class ProjectExtensionFinder {
 
     final Directory workspaceRoot = packageConfigFile.parent.parent;
     final Set<String> directDependencies = _collectDirectDependencies(
+      includeWorkspaceMembers: includeWorkspaceMembers,
       searchDir: searchDir,
       workspaceRoot: workspaceRoot,
     );
@@ -189,21 +197,37 @@ class ProjectExtensionFinder {
       );
     }
 
+    discovered.sort(
+      (DiscoveredProjectExtension a, DiscoveredProjectExtension b) => a.name.compareTo(b.name),
+    );
     return discovered;
   }
 
   /// Collects direct `dependencies` and `dev_dependencies` package names from
-  /// the active project's `pubspec.yaml` and the workspace root's `pubspec.yaml`.
+  /// the active project's `pubspec.yaml` and the workspace root's `pubspec.yaml`
+  /// (plus all `workspace:` member `pubspec.yaml` files when [searchDir] is a
+  /// Pub workspace root and [includeWorkspaceMembers] is `true`).
   Set<String> _collectDirectDependencies({
+    required bool includeWorkspaceMembers,
     required Directory searchDir,
     required Directory workspaceRoot,
   }) {
     final dependencies = <String>{};
+    final File workspacePubspec = workspaceRoot.childFile(_kPubspecFileName);
+    if (includeWorkspaceMembers &&
+        _fileSystem.path.equals(
+          _fileSystem.path.normalize(searchDir.absolute.path),
+          _fileSystem.path.normalize(workspaceRoot.absolute.path),
+        )) {
+      if (workspacePubspec.existsSync()) {
+        _extractPubspecDependencies(workspacePubspec, dependencies, visitedPubspecs: <String>{});
+      }
+      return dependencies;
+    }
     final File? projectPubspec = _findNearestPubspec(startDir: searchDir, stopAtDir: workspaceRoot);
     if (projectPubspec != null) {
       _extractPubspecDependencies(projectPubspec, dependencies);
     }
-    final File workspacePubspec = workspaceRoot.childFile(_kPubspecFileName);
     if (workspacePubspec.existsSync() &&
         (projectPubspec == null ||
             !_fileSystem.path.equals(projectPubspec.path, workspacePubspec.path))) {
@@ -228,22 +252,66 @@ class ProjectExtensionFinder {
     }
   }
 
-  void _extractPubspecDependencies(File pubspecFile, Set<String> outDependencies) {
+  void _extractPubspecDependencies(
+    File pubspecFile,
+    Set<String> outDependencies, {
+    Set<String>? visitedPubspecs,
+  }) {
+    if (visitedPubspecs != null &&
+        !visitedPubspecs.add(_fileSystem.path.canonicalize(pubspecFile.absolute.path))) {
+      return;
+    }
+    final YamlMap parsed;
     try {
       final String content = ErrorHandlingFileSystem.noExitOnFailure(pubspecFile.readAsStringSync);
-      final Object? parsed = loadYaml(content);
-      if (parsed is YamlMap) {
-        for (final String key in _kDependencyKeys) {
-          final Object? section = parsed[key];
-          if (section is YamlMap) {
-            outDependencies.addAll(section.keys.whereType<String>());
-          }
-        }
+      final Object? yaml = loadYaml(content);
+      if (yaml is! YamlMap) {
+        return;
       }
+      parsed = yaml;
     } on YamlException catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to parse "${pubspecFile.path}": $error');
+      return;
     } on FileSystemException catch (error) {
       _logger.printTrace('ProjectExtensionFinder: failed to read "${pubspecFile.path}": $error');
+      return;
+    }
+
+    for (final String key in _kDependencyKeys) {
+      if (parsed[key] case final YamlMap section) {
+        outDependencies.addAll(section.keys.whereType<String>());
+      }
+    }
+
+    if (visitedPubspecs == null) {
+      return;
+    }
+    if (parsed[_kWorkspaceKey] case final YamlList workspaceEntries) {
+      for (final String entry in workspaceEntries.whereType<String>()) {
+        try {
+          final List<Directory> memberDirs = ErrorHandlingFileSystem.noExitOnFailure(
+            () => FlutterProject.resolveWorkspacePattern(pubspecFile.parent, entry),
+          );
+          for (final memberDir in memberDirs) {
+            final File memberPubspec = memberDir.childFile(_kPubspecFileName);
+            if (ErrorHandlingFileSystem.noExitOnFailure(memberPubspec.existsSync)) {
+              _extractPubspecDependencies(
+                memberPubspec,
+                outDependencies,
+                visitedPubspecs: visitedPubspecs,
+              );
+            }
+          }
+        } on FormatException catch (error) {
+          _logger.printTrace(
+            'ProjectExtensionFinder: invalid workspace pattern "$entry" in "${pubspecFile.path}": $error',
+          );
+        } on FileSystemException catch (error) {
+          _logger.printTrace(
+            'ProjectExtensionFinder: failed to resolve workspace pattern "$entry" in "${pubspecFile.path}": $error',
+          );
+        }
+      }
     }
   }
 }

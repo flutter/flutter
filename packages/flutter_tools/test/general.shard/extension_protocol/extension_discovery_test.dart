@@ -8,7 +8,6 @@ import 'dart:io' as io;
 import 'dart:isolate';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -299,6 +298,7 @@ ExtensionKernelCompiler _createCompiler(
   SystemClock? clock,
   String? flutterRootPath,
   Logger? logger,
+  Platform? platform,
   ProcessManager? processManager,
   String? sdkRevision = '6623b84628f37ca8c5c8e3d217f8d3b72d019f02',
 }) {
@@ -319,11 +319,11 @@ ExtensionKernelCompiler _createCompiler(
     }
   }
   return ExtensionKernelCompiler(
-    artifacts: Artifacts.test(fileSystem: fs),
     clock: clock ?? _AdvancingClock(),
     fileSystem: fs,
     flutterRoot: fs.directory(resolvedFlutterRootPath),
     logger: logger ?? BufferLogger.test(),
+    platform: platform ?? FakePlatform(),
     processManager: processManager ?? FakeProcessManager.empty(),
   );
 }
@@ -338,14 +338,25 @@ FakeCommand _compileKernelCommand(
   String? depfileContent,
   Object? exception,
   int exitCode = 0,
+  String? flutterRootPath,
   DateTime? modified,
   void Function()? onRunExtra,
   String? packageConfigPath,
+  Platform? platform,
   String stderr = '',
   bool writeDefaultDepfile = true,
 }) {
-  final String dartBinary = Artifacts.test(fileSystem: fs)
-      .getArtifactPath(Artifact.engineDartBinary);
+  final Platform resolvedPlatform = platform ?? FakePlatform();
+  final String resolvedFlutterRootPath =
+      flutterRootPath ?? fs.path.join(fs.currentDirectory.path, 'flutter');
+  final String dartBinary = fs
+      .directory(resolvedFlutterRootPath)
+      .childDirectory('bin')
+      .childDirectory('cache')
+      .childDirectory('dart-sdk')
+      .childDirectory('bin')
+      .childFile(resolvedPlatform.isWindows ? 'dart.exe' : 'dart')
+      .path;
   final String resolvedPackageConfigPath =
       packageConfigPath ??
       fs.path.join(
@@ -1112,15 +1123,132 @@ dependencies:
         final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
           startDirectory: appDir,
         );
-        expect(
-          discovered.map((DiscoveredProjectExtension e) => e.name),
-          unorderedEquals(const <String>['member_ext', 'workspace_ext']),
-        );
+        expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+          'member_ext',
+          'workspace_ext',
+        ]);
         for (final ext in discovered) {
           expect(ext.workspaceRootUri, workspaceRoot.uri);
         }
       },
     );
+
+    for (final (FileSystemStyle style, String osName) in const <(FileSystemStyle, String)>[
+      (FileSystemStyle.posix, 'linux'),
+      (FileSystemStyle.windows, 'windows'),
+    ]) {
+      testWithoutContext(
+        'unions workspace member dependencies at Pub workspace root when includeWorkspaceMembers is true and sorts deterministically ($osName)',
+        () async {
+          final delegateFs = MemoryFileSystem.test(style: style);
+          final fs = ErrorHandlingFileSystem(
+            delegate: delegateFs,
+            platform: FakePlatform(operatingSystem: osName),
+          );
+          final Directory workspaceRoot = fs.directory(
+            fs.path.join(fs.currentDirectory.path, 'workspace'),
+          )..createSync(recursive: true);
+          workspaceRoot.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_workspace
+workspace:
+  - packages/member_a
+  - packages/grouped/*
+dev_dependencies:
+  root_ext:
+    path: ext/root_ext
+''');
+
+          final Directory memberADir =
+              workspaceRoot.childDirectory('packages').childDirectory('member_a')
+                ..createSync(recursive: true);
+          memberADir.childFile('pubspec.yaml').writeAsStringSync('''
+name: member_a
+resolution: workspace
+workspace:
+  - nested_member
+dependencies:
+  alpha_ext:
+    path: ../../ext/alpha_ext
+''');
+
+          final Directory nestedMemberDir = memberADir.childDirectory('nested_member')
+            ..createSync(recursive: true);
+          nestedMemberDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: nested_member
+resolution: workspace
+dev_dependencies:
+  nested_ext:
+    path: ../../../ext/nested_ext
+''');
+
+          final Directory groupedDir = workspaceRoot
+              .childDirectory('packages')
+              .childDirectory('grouped');
+          final Directory memberBDir = groupedDir.childDirectory('member_b')
+            ..createSync(recursive: true);
+          memberBDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: member_b
+resolution: workspace
+dev_dependencies:
+  zeta_ext:
+    path: ../../../ext/zeta_ext
+''');
+
+          // Malformed member pubspec is logged at trace level without failing discovery.
+          final Directory brokenMemberDir = groupedDir.childDirectory('broken_member')
+            ..createSync(recursive: true);
+          brokenMemberDir.childFile('pubspec.yaml').writeAsStringSync('dependencies: [unclosed');
+
+          final extPaths = <String, String>{};
+          for (final extName in const <String>[
+            'zeta_ext',
+            'root_ext',
+            'nested_ext',
+            'alpha_ext',
+            'transitive_ext',
+          ]) {
+            final Directory extDir = workspaceRoot.childDirectory('ext').childDirectory(extName);
+            _writeExtensionPackage(extDir, name: extName);
+            extPaths[extName] = extDir.path;
+          }
+          _writePackageConfig(workspaceRoot, extPaths);
+
+          final logger = BufferLogger.test();
+          final finder = ProjectExtensionFinder(fileSystem: fs, logger: logger);
+
+          // 1. Default `includeWorkspaceMembers: false` at workspace root returns only root deps.
+          final List<DiscoveredProjectExtension> rootOnly = await finder.findProjectExtensions(
+            startDirectory: workspaceRoot,
+          );
+          expect(rootOnly.map((DiscoveredProjectExtension e) => e.name), const <String>[
+            'root_ext',
+          ]);
+
+          // 2. `includeWorkspaceMembers: true` at workspace root unions members and sorts by name.
+          final List<DiscoveredProjectExtension> withMembers = await finder.findProjectExtensions(
+            includeWorkspaceMembers: true,
+            startDirectory: workspaceRoot,
+          );
+          expect(withMembers.map((DiscoveredProjectExtension e) => e.name), const <String>[
+            'alpha_ext',
+            'nested_ext',
+            'root_ext',
+            'zeta_ext',
+          ]);
+          expect(logger.traceText, contains('failed to parse'));
+
+          // 3. Inside a workspace member, `includeWorkspaceMembers: true` still isolates siblings.
+          final List<DiscoveredProjectExtension> fromMember = await finder.findProjectExtensions(
+            includeWorkspaceMembers: true,
+            startDirectory: memberADir,
+          );
+          expect(fromMember.map((DiscoveredProjectExtension e) => e.name), const <String>[
+            'alpha_ext',
+            'root_ext',
+          ]);
+        },
+      );
+    }
 
     testWithoutContext('discovers extensions and enforces symlink containment under ErrorHandlingFileSystem on LocalFileSystem', () async {
       final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
@@ -1213,10 +1341,10 @@ dependencies:
       final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
         startDirectory: projectDir,
       );
-      expect(
-        discovered.map((DiscoveredProjectExtension e) => e.name),
-        unorderedEquals(const <String>['valid_ext', 'internal_symlink_ext']),
-      );
+      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+        'internal_symlink_ext',
+        'valid_ext',
+      ]);
       expect(
         logger.warningText,
         contains(
@@ -1829,18 +1957,19 @@ dev_dependencies:
         final List<DiscoveredProjectExtension> discovered = await finder.findProjectExtensions(
           startDirectory: appDir,
         );
-        expect(discovered, hasLength(2));
-        final DiscoveredProjectExtension localExt = discovered.firstWhere(
-          (DiscoveredProjectExtension e) => e.name == 'local_ext',
-        );
-        final DiscoveredProjectExtension hostedExt = discovered.firstWhere(
-          (DiscoveredProjectExtension e) => e.name == 'hosted_ext',
-        );
+        expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+          'hosted_ext',
+          'local_ext',
+        ]);
+        final DiscoveredProjectExtension hostedExt = discovered[0];
+        final DiscoveredProjectExtension localExt = discovered[1];
 
+        final windowsPlatform = FakePlatform(operatingSystem: 'windows');
         final processManager = FakeProcessManager.empty();
         final ExtensionKernelCompiler compiler = _createCompiler(
           fs,
           flutterRootPath: flutterRootPath,
+          platform: windowsPlatform,
           processManager: processManager,
         );
 
@@ -1859,8 +1988,10 @@ dev_dependencies:
           _compileKernelCommand(
             fs,
             entrypointPath: localEntrypoint.path,
+            flutterRootPath: flutterRootPath,
             outputDillPath: localDill.path,
             packageConfigPath: packageConfigFile.path,
+            platform: windowsPlatform,
             bytes: const <int>[1, 2],
             depfileContent:
                 '${_escapeDepfilePath('${localDill.path}.tmp')}: '
@@ -1871,15 +2002,19 @@ dev_dependencies:
           _compileKernelCommand(
             fs,
             entrypointPath: localEntrypoint.path,
+            flutterRootPath: flutterRootPath,
             outputDillPath: localDill.path,
             packageConfigPath: packageConfigFile.path,
+            platform: windowsPlatform,
             bytes: const <int>[5, 6],
           ),
           _compileKernelCommand(
             fs,
             entrypointPath: hostedEntrypoint.path,
+            flutterRootPath: flutterRootPath,
             outputDillPath: hostedDill.path,
             packageConfigPath: packageConfigFile.path,
+            platform: windowsPlatform,
             bytes: const <int>[3, 4],
           ),
         ]);

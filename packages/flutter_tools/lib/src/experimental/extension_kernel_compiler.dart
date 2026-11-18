@@ -15,6 +15,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/time.dart';
 import '../build_system/depfile.dart';
 import '../convert.dart';
@@ -53,14 +54,18 @@ class ExtensionCompileException implements Exception {
 /// persistence.
 class ExtensionKernelCompiler {
   ExtensionKernelCompiler({
-    required this._artifacts,
     required this._fileSystem,
     required this._flutterRoot,
     required this._logger,
+    required this._platform,
     required this._processManager,
     this._clock = const SystemClock(),
   }) : _depfileService = DepfileService(fileSystem: _fileSystem, logger: _logger);
 
+  static const String _kBinDirectoryName = 'bin';
+  static const String _kCacheDirectoryName = 'cache';
+  static const String _kDartSdkDirectoryName = 'dart-sdk';
+  static const String _kRevisionFileName = 'revision';
   static const String _kDotDartToolDirectoryName = '.dart_tool';
   static const String _kFlutterToolsDirectoryName = 'flutter_tools';
   static const String _kExtensionsDirectoryName = 'extensions';
@@ -76,12 +81,12 @@ class ExtensionKernelCompiler {
   static const String _kTempFileSuffix = '.tmp';
   static const int _kBuildTokenByteLength = 16;
 
-  final Artifacts _artifacts;
   final SystemClock _clock;
   final DepfileService _depfileService;
   final FileSystem _fileSystem;
   final Directory _flutterRoot;
   final Logger _logger;
+  final Platform _platform;
   final ProcessManager _processManager;
   final Random _random = Random.secure();
 
@@ -159,11 +164,12 @@ class ExtensionKernelCompiler {
           final File tempDepFile = _fileSystem.file('${depFile.path}$_kTempFileSuffix');
           final File tempStampFile = _fileSystem.file('${stampFile.path}$_kTempFileSuffix');
           try {
+            final String dartExecutable = _resolveDartSdkDirectory()
+                .childDirectory(_kBinDirectoryName)
+                .childFile(Artifact.engineDartBinary.getFileName(_platform))
+                .path;
             final command = <String>[
-              // TODO(bkonyi): Resolve the Dart binary from _flutterRoot/bin/cache/dart-sdk
-              // instead of Artifact.engineDartBinary so --local-engine runs match the host
-              // VM used by Isolate.spawnUri and _resolveDartSdkRevisionFile().
-              _artifacts.getArtifactPath(Artifact.engineDartBinary),
+              dartExecutable,
               'compile',
               'kernel',
               '--packages=${packageConfigFile.path}',
@@ -487,7 +493,7 @@ class ExtensionKernelCompiler {
   );
 
   String _dartSdkRevision(DiscoveredProjectExtension extension) {
-    final File revisionFile = _resolveDartSdkRevisionFile();
+    final File revisionFile = _resolveDartSdkDirectory().childFile(_kRevisionFileName);
     final String? revision = _readNonEmptyTrimmed(revisionFile);
     if (revision == null) {
       throw ExtensionCompileException(
@@ -580,9 +586,8 @@ class ExtensionKernelCompiler {
     if (capabilities != null) _kCapabilitiesStampKey: capabilities.toMap(),
   };
 
-  File _resolveDartSdkRevisionFile() => _flutterRoot
-      .childDirectory('bin')
-      .childDirectory('cache')
-      .childDirectory('dart-sdk')
-      .childFile('revision');
+  Directory _resolveDartSdkDirectory() => _flutterRoot
+      .childDirectory(_kBinDirectoryName)
+      .childDirectory(_kCacheDirectoryName)
+      .childDirectory(_kDartSdkDirectoryName);
 }
