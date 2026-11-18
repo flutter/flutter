@@ -139,7 +139,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       size: size,
       shouldSkipNode: shouldSkipNode,
     ).evaluate(tester.binding);
-    String formatReason(Violation violation) => '${violation.reason}See also: $link';
+    String formatReason(Violation violation) => '${violation.reason}\nSee also: $link';
     if (result is Future<EvaluationResult>) {
       return result.then((EvaluationResult r) => _toEvaluation(r, formatReason: formatReason));
     }
