@@ -50,9 +50,14 @@ class NavigationToolbar extends StatelessWidget {
 
   /// Whether to align the [middle] widget to the center of this widget or
   /// next to the [leading] widget when false.
+  ///
+  /// If true, the [middle] widget is centered within the whole toolbar,
+  /// provided there is at least [middleSpacing] between it and the [leading]
+  /// and [trailing] widgets. If either gap would be smaller, it is positioned
+  /// as close to the center as possible while maintaining that spacing.
   final bool centerMiddle;
 
-  /// The spacing around the [middle] widget on horizontal axis.
+  /// The minimum spacing around the [middle] widget on the horizontal axis.
   ///
   /// Defaults to [kMiddleSpacing].
   final double middleSpacing;
