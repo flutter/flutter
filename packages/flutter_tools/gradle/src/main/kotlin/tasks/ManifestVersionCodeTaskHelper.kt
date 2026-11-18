@@ -12,7 +12,6 @@ import org.gradle.api.provider.Provider
 import org.xml.sax.SAXException
 import java.io.File
 import java.io.IOException
-import java.math.BigInteger
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
@@ -108,14 +107,10 @@ object ManifestVersionCodeTaskHelper {
         // SingleArtifact.MERGED_MANIFEST instead would create a task cycle because
         // ProcessApplicationManifest takes VariantOutput.versionCode as an input.
         //
-        // BigInteger accepts a leading + or - like Integer.parseInt, and also parses values outside
-        // the Int range so overflow gets a specific reason.
-        val versionCode =
-            try {
-                BigInteger(value)
-            } catch (e: NumberFormatException) {
-                null
-            }
+        // Parse as a BigInteger so values outside the Int range get a specific reason. Strip a
+        // leading + first: Integer.parseInt (and so AGP) accepts it, but toBigIntegerOrNull() does
+        // not. Reject "+-7" before stripping, or it would parse as -7.
+        val versionCode = value.takeUnless { it.startsWith("+-") }?.removePrefix("+")?.toBigIntegerOrNull()
         return when {
             value.isEmpty() -> Result.NotFound("$manifest does not set android:versionCode")
             versionCode == null -> Result.NotFound("android:versionCode=\"$value\" in $manifest is not a decimal integer")
@@ -149,7 +144,9 @@ object ManifestVersionCodeTaskHelper {
      *
      * Does not suggest `force-version-code-ignoring-abi`, because it cannot help here. When the
      * manifest has no positive `versionCode`, the flag builds APKs with no `versionCode`, which
-     * Android refuses to install. When the value is not a decimal integer, AGP fails the build.
+     * Android reads as 0. Google Play rejects those APKs, and installing one over a build with a
+     * positive `versionCode` fails with `INSTALL_FAILED_VERSION_DOWNGRADE`. When the value is not a
+     * decimal integer, AGP fails the build.
      */
     internal fun errorMessage(
         variantName: String,
