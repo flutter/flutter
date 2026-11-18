@@ -42,10 +42,10 @@ bool useCircularDistance(vec2 p, float radius, float span) {
 ///
 /// This gives the same result as `useCircularDistance`, which takes the span
 /// itself, but avoids atan() and mod(), which need more constants and uniform
-/// registers.
+/// registers. It also works directly on an unnormalized highp `p`.
 ///
 /// @see useCircularDistance
-bool useCircularDistanceCos(vec2 p, float cos_span) {
+bool useCircularDistanceCos(highp vec2 p, float cos_span) {
   return dot(p, vec2(kHalfSqrtTwo)) > cos_span * length(p);
 }
 
@@ -57,15 +57,18 @@ bool useCircularDistanceCos(vec2 p, float cos_span) {
 /// radius `radius`. `cos_span` is the cosine of the angular span of the
 /// circle's arc.
 ///
+/// All positions and lengths are highp: near the edge, the distance is a small
+/// difference of values at the scale of the shape.
+///
 /// @see useCircularDistanceCos
-float distanceFromRSEOctantCos(vec2 p_oct,
-                               vec2 circle_center,
-                               float radius,
-                               float cos_span,
-                               float axis_length,
-                               float se_degree) {
+highp float distanceFromRSEOctantCos(highp vec2 p_oct,
+                                     highp vec2 circle_center,
+                                     highp float radius,
+                                     float cos_span,
+                                     highp float axis_length,
+                                     float se_degree) {
   // Move the point to the corner circle's coordinate system.
-  vec2 p_rel = p_oct - circle_center;
+  highp vec2 p_rel = p_oct - circle_center;
 
   if (useCircularDistanceCos(p_rel, cos_span)) {
     return length(p_rel) - radius;

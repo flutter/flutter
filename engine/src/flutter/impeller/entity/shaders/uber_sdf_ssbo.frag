@@ -19,11 +19,12 @@ color_data;
 
 // Provides the `getGradientColor()` implementation used by the shared UberSDF
 // body in `uber_sdf_common.glsl`.
-vec4 getGradientColor(float t) {
+vec4 getGradientColor(highp float t) {
   // UberSDF always uses a transparent decal border.
   if ((t < 0.0 || t > 1.0) && frag_info.tile_mode == kTileModeDecal) {
     return vec4(0.0);
   }
+  // Tile while `t` is still highp (see uber_sdf.frag).
   t = IPFloatTile(t, frag_info.tile_mode);
 
   vec4 gradient_color = vec4(0.0);

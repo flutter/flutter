@@ -35,8 +35,23 @@ const float PI_OVER_FOUR = 0.78539816;
 // THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // https://www.youtube.com/c/InigoQuilez
 // https://iquilezles.org
+//
+// Shaders that include this file can define SD_SUPERELLIPSE_PRECISION as
+// `highp` to compute it in highp (otherwise it uses the default precision).
+// The result is a distance in units of the axis length, and it has to resolve
+// a fraction of a device pixel, so for shapes hundreds of pixels across it
+// needs more than mediump's 11 bits. That applies to the bisection as well:
+// unlike Newton's method it does not correct a wrong step, so a search done at
+// lower precision than the result gives the distance to the wrong segment for
+// some pixels.
 
-float sdSuperellipse(vec2 p, float n) {
+#ifndef SD_SUPERELLIPSE_PRECISION
+#define SD_SUPERELLIPSE_PRECISION
+#endif
+
+SD_SUPERELLIPSE_PRECISION float sdSuperellipse(
+    SD_SUPERELLIPSE_PRECISION vec2 p,
+    SD_SUPERELLIPSE_PRECISION float n) {
   // symmetries
   p = abs(p);
   if (p.y > p.x)
@@ -44,14 +59,15 @@ float sdSuperellipse(vec2 p, float n) {
 
   n = 2.0 / n;  // note the remapping in order to match the implicit versions
 
-  float xa = 0.0, xb = TWO_PI / 8.0;
+  SD_SUPERELLIPSE_PRECISION float xa = 0.0, xb = TWO_PI / 8.0;
   for (int i = 0; i < 6; i++) {
-    float x = 0.5 * (xa + xb);
-    float c = cos(x);
-    float s = sin(x);
-    float cn = pow(c, n);
-    float sn = pow(s, n);
-    float y = (p.x - cn) * cn * s * s - (p.y - sn) * sn * c * c;
+    SD_SUPERELLIPSE_PRECISION float x = 0.5 * (xa + xb);
+    SD_SUPERELLIPSE_PRECISION float c = cos(x);
+    SD_SUPERELLIPSE_PRECISION float s = sin(x);
+    SD_SUPERELLIPSE_PRECISION float cn = pow(c, n);
+    SD_SUPERELLIPSE_PRECISION float sn = pow(s, n);
+    SD_SUPERELLIPSE_PRECISION float y =
+        (p.x - cn) * cn * s * s - (p.y - sn) * sn * c * c;
 
     if (y < 0.0)
       xa = x;
@@ -59,10 +75,11 @@ float sdSuperellipse(vec2 p, float n) {
       xb = x;
   }
   // compute distance
-  vec2 qa = pow(vec2(cos(xa), sin(xa)), vec2(n));
-  vec2 qb = pow(vec2(cos(xb), sin(xb)), vec2(n));
-  vec2 pa = p - qa, ba = qb - qa;
-  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  SD_SUPERELLIPSE_PRECISION vec2 qa = pow(vec2(cos(xa), sin(xa)), vec2(n));
+  SD_SUPERELLIPSE_PRECISION vec2 qb = pow(vec2(cos(xb), sin(xb)), vec2(n));
+  SD_SUPERELLIPSE_PRECISION vec2 pa = p - qa, ba = qb - qa;
+  SD_SUPERELLIPSE_PRECISION float h =
+      clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
   return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
 }
 

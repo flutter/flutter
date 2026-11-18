@@ -4,8 +4,39 @@
 
 // Shared body of the UberSDF shaders, included by `uber_sdf.frag` and
 // `uber_sdf_ssbo.frag`. Each entrypoint supplies only `getGradientColor()`.
+//
+// Precision
+// =========
+//
+// The default precision is mediump, which many mobile GPUs execute as fp16:
+// 11 significant bits, a largest finite value of 65504 (so squaring anything
+// above ~256 overflows), and subnormal values below ~6e-5 that some GPUs flush
+// to zero. Some drivers (Mali on GLES) also store mediump uniforms in 16 bits,
+// rounding them before the shader runs, even if the code that reads them is
+// highp. Metal does not use fp16 for this shader, so the macOS goldens do not
+// catch violations of these rules.
+//
+// Making everything highp costs uniform registers on Mali, so the shader
+// follows these rules instead:
+//
+//  1. A value is highp from where it is read until the last subtraction that
+//     can cancel it. Near an edge, a distance is a small difference of large
+//     local coordinates. For a fill, the last subtraction is the edge
+//     distance; for a stroke, it is the subtraction of the half stroke width.
+//  2. A uniform is highp if it is a position or a length at the scale of the
+//     shape.
+//  3. An iterative solver may run in mediump only if it corrects itself
+//     (Newton's method does, bisection does not), and then needs a final step
+//     in highp.
+//  4. The gradient parameter `t` is highp until it has been tiled.
+//
+// Colors, enums, ratios, per-pixel sizes and the antialiasing math stay
+// mediump.
 
 precision mediump float;
+
+// See rule 3 above and `sdSuperellipse` in sdf_functions.glsl.
+#define SD_SUPERELLIPSE_PRECISION highp
 
 #include <impeller/color.glsl>
 #include <impeller/constants.glsl>
@@ -40,7 +71,7 @@ uniform FragInfo {
   ///   zw: The cosines of the angular spans of the corner circular arc
   ///       transitions (top octant in z, right octant in w). These share the
   ///       radii's slot to save uniform registers.
-  vec4 radii;
+  highp vec4 radii;
 
   // ===========================================================================
   // vec2 fields
@@ -48,24 +79,24 @@ uniform FragInfo {
 
   // --- General Shape Geometry ---
   /// The half-dimensions of the shape (half-width, half-height).
-  vec2 size;
+  highp vec2 size;
   /// The size of a device pixel in local coordinates.
   vec2 pixel_size;
 
   // --- Gradient Parameters ---
   /// The linear gradient's delta vector (end - start) in local coordinates.
   /// Unused (0) for radial gradients.
-  vec2 gradient_delta;
+  highp vec2 gradient_delta;
 
   // --- Superellipse Parameters ---
   /// The exponent degree (n_x, n_y) of the superellipse curvature.
   vec2 superellipse_degree;
   /// The center of the corner transition circle for the top octant of a
   /// rounded superellipse.
-  vec2 circle_center_top;
+  highp vec2 circle_center_top;
   /// The center of the corner transition circle for the right octant of a
   /// rounded superellipse.
-  vec2 circle_center_right;
+  highp vec2 circle_center_right;
 
   // ===========================================================================
   // float fields
@@ -89,7 +120,7 @@ uniform FragInfo {
   /// Whether the shape is stroked (1.0) or filled (0.0).
   float stroked;
   /// The width of the stroke.
-  float stroke_width;
+  highp float stroke_width;
   /// The join style for the stroke:
   ///   0: Miter
   ///   1: Bevel
@@ -106,7 +137,7 @@ uniform FragInfo {
   /// Inverse gradient length:
   ///   - Linear gradient: 1.0 / dot(delta, delta)
   ///   - Radial gradient: 1.0 / radius
-  float inv_gradient_length;
+  highp float inv_gradient_length;
 
   // --- Variant-Specific Gradient Parameters ---
   // Exactly one of these is used by any given entrypoint; the other is unset.
@@ -138,7 +169,7 @@ highp in vec2 v_gradient_position;
 // `t` is untiled, so implementations apply frag_info.tile_mode themselves.
 // Returns an unpremultiplied color, ignoring frag_info.color.a, which the
 // calling getColor() applies below.
-vec4 getGradientColor(float t);
+vec4 getGradientColor(highp float t);
 
 // Gets the color to use at v_position based on frag_info properties.
 vec4 getColor() {
@@ -148,10 +179,12 @@ vec4 getColor() {
     color = frag_info.color;
   } else {
     // Same expressions as IPComputeLinearGradientT and
-    // IPComputeRadialGradientT, with the subtraction of the gradient's origin
-    // already done in the vertex shader.
-    vec2 gradient_position = v_gradient_position;
-    float t;
+    // IPComputeRadialGradientT (which take mediump parameters), with the
+    // subtraction of the gradient's origin already done in the vertex shader.
+    // These are highp: the products overflow mediump for gradients longer than
+    // ~256 units.
+    highp vec2 gradient_position = v_gradient_position;
+    highp float t;
     if (frag_info.color_source_type < 1.5) {
       // Linear gradient
       t = dot(gradient_position, frag_info.gradient_delta) *
@@ -166,63 +199,97 @@ vec4 getColor() {
   return color;
 }
 
-float distanceFromCircle(vec2 p, float radius) {
+// The distance functions below take highp positions and sizes and return
+// highp distances (rule 1 above).
+
+highp float distanceFromCircle(highp vec2 p, highp float radius) {
   return length(p) - radius;
 }
 
-float distanceFromRect(vec2 p, vec2 b) {
-  vec2 d = abs(p) - b;
+highp float distanceFromRect(highp vec2 p, highp vec2 b) {
+  highp vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-float distanceFromOval(vec2 p, vec2 ab) {
-  p = abs(p);
+highp float distanceFromOval(highp vec2 position, highp vec2 semi_axes) {
+  position = abs(position);
+
+  // Find the angle `w` of the closest point on the ellipse with Newton's
+  // method. The iteration is scale invariant, so the first steps run in
+  // mediump on coordinates normalized by the larger semi-axis, where their
+  // intermediate products can't overflow.
+  highp float scale = 1.0 / max(semi_axes.x, semi_axes.y);
+  highp vec2 p_normalized = position * scale;
+  highp vec2 ab_normalized = semi_axes * scale;
+  vec2 p = p_normalized;
+  vec2 ab = ab_normalized;
   vec2 q = ab * (p - ab);
   float w = (q.x < q.y) ? 1.570796327 : 0.0;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 4; i++) {
     vec2 cs = vec2(cos(w), sin(w));
     vec2 u = ab * vec2(cs.x, cs.y);
     vec2 v = ab * vec2(-cs.y, cs.x);
     w = w + dot(p - u, v) / (dot(p - u, u) + dot(v, v));
   }
-  float d = length(p - ab * vec2(cos(w), sin(w)));
-  return (dot(p / ab, p / ab) > 1.0) ? d : -d;
+
+  // A final Newton step in highp refines the angle to full precision.
+  highp float hw = w;
+  highp vec2 hcs = vec2(cos(hw), sin(hw));
+  highp vec2 hu = ab_normalized * hcs;
+  highp vec2 hv = ab_normalized * vec2(-hcs.y, hcs.x);
+  hw = hw +
+       dot(p_normalized - hu, hv) / (dot(p_normalized - hu, hu) + dot(hv, hv));
+
+  // Near the edge, both the distance and the inside test are small differences
+  // of large values, so they are computed in highp as well. The inside test is
+  // (x/a)^2 + (y/b)^2 > 1 without the divisions.
+  highp float d = length(position - semi_axes * vec2(cos(hw), sin(hw)));
+  highp vec2 scaled_position = position * semi_axes.yx;
+  highp float axes_product = semi_axes.x * semi_axes.y;
+  return (dot(scaled_position, scaled_position) > axes_product * axes_product)
+             ? d
+             : -d;
 }
 
-float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
+highp float distanceFromRoundedRect(in highp vec2 p,
+                                    in highp vec2 b,
+                                    in highp vec4 r) {
   r.xy = (p.x > 0.0) ? r.xy : r.zw;
   r.x = (p.y > 0.0) ? r.x : r.y;
-  vec2 q = abs(p) - b + r.x;
+  highp vec2 q = abs(p) - b + r.x;
   return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
-float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
+highp float distanceFromChamferRect(highp vec2 p,
+                                    highp vec2 half_size,
+                                    highp float chamfer_size) {
   p = abs(p);
-  float d1 = max(p.x - half_size.x, p.y - half_size.y);
-  float d2 =
+  highp float d1 = max(p.x - half_size.x, p.y - half_size.y);
+  highp float d2 =
       (p.x + p.y - half_size.x - half_size.y + chamfer_size) * kHalfSqrtTwo;
   return max(d1, d2);
 }
 
-float distanceFromRoundedSuperellipse(vec2 p,
-                                      vec2 degree,
-                                      vec2 size,
-                                      vec2 radii,
-                                      vec2 cos_angle_span,
-                                      vec2 circle_center_top,
-                                      vec2 circle_center_right) {
+highp float distanceFromRoundedSuperellipse(highp vec2 p,
+                                            vec2 degree,
+                                            highp vec2 size,
+                                            highp vec2 radii,
+                                            vec2 cos_angle_span,
+                                            highp vec2 circle_center_top,
+                                            highp vec2 circle_center_right) {
   // Do work in the first quadrant to simply things.
   p = abs(p);
 
   // Transition line offset dividing top and right octants.
-  float c = size.x - size.y;
+  highp float c = size.x - size.y;
 
   // Declare all RSE params for a single octant.
-  float se_degree, cos_span, radius, axis_length;
-  vec2 circle_center;
+  float se_degree, cos_span;
+  highp float radius, axis_length;
+  highp vec2 circle_center;
 
   // 'p' in the coordinate system of the octant.
-  vec2 p_oct;
+  highp vec2 p_oct;
 
   // We split the quadrant along the diagonal of the transition (p.y + c ==
   // p.x). This allows us to grab the correct set of parameters for the
@@ -250,18 +317,18 @@ float distanceFromRoundedSuperellipse(vec2 p,
 }
 
 // Calculates pixel size for rectangles using frag_info.pixel_size.
-float rectPixelSize(vec2 p) {
+float rectPixelSize(highp vec2 p) {
   // Get pixel size in the direction perpendicular to the closest edge of the
   // rectangle: frag_info.pixel_size.x when closer to a vertical edge, and
   // frag_info.pixel_size.y when closer to a horizontal edge.
-  vec2 distance = abs(abs(p) - frag_info.size);
+  highp vec2 distance = abs(abs(p) - frag_info.size);
   return (distance.x < distance.y) ? frag_info.pixel_size.x
                                    : frag_info.pixel_size.y;
 }
 
 // Special case pixel size calculation for rounded rectangles, similar to
 // `rectPixelSize` for regular rectangles.
-float roundRectPixelSize(vec2 p) {
+float roundRectPixelSize(highp vec2 p) {
   // The change in local coordinates per horizontal device pixel (device_dx)
   // and vertical device pixel (device_dy).
   vec2 device_dx = dFdx(v_position);
@@ -271,13 +338,13 @@ float roundRectPixelSize(vec2 p) {
                                 length(vec2(device_dx.y, device_dy.y)));
 
   // Select the corner radius for the quadrant of p.
-  vec4 r = frag_info.radii;
+  highp vec4 r = frag_info.radii;
   r.xy = (p.x > 0.0) ? r.xy : r.zw;
-  float radius = (p.y > 0.0) ? r.x : r.y;
+  highp float radius = (p.y > 0.0) ? r.x : r.y;
 
   // Vector from corner circle center to abs(p).
-  vec2 corner_center = frag_info.size - radius;
-  vec2 q = abs(p) - corner_center;
+  highp vec2 corner_center = frag_info.size - radius;
+  highp vec2 q = abs(p) - corner_center;
 
   float pixel_size;
   // If in the rounded corner arc, blend X and Y pixel sizes along the normal.
@@ -291,15 +358,15 @@ float roundRectPixelSize(vec2 p) {
   return pixel_size;
 }
 
-float pixelSize(float sdf) {
+float pixelSize(highp float sdf) {
   vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
   return length(gradient);
 }
 
 // Evaluates the SDF for the shape selected by frag_info.type.
 // Returns vec2(sdf, pixel_size).
-vec2 filledSDF(vec2 p) {
-  float sdf;
+highp vec2 filledSDF(highp vec2 p) {
+  highp float sdf;
   float pixel_size;
   // frag_info.type holds a small integer. Round before converting so that a
   // value stored or converted slightly below it can't truncate to the wrong
@@ -331,32 +398,35 @@ vec2 filledSDF(vec2 p) {
 
 // Evaluates the stroked SDF for the shape selected by frag_info.type.
 // Returns vec2(sdf, pixel_size).
-vec2 strokedSDF(vec2 p) {
-  vec2 base_sdf_and_pixel_size = filledSDF(p);
-  float base_sdf = base_sdf_and_pixel_size.x;
+highp vec2 strokedSDF(highp vec2 p) {
+  highp vec2 base_sdf_and_pixel_size = filledSDF(p);
+  highp float base_sdf = base_sdf_and_pixel_size.x;
   float pixel_size = base_sdf_and_pixel_size.y;
 
-  float half_stroke = max(frag_info.stroke_width, pixel_size) * 0.5;
+  // Stroke width is clamped to be at least the base sdf's pixel size.
+  highp float half_stroke = max(frag_info.stroke_width, pixel_size) * 0.5;
 
-  float sdf;
+  highp float sdf;
   // frag_info.type and frag_info.stroke_join hold small integers (see
   // filledSDF() for why they are rounded).
   int type = int(round(frag_info.type));
   int join = int(round(frag_info.stroke_join));
   if (type == 1 && join == 0) {
     // Rect with Miter join
-    float outer = distanceFromRect(p, frag_info.size + half_stroke);
-    float inner = base_sdf + half_stroke;
+    highp float outer = distanceFromRect(p, frag_info.size + half_stroke);
+    highp float inner = base_sdf + half_stroke;
     sdf = max(outer, -inner);
   } else if (type == 1 && join == 1) {
     // Rect with Bevel join
-    float outer =
+    highp float outer =
         distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
-    float inner = base_sdf + half_stroke;
+    highp float inner = base_sdf + half_stroke;
     sdf = max(outer, -inner);
   } else {
-    // All other shapes
-    sdf = SDFStroke(base_sdf, pixel_size, frag_info.stroke_width).x;
+    // All other shapes: the stroked SDF is defined by the +/- half_stroke
+    // isolines of the base SDF. This is SDFStroke() from sdf_utils.glsl, but
+    // without converting the base distance to mediump first.
+    sdf = abs(base_sdf) - half_stroke;
   }
   return vec2(sdf, pixel_size);
 }
@@ -380,10 +450,12 @@ float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
 void main() {
   vec4 color = getColor();
 
-  vec2 p = v_position;
+  highp vec2 p = v_position;
 
-  vec2 sdf_and_pixel_size =
+  highp vec2 sdf_and_pixel_size =
       (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
+  // From here on only the antialiasing band around zero matters, so mediump is
+  // enough.
   float sdf = sdf_and_pixel_size.x;
   float pixel_size = sdf_and_pixel_size.y;
 
