@@ -94,7 +94,9 @@ abstract class Surface {
   /// Disposes of the surface and its resources.
   ///
   /// Calling this more than once has no effect.
-  @nonVirtual
+  ///
+  /// Subclasses must not override this method; implement [disposeResources]
+  /// instead.
   void dispose() {
     if (_isDisposed) {
       return;
