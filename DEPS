@@ -43,7 +43,7 @@ vars = {
 
   'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
 
-  'gcloud_version': 'version:2@444.0.0.chromium.3',
+  'gcloud_version': 'version:3@591.0.0.chromium.4',
 
   'esbuild_version': '0.19.5',
 
