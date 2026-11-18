@@ -55,7 +55,10 @@ uniform FragInfo {
   // --- Gradient Parameters ---
   /// The linear gradient's delta vector (end - start) in local coordinates.
   /// Unused (0) for radial gradients.
-  vec2 gradient_delta;
+  ///
+  /// highp, as are `inv_gradient_length` and the gradient math in
+  /// `getColor()`. See `getColor()` for why.
+  highp vec2 gradient_delta;
 
   // --- Superellipse Parameters ---
   /// The exponent degree (n_x, n_y) of the superellipse curvature.
@@ -106,7 +109,7 @@ uniform FragInfo {
   /// Inverse gradient length:
   ///   - Linear gradient: 1.0 / dot(delta, delta)
   ///   - Radial gradient: 1.0 / radius
-  float inv_gradient_length;
+  highp float inv_gradient_length;
 
   // --- Variant-Specific Gradient Parameters ---
   // Exactly one of these is used by any given entrypoint; the other is unset.
@@ -138,7 +141,7 @@ highp in vec2 v_gradient_position;
 // `t` is untiled, so implementations apply frag_info.tile_mode themselves.
 // Returns an unpremultiplied color, ignoring frag_info.color.a, which the
 // calling getColor() applies below.
-vec4 getGradientColor(float t);
+vec4 getGradientColor(highp float t);
 
 // Gets the color to use at v_position based on frag_info properties.
 vec4 getColor() {
@@ -150,8 +153,15 @@ vec4 getColor() {
     // Same expressions as IPComputeLinearGradientT and
     // IPComputeRadialGradientT, with the subtraction of the gradient's origin
     // already done in the vertex shader.
-    vec2 gradient_position = v_gradient_position;
-    float t;
+    //
+    // This must be highp. The linear dot product is roughly
+    // distance * gradient length in local units, and the radial length()
+    // squares the position. Both exceed mediump's range (65504 when mediump is
+    // fp16, as on many GLES drivers) for ordinary sizes: an 800 wide
+    // horizontal gradient overflows 82 units in, after which `t` clamps and
+    // the rest of the shape gets the end color.
+    highp vec2 gradient_position = v_gradient_position;
+    highp float t;
     if (frag_info.color_source_type < 1.5) {
       // Linear gradient
       t = dot(gradient_position, frag_info.gradient_delta) *
