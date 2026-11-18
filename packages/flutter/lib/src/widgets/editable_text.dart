@@ -4720,6 +4720,7 @@ class EditableTextState extends State<EditableText>
   }
 
   Future<void> _performSpellCheck(String text) async {
+    final List<SuggestionSpan>? suggestions;
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
 
@@ -4728,19 +4729,10 @@ class EditableTextState extends State<EditableText>
         'Locale must be specified in widget or Localization widget must be in scope',
       );
 
-      final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
-          .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
-
-      if (suggestions == null || !mounted || !spellCheckEnabled) {
-        // The request to fetch spell check suggestions was canceled due to ongoing request,
-        // the widget was unmounted, or spell check was disabled before the
-        // request completed.
-        return;
-      }
-
-      setState(() {
-        spellCheckResults = SpellCheckResults(text, suggestions);
-      });
+      suggestions = await _spellCheckConfiguration.spellCheckService!.fetchSpellCheckSuggestions(
+        localeForSpellChecking!,
+        text,
+      );
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -4750,7 +4742,20 @@ class EditableTextState extends State<EditableText>
           context: ErrorDescription('while performing spell check'),
         ),
       );
+      return;
     }
+
+    if (suggestions == null || !mounted || !spellCheckEnabled) {
+      // The request to fetch spell check suggestions was canceled due to ongoing request,
+      // the widget was unmounted, or spell check was disabled before the
+      // request completed.
+      return;
+    }
+
+    final results = SpellCheckResults(text, suggestions);
+    setState(() {
+      spellCheckResults = results;
+    });
   }
 
   @pragma('vm:notify-debugger-on-exception')
