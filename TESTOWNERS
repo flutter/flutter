@@ -321,7 +321,7 @@
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm_st.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/windowing_test_linux.dart @robert-ancell @flutter/canonical
 /dev/devicelab/bin/tasks/windowing_test_macos.dart @knopp @flutter/canonical
-/dev/devicelab/bin/tasks/windowing_test_windows.dart @mattkae @flutter/canonical
+/dev/devicelab/bin/tasks/windowing_test_windows.dart @robert-ancell @flutter/canonical
 /dev/devicelab/bin/tasks/windows_desktop_impeller.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/windows_engine_integration_golden_test.dart @b-luk @flutter/engine
 /dev/devicelab/bin/tasks/windows_engine_integration_golden_test_feature_level_10_0.dart @b-luk @flutter/engine
