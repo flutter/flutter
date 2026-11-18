@@ -1554,7 +1554,7 @@ abstract class _MatchTextFinder extends MatchFinder {
 
   bool _matchesRichText(Widget widget) {
     if (widget is RichText) {
-      return matchesText(widget.text.toPlainText());
+      return matchesText(widget.text.toPlainText(includePlaceholders: false));
     }
     return false;
   }
@@ -1565,7 +1565,7 @@ abstract class _MatchTextFinder extends MatchFinder {
         return matchesText(widget.data!);
       }
       assert(widget.textSpan != null);
-      return matchesText(widget.textSpan!.toPlainText());
+      return matchesText(widget.textSpan!.toPlainText(includePlaceholders: false));
     }
     return false;
   }
