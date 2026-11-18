@@ -3058,7 +3058,7 @@ class RenderFittedBox extends RenderProxyBox {
       case Clip.hardEdge:
       case Clip.antiAlias:
       case Clip.antiAliasWithSaveLayer:
-        if (!paintsChild(child as RenderBox)) {
+        if (child is! RenderBox || !paintsChild(child)) {
           return null;
         }
         _updatePaintData();
