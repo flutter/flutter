@@ -869,7 +869,7 @@ void main() {
       }
     });
 
-    testWithoutContext('default DeviceService returns null platform, empty emulators, and SERVER_ERROR or INVALID_PARAMS', () async {
+    testWithoutContext('default DeviceService returns null platform, empty emulators, and UnsupportedError or INVALID_PARAMS', () async {
       final ExtensionConnection conn = await ExtensionConnection.spawn(
         _deviceEntryPoint(_TestEmulatorDeviceService()),
         logger: logger,
@@ -882,25 +882,21 @@ void main() {
       await expectLater(
         client.launchEmulator(emulatorId: 'any_id', coldBoot: true),
         throwsA(
-          isA<json_rpc.RpcException>()
-              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
-              .having(
-                (json_rpc.RpcException e) => e.message,
-                'message',
-                contains('Launching emulator any_id is not supported.'),
-              ),
+          isA<UnsupportedError>().having(
+            (UnsupportedError e) => e.message,
+            'message',
+            'Launching emulator any_id is not supported.',
+          ),
         ),
       );
       await expectLater(
         client.createEmulator(name: 'any_name'),
         throwsA(
-          isA<json_rpc.RpcException>()
-              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
-              .having(
-                (json_rpc.RpcException e) => e.message,
-                'message',
-                contains('Creating emulators is not supported.'),
-              ),
+          isA<UnsupportedError>().having(
+            (UnsupportedError e) => e.message,
+            'message',
+            'Creating emulators is not supported.',
+          ),
         ),
       );
 
@@ -1155,31 +1151,59 @@ void main() {
           ).launch(),
           throwsToolExit(message: 'Failed to launch emulator "empty_err_emu".'),
         );
+      },
+    );
 
-        final ExtensionConnection conn = await ExtensionConnection.spawn(
-          _deviceEntryPoint(_TestEmulatorDeviceService(), extensionName: 'readonly_emu_ext'),
+    testWithoutContext(
+      'surfaces default SDK UnsupportedError (-32002) cleanly on launchEmulator and createEmulator',
+      () async {
+        // Omit `onLaunchEmulator` and `onCreateEmulator` so the real SDK default
+        // `throw UnsupportedError(...)` executes in the extension isolate and
+        // round-trips over JSON-RPC `ToolExtensionException.unsupportedCapabilityErrorCode`.
+        final ExtensionManager manager = _createExtensionManager(
           logger: logger,
-        );
-        addTearDown(conn.dispose);
-        await expectLater(
-          () => ExtensionEmulator(
-            deviceService: ExtensionDeviceClient(conn, logger: logger),
-            logger: logger,
-            targetEmulator: const TargetEmulator(
-              id: 'unsupported_emu',
-              name: 'Unsupported Emulator',
+          entryPoints: <ExtensionEntryPoint>[
+            _deviceEntryPoint(
+              _TestEmulatorDeviceService(
+                emulatorPlatform: 'readonly_os',
+                emulators: const <TargetEmulator>[
+                  TargetEmulator(id: 'unsupported_emu', name: 'Unsupported Emulator'),
+                ],
+              ),
+              extensionName: 'readonly_emu_ext',
             ),
-          ).launch(coldBoot: true),
+          ],
+        );
+
+        final discovery = ExtensionEmulators(extensionManager: manager, logger: logger);
+        final List<Emulator> emulators = await discovery.emulators;
+        expect(emulators, hasLength(1));
+
+        await expectLater(
+          () => emulators.single.launch(coldBoot: true),
           throwsToolExit(
             message:
                 'Extension "readonly_emu_ext": Failed to launch emulator "unsupported_emu": '
-                'Unsupported operation: Launching emulator unsupported_emu is not supported.',
+                'Launching emulator unsupported_emu is not supported.',
           ),
+        );
+
+        final CreateEmulatorResult? failedCreate = await discovery.createEmulator(
+          platform: 'readonly_os',
+          name: 'sim_1',
+        );
+        expect(failedCreate?.success, isFalse);
+        expect(
+          failedCreate?.error,
+          'Extension "readonly_emu_ext": Creating emulators is not supported.',
         );
       },
     );
 
-    testWithoutContext('getCreatePlatforms validates, deduplicates, memoizes warnings, and surfaces ToolExtensionException cleanly', () async {
+    testWithoutContext('sorts extensions lexicographically by extensionName when deduplicating create platforms '
+        'and TargetEmulator.id collisions and surfaces ToolExtensionException cleanly', () async {
+      // Register `zeta_custom_ext` BEFORE `alpha_custom_ext` in `entryPoints` so
+      // registration order differs from lexicographical `<package_name>` order.
       final ExtensionManager manager = _createExtensionManager(
         logger: logger,
         entryPoints: <ExtensionEntryPoint>[
@@ -1205,7 +1229,23 @@ void main() {
             _TestEmulatorDeviceService(
               emulatorPlatform: 'custom_os',
               emulators: const <TargetEmulator>[
-                TargetEmulator(id: 'domain_emu', name: 'Domain Error Emulator'),
+                TargetEmulator(id: 'shared_emu', name: 'Zeta Shared Emulator'),
+                TargetEmulator(id: 'zeta_only', name: 'Zeta Only Emulator'),
+              ],
+              onLaunchEmulator: (String _, bool _) =>
+                  throw const ToolExtensionException('Zeta launch should not be called.'),
+              onCreateEmulator: (String? name) =>
+                  TargetEmulator(id: name ?? 'zeta_ext_sim', name: 'Zeta Ext Sim'),
+            ),
+            extensionName: 'zeta_custom_ext',
+          ),
+          _deviceEntryPoint(
+            _TestEmulatorDeviceService(
+              emulatorPlatform: 'custom_os',
+              emulators: const <TargetEmulator>[
+                TargetEmulator(id: 'shared_emu', name: 'Alpha Shared Emulator'),
+                TargetEmulator(id: 'shared_emu', name: 'Alpha Duplicate Entry'),
+                TargetEmulator(id: 'alpha_only', name: 'Alpha Only Emulator'),
               ],
               onLaunchEmulator: (String _, bool _) =>
                   throw const ToolExtensionException('Simulator binary not found.'),
@@ -1213,14 +1253,10 @@ void main() {
                 if (name == 'fail_create') {
                   throw const ToolExtensionException('No system image installed.');
                 }
-                return TargetEmulator(id: name ?? 'first_ext_sim', name: 'First Ext Sim');
+                return TargetEmulator(id: name ?? 'alpha_ext_sim', name: 'Alpha Ext Sim');
               },
             ),
-            extensionName: 'first_custom_ext',
-          ),
-          _deviceEntryPoint(
-            _TestEmulatorDeviceService(emulatorPlatform: 'custom_os'),
-            extensionName: 'duplicate_custom_ext',
+            extensionName: 'alpha_custom_ext',
           ),
         ],
       );
@@ -1234,16 +1270,16 @@ void main() {
       expect(
         warningsAfterFirstLoad,
         contains(
-          'Ignoring emulator platform "android" from tool extension "android_collision_ext": '
-          '"android" is reserved for built-in Android emulators.',
+          'Ignoring emulator platform "android" from tool extension '
+          '(package:android_collision_ext): "android" is reserved for built-in Android emulators.',
         ),
       );
       expect(
         warningsAfterFirstLoad,
         contains(
           'Ignoring invalid emulator platform "Invalid Name!" from tool extension '
-          '"invalid_name_ext": platform identifiers must match lowercase ASCII letters, digits, '
-          'underscores, or hyphens.',
+          '(package:invalid_name_ext): platform identifiers must match lowercase ASCII letters, '
+          'digits, underscores, or hyphens.',
         ),
       );
       expect(
@@ -1254,14 +1290,16 @@ void main() {
         warningsAfterFirstLoad,
         contains(
           'Duplicate emulator platform "custom_os" registered by tool extension '
-          '"duplicate_custom_ext" and tool extension "first_custom_ext"',
+          '(package:zeta_custom_ext) and tool extension (package:alpha_custom_ext); keeping '
+          'tool extension (package:alpha_custom_ext).',
         ),
       );
 
-      // Memoized across hasEmulatorSources, getCreatePlatforms, and createEmulator.
+      // Memoized across hasEmulatorSources, getCreatePlatforms, and createEmulator;
+      // `alpha_custom_ext` wins over `zeta_custom_ext`.
       final CreateEmulatorResult? created = await discovery.createEmulator(platform: 'custom_os');
       expect(created?.success, isTrue);
-      expect(created?.emulatorName, 'first_ext_sim');
+      expect(created?.emulatorName, 'alpha_ext_sim');
       expect(logger.warningText, equals(warningsAfterFirstLoad));
 
       final CreateEmulatorResult? failed = await discovery.createEmulator(
@@ -1269,21 +1307,43 @@ void main() {
         name: 'fail_create',
       );
       expect(failed?.success, isFalse);
-      expect(failed?.error, 'Extension "first_custom_ext": No system image installed.');
+      expect(failed?.error, 'Extension "alpha_custom_ext": No system image installed.');
 
       logger.clear();
       final List<Emulator> emulators = await discovery.emulators;
-      expect(emulators, hasLength(1));
+      expect(
+        emulators.map((Emulator e) => (e.id, e.name)).toList(),
+        equals(<(String, String)>[
+          ('shared_emu', 'Alpha Shared Emulator'),
+          ('alpha_only', 'Alpha Only Emulator'),
+          ('zeta_only', 'Zeta Only Emulator'),
+        ]),
+      );
       expect(
         logger.warningText,
         contains('Extension "domain_error_ext": Emulator list command failed.'),
       );
+      expect(
+        logger.warningText,
+        contains(
+          'Duplicate emulator ID "shared_emu" returned by tool extension '
+          '(package:alpha_custom_ext); keeping the first entry.',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Duplicate emulator ID "shared_emu" registered by tool extension '
+          '(package:zeta_custom_ext) and tool extension (package:alpha_custom_ext); keeping '
+          'tool extension (package:alpha_custom_ext).',
+        ),
+      );
       expect(logger.warningText, isNot(contains('ToolExtensionException:')));
       await expectLater(
-        () => emulators.single.launch(),
+        () => emulators.first.launch(),
         throwsToolExit(
           message:
-              'Extension "first_custom_ext": Failed to launch emulator "domain_emu": '
+              'Extension "alpha_custom_ext": Failed to launch emulator "shared_emu": '
               'Simulator binary not found.',
         ),
       );

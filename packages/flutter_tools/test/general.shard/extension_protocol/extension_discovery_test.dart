@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:stream_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -130,6 +131,9 @@ final class _ProtocolHardeningService extends ToolExtensionService {
     return <String, ExtensionRpcHandler>{
       'throwUserError': (Map<String, Object?> _) {
         throw const ToolExtensionException('Missing custom SDK at /opt/custom_sdk');
+      },
+      'throwUnsupported': (Map<String, Object?> _) {
+        throw UnsupportedError('Optional capability is not supported');
       },
       'callProcessExit': (Map<String, Object?> _) {
         io.exit(42);
@@ -642,6 +646,55 @@ void main() {
       );
     });
 
+    test('UnsupportedError serializes as unsupportedCapabilityErrorCode (-32002) and translates to UnsupportedError on sendRequest', () async {
+      final receivePort = ReceivePort();
+      addTearDown(receivePort.close);
+      final Isolate isolate = await Isolate.spawn(
+        _protocolHardeningEntryPoint,
+        receivePort.sendPort,
+      );
+      addTearDown(() => isolate.kill(priority: Isolate.immediate));
+
+      final peer = json_rpc.Peer.withoutJson(IsolateChannel<Object?>.connectReceive(receivePort));
+      unawaited(peer.listen());
+      addTearDown(peer.close);
+
+      await expectLater(
+        peer.sendRequest('hardening.throwUnsupported'),
+        throwsA(
+          isA<json_rpc.RpcException>()
+              .having(
+                (json_rpc.RpcException e) => e.code,
+                'code',
+                ToolExtensionException.unsupportedCapabilityErrorCode,
+              )
+              .having(
+                (json_rpc.RpcException e) => e.message,
+                'message',
+                'Optional capability is not supported',
+              ),
+        ),
+      );
+
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _protocolHardeningEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      await expectLater(
+        connection.sendRequest('hardening.throwUnsupported'),
+        throwsA(
+          isA<UnsupportedError>().having(
+            (UnsupportedError e) => e.message,
+            'message',
+            'Optional capability is not supported',
+          ),
+        ),
+      );
+    });
+
     test('IOOverrides exit guard intercepts exit() inside extension RPC handler without killing host process', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
@@ -653,13 +706,10 @@ void main() {
       await expectLater(
         connection.sendRequest('hardening.callProcessExit'),
         throwsA(
-          isA<json_rpc.RpcException>().having(
-            (json_rpc.RpcException e) => e.message,
+          isA<UnsupportedError>().having(
+            (UnsupportedError e) => e.message,
             'message',
-            contains(
-              'Unsupported operation: Tool extensions must not call exit(42); '
-              'throw ToolExtensionException instead.',
-            ),
+            'Tool extensions must not call exit(42); throw ToolExtensionException instead.',
           ),
         ),
       );

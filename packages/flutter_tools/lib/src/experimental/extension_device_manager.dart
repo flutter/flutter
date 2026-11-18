@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
@@ -874,23 +875,32 @@ class ExtensionEmulators extends EmulatorDiscovery {
   final Logger _logger;
   Future<Map<String, DeviceService>>? _createProvidersFuture;
 
-  static String _describeExtension(DeviceService service) => switch (service) {
+  static String? _extensionNameOf(DeviceService service) => switch (service) {
     ExtensionDeviceClient(connection: ExtensionConnection(:final String extensionName)) =>
-      'tool extension "$extensionName"',
-    _ => 'tool extension',
+      extensionName,
+    _ => null,
   };
 
-  static String _extensionErrorPrefix(DeviceService service) => switch (service) {
-    ExtensionDeviceClient(connection: ExtensionConnection(:final String extensionName)) =>
-      'Extension "$extensionName": ',
-    _ => '',
+  static String _describeExtension(DeviceService service) => switch (_extensionNameOf(service)) {
+    final String extensionName => 'tool extension (package:$extensionName)',
+    null => 'tool extension',
+  };
+
+  static String _extensionErrorPrefix(DeviceService service) => switch (_extensionNameOf(service)) {
+    final String extensionName => 'Extension "$extensionName": ',
+    null => '',
   };
 
   static String _extractErrorDetail(Object error) => switch (error) {
     ToolExtensionException(:final String message) ||
     json_rpc.RpcException(:final String message) => message.trim(),
+    UnsupportedError(:final String? message) => (message ?? '').trim(),
     _ => '$error'.trim(),
   };
+
+  List<DeviceService> _sortedDeviceServices() => _extensionManager.deviceExtensions.sortedBy(
+    (DeviceService service) => _extensionNameOf(service) ?? '',
+  );
 
   void _warnQueryFailure(DeviceService service, String target, Object error, StackTrace stack) {
     final String prefix = _extensionErrorPrefix(service);
@@ -923,34 +933,49 @@ class ExtensionEmulators extends EmulatorDiscovery {
   Future<List<Emulator>> _queryEmulators() async {
     _logger.printTrace('ExtensionEmulators querying active tool extension emulators...');
     await _extensionManager.ensureInitialized();
-    final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
+    final List<DeviceService> deviceServices = _sortedDeviceServices();
     if (deviceServices.isEmpty) {
       _logger.printTrace('ExtensionEmulators found 0 active device extensions.');
       return <Emulator>[];
     }
 
-    final List<List<Emulator>> emulatorsPerService = await Future.wait(
+    final List<(DeviceService, List<TargetEmulator>)> emulatorsPerService = await Future.wait(
       deviceServices.map((DeviceService service) async {
         try {
-          final List<TargetEmulator> emulators = await service.getEmulators();
-          return <Emulator>[
-            for (final TargetEmulator targetEmulator in emulators)
-              ExtensionEmulator(
-                deviceService: service,
-                logger: _logger,
-                targetEmulator: targetEmulator,
-              ),
-          ];
+          return (service, await service.getEmulators());
         } on Object catch (e, st) {
           _warnQueryFailure(service, 'emulators', e, st);
-          return const <Emulator>[];
+          return (service, const <TargetEmulator>[]);
         }
       }),
     );
 
-    final targetEmulators = <Emulator>[
-      for (final List<Emulator> emulatorList in emulatorsPerService) ...emulatorList,
-    ];
+    final seenByEmulatorId = <String, DeviceService>{};
+    final targetEmulators = <Emulator>[];
+    for (final (DeviceService service, List<TargetEmulator> emulators) in emulatorsPerService) {
+      final String description = _describeExtension(service);
+      for (final targetEmulator in emulators) {
+        final DeviceService? existing = seenByEmulatorId[targetEmulator.id];
+        if (existing != null) {
+          _logger.printWarning(
+            identical(existing, service)
+                ? 'Duplicate emulator ID "${targetEmulator.id}" returned by $description; '
+                      'keeping the first entry.'
+                : 'Duplicate emulator ID "${targetEmulator.id}" registered by $description and '
+                      '${_describeExtension(existing)}; keeping ${_describeExtension(existing)}.',
+          );
+          continue;
+        }
+        seenByEmulatorId[targetEmulator.id] = service;
+        targetEmulators.add(
+          ExtensionEmulator(
+            deviceService: service,
+            logger: _logger,
+            targetEmulator: targetEmulator,
+          ),
+        );
+      }
+    }
 
     _logger.printTrace('ExtensionEmulators retrieved ${targetEmulators.length} emulator(s).');
     return targetEmulators;
@@ -990,7 +1015,7 @@ class ExtensionEmulators extends EmulatorDiscovery {
 
   Future<Map<String, DeviceService>> _loadCreateProviders() async {
     await _extensionManager.ensureInitialized();
-    final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;
+    final List<DeviceService> deviceServices = _sortedDeviceServices();
     if (deviceServices.isEmpty) {
       return const <String, DeviceService>{};
     }
