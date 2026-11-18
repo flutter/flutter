@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:file/file.dart';
@@ -10,8 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
-import 'package:yaml/yaml.dart';
+import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -42,49 +40,28 @@ dev_dependencies:
   final File sourcePackageConfig = flutterToolsDir
       .childDirectory('.dart_tool')
       .childFile('package_config.json');
-  final sourcePackageConfigDirUri = Uri.directory(sourcePackageConfig.parent.absolute.path);
-  final decoded = jsonDecode(sourcePackageConfig.readAsStringSync()) as Map<String, Object?>;
-  final List<Map<String, Object?>> rawPackages = (decoded['packages']! as List<Object?>)
-      .cast<Map<String, Object?>>();
-
-  final rewrittenPackages = <Map<String, Object?>>[
-    for (final Map<String, Object?> pkg in rawPackages)
-      <String, Object?>{
-        ...pkg,
-        'rootUri': sourcePackageConfigDirUri
-            .resolve(_ensureTrailingSlash(pkg['rootUri']! as String))
-            .toString(),
-      },
-  ];
-
+  final PackageConfig sourceConfig = PackageConfig.parseBytes(
+    sourcePackageConfig.readAsBytesSync(),
+    sourcePackageConfig.absolute.uri,
+  );
+  final buffer = StringBuffer();
+  PackageConfig.writeString(sourceConfig, buffer);
   projectDir.childDirectory('.dart_tool').childFile('package_config.json')
     ..createSync(recursive: true)
-    ..writeAsStringSync(
-      const JsonEncoder.withIndent('  ')
-          .convert(<String, Object?>{'configVersion': 2, 'packages': rewrittenPackages}),
-    );
+    ..writeAsStringSync(buffer.toString());
 }
-
-String _ensureTrailingSlash(String uriStr) => uriStr.endsWith('/') ? uriStr : '$uriStr/';
 
 const _linuxPrototypePackageName = 'flutter_tools_extension_linux_prototype';
 
-Future<(Uri, Uri, ExtensionPackageConfig)> _resolveLinuxPrototypeExtension() async {
+Future<(Uri, Uri)> _resolveLinuxPrototypeExtension() async {
   final Uri? libUri = await Isolate.resolvePackageUri(
     Uri.parse('package:$_linuxPrototypePackageName/$_linuxPrototypePackageName.dart'),
   );
   expect(libUri, isNotNull);
-  final Uri entrypointUri = libUri!.resolve('../bin/$_linuxPrototypePackageName.dart');
+  final Uri entrypointUri = libUri!.resolve('../extension/flutter_tools/extension.dart');
   final Uri? packageConfigUri = await Isolate.packageConfig;
   expect(packageConfigUri, isNotNull);
-
-  final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
-  final rawYaml = loadYaml(fileSystem.file(configUri).readAsStringSync()) as YamlMap;
-  final expectedConfig = ExtensionPackageConfig.fromMap(
-    rawYaml.cast<String, Object?>(),
-    packageName: _linuxPrototypePackageName,
-  );
-  return (entrypointUri, packageConfigUri!, expectedConfig);
+  return (entrypointUri, packageConfigUri!);
 }
 
 void main() {
@@ -208,7 +185,6 @@ void main() {
     if (projectDir.existsSync()) {
       projectDir.deleteSync(recursive: true);
     }
-    _seedProjectWithLinuxPrototypeExtension(projectDir);
 
     final ProcessResult result = await processManager.run(
       <String>[flutterBin, 'create', '--no-pub', '--template=custom-linux-app', projectDir.path],
@@ -232,6 +208,7 @@ void main() {
         reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
       );
       expect(result.stderr, contains('custom-linux-app'));
+      expect(projectDir.existsSync(), isFalse);
     }
   });
 
@@ -251,35 +228,6 @@ void main() {
     expect(result.stderr, contains('is not an allowed value for option "--template"'));
     expect(projectDir.existsSync(), isFalse);
   });
-
-  testWithoutContext(
-    'in-place flutter create . --platforms=custom_linux succeeds when enabled',
-    () async {
-      final Directory projectDir = tempHome.childDirectory('in_place_custom_platform_app');
-      if (projectDir.existsSync()) {
-        projectDir.deleteSync(recursive: true);
-      }
-      _seedProjectWithLinuxPrototypeExtension(projectDir);
-
-      final ProcessResult result = await processManager.run(
-        <String>[flutterBin, 'create', '--no-pub', '--platforms=custom_linux', '.'],
-        workingDirectory: projectDir.path,
-        environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
-      );
-
-      if (isLinux) {
-        expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-        final File verificationFile = projectDir.childFile('.custom_device_extension_info');
-        expect(verificationFile.existsSync(), isTrue);
-        expect(
-          verificationFile.readAsStringSync().trim(),
-          'Custom Linux Device Extension App Template Verified',
-        );
-      } else {
-        expect(result.exitCode, isNot(0));
-      }
-    },
-  );
 
   testWithoutContext(
     'flutter devices -v gracefully shuts down active tool extensions on exit',
@@ -306,12 +254,10 @@ void main() {
     'ExtensionConnection.spawnUri spawns extension script and completes handshake',
     () async {
       final logger = BufferLogger.test();
-      final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig expectedConfig) =
-          await _resolveLinuxPrototypeExtension();
+      final (Uri entrypointUri, Uri packageConfigUri) = await _resolveLinuxPrototypeExtension();
 
       final ExtensionConnection connection = await ExtensionConnection.spawnUri(
         entrypointUri,
-        expectedConfig: expectedConfig,
         extensionName: _linuxPrototypePackageName,
         logger: logger,
         packageConfigUri: packageConfigUri,
@@ -321,56 +267,16 @@ void main() {
       expect(connection.extensionName, _linuxPrototypePackageName);
       expect(
         connection.capabilities.services,
-        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
+        containsAll(const <String>[
+          'diagnostics',
+          'config',
+          'template',
+          'device',
+          'build',
+          'clean',
+          'artifact',
+        ]),
       );
     },
   );
-
-  testWithoutContext('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
-    final logger = BufferLogger.test();
-    final (Uri entrypointUri, Uri packageConfigUri, ExtensionPackageConfig prototypeConfig) =
-        await _resolveLinuxPrototypeExtension();
-
-    await expectLater(
-      ExtensionConnection.spawnUri(
-        entrypointUri,
-        expectedConfig: ExtensionPackageConfig(
-          name: _linuxPrototypePackageName,
-          hostPlatforms: prototypeConfig.hostPlatforms,
-          services: const <String>{'diagnostics'},
-        ),
-        logger: logger,
-        packageConfigUri: packageConfigUri,
-      ),
-      throwsA(
-        isA<StateError>().having(
-          (StateError e) => e.message,
-          'message',
-          contains('capabilities mismatch: extension/flutter_tools/config.yaml declares services'),
-        ),
-      ),
-    );
-
-    await expectLater(
-      ExtensionConnection.spawnUri(
-        entrypointUri,
-        expectedConfig: ExtensionPackageConfig(
-          name: _linuxPrototypePackageName,
-          hostPlatforms: const <String>{'macos'},
-          services: prototypeConfig.services,
-        ),
-        logger: logger,
-        packageConfigUri: packageConfigUri,
-      ),
-      throwsA(
-        isA<StateError>().having(
-          (StateError e) => e.message,
-          'message',
-          contains(
-            'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
-          ),
-        ),
-      ),
-    );
-  });
 }

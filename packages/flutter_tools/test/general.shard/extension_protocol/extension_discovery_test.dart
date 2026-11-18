@@ -594,15 +594,11 @@ void main() {
       );
     });
 
-    test('ExtensionConnection.spawn completes handshake and matches expectedConfig', () async {
+    test('ExtensionConnection.spawn completes handshake and reports capabilities', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         _singleServiceEntryPoint,
-        expectedConfig: ExtensionPackageConfig(
-          name: 'test_extension',
-          hostPlatforms: const <String>{'linux', 'macos'},
-          services: const <String>{'test'},
-        ),
+        extensionName: 'test_extension',
         logger: logger,
       );
       addTearDown(connection.dispose);
@@ -610,113 +606,6 @@ void main() {
       expect(connection.extensionName, 'test_extension');
       expect(connection.capabilities.services, const <String>['test']);
       expect(connection.capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
-    });
-
-    test('ExtensionConnection.spawn throws StateError when expectedConfig does not match capabilities', () async {
-      final logger = BufferLogger.test();
-      await expectLater(
-        ExtensionConnection.spawn(
-          _dummyExtensionEntryPoint,
-          expectedConfig: ExtensionPackageConfig(
-            name: 'test_extension',
-            hostPlatforms: const <String>{'linux'},
-            services: const <String>{'diagnostics'},
-          ),
-          logger: logger,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains(
-              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
-            ),
-          ),
-        ),
-      );
-
-      await expectLater(
-        ExtensionConnection.spawn(
-          _singleServiceEntryPoint,
-          expectedConfig: ExtensionPackageConfig(
-            name: 'test_extension',
-            hostPlatforms: const <String>{'linux', 'macos'},
-            services: const <String>{'other'},
-          ),
-          logger: logger,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains(
-              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
-            ),
-          ),
-        ),
-      );
-
-      await expectLater(
-        ExtensionConnection.spawn(
-          _singleServiceEntryPoint,
-          expectedConfig: ExtensionPackageConfig(
-            name: 'test_extension',
-            hostPlatforms: const <String>{'linux', 'macos'},
-          ),
-          logger: logger,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains(
-              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
-            ),
-          ),
-        ),
-      );
-
-      await expectLater(
-        ExtensionConnection.spawn(
-          _singleServiceEntryPoint,
-          expectedConfig: ExtensionPackageConfig(
-            name: 'test_extension',
-            hostPlatforms: const <String>{'linux', 'windows'},
-            services: const <String>{'test'},
-          ),
-          logger: logger,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains(
-              'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
-            ),
-          ),
-        ),
-      );
-
-      await expectLater(
-        ExtensionConnection.spawn(
-          _singleServiceEntryPoint,
-          expectedConfig: ExtensionPackageConfig(
-            name: 'test_extension',
-            hostPlatforms: const <String>{'linux'},
-            services: const <String>{'test'},
-          ),
-          logger: logger,
-        ),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains(
-              'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
-            ),
-          ),
-        ),
-      );
     });
 
     test('ToolExtensionService.sendNotification throws StateError before peer attachment', () {

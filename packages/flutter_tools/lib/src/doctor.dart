@@ -294,6 +294,7 @@ class Doctor {
   Future<List<ValidatorTask>> startValidatorTasks({ExtensionManager? extensionManager}) async {
     if (extensionManager != null) {
       await extensionManager.ensureInitialized(
+        includeWorkspaceMembers: true,
         requiredServices: const <String>{DiagnosticsExtension.serviceNamespace},
       );
     }

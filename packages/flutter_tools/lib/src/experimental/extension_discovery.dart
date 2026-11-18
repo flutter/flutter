@@ -8,7 +8,6 @@ import 'dart:isolate';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:meta/meta.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
@@ -159,23 +158,15 @@ class ExtensionConnection {
   ///
   /// Used by unit tests to exercise extension protocol behavior in-process
   /// without compiling a `.dill` kernel file.
-  ///
-  /// When [expectedConfig] is provided, validates that the runtime
-  /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
-  /// the static declarations in `extension/flutter_tools/config.yaml`,
-  /// killing the extension isolate and throwing a [StateError] if they drift.
-  @visibleForTesting
   static Future<ExtensionConnection> spawn(
     ExtensionEntryPoint entryPoint, {
     required Logger logger,
-    ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) {
     logger.printTrace('ExtensionConnection spawning extension isolate...');
     return _spawnAndHandshake(
-      expectedConfig: expectedConfig,
-      extensionName: extensionName ?? expectedConfig?.name,
+      extensionName: extensionName,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawn(entryPoint, sendPort, onError: onError, onExit: onExit);
       },
@@ -187,17 +178,11 @@ class ExtensionConnection {
   /// Spawns an extension isolate dynamically from [entrypointUri] (a compiled
   /// `.dill` Kernel URI or `.dart` script URI) using [packageConfigUri] and
   /// completes the capability handshake.
-  ///
-  /// When [expectedConfig] is provided, validates that the runtime
-  /// [ToolExtensionCapabilities] reported by `extension.getCapabilities` match
-  /// the static declarations in `extension/flutter_tools/config.yaml`,
-  /// killing the extension isolate and throwing a [StateError] if they drift.
   static Future<ExtensionConnection> spawnUri(
     Uri entrypointUri, {
     required Logger logger,
     required Uri packageConfigUri,
     List<String> args = const <String>[],
-    ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) {
@@ -205,8 +190,7 @@ class ExtensionConnection {
       'ExtensionConnection spawning extension isolate from URI "$entrypointUri"...',
     );
     return _spawnAndHandshake(
-      expectedConfig: expectedConfig,
-      extensionName: extensionName ?? expectedConfig?.name,
+      extensionName: extensionName,
       isolateLauncher: (SendPort sendPort, SendPort onError, SendPort onExit) {
         return Isolate.spawnUri(
           entrypointUri,
@@ -222,41 +206,10 @@ class ExtensionConnection {
     );
   }
 
-  static void _validateCapabilitiesMatchConfig(
-    ToolExtensionCapabilities capabilities,
-    ExtensionPackageConfig expectedConfig, {
-    required String extensionName,
-  }) {
-    final Set<String> actualServices = capabilities.services.toSet();
-    if (actualServices.length != expectedConfig.services.length ||
-        !actualServices.containsAll(expectedConfig.services)) {
-      throw StateError(
-        'Extension "$extensionName" capabilities mismatch: '
-        'extension/flutter_tools/config.yaml declares services '
-        '${expectedConfig.services.toList()}, '
-        'but ToolExtensionEntryPoint.run registered ${capabilities.services}.',
-      );
-    }
-    if (expectedConfig.hostPlatforms.isNotEmpty) {
-      final Set<String> actualPlatforms = capabilities.supportedPlatforms;
-      if (actualPlatforms.length != expectedConfig.hostPlatforms.length ||
-          !actualPlatforms.containsAll(expectedConfig.hostPlatforms)) {
-        throw StateError(
-          'Extension "$extensionName" capabilities mismatch: '
-          'extension/flutter_tools/config.yaml declares host_platforms '
-          '${expectedConfig.hostPlatforms.toList()}, '
-          'but ToolExtensionEntryPoint.run registered supportedPlatforms '
-          '${actualPlatforms.toList()}.',
-        );
-      }
-    }
-  }
-
   static Future<ExtensionConnection> _spawnAndHandshake({
     required Future<Isolate> Function(SendPort sendPort, SendPort onError, SendPort onExit)
     isolateLauncher,
     required Logger logger,
-    ExtensionPackageConfig? expectedConfig,
     String? extensionName,
     Duration timeout = const Duration(seconds: 5),
   }) async {
@@ -321,13 +274,6 @@ class ExtensionConnection {
 
       final String resolvedExtensionName =
           extensionName ?? capabilities.extensionName ?? defaultExtensionName;
-      if (expectedConfig != null) {
-        _validateCapabilitiesMatchConfig(
-          capabilities,
-          expectedConfig,
-          extensionName: resolvedExtensionName,
-        );
-      }
       return connection = ExtensionConnection._(
         capabilities: capabilities,
         errorPort: errorPort,

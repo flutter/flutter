@@ -11,9 +11,7 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 /// specifically the [LinuxProjectTemplate].
 final class LinuxTemplateService extends TemplateService {
   @override
-  Set<String> get appPlatformTemplates => const <String>{
-    'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
-  };
+  Set<String> get appPlatformTemplates => const <String>{};
 
   @override
   Set<String> get pluginPlatformTemplates => const <String>{};

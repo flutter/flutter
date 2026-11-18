@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:file/memory.dart';
@@ -18,7 +17,6 @@ import 'package:flutter_tools/src/experimental/extension_kernel_compiler.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/project_extension_finder.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -26,6 +24,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 
 final class _ShutdownNotifyingService extends ToolExtensionService {
   @override
@@ -93,12 +92,38 @@ void _linuxOnlyExtensionEntryPoint(SendPort sendPort) {
 }
 
 class _FakeExtensionKernelCompiler extends Fake implements ExtensionKernelCompiler {
-  _FakeExtensionKernelCompiler(this._onCompile);
+  final compiledExtensions = <String>[];
+  final capabilityWrites = <String>[];
+  final cachedCapabilities = <String, ToolExtensionCapabilities>{};
+  final _latestBuildTokens = <String, String>{};
+  int _compileCount = 0;
 
-  final Future<Uri> Function(DiscoveredProjectExtension extension) _onCompile;
+  void invalidate(String extensionName) {
+    cachedCapabilities.remove(extensionName);
+  }
 
   @override
-  Future<Uri> compile(DiscoveredProjectExtension extension) => _onCompile(extension);
+  Future<CompiledExtensionKernel> compile(DiscoveredProjectExtension extension) async {
+    final token = 'token-${++_compileCount}';
+    _latestBuildTokens[extension.name] = token;
+    compiledExtensions.add(extension.name);
+    return (buildToken: token, dillUri: Uri.file('/cache/${extension.name}.dill'));
+  }
+
+  @override
+  ToolExtensionCapabilities? readCachedCapabilities(DiscoveredProjectExtension extension) =>
+      cachedCapabilities[extension.name];
+
+  @override
+  Future<void> writeCachedCapabilities(
+    DiscoveredProjectExtension extension,
+    ToolExtensionCapabilities capabilities, {
+    required String buildToken,
+  }) async {
+    expect(buildToken, _latestBuildTokens[extension.name]);
+    capabilityWrites.add(extension.name);
+    cachedCapabilities[extension.name] = capabilities;
+  }
 }
 
 class _FakeExtensionConnection extends Fake implements ExtensionConnection {
@@ -127,6 +152,16 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
   Future<void> dispose() async {
     _disposed = true;
   }
+}
+
+void _writeExtensionStub(Directory rootDir, String name) {
+  rootDir
+      .childDirectory(name)
+      .childDirectory('extension')
+      .childDirectory('flutter_tools')
+      .childFile('extension.dart')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('Future<void> main(List<String> args, Object? message) async {}');
 }
 
 void main() {
@@ -161,125 +196,241 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'ensureInitialized(requiredServices: ...) only compiles and spawns matching extensions',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final logger = BufferLogger.test();
-        final Directory projectDir = fs.directory('/workspace/app')..createSync(recursive: true);
-        fs.currentDirectory = projectDir;
+    testWithoutContext('ensureInitialized caches cold .dill capabilities, disposes mismatches, and filters warm extensions', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory workspaceRoot = fs.directory('/workspace')..createSync(recursive: true);
+      final Directory projectDir = workspaceRoot.childDirectory('app')..createSync(recursive: true);
+      fs.currentDirectory = projectDir;
 
-        projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dev_dependencies:
   diag_ext:
     path: ../diag_ext
   build_ext:
     path: ../build_ext
+  win_ext:
+    path: ../win_ext
 ''');
 
-        final Directory diagExtDir = fs.directory('/workspace/diag_ext')
-          ..createSync(recursive: true);
-        diagExtDir.childFile('extension/flutter_tools/config.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-name: diag_ext
-host_platforms:
-  - linux
-services:
-  - diagnostics
+      _writeExtensionStub(workspaceRoot, 'diag_ext');
+      _writeExtensionStub(workspaceRoot, 'build_ext');
+      _writeExtensionStub(workspaceRoot, 'win_ext');
+
+      writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'app',
+        packages: <String, String>{
+          'diag_ext': '../diag_ext',
+          'build_ext': '../build_ext',
+          'win_ext': '../win_ext',
+        },
+        devDependencies: <String>['diag_ext', 'build_ext', 'win_ext'],
+      );
+
+      final compiler = _FakeExtensionKernelCompiler();
+      final spawnedExtensions = <String>[];
+      final spawnedConnections = <String, _FakeExtensionConnection>{};
+
+      Future<ExtensionConnection> spawnFake(
+        Uri entrypointUri, {
+        required Logger logger,
+        required Uri packageConfigUri,
+        String? extensionName,
+      }) async {
+        final String name = extensionName!;
+        spawnedExtensions.add(name);
+        final ToolExtensionCapabilities capabilities = switch (name) {
+          'diag_ext' => const ToolExtensionCapabilities(
+            services: <String>['diagnostics'],
+            supportedPlatforms: <String>{'linux'},
+          ),
+          'build_ext' => const ToolExtensionCapabilities(
+            services: <String>['build'],
+            supportedPlatforms: <String>{'linux'},
+          ),
+          'win_ext' => const ToolExtensionCapabilities(
+            services: <String>['diagnostics'],
+            supportedPlatforms: <String>{'windows'},
+          ),
+          _ => throw StateError('Unexpected extension "$name"'),
+        };
+        return spawnedConnections[name] = _FakeExtensionConnection(
+          capabilities: capabilities,
+          extensionName: name,
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        extensionFinder: ProjectExtensionFinder(fileSystem: fs, logger: logger),
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        kernelCompiler: compiler,
+        uriSpawner: spawnFake,
+      );
+
+      // 1. Discovery alone does not compile or spawn any extension.
+      final List<DiscoveredProjectExtension> discovered = await manager.discoverExtensions();
+      expect(discovered.map((DiscoveredProjectExtension e) => e.name), const <String>[
+        'build_ext',
+        'diag_ext',
+        'win_ext',
+      ]);
+      expect(compiler.compiledExtensions, isEmpty);
+      expect(spawnedExtensions, isEmpty);
+
+      // 2. Cold .dills are compiled and spawned once to record capabilities;
+      //    non-matching services ('build_ext') and unsupported hosts ('win_ext') are disposed.
+      await manager.ensureInitialized(requiredServices: const <String>{'diagnostics'});
+      expect(compiler.compiledExtensions, const <String>['build_ext', 'diag_ext', 'win_ext']);
+      expect(spawnedExtensions, const <String>['build_ext', 'diag_ext', 'win_ext']);
+      expect(compiler.capabilityWrites, const <String>['build_ext', 'diag_ext', 'win_ext']);
+      expect(
+        compiler.cachedCapabilities.keys,
+        containsAll(<String>['build_ext', 'diag_ext', 'win_ext']),
+      );
+      expect(spawnedConnections['build_ext']!.isDisposed, isTrue);
+      expect(spawnedConnections['win_ext']!.isDisposed, isTrue);
+      expect(spawnedConnections['diag_ext']!.isDisposed, isFalse);
+      expect(manager.connections.map((ExtensionConnection c) => c.extensionName), const <String>[
+        'diag_ext',
+      ]);
+      expect(manager.diagnosticsExtensions, hasLength(1));
+
+      // 3. Warm cache skips extensions whose cached capabilities miss 'config' or hostPlatform.
+      await manager.ensureInitialized(requiredServices: const <String>{'config'});
+      expect(compiler.compiledExtensions, const <String>['build_ext', 'diag_ext', 'win_ext']);
+      expect(spawnedExtensions, const <String>['build_ext', 'diag_ext', 'win_ext']);
+
+      // 4. Requesting 'build' subsequently spawns 'build_ext' without respawning 'diag_ext' or
+      //    'win_ext' or rewriting already-cached capabilities.
+      await manager.ensureInitialized(requiredServices: const <String>{'build'});
+      expect(compiler.compiledExtensions, const <String>[
+        'build_ext',
+        'diag_ext',
+        'win_ext',
+        'build_ext',
+      ]);
+      expect(spawnedExtensions, const <String>['build_ext', 'diag_ext', 'win_ext', 'build_ext']);
+      expect(compiler.capabilityWrites, const <String>['build_ext', 'diag_ext', 'win_ext']);
+      expect(spawnedConnections['build_ext']!.isDisposed, isFalse);
+      expect(manager.connections.map((ExtensionConnection c) => c.extensionName), const <String>[
+        'diag_ext',
+        'build_ext',
+      ]);
+      await manager.dispose();
+
+      // 5. A new CLI invocation with warm cached capabilities only spawns matching extensions
+      //    without rewriting capabilities, and re-spawns invalidated extensions to refresh them.
+      compiler.compiledExtensions.clear();
+      compiler.capabilityWrites.clear();
+      spawnedExtensions.clear();
+      final warmManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        extensionFinder: ProjectExtensionFinder(fileSystem: fs, logger: logger),
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        kernelCompiler: compiler,
+        uriSpawner: spawnFake,
+      );
+
+      await warmManager.ensureInitialized(requiredServices: const <String>{'diagnostics'});
+      expect(compiler.compiledExtensions, const <String>['diag_ext']);
+      expect(spawnedExtensions, const <String>['diag_ext']);
+      expect(compiler.capabilityWrites, isEmpty);
+
+      compiler.invalidate('win_ext');
+      await warmManager.ensureInitialized(requiredServices: const <String>{'diagnostics'});
+      expect(compiler.compiledExtensions, const <String>['diag_ext', 'win_ext']);
+      expect(spawnedExtensions, const <String>['diag_ext', 'win_ext']);
+      expect(compiler.capabilityWrites, const <String>['win_ext']);
+      expect(spawnedConnections['win_ext']!.isDisposed, isTrue);
+      expect(
+        warmManager.connections.map((ExtensionConnection c) => c.extensionName),
+        const <String>['diag_ext'],
+      );
+
+      await warmManager.dispose();
+    });
+
+    testWithoutContext(
+      'ensureInitialized forwards includeWorkspaceMembers at a Pub workspace root',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final Directory workspaceDir = fs.directory('/workspace')..createSync(recursive: true);
+        fs.currentDirectory = workspaceDir;
+
+        workspaceDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: workspace_root
+workspace:
+  - packages/member_app
 ''');
-        diagExtDir.childFile('bin/diag_ext.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main() {}');
-
-        final Directory buildExtDir = fs.directory('/workspace/build_ext')
-          ..createSync(recursive: true);
-        buildExtDir.childFile('extension/flutter_tools/config.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-name: build_ext
-host_platforms:
-  - linux
-services:
-  - build
-build_targets:
-  - custom-linux
+        final Directory memberDir =
+            workspaceDir.childDirectory('packages').childDirectory('member_app')
+              ..createSync(recursive: true);
+        memberDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: member_app
+resolution: workspace
+dev_dependencies:
+  member_ext:
+    path: ../../member_ext
 ''');
-        buildExtDir.childFile('bin/build_ext.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main() {}');
+        _writeExtensionStub(workspaceDir, 'member_ext');
 
-        projectDir.childFile('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            jsonEncode(<String, Object?>{
-              'configVersion': 2,
-              'packages': <Map<String, Object?>>[
-                <String, Object?>{'name': 'app', 'rootUri': '../', 'packageUri': 'lib/'},
-                <String, Object?>{
-                  'name': 'diag_ext',
-                  'rootUri': '../../diag_ext',
-                  'packageUri': 'lib/',
-                },
-                <String, Object?>{
-                  'name': 'build_ext',
-                  'rootUri': '../../build_ext',
-                  'packageUri': 'lib/',
-                },
-              ],
-            }),
-          );
+        writePackageConfigFiles(
+          directory: workspaceDir,
+          mainLibName: 'workspace_root',
+          packages: <String, String>{
+            'member_app': 'packages/member_app',
+            'member_ext': 'member_ext',
+          },
+        );
 
-        final compiledExtensions = <String>[];
-        final spawnedExtensions = <String>[];
-
+        final compiler = _FakeExtensionKernelCompiler();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
           extensionFinder: ProjectExtensionFinder(fileSystem: fs, logger: logger),
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          kernelCompiler: _FakeExtensionKernelCompiler((DiscoveredProjectExtension ext) async {
-            compiledExtensions.add(ext.name);
-            return Uri.file('/cache/${ext.name}.dill');
-          }),
+          kernelCompiler: compiler,
           uriSpawner:
               (
                 Uri entrypointUri, {
                 required Logger logger,
                 required Uri packageConfigUri,
-                ExtensionPackageConfig? expectedConfig,
                 String? extensionName,
               }) async {
-                expect(expectedConfig?.name, extensionName);
-                spawnedExtensions.add(extensionName ?? entrypointUri.toString());
                 return _FakeExtensionConnection(
-                  capabilities: ToolExtensionCapabilities(
-                    services: <String>[if (extensionName == 'diag_ext') 'diagnostics' else 'build'],
-                    supportedPlatforms: const <String>{'linux'},
+                  capabilities: const ToolExtensionCapabilities(
+                    services: <String>['device'],
+                    supportedPlatforms: <String>{'linux'},
                   ),
                   extensionName: extensionName,
                 );
               },
         );
 
-        // 1. Static discovery does not compile or spawn any extension.
-        final List<DiscoveredProjectExtension> discovered = await manager.discoverExtensions();
-        expect(discovered, hasLength(2));
-        expect(compiledExtensions, isEmpty);
-        expect(spawnedExtensions, isEmpty);
+        // Project-targeted initialization at the workspace root does not load member extensions.
+        await manager.ensureInitialized(
+          requiredServices: const <String>{'device'},
+          startDir: workspaceDir,
+        );
+        expect(manager.connections, isEmpty);
+        expect(compiler.compiledExtensions, isEmpty);
 
-        // 2. Requesting 'diagnostics' only compiles and spawns 'diag_ext'.
-        await manager.ensureInitialized(requiredServices: const <String>{'diagnostics'});
-        expect(compiledExtensions, const <String>['diag_ext']);
-        expect(spawnedExtensions, const <String>['diag_ext']);
-        expect(manager.diagnosticsExtensions, hasLength(1));
-
-        // 3. Requesting 'build' subsequently compiles and spawns 'build_ext' without respawning 'diag_ext'.
-        await manager.ensureInitialized(requiredServices: const <String>{'build'});
-        expect(compiledExtensions, const <String>['diag_ext', 'build_ext']);
-        expect(spawnedExtensions, const <String>['diag_ext', 'build_ext']);
-        expect(manager.connections, hasLength(2));
+        // Workspace/environment initialization unions member direct dependencies.
+        await manager.ensureInitialized(
+          includeWorkspaceMembers: true,
+          requiredServices: const <String>{'device'},
+          startDir: workspaceDir,
+        );
+        expect(manager.connections.map((ExtensionConnection c) => c.extensionName), const <String>[
+          'member_ext',
+        ]);
+        expect(await manager.discoverExtensions(startDir: workspaceDir), isEmpty);
 
         await manager.dispose();
       },

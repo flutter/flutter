@@ -401,6 +401,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
   }) async {
     _logger.printTrace('ExtensionDevices polling active tool extension devices...');
     await _extensionManager.ensureInitialized(
+      includeWorkspaceMembers: true,
       requiredServices: const <String>{DeviceService.serviceNamespace},
     );
     final List<DeviceService> deviceServices = _extensionManager.deviceExtensions;

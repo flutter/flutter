@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
@@ -34,6 +32,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -349,7 +348,7 @@ void main() {
     );
 
     testWithoutContext(
-      'ExtensionTemplateManager discovers custom platforms and resolves package: template paths',
+      'ExtensionTemplateManager resolves package: template paths for discovered extensions',
       () async {
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
@@ -359,49 +358,29 @@ void main() {
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: app
 dev_dependencies:
-  flutter_tools_extension_linux_prototype:
-    path: ../flutter_tools_extension_linux_prototype
+  my_custom_ext:
+    path: ../my_custom_ext
 ''');
 
-        final Directory extDir = fs.directory('/workspace/flutter_tools_extension_linux_prototype')
+        final Directory extDir = fs.directory('/workspace/my_custom_ext')
           ..createSync(recursive: true);
-        extDir.childFile('extension/flutter_tools/config.yaml')
+        extDir
+            .childDirectory('extension')
+            .childDirectory('flutter_tools')
+            .childFile('extension.dart')
           ..createSync(recursive: true)
-          ..writeAsStringSync('''
-name: flutter_tools_extension_linux_prototype
-host_platforms:
-  - linux
-services:
-  - template
-templates:
-  - custom-linux-app
-target_platforms:
-  - custom_linux
-''');
-        extDir.childFile('bin/flutter_tools_extension_linux_prototype.dart')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('void main() {}');
-        final Directory templateSourceDir = extDir.childDirectory('lib/templates/custom-linux-app')
-          ..createSync(recursive: true);
-        templateSourceDir
-            .childFile('.custom_device_extension_info.copy.tmpl')
-            .writeAsStringSync('Verified\n');
+          ..writeAsStringSync('Future<void> main(List<String> args, Object? message) async {}');
+        final Directory templateSourceDir =
+            extDir.childDirectory('lib').childDirectory('templates').childDirectory('custom-app')
+              ..createSync(recursive: true);
+        templateSourceDir.childFile('.custom_info.copy.tmpl').writeAsStringSync('Verified\n');
 
-        projectDir.childFile('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            jsonEncode(<String, Object?>{
-              'configVersion': 2,
-              'packages': <Map<String, Object?>>[
-                <String, Object?>{'name': 'app', 'rootUri': '../', 'packageUri': 'lib/'},
-                <String, Object?>{
-                  'name': 'flutter_tools_extension_linux_prototype',
-                  'rootUri': '../../flutter_tools_extension_linux_prototype',
-                  'packageUri': 'lib/',
-                },
-              ],
-            }),
-          );
+        writePackageConfigFiles(
+          directory: projectDir,
+          mainLibName: 'app',
+          packages: <String, String>{'my_custom_ext': '../my_custom_ext'},
+          devDependencies: <String>['my_custom_ext'],
+        );
 
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
@@ -414,24 +393,20 @@ target_platforms:
           extensionManager: manager,
           featureFlags: featureFlags,
           fileSystem: fs,
+          flutterRoot: '/flutter',
           logger: logger,
         );
 
-        final Set<String> customPlatforms = await templateManager.getCustomPlatforms(
-          projectDir: projectDir,
-        );
-        expect(customPlatforms, contains('custom_linux'));
+        await manager.discoverExtensions(startDir: projectDir);
 
         final Directory resolvedDir = templateManager.resolveTemplateDirectory(
-          'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
+          'package:my_custom_ext/templates/custom-app',
         );
         expect(resolvedDir.path, templateSourceDir.path);
         expect(resolvedDir.existsSync(), isTrue);
 
         expect(
-          () => templateManager.resolveTemplateDirectory(
-            'package:flutter_tools_extension_linux_prototype/../outside',
-          ),
+          () => templateManager.resolveTemplateDirectory('package:my_custom_ext/../outside'),
           throwsArgumentError,
         );
 

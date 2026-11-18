@@ -40,49 +40,26 @@ base class ExtensionTemplateManager extends TemplateService {
 
   List<ProjectTemplate>? _cachedTemplates;
   int _cachedGeneration = -1;
-  final _cachedCustomPlatforms = <String>{};
-  final _cachedAppPlatformTemplates = <String>{};
-  final _cachedPluginPlatformTemplates = <String>{};
 
   /// Retrieve the cached templates synchronously.
   ///
   /// Returns the list of project templates cached from the last [getProjectTemplates] call.
   List<ProjectTemplate> get cachedTemplates => _cachedTemplates ?? const <ProjectTemplate>[];
 
-  /// Retrieve the cached custom platform names declared by discovered extensions.
-  Set<String> get cachedCustomPlatforms => Set<String>.unmodifiable(_cachedCustomPlatforms);
-
-  /// Discovers custom platform names declared in `extension/flutter_tools/config.yaml`
-  /// for extensions in [projectDir] and the current working directory.
-  Future<Set<String>> getCustomPlatforms({Directory? projectDir}) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <String>{};
-    }
-    await _extensionManager.discoverExtensions();
-    if (projectDir != null) {
-      await _extensionManager.discoverExtensions(startDir: projectDir);
-    }
-    for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) {
-      _cachedCustomPlatforms.addAll(ext.config.targetPlatforms);
-    }
-    return cachedCustomPlatforms;
-  }
-
   /// Retrieve templates by routing `template.getProjectTemplates` to active tool extensions.
   ///
-  /// Results are cached after the first successful call, and refreshed if
-  /// [projectDir] introduces additional discovered extensions.
-  Future<List<ProjectTemplate>> getProjectTemplates({Directory? projectDir}) async {
+  /// Results are cached after the first successful call and refreshed if
+  /// additional extension connections are registered.
+  Future<List<ProjectTemplate>> getProjectTemplates() async {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <ProjectTemplate>[];
     }
-    await getCustomPlatforms(projectDir: projectDir);
     await _extensionManager.ensureInitialized(
       requiredServices: const <String>{TemplateService.serviceNamespace},
-      startDir: projectDir,
     );
-    if (_cachedTemplates != null && _extensionManager.connectionGeneration == _cachedGeneration) {
-      return _cachedTemplates!;
+    if (_cachedTemplates case final cachedTemplates?
+        when _extensionManager.connectionGeneration == _cachedGeneration) {
+      return cachedTemplates;
     }
 
     final templates = <ProjectTemplate>[];
@@ -128,81 +105,6 @@ base class ExtensionTemplateManager extends TemplateService {
     _cachedTemplates = templates;
     _cachedGeneration = _extensionManager.connectionGeneration;
     return templates;
-  }
-
-  /// Queries `template.getAppTemplates` from active extension isolates.
-  Future<Set<String>> fetchAppPlatformTemplates({
-    Iterable<String>? platforms,
-    Directory? projectDir,
-  }) async {
-    return _fetchPlatformTemplates(
-      method: TemplateService.getAppTemplatesMethod,
-      cache: _cachedAppPlatformTemplates,
-      platforms: platforms,
-      projectDir: projectDir,
-    );
-  }
-
-  /// Queries `template.getPluginTemplates` from active extension isolates.
-  Future<Set<String>> fetchPluginPlatformTemplates({
-    Iterable<String>? platforms,
-    Directory? projectDir,
-  }) async {
-    return _fetchPlatformTemplates(
-      method: TemplateService.getPluginTemplatesMethod,
-      cache: _cachedPluginPlatformTemplates,
-      platforms: platforms,
-      projectDir: projectDir,
-    );
-  }
-
-  Future<Set<String>> _fetchPlatformTemplates({
-    required Set<String> cache,
-    required String method,
-    Iterable<String>? platforms,
-    Directory? projectDir,
-  }) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <String>{};
-    }
-    await _extensionManager.ensureInitialized(
-      requiredServices: const <String>{TemplateService.serviceNamespace},
-      startDir: projectDir,
-    );
-    final Set<String>? platformSet = platforms?.toSet();
-    final discoveredNames = <String>{
-      for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) ext.name,
-    };
-    final Set<String>? matchingExtensionNames = platformSet == null
-        ? null
-        : <String>{
-            for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions)
-              if (ext.config.targetPlatforms.any(platformSet.contains)) ext.name,
-          };
-    final List<ExtensionConnection> connections = _extensionManager.connections
-        .where(
-          (ExtensionConnection c) =>
-              c.capabilities.services.contains(TemplateService.serviceNamespace) &&
-              (matchingExtensionNames == null ||
-                  !discoveredNames.contains(c.extensionName) ||
-                  matchingExtensionNames.contains(c.extensionName)),
-        )
-        .toList();
-
-    final results = <String>{};
-    for (final connection in connections) {
-      try {
-        final Object? rpcResult = await connection.sendRequest(method).timeout(_kRpcTimeout);
-        if (rpcResult case final List<Object?> list) {
-          final Iterable<String> paths = list.whereType<String>();
-          cache.addAll(paths);
-          results.addAll(paths);
-        }
-      } on Object catch (e) {
-        _logger.printTrace('Failed to get results from extension for $method: $e');
-      }
-    }
-    return Set<String>.unmodifiable(platformSet == null ? cache : results);
   }
 
   /// Resolves a template package URI to a local directory.
@@ -311,9 +213,8 @@ base class ExtensionTemplateManager extends TemplateService {
   Set<ProjectTemplate> get projectTemplates => cachedTemplates.toSet();
 
   @override
-  Set<String> get appPlatformTemplates => Set<String>.unmodifiable(_cachedAppPlatformTemplates);
+  Set<String> get appPlatformTemplates => const <String>{};
 
   @override
-  Set<String> get pluginPlatformTemplates =>
-      Set<String>.unmodifiable(_cachedPluginPlatformTemplates);
+  Set<String> get pluginPlatformTemplates => const <String>{};
 }
