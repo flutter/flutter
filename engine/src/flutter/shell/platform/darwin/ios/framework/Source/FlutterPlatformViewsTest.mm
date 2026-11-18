@@ -1997,6 +1997,63 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertNotNil(childClippingView.maskView);
 }
 
+- (void)testOpacity {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  // Push two opacities, which multiply.
+  stack.PushOpacity(128);
+  stack.PushOpacity(128);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(10, 10), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  // Verify the view's alpha is the product of the opacities.
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+  CGFloat expectedAlpha = flutter::DlColor::toOpacity(128) * flutter::DlColor::toOpacity(128);
+  XCTAssertEqualWithAccuracy(touchInterceptor.alpha, expectedAlpha, 1e-3);
+
+  // compositeView:withParams: resets the interceptor's alpha to 1 before applying the opacities.
+  // Verify the opacities are not applied a second time when the view is recomposited.
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+  XCTAssertEqualWithAccuracy(touchInterceptor.alpha, expectedAlpha, 1e-3);
+}
+
 - (void)testClipRect {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
@@ -4486,6 +4543,185 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
 }
+// Prerolls `viewId` with a translation of `offset` points and submits a frame.
+- (void)submitFrameWithController:(FlutterPlatformViewsController*)controller
+                           viewId:(int64_t)viewId
+                           offset:(flutter::DlScalar)offset
+                   backdropFilter:(BOOL)backdropFilter {
+  [controller beginFrameWithSize:flutter::DlISize(300, 300)];
+  flutter::MutatorsStack stack;
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({offset, offset});
+  stack.PushTransform(translateMatrix);
+  auto params = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix * translateMatrix,
+                                                              flutter::DlSize(100, 100), stack);
+  [controller prerollCompositeEmbeddedView:viewId withParams:std::move(params)];
+  if (backdropFilter) {
+    [controller pushVisitedPlatformViewId:viewId];
+    [controller pushFilterToVisitedPlatformViews:flutter::DlBlurImageFilter::Make(
+                                                     5, 5, flutter::DlTileMode::kClamp)
+                                        withRect:flutter::DlRect::MakeLTRB(0, 0, 300, 300)];
+  }
+  [controller submitFrame:CreateTestSurfaceFrame()
+           withIosContext:std::make_shared<FakeIOSContext>()];
+}
+
+- (void)testSubmitFrameRecompositesOnlyViewsWhoseParamsChanged {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  // Verify the view is composited in its first frame.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+
+  // compositeView:withParams: resets the interceptor's alpha to 1.
+  // Set it to a different value so we can detect whether the view was recomposited below.
+  touchInterceptor.alpha = 0.5;
+
+  // Verify an unchanged view is not recomposited.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 0.5);
+
+  // Verify a changed view is recomposited.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:20
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+  CGRect rectInFlutterView = [gMockPlatformView convertRect:gMockPlatformView.bounds
+                                                     toView:flutterView];
+  XCTAssertTrue(CGRectEqualToRect(rectInFlutterView, CGRectMake(20, 20, 100, 100)));
+}
+
+- (void)testSubmitFrameDoesNotRecompositeUnchangedViewUnderBackdropFilter {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  // The backdrop filter is appended to the parameters after preroll.
+  // Verify that if a view's filter has not changed, it is not recomposited.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:YES];
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  ChildClippingView* clippingView = (ChildClippingView*)touchInterceptor.superview;
+  XCTAssertEqual(clippingView.backdropFilterSubviews.count, 1u);
+  touchInterceptor.alpha = 0.5;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:YES];
+  XCTAssertEqual(touchInterceptor.alpha, 0.5);
+  XCTAssertEqual(clippingView.backdropFilterSubviews.count, 1u);
+
+  // Verify removing the filter triggers a recomposite.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+  XCTAssertEqual(clippingView.backdropFilterSubviews.count, 0u);
+}
+
+- (void)testSubmitFrameRecompositesRecreatedViewWithSameId {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  FlutterMethodCall* create =
+      [FlutterMethodCall methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @0,
+                                          @"viewType" : @"MockFlutterPlatformView",
+                                          @"gestureBlockingPolicy" : @"eager"
+                                        }];
+  [flutterPlatformViewsController onMethodCall:create result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  UIView* firstView = gMockPlatformView;
+
+  // Dispose the view and submit a frame without it, then recreate it with the same ID.
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@0]
+            result:result];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController submitFrame:CreateTestSurfaceFrame()
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+
+  // Verify the old view's clipping view was removed from the Flutter view.
+  XCTAssertNil(firstView.superview.superview.superview);
+  [flutterPlatformViewsController onMethodCall:create result:result];
+  XCTAssertNotEqual(gMockPlatformView, firstView);
+
+  // The new view has never been composited.
+  // Verify it is composited, even when the params are identical.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  CGRect rectInFlutterView = [gMockPlatformView convertRect:gMockPlatformView.bounds
+                                                     toView:flutterView];
+  XCTAssertTrue(CGRectEqualToRect(rectInFlutterView, CGRectMake(10, 10, 100, 100)));
+}
+
 - (void)testOnlyPlatformViewsAreRemovedWhenReset {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);

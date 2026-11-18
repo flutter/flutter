@@ -48,6 +48,7 @@ BundleBuilder createBundleBuilder({
     androidSdkBuilder: androidSdkBuilder,
     buildSystem: buildSystem,
     buildTargets: const BuildTargetsImpl(),
+    featureFlags: TestFeatureFlags(),
     toolContext: FakeToolContext(
       artifacts: artifacts ?? Artifacts.test(fileSystem: fileSystem),
       cache: Cache.test(

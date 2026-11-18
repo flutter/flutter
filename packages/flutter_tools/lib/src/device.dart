@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 
 import 'android/android_engine_cli_flags.dart';
 import 'application_package.dart';
-import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -23,8 +22,6 @@ import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
 import 'web/devfs_config.dart';
-
-DeviceManager? get deviceManager => context.get<DeviceManager>();
 
 /// The user-visible category of a [Device].
 typedef Category = tools_core.Category;
