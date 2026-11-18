@@ -6,6 +6,38 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('NavigationToolbar centers middle within the toolbar when there is room', (
+    WidgetTester tester,
+  ) async {
+    const middleKey = ValueKey<String>('middle');
+
+    for (final TextDirection textDirection in TextDirection.values) {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: textDirection,
+          child: const Center(
+            child: SizedBox(
+              width: 360.0,
+              height: 56.0,
+              child: NavigationToolbar(
+                centerMiddle: true,
+                middleSpacing: 4.0,
+                leading: SizedBox(width: 48.0),
+                middle: SizedBox(key: middleKey, width: 100.0, height: 56.0),
+                trailing: SizedBox(width: 120.0, height: 56.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The toolbar is centered in the 800 pixel wide test surface. The middle
+      // is centered within the toolbar, not within the space between the
+      // leading and trailing widgets, whose center is 36 pixels away.
+      expect(tester.getCenter(find.byKey(middleKey)).dx, 400.0);
+    }
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/196207.
   for (final TextDirection textDirection in TextDirection.values) {
     for (final middleWidth in <double>[112.0, 116.0, 120.0, 124.0]) {
