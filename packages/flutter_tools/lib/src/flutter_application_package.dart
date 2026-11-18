@@ -127,9 +127,14 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         // TODO(bkonyi): Replace with device-scoped DeviceService.resolveApplication
         // once available so unsupported built-in architectures are not routed here.
         final String id = _currentProject().manifest.appName;
-        return applicationBinary == null
-            ? ExtensionApplicationPackage(id: id)
-            : PrebuiltExtensionApplicationPackage(applicationPackage: applicationBinary, id: id);
+        if (applicationBinary == null) {
+          return ExtensionApplicationPackage(id: id);
+        }
+        final FileSystem fs = _toolContext.fs;
+        final FileSystemEntity entity = fs.isDirectorySync(applicationBinary.path)
+            ? fs.directory(applicationBinary.path)
+            : applicationBinary;
+        return PrebuiltExtensionApplicationPackage(applicationPackage: entity, id: id);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }

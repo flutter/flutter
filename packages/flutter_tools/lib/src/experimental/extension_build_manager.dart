@@ -4,11 +4,13 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../build_info.dart' show BuildInfo, BuildMode;
 import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
@@ -160,31 +162,63 @@ base class ExtensionBuildManager {
 
   /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
   Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
+    required BuildInfo buildInfo,
+    required FileSystem fileSystem,
     required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    String? targetDeviceId,
+    String? targetPlatform,
   }) {
+    final String? splitDebugInfoPath = buildInfo.splitDebugInfoPath;
+    final Uri? splitDebugInfo = splitDebugInfoPath != null && splitDebugInfoPath.isNotEmpty
+        ? fileSystem.directory(splitDebugInfoPath).absolute.uri
+        : null;
     return _executeBuildRpc(
-      buildMode: buildMode,
+      buildMode: buildInfo.mode,
+      buildName: buildInfo.buildName,
+      buildNumber: buildInfo.buildNumber,
       connectionMap: _buildTargetToConnection,
+      dartDefines: _parseDartDefines(buildInfo.dartDefines),
+      dartObfuscation: buildInfo.dartObfuscation,
       ensureTargetsLoaded: () async {
         if (_cachedBuildTargets == null) {
           await getBuildTargets();
         }
       },
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+      flavor: buildInfo.flavor,
       flutterRoot: flutterRoot,
       mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
       resolvedArtifacts: resolvedArtifacts,
       rpcMethod: BuildService.buildMethod,
+      splitDebugInfo: splitDebugInfo,
+      targetDeviceId: targetDeviceId,
       targetKind: 'build',
       targetName: targetName,
+      targetPlatform: targetPlatform,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+      treeShakeIcons: buildInfo.treeShakeIcons,
     );
+  }
+
+  static Map<String, String> _parseDartDefines(List<String> dartDefines) {
+    final result = <String, String>{};
+    for (final define in dartDefines) {
+      final int separatorIndex = define.indexOf('=');
+      if (separatorIndex == -1) {
+        result[define] = '';
+      } else {
+        result[define.substring(0, separatorIndex)] = define.substring(separatorIndex + 1);
+      }
+    }
+    return result;
   }
 
   /// Triggers a custom `flutter assemble` target for the given [targetName] by routing to the active extension.
@@ -197,6 +231,8 @@ base class ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    required bool trackWidgetCreation,
+    required bool treeShakeIcons,
   }) {
     return _executeBuildRpc(
       buildDir: buildDir,
@@ -215,6 +251,8 @@ base class ExtensionBuildManager {
       rpcMethod: BuildService.assembleMethod,
       targetKind: 'assemble',
       targetName: targetName,
+      trackWidgetCreation: trackWidgetCreation,
+      treeShakeIcons: treeShakeIcons,
     );
   }
 
@@ -230,7 +268,19 @@ base class ExtensionBuildManager {
     required String rpcMethod,
     required String targetKind,
     required String targetName,
+    required bool trackWidgetCreation,
+    required bool treeShakeIcons,
     Uri? buildDir,
+    String? buildName,
+    String? buildNumber,
+    Map<String, String> dartDefines = const <String, String>{},
+    bool dartObfuscation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    String? flavor,
+    Uri? splitDebugInfo,
+    String? targetDeviceId,
+    String? targetPlatform,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
@@ -277,12 +327,26 @@ base class ExtensionBuildManager {
         params: <String, Object?>{
           BuildService.buildDirParam: ?buildDir?.toString(),
           BuildService.buildModeParam: buildMode.cliName,
+          BuildService.buildNameParam: ?buildName,
+          BuildService.buildNumberParam: ?buildNumber,
+          if (dartDefines.isNotEmpty) BuildService.dartDefinesParam: dartDefines,
+          BuildService.dartObfuscationParam: dartObfuscation,
+          if (extraFrontEndOptions.isNotEmpty)
+            BuildService.extraFrontEndOptionsParam: extraFrontEndOptions,
+          if (extraGenSnapshotOptions.isNotEmpty)
+            BuildService.extraGenSnapshotOptionsParam: extraGenSnapshotOptions,
+          BuildService.flavorParam: ?flavor,
           BuildService.flutterRootParam: flutterRoot.toString(),
           BuildService.mainPathParam: mainPath,
           BuildService.outputDirParam: outputDir.toString(),
           BuildService.projectRootParam: projectRoot.toString(),
           BuildService.resolvedArtifactsParam: resolvedArtifacts,
+          BuildService.splitDebugInfoParam: ?splitDebugInfo?.toString(),
+          BuildService.targetDeviceIdParam: ?targetDeviceId,
           BuildService.targetNameParam: targetName,
+          BuildService.targetPlatformParam: ?targetPlatform,
+          BuildService.trackWidgetCreationParam: trackWidgetCreation,
+          BuildService.treeShakeIconsParam: treeShakeIcons,
         },
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.

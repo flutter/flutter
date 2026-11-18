@@ -9,6 +9,61 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
 import 'package:test/test.dart';
 
+final class _ContextRecordingBuildTarget extends BuildTarget {
+  const _ContextRecordingBuildTarget(this._onBuild)
+    : super(
+        description: 'Records ExtensionBuildContext.',
+        outputDir: '{OUTPUT_DIR}/recorded',
+        targetPlatform: 'linux-x64',
+      );
+
+  final void Function(ExtensionBuildContext context) _onBuild;
+
+  @override
+  String get name => 'custom-linux-build';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    _onBuild(context);
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _ContextRecordingAssembleTarget extends AssembleTarget {
+  const _ContextRecordingAssembleTarget(this._onAssemble)
+    : super(description: 'Records ExtensionAssembleContext.', targetPlatform: 'linux-x64');
+
+  final void Function(ExtensionAssembleContext context) _onAssemble;
+
+  @override
+  String get name => 'custom-linux-build';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    _onAssemble(context);
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _ContextRecordingBuildService extends BuildService {
+  ExtensionBuildContext? lastBuildContext;
+  ExtensionAssembleContext? lastAssembleContext;
+
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[
+    _ContextRecordingBuildTarget((ExtensionBuildContext context) {
+      lastBuildContext = context;
+    }),
+  ];
+
+  @override
+  List<AssembleTarget> get assembleTargets => <AssembleTarget>[
+    _ContextRecordingAssembleTarget((ExtensionAssembleContext context) {
+      lastAssembleContext = context;
+    }),
+  ];
+}
+
 void main() {
   group('LinuxBuildService', () {
     test('buildTargets and assembleTargets return prototype Linux targets', () {
@@ -78,6 +133,8 @@ void main() {
           BuildService.projectRootParam: '/project',
           BuildService.resolvedArtifactsParam: const <String, String>{},
           BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
+          BuildService.trackWidgetCreationParam: true,
+          BuildService.treeShakeIconsParam: false,
         });
         final missingCmakeResult = ExtensionBuildResult.fromJson(
           missingCmakeResultObj! as Map<String, Object?>,
@@ -93,6 +150,8 @@ void main() {
           BuildService.projectRootParam: '/project',
           BuildService.resolvedArtifactsParam: const <String, String>{},
           BuildService.targetNameParam: 'unknown-target',
+          BuildService.trackWidgetCreationParam: true,
+          BuildService.treeShakeIconsParam: false,
         });
         final unknownBuildResult = ExtensionBuildResult.fromJson(
           unknownBuildTargetResultObj! as Map<String, Object?>,
@@ -110,6 +169,8 @@ void main() {
             BuildService.projectRootParam: '/project',
             BuildService.resolvedArtifactsParam: const <String, String>{},
             BuildService.targetNameParam: 'unknown-assemble-target',
+            BuildService.trackWidgetCreationParam: true,
+            BuildService.treeShakeIconsParam: false,
           },
         );
         final unknownAssembleResult = ExtensionBuildResult.fromJson(
@@ -151,6 +212,8 @@ void main() {
             LinuxArtifacts.linuxDesktopPath.name: desktopDir.path,
             BuiltInArtifacts.icuData.name: icuFile.path,
           },
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         ),
       );
 
@@ -181,6 +244,8 @@ void main() {
           outputDir: tempDir.uri,
           projectRoot: tempDir.uri,
           resolvedArtifacts: const <String, String>{},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         ),
       );
 
@@ -219,6 +284,8 @@ void main() {
             LinuxArtifacts.linuxDesktopPath.name: desktopDir.path,
             BuiltInArtifacts.icuData.name: icuFile.path,
           },
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         ),
       );
 
@@ -238,73 +305,130 @@ void main() {
         BuildService.outputDirParam: '/out',
         BuildService.buildDirParam: '/build',
         BuildService.resolvedArtifactsParam: <String, String>{},
+        BuildService.trackWidgetCreationParam: true,
+        BuildService.treeShakeIconsParam: false,
       };
 
-      final commonInvalidCases =
-          <(String description, Map<String, Object?> overrides, String expectedMessage)>[
-            (
-              'missing targetName',
-              <String, Object?>{BuildService.targetNameParam: null},
-              'Missing required "${BuildService.targetNameParam}" (expected String).',
-            ),
-            (
-              'missing projectRoot',
-              <String, Object?>{BuildService.projectRootParam: null},
-              'Missing required "${BuildService.projectRootParam}" (expected String).',
-            ),
-            (
-              'relative projectRoot',
-              <String, Object?>{BuildService.projectRootParam: 'relative/path'},
-              'Missing or invalid "${BuildService.projectRootParam}" parameter.',
-            ),
-            (
-              'missing flutterRoot',
-              <String, Object?>{BuildService.flutterRootParam: null},
-              'Missing required "${BuildService.flutterRootParam}" (expected String).',
-            ),
-            (
-              'relative flutterRoot',
-              <String, Object?>{BuildService.flutterRootParam: 'relative/flutter'},
-              'Missing or invalid "${BuildService.flutterRootParam}" parameter.',
-            ),
-            (
-              'missing mainPath',
-              <String, Object?>{BuildService.mainPathParam: null},
-              'Missing required "${BuildService.mainPathParam}" (expected String).',
-            ),
-            (
-              'missing buildMode',
-              <String, Object?>{BuildService.buildModeParam: null},
-              'Missing required "${BuildService.buildModeParam}" (expected String).',
-            ),
-            (
-              'invalid buildMode',
-              <String, Object?>{BuildService.buildModeParam: 'invalid_mode'},
-              'Missing or invalid "${BuildService.buildModeParam}" parameter.',
-            ),
-            (
-              'missing outputDir',
-              <String, Object?>{BuildService.outputDirParam: null},
-              'Missing required "${BuildService.outputDirParam}" (expected String).',
-            ),
-            (
-              'relative outputDir',
-              <String, Object?>{BuildService.outputDirParam: 'relative/output'},
-              'Missing or invalid "${BuildService.outputDirParam}" parameter.',
-            ),
-            (
-              'missing resolvedArtifacts',
-              <String, Object?>{BuildService.resolvedArtifactsParam: null},
-              'Missing required "${BuildService.resolvedArtifactsParam}" (expected Map<String, Object?>).',
-            ),
-            (
-              'non-string resolvedArtifacts value',
-              <String, Object?>{
-                BuildService.resolvedArtifactsParam: <String, Object?>{'genSnapshot': 123},
-              },
-              'Invalid "${BuildService.resolvedArtifactsParam}" parameter: Invalid "genSnapshot": expected String, got int.',
-            ),
-          ];
+      final commonInvalidCases = <(String description, Map<String, Object?> overrides, String expectedMessage)>[
+        (
+          'missing targetName',
+          <String, Object?>{BuildService.targetNameParam: null},
+          'Missing required "${BuildService.targetNameParam}" (expected String).',
+        ),
+        (
+          'missing projectRoot',
+          <String, Object?>{BuildService.projectRootParam: null},
+          'Missing required "${BuildService.projectRootParam}" (expected String).',
+        ),
+        (
+          'relative projectRoot',
+          <String, Object?>{BuildService.projectRootParam: 'relative/path'},
+          'Missing or invalid "${BuildService.projectRootParam}" parameter.',
+        ),
+        (
+          'missing flutterRoot',
+          <String, Object?>{BuildService.flutterRootParam: null},
+          'Missing required "${BuildService.flutterRootParam}" (expected String).',
+        ),
+        (
+          'relative flutterRoot',
+          <String, Object?>{BuildService.flutterRootParam: 'relative/flutter'},
+          'Missing or invalid "${BuildService.flutterRootParam}" parameter.',
+        ),
+        (
+          'missing mainPath',
+          <String, Object?>{BuildService.mainPathParam: null},
+          'Missing required "${BuildService.mainPathParam}" (expected String).',
+        ),
+        (
+          'missing buildMode',
+          <String, Object?>{BuildService.buildModeParam: null},
+          'Missing required "${BuildService.buildModeParam}" (expected String).',
+        ),
+        (
+          'invalid buildMode',
+          <String, Object?>{BuildService.buildModeParam: 'invalid_mode'},
+          'Missing or invalid "${BuildService.buildModeParam}" parameter.',
+        ),
+        (
+          'missing outputDir',
+          <String, Object?>{BuildService.outputDirParam: null},
+          'Missing required "${BuildService.outputDirParam}" (expected String).',
+        ),
+        (
+          'relative outputDir',
+          <String, Object?>{BuildService.outputDirParam: 'relative/output'},
+          'Missing or invalid "${BuildService.outputDirParam}" parameter.',
+        ),
+        (
+          'missing resolvedArtifacts',
+          <String, Object?>{BuildService.resolvedArtifactsParam: null},
+          'Missing required "${BuildService.resolvedArtifactsParam}" (expected Map<String, Object?>).',
+        ),
+        (
+          'non-string resolvedArtifacts value',
+          <String, Object?>{
+            BuildService.resolvedArtifactsParam: <String, Object?>{'genSnapshot': 123},
+          },
+          'Invalid "${BuildService.resolvedArtifactsParam}" parameter: Invalid "genSnapshot": expected String, got int.',
+        ),
+        (
+          'non-directory splitDebugInfo (missing trailing slash)',
+          <String, Object?>{BuildService.splitDebugInfoParam: 'file:///tmp/not_a_dir'},
+          'Invalid "${BuildService.splitDebugInfoParam}": expected trailing-slash-terminated absolute file: URI.',
+        ),
+        (
+          'relative splitDebugInfo',
+          <String, Object?>{BuildService.splitDebugInfoParam: 'relative/symbols/'},
+          'Invalid "${BuildService.splitDebugInfoParam}": expected trailing-slash-terminated absolute file: URI.',
+        ),
+        (
+          'non-string dartDefines value',
+          <String, Object?>{
+            BuildService.dartDefinesParam: <String, Object?>{'KEY': 42},
+          },
+          'Invalid "KEY" value: expected String, got int.',
+        ),
+        (
+          'non-bool dartObfuscation',
+          <String, Object?>{BuildService.dartObfuscationParam: 'yes'},
+          'Invalid "${BuildService.dartObfuscationParam}": expected bool, got String.',
+        ),
+        (
+          'non-string extraFrontEndOptions element',
+          <String, Object?>{
+            BuildService.extraFrontEndOptionsParam: <Object?>[123],
+          },
+          'Invalid "${BuildService.extraFrontEndOptionsParam}" element: expected String, got int.',
+        ),
+        (
+          'non-string extraGenSnapshotOptions element',
+          <String, Object?>{
+            BuildService.extraGenSnapshotOptionsParam: <Object?>[456],
+          },
+          'Invalid "${BuildService.extraGenSnapshotOptionsParam}" element: expected String, got int.',
+        ),
+        (
+          'missing trackWidgetCreation',
+          <String, Object?>{BuildService.trackWidgetCreationParam: null},
+          'Missing required "${BuildService.trackWidgetCreationParam}" (expected bool).',
+        ),
+        (
+          'non-bool trackWidgetCreation',
+          <String, Object?>{BuildService.trackWidgetCreationParam: 'yes'},
+          'Invalid "${BuildService.trackWidgetCreationParam}": expected bool, got String.',
+        ),
+        (
+          'missing treeShakeIcons',
+          <String, Object?>{BuildService.treeShakeIconsParam: null},
+          'Missing required "${BuildService.treeShakeIconsParam}" (expected bool).',
+        ),
+        (
+          'non-bool treeShakeIcons',
+          <String, Object?>{BuildService.treeShakeIconsParam: 'no'},
+          'Invalid "${BuildService.treeShakeIconsParam}": expected bool, got String.',
+        ),
+      ];
 
       for (final (String description, Map<String, Object?> overrides, String expectedMessage)
           in commonInvalidCases) {
@@ -362,6 +486,63 @@ void main() {
           );
         });
       }
+
+      test('BuildService parses BuildInfo parameters into ExtensionBuildContext and ExtensionAssembleContext', () async {
+        final service = _ContextRecordingBuildService();
+        final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+        final ExtensionRpcHandler buildHandler = handlers['build']!;
+        final ExtensionRpcHandler assembleHandler = handlers['assemble']!;
+
+        final fullParams = <String, Object?>{
+          ...validParams,
+          BuildService.buildModeParam: 'release',
+          BuildService.buildNameParam: '3.2.1',
+          BuildService.buildNumberParam: '77',
+          BuildService.dartDefinesParam: <String, Object?>{'ENV': 'prod'},
+          BuildService.dartObfuscationParam: true,
+          BuildService.extraFrontEndOptionsParam: <Object?>['--fe-opt'],
+          BuildService.extraGenSnapshotOptionsParam: <Object?>['--gs-opt'],
+          BuildService.flavorParam: 'enterprise',
+          BuildService.splitDebugInfoParam: 'file:///tmp/symbols/',
+          BuildService.targetDeviceIdParam: 'device-123',
+          BuildService.targetPlatformParam: 'custom-arm64',
+          BuildService.trackWidgetCreationParam: true,
+          BuildService.treeShakeIconsParam: false,
+        };
+
+        await buildHandler(fullParams);
+        final ExtensionBuildContext buildCtx = service.lastBuildContext!;
+        expect(buildCtx.buildMode, BuildMode.release);
+        expect(buildCtx.buildName, '3.2.1');
+        expect(buildCtx.buildNumber, '77');
+        expect(buildCtx.dartDefines, const <String, String>{'ENV': 'prod'});
+        expect(buildCtx.dartObfuscation, isTrue);
+        expect(buildCtx.extraFrontEndOptions, const <String>['--fe-opt']);
+        expect(buildCtx.extraGenSnapshotOptions, const <String>['--gs-opt']);
+        expect(buildCtx.flavor, 'enterprise');
+        expect(buildCtx.splitDebugInfo, Uri.parse('file:///tmp/symbols/'));
+        expect(buildCtx.targetDeviceId, 'device-123');
+        expect(buildCtx.targetPlatform, 'custom-arm64');
+        expect(buildCtx.trackWidgetCreation, isTrue);
+        expect(buildCtx.treeShakeIcons, isFalse);
+
+        await assembleHandler(fullParams);
+        final ExtensionAssembleContext assembleCtx = service.lastAssembleContext!;
+        expect(assembleCtx.buildDir, Uri.parse('/build/'));
+        expect(assembleCtx.buildMode, BuildMode.release);
+        expect(assembleCtx.buildName, '3.2.1');
+        expect(assembleCtx.buildNumber, '77');
+        expect(assembleCtx.dartDefines, const <String, String>{'ENV': 'prod'});
+        expect(assembleCtx.dartObfuscation, isTrue);
+        expect(assembleCtx.extraFrontEndOptions, const <String>['--fe-opt']);
+        expect(assembleCtx.extraGenSnapshotOptions, const <String>['--gs-opt']);
+        expect(assembleCtx.flavor, 'enterprise');
+        expect(assembleCtx.splitDebugInfo, Uri.parse('file:///tmp/symbols/'));
+        expect(assembleCtx.targetDeviceId, 'device-123');
+        expect(assembleCtx.targetPlatform, 'custom-arm64');
+        expect(assembleCtx.trackWidgetCreation, isTrue);
+        expect(assembleCtx.treeShakeIcons, isFalse);
+      });
     });
   });
 }

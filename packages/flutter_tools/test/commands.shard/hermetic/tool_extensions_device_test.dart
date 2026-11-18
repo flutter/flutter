@@ -37,7 +37,8 @@ import 'package:flutter_tools_core/flutter_tools_core.dart'
         ExtensionBuildResult,
         ExtensionDebuggingOptions,
         ExtensionFlutterProject,
-        TargetDevice;
+        TargetDevice,
+        ToolExtensionException;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
@@ -53,6 +54,7 @@ final class _TestBuildTarget extends BuildTarget {
   const _TestBuildTarget({
     required super.description,
     required this.name,
+    this.buildContextSendPort,
     this.errorMessage,
     this.executableUri,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
@@ -63,12 +65,29 @@ final class _TestBuildTarget extends BuildTarget {
   @override
   final String name;
 
+  final SendPort? buildContextSendPort;
   final String? errorMessage;
   final Uri? executableUri;
   final bool shouldSucceed;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    buildContextSendPort?.send(<String, Object?>{
+      'buildMode': context.buildMode.cliName,
+      'buildName': context.buildName,
+      'buildNumber': context.buildNumber,
+      'dartDefines': context.dartDefines,
+      'dartObfuscation': context.dartObfuscation,
+      'extraFrontEndOptions': context.extraFrontEndOptions,
+      'extraGenSnapshotOptions': context.extraGenSnapshotOptions,
+      'flavor': context.flavor,
+      'mainPath': context.mainPath,
+      'splitDebugInfo': context.splitDebugInfo?.toString(),
+      'targetDeviceId': context.targetDeviceId,
+      'targetPlatform': context.targetPlatform,
+      'trackWidgetCreation': context.trackWidgetCreation,
+      'treeShakeIcons': context.treeShakeIcons,
+    });
     return shouldSucceed
         ? ExtensionBuildResult(success: true, executableUri: executableUri)
         : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
@@ -76,9 +95,14 @@ final class _TestBuildTarget extends BuildTarget {
 }
 
 final class _FakeTestBuildService extends BuildService {
+  _FakeTestBuildService({this.buildContextSendPort});
+
+  final SendPort? buildContextSendPort;
+
   @override
   List<BuildTarget> get buildTargets => <BuildTarget>[
     _TestBuildTarget(
+      buildContextSendPort: buildContextSendPort,
       description: 'Fake test build target',
       name: 'fake-test-build',
       executableUri: Uri.parse('file:///tmp/fake_bundle/app'),
@@ -152,7 +176,8 @@ final class _FakeTestDeviceService extends DeviceService {
   }) async => deviceId == 'fake_test_device';
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
@@ -160,23 +185,25 @@ final class _FakeTestDeviceService extends DeviceService {
   }) async {
     if (deviceId == 'fake_test_device' || deviceId == 'custom_os_test_device') {
       final validUri = prebuiltApplication
-          ? executableUri == Uri.file('/tmp/prebuilt_bundle/app')
-          : executableUri == Uri.file('/tmp/fake_bundle/app');
+          ? executableUri == Uri.parse('file:///tmp/prebuilt_bundle/app')
+          : executableUri == Uri.parse('file:///tmp/fake_bundle/app');
       final bool launched =
+          appId.isNotEmpty &&
           validUri &&
           debuggingOptions.buildMode == .debug &&
           debuggingOptions.debuggingEnabled &&
           debuggingOptions.engineSwitches.contains('enable-dart-profiling=true');
-      if (launched) {
-        _runningDevices.add(deviceId);
+      if (!launched) {
+        throw const ToolExtensionException('Invalid launch configuration.');
       }
-      return launched;
+      _runningDevices.add(deviceId);
+      return;
     }
     if (deviceId == 'missing_vm_service_device') {
       _runningDevices.add(deviceId);
-      return true;
+      return;
     }
-    return false;
+    throw const ToolExtensionException('Simulated launch failure.');
   }
 
   @override
@@ -189,8 +216,10 @@ final class _FakeTestDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp({required String deviceId}) async {
-    return _runningDevices.remove(deviceId);
+  Future<void> stopApp({required String deviceId, String? appId}) async {
+    if (!_runningDevices.remove(deviceId)) {
+      throw const ToolExtensionException('Application is not running.');
+    }
   }
 }
 
@@ -225,18 +254,21 @@ final class _CustomLogStreamingDeviceService extends DeviceService {
   }) async => true;
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
     bool prebuiltApplication = false,
-  }) async => false;
+  }) async {
+    throw const ToolExtensionException('Launching is not supported.');
+  }
 
   @override
   Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => false;
+  Future<void> stopApp({required String deviceId, String? appId}) async {}
 
   @override
   Future<void> startLogStream({required String deviceId}) async {
@@ -245,12 +277,20 @@ final class _CustomLogStreamingDeviceService extends DeviceService {
   }
 }
 
-void _fakeAppLaunchExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(
-    sendPort,
-    <ToolExtensionService>[_FakeTestBuildService(), _FakeTestDeviceService()],
-    supportedPlatforms: const <String>{'linux'},
-  );
+ExtensionEntryPoint _createFakeAppLaunchEntryPoint({SendPort? buildContextSendPort}) {
+  return (SendPort sendPort) {
+    unawaited(
+      ToolExtensionEntryPoint.run(
+        sendPort,
+        <ToolExtensionService>[
+          _FakeTestBuildService(buildContextSendPort: buildContextSendPort),
+          _FakeTestDeviceService(),
+        ],
+        extensionName: 'fake_test_ext',
+        supportedPlatforms: const <String>{'linux'},
+      ),
+    );
+  };
 }
 
 void main() {
@@ -536,8 +576,9 @@ flutter:
     );
 
     group('ExtensionBackedDevice startApp and stopApp', () {
-      Future<(ExtensionManager, BufferLogger, MemoryFileSystem, List<Device>)>
-      setUpTestDevices() async {
+      Future<(ExtensionManager, BufferLogger, MemoryFileSystem, List<Device>)> setUpTestDevices({
+        SendPort? buildContextSendPort,
+      }) async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
         fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
@@ -545,7 +586,9 @@ flutter:
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: logger,
-          entryPoints: <ExtensionEntryPoint>[_fakeAppLaunchExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[
+            _createFakeAppLaunchEntryPoint(buildContextSendPort: buildContextSendPort),
+          ],
           featureFlags: featureFlags,
         );
         addTearDown(manager.dispose);
@@ -564,22 +607,63 @@ flutter:
         return (manager, logger, fileSystem, devices);
       }
 
-      testWithoutContext(
-        'delegates build, launch, VM service discovery, and stop via RPC',
-        () async {
-          final (_, _, _, List<Device> devices) = await setUpTestDevices();
-          final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
+      testWithoutContext('delegates build with full BuildInfo context, launch, VM service discovery, and stop via RPC', () async {
+        final buildContextPort = ReceivePort();
+        addTearDown(buildContextPort.close);
+        final (_, _, MemoryFileSystem fileSystem, List<Device> devices) = await setUpTestDevices(
+          buildContextSendPort: buildContextPort.sendPort,
+        );
+        final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
-          final LaunchResult launchResult = await device.startApp(
-            null,
-            mainPath: 'lib/main.dart',
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          );
-          expect(launchResult.started, isTrue);
-          expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
-          expect(await device.stopApp(null), isTrue);
-        },
-      );
+        await expectLater(
+          device.startApp(null, debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)),
+          throwsStateError,
+        );
+
+        const buildInfo = BuildInfo(
+          BuildMode.debug,
+          'staging',
+          buildName: '1.5.0',
+          buildNumber: '9',
+          dartDefines: <String>['ENV=staging'],
+          dartObfuscation: true,
+          extraFrontEndOptions: <String>['--extra-fe'],
+          extraGenSnapshotOptions: <String>['--extra-gs'],
+          packageConfigPath: '.dart_tool/package_config.json',
+          splitDebugInfoPath: 'out/symbols',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+        );
+        final appPackage = ExtensionApplicationPackage(id: 'test_app');
+        final LaunchResult launchResult = await device.startApp(
+          appPackage,
+          mainPath: 'lib/main.dart',
+          debuggingOptions: DebuggingOptions.enabled(buildInfo),
+        );
+        expect(launchResult.started, isTrue);
+        expect(launchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
+
+        final receivedContext = await buildContextPort.first as Map<String, Object?>;
+        expect(receivedContext['buildMode'], 'debug');
+        expect(receivedContext['buildName'], '1.5.0');
+        expect(receivedContext['buildNumber'], '9');
+        expect(receivedContext['dartDefines'], const <String, String>{'ENV': 'staging'});
+        expect(receivedContext['dartObfuscation'], isTrue);
+        expect(receivedContext['extraFrontEndOptions'], const <String>['--extra-fe']);
+        expect(receivedContext['extraGenSnapshotOptions'], const <String>['--extra-gs']);
+        expect(receivedContext['flavor'], 'staging');
+        expect(receivedContext['mainPath'], fileSystem.file('lib/main.dart').absolute.path);
+        expect(
+          receivedContext['splitDebugInfo'],
+          fileSystem.directory('out/symbols').absolute.uri.toString(),
+        );
+        expect(receivedContext['targetDeviceId'], 'fake_test_device');
+        expect(receivedContext['targetPlatform'], 'linux-x64');
+        expect(receivedContext['trackWidgetCreation'], isTrue);
+        expect(receivedContext['treeShakeIcons'], isFalse);
+
+        expect(await device.stopApp(appPackage), isTrue);
+      });
 
       testWithoutContext('supports prebuilt application launch when PrebuiltExtensionApplicationPackage is provided and fails when missing', () async {
         final (_, BufferLogger logger, MemoryFileSystem fileSystem, List<Device> devices) =
@@ -587,7 +671,7 @@ flutter:
         final Device device = devices.firstWhere((Device d) => d.id == 'fake_test_device');
 
         final LaunchResult missingPrebuiltResult = await device.startApp(
-          null,
+          ExtensionApplicationPackage(id: 'test_app'),
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         );
@@ -617,14 +701,18 @@ flutter:
 
         final File prebuiltBinary = fileSystem.file('/tmp/prebuilt_bundle/app')
           ..createSync(recursive: true);
+        final prebuiltPackage = PrebuiltExtensionApplicationPackage(
+          applicationPackage: prebuiltBinary,
+          id: 'test_app',
+        );
         final LaunchResult prebuiltLaunchResult = await device.startApp(
-          PrebuiltExtensionApplicationPackage(applicationPackage: prebuiltBinary, id: 'test_app'),
+          prebuiltPackage,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(prebuiltLaunchResult.started, isTrue);
         expect(prebuiltLaunchResult.vmServiceUri, Uri.parse('http://127.0.0.1:8181/abcd=/'));
-        expect(await device.stopApp(null), isTrue);
+        expect(await device.stopApp(prebuiltPackage), isTrue);
       });
 
       testWithoutContext('FlutterApplicationPackageFactory resolves ExtensionApplicationPackage and PrebuiltExtensionApplicationPackage for TargetPlatform.unsupported', () async {
@@ -669,6 +757,19 @@ flutter:
         expect(
           (prebuiltPkg! as PrebuiltApplicationPackage).applicationPackage.path,
           binaryFile.path,
+        );
+
+        final Directory bundleDir = fileSystem.directory('/tmp/CustomApp.app')
+          ..createSync(recursive: true);
+        final ApplicationPackage? prebuiltDirPkg = await factory.getPackageForPlatform(
+          TargetPlatform.unsupported,
+          buildInfo: BuildInfo.debug,
+          applicationBinary: fileSystem.file(bundleDir.path),
+        );
+        expect(prebuiltDirPkg, isA<PrebuiltExtensionApplicationPackage>());
+        expect(
+          (prebuiltDirPkg! as PrebuiltApplicationPackage).applicationPackage,
+          isA<Directory>(),
         );
 
         final disabledFactory = FlutterApplicationPackageFactory(
@@ -803,7 +904,7 @@ flutter:
         final Device noTargetDevice = devices.firstWhere((Device d) => d.id == 'no_target_device');
 
         final LaunchResult noTargetResult = await noTargetDevice.startApp(
-          null,
+          ExtensionApplicationPackage(id: 'test_app'),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(noTargetResult.started, isFalse);
@@ -820,29 +921,35 @@ flutter:
         );
 
         final LaunchResult failingBuildResult = await failingBuildDevice.startApp(
-          null,
+          ExtensionApplicationPackage(id: 'test_app'),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(failingBuildResult.started, isFalse);
         expect(logger.errorText, contains('Build failed: Simulated build error'));
       });
 
-      testWithoutContext('fails when DeviceService.launchApp returns false', () async {
-        final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
-        final Device failingLaunchDevice = devices.firstWhere(
-          (Device d) => d.id == 'failing_launch_device',
-        );
+      testWithoutContext(
+        'fails when DeviceService.launchApp throws ToolExtensionException',
+        () async {
+          final (_, BufferLogger logger, _, List<Device> devices) = await setUpTestDevices();
+          final Device failingLaunchDevice = devices.firstWhere(
+            (Device d) => d.id == 'failing_launch_device',
+          );
 
-        final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
-          null,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        );
-        expect(failingLaunchResult.started, isFalse);
-        expect(
-          logger.errorText,
-          contains('Failed to launch application on Failing Launch Device.'),
-        );
-      });
+          final LaunchResult failingLaunchResult = await failingLaunchDevice.startApp(
+            ExtensionApplicationPackage(id: 'test_app'),
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          );
+          expect(failingLaunchResult.started, isFalse);
+          expect(
+            logger.errorText,
+            contains(
+              'Failed to launch application on Failing Launch Device ("fake_test_ext"): '
+              'Simulated launch failure.',
+            ),
+          );
+        },
+      );
 
       testWithoutContext(
         'fails without stopping app when debugging is enabled and getVmServiceUri returns null',
@@ -852,14 +959,23 @@ flutter:
             (Device d) => d.id == 'missing_vm_service_device',
           );
 
+          final appPackage = ExtensionApplicationPackage(id: 'test_app');
           final LaunchResult result = await missingVmServiceDevice.startApp(
-            null,
+            appPackage,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           );
           expect(result.started, isFalse);
           expect(logger.errorText, contains('Error waiting for a debug connection.'));
-          expect(await missingVmServiceDevice.stopApp(null), isTrue);
-          expect(await missingVmServiceDevice.stopApp(null), isFalse);
+          logger.clear();
+          expect(await missingVmServiceDevice.stopApp(appPackage), isTrue);
+          expect(await missingVmServiceDevice.stopApp(appPackage), isFalse);
+          expect(
+            logger.errorText,
+            contains(
+              'Failed to stop application on Missing VM Service Device ("fake_test_ext"): '
+              'Application is not running.',
+            ),
+          );
         },
       );
     });

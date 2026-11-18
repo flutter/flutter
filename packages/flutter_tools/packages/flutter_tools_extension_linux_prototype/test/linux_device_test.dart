@@ -153,8 +153,9 @@ void main() {
       }
 
       final ExtensionRpcHandler launchAppHandler = handlers['launchApp']!;
-      expect(
-        await launchAppHandler(<String, Object?>{
+      await expectLater(
+        launchAppHandler(<String, Object?>{
+          DeviceService.appIdParam: 'test_app',
           DeviceService.debuggingOptionsParam: <String, Object?>{
             'buildMode': 'debug',
             'debuggingEnabled': true,
@@ -163,10 +164,40 @@ void main() {
           DeviceService.executableUriParam: 'file:///nonexistent/app',
           DeviceService.prebuiltApplicationParam: true,
         }),
-        isFalse,
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            contains('Unknown device "unknown_device".'),
+          ),
+        ),
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'debug',
+            'debuggingEnabled': true,
+          },
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.executableUriParam: 'file:///nonexistent/app',
+        }),
+        _throwsInvalidParams('Missing required "${DeviceService.appIdParam}" (expected String).'),
+      );
+      await expectLater(
+        launchAppHandler(<String, Object?>{
+          DeviceService.appIdParam: '',
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'debug',
+            'debuggingEnabled': true,
+          },
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.executableUriParam: 'file:///nonexistent/app',
+        }),
+        _throwsInvalidParams('Parameter "${DeviceService.appIdParam}" must not be empty.'),
+      );
+      await expectLater(
+        launchAppHandler(<String, Object?>{
+          DeviceService.appIdParam: 'test_app',
           DeviceService.debuggingOptionsParam: <String, Object?>{
             'buildMode': 'debug',
             'debuggingEnabled': true,
@@ -188,6 +219,7 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
+          DeviceService.appIdParam: 'test_app',
           DeviceService.debuggingOptionsParam: <String, Object?>{
             'buildMode': 'debug',
             'debuggingEnabled': true,
@@ -201,6 +233,21 @@ void main() {
       );
       await expectLater(
         launchAppHandler(<String, Object?>{
+          DeviceService.appIdParam: 'test_app',
+          DeviceService.debuggingOptionsParam: <String, Object?>{
+            'buildMode': 'debug',
+            'debuggingEnabled': true,
+          },
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.executableUriParam: 'file:///',
+        }),
+        _throwsInvalidParams(
+          'Invalid "${DeviceService.executableUriParam}" parameter for ${DeviceService.launchAppMethod}',
+        ),
+      );
+      await expectLater(
+        launchAppHandler(<String, Object?>{
+          DeviceService.appIdParam: 'test_app',
           DeviceService.debuggingOptionsParam: <String, Object?>{
             'buildMode': 'invalid_mode',
             'debuggingEnabled': true,
@@ -232,7 +279,24 @@ void main() {
         await stopAppHandler(<String, Object?>{
           DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
         }),
-        isFalse,
+        isNull,
+      );
+      await expectLater(
+        stopAppHandler(<String, Object?>{
+          DeviceService.appIdParam: '',
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+        }),
+        _throwsInvalidParams('Parameter "${DeviceService.appIdParam}" must not be empty.'),
+      );
+      await expectLater(
+        stopAppHandler(<String, Object?>{DeviceService.deviceIdParam: 'unknown_device'}),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            contains('Unknown device "unknown_device".'),
+          ),
+        ),
       );
       await expectLater(
         stopAppHandler(<String, Object?>{}),
@@ -262,7 +326,8 @@ exec sleep 30
       final service = LinuxDeviceService();
       addTearDown(service.shutdown);
 
-      final bool launched = await service.launchApp(
+      await service.launchApp(
+        appId: 'fake_app.sh',
         debuggingOptions: const ExtensionDebuggingOptions(
           buildMode: .debug,
           dartEntrypointArgs: <String>['--entry-arg', 'value'],
@@ -273,7 +338,6 @@ exec sleep 30
         executableUri: scriptFile.absolute.uri,
         prebuiltApplication: true,
       );
-      expect(launched, isTrue);
 
       final Uri? vmServiceUri = await service.getVmServiceUri(
         deviceId: LinuxDeviceService.customLinuxDeviceId,
@@ -285,28 +349,37 @@ exec sleep 30
       expect(capturedEnv, contains('SWITCH_1=enable-dart-profiling=true'));
       expect(capturedEnv, contains('SWITCH_2=start-paused=true'));
 
-      final bool stopped = await service.stopApp(deviceId: LinuxDeviceService.customLinuxDeviceId);
-      expect(stopped, isTrue);
+      // Stopping a different appId leaves the active process running.
+      await service.stopApp(appId: 'other_app', deviceId: LinuxDeviceService.customLinuxDeviceId);
+      expect(
+        await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
+        Uri.parse('http://127.0.0.1:41187/wXxrm1n2GUI=/'),
+      );
+
+      await service.stopApp(appId: 'fake_app.sh', deviceId: LinuxDeviceService.customLinuxDeviceId);
       expect(
         await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
         isNull,
       );
 
-      scriptFile.writeAsStringSync('''
+      // Also supports launching from a directory bundle URI (`bundle/<appId>`).
+      final bundleDir = Directory('${tempDir.path}/bundle')..createSync();
+      final bundledExecutable = File('${bundleDir.path}/my_bundled_app')
+        ..writeAsStringSync('''
 #!/bin/sh
 echo "The Dart VM service is listening on http://[::1]:51234/"
 exec sleep 30
 ''');
-      expect(
-        await service.launchApp(
-          debuggingOptions: const ExtensionDebuggingOptions(
-            buildMode: .debug,
-            debuggingEnabled: true,
-          ),
-          deviceId: LinuxDeviceService.customLinuxDeviceId,
-          executableUri: scriptFile.absolute.uri,
+      await Process.run('chmod', <String>['+x', bundledExecutable.path]);
+
+      await service.launchApp(
+        appId: 'my_bundled_app',
+        debuggingOptions: const ExtensionDebuggingOptions(
+          buildMode: .debug,
+          debuggingEnabled: true,
         ),
-        isTrue,
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        executableUri: bundleDir.absolute.uri,
       );
       expect(
         await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),

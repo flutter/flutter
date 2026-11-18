@@ -48,6 +48,9 @@ abstract base class DeviceService extends ToolExtensionService {
   /// log line.
   static const String logEntryNotificationMethod = '$serviceNamespace.logEntry';
 
+  /// RPC parameter key for the application package identifier.
+  static const String appIdParam = 'appId';
+
   /// RPC parameter key for the target device ID.
   static const String deviceIdParam = 'deviceId';
 
@@ -82,16 +85,21 @@ abstract base class DeviceService extends ToolExtensionService {
     required ExtensionFlutterProject project,
   });
 
-  /// Launches the application at [executableUri] on the device with [deviceId]
-  /// using the given [debuggingOptions].
+  /// Installs and launches the compiled [executableUri] for [appId] on
+  /// [deviceId] using the specified [debuggingOptions].
   ///
-  /// [executableUri] is guaranteed to be an absolute `file:` URI pointing to
-  /// the built application binary or bundle. When [prebuiltApplication] is
-  /// `true`, [executableUri] points to a prebuilt package supplied by the user
-  /// (for example via `--use-application-binary`) rather than an output from an
-  /// in-session build. Returns `true` once the application process has been
-  /// started, or `false` if launching failed.
-  Future<bool> launchApp({
+  /// [executableUri] is guaranteed to be a non-root absolute `file:` URI
+  /// pointing to the built application binary or bundle directory. When
+  /// [prebuiltApplication] is `true`, [executableUri] points to a prebuilt
+  /// package or bundle supplied by the user (for example via
+  /// `--use-application-binary`) rather than an output from an in-session
+  /// build.
+  ///
+  /// Implementations must throw [ToolExtensionException] if installation or
+  /// process startup fails so the host fails the launch immediately instead of
+  /// waiting on [getVmServiceUri].
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
@@ -106,11 +114,14 @@ abstract base class DeviceService extends ToolExtensionService {
   /// or return `null` if the process exits or VM Service discovery fails.
   Future<Uri?> getVmServiceUri({required String deviceId});
 
-  /// Stops any running application on [deviceId].
+  /// Stops the running application and tears down any associated port
+  /// forwarding for [deviceId].
   ///
-  /// Returns `true` if a running application was stopped, or `false` if no
-  /// application was running on [deviceId] or stopping it failed.
-  Future<bool> stopApp({required String deviceId});
+  /// When [appId] is non-null, stops that specific application; when [appId] is
+  /// `null`, stops the active or most recently launched Flutter application on
+  /// [deviceId]. Throws [ToolExtensionException] if stopping the application
+  /// fails.
+  Future<void> stopApp({required String deviceId, String? appId});
 
   /// Starts streaming log output for the device identified by [deviceId].
   ///
@@ -184,12 +195,14 @@ abstract base class DeviceService extends ToolExtensionService {
     return deviceId;
   }
 
-  Future<bool> _launchAppRpc(Map<String, Object?> params) async {
+  Future<Object?> _launchAppRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
+    final String appId;
     final String executableUriStr;
     final Map<String, Object?> optionsMap;
     final bool prebuiltApplication;
     try {
+      appId = params.requiredField<String>(appIdParam);
       executableUriStr = params.requiredField<String>(executableUriParam);
       optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
       prebuiltApplication = params.optionalField<bool>(
@@ -199,21 +212,26 @@ abstract base class DeviceService extends ToolExtensionService {
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
+    if (appId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$appIdParam" must not be empty.');
+    }
     final Uri executableUri = _parseExecutableUri(executableUriStr);
     final ExtensionDebuggingOptions debuggingOptions = _parseDebuggingOptions(optionsMap);
-    return launchApp(
+    await launchApp(
+      appId: appId,
       debuggingOptions: debuggingOptions,
       deviceId: deviceId,
       executableUri: executableUri,
       prebuiltApplication: prebuiltApplication,
     );
+    return null;
   }
 
   static Uri _parseExecutableUri(String executableUriStr) {
     final Uri? uri = Uri.tryParse(executableUriStr);
-    if (uri == null || !uri.isValidFileUri) {
+    if (uri == null || !uri.isValidArtifactUri) {
       throw RpcException.invalidParams(
-        'Invalid "$executableUriParam" parameter for $launchAppMethod: must be an absolute "file:" URI.',
+        'Invalid "$executableUriParam" parameter for $launchAppMethod: must be a non-root absolute "file:" URI.',
       );
     }
     return uri;
@@ -235,9 +253,19 @@ abstract base class DeviceService extends ToolExtensionService {
     return <String, Object?>{vmServiceUriKey: uri?.toString()};
   }
 
-  Future<bool> _stopAppRpc(Map<String, Object?> params) async {
+  Future<Object?> _stopAppRpc(Map<String, Object?> params) async {
     final String deviceId = _parseDeviceId(params);
-    return stopApp(deviceId: deviceId);
+    final String? appId;
+    try {
+      appId = params.nullableField<String>(appIdParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    if (appId != null && appId.isEmpty) {
+      throw RpcException.invalidParams('Parameter "$appIdParam" must not be empty.');
+    }
+    await stopApp(appId: appId, deviceId: deviceId);
+    return null;
   }
 
   Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {
