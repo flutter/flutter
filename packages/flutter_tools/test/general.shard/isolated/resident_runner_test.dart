@@ -3,14 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/template.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -56,8 +59,21 @@ void main() {
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
       final residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: const DelegatingToolContext(),
+        ),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: testLogger,
+          platform: FakePlatform(),
+        ),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
           const BuildInfo(
@@ -84,9 +100,6 @@ void main() {
       expect(residentCompiler.recompileCalled, true);
       expect(residentCompiler.receivedNativeAssetsYaml, fileSystem.path.toUri('foo.yaml'));
     }),
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.any()},
   );
 }
