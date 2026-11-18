@@ -16,10 +16,10 @@ import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/content_hash.dart';
@@ -118,6 +118,7 @@ name: foo
             kBuildMode: BuildMode.debug.cliName,
           },
           artifacts: Artifacts.test(fileSystem: fs),
+          featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
           processManager: processManager,
           logger: logger,
           fileSystem: fs,
@@ -2581,6 +2582,83 @@ _flutter.loader.load();
     }),
   );
 
+  testWithoutContext('Dart2JSTarget, Dart2WasmTarget, and LinkHooks include recorded uses files only when recordUse is enabled', () {
+    final fileSystem = MemoryFileSystem.test();
+    Environment createEnv({required bool isRecordUseEnabled}) {
+      final env = Environment.test(
+        fileSystem.currentDirectory,
+        projectDir: fileSystem.currentDirectory.childDirectory('foo'),
+        outputDir: fileSystem.currentDirectory.childDirectory('bar'),
+        artifacts: Artifacts.test(fileSystem: fileSystem),
+        featureFlags: TestFeatureFlags(isRecordUseEnabled: isRecordUseEnabled),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.empty(),
+      );
+      env.buildDir.createSync(recursive: true);
+      env.outputDir.createSync(recursive: true);
+      return env;
+    }
+
+    final jsTarget = Dart2JSTarget(const JsCompilerConfig(), engineRevision: _kEngineRevision);
+    final wasmTarget = Dart2WasmTarget(
+      const WasmCompilerConfig(),
+      const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
+    );
+    final templatedFiles = WebTemplatedFiles(
+      <Map<String, Object?>>[],
+      compileTargets: <Dart2WebTarget>[jsTarget, wasmTarget],
+      engineRevision: _kEngineRevision,
+    );
+    final releaseBundle = WebReleaseBundle(
+      <WebCompilerConfig>[const JsCompilerConfig(), const WasmCompilerConfig()],
+      const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
+    );
+    final LinkHooks linkHooks = releaseBundle.dependencies.whereType<LinkHooks>().single;
+
+    final Environment enabledEnv = createEnv(isRecordUseEnabled: true);
+    expect(
+      jsTarget.resolveOutputs(enabledEnv).sources.map((File f) => f.basename),
+      contains(LinkHooks.recordedUsesJsFileName),
+    );
+    expect(
+      wasmTarget.resolveOutputs(enabledEnv).sources.map((File f) => f.basename),
+      contains(LinkHooks.recordedUsesWasmFileName),
+    );
+    expect(
+      linkHooks.resolveInputs(enabledEnv).sources.map((File f) => f.basename),
+      containsAll(<String>[LinkHooks.recordedUsesJsFileName, LinkHooks.recordedUsesWasmFileName]),
+    );
+    expect(
+      templatedFiles.resolveInputs(enabledEnv).sources.map((File f) => f.basename),
+      isNot(contains(LinkHooks.recordedUsesJsFileName)),
+    );
+    expect(
+      releaseBundle.resolveOutputs(enabledEnv).sources.map((File f) => f.basename),
+      isNot(contains(LinkHooks.recordedUsesJsFileName)),
+    );
+
+    final Environment disabledEnv = createEnv(isRecordUseEnabled: false);
+    expect(
+      jsTarget.resolveOutputs(disabledEnv).sources.map((File f) => f.basename),
+      isNot(contains(LinkHooks.recordedUsesJsFileName)),
+    );
+    expect(
+      wasmTarget.resolveOutputs(disabledEnv).sources.map((File f) => f.basename),
+      isNot(contains(LinkHooks.recordedUsesWasmFileName)),
+    );
+    expect(
+      linkHooks.resolveInputs(disabledEnv).sources.map((File f) => f.basename),
+      isNot(contains(LinkHooks.recordedUsesJsFileName)),
+    );
+    expect(
+      linkHooks.resolveInputs(disabledEnv).sources.map((File f) => f.basename),
+      isNot(contains(LinkHooks.recordedUsesWasmFileName)),
+    );
+  });
+
   test(
     'Dart2JSTarget and Dart2WasmTarget getBuildConfig safely handle multiple candidate files in buildDir',
     () => testbed.run(() {
@@ -3124,6 +3202,7 @@ flutter:
         projectDir: environment.fileSystem.directory('/work/canvaskit/app/foo'),
         outputDir: environment.fileSystem.directory('/work/canvaskit/app/bar'),
         artifacts: Artifacts.test(fileSystem: environment.fileSystem),
+        featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
         processManager: processManager,
         logger: environment.logger,
         fileSystem: environment.fileSystem,
@@ -3636,6 +3715,7 @@ _flutter.loader.load({
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
       processManager: FakeProcessManager.any(),
     );
     testEnvironment.buildDir.createSync(recursive: true);
@@ -3666,7 +3746,6 @@ _flutter.loader.load({
     late FlutterBuildSystem buildSystem;
 
     Map<Type, Generator> buildOverrides() => <Type, Generator>{
-      FeatureFlags: TestFeatureFlags.new,
       ProcessManager: () => processManager,
       TemplateRenderer: () => const MustacheTemplateRenderer(),
       Pub: ThrowingPub.new,
@@ -3701,6 +3780,7 @@ _flutter.loader.load({
         },
         engineVersion: _kEngineRevision,
         artifacts: environment.artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         logger: environment.logger,
         fileSystem: fs,
@@ -4390,6 +4470,7 @@ _flutter.loader.load();
         },
         engineVersion: _kEngineRevision,
         artifacts: environment.artifacts,
+        featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
         processManager: processManager,
         logger: environment.logger,
         fileSystem: fs,
@@ -4582,7 +4663,6 @@ flutter:
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isRecordUseEnabled: true),
           ProcessManager: () => processManager,
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           Pub: ThrowingPub.new,
@@ -4721,7 +4801,6 @@ flutter:
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isRecordUseEnabled: true),
           ProcessManager: () => processManager,
           TemplateRenderer: () => const MustacheTemplateRenderer(),
           Pub: ThrowingPub.new,
@@ -4735,6 +4814,7 @@ flutter:
     final testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),

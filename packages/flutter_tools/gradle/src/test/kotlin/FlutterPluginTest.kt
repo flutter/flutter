@@ -24,6 +24,9 @@ import com.flutter.gradle.tasks.CopyFlutterApksTask
 import com.flutter.gradle.tasks.CopyFlutterAssetsTask
 import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
+import com.flutter.gradle.tasks.ManifestVersionCodeTask
+import com.flutter.gradle.tasks.ManifestVersionCodeTaskHelper
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.testing.mockAbiFilters
 import com.flutter.gradle.testing.mockProductFlavors
@@ -38,15 +41,18 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.assertThrows
@@ -59,6 +65,7 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -110,7 +117,6 @@ class FlutterPluginTest {
             FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
             DependencyVersionChecker.checkDependencyVersions(project)
             project.tasks.register("javaVersion", PrintTask::class.java, any())
-            mockComponentsExtension.finalizeDsl(any<(Any) -> Unit>())
             mockComponentsExtension.onVariants(any(), any<(Variant) -> Unit>())
             mockApplicationExtension.defaultConfig
             mockApplicationExtension.buildTypes
@@ -420,28 +426,130 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants warns and leaves versionCodes unchanged when the DSL declares no versionCode`(
+    fun `onVariants offsets a versionCode that a later finalizeDsl callback sets`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         every { env.project.findProperty("split-per-abi") } returns "true"
         val arm64 = mockVariantOutput(abi = "arm64-v8a")
-
         val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        // Like a finalizeDsl block in the app's build script, which AGP runs after Flutter's
+        // callbacks and before any onVariants callback.
+        val appExtension = env.project.extensions.getByType(ApplicationExtension::class.java)
+        every { appExtension.defaultConfig.versionCode } returns 55
+
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
-        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
-        val logger = env.project.logger
-        verify {
-            logger.error(
-                match<String> {
-                    it.contains("variant 'debug'") &&
-                        it.contains("declares no versionCode") &&
-                        it.contains("versionCode = flutter.versionCode")
-                }
-            )
+        verify { arm64.versionCode.set(2055) }
+    }
+
+    @Test
+    fun `onVariants fails instead of overflowing a split APK versionCode`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm32 = mockVariantOutput(abi = "armeabi-v7a")
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = 2147482000)
+
+        val error =
+            assertThrows<GradleException> {
+                onVariant(mockApplicationVariant(outputs = listOf(arm32.output, arm64.output)))
+            }
+
+        // 1000 + 2147482000 still fits in an Int; 2000 + 2147482000 does not.
+        verify { arm32.versionCode.set(2147483000) }
+        assertContains(error.message!!, "arm64-v8a split APK of variant 'debug'")
+        assertContains(error.message!!, "2000 + 2147482000 is larger than 2147483647")
+        assertContains(error.message!!, "force-version-code-ignoring-abi=true")
+    }
+
+    @Test
+    fun `splitApkVersionCode allows versionCodes up to Int MAX_VALUE`() {
+        assertEquals(Int.MAX_VALUE, FlutterPlugin.splitApkVersionCode("release", "x86_64", 4, Int.MAX_VALUE - 4000))
+        assertThrows<GradleException> {
+            FlutterPlugin.splitApkVersionCode("release", "x86_64", 4, Int.MAX_VALUE - 3999)
         }
-        verify(exactly = 0) { logger.warn(any<String>()) }
+    }
+
+    @Test
+    fun `onVariants reads the main manifest versionCode in a task when the DSL declares none`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val project = stubManifestVersionCodeTaskRegistration(env, tempDir)
+        val debugManifest = tempDir.resolve("debug.xml").toFile()
+        val mainManifest = tempDir.resolve("main.xml").toFile()
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        // AGP's ManifestFiles.all lists the main manifest last.
+        every { variant.sources.manifests.all } returns
+            project.provider { listOf(debugManifest, mainManifest).map { project.layout.projectDirectory.file(it.path) } }
+
+        onVariant(variant)
+        // Written after configuration, so the value must be read when the task runs.
+        debugManifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="9"/>"""
+        )
+        mainManifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="7"/>"""
+        )
+
+        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+        assertTrue(versionCodeProvider.isCaptured)
+        val task = project.tasks.getByName("resolveManifestVersionCodeDebug") as ManifestVersionCodeTask
+        val versionCodeFile = task.versionCodeFile.get().asFile
+        // Gradle creates the parent of an @OutputFile before it runs the task.
+        versionCodeFile.parentFile.mkdirs()
+        task.writeVersionCode()
+        // Gradle refuses to query the offset provider outside a build, because it maps a task
+        // output. flutter_build_apk_split_per_abi_test checks the offset values.
+        assertEquals("7", versionCodeFile.readText())
+        mainManifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
+        val error = assertThrows<GradleException> { task.writeVersionCode() }
+        assertContains(error.message!!, "variant 'debug'")
+        assertContains(error.message!!, "$mainManifest does not set android:versionCode")
+        assertContains(error.message!!, "versionCode = flutter.versionCode")
+    }
+
+    @Test
+    fun `onVariants reads the manifest versionCode after tasks that generate manifests`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val project = stubManifestVersionCodeTaskRegistration(env, tempDir)
+        // Like AGP's ManifestFiles.all after addGeneratedManifestFile: the reversed list of the
+        // main manifest and then the generated one, which a task produces.
+        val generateManifest =
+            project.tasks.register("generateEngineFlagsManifestDebug", GenerateEngineFlagsManifestTask::class.java) {
+                manifestOutputFile.set(project.layout.buildDirectory.file("generated/AndroidManifest.xml"))
+            }
+        val manifestFiles = project.objects.listProperty(RegularFile::class.java)
+        manifestFiles.add(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
+        manifestFiles.add(generateManifest.flatMap { it.manifestOutputFile })
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        every { variant.sources.manifests.all } returns manifestFiles.map { it.reversed() }
+
+        onVariant(variant)
+
+        // Building the task graph must not query the generated manifest before its task ran.
+        val processManifest =
+            project.tasks.register("processDebugMainManifest") {
+                inputs.property("versionCode", versionCodeProvider.captured)
+            }
+        val resolveVersionCode = project.tasks.getByName("resolveManifestVersionCodeDebug")
+        assertEquals(setOf(resolveVersionCode), processManifest.get().taskDependencies.getDependencies(null))
+        assertEquals(setOf(generateManifest.get()), resolveVersionCode.taskDependencies.getDependencies(null))
     }
 
     @Test
@@ -458,7 +566,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants leaves versionCodes unchanged when force-version-code-ignoring-abi is set`(
+    fun `onVariants leaves DSL versionCodes unchanged when force-version-code-ignoring-abi is set`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -470,6 +578,32 @@ class FlutterPluginTest {
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+        verify(exactly = 0) { arm64.versionCode.set(any<Provider<Int>>()) }
+    }
+
+    @Test
+    fun `onVariants uses the checked main manifest versionCode without an offset when force-version-code-ignoring-abi is set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        every { env.project.findProperty("force-version-code-ignoring-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        // Stands in for the ManifestVersionCodeTask output, which fails the build when the main
+        // manifest sets no positive versionCode.
+        mockkObject(ManifestVersionCodeTaskHelper)
+        every { ManifestVersionCodeTaskHelper.registerTask(env.project, variant) } returns
+            ProjectBuilder.builder().build().provider { 7 }
+
+        onVariant(variant)
+
+        verify(exactly = 1) { ManifestVersionCodeTaskHelper.registerTask(env.project, variant) }
+        // 7, not 2007: with the flag, every split APK gets the manifest versionCode.
+        assertEquals(7, versionCodeProvider.captured.get())
     }
 
     @Test
@@ -789,6 +923,27 @@ class FlutterPluginTest {
         every { output.filters } returns mockAbiFilters(abi)
         every { output.versionCode } returns versionCodeProperty
         return MockVariantOutput(output, versionCodeProperty)
+    }
+
+    /**
+     * Makes [env]'s project register the `resolveManifestVersionCodeDebug` task in a real project
+     * in [tempDir], which is returned, so the task's properties and dependencies are real. Call it
+     * after [applyPluginCapturingVariantCallback], which stubs the build directory too.
+     */
+    private fun stubManifestVersionCodeTaskRegistration(
+        env: TestProjectEnvironment,
+        tempDir: Path
+    ): Project {
+        val project = ProjectBuilder.builder().withProjectDir(tempDir.toFile()).build()
+        every {
+            env.project.layout.buildDirectory
+                .file(any<String>())
+        } answers
+            { project.layout.buildDirectory.file(firstArg<String>()) }
+        every {
+            env.project.tasks.register("resolveManifestVersionCodeDebug", ManifestVersionCodeTask::class.java, any())
+        } answers { project.tasks.register(firstArg(), ManifestVersionCodeTask::class.java, thirdArg()) }
+        return project
     }
 
     private data class TestProjectEnvironment(

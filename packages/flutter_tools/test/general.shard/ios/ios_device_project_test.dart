@@ -111,6 +111,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   );
   return IOSDevice(
     'test',
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: FakeXcode(),
     iosDeploy: IOSDeploy(toolContext: toolContext),

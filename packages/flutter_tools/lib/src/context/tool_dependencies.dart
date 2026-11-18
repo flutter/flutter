@@ -496,6 +496,7 @@ class ToolDependencies {
       processManager: finalProcessManager,
     );
 
+    late final Artifacts finalArtifacts;
     late final Pub finalPub;
 
     final Cache finalCache =
@@ -503,6 +504,7 @@ class ToolDependencies {
         FlutterCache(
           flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
+          isLocalEngineBuilder: () => finalArtifacts.localEngineInfo != null,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
@@ -519,6 +521,7 @@ class ToolDependencies {
           flutterRoot: finalFlutterRoot,
           fs: finalFS,
           git: finalGit,
+          isOmitLegacyVersionFileEnabled: () => finalFeatureFlags.isOmitLegacyVersionFileEnabled,
           logger: finalLogger,
           platform: finalPlatform,
         );
@@ -601,7 +604,7 @@ class ToolDependencies {
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // Artifacts will be updated later if a local engine is used.
-    final Artifacts finalArtifacts = switch (artifacts) {
+    finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
       final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
       null => DeferredArtifacts(
@@ -669,7 +672,7 @@ class ToolDependencies {
           platform: finalPlatform,
         );
 
-    finalPub = pub ?? Pub(toolContext: finalToolContext);
+    finalPub = pub ?? Pub(featureFlags: finalFeatureFlags, toolContext: finalToolContext);
 
     // 11. AppleContext Dependencies
     late final CocoaPods finalCocoaPods =
@@ -692,6 +695,7 @@ class ToolDependencies {
         XCDevice(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
@@ -718,6 +722,7 @@ class ToolDependencies {
         IOSSimulatorUtils(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           mdnsVmServiceDiscovery: finalMDnsVmServiceDiscovery,
           plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
@@ -881,12 +886,15 @@ class ToolDependencies {
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
               doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
+                androidContext: finalAndroidContext,
+                androidWorkflow: finalAndroidWorkflow,
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,
                 featureFlags: finalFeatureFlags,
                 httpClientFactory: httpClientFactory,
                 toolContext: finalToolContext,
+                windowsWorkflow: finalWindowsWorkflow,
               ),
         );
 

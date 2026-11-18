@@ -19,7 +19,6 @@ import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart';
 import '../../flutter_plugins.dart';
 import '../../isolated/mustache_template.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
@@ -284,8 +283,13 @@ abstract class Dart2WebTarget extends Target {
   @override
   List<Source> get outputs => <Source>[
     for (final String stem in buildPatternStems) buildStemSource(Environment.kBuildDirectory, stem),
-    if (featureFlags.isRecordUseEnabled)
-      if (recordedUsesFileName case final String fileName) Source.pattern('{BUILD_DIR}/$fileName'),
+    Source.fromEnvironment(
+      (Environment environment) => <Source>[
+        if (environment.featureFlags.isRecordUseEnabled)
+          if (recordedUsesFileName case final String fileName)
+            Source.pattern('{BUILD_DIR}/$fileName'),
+      ],
+    ),
   ];
 
   @override
@@ -382,7 +386,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
-      if (featureFlags.isRecordUseEnabled) '--write-resources',
+      if (environment.featureFlags.isRecordUseEnabled) '--write-resources',
     ];
 
     // NOTE: most args should be populated in [toSharedCommandOptions].
@@ -419,7 +423,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     final File recordedUsesFile = environment.buildDir.childFile(LinkHooks.recordedUsesJsFileName);
     if (resourcesFile.existsSync()) {
       resourcesFile.renameSync(recordedUsesFile.path);
-    } else if (featureFlags.isRecordUseEnabled) {
+    } else if (environment.featureFlags.isRecordUseEnabled) {
       recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
     final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
@@ -658,7 +662,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
-      if (featureFlags.isRecordUseEnabled)
+      if (environment.featureFlags.isRecordUseEnabled)
         '--recorded-uses=${environment.buildDir.childFile(LinkHooks.recordedUsesWasmFileName).path}',
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
@@ -701,7 +705,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final File recordedUsesFile = environment.buildDir.childFile(
       LinkHooks.recordedUsesWasmFileName,
     );
-    if (featureFlags.isRecordUseEnabled &&
+    if (environment.featureFlags.isRecordUseEnabled &&
         !compilerConfig.dryRun &&
         !recordedUsesFile.existsSync()) {
       recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
