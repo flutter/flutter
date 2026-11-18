@@ -41,6 +41,7 @@ import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -4859,12 +4860,17 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 2. We want to pretend we're creating into a relative (not absolute) path
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
-      final CommandRunner<void> runner = createTestCommandRunner(
+      final ToolContext toolContext = _createToolContext();
+      final runner = TestFlutterCommandRunner(toolContext: toolContext);
+      runner.addCommand(
         CreateCommand(
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
+          featureFlags: runner.featureFlags,
+          pub: Pub(featureFlags: runner.featureFlags, toolContext: toolContext),
+          templatePathProvider: TemplatePathProvider(flutterRoot: toolContext.cache.flutterRoot),
           templateRenderer: const MustacheTemplateRenderer(),
-          toolContext: _createToolContext(),
+          toolContext: toolContext,
         ),
       );
       await runner.run(<String>['create', '--no-pub', '.']);
@@ -5016,6 +5022,7 @@ CreateCommand createCreateCommand({
   AndroidContext? androidContext,
   AppleContext? appleContext,
   ExtensionTemplateManager? extensionTemplateManager,
+  FeatureFlags? featureFlags,
   Java? java,
   Net? net,
   Pub? pub,
@@ -5024,6 +5031,7 @@ CreateCommand createCreateCommand({
   bool verboseHelp = false,
 }) {
   final ToolContext resolvedToolContext = toolContext ?? _createToolContext();
+  final FeatureFlags resolvedFeatureFlags = featureFlags ?? TestFlutterCommandRunner().featureFlags;
   final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
       resolvedToolContext;
   return CreateCommand(
@@ -5047,6 +5055,9 @@ CreateCommand createCreateCommand({
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),
+    featureFlags: resolvedFeatureFlags,
+    pub: pub ?? Pub(featureFlags: resolvedFeatureFlags, toolContext: resolvedToolContext),
+    templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext: resolvedToolContext,
     extensionTemplateManager: extensionTemplateManager,
@@ -5057,7 +5068,6 @@ CreateCommand createCreateCommand({
           logger: logger,
           platform: platform,
         ),
-    pub: pub,
     verboseHelp: verboseHelp,
   );
 }

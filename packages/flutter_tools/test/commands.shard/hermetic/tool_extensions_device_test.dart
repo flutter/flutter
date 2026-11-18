@@ -635,7 +635,7 @@ flutter:
                 extensionArtifactManager: _NoOpExtensionArtifactManager(),
                 extensionBuildManager: ExtensionBuildManager(
                   extensionManager: logsExtensionManager!,
-                  featureFlags: featureFlags,
+                  featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
                   logger: testLogger,
                 ),
                 extensionManager: logsExtensionManager!,

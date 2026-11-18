@@ -5,9 +5,11 @@
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'android/android_builder.dart';
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
+import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/file_system.dart';
@@ -33,6 +35,7 @@ import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
+import 'mdns_discovery.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -42,9 +45,11 @@ import 'windows/windows_workflow.dart';
 class FlutterDeviceManager extends DeviceManager {
   FlutterDeviceManager({
     required this._analytics,
+    required this._androidBuilder,
     required this._androidSdkBuilder,
     required this._androidWorkflow,
     required this._appleContext,
+    required this._applicationPackageFactory,
     required this._buildSystem,
     required this._buildTargets,
     required this._extensionArtifactManager,
@@ -52,15 +57,18 @@ class FlutterDeviceManager extends DeviceManager {
     required this._extensionManager,
     required this._featureFlags,
     required this._macOSWorkflow,
+    required this._mdnsVmServiceDiscovery,
     required this._templateRenderer,
     required this._toolContext,
     required this._windowsWorkflow,
   }) : super(fileSystem: _toolContext.fs, logger: _toolContext.logger);
 
   final Analytics _analytics;
+  final AndroidBuilder _androidBuilder;
   final AndroidSdk? Function() _androidSdkBuilder;
   final AndroidWorkflow _androidWorkflow;
   final AppleContext _appleContext;
+  final ApplicationPackageFactory _applicationPackageFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final ExtensionArtifactManager _extensionArtifactManager;
@@ -68,6 +76,7 @@ class FlutterDeviceManager extends DeviceManager {
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final MacOSWorkflow _macOSWorkflow;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
   final WindowsWorkflow _windowsWorkflow;
@@ -88,12 +97,14 @@ class FlutterDeviceManager extends DeviceManager {
     ) = _toolContext;
     return <DeviceDiscovery>[
       AndroidDevices(
-        logger: logger,
+        androidBuilder: _androidBuilder,
         androidSdkBuilder: _androidSdkBuilder,
         androidWorkflow: _androidWorkflow,
-        processManager: processManager,
+        applicationPackageFactory: _applicationPackageFactory,
         fileSystem: fs,
+        logger: logger,
         platform: platform,
+        processManager: processManager,
         userMessages: userMessages,
       ),
       IOSDevices(
@@ -111,6 +122,7 @@ class FlutterDeviceManager extends DeviceManager {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: _toolContext,
       ),
       MacOSDevices(
@@ -123,11 +135,13 @@ class FlutterDeviceManager extends DeviceManager {
       ),
       MacOSDesignedForIPadDevices(
         iosWorkflow: _appleContext.iosWorkflow,
+        mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
         toolContext: _toolContext,
       ),
       LinuxDevices(analytics: _analytics, featureFlags: _featureFlags, toolContext: _toolContext),
       WindowsDevices(
         analytics: _analytics,
+        featureFlags: _featureFlags,
         toolContext: _toolContext,
         windowsWorkflow: _windowsWorkflow,
       ),
