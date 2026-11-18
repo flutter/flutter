@@ -102,6 +102,22 @@ GdkWindowState gdk_window_get_state(GdkWindow* window) {
   return mock->gdk_window_get_state(window);
 }
 
+struct wl_display* gdk_wayland_display_get_wl_display(GdkDisplay* display) {
+  check_thread();
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gdk_wayland_display_get_wl_display(display);
+}
+
+struct wl_surface* gdk_wayland_window_get_wl_surface(GdkWindow* window) {
+  check_thread();
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gdk_wayland_window_get_wl_surface(window);
+}
+
 GdkDisplay* gdk_window_get_display(GdkWindow* window) {
   check_thread();
   return GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
@@ -252,7 +268,10 @@ void gtk_widget_get_allocation(GtkWidget* widget, GtkAllocation* allocation) {
 
 GdkDisplay* gtk_widget_get_display(GtkWidget* widget) {
   check_thread();
-  return nullptr;
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gtk_widget_get_display(widget);
 }
 
 gint gtk_widget_get_scale_factor(GtkWidget* widget) {
