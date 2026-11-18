@@ -293,6 +293,7 @@ void main() {
   }
 
   WidgetPreviewCommand createWidgetPreviewCommand({
+    DeviceManager? deviceManager,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) {
@@ -305,6 +306,7 @@ void main() {
       ),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const BuildTargetsImpl(),
+      deviceManager: deviceManager ?? fakeDeviceManager,
       pub: Pub.test(
         flutterRoot: flutterRoot,
         fileSystem: fs,
@@ -348,8 +350,10 @@ void main() {
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     ResidentRunnerFactory? residentRunnerFactoryOverride,
   }) async {
-    final CommandRunner<void> runner = createTestCommandRunner(
+    final runner = TestFlutterCommandRunner();
+    runner.addCommand(
       createWidgetPreviewCommand(
+        deviceManager: runner.deviceManager,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         residentRunnerFactoryOverride: residentRunnerFactoryOverride,
       ),

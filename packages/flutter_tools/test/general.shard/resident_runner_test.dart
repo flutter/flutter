@@ -2375,7 +2375,8 @@ class TestHotRunner extends HotRunner {
     required super.target,
     required super.toolContext,
     required super.xcode,
-  });
+    FeatureFlags? featureFlags,
+  }) : super(featureFlags: featureFlags ?? TestFeatureFlags());
 
   void testCacheInitialDillCompilation() {
     cacheInitialDillCompilation();
