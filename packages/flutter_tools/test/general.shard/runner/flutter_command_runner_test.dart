@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/experimental/extension_arg_parser.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -243,29 +242,31 @@ void main() {
 
       // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       group('${FlutterGlobalOptions.kPrintDtd} flag', () {
-        testUsingContext(
-          'sets DevtoolsLauncher.printDtdUri to false when not present',
-          () async {
-            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            await runner.run(<String>[]);
-            expect(DevtoolsLauncher.instance!.printDtdUri, false);
-          },
-          overrides: <Type, Generator>{
-            DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
-          },
-        );
+        testWithoutContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
+          final toolContext = FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+          );
+          final devtoolsLauncher = FakeDevtoolsLauncher()..dtdUri = Uri();
+          final runner = TestFlutterCommandRunner(
+            devtoolsLauncher: devtoolsLauncher,
+            toolContext: toolContext,
+          )..addCommand(DummyFlutterCommand(toolContext: toolContext));
+          await runner.run(<String>[]);
+          expect(devtoolsLauncher.printDtdUri, false);
+        });
 
-        testUsingContext(
-          'sets DevtoolsLauncher.printDtdUri to true when present',
-          () async {
-            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
-            expect(DevtoolsLauncher.instance!.printDtdUri, true);
-          },
-          overrides: <Type, Generator>{
-            DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
-          },
-        );
+        testWithoutContext('sets DevtoolsLauncher.printDtdUri to true when present', () async {
+          final toolContext = FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+          );
+          final devtoolsLauncher = FakeDevtoolsLauncher()..dtdUri = Uri();
+          final runner = TestFlutterCommandRunner(
+            devtoolsLauncher: devtoolsLauncher,
+            toolContext: toolContext,
+          )..addCommand(DummyFlutterCommand(toolContext: toolContext));
+          await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
+          expect(devtoolsLauncher.printDtdUri, true);
+        });
       });
 
       testUsingContext(
