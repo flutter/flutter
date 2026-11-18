@@ -56,6 +56,7 @@ TEST(EGLManagerTest, EnablesMultithreadProtection) {
 
   Microsoft::WRL::ComPtr<ID3D11Device> device;
   ASSERT_TRUE(manager->GetDevice(&device));
+  ASSERT_NE(device, nullptr);
 
   Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context;
   device->GetImmediateContext(&device_context);
