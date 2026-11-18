@@ -2922,6 +2922,11 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(scrollController.offset, 0.0);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    addTearDown(() async {
+      if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft)) {
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      }
+    });
 
     final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     pointer.hover(const Offset(15.0, 598.0));
@@ -2995,6 +3000,11 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
     await tester.pumpAndSettle();
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    addTearDown(() async {
+      if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft)) {
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      }
+    });
 
     final mouse = TestPointer(1, ui.PointerDeviceKind.mouse);
     mouse.hover(const Offset(798.0, 15.0));
@@ -3085,9 +3095,35 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
     final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     pointer.hover(const Offset(15.0, 598.0));
-    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
-    await tester.pumpAndSettle();
+    final platformDefaults = <bool>[];
+    Future<void> scroll(Offset delta) async {
+      platformDefaults.clear();
+      await tester.sendEventToBinding(
+        pointer.scroll(
+          delta,
+          onRespond: ({required bool allowPlatformDefault}) {
+            platformDefaults.add(allowPlatformDefault);
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await scroll(const Offset(0.0, 30.0));
     expect(scrollController.offset, 30.0);
+    expect(platformDefaults, <bool>[false]);
+
+    // With Shift held, horizontal wheel input cannot scroll the horizontal list.
+    await scroll(const Offset(30.0, 0.0));
+    expect(scrollController.offset, 30.0);
+    expect(platformDefaults, <bool>[true]);
+
+    // At the leading edge, a backward scroll can be handled by the browser.
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+    await scroll(const Offset(0.0, -30.0));
+    expect(scrollController.offset, 0.0);
+    expect(platformDefaults, <bool>[true]);
   }, variant: TargetPlatformVariant.all());
 
   testWidgets(

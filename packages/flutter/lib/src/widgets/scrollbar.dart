@@ -2334,7 +2334,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollPosition position = _cachedController!.position;
     final ScrollContext scrollContext = position.context;
     final ScrollBehavior scrollBehavior = scrollContext is ScrollableState
-        ? scrollContext.resolvedScrollBehavior
+        ? scrollContext.resolvedScrollBehavior ?? _scrollBehavior
         : _scrollBehavior;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes =
@@ -2374,6 +2374,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != _cachedController!.position.pixels) {
       _cachedController!.position.pointerScroll(delta);
+      event.respond(allowPlatformDefault: false);
     }
   }
 

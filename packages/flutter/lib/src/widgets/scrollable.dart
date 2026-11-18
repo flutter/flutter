@@ -578,7 +578,8 @@ class ScrollableState extends State<Scrollable>
   ///
   /// This is [Scrollable.scrollBehavior] if one was provided, otherwise the
   /// behavior of the nearest enclosing [ScrollConfiguration]. It is resolved
-  /// when dependencies or the widget change, and configures gestures, physics,
+  /// when dependencies or the widget change, and is null before dependencies
+  /// are first resolved. The behavior configures gestures, physics,
   /// and pointer scroll handling (see [ScrollBehavior.pointerAxisModifiers]).
   ///
   /// [RawScrollbar] uses this to match the scrollable's mouse wheel handling
@@ -587,7 +588,7 @@ class ScrollableState extends State<Scrollable>
   /// See also:
   ///
   ///  * [resolvedPhysics], the [ScrollPhysics] derived from this behavior.
-  ScrollBehavior get resolvedScrollBehavior => _configuration;
+  ScrollBehavior? get resolvedScrollBehavior => _configuration;
 
   /// An [Offset] that represents the absolute distance from the origin, or 0,
   /// of the [ScrollPosition] expressed in the associated [Axis].
@@ -624,7 +625,7 @@ class ScrollableState extends State<Scrollable>
   String? get restorationId => widget.restorationId;
   final _RestorableScrollOffset _persistedScrollOffset = _RestorableScrollOffset();
 
-  late ScrollBehavior _configuration;
+  ScrollBehavior? _configuration;
   ScrollController? _fallbackScrollController;
   DeviceGestureSettings? _mediaQueryGestureSettings;
 
@@ -633,7 +634,7 @@ class ScrollableState extends State<Scrollable>
     _configuration = widget.scrollBehavior ?? ScrollConfiguration.of(context);
     final ScrollPhysics? physicsFromWidget =
         widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
-    _physics = _configuration.getScrollPhysics(context);
+    _physics = _configuration!.getScrollPhysics(context);
     _physics = physicsFromWidget?.applyTo(_physics) ?? _physics;
 
     final ScrollPosition? oldPosition = _position;
@@ -693,10 +694,12 @@ class ScrollableState extends State<Scrollable>
     if ((widget.scrollBehavior == null) != (oldWidget.scrollBehavior == null)) {
       return true;
     }
-    if (widget.scrollBehavior != null &&
-        oldWidget.scrollBehavior != null &&
-        widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
-      return true;
+    if (widget.scrollBehavior != null && oldWidget.scrollBehavior != null) {
+      if (widget.scrollBehavior.runtimeType != oldWidget.scrollBehavior.runtimeType ||
+          (widget.scrollBehavior != oldWidget.scrollBehavior &&
+              widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!))) {
+        return true;
+      }
     }
 
     final ScrollPhysics? newPhysics =
@@ -805,7 +808,8 @@ class ScrollableState extends State<Scrollable>
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer:
                 GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-                  () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
+                  () =>
+                      VerticalDragGestureRecognizer(supportedDevices: _configuration!.dragDevices),
                   (VerticalDragGestureRecognizer instance) {
                     instance
                       ..onDown = _handleDragDown
@@ -816,11 +820,11 @@ class ScrollableState extends State<Scrollable>
                       ..minFlingDistance = _physics?.minFlingDistance
                       ..minFlingVelocity = _physics?.minFlingVelocity
                       ..maxFlingVelocity = _physics?.maxFlingVelocity
-                      ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
+                      ..velocityTrackerBuilder = _configuration!.velocityTrackerBuilder(context)
                       ..dragStartBehavior = widget.dragStartBehavior
-                      ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
+                      ..multitouchDragStrategy = _configuration!.getMultitouchDragStrategy(context)
                       ..gestureSettings = _mediaQueryGestureSettings
-                      ..supportedDevices = _configuration.dragDevices;
+                      ..supportedDevices = _configuration!.dragDevices;
                   },
                 ),
           };
@@ -828,8 +832,9 @@ class ScrollableState extends State<Scrollable>
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer:
                 GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-                  () =>
-                      HorizontalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
+                  () => HorizontalDragGestureRecognizer(
+                    supportedDevices: _configuration!.dragDevices,
+                  ),
                   (HorizontalDragGestureRecognizer instance) {
                     instance
                       ..onDown = _handleDragDown
@@ -840,11 +845,11 @@ class ScrollableState extends State<Scrollable>
                       ..minFlingDistance = _physics?.minFlingDistance
                       ..minFlingVelocity = _physics?.minFlingVelocity
                       ..maxFlingVelocity = _physics?.maxFlingVelocity
-                      ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
+                      ..velocityTrackerBuilder = _configuration!.velocityTrackerBuilder(context)
                       ..dragStartBehavior = widget.dragStartBehavior
-                      ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
+                      ..multitouchDragStrategy = _configuration!.getMultitouchDragStrategy(context)
                       ..gestureSettings = _mediaQueryGestureSettings
-                      ..supportedDevices = _configuration.dragDevices;
+                      ..supportedDevices = _configuration!.dragDevices;
                   },
                 ),
           };
@@ -949,7 +954,7 @@ class ScrollableState extends State<Scrollable>
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes =
-        pressed.any(_configuration.pointerAxisModifiers.contains) &&
+        pressed.any(_configuration!.pointerAxisModifiers.contains) &&
         // Axes are only flipped for physical mouse wheel input.
         // On some platforms, like web, trackpad input is handled through pointer
         // signals, but should not be included in this axis modifying behavior.
@@ -1016,9 +1021,9 @@ class ScrollableState extends State<Scrollable>
       decorationClipBehavior: widget.clipBehavior,
     );
 
-    return _configuration.buildScrollbar(
+    return _configuration!.buildScrollbar(
       context,
-      _configuration.buildOverscrollIndicator(context, child, details),
+      _configuration!.buildOverscrollIndicator(context, child, details),
       details,
     );
   }
@@ -1117,6 +1122,7 @@ class ScrollableState extends State<Scrollable>
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', _position));
     properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
+    properties.add(DiagnosticsProperty<ScrollBehavior>('scroll behavior', _configuration));
   }
 }
 
@@ -2411,7 +2417,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
           // the horizontal scrollable.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-              () => PanGestureRecognizer(supportedDevices: _configuration.dragDevices),
+              () => PanGestureRecognizer(supportedDevices: _configuration!.dragDevices),
               (PanGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -2422,7 +2428,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
+                  ..velocityTrackerBuilder = _configuration!.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
                   ..gestureSettings = _mediaQueryGestureSettings;
               },
@@ -2451,7 +2457,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
     );
     // Skip building a scrollbar here, the dual scrollbar is added in
     // TwoDimensionalScrollableState.
-    return _configuration.buildOverscrollIndicator(context, child, details);
+    return _configuration!.buildOverscrollIndicator(context, child, details);
   }
 }
 
@@ -2569,6 +2575,6 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     );
     // Skip building a scrollbar here, the dual scrollbar is added in
     // TwoDimensionalScrollableState.
-    return _configuration.buildOverscrollIndicator(context, child, details);
+    return _configuration!.buildOverscrollIndicator(context, child, details);
   }
 }
