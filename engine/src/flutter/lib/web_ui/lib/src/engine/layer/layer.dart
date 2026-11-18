@@ -50,6 +50,10 @@ abstract class ContainerLayer extends Layer {
   ///
   /// When the reference count reaches zero, this layer is marked disposed and
   /// recursively releases child [ContainerLayer]s and disposes child [PictureLayer]s.
+  ///
+  /// The [children] list itself is left intact so that the layer tree's
+  /// structure and preroll results (such as [paintBounds]) can still be
+  /// inspected after the native resources have been released.
   void release() {
     assert(_refCount > 0, 'Cannot release a ContainerLayer with refCount == 0');
     _refCount--;
@@ -62,7 +66,6 @@ abstract class ContainerLayer extends Layer {
           child.dispose();
         }
       }
-      children.clear();
     }
   }
 
