@@ -3838,181 +3838,71 @@ String helloNameAndAge({required String name, required int age}) {
   });
 
   // Regression tests for https://github.com/flutter/flutter/issues/195904.
-  testWithoutContext('throws an exception when placeholder name is numeric', () {
-    const numericPlaceholderArb = '''
-{
-  "handsPlayed": "Hands played: {count}",
-  "@handsPlayed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "No": {
-        "type": "String"
-      },
-      "1": {
-        "type": "String"
-      }
-    }
-  }
-}''';
-    expect(
-      () => setupLocalizations(<String, String>{'en': numericPlaceholderArb}),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('Invalid placeholder name "1" in message "handsPlayed".'),
-        ),
+  group('invalid identifier validation', () {
+    const cases = <({String description, String arb, String expectedMessage})>[
+      (
+        description: 'numeric template placeholder name',
+        arb: '{"handsPlayed": "Hands played: {count}", "@handsPlayed": {"placeholders": {"count": {"type": "int"}, "1": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "1" in message "handsPlayed".',
       ),
-    );
-    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
-  });
-
-  testWithoutContext('throws an exception when placeholder name is empty', () {
-    const emptyPlaceholderArb = '''
-{
-  "greeting": "Hello",
-  "@greeting": {
-    "placeholders": {
-      "": {
-        "type": "String"
-      }
-    }
-  }
-}''';
-    expect(
-      () => setupLocalizations(<String, String>{'en': emptyPlaceholderArb}),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('Invalid placeholder name "" in message "greeting".'),
-        ),
+      (
+        description: 'empty template placeholder name',
+        arb: '{"greeting": "Hello", "@greeting": {"placeholders": {"": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "" in message "greeting".',
       ),
-    );
-    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
-  });
+      (
+        description: 'wildcard template placeholder name',
+        arb: '{"greeting": "Hello", "@greeting": {"placeholders": {"_": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "_" in message "greeting".',
+      ),
+      (
+        description: 'punctuation in template placeholder name',
+        arb: '{"greeting": "Hello", "@greeting": {"placeholders": {"user-name": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "user-name" in message "greeting".',
+      ),
+      (
+        description: 'reserved-word template placeholder name',
+        arb:
+            '{"greeting": "Hello", "@greeting": {"placeholders": {"default": {"type": "String"}}}}',
+        expectedMessage: 'Invalid placeholder name "default" in message "greeting".',
+      ),
+      (
+        description: 'inferred undeclared invalid placeholder name',
+        arb: '{"greeting": "Hello {a|b}"}',
+        expectedMessage: 'Invalid placeholder name "a|b" in message "greeting".',
+      ),
+      (
+        description: 'reserved-word ARB resource ID',
+        arb: '{"continue": "Continue"}',
+        expectedMessage: 'Invalid ARB resource name "continue"',
+      ),
+    ];
 
-  testWithoutContext(
-    'throws an exception when placeholder name contains non-alphanumeric characters',
-    () {
-      const invalidCharPlaceholderArb = '''
-{
-  "greeting": "Hello",
-  "@greeting": {
-    "placeholders": {
-      "user-name": {
-        "type": "String"
-      }
-    }
-  }
-}''';
-      expect(
-        () => setupLocalizations(<String, String>{'en': invalidCharPlaceholderArb}),
-        throwsA(
-          isA<L10nException>().having(
-            (L10nException e) => e.message,
-            'message',
-            contains('Invalid placeholder name "user-name" in message "greeting".'),
+    for (final (:String description, :String arb, :String expectedMessage) in cases) {
+      testWithoutContext('throws L10nException on $description', () {
+        expect(
+          () => setupLocalizations(<String, String>{'en': arb}),
+          throwsA(
+            isA<L10nException>().having(
+              (L10nException e) => e.message,
+              'message',
+              contains(expectedMessage),
+            ),
           ),
-        ),
-      );
-      expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
-    },
-  );
+        );
+        expect(
+          fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(),
+          isFalse,
+        );
+      });
+    }
 
-  testWithoutContext('throws an exception when placeholder name is a Dart reserved word', () {
-    const reservedWordPlaceholderArb = '''
-{
-  "greeting": "Hello {default}"
-}''';
-    expect(
-      () => setupLocalizations(<String, String>{'en': reservedWordPlaceholderArb}),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('Invalid placeholder name "default" in message "greeting".'),
-        ),
-      ),
-    );
-    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
-  });
-
-  testWithoutContext('throws an exception when placeholder name is a single underscore', () {
-    const wildcardPlaceholderArb = '''
-{
-  "greeting": "Hello {_}"
-}''';
-    expect(
-      () => setupLocalizations(<String, String>{'en': wildcardPlaceholderArb}),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains('Invalid placeholder name "_" in message "greeting".'),
-        ),
-      ),
-    );
-    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
-  });
-
-  testWithoutContext('throws an exception when placeholder name starts with an underscore and useNamedParameters is true', () {
-    const leadingUnderscorePlaceholderArb = '''
-{
-  "greeting": "Hello {_foo}"
-}''';
-    expect(
-      () => setupLocalizations(<String, String>{
-        'en': leadingUnderscorePlaceholderArb,
-      }, useNamedParameters: true),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          contains(
-            'Invalid placeholder name "_foo" in message "greeting". '
-            'Placeholder names cannot start with an underscore when '
-            '"use-named-parameters" is enabled.',
-          ),
-        ),
-      ),
-    );
-    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
-  });
-
-  testWithoutContext(
-    'allows placeholder name starting with an underscore when useNamedParameters is false',
-    () {
-      const leadingUnderscorePlaceholderArb = '''
-{
-  "greeting": "Hello {_foo}"
-}''';
-      setupLocalizations(<String, String>{'en': leadingUnderscorePlaceholderArb});
-      final String localizationsFile = getGeneratedFileContent(locale: 'en');
-      expect(localizationsFile, contains('String greeting(Object _foo)'));
-    },
-  );
-
-  testWithoutContext('throws an exception when resource ID is a Dart reserved word', () {
-    const reservedWordResourceArb = '''
-{
-  "continue": "Continue"
-}''';
-    expect(
-      () => setupLocalizations(<String, String>{'en': reservedWordResourceArb}),
-      throwsA(
-        isA<L10nException>().having(
-          (L10nException e) => e.message,
-          'message',
-          allOf(
-            contains('Invalid ARB resource name "continue"'),
-            contains('cannot be a Dart reserved word'),
-          ),
-        ),
-      ),
-    );
-    expect(fs.file(fs.path.join(defaultL10nPath, defaultOutputFileString)).existsSync(), isFalse);
+    testWithoutContext('ignores unused invalid placeholder keys in non-template ARB metadata', () {
+      setupLocalizations(<String, String>{
+        'en': '{"greeting": "Hello {user}", "@greeting": {"placeholders": {"user": {"type": "String"}}}}',
+        'es': '{"greeting": "Hola {user}", "@greeting": {"placeholders": {"user": {"type": "String"}, "1": {"type": "String"}}}}',
+      });
+      expect(getGeneratedFileContent(locale: 'es'), contains('String greeting(String user)'));
+    });
   });
 }

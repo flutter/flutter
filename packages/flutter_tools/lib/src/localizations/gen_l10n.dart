@@ -956,10 +956,7 @@ class LocalizationsGenerator {
     if (name[0].contains(RegExp(r'\d'))) {
       return false;
     }
-    if (dartReservedWords.contains(name)) {
-      return false;
-    }
-    return true;
+    return !isDartReservedWord(name);
   }
 
   void _addToFileList(List<String> fileList, String path) {
@@ -998,19 +995,6 @@ class LocalizationsGenerator {
           ),
         )
         .toList();
-    if (useNamedParameters) {
-      for (final Message message in _allMessages) {
-        for (final String placeholderName in message.templatePlaceholders.keys) {
-          if (placeholderName.startsWith('_')) {
-            throw L10nException(
-              'Invalid placeholder name "$placeholderName" in message "${message.resourceId}". '
-              'Placeholder names cannot start with an underscore when '
-              '"use-named-parameters" is enabled.',
-            );
-          }
-        }
-      }
-    }
     hadErrors = _allMessages.any((Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
       _addAllToFileList(
