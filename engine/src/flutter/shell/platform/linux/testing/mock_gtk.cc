@@ -39,6 +39,8 @@ MockGtk::MockGtk() {
       .WillByDefault(::testing::Return(100));
   ON_CALL(*this, gdk_window_get_height(::testing::_))
       .WillByDefault(::testing::Return(100));
+  ON_CALL(*this, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
 }
 
 MockGtk::~MockGtk() {
@@ -129,7 +131,10 @@ void gdk_monitor_get_geometry(GdkMonitor* monitor, GdkRectangle* geometry) {
 
 int gdk_monitor_get_refresh_rate(GdkMonitor* monitor) {
   check_thread();
-  return 60000;
+  if (mock == nullptr) {
+    return 60000;
+  }
+  return mock->gdk_monitor_get_refresh_rate(monitor);
 }
 
 int gdk_monitor_get_scale_factor(GdkMonitor* monitor) {

@@ -6,6 +6,9 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <functional>
+#include <vector>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -13,7 +16,11 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 #include "flutter/shell/platform/linux/testing/mock_renderable.h"
+
+VsyncCallback fl_mock_engine_get_vsync_callback();
+void fl_mock_engine_reset_vsync_callback();
 
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -70,6 +77,285 @@ TEST_F(FlEngineTest, NotifyDisplayUpdate) {
   fl_engine_notify_display_update(engine, displays, 2);
 
   EXPECT_TRUE(called);
+}
+
+// Starts the engine with a captured vsync callback and a mocked OnVsync.
+static VsyncCallback start_engine_with_vsync(
+    FlEngine* engine,
+    std::function<void(uint64_t, uint64_t)> on_vsync) {
+  fl_mock_engine_reset_vsync_callback();
+  fl_engine_get_embedder_api(engine)->OnVsync = MOCK_ENGINE_PROC(
+      OnVsync,
+      ([on_vsync](auto engine, intptr_t baton, uint64_t frame_start_time_nanos,
+                  uint64_t frame_target_time_nanos) {
+        EXPECT_EQ(baton, 42);
+        on_vsync(frame_start_time_nanos, frame_target_time_nanos);
+        return kSuccess;
+      }));
+
+  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+  VsyncCallback callback = fl_mock_engine_get_vsync_callback();
+  EXPECT_NE(callback, nullptr);
+  return callback;
+}
+
+// Checks the engine produces frames at the display refresh rate.
+TEST_F(FlEngineTest, VsyncUsesDisplayRefreshRate) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  EXPECT_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillRepeatedly(::testing::Return(144000));
+
+  uint64_t start_time = 0;
+  uint64_t target_time = 0;
+  VsyncCallback callback =
+      start_engine_with_vsync(engine, [&](uint64_t start, uint64_t target) {
+        start_time = start;
+        target_time = target;
+      });
+
+  callback(engine, 42);
+
+  // 144Hz is a 6944us frame interval.
+  EXPECT_EQ(target_time - start_time, 6944000u);
+}
+
+// Checks common high refresh rates are converted to the right interval.
+TEST_F(FlEngineTest, VsyncCommonRefreshRates) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+
+  uint64_t start_time = 0;
+  uint64_t target_time = 0;
+  VsyncCallback callback =
+      start_engine_with_vsync(engine, [&](uint64_t start, uint64_t target) {
+        start_time = start;
+        target_time = target;
+      });
+
+  struct RefreshRateCase {
+    int millihertz;
+    uint64_t expected_interval_ns;
+  } cases[] = {
+      {60000, 16667000u},  // 60Hz
+      {120000, 8333000u},  // 120Hz
+      {144000, 6944000u},  // 144Hz
+      {165000, 6061000u},  // 165Hz
+      {240000, 4167000u},  // 240Hz
+  };
+
+  for (const RefreshRateCase& test_case : cases) {
+    ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+        .WillByDefault(::testing::Return(test_case.millihertz));
+    fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+    callback(engine, 42);
+    EXPECT_EQ(target_time - start_time, test_case.expected_interval_ns)
+        << test_case.millihertz << "mHz";
+  }
+}
+
+// Checks a refresh rate update is picked up from window metrics.
+TEST_F(FlEngineTest, VsyncFollowsRefreshRateChange) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+
+  uint64_t start_time = 0;
+  uint64_t target_time = 0;
+  VsyncCallback callback =
+      start_engine_with_vsync(engine, [&](uint64_t start, uint64_t target) {
+        start_time = start;
+        target_time = target;
+      });
+
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+
+  callback(engine, 42);
+  EXPECT_EQ(target_time - start_time, 16667000u);
+
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(144000));
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+
+  callback(engine, 42);
+  EXPECT_EQ(target_time - start_time, 6944000u);
+}
+
+// Runs the main context until @done returns true or the timeout expires.
+static bool RunMainContextUntil(std::function<bool()> done,
+                                gint64 timeout_us = 2000000) {
+  const gint64 deadline = g_get_monotonic_time() + timeout_us;
+  while (!done() && g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+    g_usleep(100);
+  }
+  return done();
+}
+
+// Checks presentation feedback moves the frame start later, and that the
+// vsync is actually delivered at the shifted time instead of only changing the
+// timestamps passed to the engine.
+TEST_F(FlEngineTest, VsyncUsesPresentationPhase) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+
+  std::vector<uint64_t> starts;
+  std::vector<uint64_t> targets;
+  VsyncCallback callback =
+      start_engine_with_vsync(engine, [&](uint64_t start, uint64_t target) {
+        starts.push_back(start);
+        targets.push_back(target);
+      });
+
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  callback(engine, 42);
+  ASSERT_EQ(starts.size(), 1u);
+  const uint64_t first_start = starts[0];
+  const uint64_t interval = targets[0] - starts[0];  // 60Hz, 16667000ns.
+
+  // A commit that is presented almost a full refresh later tells the
+  // controller the grid can be started later.
+  for (int i = 0; i < 24; i++) {
+    fl_engine_add_presentation_sample(engine, 16000);
+  }
+  const gint64 phase = fl_engine_get_presentation_phase(engine);
+  ASSERT_GT(phase, 0);
+
+  // The next frame is due one interval and one phase after the first one, and
+  // the vsync is not delivered before that time.
+  callback(engine, 42);
+  EXPECT_EQ(starts.size(), 1u);
+  ASSERT_TRUE(RunMainContextUntil([&] { return starts.size() == 2; }));
+  const uint64_t expected = interval + phase * 1000;
+  // The main loop dispatches the ready-time source within a fraction of a
+  // millisecond. A delivery that fires slightly late reports its actual start
+  // time, so allow the observed dispatch jitter on both sides.
+  EXPECT_GE(starts[1] - first_start, expected - 500000);
+  EXPECT_LE(starts[1] - first_start, expected + 1000000);
+  EXPECT_EQ(targets[1] - starts[1], interval);
+
+  // Once the phase is applied, the grid keeps advancing by exactly one
+  // interval; the phase is not accumulated on every frame.
+  callback(engine, 42);
+  ASSERT_TRUE(RunMainContextUntil([&] { return starts.size() == 3; }));
+  EXPECT_GE(starts[2] - starts[1], interval - 500000);
+  EXPECT_LE(starts[2] - starts[1], interval + 1000000);
+
+  fl_engine_reset_presentation_phase(engine);
+  EXPECT_EQ(fl_engine_get_presentation_phase(engine), 0);
+}
+
+// Checks changing the display refresh rate discards a phase learned for the
+// old period instead of applying it to the new grid.
+TEST_F(FlEngineTest, RefreshRateChangeResetsPresentationPhase) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+
+  VsyncCallback callback =
+      start_engine_with_vsync(engine, [](uint64_t, uint64_t) {});
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  callback(engine, 42);
+
+  for (int i = 0; i < 24; i++) {
+    fl_engine_add_presentation_sample(engine, 16000);
+  }
+  ASSERT_GT(fl_engine_get_presentation_phase(engine), 0);
+
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(144000));
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  EXPECT_EQ(fl_engine_get_presentation_phase(engine), 0);
+}
+
+// Checks a second vsync request releases the pending baton instead of losing
+// it, then schedules the new frame normally.
+TEST_F(FlEngineTest, SecondVsyncRequestFlushesThePendingBaton) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+
+  std::vector<uint64_t> starts;
+  VsyncCallback callback = start_engine_with_vsync(
+      engine,
+      [&](uint64_t start, uint64_t target) { starts.push_back(start); });
+
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  callback(engine, 42);
+  ASSERT_EQ(starts.size(), 1u);
+
+  // The second request is scheduled for the next grid point.
+  callback(engine, 42);
+  ASSERT_EQ(starts.size(), 1u);
+
+  // The third request cannot wait for the second baton: it has to release it
+  // first, then schedule its own frame.
+  callback(engine, 42);
+  EXPECT_EQ(starts.size(), 2u);
+  ASSERT_TRUE(RunMainContextUntil([&] { return starts.size() == 3; }));
+}
+
+// Checks a delivery that is still pending when the engine is disposed does not
+// run against the destroyed engine.
+TEST_F(FlEngineTest, PendingVsyncIsCancelledOnDispose) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+
+  std::vector<uint64_t> starts;
+  VsyncCallback callback = start_engine_with_vsync(
+      engine,
+      [&](uint64_t start, uint64_t target) { starts.push_back(start); });
+
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  callback(engine, 42);
+  callback(engine, 42);
+  ASSERT_EQ(starts.size(), 1u);
+
+  g_clear_object(&engine);
+
+  // Iterate past the time the cancelled delivery would have fired. If the
+  // source survived, it would call into the destroyed engine.
+  const gint64 deadline = g_get_monotonic_time() + 50000;
+  while (g_get_monotonic_time() < deadline) {
+    g_main_context_iteration(nullptr, FALSE);
+    g_usleep(200);
+  }
+  EXPECT_EQ(starts.size(), 1u);
+}
+
+// Checks a request that arrives after its grid point skips whole periods and
+// keeps the grid phase instead of starting the frame in the past.
+TEST_F(FlEngineTest, LateRequestKeepsTheGridPhase) {
+  ::testing::NiceMock<flutter::testing::MockGtk> gtk;
+  ON_CALL(gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+
+  std::vector<uint64_t> starts;
+  std::vector<uint64_t> targets;
+  VsyncCallback callback =
+      start_engine_with_vsync(engine, [&](uint64_t start, uint64_t target) {
+        starts.push_back(start);
+        targets.push_back(target);
+      });
+
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  callback(engine, 42);
+  ASSERT_EQ(starts.size(), 1u);
+  const uint64_t interval = targets[0] - starts[0];
+
+  // Make the next request arrive well after its grid point.
+  g_usleep(30000);
+  const uint64_t request_time_ns =
+      fl_engine_get_embedder_api(engine)->GetCurrentTime();
+  callback(engine, 42);
+  ASSERT_TRUE(RunMainContextUntil([&] { return starts.size() == 2; }));
+
+  // The start is the next grid point after the request, not a past one, and
+  // it is a whole number of intervals after the first frame.
+  EXPECT_GE(starts[1], request_time_ns);
+  const uint64_t delta = starts[1] - starts[0];
+  EXPECT_GE(delta, 2 * interval);
+  EXPECT_LE(delta, 3 * interval);
 }
 
 // Checks asking the engine to render a frame works.
