@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/throwing_pub.dart';
 
@@ -66,6 +67,7 @@ void main() {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -76,6 +78,7 @@ void main() {
       final environment2 = Environment.test(
         fileSystem.currentDirectory,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
@@ -105,6 +108,7 @@ void main() {
             Environment.test(
               fileSystem.currentDirectory,
               artifacts: Artifacts.test(),
+              featureFlags: TestFeatureFlags(),
               fileSystem: fileSystem,
               logger: BufferLogger.test(),
               processManager: FakeProcessManager.any(),
@@ -125,6 +129,7 @@ void main() {
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -167,6 +172,7 @@ name: path_provider_example
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -253,6 +259,7 @@ name: path_provider_example
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
@@ -306,6 +313,7 @@ name: path_provider_example
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),

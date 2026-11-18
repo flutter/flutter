@@ -191,7 +191,8 @@ class PackagesTestCommand extends FlutterCommand {
   }
 
   final Pub? _injectedPub;
-  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   @override
   String get name => 'test';
@@ -232,7 +233,8 @@ class PackagesForwardCommand extends FlutterCommand {
   }
 
   final Pub? _injectedPub;
-  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -276,7 +278,8 @@ class PackagesPassthroughCommand extends FlutterCommand {
   ArgParser argParser = ArgParser.allowAnything();
 
   final Pub? _injectedPub;
-  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   @override
   String get name => 'pub';
@@ -337,7 +340,8 @@ class PackagesGetCommand extends FlutterCommand {
   }
 
   final Pub? _injectedPub;
-  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
+  late final Pub _pub =
+      _injectedPub ?? Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -498,6 +502,7 @@ class PackagesGetCommand extends FlutterCommand {
             platform: platform,
             analytics: analytics,
             androidSdkBuilder: null,
+            featureFlags: runner!.featureFlags,
             projectFactory: projectFactory,
             visualStudio: null,
             xcode: null,
