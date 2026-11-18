@@ -11,7 +11,6 @@ import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'android/java.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
@@ -22,8 +21,6 @@ import 'experimental/extension_manager.dart';
 import 'ios/ios_emulators.dart';
 import 'ios/ios_workflow.dart';
 import 'macos/xcode.dart';
-
-EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 
 /// A class to get all available emulators.
 class EmulatorManager {

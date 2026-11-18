@@ -14,6 +14,7 @@ import '../android/android_workflow.dart';
 import '../android/java.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -33,6 +34,7 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
+import '../hook_runner.dart' show FlutterHookRunner;
 import '../ios/ios_workflow.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -56,14 +58,19 @@ const protocolVersion = '0.6.1';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
     required this._androidContext,
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
     required this._xcode,
     this._androidWorkflow,
+    super.applicationPackages,
     this._deviceManager,
     this._emulatorManager,
+    this._flutterHookRunner,
     this.hidden = false,
+    this._webRunnerFactory,
   }) {
     argParser.addOption(
       'listen-on-tcp-port',
@@ -73,8 +80,12 @@ class DaemonCommand extends FlutterCommand {
   }
 
   final AndroidContext _androidContext;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
@@ -114,23 +125,28 @@ class DaemonCommand extends FlutterCommand {
 
       await DaemonServer(
         analytics: analytics,
+        androidSdk: _androidSdk,
+        androidWorkflow: _androidWorkflow,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        featureFlags: featureFlags,
+        deviceManager: _deviceManager,
+        devtoolsLauncher: _devtoolsLauncher,
+        emulatorManager: _emulatorManager,
+        featureFlags: runner!.featureFlags,
+        flutterHookRunner: _flutterHookRunner,
+        java: _java,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
           outputPreferences: outputPreferences,
         ),
-        toolContext: toolContext,
-        xcode: _xcode,
-        androidSdk: _androidSdk,
-        androidWorkflow: _androidWorkflow,
-        deviceManager: _deviceManager,
-        emulatorManager: _emulatorManager,
-        java: _java,
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         port: port,
+        toolContext: toolContext,
+        webRunnerFactory: _webRunnerFactory,
+        xcode: _xcode,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -140,17 +156,22 @@ class DaemonCommand extends FlutterCommand {
         logger: logger,
       ),
       analytics: analytics,
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
-      featureFlags: featureFlags,
-      toolContext: toolContext,
-      xcode: _xcode,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: _assetBundleFactory,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
       deviceManager: _deviceManager,
+      devtoolsLauncher: _devtoolsLauncher,
       emulatorManager: _emulatorManager,
+      featureFlags: runner!.featureFlags,
+      flutterHookRunner: _flutterHookRunner,
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
+      toolContext: toolContext,
+      webRunnerFactory: _webRunnerFactory,
+      xcode: _xcode,
     );
     logger.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
@@ -165,8 +186,11 @@ class DaemonCommand extends FlutterCommand {
 class DaemonServer {
   DaemonServer({
     required this.analytics,
+    required this.applicationPackageFactory,
+    required this.assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
+    required this.devtoolsLauncher,
     required this.featureFlags,
     required this.logger,
     required this.toolContext,
@@ -176,15 +200,22 @@ class DaemonServer {
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
     this.emulatorManager,
+    this.flutterHookRunner,
     this.java,
     this.notifyingLogger,
     this.port,
+    this.webRunnerFactory,
   });
 
   final int? port;
+  final ApplicationPackageFactory applicationPackageFactory;
+  final AssetBundleFactory assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
+  final DevtoolsLauncher devtoolsLauncher;
+  final FlutterHookRunner? flutterHookRunner;
   final ToolContext toolContext;
+  final WebRunnerFactory? webRunnerFactory;
   final Xcode? xcode;
 
   /// Stdout logger used to print general server-related errors.
@@ -234,17 +265,22 @@ class DaemonServer {
           logger: logger,
         ),
         analytics: analytics,
+        androidSdk: androidSdk,
+        androidWorkflow: androidWorkflow,
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: toolContext,
-        xcode: xcode,
-        notifyingLogger: notifyingLogger,
         deviceManager: deviceManager,
+        devtoolsLauncher: devtoolsLauncher,
         emulatorManager: emulatorManager,
-        java: java,
-        androidSdk: androidSdk,
         featureFlags: featureFlags,
-        androidWorkflow: androidWorkflow,
+        flutterHookRunner: flutterHookRunner,
+        java: java,
+        notifyingLogger: notifyingLogger,
+        toolContext: toolContext,
+        webRunnerFactory: webRunnerFactory,
+        xcode: xcode,
       );
       await daemon.onExit;
       await socketDone;
@@ -269,8 +305,11 @@ class Daemon {
   Daemon(
     this.connection, {
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required DevtoolsLauncher devtoolsLauncher,
     required FeatureFlags featureFlags,
     required this._toolContext,
     required Xcode? xcode,
@@ -279,9 +318,11 @@ class Daemon {
     DeviceManager? deviceManager,
     EmulatorManager? emulatorManager,
     FileTransfer fileTransfer = const FileTransfer(),
+    FlutterHookRunner? flutterHookRunner,
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
+    WebRunnerFactory? webRunnerFactory,
   }) {
     final Platform platform = _toolContext.platform;
     final AndroidWorkflow workflow =
@@ -297,12 +338,23 @@ class Daemon {
       appDomain = AppDomain(
         this,
         analytics: analytics,
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: featureFlags,
+        flutterHookRunner: flutterHookRunner,
+        webRunnerFactory: webRunnerFactory,
         xcode: xcode,
       ),
     );
-    registerDomain(deviceDomain = DeviceDomain(this, deviceManager: deviceManager));
+    registerDomain(
+      deviceDomain = DeviceDomain(
+        this,
+        applicationPackageFactory: applicationPackageFactory,
+        deviceManager: deviceManager,
+      ),
+    );
     registerDomain(
       emulatorDomain = EmulatorDomain(
         this,
@@ -314,7 +366,7 @@ class Daemon {
         java: java,
       ),
     );
-    registerDomain(devToolsDomain = DevToolsDomain(this));
+    registerDomain(devToolsDomain = DevToolsDomain(this, devtoolsLauncher: devtoolsLauncher));
     registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
@@ -331,8 +383,11 @@ class Daemon {
 
   factory Daemon.createMachineDaemon({
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required DevtoolsLauncher devtoolsLauncher,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
     required Xcode? xcode,
@@ -340,7 +395,9 @@ class Daemon {
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
     EmulatorManager? emulatorManager,
+    FlutterHookRunner? flutterHookRunner,
     Java? java,
+    WebRunnerFactory? webRunnerFactory,
   }) {
     final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
@@ -349,20 +406,25 @@ class Daemon {
         logger: logger,
       ),
       analytics: analytics,
+      androidSdk: androidSdk,
+      androidWorkflow: androidWorkflow,
+      applicationPackageFactory: applicationPackageFactory,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      toolContext: toolContext,
-      xcode: xcode,
+      deviceManager: deviceManager,
+      devtoolsLauncher: devtoolsLauncher,
+      emulatorManager: emulatorManager,
+      featureFlags: featureFlags,
+      flutterHookRunner: flutterHookRunner,
+      java: java,
+      logToStdout: true,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
-      logToStdout: true,
-      deviceManager: deviceManager,
-      emulatorManager: emulatorManager,
-      java: java,
-      androidSdk: androidSdk,
-      featureFlags: featureFlags,
-      androidWorkflow: androidWorkflow,
+      toolContext: toolContext,
+      webRunnerFactory: webRunnerFactory,
+      xcode: xcode,
     );
     return daemon;
   }
@@ -812,9 +874,14 @@ class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
     required this._analytics,
+    required this._applicationPackageFactory,
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._xcode,
+    this._flutterHookRunner,
+    this._webRunnerFactory,
   }) : super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
@@ -823,8 +890,13 @@ class AppDomain extends Domain {
   }
 
   final Analytics _analytics;
+  final ApplicationPackageFactory _applicationPackageFactory;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
 
   static const _uuidGenerator = Uuid();
@@ -878,46 +950,58 @@ class AppDomain extends Domain {
     ResidentRunner runner;
 
     if (await device.targetPlatform == TargetPlatform.web_javascript) {
-      runner = webRunnerFactory!.createWebRunner(
+      runner = _webRunnerFactory!.createWebRunner(
         flutterDevice,
-        flutterProject: flutterProject,
-        target: target,
-        debuggingOptions: options,
-        stayResident: true,
-        urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
-        machine: machine,
         analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        debuggingOptions: options,
+        featureFlags: _featureFlags,
+        flutterHookRunner: _flutterHookRunner,
+        flutterProject: flutterProject,
+        machine: machine,
+        stayResident: true,
+        target: target,
         toolContext: toolContext,
+        urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
-        target: target,
-        debuggingOptions: options,
-        applicationBinary: applicationBinary,
-        projectRootPath: projectRootPath,
-        dillOutputPath: dillOutputPath,
-        hostIsIde: true,
-        machine: machine,
         analytics: _analytics,
+        applicationBinary: applicationBinary,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: options,
+        dillOutputPath: dillOutputPath,
+        featureFlags: _featureFlags,
+        hostIsIde: true,
+        machine: machine,
+        projectRootPath: projectRootPath,
+        target: target,
         toolContext: toolContext,
         xcode: _xcode,
       );
     } else {
       runner = ColdRunner(
         <FlutterDevice>[flutterDevice],
-        target: target,
-        debuggingOptions: options,
-        applicationBinary: applicationBinary,
-        machine: machine,
         analytics: _analytics,
+        applicationBinary: applicationBinary,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: options,
+        featureFlags: _featureFlags,
+        machine: machine,
+        target: target,
         toolContext: toolContext,
         xcode: _xcode,
       );
@@ -1215,7 +1299,8 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {this._deviceManager}) : super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {required this._applicationPackageFactory, this._deviceManager})
+    : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1240,6 +1325,7 @@ class DeviceDomain extends Domain {
     _deviceManager?.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
+  final ApplicationPackageFactory _applicationPackageFactory;
   final DeviceManager? _deviceManager;
 
   Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
@@ -1372,7 +1458,7 @@ class DeviceDomain extends Domain {
     final File applicationBinary = daemon.proxyDomain.tempDirectory.childFile(
       _getStringArg(args, 'applicationBinary', required: true)!,
     );
-    final ApplicationPackage? applicationPackage = await ApplicationPackageFactory.instance!
+    final ApplicationPackage? applicationPackage = await _applicationPackageFactory
         .getPackageForPlatform(targetPlatform, applicationBinary: applicationBinary);
     final id = 'application_package_${_id++}';
     _applicationPackages[id] = applicationPackage;
@@ -1605,21 +1691,20 @@ class DeviceDomain extends Domain {
 }
 
 class DevToolsDomain extends Domain {
-  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+  DevToolsDomain(Daemon daemon, {required this._devtoolsLauncher}) : super(daemon, 'devtools') {
     registerHandler('serve', serve);
   }
 
-  DevtoolsLauncher? _devtoolsLauncher;
+  final DevtoolsLauncher _devtoolsLauncher;
 
   Future<Map<String, Object?>> serve([Map<String, Object?>? args]) async {
-    _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final DevToolsServerAddress? server = await _devtoolsLauncher?.serve();
+    final DevToolsServerAddress? server = await _devtoolsLauncher.serve();
     return <String, Object?>{'host': server?.host, 'port': server?.port};
   }
 
   @override
   Future<void> dispose() async {
-    await _devtoolsLauncher?.close();
+    await _devtoolsLauncher.close();
   }
 }
 
