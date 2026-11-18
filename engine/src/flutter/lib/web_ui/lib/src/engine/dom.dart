@@ -521,11 +521,21 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
   /// If [node] is already in the document, it is moved with `moveBefore` when
   /// the browser supports it. Unlike a remove-and-insert, `moveBefore` keeps the
   /// focus inside [node], so a focused descendant is not blurred.
+  ///
+  /// Without `moveBefore`, the browser drops the focus of a moved descendant
+  /// (Safari does so without firing `blur`), so the focus is restored after the
+  /// move.
   void insertOrMoveBefore(DomNode node, DomNode? referenceNode) {
-    if (node.isConnected == true && isConnected == true && (this as JSObject).has('moveBefore')) {
+    final bool isMove = node.isConnected == true && isConnected == true;
+    if (isMove && (this as JSObject).has('moveBefore')) {
       moveBefore(node, referenceNode);
-    } else {
-      insertBefore(node, referenceNode);
+      return;
+    }
+    final DomElement? focused = isMove ? domDocument.activeElement : null;
+    final bool restoreFocus = focused != null && node.contains(focused);
+    insertBefore(node, referenceNode);
+    if (restoreFocus && domDocument.activeElement != focused) {
+      focused.focusWithoutScroll();
     }
   }
 
