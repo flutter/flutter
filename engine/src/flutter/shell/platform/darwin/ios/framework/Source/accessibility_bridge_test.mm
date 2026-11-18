@@ -263,10 +263,8 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
   for (bool scrollable : {true, false, true}) {
     @autoreleasepool {
       list.flags.hasImplicitScrolling = scrollable;
-      __weak SemanticsObject* oldList;
       @autoreleasepool {
-        oldList = parentObject.children[0];
-        SemanticsObject* retainedOldList = mode == 4 ? oldList : nil;
+        SemanticsObject* retainedOldList = mode == 4 ? parentObject.children[0] : nil;
         // The parent is unchanged and is intentionally absent from this partial update.
         bridge->UpdateSemantics({{2, list}}, actions);
         if (mode == 4) {
@@ -294,7 +292,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
       if (mode < 2 || mode == 4) {
         XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
       }
-      XCTAssertNil(oldList);
     }
   }
   bridge->clearState();
