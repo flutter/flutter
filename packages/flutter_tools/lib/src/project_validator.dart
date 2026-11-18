@@ -10,6 +10,7 @@ import 'base/platform.dart';
 import 'cache.dart';
 import 'context/android_context.dart';
 import 'context/tool_context.dart';
+import 'features.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
 import 'project.dart';
@@ -37,8 +38,12 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  const VariableDumpMachineProjectValidator({required this._toolContext});
+  const VariableDumpMachineProjectValidator({
+    required this._featureFlags,
+    required this._toolContext,
+  });
 
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   String _toJsonValue(Object? obj) {
@@ -52,8 +57,17 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Platform platform) = _toolContext;
-    final version = FlutterVersion(flutterRoot: cache.flutterRoot, fs: fs, git: git);
+    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Logger logger, :Platform platform) =
+        _toolContext;
+    final version = FlutterVersion(
+      cache: cache,
+      flutterRoot: cache.flutterRoot,
+      fs: fs,
+      git: git,
+      isOmitLegacyVersionFileEnabled: () => _featureFlags.isOmitLegacyVersionFileEnabled,
+      logger: logger,
+      platform: platform,
+    );
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,

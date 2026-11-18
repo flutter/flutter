@@ -26,7 +26,7 @@ class BuildMacosCommand extends BuildSubCommand {
     required this.buildSystem,
     required this.featureFlags,
     required this.templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     registerOptionBundles(const <OptionBundle>[
@@ -35,10 +35,7 @@ class BuildMacosCommand extends BuildSubCommand {
       DartCompileOptionsBundle(),
       AppleBuildOptionsBundle(),
     ]);
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      BuildInfoOptions.trackWidgetCreation,
-      AppleBuildOptionsBundle.configOnly,
-    ], verboseHelp: verboseHelp);
+    argParser.addDescriptor(AppleBuildOptionsBundle.configOnly, verboseHelp: verboseHelp);
   }
 
   /// Holds Apple-specific dependencies.
@@ -53,9 +50,6 @@ class BuildMacosCommand extends BuildSubCommand {
 
   /// Renderer used for template generation during pod processing.
   final TemplateRenderer templateRenderer;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'macos';

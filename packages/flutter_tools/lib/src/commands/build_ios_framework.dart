@@ -39,7 +39,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._buildSystem,
     required this.codesign,
     required this.templateRenderer,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
@@ -117,10 +117,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   @protected
   BuildSystem get buildSystem => _buildSystem;
-
-  @protected
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @protected
   Cache get cache => toolContext.cache;
@@ -616,6 +612,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           cocoaPods: appleContext.cocoaPods,
+          featureFlags: runner!.featureFlags,
           templateRenderer: templateRenderer,
           toolContext: toolContext,
           forceCocoaPodsOnly: true,
@@ -832,6 +829,7 @@ end
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final AppleContext(:Xcode xcode) = appleContext;
 
@@ -869,6 +867,11 @@ end
           processManager: processManager,
           platform: platform,
           analytics: analytics,
+          androidSdkBuilder: null,
+          featureFlags: runner!.featureFlags,
+          projectFactory: projectFactory,
+          visualStudio: null,
+          xcode: xcode,
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
         );

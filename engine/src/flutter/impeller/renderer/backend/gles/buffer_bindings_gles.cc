@@ -408,7 +408,7 @@ bool BufferBindingsGLES::BindUniformBufferV3(
           DeviceBufferGLES::BindingType::kUniformBuffer)) {
     return false;
   }
-  auto handle = device_buffer_gles.GetHandle();
+  auto handle = device_buffer_gles.GetUniformHandle();
   if (!handle.has_value()) {
     return false;
   }
