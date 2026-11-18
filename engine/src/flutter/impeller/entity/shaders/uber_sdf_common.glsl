@@ -4,38 +4,10 @@
 
 // Shared body of the UberSDF shaders, included by `uber_sdf.frag` and
 // `uber_sdf_ssbo.frag`. Each entrypoint supplies only `getGradientColor()`.
-//
-// Precision
-// =========
-//
-// The default precision is mediump, which many mobile GPUs execute as fp16:
-// 11 significant bits, a largest finite value of 65504 (so squaring anything
-// above ~256 overflows), and subnormal values below ~6e-5 that some GPUs flush
-// to zero. Some drivers (Mali on GLES) also store mediump uniforms in 16 bits,
-// rounding them before the shader runs, even if the code that reads them is
-// highp. Metal does not use fp16 for this shader, so the macOS goldens do not
-// catch violations of these rules.
-//
-// Making everything highp costs uniform registers on Mali, so the shader
-// follows these rules instead:
-//
-//  1. A value is highp from where it is read until the last subtraction that
-//     can cancel it. Near an edge, a distance is a small difference of large
-//     local coordinates. For a fill, the last subtraction is the edge
-//     distance; for a stroke, it is the subtraction of the half stroke width.
-//  2. A uniform is highp if it is a position or a length at the scale of the
-//     shape.
-//  3. An iterative solver may run in mediump only if it corrects itself
-//     (Newton's method does, bisection does not), and then needs a final step
-//     in highp.
-//  4. The gradient parameter `t` is highp until it has been tiled.
-//
-// Colors, enums, ratios, per-pixel sizes and the antialiasing math stay
-// mediump.
 
 precision mediump float;
 
-// See rule 3 above and `sdSuperellipse` in sdf_functions.glsl.
+// See `sdSuperellipse` in sdf_functions.glsl.
 #define SD_SUPERELLIPSE_PRECISION highp
 
 #include <impeller/color.glsl>
