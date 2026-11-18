@@ -441,3 +441,18 @@ TEST_F(FlAccessibleNodeTest, SurvivesParentDestruction) {
   atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
                             ATK_XY_SCREEN);
 }
+
+TEST_F(FlAccessibleNodeTest, ParentCoordinatesDoNotAddAncestorOrigin) {
+  g_autoptr(FlAccessibleNode) parent = fl_accessible_node_new(engine, 456, 0);
+  g_autoptr(FlAccessibleNode) child = fl_accessible_node_new(engine, 456, 1);
+  fl_accessible_node_set_extents(parent, 70, 90, 300, 200);
+  fl_accessible_node_set_extents(child, 11, 13, 60, 40);
+  fl_accessible_node_set_parent(child, ATK_OBJECT(parent), 0);
+  gint x, y, width, height;
+  atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
+                            ATK_XY_PARENT);
+  EXPECT_EQ(x, 11);
+  EXPECT_EQ(y, 13);
+  EXPECT_EQ(width, 60);
+  EXPECT_EQ(height, 40);
+}
