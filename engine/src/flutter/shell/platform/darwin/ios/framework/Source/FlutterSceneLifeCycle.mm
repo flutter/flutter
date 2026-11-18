@@ -510,6 +510,30 @@ static BOOL _sceneWillConnectFallbackCalled = NO;
   }
 }
 
+#pragma mark - Responding to geometry changes
+
+// UIKit declares `previousEffectiveGeometry` as nonnull, but passes `nil` for it on the initial
+// call while the scene is being created. This is a UIKit bug. If Apple fixes it by marking the
+// parameter nullable, that is a breaking change for every Swift implementer of
+// `UIWindowSceneDelegate`, and this method will change to match.
+//
+// This parameter is still intentionally nonnull to match UIKit, rather than nullable:
+// - This method then only changes when UIKit's does, so Flutter never introduces a breaking change
+//   here on its own. If it were nullable, Swift callers could pass an optional, and changing it to
+//   nonnull later (e.g. if Apple stops passing `nil`) would break them.
+// - Like the other methods of this class, it mirrors the UIKit callback exactly, so forwarding is a
+//   direct pass-through with matching types.
+- (void)windowScene:(UIWindowScene*)windowScene
+    didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry
+    API_AVAILABLE(ios(26.0)) {
+  // The scene may have moved to a different screen. Unlike `viewDidLayoutSubviews`, this is called
+  // even if the Flutter view's size did not change (e.g. a fixed-size view in an add-to-app host).
+  // `updateDisplays` skips the update if the display information has not changed.
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:windowScene]) {
+    [engine updateDisplays];
+  }
+}
+
 #pragma mark - Helpers
 
 - (void)handleDeeplinkingForEngine:(FlutterEngine*)engine

@@ -11,11 +11,9 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/error_formatter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
@@ -24,7 +22,7 @@ import 'mocks.dart';
 
 void main() {
   // Use the real platform as a base so that Windows bots test paths.
-  final platform = FakePlatform.fromPlatform(globals.platform);
+  final platform = FakePlatform.fromPlatform(const LocalPlatform());
   final FileSystemStyle fsStyle = platform.isWindows
       ? FileSystemStyle.windows
       : FileSystemStyle.posix;
@@ -34,10 +32,6 @@ void main() {
     final expectedFlutterExecutable = platform.isWindows
         ? r'C:\fake\flutter\bin\flutter.bat'
         : '/fake/flutter/bin/flutter';
-
-    setUpAll(() {
-      Cache.flutterRoot = flutterRoot;
-    });
 
     group('launchRequest', () {
       test('runs "flutter run" with --machine', () async {

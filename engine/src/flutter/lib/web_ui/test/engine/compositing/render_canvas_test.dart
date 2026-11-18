@@ -123,7 +123,7 @@ void testMain() {
       sceneBuilder.addPicture(ui.Offset.zero, picture);
       final ui.Scene scene = sceneBuilder.build();
 
-      await renderer.renderScene(scene, implicitView);
+      await renderer.renderScene(scene, implicitView, size: implicitView.physicalSize);
 
       expect(
         renderer.rasterizers[implicitView.viewId]!.currentFrameSize,

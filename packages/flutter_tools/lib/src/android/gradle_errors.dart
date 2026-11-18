@@ -192,7 +192,7 @@ final zipExceptionHandler = GradleHandledError(
           '${logger.terminal.warningMark} '
           'Your .gradle directory under the home directory might be corrupted.',
         );
-        bool shouldDeleteUserGradle = await botDetector.isRunningOnBot;
+        bool shouldDeleteUserGradle = botDetector.isRunningOnBot;
         if (!shouldDeleteUserGradle && logger.terminal.stdinHasTerminal) {
           try {
             final String selection = await logger.terminal.promptForCharInput(
