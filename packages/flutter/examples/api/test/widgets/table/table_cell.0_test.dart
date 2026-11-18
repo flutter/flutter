@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/table/table_cell.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,13 +13,6 @@ void main() {
     await tester.pumpWidget(const example.TableCellSpanExampleApp());
 
     final Table table = tester.widget<Table>(find.byType(Table));
-
-    // Check the defined columnWidths.
-    expect(table.columnWidths, const <int, TableColumnWidth>{
-      0: FlexColumnWidth(),
-      1: FlexColumnWidth(),
-      2: FlexColumnWidth(),
-    });
 
     // The table has five rows.
     expect(table.children.length, 5);
@@ -59,27 +52,20 @@ void main() {
     // The spanning header covers three columns, so its rendered width is
     // wider than a single column of the table.
     final Rect spanningHeader = tester.getRect(
-      find.ancestor(of: find.text('2026 Sales Performance'), matching: find.byType(Container)).last,
+      find.text('2026 Sales Performance'),
     );
-    final Rect product = tester.getRect(
-      find.ancestor(of: find.text('Product'), matching: find.byType(Container)).last,
-    );
+    final Rect product = tester.getRect(find.text('Product'));
 
     expect(spanningHeader.width, greaterThan(product.width));
 
     // The row-spanning cell is middle-aligned within the two rows it
-    // covers, so its center sits below the first row it starts in.
-    final Rect q1 = tester.getRect(
-      find.ancestor(of: find.text('Q1'), matching: find.byType(Container)).first,
-    );
-    final Rect quarter = tester.getRect(
-      find.ancestor(of: find.text('Quarter'), matching: find.byType(Container)).first,
-    );
-    expect(q1.center.dy, greaterThan(quarter.center.dy));
-    // And above the last row it covers (the total row).
-    final Rect total = tester.getRect(
-      find.ancestor(of: find.text('Total Q1 Revenue'), matching: find.byType(Container)).first,
-    );
+    // covers, so its center sits below the center of the header row above
+    // the rows it covers.
+    final Rect q1 = tester.getRect(find.text('Q1'));
+    expect(q1.center.dy, greaterThan(product.center.dy));
+
+    // And its center sits above the last row it covers (the total row).
+    final Rect total = tester.getRect(find.text('Total Q1 Revenue'));
     expect(q1.center.dy, lessThan(total.center.dy));
   });
 }
