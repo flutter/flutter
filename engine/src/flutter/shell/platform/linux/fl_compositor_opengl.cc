@@ -69,12 +69,14 @@ static void composite_layer(FlCompositorOpenGL* self,
                             double y,
                             int width,
                             int height) {
-  size_t texture_width = fl_framebuffer_get_width(framebuffer);
-  size_t texture_height = fl_framebuffer_get_height(framebuffer);
-  fl_compositor_opengl_shader_set_offset(self->shader, (2 * x / width) - 1.0,
-                                         (2 * y / height) - 1.0);
-  fl_compositor_opengl_shader_set_scale(self->shader, texture_width / width,
-                                        texture_height / height);
+  double scale_x =
+      static_cast<double>(fl_framebuffer_get_width(framebuffer)) / width;
+  double scale_y =
+      static_cast<double>(fl_framebuffer_get_height(framebuffer)) / height;
+  fl_compositor_opengl_shader_set_offset(self->shader,
+                                         (2 * x / width) + scale_x - 1.0,
+                                         1.0 - (2 * y / height) - scale_y);
+  fl_compositor_opengl_shader_set_scale(self->shader, scale_x, scale_y);
 
   GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
   glBindTexture(GL_TEXTURE_2D, texture_id);
