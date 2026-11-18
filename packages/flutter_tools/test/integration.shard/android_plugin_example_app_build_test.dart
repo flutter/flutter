@@ -42,6 +42,38 @@ void main() {
 
     final Directory exampleAppDir = tempDir.childDirectory(testName).childDirectory('example');
 
+    // Add build type settings that AGP rejects in a library, to check that they
+    // are not copied onto library plugins.
+    // Regression test for https://github.com/flutter/flutter/issues/196412.
+    final File appGradleFile = exampleAppDir
+        .childDirectory('android')
+        .childDirectory('app')
+        .childFile('build.gradle.kts');
+    expect(appGradleFile, exists);
+    appGradleFile.writeAsStringSync('''
+${appGradleFile.readAsStringSync()}
+
+android {
+    buildFeatures {
+        buildConfig = true
+        resValues = true
+    }
+    buildTypes {
+        getByName("profile") {
+            applicationIdSuffix = ".profile"
+            versionNameSuffix = "-PROFILE"
+            buildConfigField("String", "BUILD_TYPE_NOTE", "\\"profile\\"")
+            resValue("string", "build_type_note", "profile")
+        }
+        create("staging") {
+            initWith(getByName("release"))
+            isMinifyEnabled = true
+            isShrinkResources = true
+        }
+    }
+}
+''');
+
     result = processManager.runSync(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -49,6 +81,10 @@ void main() {
       'apk',
       '--target-platform=android-arm',
     ], workingDirectory: exampleAppDir.path);
+    expect(result.stderr, isNot(contains('Library projects cannot set applicationIdSuffix')));
+    expect(result.stderr, isNot(contains('Resource shrinker cannot be used for libraries')));
+    expect(result.stderr, isNot(contains('contains custom BuildConfig fields')));
+    expect(result.stderr, isNot(contains('contains custom resource values')));
     if (result.exitCode != 0) {
       throw Exception(
         'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
@@ -70,6 +106,20 @@ void main() {
     if (template == 'plugin_ffi') {
       // Does not support AGP 3.3.0.
       return;
+    }
+
+    // The staging build type minifies the app. Check that R8 keeps the plugin
+    // classes.
+    final Directory exampleAndroidDir = exampleAppDir.childDirectory('android');
+    result = processManager.runSync(<String>[
+      exampleAndroidDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').path,
+      ':app:assembleStaging',
+      '-Ptarget-platform=android-arm',
+    ], workingDirectory: exampleAndroidDir.path);
+    if (result.exitCode != 0) {
+      throw Exception(
+        'gradlew :app:assembleStaging failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+      );
     }
 
     // Clean

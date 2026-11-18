@@ -307,14 +307,14 @@ void _applyTextStyleToNative(EngineTextStyle style, SkwasmNativeTextStyle native
     skStringFree(localeHandle);
   }
   if (style.background != null) {
-    final PaintHandle backgroundPaint = (style.background! as SkwasmPaint).toRawPaint();
-    textStyleSetBackground(handle, backgroundPaint);
-    paintDispose(backgroundPaint);
+    final backgroundPaint = (style.background! as EnginePaint).createBackendPaint() as SkwasmPaint;
+    textStyleSetBackground(handle, backgroundPaint.handle);
+    backgroundPaint.dispose();
   }
   if (style.foreground != null) {
-    final PaintHandle foregroundPaint = (style.foreground! as SkwasmPaint).toRawPaint();
-    textStyleSetForeground(handle, foregroundPaint);
-    paintDispose(foregroundPaint);
+    final foregroundPaint = (style.foreground! as EnginePaint).createBackendPaint() as SkwasmPaint;
+    textStyleSetForeground(handle, foregroundPaint.handle);
+    foregroundPaint.dispose();
   }
   if (style.shadows != null) {
     for (final ui.Shadow shadow in style.shadows!) {

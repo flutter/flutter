@@ -613,13 +613,7 @@ bool TextureGLES::Bind() {
   }
   const auto& gl = reactor_->GetProcTable();
 
-  if (fence_.IsValid()) {
-    std::optional<GLsync> fence = reactor_->GetGLFence(fence_.Get());
-    if (fence.has_value()) {
-      gl.WaitSync(fence.value(), 0, GL_TIMEOUT_IGNORED);
-    }
-    fence_.Reset();
-  }
+  WaitForFence();
 
   switch (type_) {
     case Type::kTexture:
@@ -815,6 +809,7 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   if (!handle.has_value()) {
     return false;
   }
+  WaitForFence();
   const GLint level = static_cast<GLint>(mip_level);
 
   switch (ComputeTypeForBinding(target)) {
@@ -867,6 +862,17 @@ std::optional<GLuint> TextureGLES::GetFBO() const {
 void TextureGLES::SetFence(HandleGLES fence) {
   FML_DCHECK(!fence_.IsValid());
   fence_ = UniqueHandleGLES(reactor_, fence);
+}
+
+void TextureGLES::WaitForFence() {
+  if (!fence_.IsValid()) {
+    return;
+  }
+  std::optional<GLsync> fence = reactor_->GetGLFence(fence_.Get());
+  if (fence.has_value()) {
+    reactor_->GetProcTable().WaitSync(fence.value(), 0, GL_TIMEOUT_IGNORED);
+  }
+  fence_.Reset();
 }
 
 // Visible for testing.

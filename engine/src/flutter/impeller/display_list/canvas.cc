@@ -1814,17 +1814,13 @@ std::optional<Rect> Canvas::GetLocalCoverageLimit() const {
 
   // The maximum coverage of the subpass. Subpasses textures should never
   // extend outside the parent pass texture or the current clip coverage.
-  std::optional<Rect> maybe_coverage_limit =
-      Rect::MakeOriginSize(GetGlobalPassPosition(),
-                           Size(back_texture->GetSize()))
-          .Intersection(current_clip_coverage);
-
-  if (!maybe_coverage_limit.has_value() || maybe_coverage_limit->IsEmpty()) {
-    return std::nullopt;
-  }
-
-  return maybe_coverage_limit->Intersection(
-      Rect::MakeSize(render_target_.GetRenderTargetSize()));
+  //
+  // Do not intersect with the root render target. Inside a subpass, content
+  // outside the root RT can still end up on-screen (e.g. an ancestor image
+  // filter translates it).
+  return Rect::MakeOriginSize(GetGlobalPassPosition(),
+                              Size(back_texture->GetSize()))
+      .Intersection(current_clip_coverage);
 }
 
 void Canvas::SaveLayer(const Paint& paint,
