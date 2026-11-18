@@ -58,13 +58,15 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// be used to control one sheet at a time. A controller can be reused with a
 /// new sheet if the previous sheet has been disposed.
 ///
-/// If a sheet is recreated instead of updated, its new [State] attaches to the
-/// controller while the old one is still in the tree. This is allowed when the
-/// old sheet has already been deactivated, for example because an un-keyed
-/// sibling was inserted before it. When the sheet's key, or the key of one of
-/// its ancestors in a [Row], [Column], [Stack] or similar, changes, the old
-/// sheet is still active at that point and attaching throws. Keep those keys
-/// stable, or give the sheet a [GlobalKey] so that its [State] is reused.
+/// A sheet detaches from its controller when it is removed from the tree, and
+/// attaches again if it is reinserted, for example when it is moved with a
+/// [GlobalKey]. So a sheet that is recreated instead of updated, for example
+/// because an un-keyed sibling was inserted before it, can attach its new
+/// [State] to the same controller. When the sheet's key, or the key of one of
+/// its ancestors in a [Row], [Column], [Stack] or similar, changes, the new
+/// sheet is created before the old one is removed, and attaching throws. Keep
+/// those keys stable, or give the sheet a [GlobalKey] so that its [State] is
+/// reused.
 ///
 /// The controller's methods cannot be used until after the controller has been
 /// passed into a [DraggableScrollableSheet] and the sheet has run initState.
@@ -84,7 +86,6 @@ class DraggableScrollableController extends ChangeNotifier {
   }
 
   _DraggableScrollableSheetScrollController? _attachedController;
-  BuildContext? _debugAttachedSheet;
   final Set<AnimationController> _animationControllers = <AnimationController>{};
 
   /// Get the current size (as a fraction of the parent height) of the attached sheet.
@@ -215,16 +216,11 @@ class DraggableScrollableController extends ChangeNotifier {
     );
   }
 
-  void _attach(_DraggableScrollableSheetScrollController scrollController, BuildContext sheet) {
+  void _attach(_DraggableScrollableSheetScrollController scrollController) {
     assert(() {
-      final BuildContext? previousSheet = _debugAttachedSheet;
-      // A sheet that is recreated instead of updated (for example because an
-      // un-keyed sibling was inserted before it) attaches its new State while
-      // the old one is inactive and about to be disposed. That is allowed; only
-      // two active sheets sharing one controller is an error.
-      if (_attachedController != null &&
-          _attachedController != scrollController &&
-          ((previousSheet as StatefulElement?)?.debugIsActive ?? false)) {
+      // A sheet detaches when it is deactivated, so a controller that is still
+      // attached here belongs to another sheet that is in the tree.
+      if (_attachedController != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('DraggableScrollableController is already attached to a sheet.'),
           ErrorDescription(
@@ -246,26 +242,26 @@ class DraggableScrollableController extends ChangeNotifier {
           ),
         ]);
       }
-      _debugAttachedSheet = sheet;
       return true;
     }());
-    final _DraggableScrollableSheetScrollController? previousController = _attachedController;
-    if (previousController != null && previousController != scrollController) {
-      // The previous sheet is being replaced. Let go of it now; its State
-      // disposes its own extent later.
-      _detach(previousController);
-    }
     _attachedController = scrollController;
     _attachedController!.extent._currentSize.addListener(notifyListeners);
     _attachedController!.onPositionDetached = _disposeAnimationControllers;
   }
 
-  void _onExtentReplaced(_DraggableSheetExtent previousExtent) {
+  void _onExtentReplaced(
+    _DraggableScrollableSheetScrollController scrollController,
+    _DraggableSheetExtent previousExtent,
+  ) {
+    // Only the sheet that is currently attached is listened to.
+    if (_attachedController != scrollController) {
+      return;
+    }
     // When the extent has been replaced, the old extent is already disposed and
     // the controller will point to a new extent. We have to add our listener to
     // the new extent.
-    _attachedController!.extent._currentSize.addListener(notifyListeners);
-    if (previousExtent.currentSize != _attachedController!.extent.currentSize) {
+    scrollController.extent._currentSize.addListener(notifyListeners);
+    if (previousExtent.currentSize != scrollController.extent.currentSize) {
       // The listener won't fire for a change in size between two extent
       // objects so we have to fire it manually here.
       notifyListeners();
@@ -273,8 +269,8 @@ class DraggableScrollableController extends ChangeNotifier {
   }
 
   void _detach(_DraggableScrollableSheetScrollController scrollController) {
-    // Only the sheet that is currently attached can detach. A sheet that was
-    // already replaced by a newer one must not detach the newer one.
+    // Only the sheet that is currently attached can detach, so a sheet that is
+    // not attached can never detach another one.
     if (_attachedController != scrollController) {
       return;
     }
@@ -282,10 +278,6 @@ class DraggableScrollableController extends ChangeNotifier {
     scrollController.onPositionDetached = null;
     _disposeAnimationControllers();
     _attachedController = null;
-    assert(() {
-      _debugAttachedSheet = null;
-      return true;
-    }());
   }
 
   void _disposeAnimationControllers() {
@@ -714,7 +706,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       shouldCloseOnMinExtent: widget.shouldCloseOnMinExtent,
     );
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
-    widget.controller?._attach(_scrollController, context);
+    widget.controller?._attach(_scrollController);
   }
 
   List<double> _impliedSnapSizes() {
@@ -745,7 +737,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?._detach(_scrollController);
-      widget.controller?._attach(_scrollController, context);
+      widget.controller?._attach(_scrollController);
     }
     _replaceExtent(oldWidget);
   }
@@ -778,8 +770,22 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   @override
-  void dispose() {
+  void activate() {
+    super.activate();
+    // The sheet was reinserted into the tree, for example with a GlobalKey.
+    widget.controller?._attach(_scrollController);
+  }
+
+  @override
+  void deactivate() {
+    // Detach as soon as the sheet leaves the tree, so that a sheet that replaces
+    // this one can attach to the same controller.
     widget.controller?._detach(_scrollController);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
     _extent.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -801,7 +807,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _scrollController.extent = _extent;
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
-    widget.controller?._onExtentReplaced(previousExtent);
+    widget.controller?._onExtentReplaced(_scrollController, previousExtent);
     previousExtent.dispose();
     if (widget.snap &&
         (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes) &&

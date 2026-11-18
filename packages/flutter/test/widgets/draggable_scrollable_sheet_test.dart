@@ -1536,8 +1536,9 @@ void main() {
   });
 
   group('DraggableScrollableSheet recreated with the same controller', () {
-    Widget sheet(DraggableScrollableController controller) {
+    Widget sheet(DraggableScrollableController controller, {Key? key}) {
       return DraggableScrollableSheet(
+        key: key,
         controller: controller,
         builder: (BuildContext context, ScrollController scrollController) {
           return SingleChildScrollView(
@@ -1571,8 +1572,8 @@ void main() {
       await tester.pumpWidget(column(insertSibling: false, controller: controller));
       expect(controller.isAttached, isTrue);
 
-      // The sibling makes the sheet's State be recreated: the new State
-      // attaches before the old one is disposed.
+      // The sibling makes the sheet's State be recreated: the old State is
+      // deactivated and detaches before the new one attaches.
       await tester.pumpWidget(column(insertSibling: true, controller: controller));
       expect(tester.takeException(), isNull);
       // Disposing the old State must not detach the new one.
@@ -1599,6 +1600,36 @@ void main() {
       await tester.pumpWidget(column(insertSibling: false, controller: controller));
       expect(tester.takeException(), isNull);
       expect(controller.isAttached, isTrue);
+    });
+
+    testWidgets('reattaches when the sheet is moved with a GlobalKey', (WidgetTester tester) async {
+      final controller = DraggableScrollableController();
+      addTearDown(controller.dispose);
+      final GlobalKey sheetKey = GlobalKey();
+      Widget build({required bool wrapped}) {
+        final Widget keyedSheet = sheet(controller, key: sheetKey);
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: wrapped ? Padding(padding: EdgeInsets.zero, child: keyedSheet) : keyedSheet,
+        );
+      }
+
+      await tester.pumpWidget(build(wrapped: false));
+      final State<StatefulWidget> state = sheetKey.currentState!;
+      expect(controller.isAttached, isTrue);
+
+      // Moving the sheet deactivates its State and activates it again.
+      await tester.pumpWidget(build(wrapped: true));
+      expect(tester.takeException(), isNull);
+      expect(sheetKey.currentState, same(state));
+      expect(controller.isAttached, isTrue);
+
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+      controller.jumpTo(0.3);
+      await tester.pump();
+      expect(controller.size, moreOrLessEquals(0.3));
+      expect(notifications, greaterThan(0));
     });
   });
 
