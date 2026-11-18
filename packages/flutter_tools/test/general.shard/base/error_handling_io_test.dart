@@ -481,6 +481,7 @@ void main() {
     const eperm = 1;
     const enospc = 28;
     const eacces = 13;
+    const exdev = 18;
     const erofs = 30;
 
     late FileExceptionHandler exceptionHandler;
@@ -765,12 +766,69 @@ void main() {
         throwsToolExit(message: 'The file or directory could not be found'),
       );
     });
+
+    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: linuxPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file')..createSync();
+
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.copy,
+          FileSystemException(
+            'Cannot copy file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
+
+      const expectedCrossDeviceMessage =
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(() => file.delete(), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(() => file.deleteSync(), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(
+        () => ErrorHandlingFileSystem.deleteIfExists(file, recursive: true),
+        throwsToolExit(message: expectedCrossDeviceMessage),
+      );
+      await expectLater(
+        () => file.copy('dir/copied'),
+        throwsToolExit(message: expectedCrossDeviceMessage),
+      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedCrossDeviceMessage));
+      expect(
+        () => ErrorHandlingFileSystem.noExitOnFailure(() => file.deleteSync()),
+        throwsFileSystemException(),
+      );
+    });
   });
 
   group('throws ToolExit on macOS', () {
     const eperm = 1;
     const enospc = 28;
     const eacces = 13;
+    const exdev = 18;
     const erofs = 30;
     late FileExceptionHandler exceptionHandler;
 
@@ -1052,6 +1110,54 @@ void main() {
         () => fileSystem.currentDirectory,
         throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
       );
+    });
+
+    testWithoutContext('when a cross-device link error occurs (exdev)', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: macOSPlatform,
+      );
+      final Directory directory = fileSystem.directory('dir')..createSync();
+      final File file = directory.childFile('file')..createSync();
+
+      exceptionHandler
+        ..addError(
+          file,
+          FileSystemOp.delete,
+          FileSystemException(
+            'Cannot delete file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        )
+        ..addError(
+          file,
+          FileSystemOp.write,
+          FileSystemException(
+            'Cannot write file',
+            file.path,
+            const OSError('Cross-device link', exdev),
+          ),
+        );
+
+      const expectedDeleteMessage =
+          'Flutter failed to delete file at "dir/file".\n'
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(() => file.delete(), throwsToolExit(message: expectedDeleteMessage));
+      expect(() => file.deleteSync(), throwsToolExit(message: expectedDeleteMessage));
+      expect(
+        () => ErrorHandlingFileSystem.deleteIfExists(file, recursive: true),
+        throwsToolExit(message: expectedDeleteMessage),
+      );
+
+      const expectedWriteMessage =
+          'Flutter failed to write to a file at "dir/file".\n'
+          'A file system operation failed across different volumes or mount points.';
+      await expectLater(
+        () => file.writeAsString(''),
+        throwsToolExit(message: expectedWriteMessage),
+      );
+      expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedWriteMessage));
     });
   });
 
