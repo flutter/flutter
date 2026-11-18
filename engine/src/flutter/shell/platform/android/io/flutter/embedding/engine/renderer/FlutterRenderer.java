@@ -1086,7 +1086,7 @@ public class FlutterRenderer implements TextureRegistry {
         Log.e(TAG, "Dropping PlatformView Frame");
         toClose.close();
       }
-      if (image != null) {
+      if (image != null && flutterJNI.isAttached()) {
         flutterJNI.markTextureFrameAvailable(id);
       }
     }
