@@ -6,6 +6,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
+import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -124,23 +125,6 @@ Future<void> main(List<String> args) async {
         widgetPreviews: widgetPreviews,
       );
 
-  final ToolDependencies toolDependencies = await ToolDependencies.bootstrap(
-    buildTargets: const BuildTargetsImpl(),
-    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-    flutterHookRunner: FlutterHookRunnerNative(),
-    logger: logger,
-    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
-    outputPreferences: outputPreferences,
-    platform: platform,
-    preRunValidatorBuilder: PreRunValidator.new,
-    shutdownHooks: shutdownHooks,
-    stdio: stdio,
-    templateRenderer: const MustacheTemplateRenderer(),
-    terminal: terminal,
-    // The web runner is not supported in google3 because it depends on dwds.
-    webRunnerFactory: DwdsWebRunnerFactory(),
-  );
-
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
@@ -164,10 +148,24 @@ Future<void> main(List<String> args) async {
         extensionTemplateManager: templateManager,
       );
     },
+    buildTargets: const BuildTargetsImpl(),
+    extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+    flutterHookRunner: FlutterHookRunnerNative(),
     muteCommandLogging: muteCommandLogging,
-    toolDependencies: toolDependencies,
+    nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+    overrides: <Type, Generator>{
+      AnsiTerminal: () => terminal,
+      Logger: () => logger,
+      OutputPreferences: () => outputPreferences,
+      Stdio: () => stdio,
+    },
+    preRunValidatorBuilder: PreRunValidator.new,
+    shutdownHooks: shutdownHooks,
+    templateRenderer: const MustacheTemplateRenderer(),
     verbose: verbose,
     verboseHelp: verboseHelp,
+    // The web runner is not supported in google3 because it depends on dwds.
+    webRunnerFactory: DwdsWebRunnerFactory(),
   );
 }
 
