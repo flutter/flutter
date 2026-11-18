@@ -5,11 +5,15 @@
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fakes.dart';
 import 'utils/project_testing_utils.dart';
 
 void main() {
@@ -17,7 +21,7 @@ void main() {
   late Directory tempDir;
 
   setUp(() async {
-    fs = LocalFileSystem.test(signals: FakeSignals());
+    fs = LocalFileSystem.test(signals: Signals.test());
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tree_shaker_test.');
     await ensureFlutterToolsSnapshot();
   });
@@ -28,16 +32,30 @@ void main() {
     await restoreFlutterToolsSnapshot();
   });
 
-  testUsingContext('tool_backend.dart tree shakes icons successfully', () async {
+  testWithoutContext('tool_backend.dart tree shakes icons successfully', () async {
     final String flutterRoot = getFlutterRoot();
     final String flutterBin = fs.path.join(
       flutterRoot,
       'bin',
       io.Platform.isWindows ? 'flutter.bat' : 'flutter',
     );
-    final String engineDartBin = context.get<Artifacts>()!.getArtifactPath(
-      Artifact.engineDartBinary,
+    const Platform platform = LocalPlatform();
+    const ProcessManager processManager = LocalProcessManager();
+    final logger = BufferLogger.test();
+    final artifacts = CachedArtifacts(
+      fileSystem: fs,
+      platform: platform,
+      cache: Cache.test(
+        flutterRoot: flutterRoot,
+        rootOverride: fs.directory(flutterRoot),
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
+    final String engineDartBin = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String toolBackend = fs.path.join(
       flutterRoot,
       'packages',

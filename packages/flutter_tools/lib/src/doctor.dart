@@ -63,21 +63,25 @@ abstract class DoctorValidatorsProvider {
   /// Create a [DoctorValidatorsProvider] with explicit options.
   factory DoctorValidatorsProvider.create({
     required AndroidContext androidContext,
+    required AndroidWorkflow androidWorkflow,
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
+    required WindowsWorkflow windowsWorkflow,
     DeviceManager? deviceManager,
     ExtensionManager? extensionManager,
     HttpClientFactory? httpClientFactory,
   }) {
     return _DefaultDoctorValidatorsProvider(
       androidContext: androidContext,
+      androidWorkflow: androidWorkflow,
       appleContext: appleContext,
       deviceManager: deviceManager,
       extensionManager: extensionManager,
       featureFlags: featureFlags,
       httpClientFactory: httpClientFactory,
       toolContext: toolContext,
+      windowsWorkflow: windowsWorkflow,
     );
   }
 
@@ -88,9 +92,11 @@ abstract class DoctorValidatorsProvider {
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   _DefaultDoctorValidatorsProvider({
     required this._androidContext,
+    required this.androidWorkflow,
     required this._appleContext,
     required this.featureFlags,
     required this._toolContext,
+    required this.windowsWorkflow,
     this._deviceManager,
     this.extensionManager,
     this._httpClientFactory,
@@ -99,19 +105,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final AndroidContext _androidContext;
+  final AndroidWorkflow androidWorkflow;
   final AppleContext _appleContext;
   final DeviceManager? _deviceManager;
   final FeatureFlags featureFlags;
   final ExtensionManager? extensionManager;
   final HttpClientFactory? _httpClientFactory;
   final ToolContext _toolContext;
+  final WindowsWorkflow windowsWorkflow;
 
   Platform get _platform => _toolContext.platform;
-
-  late final androidWorkflow = AndroidWorkflow(
-    androidSdkBuilder: () => _androidContext.androidSdk,
-    featureFlags: featureFlags,
-  );
 
   late final linuxWorkflow = LinuxWorkflow(platform: _platform, featureFlags: featureFlags);
 
@@ -119,9 +122,38 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   late final macOSWorkflow = MacOSWorkflow(platform: _platform, featureFlags: featureFlags);
 
-  late final windowsWorkflow = WindowsWorkflow(platform: _platform, featureFlags: featureFlags);
-
   late final customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags);
+
+  GroupedValidator _createAndroidValidators({
+    required Logger logger,
+    required OperatingSystemUtils os,
+    required Platform platform,
+    required ProcessManager processManager,
+    required Stdio stdio,
+    required UserMessages userMessages,
+  }) {
+    final AndroidContext(:AndroidSdk? androidSdk, :Java? java) = _androidContext;
+    return GroupedValidator(<DoctorValidator>[
+      AndroidValidator(
+        androidSdk: androidSdk,
+        java: java,
+        logger: logger,
+        osUtils: os,
+        platform: platform,
+        processManager: processManager,
+        userMessages: userMessages,
+      ),
+      AndroidLicenseValidator(
+        androidSdk: androidSdk,
+        java: java,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        stdio: stdio,
+        userMessages: userMessages,
+      ),
+    ]);
+  }
 
   @override
   List<DoctorValidator> get validators {
@@ -147,7 +179,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       :IOSWorkflow iosWorkflow,
       :Xcode xcode,
     ) = _appleContext;
-    final AndroidContext(:AndroidSdk? androidSdk, :Java? java) = _androidContext;
     final proxyValidator = ProxyValidator(platform: platform);
     return _validators = <DoctorValidator>[
       FlutterValidator(
@@ -168,26 +199,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           versionExtractor: WindowsVersionExtractor(processManager: processManager, logger: logger),
         ),
       if (androidWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[
-          AndroidValidator(
-            androidSdk: androidSdk,
-            java: java,
-            logger: logger,
-            osUtils: os,
-            platform: platform,
-            processManager: processManager,
-            userMessages: userMessages,
-          ),
-          AndroidLicenseValidator(
-            androidSdk: androidSdk,
-            java: java,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            stdio: stdio,
-            userMessages: userMessages,
-          ),
-        ]),
+        _createAndroidValidators(
+          logger: logger,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+          userMessages: userMessages,
+        ),
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(

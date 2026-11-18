@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../android/android_workflow.dart' as android_workflow;
+import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -18,10 +18,9 @@ import '../runner/flutter_command.dart';
 /// installed developer environment and tooling.
 class DoctorCommand extends FlutterCommand {
   DoctorCommand({
+    required this._androidContext,
     required this._doctor,
     required super.toolContext,
-    this._androidContext,
-    this._androidLicenseValidator,
     this.extensionManager,
     this.verbose = false,
   }) {
@@ -40,9 +39,8 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
+  final AndroidContext _androidContext;
   final Doctor _doctor;
-  final AndroidContext? _androidContext;
-  final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
 
@@ -75,28 +73,27 @@ class DoctorCommand extends FlutterCommand {
         );
       }
     }
-    android_workflow.AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
-    if (androidLicenseValidator == null && boolArg('android-licenses')) {
-      if (_androidContext case final AndroidContext androidContext) {
-        final ToolContext(
-          :Logger logger,
-          :Platform platform,
-          :Stdio stdio,
-          :UserMessages userMessages,
-        ) = toolContext;
-        androidLicenseValidator = android_workflow.AndroidLicenseValidator(
-          androidSdk: androidContext.androidSdk,
-          java: androidContext.java,
-          logger: logger,
-          platform: platform,
-          processManager: toolContext.processManager,
-          stdio: stdio,
-          userMessages: userMessages,
-        );
-      }
+    final bool androidLicenses = boolArg('android-licenses');
+    AndroidLicenseValidator? androidLicenseValidator;
+    if (androidLicenses) {
+      final ToolContext(
+        :Logger logger,
+        :Platform platform,
+        :Stdio stdio,
+        :UserMessages userMessages,
+      ) = toolContext;
+      androidLicenseValidator = AndroidLicenseValidator(
+        androidSdk: _androidContext.androidSdk,
+        java: _androidContext.java,
+        logger: logger,
+        platform: platform,
+        processManager: toolContext.processManager,
+        stdio: stdio,
+        userMessages: userMessages,
+      );
     }
     final bool success = await _doctor.diagnose(
-      androidLicenses: boolArg('android-licenses'),
+      androidLicenses: androidLicenses,
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
       extensionManager: extensionManager,

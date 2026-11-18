@@ -3,24 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
-import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -35,7 +32,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../bin/fuchsia_tester.dart' as fuchsia_tester;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -86,17 +82,6 @@ void main() {
         .childFile('some_integration_test.dart')
         .createSync(recursive: true);
 
-    writePackageConfigFiles(
-      directory: fs.directory(fs.path.join(getFlutterRoot(), 'packages', 'flutter_tools')),
-      packages: <String, String>{
-        'ffi': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/ffi-2.1.2',
-        'test': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test-1.24.9',
-        'test_api': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_api-0.6.1',
-        'test_core': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dev/test_core-0.5.9',
-      },
-      mainLibName: 'my_app',
-    );
-
     fs.currentDirectory = package.path;
 
     logger = LoggingLogger();
@@ -111,6 +96,12 @@ void main() {
   testUsingContext('accepts --[no-]deprecated-js-interop', () {
     expectAcceptsDeprecatedJsInteropFlag(
       TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: FakePackageTest(),
@@ -127,6 +118,12 @@ void main() {
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -162,6 +159,12 @@ dev_dependencies:
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -185,6 +188,12 @@ dev_dependencies:
       final fakePackageTest = FakePackageTest();
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -214,6 +223,12 @@ dev_dependencies:
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -243,6 +258,12 @@ dev_dependencies:
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -266,6 +287,12 @@ dev_dependencies:
       () async {
         final fakePackageTest = FakePackageTest();
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -317,6 +344,12 @@ dev_dependencies:
     Future<void> expectPassesReporter(String value) async {
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -358,6 +391,12 @@ dev_dependencies:
       () async {
         final fakePackageTest = FakePackageTest();
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -381,6 +420,12 @@ dev_dependencies:
       final fakePackageTest = FakePackageTest();
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -438,6 +483,12 @@ dev_dependencies:
       final testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -531,6 +582,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -589,6 +646,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -618,6 +681,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -650,6 +719,12 @@ resolution: workspace
     Future<void> expectPassesArgument(String value, [String? passValue]) async {
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -680,6 +755,12 @@ resolution: workspace
       () async {
         final fakePackageTest = FakePackageTest();
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -704,6 +785,12 @@ resolution: workspace
       () async {
         final fakePackageTest = FakePackageTest();
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -730,6 +817,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -765,198 +858,62 @@ resolution: workspace
     },
   );
 
-  testUsingContext(
-    'Generates a satisfactory test runner package_config.json when --experimental-faster-testing is set',
+  testWithoutContext(
+    '--experimental-faster-testing logs deprecation warning and runs tests',
     () async {
+      final testRunner = FakeFlutterTestRunner(0);
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
+        testRunner: testRunner,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      var caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--no-test-assets',
+        '--experimental-faster-testing',
+      ]);
 
-          final File isolateSpawningTesterPackageConfigFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childDirectory('.dart_tool')
-              .childFile('package_config.json');
-          expect(isolateSpawningTesterPackageConfigFile.existsSync(), true);
-          // We expect [isolateSpawningTesterPackageConfigFile] to contain the
-          // union of the packages in [_packageConfigContents] and
-          // [_flutterToolsPackageConfigContents].
-          final String configContents = isolateSpawningTesterPackageConfigFile.readAsStringSync();
-          expect(configContents.contains('"name": "integration_test"'), true);
-          expect(configContents.contains('"name": "ffi"'), true);
-          expect(configContents.contains('"name": "test"'), true);
-          expect(configContents.contains('"name": "test_api"'), true);
-          expect(configContents.contains('"name": "test_core"'), true);
-
-          final config = json.decode(configContents) as Map<String, dynamic>;
-          final packages = config['packages'] as List<dynamic>;
-          final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
-            (Map<String, dynamic> p) => p['name'] == 'my_app',
-          );
-          expect(myApp['rootUri'], fs.currentDirectory.uri.toString());
-        },
+      expect(
+        logger.warningText,
+        contains(
+          'The "--experimental-faster-testing" flag is deprecated and no longer '
+          'has any effect. This flag will be removed in a future version of Flutter.',
+        ),
       );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+      expect(testRunner.lastExecutionSpec, isNotNull);
     },
   );
 
-  testUsingContext(
-    'Pipes specified arguments to package:test when --experimental-faster-testing is set',
+  testWithoutContext(
+    'omitting --experimental-faster-testing does not log deprecation warning',
     () async {
+      final testRunner = FakeFlutterTestRunner(0);
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
+        testRunner: testRunner,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
-      var caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--reporter=compact',
-          '--file-reporter=json:reports/tests.json',
-          '--timeout=100',
-          '--ignore-timeouts',
-          '--concurrency=3',
-          '--name=name1',
-          '--plain-name=name2',
-          '--test-randomize-ordering-seed=random',
-          '--tags=tag1',
-          '--exclude-tags=tag2',
-          '--preset=preset1',
-          '--fail-fast',
-          '--run-skipped',
-          '--total-shards=1',
-          '--shard-index=1',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
+      await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
 
-          final File childTestIsolateSpawnerSourceFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childFile('child_test_isolate_spawner.dart');
-          expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
-          expect(
-            childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
-const List<String> packageTestArgs = <String>[
-  '--no-color',
-  '-r',
-  'compact',
-  '--file-reporter=json:reports/tests.json',
-  '--timeout',
-  '100',
-  '--ignore-timeouts',
-  '--concurrency=3',
-  '--name',
-  'name1',
-  '--plain-name',
-  'name2',
-  '--test-randomize-ordering-seed=random',
-  '--tags',
-  'tag1',
-  '--exclude-tags',
-  'tag2',
-  '--preset',
-  'preset1',
-  '--fail-fast',
-  '--run-skipped',
-  '--total-shards=1',
-  '--shard-index=1',
-  '--chain-stack-traces',
-];
-'''),
-            true,
-          );
-        },
-      );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
-    },
-  );
-
-  testUsingContext(
-    'Only passes --no-color and --chain-stack-traces to package:test by default when --experimental-faster-testing is set',
-    () async {
-      final testCommand = TestCommand(
-        templateRenderer: const MustacheTemplateRenderer(),
-        toolContext: toolContext,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-      var caughtToolExit = false;
-      await asyncGuard<void>(
-        () => commandRunner.run(const <String>[
-          'test',
-          '--no-pub',
-          '--experimental-faster-testing',
-          '--',
-          'test/fake_test.dart',
-          'test/fake_test_2.dart',
-        ]),
-        onError: (Object error) async {
-          expect(error, isA<ToolExit>());
-          // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
-          caughtToolExit = true;
-
-          final File childTestIsolateSpawnerSourceFile = fs
-              .directory(fs.path.join('build', 'isolate_spawning_tester'))
-              .childFile('child_test_isolate_spawner.dart');
-          expect(childTestIsolateSpawnerSourceFile.existsSync(), true);
-          expect(
-            childTestIsolateSpawnerSourceFile.readAsStringSync().contains('''
-const List<String> packageTestArgs = <String>[
-  '--no-color',
-  '--chain-stack-traces',
-];
-'''),
-            true,
-          );
-        },
-      );
-      expect(caughtToolExit, true);
-    },
-    overrides: <Type, Generator>{
-      AnsiTerminal: () => _FakeTerminal(),
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+      expect(logger.warningText, isNot(contains('--experimental-faster-testing')));
+      expect(testRunner.lastExecutionSpec, isNotNull);
     },
   );
 
@@ -966,6 +923,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1002,6 +965,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1029,6 +998,12 @@ const List<String> packageTestArgs = <String>[
       final fakePackageTest = FakePackageTest();
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -1054,6 +1029,12 @@ const List<String> packageTestArgs = <String>[
       final fakePackageTest = FakePackageTest();
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -1085,6 +1066,12 @@ const List<String> packageTestArgs = <String>[
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -1110,6 +1097,12 @@ const List<String> packageTestArgs = <String>[
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -1135,6 +1128,12 @@ const List<String> packageTestArgs = <String>[
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -1164,6 +1163,12 @@ const List<String> packageTestArgs = <String>[
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -1193,6 +1198,12 @@ const List<String> packageTestArgs = <String>[
         final fakePackageTest = FakePackageTest();
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testWrapper: fakePackageTest,
@@ -1222,6 +1233,12 @@ const List<String> packageTestArgs = <String>[
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1252,6 +1269,12 @@ const List<String> packageTestArgs = <String>[
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1274,6 +1297,12 @@ const List<String> packageTestArgs = <String>[
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1296,6 +1325,12 @@ const List<String> packageTestArgs = <String>[
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1323,6 +1358,12 @@ const List<String> packageTestArgs = <String>[
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1352,6 +1393,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1377,6 +1424,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1401,6 +1454,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1429,6 +1488,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1460,6 +1525,12 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1502,6 +1573,12 @@ dev_dependencies:
   integration_test:
     sdk: flutter''');
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1546,6 +1623,12 @@ dev_dependencies:
   integration_test:
     sdk: flutter''');
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1586,6 +1669,12 @@ dev_dependencies:
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1622,6 +1711,12 @@ dev_dependencies:
   integration_test:
     sdk: flutter''');
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1665,6 +1760,12 @@ dev_dependencies:
         ),
       );
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -1711,6 +1812,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1738,6 +1845,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1775,6 +1888,12 @@ dev_dependencies:
         );
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: testToolContext,
           testRunner: testRunner,
@@ -1808,6 +1927,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1829,6 +1954,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1854,6 +1985,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1875,6 +2012,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1901,6 +2044,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1922,6 +2071,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1943,6 +2098,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1964,6 +2125,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -1985,6 +2152,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -2011,6 +2184,12 @@ dev_dependencies:
         final testRunner = FakeFlutterTestRunner(0);
 
         final testCommand = TestCommand(
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '',
+            logger: logger,
+            platform: toolContext.platform,
+          ),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
           testRunner: testRunner,
@@ -2068,6 +2247,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0);
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
@@ -2094,6 +2279,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(79);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -2117,6 +2308,12 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0);
 
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
@@ -2133,14 +2330,12 @@ resolution: workspace
     },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'throws ToolExit when test argument contains Windows reserved characters',
     () async {
-      final ToolContext(
-        fs: FileSystem windowsFs,
-        platform: Platform windowsPlatform,
-        processManager: ProcessManager windowsProcessManager,
-      ) = const DelegatingToolContext();
+      final windowsFs = MemoryFileSystem(style: FileSystemStyle.windows);
+      final windowsPlatform = FakePlatform(operatingSystem: 'windows');
+      final ProcessManager windowsProcessManager = FakeProcessManager.any();
       final Directory package = windowsFs.directory('package');
       package.childFile('pubspec.yaml')
         ..createSync(recursive: true)
@@ -2158,10 +2353,16 @@ resolution: workspace
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: windowsFs,
+          flutterRoot: '',
+          logger: BufferLogger.test(),
+          platform: windowsPlatform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: windowsFs,
-          logger: logger,
+          logger: BufferLogger.test(),
           platform: windowsPlatform,
           processManager: windowsProcessManager,
         ),
@@ -2175,11 +2376,6 @@ resolution: workspace
           message: r'Invalid test path "test\foo*bar_test.dart": Illegal character in path',
         ),
       );
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => FakePlatform(operatingSystem: 'windows'),
     },
   );
 
@@ -2287,6 +2483,12 @@ resolution: workspace
 
     testUsingContext('preserves expected hidden options and test-specific --wasm help text', () {
       final defaultCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
       );
@@ -2324,6 +2526,12 @@ resolution: workspace
       );
 
       final verboseCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         verboseHelp: true,
@@ -2334,63 +2542,6 @@ resolution: workspace
       };
       expect(hiddenInVerboseMode, isEmpty);
     });
-
-    testWithoutContext(
-      'fuchsia_tester.run links artifacts and invokes testWrapper without AppContext',
-      () async {
-        final fileSystem = MemoryFileSystem.test();
-        fileSystem.file('/bin/flutter_tester').createSync(recursive: true);
-        fileSystem.file('/sdk_root/platform_strong.dill').createSync(recursive: true);
-        fileSystem.file('/icudtl.dat').createSync(recursive: true);
-        fileSystem.file('/.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion": 2, "packages": []}');
-        fileSystem.file('/test/foo_test.dart').createSync(recursive: true);
-        fileSystem.file('/out/foo_test.dart.dill').createSync(recursive: true);
-        fileSystem.file('/tests.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            '[{"source": "/test/foo_test.dart", "dill": "/out/foo_test.dart.dill"}]',
-          );
-
-        final artifacts = Artifacts.test(fileSystem: fileSystem);
-        final fakePackageTest = FakePackageTest();
-        final toolContext = FakeToolContext(
-          artifacts: artifacts,
-          fs: fileSystem,
-          logger: BufferLogger.test(),
-          platform: FakePlatform(numberOfProcessors: 4),
-          processManager: FakeProcessManager.empty(),
-        );
-
-        await fuchsia_tester.run(
-          const <String>[
-            '--packages=/.dart_tool/package_config.json',
-            '--shell=/bin/flutter_tester',
-            '--sdk-root=/sdk_root',
-            '--icudtl=/icudtl.dat',
-            '--tests=/tests.json',
-          ],
-          toolContext: toolContext,
-          testWrapper: fakePackageTest,
-        );
-
-        expect(
-          fileSystem.link(artifacts.getArtifactPath(Artifact.flutterTester)).targetSync(),
-          '/bin/flutter_tester',
-        );
-        final String sdkDestPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-        expect(
-          fileSystem.link(fileSystem.path.join(sdkDestPath, 'platform_strong.dill')).targetSync(),
-          '/sdk_root/platform_strong.dill',
-        );
-        expect(
-          fileSystem.link(fileSystem.path.join(sdkDestPath, 'platform.dill')).targetSync(),
-          'platform_strong.dill',
-        );
-        expect(fakePackageTest.lastArgs, contains(Uri.file('/test/foo_test.dart').toString()));
-      },
-    );
   });
 }
 
@@ -2430,11 +2581,6 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
 
     return exitCode;
   }
-
-  @override
-  Never runTestsBySpawningLightweightEngines(List<Uri> testFiles, TestExecutionSpecification spec) {
-    throw UnimplementedError();
-  }
 }
 
 class TestTestDevice extends Fake implements TestDevice {
@@ -2468,14 +2614,6 @@ class FakePackageTest implements TestWrapper {
   ) {}
 }
 
-class _FakeTerminal extends Fake implements AnsiTerminal {
-  @override
-  final supportsColor = false;
-
-  @override
-  bool get isCliAnimationEnabled => supportsColor;
-}
-
 class _FakeDeviceManager extends DeviceManager {
   _FakeDeviceManager(this._connectedDevices)
     : super(logger: testLogger, fileSystem: MemoryFileSystem.test());
@@ -2504,11 +2642,16 @@ class _FakeNativeAssetsBuilderWithDataAssets extends Fake
   FlutterHookResult hookResult;
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async => null;
+  Future<Uri?> build(
+    BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+  }) async => null;
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
     BuildInfo buildInfo, {
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
   }) async => (nativeAssetsManifest: null, flutterHookResult: hookResult);
 }

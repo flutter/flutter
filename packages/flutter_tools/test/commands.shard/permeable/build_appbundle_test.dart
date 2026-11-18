@@ -12,13 +12,15 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -27,16 +29,19 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart'
     show
-        DelegatingToolContext,
         FakeAndroidContext,
+        FakeBuildSystem,
         FakeFlutterVersion,
+        FakeOperatingSystemUtils,
         FakeToolContext,
         TestFeatureFlags;
 import '../../src/test_flutter_command_runner.dart';
 
+final localFs = LocalFileSystem.test(signals: FakeSignals());
+const Platform localPlatform = LocalPlatform();
+
 void main() {
   Cache.disableLocking();
-  final localFs = LocalFileSystem.test(signals: FakeSignals());
 
   tearDownAll(() async {
     await localFs.dispose();
@@ -98,7 +103,10 @@ void main() {
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildAppBundleCommand(projectPath);
+        await runBuildAppBundleCommand(
+          projectPath,
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
 
         expect(
           fakeAnalytics.sentEvents,
@@ -117,7 +125,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -131,7 +138,10 @@ void main() {
 
         // The manifest does not set EnableHcpp, so the build injects the feature flag value
         // and the packaged app has HCPP on.
-        await runBuildAppBundleCommand(projectPath);
+        await runBuildAppBundleCommand(
+          projectPath,
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
         expect(
           fakeAnalytics.sentEvents,
           contains(
@@ -149,7 +159,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -164,7 +173,11 @@ void main() {
         // The manifest does not set EnableHcpp, so the build injects the flag value and the
         // packaged app has HCPP on. Analytics has to report what was packaged, not what the
         // source manifest happened to say.
-        await runBuildAppBundleCommand(projectPath, arguments: <String>['--enable-hcpp']);
+        await runBuildAppBundleCommand(
+          projectPath,
+          arguments: <String>['--enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
 
         expect(
           fakeAnalytics.sentEvents,
@@ -183,7 +196,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -195,7 +207,11 @@ void main() {
           arguments: <String>['--no-pub', '--template=app'],
         );
 
-        await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-enable-hcpp']);
+        await runBuildAppBundleCommand(
+          projectPath,
+          arguments: <String>['--no-enable-hcpp'],
+          projectFactory: FakeFlutterProjectFactory(tempDir),
+        );
 
         expect(
           fakeAnalytics.sentEvents,
@@ -214,7 +230,6 @@ void main() {
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
         FeatureFlags: () => TestFeatureFlags(),
-        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
 
@@ -222,7 +237,8 @@ void main() {
       final command = BuildAppBundleCommand(
         androidBuilder: FakeAndroidBuilder(),
         androidContext: FakeAndroidContext(),
-        buildSystem: context.get<BuildSystem>()!,
+        buildSystem: FakeBuildSystem(),
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(logger: BufferLogger.test()),
       );
@@ -321,7 +337,7 @@ void main() {
               commandPath: 'create',
               result: 'success',
               commandHasTerminal: false,
-              hostArch: context.get<OperatingSystemUtils>()!.hostPlatform.cliName,
+              hostArch: FakeOperatingSystemUtils().hostPlatform.cliName,
               maxRss: processInfo.maxRss,
             ),
           ),
@@ -517,6 +533,7 @@ void main() {
     late FakeProcessManager processManager;
     late FakeAndroidSdk androidSdk;
     late FakeAnalytics analytics;
+    late BufferLogger logger;
 
     setUp(() {
       analytics = getInitializedFakeAnalyticsInstance(
@@ -526,6 +543,7 @@ void main() {
       tempDir = localFs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
       processManager = FakeProcessManager.any();
       androidSdk = FakeAndroidSdk(localFs.directory('irrelevant'));
+      logger = BufferLogger.test();
     });
 
     tearDown(() {
@@ -543,7 +561,14 @@ void main() {
 
           await expectLater(
             () async {
-              await runBuildAppBundleCommand(projectPath, arguments: <String>['--no-pub']);
+              await runBuildAppBundleCommand(
+                projectPath,
+                androidSdk: null,
+                arguments: <String>['--no-pub'],
+                logger: logger,
+                processManager: processManager,
+                projectFactory: FakeFlutterProjectFactory(tempDir),
+              );
             },
             throwsToolExit(
               message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
@@ -551,7 +576,6 @@ void main() {
           );
         },
         overrides: <Type, Generator>{
-          AndroidSdk: () => null,
           FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
           ProcessManager: () => processManager,
         },
@@ -574,11 +598,17 @@ void main() {
 
         // The command throws a [ToolExit] because it expects an AAB in the file system.
         await expectLater(() async {
-          await runBuildAppBundleCommand(projectPath);
+          await runBuildAppBundleCommand(
+            projectPath,
+            androidSdk: androidSdk,
+            logger: logger,
+            processManager: processManager,
+            projectFactory: FakeFlutterProjectFactory(tempDir),
+          );
         }, throwsToolExit());
 
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(containsIgnoringWhitespace("Your app isn't using AndroidX")),
         );
 
@@ -596,6 +626,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidSdk: () => androidSdk,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Logger: () => logger,
         ProcessManager: () => processManager,
         Analytics: () => analytics,
       },
@@ -611,15 +642,21 @@ void main() {
 
         // The command throws a [ToolExit] because it expects an AAB in the file system.
         await expectLater(() async {
-          await runBuildAppBundleCommand(projectPath);
+          await runBuildAppBundleCommand(
+            projectPath,
+            androidSdk: androidSdk,
+            logger: logger,
+            processManager: processManager,
+            projectFactory: FakeFlutterProjectFactory(tempDir),
+          );
         }, throwsToolExit());
 
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(containsIgnoringWhitespace("Your app isn't using AndroidX")),
         );
         expect(
-          testLogger.statusText,
+          logger.statusText,
           isNot(
             containsIgnoringWhitespace(
               'To avoid potential build failures, you can quickly migrate your app by '
@@ -642,6 +679,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidSdk: () => androidSdk,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        Logger: () => logger,
         ProcessManager: () => processManager,
         Analytics: () => analytics,
       },
@@ -652,23 +690,40 @@ void main() {
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
   AndroidBuilder? androidBuilder,
+  AndroidSdk? androidSdk = const _FakeAndroidSdk(),
   List<String>? arguments,
+  Logger? logger,
+  ProcessManager? processManager,
+  FlutterProjectFactory? projectFactory,
 }) async {
-  const delegatingContext = DelegatingToolContext();
-  final FileSystem fs = delegatingContext.fs;
+  final Logger resolvedLogger = logger ?? BufferLogger.test();
+  final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+  final String flutterRoot = getFlutterRoot();
+  final cache = Cache.test(
+    flutterRoot: flutterRoot,
+    rootOverride: localFs.directory(flutterRoot),
+    fileSystem: localFs,
+    logger: resolvedLogger,
+    platform: localPlatform,
+    processManager: resolvedProcessManager,
+  );
   final command = BuildAppBundleCommand(
     androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
-    androidContext: FakeAndroidContext(
-      androidSdk: context.get<AndroidSdk>() ?? FakeAndroidSdk(fs.directory('android-sdk')),
+    androidContext: FakeAndroidContext(androidSdk: androidSdk),
+    buildSystem: FlutterBuildSystem(
+      fileSystem: localFs,
+      logger: resolvedLogger,
+      platform: localPlatform,
     ),
-    buildSystem: context.get<BuildSystem>()!,
+    templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
-      fs: fs,
-      logger: delegatingContext.logger,
-      platform: delegatingContext.platform,
-      processManager: delegatingContext.processManager,
-      projectFactory: delegatingContext.projectFactory,
+      cache: cache,
+      fs: localFs,
+      logger: resolvedLogger,
+      platform: localPlatform,
+      processManager: resolvedProcessManager,
+      projectFactory: projectFactory,
     ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -676,7 +731,7 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
     'appbundle',
     ...?arguments,
     '--no-pub',
-    fs.path.join(target, 'lib', 'main.dart'),
+    localFs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
 }
@@ -686,6 +741,10 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final Directory directory;
+}
+
+final class _FakeAndroidSdk with Fake implements AndroidSdk {
+  const _FakeAndroidSdk();
 }
 
 class FakeProcessInfo extends Fake implements ProcessInfo {

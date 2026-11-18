@@ -48,9 +48,9 @@ void main() {
     test('Can provide default interfaces', () async {
       final testbed = TestBed();
 
-      late FileSystem localFileSystem;
+      FileSystem? localFileSystem;
       await testbed.run(() {
-        localFileSystem = context.get<FileSystem>()!;
+        localFileSystem = context.get<FileSystem>();
       });
 
       expect(localFileSystem, isA<MemoryFileSystem>());

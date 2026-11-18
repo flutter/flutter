@@ -8,7 +8,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -23,9 +22,6 @@ import '../features.dart';
 import 'android_sdk.dart';
 import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
-
-AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
-AndroidValidator? get androidValidator => context.get<AndroidValidator>();
 
 enum LicensesAccepted { none, some, all, unknown }
 

@@ -5,7 +5,6 @@
 import 'dart:ffi' show Abi;
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -305,12 +304,11 @@ void main() {
       final cacheWithArtifacts = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
+        isLocalEngineBuilder: () => true,
         processManager: FakeProcessManager.any(),
       );
 
-      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, isLocalEngine: true);
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
     });
@@ -323,12 +321,11 @@ void main() {
       final cacheWithArtifacts = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
+        isLocalEngineBuilder: () => true,
         processManager: FakeProcessManager.any(),
       );
 
-      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, isLocalEngine: true);
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
     });
@@ -1382,6 +1379,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1408,6 +1406,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1433,6 +1432,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1741,16 +1741,26 @@ void main() {
     );
   });
 
-  testUsingContext('Check current DevTools version', () async {
-    final String currentDevToolsVersion = const DelegatingToolContext().cache.devToolsVersion;
+  testWithoutContext('Check current DevTools version', () {
+    final fileSystem = LocalFileSystem.test(signals: FakeSignals());
+    addTearDown(fileSystem.dispose);
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(getFlutterRoot()),
+      processManager: FakeProcessManager.any(),
+    );
+    final String currentDevToolsVersion = cache.devToolsVersion;
     final devToolsVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
     expect(devToolsVersionFormat.allMatches(currentDevToolsVersion).length, 1);
   });
 
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
-  testUsingContext('Check current Dart SDK build number', () async {
-    final String currentDartSdkVersion = const DelegatingToolContext().cache.dartSdkBuild;
+  testWithoutContext('Check current Dart SDK build number', () {
+    final cache = Cache.test(
+      platform: const LocalPlatform(),
+      processManager: FakeProcessManager.any(),
+    );
+    final String currentDartSdkVersion = cache.dartSdkBuild;
     final dartSdkVersionFormat = RegExp(r'\d+\.\d+\.\d+(?:-\S+)?');
 
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);
@@ -1864,6 +1874,7 @@ void main() {
     final explicitCache = Cache(
       fileSystem: fileSystem,
       flutterRoot: '/explicit/flutter',
+      isLocalEngineBuilder: () => false,
       logger: logger,
       osUtils: osUtils,
       platform: platform,
@@ -1873,6 +1884,7 @@ void main() {
 
     final overrideCache = Cache(
       fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
       logger: logger,
       osUtils: osUtils,
       platform: platform,
@@ -1883,6 +1895,7 @@ void main() {
     final mutableEnv = <String, String>{'FLUTTER_ROOT': '/env/flutter'};
     final defaultCache = Cache(
       fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
       logger: logger,
       osUtils: osUtils,
       platform: FakePlatform(environment: mutableEnv),
@@ -2110,7 +2123,7 @@ class FakeCache extends Cache {
     required super.fileSystem,
     required super.platform,
     required super.osUtils,
-  }) : super(artifacts: <ArtifactSet>[]);
+  }) : super(artifacts: <ArtifactSet>[], isLocalEngineBuilder: () => false);
 
   late File stampFile;
 

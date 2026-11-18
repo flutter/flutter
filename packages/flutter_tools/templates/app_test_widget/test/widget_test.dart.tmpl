@@ -28,6 +28,26 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
   });
+
+  testWidgets('Meets accessibility guidelines', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Checks that tappable nodes have a minimum size of 48 by 48 pixels
+    // for Android.
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+
+    // Checks that tappable nodes have a minimum size of 44 by 44 pixels
+    // for iOS.
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+
+    // Checks that touch targets with a tap or long press action are labeled.
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+
+    // Checks that text meets the minimum contrast ratio: 4.5:1 for normal
+    // text and 3:1 for large text.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  });
 }
 {{/withPluginHook}}
 {{#withPlatformChannelPluginHook}}

@@ -3,31 +3,47 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import 'test_utils.dart';
 
 void main() {
   late BufferLogger logger;
+  late Artifacts artifacts;
 
   setUp(() {
     logger = BufferLogger.test();
+    final String flutterRoot = getFlutterRoot();
+    final cache = Cache.test(
+      rootOverride: fileSystem.directory(flutterRoot),
+      flutterRoot: flutterRoot,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    );
+    artifacts = CachedArtifacts(
+      fileSystem: fileSystem,
+      cache: cache,
+      platform: platform,
+      operatingSystemUtils: cache.osUtils,
+    );
   });
 
   Future<bool> testCompileShader(String source, {required bool targetSkslOnly}) async {
     final Directory tmpDir = fileSystem.systemTempDirectory.createTempSync('shader_compiler_test.');
+    addTearDown(() => tryToDelete(tmpDir));
     final File file = tmpDir.childFile('test_shader.frag')..writeAsStringSync(source);
     final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: context.get<Artifacts>()!,
+      artifacts: artifacts,
       platform: platform,
     );
     return shaderCompiler.compileShader(
@@ -41,7 +57,7 @@ void main() {
     );
   }
 
-  testUsingContext('impellerc .iplr output has correct permissions', () async {
+  testWithoutContext('impellerc .iplr output has correct permissions', () async {
     if (platform.isWindows) {
       return;
     }
@@ -58,13 +74,14 @@ void main() {
       'ink_sparkle.frag',
     );
     final Directory tmpDir = fileSystem.systemTempDirectory.createTempSync('shader_compiler_test.');
+    addTearDown(() => tryToDelete(tmpDir));
     final String inkSparkleOutputPath = fileSystem.path.join(tmpDir.path, 'ink_sparkle.frag');
 
     final shaderCompiler = ShaderCompiler(
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
-      artifacts: context.get<Artifacts>()!,
+      artifacts: artifacts,
       platform: platform,
     );
     final bool compileResult = await shaderCompiler.compileShader(
@@ -92,7 +109,7 @@ void main() {
     }
     ''';
 
-    testUsingContext('fails SkSL compilation', () async {
+    testWithoutContext('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithInput, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -100,7 +117,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support inputs'));
     });
 
-    testUsingContext('succeeds with non-SkSL compilation', () async {
+    testWithoutContext('succeeds with non-SkSL compilation', () async {
       final bool compileResult = await testCompileShader(kShaderWithInput, targetSkslOnly: false);
       expect(compileResult, true);
       expect(
@@ -128,7 +145,7 @@ void main() {
 }
 ''';
 
-    testUsingContext('fails SkSL compilation', () async {
+    testWithoutContext('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithUbo, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -136,7 +153,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support UBOs or SSBOs'));
     });
 
-    testUsingContext('succeeds with non-SkSL compilation', () async {
+    testWithoutContext('succeeds with non-SkSL compilation', () async {
       final bool compileResult = await testCompileShader(kShaderWithUbo, targetSkslOnly: false);
       expect(compileResult, true);
       expect(
@@ -162,7 +179,7 @@ void main() {
 }
 ''';
 
-    testUsingContext('fails SkSL compilation', () async {
+    testWithoutContext('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithTextureArguments, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -173,7 +190,7 @@ void main() {
       );
     });
 
-    testUsingContext('succeeds with non-SkSL compilation', () async {
+    testWithoutContext('succeeds with non-SkSL compilation', () async {
       final bool compileResult = await testCompileShader(
         kShaderWithTextureArguments,
         targetSkslOnly: false,
@@ -201,7 +218,7 @@ void main() {
   void main() {}
   ''';
 
-    testUsingContext('fails SkSL compilation', () async {
+    testWithoutContext('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithUint8Uniforms, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -209,7 +226,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support unsigned integers'));
     });
 
-    testUsingContext('fails with non-SkSL compilation', () async {
+    testWithoutContext('fails with non-SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithUint8Uniforms, targetSkslOnly: false),
         throwsA(isA<ShaderCompilerException>()),
@@ -228,7 +245,7 @@ void main() {
 }
 ''';
 
-    testUsingContext('fails SkSL compilation', () async {
+    testWithoutContext('fails SkSL compilation', () async {
       await expectLater(
         () => testCompileShader(kShaderWithArrayInitializer, targetSkslOnly: true),
         throwsA(isA<ShaderCompilerException>()),
@@ -236,7 +253,7 @@ void main() {
       expect(logger.errorText, contains('SkSL does not support array initializers'));
     });
 
-    testUsingContext('succeeds with non-SkSL compilation', () async {
+    testWithoutContext('succeeds with non-SkSL compilation', () async {
       final bool compilationResult = await testCompileShader(
         kShaderWithArrayInitializer,
         targetSkslOnly: false,

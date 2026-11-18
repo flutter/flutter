@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/gradle_utils.dart';
+import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/common.dart';
@@ -28,6 +29,7 @@ import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
@@ -35,6 +37,7 @@ import '../features.dart';
 import '../ios/plist_parser.dart';
 import '../macos/cocoapods.dart';
 import '../resident_runner.dart';
+import '../template.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
@@ -73,17 +76,20 @@ class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required this.analytics,
     required this._androidContext,
+    required this.applicationPackageFactory,
     required this.cocoaPods,
     required this.deviceManager,
+    required this.devtoolsLauncher,
     required this.doctor,
     required this._extensionManager,
     required this.featureFlags,
     required this.plistParser,
+    required this.pub,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
-    bool verboseHelp = false,
-  }) : _verboseHelp = verboseHelp,
-       _argParser = _createInitialArgParser(toolContext.outputPreferences),
+    this._verboseHelp = false,
+  }) : _argParser = _createInitialArgParser(toolContext.outputPreferences),
        super(
          'flutter',
          'Manage your Flutter app development.\n'
@@ -96,7 +102,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
              '  flutter run [options]\n'
              '    Run your Flutter application on an attached device or in an emulator.',
        ) {
-    _populateOptions(argParser, verboseHelp: verboseHelp);
+    _populateOptions(argParser, verboseHelp: _verboseHelp);
   }
 
   static ArgParser _createInitialArgParser(OutputPreferences outputPreferences) {
@@ -112,14 +118,30 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   ArgParser _argParser;
 
-  /// Creates a standalone [ArgParser] configured with global `flutter` options
-  /// and the built-in `help` command.
-  static ArgParser createGlobalArgParser({bool verboseHelp = false, int? usageLineLength}) {
-    final parser = ArgParser(allowTrailingOptions: false, usageLineLength: usageLineLength)
+  static ArgParser _createGlobalArgParser() {
+    final parser = ArgParser(allowTrailingOptions: false)
       ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this usage information.')
       ..addCommand('help');
-    _populateOptions(parser, verboseHelp: verboseHelp);
+    _populateOptions(parser, verboseHelp: false);
     return parser;
+  }
+
+  /// The name of the command in [args], or null if there isn't one.
+  ///
+  /// Global options can come before the command, so it can't be found by
+  /// position. A throwaway parser walks past them instead: trailing options are
+  /// disabled, so parsing stops at the command and leaves it at the head of
+  /// [ArgResults.rest]. `help` is the exception, since the command runner
+  /// registers it on the parser itself and so reports it as a parsed command.
+  static String? findCommandName(List<String> args) {
+    final ArgResults results;
+    try {
+      results = _createGlobalArgParser().parse(args);
+    } on ArgParserException {
+      // The real parser will complain about these later.
+      return null;
+    }
+    return results.command?.name ?? results.rest.firstOrNull;
   }
 
   static void _populateOptions(ArgParser argParser, {required bool verboseHelp}) {
@@ -333,11 +355,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [Analytics] instance.
   final Analytics analytics;
 
+  /// The [ApplicationPackageFactory] instance.
+  final ApplicationPackageFactory applicationPackageFactory;
+
   /// The [CocoaPods] instance.
   final CocoaPods cocoaPods;
 
   /// The [DeviceManager] instance.
   final DeviceManager deviceManager;
+
+  /// The [DevtoolsLauncher] instance.
+  final DevtoolsLauncher devtoolsLauncher;
 
   /// The [Doctor] instance.
   final Doctor doctor;
@@ -347,6 +375,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   /// The [PlistParser] instance.
   final PlistParser plistParser;
+
+  /// The [Pub] instance.
+  final Pub pub;
+
+  /// The [TemplatePathProvider] instance.
+  final TemplatePathProvider templatePathProvider;
 
   /// The [TemplateRenderer] instance.
   final TemplateRenderer templateRenderer;
@@ -521,7 +555,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // e.g. `flutter bash-completion` or `flutter zsh-completion`
     final bool isShellCompletionCommand =
         !stdio.hasTerminal && (topLevelResults.command?.name ?? '').endsWith('-completion');
-    if (isShellCompletionCommand || await botDetector.isRunningOnBot) {
+    if (isShellCompletionCommand || botDetector.isRunningOnBot) {
       return false;
     }
 
@@ -640,9 +674,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         // Required to support `flutter --version` before artifacts are cached.
-        await cache.updateAll(<DevelopmentArtifact>{
-          DevelopmentArtifact.informative,
-        }, isLocalEngine: artifacts.localEngineInfo != null);
+        await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.informative});
 
         flutterVersion.ensureVersionFile();
         if (await _shouldCheckForUpdates(topLevelResults)) {
@@ -689,7 +721,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final bool shouldPrintDtdUri =
             topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
         if (shouldPrintDtdUri) {
-          DevtoolsLauncher.instance?.printDtdUri = shouldPrintDtdUri;
+          devtoolsLauncher.printDtdUri = shouldPrintDtdUri;
         }
 
         await super.runCommand(topLevelResults);

@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -47,9 +46,8 @@ const _kOptionCoveragePath = 'coverage-path';
 Future<void> main(List<String> args) async {
   final shutdownHooks = ShutdownHooks();
   final fs = LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, shutdownHooks);
-  Directory? tempDir;
   try {
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
     final ToolDependencies dependencies = await ToolDependencies.bootstrap(
       analytics: const NoOpAnalytics(),
       flutterRoot: tempDir.path,
@@ -59,7 +57,6 @@ Future<void> main(List<String> args) async {
     );
     await run(args, toolContext: dependencies.toolContext);
   } finally {
-    tempDir?.deleteSync(recursive: true);
     await fs.dispose();
   }
   // TODO(ianh): There's apparently some sort of lost async task keeping the
@@ -72,8 +69,12 @@ Future<void> run(
   required ToolContext toolContext,
   TestWrapper testWrapper = const TestWrapper(),
 }) async {
-  final ToolContext(:Artifacts artifacts, :FileSystem fs, :Logger logger, :Platform platform) =
-      toolContext;
+  final ToolContext(
+    :Artifacts artifacts,
+    :FileSystem fs,
+    :Platform platform,
+    :FlutterProjectFactory projectFactory,
+  ) = toolContext;
 
   final parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config.json file')
@@ -135,12 +136,12 @@ Future<void> run(
 
   Directory? testDirectory;
   CoverageCollector? collector;
-  if (argResults['coverage'] as bool? ?? false) {
+  if (argResults[_kOptionCoverage] as bool? ?? false) {
     // If we have a specified coverage directory then accept all libraries by
     // setting libraryNames to null.
     final Set<String>? libraryNames = coverageDirectory != null
         ? null
-        : <String>{FlutterProject.current(fs, logger: logger).manifest.appName};
+        : <String>{projectFactory.fromDirectory(fs.currentDirectory).manifest.appName};
     final String packagesPath = fs.path.normalize(
       fs.path.absolute(argResults[_kOptionPackages] as String),
     );

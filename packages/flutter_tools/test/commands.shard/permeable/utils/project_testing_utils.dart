@@ -5,16 +5,18 @@
 import 'dart:convert';
 
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:process/process.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 
-final _localFs = LocalFileSystem.test(signals: FakeSignals());
+final _fs = LocalFileSystem.test(signals: Signals.test());
 
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
@@ -72,16 +74,32 @@ Future<void> analyzeProject(
   String workingDir, {
   List<String> expectedFailures = const <String>[],
 }) async {
-  final FileSystem fs = context.get<FileSystem>() ?? _localFs;
-  final Platform platform = context.get<Platform>() ?? const LocalPlatform();
-  final String flutterToolsSnapshotPath = fs.path.absolute(
-    fs.path.join(getFlutterRoot(), 'bin', 'cache', 'flutter_tools.snapshot'),
+  const Platform platform = LocalPlatform();
+  const ProcessManager processManager = LocalProcessManager();
+  final logger = BufferLogger.test();
+  final String flutterRoot = getFlutterRoot();
+  final cache = Cache.test(
+    flutterRoot: flutterRoot,
+    rootOverride: _fs.directory(flutterRoot),
+    fileSystem: _fs,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
+  final artifacts = CachedArtifacts(
+    fileSystem: _fs,
+    platform: platform,
+    cache: cache,
+    operatingSystemUtils: FakeOperatingSystemUtils(),
+  );
+  final String flutterToolsSnapshotPath = _fs.path.absolute(
+    _fs.path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final args = <String>[flutterToolsSnapshotPath, 'analyze'];
 
   final ProcessResult exec = await Process.run(
-    context.get<Artifacts>()!.getArtifactPath(Artifact.engineDartBinary),
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
     args,
     workingDirectory: workingDir,
   );
@@ -127,17 +145,15 @@ Future<void> analyzeProject(
 }
 
 Future<void> ensureFlutterToolsSnapshot() async {
-  final String flutterToolsPath = _localFs.path.absolute(
-    _localFs.path.join('bin', 'flutter_tools.dart'),
+  final String flutterToolsPath = _fs.path.absolute(_fs.path.join('bin', 'flutter_tools.dart'));
+  final String flutterToolsSnapshotPath = _fs.path.absolute(
+    _fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
-  final String flutterToolsSnapshotPath = _localFs.path.absolute(
-    _localFs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
-  );
-  final String packageConfig = _localFs.path.absolute(
-    _localFs.path.join('.dart_tool', 'package_config.json'),
+  final String packageConfig = _fs.path.absolute(
+    _fs.path.join('.dart_tool', 'package_config.json'),
   );
 
-  final File snapshotFile = _localFs.file(flutterToolsSnapshotPath);
+  final File snapshotFile = _fs.file(flutterToolsSnapshotPath);
   if (snapshotFile.existsSync()) {
     snapshotFile.renameSync('$flutterToolsSnapshotPath.bak');
   }
@@ -158,11 +174,11 @@ Future<void> ensureFlutterToolsSnapshot() async {
 }
 
 Future<void> restoreFlutterToolsSnapshot() async {
-  final String flutterToolsSnapshotPath = _localFs.path.absolute(
-    _localFs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
+  final String flutterToolsSnapshotPath = _fs.path.absolute(
+    _fs.path.join('..', '..', 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
-  final File snapshotBackup = _localFs.file('$flutterToolsSnapshotPath.bak');
+  final File snapshotBackup = _fs.file('$flutterToolsSnapshotPath.bak');
   if (!snapshotBackup.existsSync()) {
     // No backup to restore.
     return;

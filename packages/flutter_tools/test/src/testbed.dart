@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' show HttpOverrides, SecurityContext;
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
@@ -48,7 +50,7 @@ FlutterProjectFactory _contextProjectFactory() =>
     context.get<FlutterProjectFactory>() ??
     FlutterProjectFactory(
       config: context.get<Config>()!,
-      featureFlagsBuilder: () => featureFlags,
+      featureFlagsBuilder: () => context.get<FeatureFlags>()!,
       fileSystem: _contextFileSystem(),
       logger: context.get<Logger>()!,
       plistParser:
@@ -89,10 +91,12 @@ final _testbedDefaults = <Type, Generator>{
   Cache: () => FlutterCache(
     flutterRoot: '',
     fileSystem: _contextFileSystem(),
+    isLocalEngineBuilder: () => context.get<Artifacts>()?.localEngineInfo != null,
     logger: context.get<Logger>()!,
     platform: _contextPlatform(),
     osUtils: context.get<OperatingSystemUtils>()!,
     projectFactory: _contextProjectFactory(),
+    pub: () => const ThrowingPub(),
   ),
   Config: () => Config.test(
     name: Config.kFlutterSettings,
@@ -144,6 +148,27 @@ class TestBed {
   /// including any specified overrides.
   TestBed({this._setup, this._overrides});
 
+  static final Object _inTestBedKey = Object();
+
+  /// Returns a [ToolContext] backed by the active [TestBed] zone, or `null`
+  /// when called outside [TestBed.run].
+  static ToolContext? createToolContext() {
+    if (Zone.current[_inTestBedKey] != true || Zone.current[contextKey] == null) {
+      return null;
+    }
+    final Platform platform = _contextPlatform();
+    return FakeToolContext(
+      artifacts: context.get<Artifacts>(),
+      cache: context.get<Cache>(),
+      config: context.get<Config>(),
+      fs: _contextFileSystem(),
+      flutterVersion: context.get<FlutterVersion>(),
+      logger: context.get<Logger>(),
+      platform: platform,
+      processManager: context.get<ProcessManager>(),
+    );
+  }
+
   final FutureOr<void> Function()? _setup;
   final Map<Type, Generator>? _overrides;
 
@@ -165,50 +190,53 @@ class TestBed {
     // Track pending timers to verify that they were correctly cleaned up.
     final timers = <Timer, StackTrace>{};
 
-    return HttpOverrides.runZoned(() {
-      return runInContext<T?>(() {
-        return context.run<T?>(
-          name: 'testbed-zone',
-          zoneSpecification: ZoneSpecification(
-            createTimer:
-                (
-                  Zone self,
-                  ZoneDelegate parent,
-                  Zone zone,
-                  Duration duration,
-                  void Function() timer,
-                ) {
-                  final Timer result = parent.createTimer(zone, duration, timer);
-                  timers[result] = StackTrace.current;
-                  return result;
-                },
-            createPeriodicTimer:
-                (
-                  Zone self,
-                  ZoneDelegate parent,
-                  Zone zone,
-                  Duration period,
-                  void Function(Timer) timer,
-                ) {
-                  final Timer result = parent.createPeriodicTimer(zone, period, timer);
-                  timers[result] = StackTrace.current;
-                  return result;
-                },
-          ),
-          body: () async {
-            if (_setup != null) {
-              await _setup.call();
-            }
-            await test();
-            for (final MapEntry<Timer, StackTrace> entry in timers.entries) {
-              if (entry.key.isActive) {
-                throw StateError('A Timer was active at the end of a test: ${entry.value}');
+    return runZoned(
+      () => HttpOverrides.runZoned(() {
+        return runInContext<T?>(() {
+          return context.run<T?>(
+            name: 'testbed-zone',
+            zoneSpecification: ZoneSpecification(
+              createTimer:
+                  (
+                    Zone self,
+                    ZoneDelegate parent,
+                    Zone zone,
+                    Duration duration,
+                    void Function() timer,
+                  ) {
+                    final Timer result = parent.createTimer(zone, duration, timer);
+                    timers[result] = StackTrace.current;
+                    return result;
+                  },
+              createPeriodicTimer:
+                  (
+                    Zone self,
+                    ZoneDelegate parent,
+                    Zone zone,
+                    Duration period,
+                    void Function(Timer) timer,
+                  ) {
+                    final Timer result = parent.createPeriodicTimer(zone, period, timer);
+                    timers[result] = StackTrace.current;
+                    return result;
+                  },
+            ),
+            body: () async {
+              if (_setup != null) {
+                await _setup.call();
               }
-            }
-            return null;
-          },
-        );
-      }, overrides: testOverrides);
-    }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any());
+              await test();
+              for (final MapEntry(:Timer key, :StackTrace value) in timers.entries) {
+                if (key.isActive) {
+                  throw StateError('A Timer was active at the end of a test: $value');
+                }
+              }
+              return null;
+            },
+          );
+        }, overrides: testOverrides);
+      }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any()),
+      zoneValues: <Object?, Object?>{_inTestBedKey: true},
+    );
   }
 }

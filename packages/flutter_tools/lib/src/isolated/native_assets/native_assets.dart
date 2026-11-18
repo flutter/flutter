@@ -12,7 +12,6 @@ import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
 
-import '../../android/android_sdk.dart';
 import '../../base/common.dart';
 import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
@@ -21,7 +20,8 @@ import '../../base/platform.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
-import '../../features.dart';
+import '../../context/android_context.dart' show AndroidSdkProvider;
+import '../../features.dart' show FeatureFlags;
 import '../../windows/visual_studio.dart';
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
@@ -85,26 +85,28 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required FeatureFlags featureFlags,
   required Logger logger,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
   required File? recordedUsesFile,
-  AndroidSdk? Function()? androidSdkBuilder,
+  AndroidSdkProvider? androidSdkProvider,
   VisualStudio? visualStudio,
 }) async {
-  if (!await _hookRunRequired(buildRunner, logger: logger)) {
+  if (!await _hookRunRequired(buildRunner, featureFlags: featureFlags, logger: logger)) {
     return DartHooksResult.empty();
   }
 
   final buildStart = DateTime.now();
 
   final (:SerializedBuildResults results, buildResult: _) = await runFlutterSpecificBuildHooks(
-    androidSdkBuilder: androidSdkBuilder,
+    androidSdkProvider: androidSdkProvider,
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: targetPlatform,
     projectUri: projectUri,
     fileSystem: fileSystem,
+    featureFlags: featureFlags,
     logger: logger,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
@@ -119,12 +121,13 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   final DartHooksResult linkResult;
   if (linkingEnabled) {
     linkResult = await runFlutterSpecificLinkHooks(
-      androidSdkBuilder: androidSdkBuilder,
+      androidSdkProvider: androidSdkProvider,
       environmentDefines: environmentDefines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: featureFlags,
       logger: logger,
       buildCodeAssets: buildCodeAssets,
       buildDataAssets: buildDataAssets,
@@ -140,6 +143,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     environmentDefines: environmentDefines,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
+    featureFlags: featureFlags,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
     buildResults: results,
@@ -161,18 +165,19 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 /// collected during the build stage.
 Future<({SerializedBuildResults results, DartHooksResult buildResult})>
 runFlutterSpecificBuildHooks({
+  required AndroidSdkProvider? androidSdkProvider,
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required FeatureFlags featureFlags,
   required Logger logger,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
-  AndroidSdk? Function()? androidSdkBuilder,
-  VisualStudio? visualStudio,
+  required VisualStudio? visualStudio,
 }) async {
-  if (!await _hookRunRequired(buildRunner, logger: logger)) {
+  if (!await _hookRunRequired(buildRunner, featureFlags: featureFlags, logger: logger)) {
     return (results: const <String, Map<String, Object?>>{}, buildResult: DartHooksResult.empty());
   }
 
@@ -183,11 +188,12 @@ runFlutterSpecificBuildHooks({
     buildMode: BuildMode buildMode,
     linkingEnabled: bool linkingEnabled,
   ) = await _setupHooks(
-    androidSdkBuilder: androidSdkBuilder,
+    androidSdkProvider: androidSdkProvider,
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
+    featureFlags: featureFlags,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
     visualStudio: visualStudio,
@@ -235,13 +241,14 @@ runFlutterSpecificBuildHooks({
 }
 
 List<AssetBuildTarget> _getTargets({
+  required AndroidSdkProvider? androidSdkProvider,
   required Map<String, String> environmentDefines,
   required TargetPlatform targetPlatform,
   required FileSystem fileSystem,
+  required FeatureFlags featureFlags,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
-  AndroidSdk? Function()? androidSdkBuilder,
-  VisualStudio? visualStudio,
+  required VisualStudio? visualStudio,
 }) {
   final supportedAssetTypes = <SupportedAssetTypes>[
     if (featureFlags.isNativeAssetsEnabled && buildCodeAssets != null)
@@ -255,32 +262,34 @@ List<AssetBuildTarget> _getTargets({
   );
 
   return AssetBuildTarget.targetsFor(
+    androidSdkProvider: androidSdkProvider,
     targetPlatform: targetPlatform,
     buildMode: buildMode,
     environmentDefines: environmentDefines,
     fileSystem: fileSystem,
     supportedAssetTypes: supportedAssetTypes,
     buildDirectory: buildCodeAssets?.appBuildDirectory,
-    androidSdkBuilder: androidSdkBuilder,
     visualStudio: visualStudio,
   );
 }
 
 Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnabled})> _setupHooks({
+  required AndroidSdkProvider? androidSdkProvider,
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
   required FileSystem fileSystem,
+  required FeatureFlags featureFlags,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
-  AndroidSdk? Function()? androidSdkBuilder,
-  VisualStudio? visualStudio,
+  required VisualStudio? visualStudio,
 }) async {
   final List<AssetBuildTarget> targets = _getTargets(
-    androidSdkBuilder: androidSdkBuilder,
+    androidSdkProvider: androidSdkProvider,
     environmentDefines: environmentDefines,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
+    featureFlags: featureFlags,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
     visualStudio: visualStudio,
@@ -313,18 +322,19 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
 /// The returned dependencies only include those collected during the link stage.
 /// The returned assets only include those produced during the link stage.
 Future<DartHooksResult> runFlutterSpecificLinkHooks({
+  required AndroidSdkProvider? androidSdkProvider,
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
   required Uri projectUri,
   required FileSystem fileSystem,
+  required FeatureFlags featureFlags,
   required Logger logger,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
   required SerializedBuildResults buildResults,
   required File? recordedUsesFile,
-  AndroidSdk? Function()? androidSdkBuilder,
-  VisualStudio? visualStudio,
+  required VisualStudio? visualStudio,
 }) async {
   if (buildResults.isEmpty) {
     return DartHooksResult.empty();
@@ -335,11 +345,12 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     buildMode: BuildMode buildMode,
     linkingEnabled: bool linkingEnabled,
   ) = await _setupHooks(
-    androidSdkBuilder: androidSdkBuilder,
+    androidSdkProvider: androidSdkProvider,
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
+    featureFlags: featureFlags,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
     visualStudio: visualStudio,
@@ -407,17 +418,21 @@ DartHooksResult combineBuildAndLinkResults({
   required Map<String, String> environmentDefines,
   required TargetPlatform targetPlatform,
   required FileSystem fileSystem,
+  required FeatureFlags featureFlags,
   required BuildCodeAssetsOptions? buildCodeAssets,
   required bool buildDataAssets,
   required SerializedBuildResults buildResults,
   required DartHooksResult linkResult,
 }) {
   final List<AssetBuildTarget> targets = _getTargets(
+    androidSdkProvider: null,
     environmentDefines: environmentDefines,
     targetPlatform: targetPlatform,
     fileSystem: fileSystem,
+    featureFlags: featureFlags,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
+    visualStudio: null,
   );
 
   final codeAssets = <FlutterCodeAsset>[...linkResult.codeAssets];
@@ -544,6 +559,7 @@ Future<List<File>> installCodeAssets({
     codesignIdentity,
     flutterTester,
     logger: logger,
+    nativeAssetsFileUri: nativeAssetsFileUri,
     processManager: processManager,
   );
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
@@ -727,6 +743,7 @@ bool _nativeAssetsLinkingEnabled(BuildMode buildMode) {
 
 Future<bool> _hookRunRequired(
   FlutterNativeAssetsBuildRunner buildRunner, {
+  required FeatureFlags featureFlags,
   required Logger logger,
 }) async {
   final List<String> packagesWithNativeAssets = await buildRunner.packagesWithNativeAssets();
@@ -814,6 +831,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   String? codesignIdentity,
   bool flutterTester, {
   required Logger logger,
+  required Uri nativeAssetsFileUri,
   required ProcessManager processManager,
 }) async {
   // We only have to copy code assets that are bundled within the app.
@@ -830,7 +848,13 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
-  for (final FileSystemEntity entity in await targetDir.list().toList()) {
+  final String nativeAssetsFilePath = fileSystem.file(nativeAssetsFileUri).path;
+  for (final FileSystemEntity entity in await targetDir.list(followLinks: false).toList()) {
+    if (entity is File && fileSystem.path.equals(entity.path, nativeAssetsFilePath)) {
+      // _writeNativeAssetsJson immediately truncates and overwrites this
+      // manifest file in place, so avoid unlinking it unnecessarily.
+      continue;
+    }
     ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
   }
 
@@ -859,6 +883,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
           codesignIdentity,
           buildMode,
           fileSystem,
+          logger: logger,
           processUtils: processUtils,
         );
       } else {

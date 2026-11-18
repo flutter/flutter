@@ -8,22 +8,26 @@ import 'dart:typed_data';
 
 import 'package:dwds/dwds.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_server_utilities.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
@@ -40,6 +44,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fake_web_devfs.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
+import '../../src/throwing_pub.dart';
 
 const kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
@@ -80,8 +85,6 @@ void main() {
     logger = BufferLogger.test();
     testbed = TestBed(
       setup: () {
-        ToolContext(:artifacts, :config, :flutterVersion, :fs, :platform) =
-            const DelegatingToolContext();
         webAssetServer = WebAssetServer(
           httpServer,
           packages,
@@ -94,6 +97,7 @@ void main() {
             fs: fs,
             flutterVersion: flutterVersion,
             logger: logger,
+            platform: platform,
           ),
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
@@ -117,7 +121,54 @@ void main() {
     FutureOr<void> Function() body, {
     Map<Type, Generator>? overrides,
   }) {
-    test(description, () => testbed.run(body, overrides: overrides));
+    test(description, () {
+      platform = overrides?[Platform] != null
+          ? overrides![Platform]!() as Platform
+          : const LocalPlatform();
+      final rawFs = MemoryFileSystem(
+        style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      );
+      fs = ErrorHandlingFileSystem(delegate: rawFs, platform: platform);
+      config = Config.test(
+        name: Config.kFlutterSettings,
+        directory: fs.systemTempDirectory.createTempSync('flutter_config_dir_test.'),
+        logger: logger,
+      );
+      flutterVersion = FakeFlutterVersion();
+      final os = FakeOperatingSystemUtils();
+      final cache = FlutterCache(
+        flutterRoot: '',
+        fileSystem: fs,
+        isLocalEngineBuilder: () => artifacts.localEngineInfo != null,
+        logger: logger,
+        platform: platform,
+        osUtils: os,
+        projectFactory: FlutterProjectFactory(config: config, fileSystem: fs, logger: logger),
+        pub: () => const ThrowingPub(),
+      );
+      artifacts = overrides?[Artifacts] != null
+          ? overrides![Artifacts]!() as Artifacts
+          : CachedArtifacts(
+              fileSystem: fs,
+              cache: cache,
+              platform: platform,
+              operatingSystemUtils: os,
+            );
+      return testbed.run(
+        body,
+        overrides: <Type, Generator>{
+          ...?overrides,
+          Artifacts: () => artifacts,
+          Cache: () => cache,
+          Config: () => config,
+          FileSystem: () => rawFs,
+          FlutterVersion: () => flutterVersion,
+          Logger: () => logger,
+          OperatingSystemUtils: () => os,
+          Platform: () => platform,
+        },
+      );
+    });
   }
 
   runInTestbed('WebDevFS.assetPathsToEvict is mutable and can be cleared/modified', () {

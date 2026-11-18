@@ -4,22 +4,26 @@
 
 import 'dart:io' show Platform, Process, ProcessResult;
 
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
+  final fs = LocalFileSystem.test(signals: Signals.test());
+
   setUpAll(() {
     Cache.disableLocking();
   });
 
-  testUsingContext(
+  tearDownAll(() async {
+    await fs.dispose();
+  });
+
+  testWithoutContext(
     'flutter command can receive `!`, avoiding expansion by cmd.exe',
     () async {
-      final FileSystem fs = context.get<FileSystem>()!;
       final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter.bat');
 
       final ProcessResult exec = await Process.run(flutterBin, <String>[
@@ -33,8 +37,7 @@ void main() {
     skip: !Platform.isWindows, // [intended] relies on Windows's cmd.exe
   );
 
-  testUsingContext('windows entrypoint batch scripts do not enable delayed expansion', () {
-    final FileSystem fs = context.get<FileSystem>()!;
+  testWithoutContext('windows entrypoint batch scripts do not enable delayed expansion', () {
     final String flutterRoot = getFlutterRoot();
     final File flutterBat = fs.file(fs.path.join(flutterRoot, 'bin', 'flutter.bat'));
     final File dartBat = fs.file(fs.path.join(flutterRoot, 'bin', 'dart.bat'));

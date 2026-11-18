@@ -17,6 +17,7 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -31,6 +32,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -82,6 +84,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -134,6 +137,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug', kBuildName: '2.0.0', kBuildNumber: '22'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -165,25 +169,24 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'DebugBundleLinuxAssets bundles assets for the selected flavor',
-    () async {
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        defines: <String, String>{kBuildMode: 'debug', kFlavor: 'strawberry'},
-        engineVersion: '2',
-      );
+  testWithoutContext('DebugBundleLinuxAssets bundles assets for the selected flavor', () async {
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      defines: <String, String>{kBuildMode: 'debug', kFlavor: 'strawberry'},
+      engineVersion: '2',
+    );
 
-      environment.buildDir.childFile('app.dill').createSync(recursive: true);
-      environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync('''
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
 name: example
 flutter:
   assets:
@@ -196,30 +199,25 @@ flutter:
         - strawberry
 ''');
 
-      fileSystem.file('assets/common/image.png').createSync(recursive: true);
-      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
-      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    fileSystem.file('assets/common/image.png').createSync(recursive: true);
+    fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+    fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
 
-      await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(environment);
+    await const DebugBundleLinuxAssets(TargetPlatform.linux_x64).build(environment);
 
-      final Uint8List assetManifestData = environment.outputDir
-          .childDirectory('flutter_assets')
-          .childFile('AssetManifest.bin')
-          .readAsBytesSync();
-      final assetManifest = const StandardMessageCodec().decodeMessage(
-        ByteData.sublistView(assetManifestData),
-      ) as Map<Object?, Object?>;
+    final Uint8List assetManifestData = environment.outputDir
+        .childDirectory('flutter_assets')
+        .childFile('AssetManifest.bin')
+        .readAsBytesSync();
+    final assetManifest = const StandardMessageCodec().decodeMessage(
+      ByteData.sublistView(assetManifestData),
+    ) as Map<Object?, Object?>;
 
-      expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
-      expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);
-      expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+    expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
+    expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);
+    expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
+  });
 
   testWithoutContext("DebugBundleLinuxAssets' name depends on target platforms", () async {
     expect(
@@ -239,6 +237,7 @@ flutter:
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'profile'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -285,6 +284,7 @@ flutter:
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'release'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),

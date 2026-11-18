@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test_api/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -82,6 +83,7 @@ void main() {
       cocoaPods: cocoaPods ?? FakeCocoaPods(),
       codesign: FakeDarwinAddToAppCodesigning(),
       featureFlags: FakeFeatureFlags(),
+      templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: FakeToolContext(
         artifacts: FakeArtifacts(_engineArtifactPath),
@@ -3409,9 +3411,11 @@ BuildSwiftPackageUtils _createTestUtils({
     analytics: FakeAnalytics(),
     buildSystem: buildSystem ?? FakeBuildSystem(),
     cocoaPods: cocoaPods ?? FakeCocoaPods(),
+    featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
     flutterRoot: _flutterRoot,
     project:
         project ?? FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),
+    templatePathProvider: TemplatePathProvider(flutterRoot: getFlutterRoot()),
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: FakeArtifacts(_engineArtifactPath),
@@ -3548,11 +3552,7 @@ class FakeCache extends Fake implements Cache {
   Future<void> lock() async {}
 
   @override
-  Future<void> updateAll(
-    Set<DevelopmentArtifact> artifacts, {
-    bool isLocalEngine = false,
-    bool offline = false,
-  }) async {}
+  Future<void> updateAll(Set<DevelopmentArtifact> artifacts, {bool offline = false}) async {}
 
   @override
   void releaseLock() {}

@@ -11,15 +11,18 @@ import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
+import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -32,10 +35,11 @@ import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+final localFs = LocalFileSystem.test(signals: FakeSignals());
+const Platform localPlatform = LocalPlatform();
+
 void main() {
   Cache.disableLocking();
-  final localFs = LocalFileSystem.test(signals: FakeSignals());
-  const Platform localPlatform = LocalPlatform();
 
   tearDownAll(() async {
     await localFs.dispose();
@@ -54,21 +58,40 @@ void main() {
     AndroidBuilder? androidBuilder,
     AndroidSdk? androidSdk = const _FakeAndroidSdk(),
     List<String>? arguments,
+    Logger? logger,
+    ProcessManager? processManager,
+    FlutterProjectFactory? projectFactory,
+    Pub? pub,
   }) async {
-    const delegatingContext = DelegatingToolContext();
+    final Logger resolvedLogger = logger ?? BufferLogger.test();
+    final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
+    final String flutterRoot = getFlutterRoot();
+    final cache = Cache.test(
+      flutterRoot: flutterRoot,
+      rootOverride: localFs.directory(flutterRoot),
+      fileSystem: localFs,
+      logger: resolvedLogger,
+      platform: localPlatform,
+      processManager: resolvedProcessManager,
+    );
     final command = BuildAarCommand(
       androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
       androidContext: FakeAndroidContext(androidSdk: androidSdk),
-      buildSystem: context.get<BuildSystem>()!,
+      buildSystem: FlutterBuildSystem(
+        fileSystem: localFs,
+        logger: resolvedLogger,
+        platform: localPlatform,
+      ),
       toolContext: FakeToolContext(
-        fs: delegatingContext.fs,
-        logger: delegatingContext.logger,
-        platform: delegatingContext.platform,
-        processManager: delegatingContext.processManager,
-        projectFactory: delegatingContext.projectFactory,
+        cache: cache,
+        fs: localFs,
+        logger: resolvedLogger,
+        platform: localPlatform,
+        processManager: resolvedProcessManager,
+        projectFactory: projectFactory,
       ),
     );
-    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command, null, null, null, pub);
     await runner.run(<String>['aar', ...?arguments, target]);
     return command;
   }
@@ -158,6 +181,7 @@ void main() {
         await runBuildAar(
           projectPath,
           arguments: <String>['--target-platform=android-arm'],
+          pub: FakePub(),
           // If we use --no-pub, it bypasses validation that occurs only on a
           // build with --pub, which as a consequence means that we aren't
           // testing every code branch.
@@ -166,7 +190,6 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
-        Pub: FakePub.new,
       },
     );
 
@@ -383,7 +406,13 @@ void main() {
 
           await expectLater(
             () async {
-              await runBuildAar(projectPath, androidSdk: null, arguments: <String>['--no-pub']);
+              await runBuildAar(
+                projectPath,
+                androidSdk: null,
+                arguments: <String>['--no-pub'],
+                processManager: FakeProcessManager.any(),
+                projectFactory: FakeFlutterProjectFactory(tempDir),
+              );
             },
             throwsToolExit(
               message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
@@ -494,6 +523,8 @@ void main() {
           () => runBuildAar(
             projectPath,
             androidSdk: androidSdk,
+            processManager: processManager,
+            projectFactory: FakeFlutterProjectFactory(tempDir),
             arguments: <String>[
               '--no-pub',
               '--no-debug',
@@ -556,7 +587,11 @@ void main() {
             arguments: <String>['--no-pub', '--template=module'],
           );
 
-          await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+          await runBuildAar(
+            projectPath,
+            arguments: <String>['--no-pub'],
+            projectFactory: FakeFlutterProjectFactory(tempDir),
+          );
 
           expect(
             fakeAnalytics.sentEvents,
@@ -568,36 +603,49 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
 
       testUsingContext(
         'EnableImpeller="true" reports an enabled event',
         () async {
-          const delegatingContext = DelegatingToolContext();
+          final logger = BufferLogger.test();
+          final os = FakeOperatingSystemUtils();
+          final cache = Cache.test(
+            flutterRoot: flutterRoot,
+            rootOverride: localFs.directory(flutterRoot),
+            fileSystem: localFs,
+            logger: logger,
+            platform: localPlatform,
+            processManager: processManager,
+          );
+          final projectFactory = FakeFlutterProjectFactory(tempDir);
           final String projectPath = await createProject(
             tempDir,
             arguments: <String>['--no-pub', '--template=module'],
           );
           final FlutterProject project = FlutterProject.fromDirectory(
-            delegatingContext.fs.directory(projectPath),
-            logger: delegatingContext.logger,
+            localFs.directory(projectPath),
+            logger: logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
             toolContext: FakeToolContext(
-              cache: delegatingContext.cache,
-              config: delegatingContext.config,
-              flutterVersion: delegatingContext.flutterVersion,
-              fs: delegatingContext.fs,
-              logger: delegatingContext.logger,
-              os: delegatingContext.os,
-              platform: delegatingContext.platform,
-              processManager: delegatingContext.processManager,
-              systemClock: delegatingContext.systemClock,
+              cache: cache,
+              fs: localFs,
+              logger: logger,
+              os: os,
+              platform: localPlatform,
+              processManager: processManager,
+              projectFactory: projectFactory,
             ),
-            gradleUtils: context.get<GradleUtils>(),
-            templateRenderer: context.get<TemplateRenderer>()!,
+            gradleUtils: GradleUtils(
+              cache: cache,
+              logger: logger,
+              operatingSystemUtils: os,
+              platform: localPlatform,
+            ),
+            templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
+            templateRenderer: const MustacheTemplateRenderer(),
           );
 
           writeManifestMetadata(
@@ -606,7 +654,13 @@ void main() {
             value: 'true',
           );
 
-          await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+          await runBuildAar(
+            projectPath,
+            arguments: <String>['--no-pub'],
+            logger: logger,
+            processManager: processManager,
+            projectFactory: projectFactory,
+          );
 
           expect(
             fakeAnalytics.sentEvents,
@@ -618,36 +672,49 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
 
       testUsingContext(
         'EnableImpeller="false" reports a disabled event',
         () async {
-          const delegatingContext = DelegatingToolContext();
+          final logger = BufferLogger.test();
+          final os = FakeOperatingSystemUtils();
+          final cache = Cache.test(
+            flutterRoot: flutterRoot,
+            rootOverride: localFs.directory(flutterRoot),
+            fileSystem: localFs,
+            logger: logger,
+            platform: localPlatform,
+            processManager: processManager,
+          );
+          final projectFactory = FakeFlutterProjectFactory(tempDir);
           final String projectPath = await createProject(
             tempDir,
             arguments: <String>['--no-pub', '--template=module'],
           );
           final FlutterProject project = FlutterProject.fromDirectory(
-            delegatingContext.fs.directory(projectPath),
-            logger: delegatingContext.logger,
+            localFs.directory(projectPath),
+            logger: logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
             toolContext: FakeToolContext(
-              cache: delegatingContext.cache,
-              config: delegatingContext.config,
-              flutterVersion: delegatingContext.flutterVersion,
-              fs: delegatingContext.fs,
-              logger: delegatingContext.logger,
-              os: delegatingContext.os,
-              platform: delegatingContext.platform,
-              processManager: delegatingContext.processManager,
-              systemClock: delegatingContext.systemClock,
+              cache: cache,
+              fs: localFs,
+              logger: logger,
+              os: os,
+              platform: localPlatform,
+              processManager: processManager,
+              projectFactory: projectFactory,
             ),
-            gradleUtils: context.get<GradleUtils>(),
-            templateRenderer: context.get<TemplateRenderer>()!,
+            gradleUtils: GradleUtils(
+              cache: cache,
+              logger: logger,
+              operatingSystemUtils: os,
+              platform: localPlatform,
+            ),
+            templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
+            templateRenderer: const MustacheTemplateRenderer(),
           );
 
           writeManifestMetadata(
@@ -656,7 +723,13 @@ void main() {
             value: 'false',
           );
 
-          await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+          await runBuildAar(
+            projectPath,
+            arguments: <String>['--no-pub'],
+            logger: logger,
+            processManager: processManager,
+            projectFactory: projectFactory,
+          );
 
           expect(
             fakeAnalytics.sentEvents,
@@ -668,7 +741,6 @@ void main() {
         overrides: <Type, Generator>{
           Analytics: () => fakeAnalytics,
           AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
-          FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         },
       );
     });

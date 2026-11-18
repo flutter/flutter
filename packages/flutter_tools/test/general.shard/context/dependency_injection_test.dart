@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -18,6 +19,8 @@ import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -29,6 +32,7 @@ import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -37,7 +41,10 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-class FakeAndroidSdk extends Fake implements AndroidSdk {}
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String? get adbPath => null;
+}
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
@@ -50,7 +57,10 @@ class FakeGradleUtils extends Fake implements GradleUtils {}
 
 class FakeJava extends Fake implements Java {}
 
-class _StubFlutterVersion extends Fake implements FlutterVersion {}
+class _StubFlutterVersion extends Fake implements FlutterVersion {
+  @override
+  String get channel => 'master';
+}
 
 void main() {
   group('ToolDependencies.bootstrap', () {
@@ -313,7 +323,15 @@ void main() {
       }
     });
 
-    testWithoutContext('does not eagerly evaluate AndroidStudio, Java, or AndroidSdk during bootstrap or EmulatorManager queries', () async {
+    testWithoutContext('does not eagerly evaluate AndroidStudio, Java, or AndroidSdk during bootstrap, Doctor creation, or EmulatorManager queries', () async {
+      // A discoverable Android Studio install. Evaluating AndroidStudio runs
+      // its bundled `java -version`, and evaluating Java either goes through
+      // AndroidStudio or falls back to `which java`, so evaluating either one
+      // makes a process call that strictProcessManager rejects.
+      const studioInstallPath = '/opt/android-studio';
+      final String studioJava = fs.path.join(studioInstallPath, 'jbr', 'bin', 'java');
+      fs.directory(fs.path.join(studioInstallPath, 'jbr', 'bin')).createSync(recursive: true);
+
       final strictProcessManager = FakeProcessManager.empty();
       final ToolDependencies dependencies = await ToolDependencies.bootstrap(
         analytics: const NoOpAnalytics(),
@@ -325,6 +343,9 @@ void main() {
         templateRenderer: FakeTemplateRenderer(),
       );
 
+      expect(dependencies.doctor, isNotNull);
+      expect(strictProcessManager, hasNoRemainingExpectations);
+
       // Creating the SDK directory after bootstrap proves AndroidSdk was not
       // evaluated during ToolDependencies.bootstrap (otherwise locateAndroidSdk
       // would have fallen back to `which -a aapt` on strictProcessManager).
@@ -335,6 +356,24 @@ void main() {
       await dependencies.emulatorManager.getAllAvailableEmulators();
       expect(dependencies.androidContext.androidSdk, isNotNull);
       expect(strictProcessManager, hasNoRemainingExpectations);
+
+      // Building Doctor validators evaluates Java through the shared
+      // AndroidStudio instance, running the bundled `java -version` once across
+      // Doctor, Java, and AndroidStudio lookups.
+      fs.directory('/flutter/bin/cache/artifacts').createSync(recursive: true);
+      strictProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[studioJava, '-version'],
+          stderr: 'openjdk version "17.0.8"\nOpenJDK Runtime Environment',
+        ),
+      );
+      expect(dependencies.doctor.validators, isNotEmpty);
+      final Java? java = dependencies.androidContext.java;
+      final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+      expect(strictProcessManager, hasNoRemainingExpectations);
+      expect(studio?.directory, studioInstallPath);
+      expect(java?.javaSource, JavaSource.androidStudio);
+      expect(java?.javaHome, studio?.javaPath);
     });
 
     testWithoutContext('respects explicit overrides for Java and GradleUtils', () async {
@@ -391,41 +430,68 @@ void main() {
         templateRenderer: FakeTemplateRenderer(),
       );
 
-      expect(dependencies.toolContext.preRunValidator, isA<PreRunValidator>());
+      expect(dependencies.toolContext.preRunValidator, isNot(isA<NoOpPreRunValidator>()));
     });
   });
 
   group('runInContext fallback generators', () {
     var sdkEvaluations = 0;
+    var studioEvaluations = 0;
     var javaEvaluations = 0;
 
     setUp(() {
       sdkEvaluations = 0;
+      studioEvaluations = 0;
       javaEvaluations = 0;
     });
 
     testUsingContext(
-      'AndroidWorkflow does not eagerly evaluate AndroidSdk or Java',
+      'AndroidWorkflow, EmulatorManager, and DoctorValidatorsProvider defer AndroidSdk, AndroidStudio, and Java until validators run',
       () {
-        expect(androidWorkflow, isNotNull);
+        expect(context.get<AndroidWorkflow>(), isA<AndroidWorkflow>());
+        expect(context.get<WindowsWorkflow>(), isNotNull);
+        expect(context.get<EmulatorManager>(), isNotNull);
+        final Doctor doctor = context.get<Doctor>()!;
+        final DoctorValidatorsProvider provider = context.get<DoctorValidatorsProvider>()!;
         expect(sdkEvaluations, 0);
+        expect(studioEvaluations, 0);
         expect(javaEvaluations, 0);
+
+        expect(provider.validators, isNotEmpty);
+        expect(sdkEvaluations, 1);
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 1);
+
+        expect(doctor.validators, isNotEmpty);
+        expect(sdkEvaluations, 1);
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 1);
       },
       overrides: <Type, Generator>{
         AndroidSdk: () {
           sdkEvaluations++;
           return FakeAndroidSdk();
         },
+        AndroidStudio: () {
+          studioEvaluations++;
+          return FakeAndroidStudio();
+        },
+        FlutterVersion: _StubFlutterVersion.new,
         Java: () {
           javaEvaluations++;
           return FakeJava();
         },
-        FileSystem: () => MemoryFileSystem.test(),
-        Logger: () => BufferLogger.test(),
+        FileSystem: () {
+          final fs = MemoryFileSystem.test();
+          fs.directory('/flutter/packages/flutter_tools').createSync(recursive: true);
+          fs.file('/pubspec.yaml').createSync();
+          return fs;
+        },
+        Logger: BufferLogger.test,
         Platform: () => FakePlatform(
           environment: <String, String>{'FLUTTER_ROOT': '/flutter', 'HOME': '/home/user'},
         ),
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: FakeProcessManager.any,
       },
     );
   });

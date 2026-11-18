@@ -115,15 +115,6 @@ class AppContext {
     });
   }
 
-  /// Returns `true` if [type] is explicitly overridden in this context or an
-  /// ancestor context (excluding `fallbacks`).
-  bool hasOverride(Type type) {
-    if (_overrides.containsKey(type)) {
-      return true;
-    }
-    return _parent?.hasOverride(type) ?? false;
-  }
-
   /// Gets the value associated with the specified [T], or `null` if no
   /// such value has been associated.
   T? get<T>() {

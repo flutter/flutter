@@ -152,6 +152,7 @@ class Cache {
   /// [artifactUpdater] is configurable for testing.
   Cache({
     required FileSystem fileSystem,
+    required this._isLocalEngineBuilder,
     required Logger logger,
     required this._osUtils,
     required Platform platform,
@@ -178,6 +179,7 @@ class Cache {
     List<ArtifactSet>? artifacts,
     ArtifactUpdater? artifactUpdater,
     String? flutterRoot,
+    bool Function()? isLocalEngineBuilder,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
@@ -202,6 +204,7 @@ class Cache {
       artifacts: artifacts ?? <ArtifactSet>[],
       artifactUpdater: artifactUpdater,
       flutterRoot: flutterRoot,
+      isLocalEngineBuilder: isLocalEngineBuilder ?? _defaultIsLocalEngine,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -216,6 +219,8 @@ class Cache {
     );
   }
 
+  static bool _defaultIsLocalEngine() => false;
+
   final Logger _logger;
   final Platform _platform;
   final FileSystem _fileSystem;
@@ -223,6 +228,7 @@ class Cache {
   OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
+  final bool Function() _isLocalEngineBuilder;
   final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
@@ -641,7 +647,7 @@ class Cache {
   }
 
   String getHostPlatformArchName() {
-    return _osUtils.hostPlatform.platformName;
+    return _osUtils.hostPlatform.cpuArchName;
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
@@ -780,10 +786,10 @@ class Cache {
 
   /// Returns the list of artifacts that need updating from [requiredArtifacts].
   Future<List<ArtifactSet>> _collectArtifactsToUpdate(
-    Set<DevelopmentArtifact> requiredArtifacts, {
-    required bool isLocalEngine,
-  }) async {
+    Set<DevelopmentArtifact> requiredArtifacts,
+  ) async {
     final artifactsToUpdate = <ArtifactSet>[];
+    final bool isLocalEngine = _isLocalEngineBuilder();
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
@@ -805,19 +811,12 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(
-    Set<DevelopmentArtifact> requiredArtifacts, {
-    bool isLocalEngine = false,
-    bool offline = false,
-  }) async {
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
     if (!_lockEnabled) {
       return;
     }
 
-    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(
-      requiredArtifacts,
-      isLocalEngine: isLocalEngine,
-    );
+    final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
 
     if (artifactsToUpdate.isEmpty) {
       return;

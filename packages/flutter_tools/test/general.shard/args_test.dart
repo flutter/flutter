@@ -36,7 +36,6 @@ void main() {
       final fakeAppleContext = FakeAppleContext();
       final fakeToolContext = FakeToolContext();
       final fakeToolDependencies = FakeToolDependencies(
-        analytics: FakeAnalytics(),
         androidContext: fakeAndroidContext,
         appleContext: fakeAppleContext,
         toolContext: fakeToolContext,

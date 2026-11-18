@@ -19,7 +19,6 @@ import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
 import 'package:unified_analytics/unified_analytics.dart';
 
-import 'context_runner.dart';
 import 'fakes.dart';
 import 'fs_safety.dart';
 
@@ -197,7 +196,7 @@ void test(
   test_package.test(
     description,
     () async {
-      addTearDown(disposeContextRunnerLocalFileSystem);
+      addTearDown(disposeFallbackLocalFileSystem);
 
       return io.IOOverrides.runWithIOOverrides(() => body(), FSGuardIOOverrides());
     },
@@ -253,9 +252,6 @@ void testWithoutContext(
 /// a Zone value in place of a constructor parameter.
 class _NoContext implements AppContext {
   const _NoContext();
-
-  @override
-  bool hasOverride(Type type) => false;
 
   @override
   T get<T>() {
