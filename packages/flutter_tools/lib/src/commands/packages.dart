@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
@@ -37,6 +38,7 @@ class PackagesCommand extends FlutterCommand {
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     super.verboseHelp,
+    @visibleForTesting Pub? pub,
   }) : super(toolContext: toolContext) {
     addSubcommand(
       PackagesGetCommand(
@@ -45,6 +47,7 @@ class PackagesCommand extends FlutterCommand {
         PubContext.pubGet,
         buildSystem: buildSystem,
         toolContext: toolContext,
+        pub: pub,
       ),
     );
     addSubcommand(
@@ -54,6 +57,7 @@ class PackagesCommand extends FlutterCommand {
         PubContext.pubUpgrade,
         buildSystem: buildSystem,
         toolContext: toolContext,
+        pub: pub,
       ),
     );
     addSubcommand(
@@ -63,6 +67,7 @@ class PackagesCommand extends FlutterCommand {
         PubContext.pubAdd,
         buildSystem: buildSystem,
         toolContext: toolContext,
+        pub: pub,
       ),
     );
     addSubcommand(
@@ -72,14 +77,16 @@ class PackagesCommand extends FlutterCommand {
         PubContext.pubRemove,
         buildSystem: buildSystem,
         toolContext: toolContext,
+        pub: pub,
       ),
     );
-    addSubcommand(PackagesTestCommand(toolContext: toolContext));
+    addSubcommand(PackagesTestCommand(toolContext: toolContext, pub: pub));
     addSubcommand(
       PackagesForwardCommand(
         'publish',
         'Publish the current package to pub.dartlang.org.',
         toolContext: toolContext,
+        pub: pub,
         requiresPubspec: true,
       ),
     );
@@ -88,45 +95,66 @@ class PackagesCommand extends FlutterCommand {
         'downgrade',
         'Downgrade packages in a Flutter project.',
         toolContext: toolContext,
+        pub: pub,
         requiresPubspec: true,
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('deps', 'Print package dependencies.', toolContext: toolContext),
+      PackagesForwardCommand(
+        'deps',
+        'Print package dependencies.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     ); // path to package can be specified with --directory argument
     addSubcommand(
       PackagesForwardCommand(
         'run',
         'Run an executable from a package.',
         toolContext: toolContext,
+        pub: pub,
         requiresPubspec: true,
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('cache', 'Work with the Pub system cache.', toolContext: toolContext),
+      PackagesForwardCommand(
+        'cache',
+        'Work with the Pub system cache.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     );
     addSubcommand(
-      PackagesForwardCommand('version', 'Print Pub version.', toolContext: toolContext),
+      PackagesForwardCommand('version', 'Print Pub version.', toolContext: toolContext, pub: pub),
     );
     addSubcommand(
       PackagesForwardCommand(
         'uploader',
         'Manage uploaders for a package on pub.dev.',
         toolContext: toolContext,
+        pub: pub,
       ),
     );
-    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: toolContext));
     addSubcommand(
-      PackagesForwardCommand('logout', 'Log out of pub.dev.', toolContext: toolContext),
+      PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: toolContext, pub: pub),
     );
     addSubcommand(
-      PackagesForwardCommand('global', 'Work with Pub global packages.', toolContext: toolContext),
+      PackagesForwardCommand('logout', 'Log out of pub.dev.', toolContext: toolContext, pub: pub),
+    );
+    addSubcommand(
+      PackagesForwardCommand(
+        'global',
+        'Work with Pub global packages.',
+        toolContext: toolContext,
+        pub: pub,
+      ),
     );
     addSubcommand(
       PackagesForwardCommand(
         'outdated',
         'Analyze dependencies to find which ones can be upgraded.',
         toolContext: toolContext,
+        pub: pub,
         requiresPubspec: true,
       ),
     );
@@ -135,9 +163,10 @@ class PackagesCommand extends FlutterCommand {
         'token',
         'Manage authentication tokens for hosted pub repositories.',
         toolContext: toolContext,
+        pub: pub,
       ),
     );
-    addSubcommand(PackagesPassthroughCommand(toolContext: toolContext));
+    addSubcommand(PackagesPassthroughCommand(toolContext: toolContext, pub: pub));
   }
 
   @override
@@ -157,11 +186,12 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand({required super.toolContext}) {
+  PackagesTestCommand({required super.toolContext, Pub? pub}) : _injectedPub = pub {
     requiresPubspecYaml();
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  final Pub? _injectedPub;
+  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
 
   @override
   String get name => 'test';
@@ -194,13 +224,15 @@ class PackagesForwardCommand extends FlutterCommand {
     this._description, {
     required super.toolContext,
     bool requiresPubspec = false,
-  }) {
+    Pub? pub,
+  }) : _injectedPub = pub {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  final Pub? _injectedPub;
+  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -238,12 +270,13 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand({required super.toolContext});
+  PackagesPassthroughCommand({required super.toolContext, Pub? pub}) : _injectedPub = pub;
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
-  late final Pub _pub = _createPub(toolContext);
+  final Pub? _injectedPub;
+  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
 
   @override
   String get name => 'pub';
@@ -275,7 +308,8 @@ class PackagesGetCommand extends FlutterCommand {
     this._context, {
     required this._buildSystem,
     required super.toolContext,
-  });
+    Pub? pub,
+  }) : _injectedPub = pub;
 
   final BuildSystem _buildSystem;
 
@@ -302,7 +336,8 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
 
-  late final Pub _pub = _createPub(toolContext);
+  final Pub? _injectedPub;
+  late final Pub _pub = _injectedPub ?? Pub(toolContext: toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -597,8 +632,4 @@ class PackagesGetCommand extends FlutterCommand {
       packagesAndroidEmbeddingVersion: _androidEmbeddingVersion,
     );
   }
-}
-
-Pub _createPub(ToolContext toolContext) {
-  return Pub(stdio: toolContext.stdio, toolContext: toolContext);
 }

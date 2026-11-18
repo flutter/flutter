@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -125,6 +126,16 @@ void main() {
             xcode: FakeXcode(),
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
+          stdio: mockStdio,
+        ),
+        pub: Pub.test(
+          botDetector: fakeBotDetector,
+          cache: localCache,
+          fileSystem: localFs,
+          flutterRoot: localCache.flutterRoot,
+          logger: logger,
+          platform: localPlatform,
+          processManager: localProcessManager,
           stdio: mockStdio,
         ),
       );
