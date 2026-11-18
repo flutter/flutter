@@ -487,7 +487,11 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     is_valid_ = true;
   }
 
-  ~AllocatedTextureSourceVK() = default;
+  ~AllocatedTextureSourceVK() override {
+    // Destroy cached framebuffers and render passes while resource_ still keeps
+    // the backing DeviceHolderVK alive.
+    ClearCachedFrameData();
+  }
 
   bool IsValid() const { return is_valid_; }
 

@@ -68,8 +68,6 @@ struct MockSwapchainKHR {
 
 struct MockSemaphore {};
 
-struct MockFramebuffer {};
-
 static ISize currentImageSize = ISize{1, 1};
 
 class MockPhysicalDevice {
@@ -1139,14 +1137,23 @@ VkResult vkCreateFramebuffer(VkDevice device,
                              const VkFramebufferCreateInfo* pCreateInfo,
                              const VkAllocationCallbacks* pAllocator,
                              VkFramebuffer* pFramebuffer) {
-  *pFramebuffer = reinterpret_cast<VkFramebuffer>(new MockFramebuffer());
+  static std::atomic_uint64_t next_handle = 0x1000;
+  *pFramebuffer = reinterpret_cast<VkFramebuffer>(next_handle.fetch_add(1));
   return VK_SUCCESS;
 }
 
 void vkDestroyFramebuffer(VkDevice device,
                           VkFramebuffer framebuffer,
                           const VkAllocationCallbacks* pAllocator) {
-  delete reinterpret_cast<MockFramebuffer*>(framebuffer);
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyFramebuffer");
+}
+
+void vkDestroyRenderPass(VkDevice device,
+                         VkRenderPass renderPass,
+                         const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = MockDevice::Unwrap(device);
+  mock_device->AddCalledFunction("vkDestroyRenderPass");
 }
 
 void vkTrimCommandPool(VkDevice device,
@@ -1272,6 +1279,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkBindBufferMemory);
   } else if (strcmp("vkCreateRenderPass", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateRenderPass);
+  } else if (strcmp("vkDestroyRenderPass", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyRenderPass);
   } else if (strcmp("vkCreateDescriptorSetLayout", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateDescriptorSetLayout);
   } else if (strcmp("vkCreatePipelineLayout", pName) == 0) {

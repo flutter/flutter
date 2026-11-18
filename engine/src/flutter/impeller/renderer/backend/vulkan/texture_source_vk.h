@@ -177,6 +177,10 @@ class TextureSourceVK {
 
   explicit TextureSourceVK(TextureDescriptor desc);
 
+  /// Clear cached framebuffers and render passes before subclass members
+  /// release their DeviceHolderVK references.
+  void ClearCachedFrameData();
+
  private:
   struct CachedFrameDataEntry {
     SampleCount sample_count = SampleCount::kCount1;

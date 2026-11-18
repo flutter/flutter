@@ -13,7 +13,11 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/render_pass.h"
+#include "impeller/renderer/render_target.h"
 #include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
@@ -157,6 +161,78 @@ TEST(AllocatorVKTest, RecreateSwapchainWhenSizeChanges) {
 }
 
 #endif  // IMPELLER_DEBUG
+
+TEST(AllocatorVKTest,
+     AllocatedTextureSourceClearsFrameDataBeforeDeviceIsDestroyed) {
+  std::shared_ptr<Texture> texture;
+  std::shared_ptr<std::vector<std::string>> called;
+  {
+    auto context = MockVulkanContextBuilder().Build();
+    ASSERT_TRUE(context);
+    called = GetMockVulkanFunctions(context->GetDevice());
+
+    texture = context->GetResourceAllocator()->CreateTexture(TextureDescriptor{
+        .storage_mode = StorageMode::kDevicePrivate,
+        .format = PixelFormat::kR8G8B8A8UNormInt,
+        .size = {64, 64},
+        .usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead,
+    });
+    ASSERT_TRUE(texture);
+
+    {
+      RenderTarget render_target;
+      ColorAttachment color0;
+      color0.texture = texture;
+      render_target.SetColorAttachment(color0, 0);
+
+      auto cmd_buffer = context->CreateCommandBuffer();
+      ASSERT_TRUE(cmd_buffer);
+      auto render_pass = cmd_buffer->CreateRenderPass(render_target);
+      ASSERT_TRUE(render_pass);
+      render_pass->EncodeCommands();
+    }
+
+    context->Shutdown();
+  }
+
+  // |texture| holds the last reference to the backing DeviceHolderVK via its
+  // ImageResource. Destroying it must clear cached frame_data_ before
+  // ImageResource drops DeviceHolderVK and destroys the VkDevice.
+  texture.reset();
+
+  auto destroy_fb =
+      std::find(called->begin(), called->end(), "vkDestroyFramebuffer");
+  auto destroy_rp =
+      std::find(called->begin(), called->end(), "vkDestroyRenderPass");
+  auto destroy_device =
+      std::find(called->begin(), called->end(), "vkDestroyDevice");
+  EXPECT_NE(destroy_fb, called->end());
+  EXPECT_NE(destroy_rp, called->end());
+  EXPECT_NE(destroy_device, called->end());
+  EXPECT_LT(destroy_fb, destroy_device);
+  EXPECT_LT(destroy_rp, destroy_device);
+}
+
+TEST(AllocatorVKTest, SharedObjectReleasesHandleAfterDeviceIsDestroyed) {
+  SharedHandleVK<vk::Framebuffer> shared_framebuffer;
+  {
+    auto context = MockVulkanContextBuilder().Build();
+    ASSERT_TRUE(context);
+
+    auto framebuffer = context->GetDevice().createFramebufferUnique(
+        vk::FramebufferCreateInfo{});
+    ASSERT_EQ(framebuffer.result, vk::Result::eSuccess);
+    shared_framebuffer =
+        MakeSharedVK(std::move(framebuffer.value), context->GetDeviceHolder());
+    ASSERT_TRUE(shared_framebuffer);
+
+    context->Shutdown();
+  }
+
+  // The context and its VkDevice are now destroyed. Releasing the shared handle
+  // must not call vkDestroyFramebuffer on the dead VkDevice.
+  shared_framebuffer.reset();
+}
 
 }  // namespace testing
 }  // namespace impeller
