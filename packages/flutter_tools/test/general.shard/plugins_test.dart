@@ -100,6 +100,7 @@ void main() {
     late FlutterVersion flutterVersion;
     late FakeCocoaPodsCapturesInvalidate cocoaPods;
     late Config config;
+    late FeatureFlags featureFlags;
     late NoOpAnalytics analytics;
     late Platform platform;
     late OperatingSystemUtils os;
@@ -209,6 +210,13 @@ void main() {
       flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
       cocoaPods = FakeCocoaPodsCapturesInvalidate();
       config = Config.test();
+      featureFlags = TestFeatureFlags(
+        isLinuxEnabled: true,
+        isMacOSEnabled: true,
+        isWebEnabled: true,
+        isWindowsEnabled: true,
+        isSwiftPackageManagerEnabled: true,
+      );
       analytics = const NoOpAnalytics();
       platform = FakePlatform();
       os = FakeOperatingSystemUtils('');
@@ -2357,10 +2365,8 @@ flutter:
     });
 
     group('createPluginSymlinks', () {
-      late FeatureFlags testFeatureFlags;
-
       setUp(() {
-        testFeatureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true);
+        featureFlags = TestFeatureFlags(isLinuxEnabled: true, isWindowsEnabled: true);
       });
 
       testUsingContext(
@@ -2381,7 +2387,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2403,7 +2408,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2436,7 +2440,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2470,7 +2473,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2503,7 +2505,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2541,7 +2542,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2581,7 +2581,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
 
@@ -2626,7 +2625,6 @@ flutter:
         overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => testFeatureFlags,
         },
       );
     });

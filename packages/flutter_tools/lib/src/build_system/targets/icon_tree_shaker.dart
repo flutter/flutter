@@ -69,7 +69,7 @@ class IconTreeShaker {
   ///
   /// Web targets (such as `WebReleaseBundle`) do not use this field because
   /// their recorded uses inputs are dynamically provided via
-  /// `Dart2WebTarget.buildPatternStems`.
+  /// `Dart2WebTarget.buildPatternStemsFor`.
   ///
   /// See [Target.inputs].
   static const inputs = <Source>[

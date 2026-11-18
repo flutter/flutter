@@ -4861,11 +4861,13 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
       final ToolContext toolContext = _createToolContext();
-      final CommandRunner<void> runner = createTestCommandRunner(
+      final runner = TestFlutterCommandRunner(toolContext: toolContext);
+      runner.addCommand(
         CreateCommand(
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
-          pub: Pub(toolContext: toolContext),
+          featureFlags: runner.featureFlags,
+          pub: Pub(featureFlags: runner.featureFlags, toolContext: toolContext),
           templatePathProvider: TemplatePathProvider(flutterRoot: toolContext.cache.flutterRoot),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
@@ -5020,6 +5022,7 @@ CreateCommand createCreateCommand({
   AndroidContext? androidContext,
   AppleContext? appleContext,
   ExtensionTemplateManager? extensionTemplateManager,
+  FeatureFlags? featureFlags,
   Java? java,
   Net? net,
   Pub? pub,
@@ -5028,6 +5031,7 @@ CreateCommand createCreateCommand({
   bool verboseHelp = false,
 }) {
   final ToolContext resolvedToolContext = toolContext ?? _createToolContext();
+  final FeatureFlags resolvedFeatureFlags = featureFlags ?? TestFlutterCommandRunner().featureFlags;
   final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
       resolvedToolContext;
   return CreateCommand(
@@ -5051,7 +5055,8 @@ CreateCommand createCreateCommand({
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),
-    pub: pub ?? Pub(toolContext: resolvedToolContext),
+    featureFlags: resolvedFeatureFlags,
+    pub: pub ?? Pub(featureFlags: resolvedFeatureFlags, toolContext: resolvedToolContext),
     templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext: resolvedToolContext,
