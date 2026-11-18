@@ -13,7 +13,6 @@ import 'base/time.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'features.dart';
 import 'git.dart';
 
 /// The default version when a version could not be determined.
@@ -74,6 +73,7 @@ abstract class FlutterVersion {
     required FileSystem fs,
     required Git git,
     required Cache cache,
+    required bool Function() isOmitLegacyVersionFileEnabled,
     SystemClock clock = const SystemClock(),
     @protected bool fetchTags = false,
     required Logger logger,
@@ -89,6 +89,7 @@ abstract class FlutterVersion {
         logger: logger,
         platform: platform,
         cache: cache,
+        isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
       );
       if (version != null) {
         final String gitPath = fs.path.join(flutterRoot, '.git');
@@ -131,6 +132,7 @@ abstract class FlutterVersion {
       frameworkRevision: frameworkRevision,
       fs: fs,
       git: git,
+      isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
     );
@@ -142,6 +144,7 @@ abstract class FlutterVersion {
     required this.fs,
     required this._git,
     required this._cache,
+    required this._isOmitLegacyVersionFileEnabled,
     required this._logger,
     required this._platform,
   });
@@ -153,6 +156,7 @@ abstract class FlutterVersion {
     required Git git,
     required Platform platform,
     required Cache cache,
+    required bool Function() isOmitLegacyVersionFileEnabled,
     SystemClock clock = const SystemClock(),
     bool fetchTags = false,
     required Logger logger,
@@ -175,6 +179,7 @@ abstract class FlutterVersion {
       fs: fs,
       git: git,
       gitTagVersion: gitTagVersion,
+      isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
     );
@@ -187,6 +192,7 @@ abstract class FlutterVersion {
   final Platform _platform;
   final Logger _logger;
   final Cache _cache;
+  final bool Function() _isOmitLegacyVersionFileEnabled;
 
   /// Ensure the latest git tags are fetched and recalculate [FlutterVersion].
   ///
@@ -209,6 +215,7 @@ abstract class FlutterVersion {
       fetchTags: true,
       git: _git,
       cache: _cache,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled,
       logger: _logger,
       platform: _platform,
     );
@@ -565,6 +572,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required super.flutterRoot,
     required super.fs,
     required super.git,
+    required super.isOmitLegacyVersionFileEnabled,
     required super.platform,
     required super.logger,
     required super.cache,
@@ -574,6 +582,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     File jsonFile, {
     required String flutterRoot,
     required Git git,
+    required bool Function() isOmitLegacyVersionFileEnabled,
     SystemClock clock = const SystemClock(),
     required Logger logger,
     required Platform platform,
@@ -600,6 +609,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String, logger: logger),
         flutterRoot: flutterRoot,
         fs: jsonFile.fileSystem,
+        isOmitLegacyVersionFileEnabled: isOmitLegacyVersionFileEnabled,
         platform: platform,
         logger: logger,
         cache: cache,
@@ -658,7 +668,12 @@ class _FlutterVersionFromFile extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
+    _ensureLegacyVersionFile(
+      flutterRoot: flutterRoot,
+      frameworkVersion: frameworkVersion,
+      fs: fs,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled(),
+    );
   }
 }
 
@@ -671,6 +686,7 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.gitTagVersion,
     required super.fs,
     required super.git,
+    required super.isOmitLegacyVersionFileEnabled,
     required super.platform,
     required super.logger,
     required super.cache,
@@ -771,7 +787,12 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
+    _ensureLegacyVersionFile(
+      flutterRoot: flutterRoot,
+      frameworkVersion: frameworkVersion,
+      fs: fs,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled(),
+    );
     const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     newVersionFile.writeAsStringSync(encoder.convert(toJson()));
@@ -785,12 +806,13 @@ class _FlutterVersionGit extends FlutterVersion {
 }
 
 void _ensureLegacyVersionFile({
-  required FileSystem fs,
   required String flutterRoot,
   required String frameworkVersion,
+  required FileSystem fs,
+  required bool isOmitLegacyVersionFileEnabled,
 }) {
   // TODO(matanlurey): https://github.com/flutter/flutter/issues/171900.
-  if (featureFlags.isOmitLegacyVersionFileEnabled) {
+  if (isOmitLegacyVersionFileEnabled) {
     return;
   }
   final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));

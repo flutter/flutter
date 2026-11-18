@@ -6,7 +6,6 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:process/process.dart';
 
 import 'runner.dart' as runner;
-import 'src/android/gradle.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -50,7 +49,6 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
-import 'src/context_runner.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
@@ -129,6 +127,7 @@ Future<void> main(List<String> args) async {
     buildTargets: const BuildTargetsImpl(),
     enablePreRunValidator: true,
     extensionEntryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+    flutterHookRunner: FlutterHookRunnerNative(),
     logger: logger,
     nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
     outputPreferences: outputPreferences,
@@ -137,42 +136,36 @@ Future<void> main(List<String> args) async {
     stdio: stdio,
     templateRenderer: const MustacheTemplateRenderer(),
     terminal: terminal,
+    // The web runner is not supported in google3 because it depends on dwds.
+    webRunnerFactory: DwdsWebRunnerFactory(),
   );
 
-  // `runInContext` still supplies the services that `runner.run` doesn't
-  // register (such as `Pub` and `AndroidBuilder`) until it's deleted.
-  await runInContext<int>(
-    () => runner.run(
-      args,
-      (ToolDependencies toolDependencies) {
-        final ToolDependencies(
-          :ExtensionManager extensionManager,
-          :FeatureFlags featureFlags,
-          toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
-        ) = toolDependencies;
-        final templateManager = ExtensionTemplateManager(
-          extensionManager: extensionManager,
-          featureFlags: featureFlags,
-          fileSystem: fs,
-          flutterRoot: cache.flutterRoot,
-          logger: logger,
-        );
-        return generateCommands(
-          toolDependencies: toolDependencies,
-          verboseHelp: verboseHelp,
-          verbose: verbose,
-          extensionTemplateManager: templateManager,
-        );
-      },
-      flutterHookRunner: FlutterHookRunnerNative(),
-      muteCommandLogging: muteCommandLogging,
-      toolDependencies: toolDependencies,
-      verbose: verbose,
-      verboseHelp: verboseHelp,
-      // The web runner is not supported in google3 because it depends
-      // on dwds.
-      webRunnerFactory: DwdsWebRunnerFactory(),
-    ),
+  await runner.run(
+    args,
+    (ToolDependencies toolDependencies) {
+      final ToolDependencies(
+        :ExtensionManager extensionManager,
+        :FeatureFlags featureFlags,
+        toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
+      ) = toolDependencies;
+      final templateManager = ExtensionTemplateManager(
+        extensionManager: extensionManager,
+        featureFlags: featureFlags,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
+        logger: logger,
+      );
+      return generateCommands(
+        toolDependencies: toolDependencies,
+        verboseHelp: verboseHelp,
+        verbose: verbose,
+        extensionTemplateManager: templateManager,
+      );
+    },
+    muteCommandLogging: muteCommandLogging,
+    toolDependencies: toolDependencies,
+    verbose: verbose,
+    verboseHelp: verboseHelp,
   );
 }
 
@@ -198,13 +191,9 @@ List<FlutterCommand> generateCommands({
           logger: logger,
           processManager: processManager,
         ),
-        VariableDumpMachineProjectValidator(toolContext: toolContext),
+        VariableDumpMachineProjectValidator(featureFlags: featureFlags, toolContext: toolContext),
       ],
-      androidBuilder: AndroidGradleBuilder.fromContexts(
-        analytics: toolDependencies.analytics,
-        androidContext: toolDependencies.androidContext,
-        toolContext: toolContext,
-      ),
+      androidBuilder: toolDependencies.androidBuilder,
       suppressAnalytics: !toolDependencies.analytics.okToSend,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -219,23 +208,24 @@ List<FlutterCommand> generateCommands({
       xcode: toolDependencies.appleContext.xcode,
     ),
     AttachCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       toolContext: toolContext,
       xcode: toolDependencies.appleContext.xcode,
       verboseHelp: verboseHelp,
     ),
     BuildCommand(
-      androidBuilder: AndroidGradleBuilder.fromContexts(
-        analytics: toolDependencies.analytics,
-        androidContext: toolDependencies.androidContext,
-        toolContext: toolContext,
-      ),
+      androidBuilder: toolDependencies.androidBuilder,
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
       buildSystem: toolDependencies.buildSystem,
       extensionBuildManager: toolDependencies.extensionBuildManager,
       featureFlags: featureFlags,
+      templatePathProvider: toolDependencies.templatePathProvider,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -259,6 +249,9 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      featureFlags: featureFlags,
+      pub: toolDependencies.pub,
+      templatePathProvider: toolDependencies.templatePathProvider,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       extensionTemplateManager: extensionTemplateManager,
@@ -267,11 +260,16 @@ List<FlutterCommand> generateCommands({
     DaemonCommand(
       androidContext: toolDependencies.androidContext,
       androidWorkflow: toolDependencies.androidWorkflow,
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
       deviceManager: toolDependencies.deviceManager,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       hidden: !verboseHelp,
       toolContext: toolContext,
+      webRunnerFactory: toolDependencies.webRunnerFactory,
       xcode: toolDependencies.appleContext.xcode,
     ),
     DebugAdapterCommand(toolContext: toolContext, verboseHelp: verboseHelp),
@@ -282,6 +280,7 @@ List<FlutterCommand> generateCommands({
       verboseHelp: verboseHelp,
     ),
     DoctorCommand(
+      androidContext: toolDependencies.androidContext,
       doctor: toolDependencies.doctor,
       extensionManager: toolDependencies.extensionManager,
       toolContext: toolContext,
@@ -289,10 +288,15 @@ List<FlutterCommand> generateCommands({
     ),
     DowngradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
     DriveCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
+      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     EmulatorsCommand(
       doctor: toolDependencies.doctor,
@@ -302,8 +306,15 @@ List<FlutterCommand> generateCommands({
     ),
     GenerateCommand(toolContext: toolContext),
     GenerateLocalizationsCommand(toolContext: toolContext),
-    InstallCommand(toolContext: toolContext, verboseHelp: verboseHelp),
-    LogsCommand(toolContext: toolContext),
+    InstallCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    ),
+    LogsCommand(
+      applicationPackageFactory: toolDependencies.applicationPackageFactory,
+      toolContext: toolContext,
+    ),
     PackagesCommand(
       buildSystem: toolDependencies.buildSystem,
       toolContext: toolContext,
@@ -319,17 +330,24 @@ List<FlutterCommand> generateCommands({
     ),
     RunCommand(
       appleContext: toolDependencies.appleContext,
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
       toolContext: toolContext,
       androidContext: toolDependencies.androidContext,
       androidWorkflow: toolDependencies.androidWorkflow,
       deviceManager: toolDependencies.deviceManager,
+      devtoolsLauncher: toolDependencies.devtoolsLauncher,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
       verboseHelp: verboseHelp,
+      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
     TestCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -337,12 +355,18 @@ List<FlutterCommand> generateCommands({
       nativeAssetsBuilder: nativeAssetsBuilder,
     ),
     WidgetPreviewCommand(
+      applicationPackages: toolDependencies.applicationPackageFactory,
+      assetBundleFactory: toolDependencies.assetBundleFactory,
       buildSystem: toolDependencies.buildSystem,
       buildTargets: toolDependencies.buildTargets,
+      deviceManager: toolDependencies.deviceManager,
+      flutterHookRunner: toolDependencies.flutterHookRunner,
+      pub: toolDependencies.pub,
+      templatePathProvider: toolDependencies.templatePathProvider,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     ),
-    UpgradeCommand(toolContext: toolContext, verboseHelp: verboseHelp),
+    UpgradeCommand(featureFlags: featureFlags, toolContext: toolContext, verboseHelp: verboseHelp),
     SymbolizeCommand(toolContext: toolContext),
     // Development-only commands. These are always hidden,
     IdeConfigCommand(toolContext: toolContext),

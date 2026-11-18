@@ -31,6 +31,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// change. This defaults to true.
   DeferredComponentsPrebuildValidator(
     Directory projectDir, {
+    required this._templatePathProvider,
     required this._templateRenderer,
     required this._toolContext,
     super.exitOnFail,
@@ -39,6 +40,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     super.title,
   }) : super(projectDir, _toolContext.logger, _toolContext.platform);
 
+  final TemplatePathProvider _templatePathProvider;
   final Directory? _templatesDir;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
@@ -66,6 +68,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
       final androidFiles = _DeferredComponentAndroidFiles(
         name: component.name,
         projectDir: projectDir,
+        templatePathProvider: _templatePathProvider,
         templateRenderer: _templateRenderer,
         templatesDir: _templatesDir,
         toolContext: _toolContext,
@@ -216,6 +219,7 @@ class _DeferredComponentAndroidFiles {
   _DeferredComponentAndroidFiles({
     required this.name,
     required this.projectDir,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
     this._templatesDir,
@@ -224,6 +228,7 @@ class _DeferredComponentAndroidFiles {
   // The name of the deferred component.
   final String name;
   final Directory projectDir;
+  final TemplatePathProvider templatePathProvider;
   final TemplateRenderer templateRenderer;
   final Directory? _templatesDir;
   final ToolContext toolContext;
@@ -285,6 +290,7 @@ class _DeferredComponentAndroidFiles {
         fileSystem: fs,
         templateManifest: null,
         logger: logger,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
       );
     }
