@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -79,6 +80,7 @@ void main() {
     testWithoutContext('successfully instantiates on Mac OS', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         iosDeploy: iosDeploy,
@@ -98,6 +100,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -108,6 +115,7 @@ void main() {
       testWithoutContext('returns expected values for different BuildInfo and options', () {
         final device = IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -127,6 +135,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -158,6 +171,7 @@ void main() {
     testWithoutContext('32-bit devices are unsupported', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -176,6 +190,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -186,6 +205,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -205,6 +225,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -213,6 +238,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -232,6 +258,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -240,6 +271,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -259,6 +291,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -267,6 +304,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -286,6 +324,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -294,6 +337,7 @@ void main() {
       expect(
         IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -313,6 +357,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         ).majorSdkVersion,
@@ -323,6 +372,7 @@ void main() {
     testWithoutContext('parses sdk version', () {
       Version? sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -342,6 +392,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -352,6 +407,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -371,6 +427,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -381,6 +442,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -400,6 +462,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -410,6 +477,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -429,6 +497,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -439,6 +512,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -457,6 +531,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -464,6 +543,7 @@ void main() {
 
       sdkVersion = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -483,6 +563,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       ).sdkVersion;
@@ -492,6 +577,7 @@ void main() {
     testWithoutContext('has build number in sdkNameAndVersion', () async {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -511,6 +597,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -521,6 +612,7 @@ void main() {
     testWithoutContext('Supports debug, profile, and release modes', () {
       final device = IOSDevice(
         'device-123',
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
@@ -540,6 +632,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -557,6 +654,7 @@ void main() {
           expect(() {
             IOSDevice(
               'device-123',
+              featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
               toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
               analytics: FakeAnalytics(),
@@ -576,6 +674,11 @@ void main() {
               isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
+              mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+                analytics: const NoOpAnalytics(),
+                logger: logger,
+                platform: macPlatform,
+              ),
               templateRenderer: FakeTemplateRenderer(),
               xcode: FakeXcode(),
             );
@@ -653,6 +756,7 @@ void main() {
       testWithoutContext('kills all log readers & port forwarders', () async {
         device = IOSDevice(
           '123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
@@ -672,6 +776,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(),
         );
@@ -702,6 +811,7 @@ void main() {
       IOSDevice createCoreDevice({required Xcode xcode}) {
         return IOSDevice(
           'device-123',
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
@@ -721,6 +831,11 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: macPlatform,
+          ),
           templateRenderer: FakeTemplateRenderer(),
           xcode: xcode,
         );
@@ -973,6 +1088,7 @@ void main() {
         name: 'Paired iPhone',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -994,6 +1110,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -1003,6 +1124,7 @@ void main() {
         name: 'iPad Pro',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1024,6 +1146,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
@@ -1344,6 +1471,7 @@ void main() {
         name: 'iPad',
         sdkVersion: '13.3',
         cpuArch: .arm64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1365,6 +1493,11 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
         templateRenderer: FakeTemplateRenderer(),
         xcode: FakeXcode(),
       );
