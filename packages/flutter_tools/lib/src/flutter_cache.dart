@@ -26,6 +26,7 @@ import 'project.dart';
 class FlutterCache extends Cache {
   FlutterCache({
     required super.fileSystem,
+    required super.isLocalEngineBuilder,
     required Logger logger,
     required super.osUtils,
     required Platform platform,
