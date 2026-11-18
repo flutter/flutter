@@ -37,11 +37,11 @@ abstract class ToolExtensionService {
   /// Parameter key for the prompt message in [promptForOption] and [promptForInput].
   static const String promptMessageParam = 'message';
 
-  /// Parameter key for the options map in [promptForOption].
+  /// Parameter key for the options list in [promptForOption].
   static const String promptOptionsParam = 'options';
 
-  /// Parameter key for the default option identifier in [promptForOption].
-  static const String promptDefaultOptionIdParam = 'defaultOptionId';
+  /// Parameter key for the default 0-based choice index in [promptForOption].
+  static const String promptDefaultChoiceIndexParam = 'defaultChoiceIndex';
 
   /// Parameter key for the default input value in [promptForInput].
   static const String promptDefaultValueParam = 'defaultValue';
@@ -49,8 +49,8 @@ abstract class ToolExtensionService {
   /// Parameter key for the echo flag in [promptForInput].
   static const String promptEchoParam = 'echo';
 
-  /// Response map key for the selected option identifier from [promptForOption].
-  static const String promptOptionIdKey = 'optionId';
+  /// Response map key for the selected 0-based choice index from [promptForOption].
+  static const String promptSelectedIndexKey = 'selectedIndex';
 
   /// Response map key for the entered value from [promptForInput].
   static const String promptValueKey = 'value';
@@ -104,7 +104,7 @@ abstract class ToolExtensionService {
       return await sender(method, params);
     } on json_rpc.RpcException catch (error) {
       if (error.code == ToolExtensionException.domainErrorCode ||
-          error.code == ToolExtensionException.nonInteractiveErrorCode) {
+          error.code == ToolExtensionException.unsupportedCapabilityErrorCode) {
         throw ToolExtensionException(error.message, code: error.code);
       }
       rethrow;
@@ -116,9 +116,10 @@ abstract class ToolExtensionService {
   ///
   /// Only keys declared by this extension's `ConfigService` (`FeatureFlag.settingName`
   /// mapped to `bool`, and `ConfigOption.name` and `ConfigAction.settingsKeys`
-  /// mapped to `String`, omitting unset keys) are returned. The host looks up
-  /// `<extensionName>.<key>` first in `flutter_settings` and falls back to
-  /// unprefixed `<key>` and any `ConfigOption.aliases`.
+  /// mapped to `String`, omitting unset keys) are returned. The host resolves
+  /// `environmentOverride` ahead of `"extensions"` settings in `flutter_settings`
+  /// and falls back to any `ConfigOption.aliases` and default values.
+  @nonVirtual
   Future<Map<String, Object?>> getConfigurationValues() async {
     final Object? rawResult = await _sendHostRequest(
       getConfigurationValuesMethod,
@@ -135,28 +136,29 @@ abstract class ToolExtensionService {
   }
 
   /// Prompts the user via the host tool's interactive terminal to choose one of
-  /// [options] (mapping option IDs to human-readable labels).
+  /// [options].
   ///
-  /// Returns the selected option ID, or `null` if the user cancels the prompt.
+  /// Returns the selected 0-based index in [options], or `null` if the user
+  /// cancels the prompt.
   ///
-  /// Throws a [ToolExtensionException] with
-  /// [ToolExtensionException.nonInteractiveErrorCode] (`-32002`) when the host
-  /// tool is running without an interactive terminal or in `--machine` mode.
-  Future<String?> promptForOption({
+  /// Throws a [ToolExtensionException] when the host tool is running without an
+  /// interactive terminal or in `--machine` mode.
+  @nonVirtual
+  Future<int?> promptForOption({
     required String message,
-    required Map<String, String> options,
-    String? defaultOptionId,
+    required List<String> options,
+    int? defaultChoiceIndex,
   }) async {
     final Object? rawResult = await _sendHostRequest(promptForOptionMethod, <String, Object?>{
       promptMessageParam: message,
       promptOptionsParam: options,
-      promptDefaultOptionIdParam: ?defaultOptionId,
+      promptDefaultChoiceIndexParam: ?defaultChoiceIndex,
     });
-    if (rawResult case {promptOptionIdKey: final String? optionId}) {
-      return optionId;
+    if (rawResult case {promptSelectedIndexKey: final int? selectedIndex}) {
+      return selectedIndex;
     }
     throw FormatException(
-      'Expected {"$promptOptionIdKey": String?} from "$promptForOptionMethod", got '
+      'Expected {"$promptSelectedIndexKey": int?} from "$promptForOptionMethod", got '
       '${rawResult.runtimeType}.',
       rawResult,
     );
@@ -168,9 +170,9 @@ abstract class ToolExtensionService {
   /// When [echo] is `false`, terminal character echoing is disabled while
   /// reading the line (for example, when prompting for a passphrase or token).
   ///
-  /// Throws a [ToolExtensionException] with
-  /// [ToolExtensionException.nonInteractiveErrorCode] (`-32002`) when the host
-  /// tool is running without an interactive terminal or in `--machine` mode.
+  /// Throws a [ToolExtensionException] when the host tool is running without an
+  /// interactive terminal or in `--machine` mode.
+  @nonVirtual
   Future<String?> promptForInput({
     required String message,
     String? defaultValue,

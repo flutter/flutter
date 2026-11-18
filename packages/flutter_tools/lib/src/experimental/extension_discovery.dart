@@ -13,6 +13,24 @@ import 'package:stream_channel/isolate_channel.dart';
 
 import '../base/logger.dart';
 
+const _kRpcRequestDataKey = 'request';
+
+/// Extracts structured diagnostic data from a decoded JSON-RPC 2.0 `error.data`
+/// payload, stripping any `request` entry injected by `package:json_rpc_2` and
+/// returning `null` if [rawData] is not a map or has no remaining string-keyed
+/// entries.
+@visibleForTesting
+Map<String, Object?>? extractRpcErrorData(Object? rawData) {
+  if (rawData is! Map) {
+    return null;
+  }
+  final extracted = <String, Object?>{
+    for (final MapEntry(:Object? key, :Object? value) in rawData.entries)
+      if (key is String && key != _kRpcRequestDataKey) key: value,
+  };
+  return extracted.isEmpty ? null : extracted;
+}
+
 /// Typedef for an in-process extension isolate entrypoint function.
 ///
 /// Used by unit tests to spawn lightweight in-process extension isolates via
@@ -165,8 +183,12 @@ class ExtensionConnection {
       return result;
     } on json_rpc.RpcException catch (error) {
       if (error.code == ToolExtensionException.domainErrorCode ||
-          error.code == ToolExtensionException.nonInteractiveErrorCode) {
-        throw ToolExtensionException(error.message, code: error.code);
+          error.code == ToolExtensionException.unsupportedCapabilityErrorCode) {
+        throw ToolExtensionException(
+          error.message,
+          code: error.code,
+          data: extractRpcErrorData(error.data),
+        );
       }
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;

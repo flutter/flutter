@@ -13,7 +13,7 @@ class FeatureFlag {
   const FeatureFlag({
     required this.name,
     required this.help,
-    this.environmentVariable,
+    this.environmentOverride,
     this.enabledByDefault = false,
   });
 
@@ -22,7 +22,7 @@ class FeatureFlag {
     return FeatureFlag(
       name: json.optionalField<String>(nameKey, defaultValue: ''),
       help: json.optionalField<String>(helpKey, defaultValue: ''),
-      environmentVariable: json.nullableField<String>(environmentVariableKey),
+      environmentOverride: json.nullableField<String>(environmentOverrideKey),
       enabledByDefault: json.optionalField<bool>(enabledByDefaultKey, defaultValue: false),
     );
   }
@@ -30,8 +30,8 @@ class FeatureFlag {
   /// Map key for [enabledByDefault].
   static const String enabledByDefaultKey = 'enabledByDefault';
 
-  /// Map key for [environmentVariable].
-  static const String environmentVariableKey = 'environmentVariable';
+  /// Map key for [environmentOverride].
+  static const String environmentOverrideKey = 'environmentOverride';
 
   /// Map key for [help].
   static const String helpKey = 'help';
@@ -51,7 +51,7 @@ class FeatureFlag {
   final String help;
 
   /// Optional environment variable name that overrides this feature flag setting.
-  final String? environmentVariable;
+  final String? environmentOverride;
 
   /// Whether this feature flag is enabled by default.
   final bool enabledByDefault;
@@ -60,25 +60,25 @@ class FeatureFlag {
   Map<String, Object?> toMap() => <String, Object?>{
     nameKey: name,
     helpKey: help,
-    environmentVariableKey: ?environmentVariable,
+    environmentOverrideKey: ?environmentOverride,
     enabledByDefaultKey: enabledByDefault,
   };
 
   @override
   String toString() =>
-      'FeatureFlag(name: $name, help: $help, environmentVariable: $environmentVariable, enabledByDefault: $enabledByDefault)';
+      'FeatureFlag(name: $name, help: $help, environmentOverride: $environmentOverride, enabledByDefault: $enabledByDefault)';
 
   @override
   bool operator ==(Object other) {
     return other is FeatureFlag &&
         other.name == name &&
         other.help == help &&
-        other.environmentVariable == environmentVariable &&
+        other.environmentOverride == environmentOverride &&
         other.enabledByDefault == enabledByDefault;
   }
 
   @override
-  int get hashCode => Object.hash(name, help, environmentVariable, enabledByDefault);
+  int get hashCode => Object.hash(name, help, environmentOverride, enabledByDefault);
 }
 
 /// Representation of a custom configuration setting key and value pair.
@@ -87,6 +87,7 @@ class ConfigOption {
   const ConfigOption({
     required this.name,
     required this.help,
+    this.environmentOverride,
     this.value,
     this.aliases = const <String>[],
   });
@@ -96,6 +97,7 @@ class ConfigOption {
     return ConfigOption(
       name: json.optionalField<String>(nameKey, defaultValue: ''),
       help: json.optionalField<String>(helpKey, defaultValue: ''),
+      environmentOverride: json.nullableField<String>(environmentOverrideKey),
       value: json.nullableField<String>(valueKey),
       aliases: List<String>.unmodifiable(json.stringIterable(aliasesKey)),
     );
@@ -103,6 +105,9 @@ class ConfigOption {
 
   /// Map key for [aliases].
   static const String aliasesKey = 'aliases';
+
+  /// Map key for [environmentOverride].
+  static const String environmentOverrideKey = 'environmentOverride';
 
   /// Map key for [help].
   static const String helpKey = 'help';
@@ -119,6 +124,9 @@ class ConfigOption {
   /// Description of the configuration option displayed in `flutter config`.
   final String help;
 
+  /// Optional environment variable name that overrides this configuration option.
+  final String? environmentOverride;
+
   /// Current or default value set for this configuration option, if any.
   final String? value;
 
@@ -129,12 +137,14 @@ class ConfigOption {
   Map<String, Object?> toMap() => <String, Object?>{
     nameKey: name,
     helpKey: help,
+    environmentOverrideKey: ?environmentOverride,
     valueKey: ?value,
     if (aliases.isNotEmpty) aliasesKey: aliases,
   };
 
   @override
-  String toString() => 'ConfigOption(name: $name, help: $help, value: $value, aliases: $aliases)';
+  String toString() =>
+      'ConfigOption(name: $name, help: $help, environmentOverride: $environmentOverride, value: $value, aliases: $aliases)';
 
   @override
   bool operator ==(Object other) {
@@ -142,12 +152,19 @@ class ConfigOption {
     return other is ConfigOption &&
         other.name == name &&
         other.help == help &&
+        other.environmentOverride == environmentOverride &&
         other.value == value &&
         listEquality.equals(other.aliases, aliases);
   }
 
   @override
-  int get hashCode => Object.hash(name, help, value, const ListEquality<String>().hash(aliases));
+  int get hashCode => Object.hash(
+    name,
+    help,
+    environmentOverride,
+    value,
+    const ListEquality<String>().hash(aliases),
+  );
 }
 
 /// Describes an interactive or multi-setting configuration action registered on

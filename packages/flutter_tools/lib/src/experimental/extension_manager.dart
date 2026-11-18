@@ -27,6 +27,7 @@ class ExtensionManager {
     this._entryPoints = const <ExtensionEntryPoint>[],
     this._config,
     ExtensionDiscovery? discovery,
+    this._environment = const <String, String>{},
     Stdio? stdio,
     Terminal? terminal,
   }) : _logger = logger,
@@ -36,6 +37,7 @@ class ExtensionManager {
   /// The active [HostPlatform].
   final HostPlatform hostPlatform;
   final Config? _config;
+  final Map<String, String> _environment;
   final Logger _logger;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
@@ -52,7 +54,7 @@ class ExtensionManager {
   /// Marks the current CLI invocation as running in `--machine` mode so
   /// interactive terminal prompt RPCs (`terminal.promptForOption` and
   /// `terminal.promptForInput`) fail fast with
-  /// `ToolExtensionException.nonInteractiveErrorCode`.
+  /// `ToolExtensionException.domainErrorCode`.
   void enableMachineMode() {
     _prompter.enableMachineMode();
   }
@@ -156,6 +158,7 @@ class ExtensionManager {
       }
       return ExtensionConfiguration.resolveConfigurationValues(
         config: config,
+        environment: _environment,
         extension: configClient,
         extensionName: connection.extensionName,
       );

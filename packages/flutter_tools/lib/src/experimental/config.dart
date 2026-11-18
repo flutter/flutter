@@ -30,8 +30,8 @@ class ExtensionSettingsGroup {
   /// The human-readable title of the extension.
   final String title;
 
-  /// Optional identifier of the extension package (used to namespace settings in
-  /// `flutter_settings` as `<extensionName>.<key>`).
+  /// Optional identifier of the extension package (used to namespace settings
+  /// under `"extensions": { "<extensionName>": { ... } }` in `flutter_settings`).
   final String? extensionName;
 
   /// The [ConfigurationExtension] that produced this group, if available.
@@ -45,6 +45,14 @@ class ExtensionSettingsGroup {
 
   /// Interactive or custom configuration actions registered by the extension.
   final List<ConfigAction> configActions;
+
+  /// Section header attributing this group to its declaring extension package.
+  String get displayTitle {
+    if (extensionName case final name? when name.isNotEmpty) {
+      return '$title (package:$name)';
+    }
+    return title;
+  }
 
   /// Settings keys declared by [configActions] that do not already correspond to
   /// a [FeatureFlag] or [ConfigOption] in this group.
@@ -83,90 +91,99 @@ class ExtensionSettingsGroup {
 /// A host-side configuration manager that delegates feature flag, option, and action queries to extensions.
 class ExtensionConfiguration {
   ExtensionConfiguration({required List<ConfigurationExtension> extensions, required this._logger})
-    : extensions = List<ConfigurationExtension>.unmodifiable(extensions);
+    : extensions = _sortedExtensions(extensions);
 
-  /// The active extension services executing configuration queries.
+  /// Top-level JSON map key in Flutter's global settings file storing nested
+  /// per-extension configuration maps (`"extensions": { "<package_name>": { ... } }`).
+  static const String extensionsSettingsKey = 'extensions';
+
+  /// The active extension services executing configuration queries, sorted in
+  /// lexicographical `<package_name>` order.
   final List<ConfigurationExtension> extensions;
   final Logger _logger;
 
-  String _extensionIdentifier(ConfigurationExtension ext) =>
+  static List<ConfigurationExtension> _sortedExtensions(List<ConfigurationExtension> extensions) {
+    return List<ConfigurationExtension>.unmodifiable(
+      <ConfigurationExtension>[...extensions]..sort(
+        (ConfigurationExtension a, ConfigurationExtension b) =>
+            _extensionIdentifier(a).compareTo(_extensionIdentifier(b)),
+      ),
+    );
+  }
+
+  static String _extensionIdentifier(ConfigurationExtension ext) =>
       ext is ConfigurationExtensionClient ? ext.connection.extensionName : ext.title;
 
   String? _extensionStorageNamespace(ConfigurationExtension ext) =>
       ext is ConfigurationExtensionClient ? ext.connection.extensionName : null;
 
-  /// Returns the storage key in `flutter_settings` for [key] under optional
-  /// [extensionName] (`<extensionName>.<key>` when [extensionName] is non-empty,
-  /// or unprefixed [key] otherwise).
-  static String storageKey(String key, {String? extensionName}) {
-    if (extensionName != null && extensionName.isNotEmpty) {
-      return '$extensionName.$key';
-    }
-    return key;
-  }
-
-  /// Looks up a setting [key] (and optional [aliases]) in [config], checking
-  /// `<extensionName>.<key>` first when [extensionName] is non-empty before
-  /// falling back to unprefixed `<key>` and any aliases.
+  /// Looks up a persisted setting [key] (and optional [aliases]) in [config],
+  /// checking `"extensions"[extensionName]` first when [extensionName] is
+  /// non-empty before falling back to legacy top-level [aliases].
   static Object? lookupSettingValue(
     Config config,
     String key, {
     String? extensionName,
     List<String> aliases = const <String>[],
   }) {
-    final bool hasPrefix = extensionName != null && extensionName.isNotEmpty;
-    if (hasPrefix) {
-      final Object? prefixed = config.getValue('$extensionName.$key');
-      if (prefixed != null) {
-        return prefixed;
+    if (extensionName != null && extensionName.isNotEmpty) {
+      if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> extensionsMap) {
+        if (extensionsMap[extensionName] case final Map<String, Object?> pkgMap) {
+          if (pkgMap[key] case final Object value) {
+            return value;
+          }
+        }
       }
-    }
-    final Object? unprefixed = config.getValue(key);
-    if (unprefixed != null) {
+    } else if (config.getValue(key) case final Object unprefixed) {
       return unprefixed;
     }
     for (final alias in aliases) {
-      if (hasPrefix) {
-        final Object? prefixedAlias = config.getValue('$extensionName.$alias');
-        if (prefixedAlias != null) {
-          return prefixedAlias;
-        }
-      }
-      final Object? unprefixedAlias = config.getValue(alias);
-      if (unprefixedAlias != null) {
-        return unprefixedAlias;
+      if (config.getValue(alias) case final Object aliasValue) {
+        return aliasValue;
       }
     }
     return null;
   }
 
-  /// Removes a setting [key] (both `<extensionName>.<key>` and unprefixed `<key>`,
-  /// plus any [aliases]) from [config].
+  /// Removes a setting [key] (and any legacy [aliases]) under [extensionName]
+  /// from [config].
   static void removeSettingValue(
     Config config,
     String key, {
     String? extensionName,
     List<String> aliases = const <String>[],
   }) {
-    final bool hasPrefix = extensionName != null && extensionName.isNotEmpty;
-    if (hasPrefix && config.containsKey('$extensionName.$key')) {
-      config.removeValue('$extensionName.$key');
-    }
-    if (config.containsKey(key)) {
-      config.removeValue(key);
-    }
     for (final alias in aliases) {
-      if (hasPrefix && config.containsKey('$extensionName.$alias')) {
-        config.removeValue('$extensionName.$alias');
-      }
       if (config.containsKey(alias)) {
         config.removeValue(alias);
       }
     }
+    if (extensionName != null && extensionName.isNotEmpty) {
+      if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> existing) {
+        final extensionsMap = <String, Object?>{...existing};
+        if (extensionsMap[extensionName] case final Map<String, Object?> existingPkg) {
+          final pkgMap = <String, Object?>{...existingPkg}..remove(key);
+          if (pkgMap.isEmpty) {
+            extensionsMap.remove(extensionName);
+          } else {
+            extensionsMap[extensionName] = pkgMap;
+          }
+          if (extensionsMap.isEmpty) {
+            config.removeValue(extensionsSettingsKey);
+          } else {
+            config.setValue(extensionsSettingsKey, extensionsMap);
+          }
+        }
+      }
+      return;
+    }
+    if (config.containsKey(key)) {
+      config.removeValue(key);
+    }
   }
 
-  /// Persists [value] for [key] under [extensionName] in [config] and removes
-  /// any pre-existing legacy unprefixed or [aliases] keys.
+  /// Persists [value] for [key] under `"extensions"[extensionName]` in [config]
+  /// and removes any pre-existing legacy [aliases] keys.
   static void setSettingValue(
     Config config,
     String key,
@@ -174,75 +191,112 @@ class ExtensionConfiguration {
     String? extensionName,
     List<String> aliases = const <String>[],
   }) {
-    final bool hasPrefix = extensionName != null && extensionName.isNotEmpty;
-    if (hasPrefix && config.containsKey(key)) {
-      config.removeValue(key);
-    }
     for (final alias in aliases) {
-      if (hasPrefix && config.containsKey('$extensionName.$alias')) {
-        config.removeValue('$extensionName.$alias');
-      }
       if (config.containsKey(alias)) {
         config.removeValue(alias);
       }
     }
-    config.setValue(storageKey(key, extensionName: extensionName), value);
+    if (extensionName != null && extensionName.isNotEmpty) {
+      final extensionsMap = <String, Object?>{
+        if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> existing)
+          ...existing,
+      };
+      final pkgMap = <String, Object?>{
+        if (extensionsMap[extensionName] case final Map<String, Object?> existingPkg)
+          ...existingPkg,
+      };
+      pkgMap[key] = value;
+      extensionsMap[extensionName] = pkgMap;
+      config.setValue(extensionsSettingsKey, extensionsMap);
+      return;
+    }
+    config.setValue(key, value);
   }
 
-  /// Collects the persisted configuration values owned by [group] from [config],
-  /// returning native `bool` values for declared [FeatureFlag.settingName] keys
-  /// and `String` values for declared [ConfigOption.name] and
-  /// [ConfigAction.settingsKeys] (omitting unset keys).
-  static Map<String, Object?> collectConfigurationValues(
+  /// Resolves the effective value of [flag] (`environmentOverride` > persisted
+  /// `"extensions"` setting > [FeatureFlag.enabledByDefault]).
+  static bool resolveFeatureFlagValue(
     Config config,
-    ExtensionSettingsGroup group,
-  ) {
-    final values = <String, Object?>{};
-    final String? extensionName = group.extensionName;
-    for (final FeatureFlag(:settingName) in group.featureFlags) {
-      final Object? rawValue = lookupSettingValue(
-        config,
-        settingName,
-        extensionName: extensionName,
-      );
-      if (rawValue is bool) {
-        values[settingName] = rawValue;
-      } else if (rawValue == 'true') {
-        values[settingName] = true;
-      } else if (rawValue == 'false') {
-        values[settingName] = false;
+    FeatureFlag flag, {
+    Map<String, String> environment = const <String, String>{},
+    String? extensionName,
+  }) {
+    if (flag.environmentOverride case final String envVar when envVar.isNotEmpty) {
+      switch (environment[envVar]?.trim().toLowerCase()) {
+        case 'true' || '1':
+          return true;
+        case 'false' || '0':
+          return false;
       }
     }
-    final aliasesByOptionName = <String, List<String>>{};
-    for (final ConfigOption(:name, :aliases) in group.configOptions) {
-      aliasesByOptionName[name] = aliases;
-      final Object? rawValue = lookupSettingValue(
-        config,
-        name,
-        extensionName: extensionName,
-        aliases: aliases,
-      );
-      if (rawValue != null) {
-        values[name] = rawValue.toString();
+    final Object? rawValue = lookupSettingValue(
+      config,
+      flag.settingName,
+      extensionName: extensionName,
+    );
+    return switch (rawValue) {
+      final bool b => b,
+      'true' => true,
+      'false' => false,
+      _ => flag.enabledByDefault,
+    };
+  }
+
+  /// Resolves the effective value of [option] (`environmentOverride` >
+  /// persisted `"extensions"` setting / legacy [ConfigOption.aliases] >
+  /// [ConfigOption.value]).
+  static String? resolveConfigOptionValue(
+    Config config,
+    ConfigOption option, {
+    Map<String, String> environment = const <String, String>{},
+    String? extensionName,
+  }) {
+    if (option.environmentOverride case final String envVar when envVar.isNotEmpty) {
+      final String? envValue = environment[envVar];
+      if (envValue != null && envValue.isNotEmpty) {
+        return envValue;
       }
     }
-    for (final ConfigAction(:settingsKeys) in group.configActions) {
-      for (final key in settingsKeys) {
-        if (values.containsKey(key)) {
-          continue;
+    final Object? rawValue = lookupSettingValue(
+      config,
+      option.name,
+      extensionName: extensionName,
+      aliases: option.aliases,
+    );
+    if (rawValue != null) {
+      return rawValue.toString();
+    }
+    return option.value;
+  }
+
+  /// Returns persisted settings under `"extensions"` in [config] for packages
+  /// not in [activeExtensionNames], sorted lexicographically by package name
+  /// and setting key.
+  static Map<String, Map<String, Object?>> inactiveSavedExtensionSettings(
+    Config config, {
+    required Set<String> activeExtensionNames,
+  }) {
+    if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> rawExtensions) {
+      final packageNames = <String>[
+        for (final String pkg in rawExtensions.keys)
+          if (!activeExtensionNames.contains(pkg)) pkg,
+      ]..sort();
+      final result = <String, Map<String, Object?>>{};
+      for (final pkg in packageNames) {
+        if (rawExtensions[pkg] case final Map<String, Object?> pkgMap) {
+          final List<String> sortedKeys = pkgMap.keys.toList()..sort();
+          final entries = <String, Object?>{
+            for (final String key in sortedKeys)
+              if (pkgMap[key] != null) key: pkgMap[key],
+          };
+          if (entries.isNotEmpty) {
+            result[pkg] = entries;
+          }
         }
-        final Object? rawValue = lookupSettingValue(
-          config,
-          key,
-          extensionName: extensionName,
-          aliases: aliasesByOptionName[key] ?? const <String>[],
-        );
-        if (rawValue != null) {
-          values[key] = rawValue.toString();
-        }
       }
+      return result;
     }
-    return values;
+    return const <String, Map<String, Object?>>{};
   }
 
   /// Collects the persisted setting values scoped to [group]'s declared
@@ -286,11 +340,13 @@ class ExtensionConfiguration {
 
   /// Queries [extension] for its declared feature flags, configuration options,
   /// and configuration actions, and returns a map of its owned keys to their
-  /// persisted values in [config] (`bool` for feature flags, `String` for
-  /// options and action keys, omitting unset keys).
+  /// resolved values (`environmentOverride` > `"extensions"` settings > default
+  /// value; `bool` for feature flags, `String` for options and action keys,
+  /// omitting unset keys).
   static Future<Map<String, Object?>> resolveConfigurationValues({
     required Config config,
     required ConfigurationExtension extension,
+    Map<String, String> environment = const <String, String>{},
     String? extensionName,
   }) async {
     final List<FeatureFlag> flags = await extension.getFeatureFlags();
@@ -304,7 +360,27 @@ class ExtensionConfiguration {
       configOptions: options,
       configActions: actions,
     );
-    return collectConfigurationValues(config, group);
+    final values = <String, Object?>{...collectActionSettings(config, group)};
+    for (final flag in flags) {
+      values[flag.settingName] = resolveFeatureFlagValue(
+        config,
+        flag,
+        environment: environment,
+        extensionName: extensionName,
+      );
+    }
+    for (final option in options) {
+      final String? resolved = resolveConfigOptionValue(
+        config,
+        option,
+        environment: environment,
+        extensionName: extensionName,
+      );
+      if (resolved != null) {
+        values[option.name] = resolved;
+      }
+    }
+    return values;
   }
 
   /// Retrieves feature flags provided by all registered extensions.
@@ -433,7 +509,7 @@ class ExtensionTerminalPrompter {
 
   /// Marks the current CLI invocation as running in `--machine` mode so
   /// interactive terminal prompt RPCs fail fast with
-  /// [ToolExtensionException.nonInteractiveErrorCode].
+  /// [ToolExtensionException.domainErrorCode].
   void enableMachineMode() {
     _isMachineMode = true;
   }
@@ -442,7 +518,6 @@ class ExtensionTerminalPrompter {
     if (_isMachineMode) {
       throw const ToolExtensionException(
         'Cannot prompt for user input when "--machine" is enabled.',
-        code: ToolExtensionException.nonInteractiveErrorCode,
       );
     }
     final bool hasTerminal =
@@ -450,7 +525,6 @@ class ExtensionTerminalPrompter {
     if (!hasTerminal) {
       throw const ToolExtensionException(
         'Cannot prompt for user input in a non-interactive terminal.',
-        code: ToolExtensionException.nonInteractiveErrorCode,
       );
     }
   }
@@ -486,35 +560,34 @@ class ExtensionTerminalPrompter {
   /// Handles a `terminal.promptForOption` RPC request from an extension isolate.
   Future<Map<String, Object?>> handlePromptForOption(Map<String, Object?> params) async {
     final String message;
-    final Map<String, String> options;
-    final String? defaultOptionId;
+    final List<String> options;
+    final int? defaultChoiceIndex;
     try {
       message = params.requiredField<String>(ToolExtensionService.promptMessageParam);
-      options = params.stringMap(ToolExtensionService.promptOptionsParam);
-      defaultOptionId = params.nullableField<String>(
-        ToolExtensionService.promptDefaultOptionIdParam,
+      // Ensure `options` is present and a JSON list before parsing its string elements.
+      params.requiredField<List<Object?>>(ToolExtensionService.promptOptionsParam);
+      options = params.stringIterable(ToolExtensionService.promptOptionsParam).toList();
+      defaultChoiceIndex = params.nullableField<int>(
+        ToolExtensionService.promptDefaultChoiceIndexParam,
       );
     } on FormatException catch (e) {
       throw json_rpc.RpcException.invalidParams(e.message);
     }
-    if (defaultOptionId != null && !options.containsKey(defaultOptionId)) {
+    if (defaultChoiceIndex != null &&
+        (defaultChoiceIndex < 0 || defaultChoiceIndex >= options.length)) {
       throw json_rpc.RpcException.invalidParams(
-        'Default option ID "$defaultOptionId" is not present in options.',
+        'Default choice index $defaultChoiceIndex is out of range for ${options.length} option(s).',
       );
     }
     _ensureInteractiveTerminal();
     if (options.isEmpty) {
-      return <String, Object?>{ToolExtensionService.promptOptionIdKey: null};
+      return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
     }
 
-    final List<MapEntry<String, String>> entries = options.entries.toList();
-    final int count = entries.length;
-    final int defaultIndex = defaultOptionId != null
-        ? entries.indexWhere((MapEntry<String, String> entry) => entry.key == defaultOptionId)
-        : -1;
+    final int count = options.length;
     for (var i = 0; i < count; i++) {
-      final defaultSuffix = i == defaultIndex ? ' (default)' : '';
-      _logger.printStatus('[${i + 1}] ${entries[i].value}$defaultSuffix');
+      final defaultSuffix = i == defaultChoiceIndex ? ' (default)' : '';
+      _logger.printStatus('[${i + 1}] ${options[i]}$defaultSuffix');
     }
     final promptText = '$message (or "q" to quit)';
 
@@ -526,43 +599,39 @@ class ExtensionTerminalPrompter {
         choice = await terminal.promptForCharInput(
           List<String>.generate(count, (int number) => '${number + 1}')..add('q'),
           prompt: promptText,
-          defaultChoiceIndex: defaultIndex >= 0 ? defaultIndex : null,
+          defaultChoiceIndex: defaultChoiceIndex,
           logger: _logger,
           displayAcceptedCharacters: false,
         );
       } on StateError {
-        return <String, Object?>{ToolExtensionService.promptOptionIdKey: null};
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
       }
       if (choice == 'q') {
-        return <String, Object?>{ToolExtensionService.promptOptionIdKey: null};
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
       }
       final int? selectedNumber = int.tryParse(choice);
       if (selectedNumber != null && selectedNumber >= 1 && selectedNumber <= count) {
-        return <String, Object?>{
-          ToolExtensionService.promptOptionIdKey: entries[selectedNumber - 1].key,
-        };
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: selectedNumber - 1};
       }
-      return <String, Object?>{ToolExtensionService.promptOptionIdKey: null};
+      return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
     }
 
     while (true) {
       _logger.printStatus('$promptText: ', emphasis: true, newline: false);
       final String? rawLine = await _readStdinLine();
       if (rawLine == null) {
-        return <String, Object?>{ToolExtensionService.promptOptionIdKey: null};
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
       }
       final String trimmed = rawLine.trim();
-      if (trimmed.isEmpty && defaultIndex >= 0) {
-        return <String, Object?>{ToolExtensionService.promptOptionIdKey: entries[defaultIndex].key};
+      if (trimmed.isEmpty && defaultChoiceIndex != null) {
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: defaultChoiceIndex};
       }
       if (trimmed == 'q') {
-        return <String, Object?>{ToolExtensionService.promptOptionIdKey: null};
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
       }
       final int? selectedNumber = int.tryParse(trimmed);
       if (selectedNumber != null && selectedNumber >= 1 && selectedNumber <= count) {
-        return <String, Object?>{
-          ToolExtensionService.promptOptionIdKey: entries[selectedNumber - 1].key,
-        };
+        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: selectedNumber - 1};
       }
     }
   }

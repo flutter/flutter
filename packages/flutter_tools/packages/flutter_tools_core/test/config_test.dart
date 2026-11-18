@@ -11,42 +11,55 @@ void main() {
       const flag = FeatureFlag(
         name: 'enable-linux-custom-prototype',
         help: 'Enable custom Linux prototype',
-        environmentVariable: 'FLUTTER_LINUX_PROTOTYPE',
+        environmentOverride: 'FLUTTER_LINUX_PROTOTYPE',
         enabledByDefault: true,
       );
 
       final Map<String, Object?> map = flag.toMap();
       expect(map['name'], 'enable-linux-custom-prototype');
       expect(map['help'], 'Enable custom Linux prototype');
-      expect(map['environmentVariable'], 'FLUTTER_LINUX_PROTOTYPE');
+      expect(map['environmentOverride'], 'FLUTTER_LINUX_PROTOTYPE');
       expect(map['enabledByDefault'], isTrue);
 
       final parsed = FeatureFlag.fromJson(map);
       expect(parsed, equals(flag));
-    });
-
-    test('ConfigOption serializes and deserializes correctly with aliases', () {
-      const config = ConfigOption(
-        name: 'linux-gtk-version',
-        help: 'Target GTK version',
-        value: '3',
-        aliases: <String>['gtk-version', 'legacy-gtk-version'],
-      );
-
-      final Map<String, Object?> map = config.toMap();
-      expect(map['name'], 'linux-gtk-version');
-      expect(map['help'], 'Target GTK version');
-      expect(map['value'], '3');
-      expect(map['aliases'], <String>['gtk-version', 'legacy-gtk-version']);
-
-      final parsed = ConfigOption.fromJson(map);
-      expect(parsed, equals(config));
-      expect(parsed.hashCode, equals(config.hashCode));
+      expect(parsed.hashCode, equals(flag.hashCode));
       expect(
         parsed.toString(),
-        'ConfigOption(name: linux-gtk-version, help: Target GTK version, value: 3, aliases: [gtk-version, legacy-gtk-version])',
+        'FeatureFlag(name: enable-linux-custom-prototype, help: Enable custom Linux prototype, '
+        'environmentOverride: FLUTTER_LINUX_PROTOTYPE, enabledByDefault: true)',
       );
     });
+
+    test(
+      'ConfigOption serializes and deserializes correctly with aliases and environmentOverride',
+      () {
+        const config = ConfigOption(
+          name: 'linux-gtk-version',
+          help: 'Target GTK version',
+          environmentOverride: 'FLUTTER_LINUX_GTK_VERSION',
+          value: '3',
+          aliases: <String>['gtk-version', 'legacy-gtk-version'],
+        );
+
+        final Map<String, Object?> map = config.toMap();
+        expect(map['name'], 'linux-gtk-version');
+        expect(map['help'], 'Target GTK version');
+        expect(map['environmentOverride'], 'FLUTTER_LINUX_GTK_VERSION');
+        expect(map['value'], '3');
+        expect(map['aliases'], <String>['gtk-version', 'legacy-gtk-version']);
+
+        final parsed = ConfigOption.fromJson(map);
+        expect(parsed, equals(config));
+        expect(parsed.hashCode, equals(config.hashCode));
+        expect(
+          parsed.toString(),
+          'ConfigOption(name: linux-gtk-version, help: Target GTK version, '
+          'environmentOverride: FLUTTER_LINUX_GTK_VERSION, value: 3, '
+          'aliases: [gtk-version, legacy-gtk-version])',
+        );
+      },
+    );
 
     test('ConfigAction serializes and deserializes correctly', () {
       const action = ConfigAction(
@@ -89,7 +102,16 @@ void main() {
         throwsFormatException,
       );
       expect(
+        () => FeatureFlag.fromJson(const <String, Object?>{FeatureFlag.environmentOverrideKey: 42}),
+        throwsFormatException,
+      );
+      expect(
         () => ConfigOption.fromJson(const <String, Object?>{ConfigOption.valueKey: 42}),
+        throwsFormatException,
+      );
+      expect(
+        () =>
+            ConfigOption.fromJson(const <String, Object?>{ConfigOption.environmentOverrideKey: 42}),
         throwsFormatException,
       );
       expect(

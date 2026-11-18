@@ -52,7 +52,7 @@ class ToolExtensionEntryPoint {
         logger: logger,
         extensionName: extensionName,
       ),
-      exit: (int code) => throw UnsupportedError(
+      exit: (int code) => throw StateError(
         'Tool extensions must not call exit($code); throw ToolExtensionException instead.',
       ),
     );
@@ -141,7 +141,16 @@ class ToolExtensionEntryPoint {
             '[ToolExtensionIsolate] RPC request "$fullMethod" threw ToolExtensionException: '
             '${error.message}',
           );
-          throw json_rpc.RpcException(error.code, error.message);
+          throw json_rpc.RpcException(error.code, error.message, data: error.data);
+        } on UnsupportedError catch (error) {
+          final String message = error.message ?? 'Unsupported operation.';
+          logger?.call(
+            '[ToolExtensionIsolate] RPC request "$fullMethod" threw UnsupportedError: $message',
+          );
+          throw json_rpc.RpcException(
+            ToolExtensionException.unsupportedCapabilityErrorCode,
+            message,
+          );
         } on Object catch (error, stackTrace) {
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',

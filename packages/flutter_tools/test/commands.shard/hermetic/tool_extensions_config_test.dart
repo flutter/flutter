@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/experimental/config.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
@@ -29,7 +30,10 @@ import '../../src/test_flutter_command_runner.dart';
 
 class _TestSigningConfigExtension extends ConfigurationExtension {
   static const String kEnableSigning = 'enable-custom-signing';
+  static const String kEnableSigningEnv = 'FLUTTER_CUSTOM_SIGNING';
+  static const String kUnlistedSigningFlag = 'enable-unlisted-signing-flag';
   static const String kCustomSdkPath = 'custom-sdk-path';
+  static const String kCustomSdkEnv = 'FLUTTER_CUSTOM_SDK_PATH';
   static const String kLegacySdkAlias = 'legacy-custom-sdk-dir';
   static const String kSigningCert = 'custom-signing-cert';
   static const String kSigningProfile = 'custom-signing-profile';
@@ -49,6 +53,12 @@ class _TestSigningConfigExtension extends ConfigurationExtension {
         name: kEnableSigning,
         help: 'Enable custom platform signing.',
         enabledByDefault: true,
+        environmentOverride: kEnableSigningEnv,
+      ),
+      FeatureFlag(
+        name: kUnlistedSigningFlag,
+        help: 'Unlisted feature flag not referenced by any ConfigAction.',
+        enabledByDefault: true,
       ),
     ];
   }
@@ -60,6 +70,7 @@ class _TestSigningConfigExtension extends ConfigurationExtension {
         name: kCustomSdkPath,
         help: 'The custom platform SDK installation directory.',
         aliases: <String>[kLegacySdkAlias],
+        environmentOverride: kCustomSdkEnv,
       ),
     ];
   }
@@ -96,7 +107,7 @@ class _TestSigningConfigExtension extends ConfigurationExtension {
     String name, {
     required Map<String, String?> currentSettings,
   }) async {
-    if (currentSettings.containsKey(kEnableSigning)) {
+    if (currentSettings.containsKey(kUnlistedSigningFlag)) {
       throw const ToolExtensionException(
         'FeatureFlag keys must not leak into currentSettings unless declared in settingsKeys.',
       );
@@ -105,16 +116,16 @@ class _TestSigningConfigExtension extends ConfigurationExtension {
       case kClearSigningAction:
         return const <String, String?>{kSigningCert: null, kSigningProfile: null};
       case kSelectSigningAction:
+        const certIds = <String>['cert-1', 'cert-2'];
+        const certLabels = <String>['Custom Developer 1 (TEAM1)', 'Custom Developer 2 (TEAM2)'];
         final String? existingCert = currentSettings[kSigningCert];
-        final String? chosenCert = await promptForOption(
+        final int defaultIndex = existingCert != null ? certIds.indexOf(existingCert) : 0;
+        final int? chosenIndex = await promptForOption(
           message: 'Select a signing certificate',
-          options: const <String, String>{
-            'cert-1': 'Custom Developer 1 (TEAM1)',
-            'cert-2': 'Custom Developer 2 (TEAM2)',
-          },
-          defaultOptionId: existingCert ?? 'cert-1',
+          options: certLabels,
+          defaultChoiceIndex: defaultIndex >= 0 ? defaultIndex : 0,
         );
-        if (chosenCert == null) {
+        if (chosenIndex == null) {
           return const <String, String?>{};
         }
         final String? profilePath = await promptForInput(
@@ -122,7 +133,7 @@ class _TestSigningConfigExtension extends ConfigurationExtension {
           defaultValue: '/profiles/default.profile',
           echo: false,
         );
-        return <String, String?>{kSigningCert: chosenCert, kSigningProfile: profilePath};
+        return <String, String?>{kSigningCert: certIds[chosenIndex], kSigningProfile: profilePath};
       case kEmptyAndBoolAction:
         return const <String, String?>{
           kCustomSdkPath: '/opt/action-sdk',
@@ -151,6 +162,11 @@ class _CollidingConfigExtension extends ConfigurationExtension {
   Future<List<FeatureFlag>> getFeatureFlags() async {
     return const <FeatureFlag>[
       FeatureFlag(name: 'list', help: 'Collides with built-in --list flag.'),
+      FeatureFlag(name: 'verbose', help: 'Collides with global --verbose flag.'),
+      FeatureFlag(
+        name: _TestSigningConfigExtension.kEnableSigning,
+        help: 'Collides with custom_signing_ext feature flag.',
+      ),
     ];
   }
 
@@ -190,10 +206,10 @@ class _CollidingConfigExtension extends ConfigurationExtension {
   }
 }
 
-void _collidingConfigEntryPoint(SendPort sendPort) {
+void _zetaCollidingConfigEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
     _CollidingConfigExtension(),
-  ], extensionName: 'colliding_ext');
+  ], extensionName: 'zeta_colliding_ext');
 }
 
 class _SingleSubscriptionStdin extends Stream<List<int>> with Fake implements Stdin {
@@ -255,20 +271,47 @@ void main() {
     late MemoryFileSystem fs;
     late Config hostConfig;
     late BufferLogger logger;
+    late Map<String, String> env;
+    late FakePlatform platform;
+    late TestFeatureFlags featureFlags;
 
     setUp(() {
       fs = MemoryFileSystem.test();
       hostConfig = Config.test(directory: fs.directory('/'));
       logger = BufferLogger.test();
+      env = <String, String>{};
+      platform = FakePlatform(environment: env);
+      featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
     });
 
-    testWithoutContext('registers ConfigOption aliases, non-negatable ConfigAction flags, and logs warnings on flag or alias collisions', () async {
-      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+    CommandRunner<void> createScopedRunner({
+      ExtensionManager? activeManager,
+      Stdio? stdio,
+      AnsiTerminal? terminal,
+    }) {
+      final command = ConfigCommand(
+        androidContext: FakeAndroidContext(),
+        extensionManager: activeManager,
+        featureFlags: featureFlags,
+        toolContext: FakeToolContext(
+          config: hostConfig,
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          stdio: stdio,
+          terminal: terminal,
+        ),
+      );
+      return createTestCommandRunner(command, null, null, featureFlags);
+    }
+
+    testWithoutContext('sorts extensions lexicographically, groups --help under <title> (package:<name>), and logs collision warnings naming both packages', () async {
+      // Pass zeta_colliding_ext before custom_signing_ext to verify deterministic lexicographical sorting.
       final manager = ExtensionManager(
         config: hostConfig,
         entryPoints: const <ExtensionEntryPoint>[
+          _zetaCollidingConfigEntryPoint,
           _signingConfigEntryPoint,
-          _collidingConfigEntryPoint,
         ],
         featureFlags: featureFlags,
         hostPlatform: HostPlatform.linux_x64,
@@ -282,6 +325,7 @@ void main() {
         featureFlags: featureFlags,
         toolContext: FakeToolContext(config: hostConfig, fs: fs, logger: logger),
       );
+      createTestCommandRunner(command, null, null, featureFlags);
       await command.initializeDynamicOptions();
       final ArgParser parser = command.argParser;
 
@@ -300,47 +344,73 @@ void main() {
       expect(clearActionFlag.isFlag, isTrue);
       expect(clearActionFlag.negatable, isFalse);
 
-      // Colliding primary names were skipped and logged as warnings with the extension name.
+      // Colliding primary names were skipped and logged as warnings naming both extensions.
       expect(parser.options.containsKey(_TestSigningConfigExtension.kLegacySdkAlias), isFalse);
       expect(parser.options.containsKey(_TestSigningConfigExtension.kSelectSigningAlias), isFalse);
+      expect(parser.options.containsKey('verbose'), isFalse);
       final Option validOpt = parser.options['valid-colliding-ext-opt']!;
       expect(validOpt.aliases, const <String>['valid-ext-alias']);
       final Option validAction = parser.options['valid-colliding-ext-action']!;
       expect(validAction.aliases, isEmpty);
 
+      final String helpText = command.usage;
+      final int signingHeaderIndex = helpText.indexOf(
+        'Custom Signing Extension (package:custom_signing_ext)',
+      );
+      final int collidingHeaderIndex = helpText.indexOf(
+        'Colliding Config Extension (package:zeta_colliding_ext)',
+      );
+      expect(signingHeaderIndex, greaterThanOrEqualTo(0));
+      expect(collidingHeaderIndex, greaterThan(signingHeaderIndex));
+
       expect(
         logger.warningText,
         contains(
-          'Extension "colliding_ext" feature flag "--list" conflicts with an existing option',
+          'Extension "zeta_colliding_ext" feature flag "--list" conflicts with an existing option',
         ),
       );
       expect(
         logger.warningText,
         contains(
-          'Extension "colliding_ext" config option "--legacy-custom-sdk-dir" conflicts with an existing option',
+          'Extension "zeta_colliding_ext" feature flag "--verbose" conflicts with an existing option',
         ),
       );
       expect(
         logger.warningText,
         contains(
-          'Extension "colliding_ext" config option alias "--android-sdk" for "--valid-colliding-ext-opt" conflicts',
+          'Extension "zeta_colliding_ext" feature flag "--enable-custom-signing" conflicts with an '
+          'existing option registered by extension "custom_signing_ext"',
         ),
       );
       expect(
         logger.warningText,
         contains(
-          'Extension "colliding_ext" config action "--select-custom-signing-cert" conflicts with an existing option',
+          'Extension "zeta_colliding_ext" config option "--legacy-custom-sdk-dir" conflicts with an '
+          'existing option registered by extension "custom_signing_ext"',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Extension "zeta_colliding_ext" config option alias "--android-sdk" for "--valid-colliding-ext-opt" conflicts',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Extension "zeta_colliding_ext" config action "--select-custom-signing-cert" conflicts with an '
+          'existing option registered by extension "custom_signing_ext"',
         ),
       );
     });
 
-    testWithoutContext('persists extension settings under <extensionName>.<key>, executes ConfigActions on AnsiTerminal, and cleans up legacy/alias keys', () async {
-      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+    testWithoutContext('persists extension settings under nested "extensions" map, executes ConfigActions on AnsiTerminal, and cleans up legacy alias keys', () async {
       final stdio = _InteractiveStdio(_SingleSubscriptionStdin(const <String>['2', '\n']));
-      final terminal = AnsiTerminal(stdio: stdio, platform: FakePlatform());
+      final terminal = AnsiTerminal(stdio: stdio, platform: platform);
       final manager = ExtensionManager(
         config: hostConfig,
         entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
+        environment: env,
         featureFlags: featureFlags,
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
@@ -349,55 +419,53 @@ void main() {
       );
       addTearDown(manager.dispose);
 
-      // Seed legacy unprefixed and alias keys to verify they are cleaned up when canonical keys are written.
-      hostConfig
-        ..setValue(_TestSigningConfigExtension.kLegacySdkAlias, '/opt/stale-legacy-sdk')
-        ..setValue(_TestSigningConfigExtension.kCustomSdkPath, '/opt/stale-unprefixed-sdk');
+      hostConfig.setValue(_TestSigningConfigExtension.kLegacySdkAlias, '/opt/stale-legacy-sdk');
 
-      CommandRunner<void> createScopedRunner() {
-        final command = ConfigCommand(
-          androidContext: FakeAndroidContext(),
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          toolContext: FakeToolContext(
-            config: hostConfig,
-            fs: fs,
-            logger: logger,
-            stdio: stdio,
-            terminal: terminal,
-          ),
-        );
-        return createTestCommandRunner(command, null, null, featureFlags);
-      }
-
-      // 1. Set option via alias and feature flag via CLI.
-      await createScopedRunner().run(<String>[
-        'config',
-        '--${_TestSigningConfigExtension.kLegacySdkAlias}=/opt/custom-sdk',
-        '--no-${_TestSigningConfigExtension.kEnableSigning}',
-      ]);
-
-      expect(hostConfig.getValue('custom_signing_ext.custom-sdk-path'), '/opt/custom-sdk');
-      expect(hostConfig.containsKey(_TestSigningConfigExtension.kLegacySdkAlias), isFalse);
-      expect(hostConfig.containsKey(_TestSigningConfigExtension.kCustomSdkPath), isFalse);
-      expect(hostConfig.getValue('custom_signing_ext.enable-custom-signing'), isFalse);
-
-      // 2. Run interactive ConfigAction via alias flag (confirming FeatureFlag keys do not leak into currentSettings).
-      await createScopedRunner().run(<String>[
-        'config',
-        '--${_TestSigningConfigExtension.kSelectSigningAlias}',
-      ]);
-
-      expect(hostConfig.getValue('custom_signing_ext.custom-signing-cert'), 'cert-2');
-      expect(
-        hostConfig.getValue('custom_signing_ext.custom-signing-profile'),
-        '/profiles/default.profile',
+      // 1. Set option via alias and feature flags via CLI.
+      await createScopedRunner(activeManager: manager, stdio: stdio, terminal: terminal).run(
+        <String>[
+          'config',
+          '--${_TestSigningConfigExtension.kLegacySdkAlias}=/opt/custom-sdk',
+          '--no-${_TestSigningConfigExtension.kEnableSigning}',
+          '--no-${_TestSigningConfigExtension.kUnlistedSigningFlag}',
+        ],
       );
 
-      // 3. Verify `flutter config --list` displays ConfigOption and ConfigAction.settingsKeys.
+      final extensionsMap =
+          hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
+              as Map<String, Object?>;
+      final signingMap = extensionsMap['custom_signing_ext']! as Map<String, Object?>;
+      expect(signingMap['custom-sdk-path'], '/opt/custom-sdk');
+      expect(signingMap['enable-custom-signing'], isFalse);
+      expect(signingMap['enable-unlisted-signing-flag'], isFalse);
+      expect(hostConfig.containsKey(_TestSigningConfigExtension.kLegacySdkAlias), isFalse);
+
+      // 2. Run interactive ConfigAction via alias flag (confirming unlisted FeatureFlag keys do not leak into currentSettings).
+      await createScopedRunner(
+        activeManager: manager,
+        stdio: stdio,
+        terminal: terminal,
+      ).run(<String>['config', '--${_TestSigningConfigExtension.kSelectSigningAlias}']);
+
+      final updatedExtensions =
+          hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
+              as Map<String, Object?>;
+      final updatedSigning = updatedExtensions['custom_signing_ext']! as Map<String, Object?>;
+      expect(updatedSigning['custom-signing-cert'], 'cert-2');
+      expect(updatedSigning['custom-signing-profile'], '/profiles/default.profile');
+
+      // 3. Verify `flutter config --list` skips `"extensions"` in `All Settings:` and displays `<title> (package:<name>):`.
       logger.clear();
-      await createScopedRunner().run(<String>['config', '--list']);
-      expect(logger.statusText, contains('  Custom Signing Extension:'));
+      await createScopedRunner(
+        activeManager: manager,
+        stdio: stdio,
+        terminal: terminal,
+      ).run(<String>['config', '--list']);
+      expect(logger.statusText, isNot(contains('  extensions:')));
+      expect(
+        logger.statusText,
+        contains('  Custom Signing Extension (package:custom_signing_ext):'),
+      );
       expect(logger.statusText, contains('    enable-custom-signing: false'));
       expect(logger.statusText, contains('    custom-sdk-path: /opt/custom-sdk'));
       expect(logger.statusText, contains('    custom-signing-cert: cert-2'));
@@ -405,31 +473,104 @@ void main() {
 
       // 4. Verify ConfigAction persists empty string (''), writes native bool for FeatureFlag, and removes legacy alias keys.
       hostConfig.setValue(_TestSigningConfigExtension.kLegacySdkAlias, '/opt/stale-alias');
-      await createScopedRunner().run(<String>[
-        'config',
-        '--${_TestSigningConfigExtension.kEmptyAndBoolAction}',
-      ]);
-      expect(hostConfig.getValue('custom_signing_ext.custom-sdk-path'), '/opt/action-sdk');
+      await createScopedRunner(
+        activeManager: manager,
+        stdio: stdio,
+        terminal: terminal,
+      ).run(<String>['config', '--${_TestSigningConfigExtension.kEmptyAndBoolAction}']);
+      final afterAction =
+          (hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
+                  as Map<String, Object?>)['custom_signing_ext']!
+              as Map<String, Object?>;
+      expect(afterAction['custom-sdk-path'], '/opt/action-sdk');
       expect(hostConfig.containsKey(_TestSigningConfigExtension.kLegacySdkAlias), isFalse);
-      expect(hostConfig.getValue('custom_signing_ext.custom-signing-profile'), '');
-      expect(hostConfig.getValue('custom_signing_ext.enable-custom-signing'), isTrue);
+      expect(afterAction['custom-signing-profile'], '');
+      expect(afterAction['enable-custom-signing'], isTrue);
 
       // 5. Clear signing settings via --clear-custom-signing-settings ConfigAction.
-      await createScopedRunner().run(<String>[
-        'config',
-        '--${_TestSigningConfigExtension.kClearSigningAction}',
-      ]);
-      expect(hostConfig.getValue('custom_signing_ext.custom-signing-cert'), isNull);
-      expect(hostConfig.getValue('custom_signing_ext.custom-signing-profile'), isNull);
+      await createScopedRunner(
+        activeManager: manager,
+        stdio: stdio,
+        terminal: terminal,
+      ).run(<String>['config', '--${_TestSigningConfigExtension.kClearSigningAction}']);
+      final afterClear =
+          (hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
+                  as Map<String, Object?>)['custom_signing_ext']!
+              as Map<String, Object?>;
+      expect(afterClear.containsKey('custom-signing-cert'), isFalse);
+      expect(afterClear.containsKey('custom-signing-profile'), isFalse);
 
       logger.clear();
-      await createScopedRunner().run(<String>['config', '--list']);
+      await createScopedRunner(
+        activeManager: manager,
+        stdio: stdio,
+        terminal: terminal,
+      ).run(<String>['config', '--list']);
       expect(logger.statusText, contains('    custom-signing-cert: (Not set)'));
       expect(logger.statusText, contains('    custom-signing-profile: (Not set)'));
     });
 
+    testWithoutContext('resolves environmentOverride ahead of persisted "extensions" settings in flutter config --list', () async {
+      final manager = ExtensionManager(
+        config: hostConfig,
+        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
+        environment: env,
+        featureFlags: featureFlags,
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+
+      hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
+        'custom_signing_ext': <String, Object?>{
+          _TestSigningConfigExtension.kEnableSigning: false,
+          _TestSigningConfigExtension.kCustomSdkPath: '/opt/custom-sdk',
+        },
+      });
+      env[_TestSigningConfigExtension.kEnableSigningEnv] = 'true';
+      env[_TestSigningConfigExtension.kCustomSdkEnv] = '/opt/env-override-sdk';
+
+      await createScopedRunner(activeManager: manager).run(<String>['config', '--list']);
+      expect(logger.statusText, contains('    enable-custom-signing: true'));
+      expect(logger.statusText, contains('    custom-sdk-path: /opt/env-override-sdk'));
+    });
+
+    testWithoutContext('displays inactive saved extension settings in flutter config --list inside and outside projects', () async {
+      final manager = ExtensionManager(
+        config: hostConfig,
+        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
+        environment: env,
+        featureFlags: featureFlags,
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+
+      hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
+        'custom_signing_ext': <String, Object?>{
+          _TestSigningConfigExtension.kCustomSdkPath: '/opt/custom-sdk',
+        },
+        'inactive_ext': <String, Object?>{'saved-path': '/opt/inactive-sdk'},
+      });
+
+      await createScopedRunner(activeManager: manager).run(<String>['config', '--list']);
+      expect(
+        logger.statusText,
+        contains('  Custom Signing Extension (package:custom_signing_ext):'),
+      );
+      expect(logger.statusText, contains('Saved Extension Settings (inactive outside project):'));
+      expect(logger.statusText, contains('  inactive_ext:\n    saved-path: /opt/inactive-sdk'));
+      expect(logger.statusText, isNot(contains('  custom_signing_ext:')));
+
+      logger.clear();
+      await createScopedRunner().run(<String>['config', '--list']);
+      expect(logger.statusText, isNot(contains('Extension Settings:\n')));
+      expect(logger.statusText, contains('Saved Extension Settings (inactive outside project):'));
+      expect(logger.statusText, contains('  custom_signing_ext:'));
+      expect(logger.statusText, contains('  inactive_ext:'));
+    });
+
     testWithoutContext('fails with ToolExit when interactive ConfigAction runs without a terminal or returns undeclared key', () async {
-      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
         config: hostConfig,
         entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
@@ -440,29 +581,15 @@ void main() {
       );
       addTearDown(manager.dispose);
 
-      CommandRunner<void> createScopedRunner() {
-        final command = ConfigCommand(
-          androidContext: FakeAndroidContext(),
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          toolContext: FakeToolContext(config: hostConfig, fs: fs, logger: logger),
-        );
-        return createTestCommandRunner(command, null, null, featureFlags);
-      }
-
       await expectLater(
-        createScopedRunner().run(<String>[
-          'config',
-          '--${_TestSigningConfigExtension.kSelectSigningAction}',
-        ]),
+        createScopedRunner(activeManager: manager)
+            .run(<String>['config', '--${_TestSigningConfigExtension.kSelectSigningAction}']),
         throwsToolExit(message: 'Cannot prompt for user input in a non-interactive terminal.'),
       );
 
       await expectLater(
-        createScopedRunner().run(<String>[
-          'config',
-          '--${_TestSigningConfigExtension.kInvalidKeyAction}',
-        ]),
+        createScopedRunner(activeManager: manager)
+            .run(<String>['config', '--${_TestSigningConfigExtension.kInvalidKeyAction}']),
         throwsToolExit(message: 'returned undeclared setting key "undeclared-key"'),
       );
     });

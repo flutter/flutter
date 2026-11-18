@@ -79,7 +79,9 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
 }
 
 void _secondaryExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_SecondaryConfigurationExtension()]);
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+    _SecondaryConfigurationExtension(),
+  ], extensionName: 'secondary_config_ext');
 }
 
 class _DomainErrorConfigurationExtension extends ConfigurationExtension {
@@ -105,7 +107,9 @@ void _domainErrorConfigEntryPoint(SendPort sendPort) {
 
 class _InteractiveSigningConfigExtension extends ConfigurationExtension {
   static const String kEnableSigning = 'enable-custom-signing';
+  static const String kEnableSigningEnv = 'FLUTTER_CUSTOM_SIGNING';
   static const String kCustomSdkPath = 'custom-sdk-path';
+  static const String kCustomSdkEnv = 'FLUTTER_CUSTOM_SDK_PATH';
   static const String kLegacySdkPath = 'legacy-custom-sdk';
   static const String kSigningCert = 'custom-signing-cert';
   static const String kSigningPassphrase = 'custom-signing-passphrase';
@@ -124,7 +128,11 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
   Future<List<FeatureFlag>> getFeatureFlags() async {
     _featureFlagsFetchCount++;
     return const <FeatureFlag>[
-      FeatureFlag(name: kEnableSigning, help: 'Enable custom signing workflows.'),
+      FeatureFlag(
+        name: kEnableSigning,
+        help: 'Enable custom signing workflows.',
+        environmentOverride: kEnableSigningEnv,
+      ),
     ];
   }
 
@@ -135,6 +143,7 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
         name: kCustomSdkPath,
         help: 'Path to custom SDK.',
         aliases: <String>[kLegacySdkPath],
+        environmentOverride: kCustomSdkEnv,
       ),
     ];
   }
@@ -180,15 +189,14 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
       case kClearSigningAction:
         return const <String, String?>{kSigningCert: null, kSigningPassphrase: null};
       case kSelectSigningAction:
-        final String? selectedCert = await promptForOption(
+        const certIds = <String>['cert-alpha', 'cert-beta'];
+        const certLabels = <String>['Developer Alpha (TEAM1)', 'Developer Beta (TEAM2)'];
+        final int? selectedIndex = await promptForOption(
           message: 'Select a signing certificate',
-          options: const <String, String>{
-            'cert-alpha': 'Developer Alpha (TEAM1)',
-            'cert-beta': 'Developer Beta (TEAM2)',
-          },
-          defaultOptionId: 'cert-alpha',
+          options: certLabels,
+          defaultChoiceIndex: 0,
         );
-        if (selectedCert == null) {
+        if (selectedIndex == null) {
           return const <String, String?>{};
         }
         final String? passphrase = await promptForInput(
@@ -196,14 +204,20 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
           defaultValue: 'default-secret',
           echo: false,
         );
-        return <String, String?>{kSigningCert: selectedCert, kSigningPassphrase: passphrase};
+        return <String, String?>{
+          kSigningCert: certIds[selectedIndex],
+          kSigningPassphrase: passphrase,
+        };
       case kSelectManyAction:
-        final String? selectedCert = await promptForOption(
+        final options = <String>[for (var i = 1; i <= 10; i++) 'Certificate $i'];
+        final int? selectedIndex = await promptForOption(
           message: 'Select a certificate from full list',
-          options: <String, String>{for (var i = 1; i <= 10; i++) 'cert-$i': 'Certificate $i'},
-          defaultOptionId: 'cert-1',
+          options: options,
+          defaultChoiceIndex: 0,
         );
-        return <String, String?>{kSigningCert: selectedCert};
+        return <String, String?>{
+          if (selectedIndex != null) kSigningCert: 'cert-${selectedIndex + 1}',
+        };
       case kReadOwnedValuesAction:
         final Map<String, Object?> ownedValues = await getConfigurationValues();
         final List<String> summary =
@@ -328,13 +342,12 @@ void main() {
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
       );
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
+      await manager.initialize(
+        entryPoints: <ExtensionEntryPoint>[_secondaryExtensionEntryPoint, linuxExtensionEntryPoint],
+      );
 
       final config = ExtensionConfiguration(
-        extensions: <ConfigurationExtension>[
-          ...manager.configurationExtensions,
-          _SecondaryConfigurationExtension(),
-        ],
+        extensions: manager.configurationExtensions,
         logger: logger,
       );
 
@@ -378,10 +391,18 @@ void main() {
 
       final String settingsOutput = await command.settingsText;
       expect(settingsOutput, contains('Extension Settings:'));
-      expect(settingsOutput, contains('  Linux Custom Extension Prototype:'));
+      expect(
+        settingsOutput,
+        contains(
+          '  Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype):',
+        ),
+      );
       expect(settingsOutput, contains('    enable-linux-custom-prototype: true'));
       expect(settingsOutput, contains('    linux-gtk-version: 3'));
-      expect(settingsOutput, contains('  Secondary Configuration Extension:'));
+      expect(
+        settingsOutput,
+        contains('  Secondary Configuration Extension (package:secondary_config_ext):'),
+      );
       expect(settingsOutput, contains('    enable-secondary-feature: false'));
       expect(settingsOutput, contains('    secondary-config-key: custom-value'));
 
@@ -495,10 +516,7 @@ void main() {
         ),
       );
       await expectLater(
-        service.promptForOption(
-          message: 'Select option',
-          options: const <String, String>{'a': 'Option A'},
-        ),
+        service.promptForOption(message: 'Select option', options: const <String>['Option A']),
         throwsA(
           isA<StateError>().having(
             (StateError e) => e.message,
@@ -519,19 +537,25 @@ void main() {
       );
     });
 
-    testWithoutContext('extension.getConfigurationValues scopes returned keys to extension owned settings with native bool feature flags and zero re-entrant RPCs', () async {
+    testWithoutContext('extension.getConfigurationValues resolves environmentOverride > nested extensions settings > legacy aliases > defaults with zero re-entrant RPCs', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       hostConfig
-        ..setValue('custom_signing_ext.enable-custom-signing', true)
         ..setValue('legacy-custom-sdk', '/opt/legacy-sdk')
-        ..setValue('custom_signing_ext.custom-signing-cert', 'cert-alpha')
-        ..setValue('other_ext.secret-key', 'should-not-leak')
-        ..setValue('android-sdk', '/opt/android-sdk');
+        ..setValue('android-sdk', '/opt/android-sdk')
+        ..setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
+          'custom_signing_ext': <String, Object?>{
+            'enable-custom-signing': true,
+            'custom-signing-cert': 'cert-alpha',
+          },
+          'other_ext': <String, Object?>{'secret-key': 'should-not-leak'},
+        });
 
+      final env = <String, String>{};
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         config: hostConfig,
+        environment: env,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
@@ -562,8 +586,13 @@ void main() {
         'enable-custom-signing=true(bool)',
       );
 
-      // Prefixed setting takes precedence over unprefixed/alias fallback without re-querying getFeatureFlags().
-      hostConfig.setValue('custom_signing_ext.custom-sdk-path', '/opt/scoped-sdk');
+      // Nested `"extensions"` setting takes precedence over legacy top-level alias fallback without re-querying getFeatureFlags().
+      ExtensionConfiguration.setSettingValue(
+        hostConfig,
+        _InteractiveSigningConfigExtension.kCustomSdkPath,
+        '/opt/scoped-sdk',
+        extensionName: 'custom_signing_ext',
+      );
       final Map<String, String?> updated = await extConfig.runConfigAction(
         extension: group.extension!,
         action: readAction,
@@ -575,6 +604,22 @@ void main() {
         'custom-sdk-path=/opt/scoped-sdk(String),'
         'custom-signing-cert=cert-alpha(String),'
         'enable-custom-signing=true(bool)',
+      );
+
+      // Environment overrides take precedence over persisted `"extensions"` settings.
+      env[_InteractiveSigningConfigExtension.kEnableSigningEnv] = '0';
+      env[_InteractiveSigningConfigExtension.kCustomSdkEnv] = '/opt/env-sdk';
+      final Map<String, String?> envOverridden = await extConfig.runConfigAction(
+        extension: group.extension!,
+        action: readAction,
+        currentSettings: const <String, String?>{},
+      );
+      expect(
+        envOverridden[_InteractiveSigningConfigExtension.kSigningCert],
+        'fetches=1;'
+        'custom-sdk-path=/opt/env-sdk(String),'
+        'custom-signing-cert=cert-alpha(String),'
+        'enable-custom-signing=false(bool)',
       );
     });
 
@@ -643,7 +688,7 @@ void main() {
       });
     });
 
-    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with -32002 in non-TTY and --machine modes', () async {
+    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in non-TTY and --machine modes and reject invalid params', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       final logger = BufferLogger.test();
@@ -682,7 +727,7 @@ void main() {
               .having(
                 (ToolExtensionException e) => e.code,
                 'code',
-                ToolExtensionException.nonInteractiveErrorCode,
+                ToolExtensionException.domainErrorCode,
               )
               .having(
                 (ToolExtensionException e) => e.message,
@@ -692,7 +737,24 @@ void main() {
         ),
       );
 
-      // 2. --machine mode with an interactive terminal still fails with -32002.
+      // Out-of-range defaultChoiceIndex fails with INVALID_PARAMS (-32602).
+      final prompter = ExtensionTerminalPrompter(logger: logger, terminal: Terminal.test());
+      await expectLater(
+        prompter.handlePromptForOption(const <String, Object?>{
+          'message': 'Pick one',
+          'options': <String>['A', 'B'],
+          'defaultChoiceIndex': 2,
+        }),
+        throwsA(
+          isA<json_rpc.RpcException>().having(
+            (json_rpc.RpcException e) => e.code,
+            'code',
+            error_code.INVALID_PARAMS,
+          ),
+        ),
+      );
+
+      // 2. --machine mode with an interactive terminal still fails with domainErrorCode (-32001).
       final machineStdio = _EchoTrackingStdio(_SingleSubscriptionStdin(const <String>['1']));
       final machineManager = ExtensionManager(
         config: hostConfig,
@@ -725,7 +787,7 @@ void main() {
               .having(
                 (ToolExtensionException e) => e.code,
                 'code',
-                ToolExtensionException.nonInteractiveErrorCode,
+                ToolExtensionException.domainErrorCode,
               )
               .having((ToolExtensionException e) => e.message, 'message', contains('"--machine"')),
         ),

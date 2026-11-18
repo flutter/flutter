@@ -370,12 +370,13 @@ class AnsiTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes {
-    return _broadcastStdInString ??= _stdinBroadcastStream
-        .transform<String>(const AsciiDecoder(allowInvalid: true))
-        .asBroadcastStream(
-          onListen: (StreamSubscription<String> subscription) => subscription.resume(),
-          onCancel: (StreamSubscription<String> subscription) => subscription.pause(),
-        );
+    // Map directly over `_stdinBroadcastStream` rather than wrapping in a
+    // second `asBroadcastStream(onCancel: sub.pause)` so cancelling the last
+    // `keystrokes` listener pauses `_stdio.stdin` between `promptForOption` and
+    // `promptForInput` RPCs while keeping `keystrokes` cached as a broadcast stream.
+    return _broadcastStdInString ??= _stdinBroadcastStream.map<String>(
+      const AsciiDecoder(allowInvalid: true).convert,
+    );
   }
 
   Stream<String>? _broadcastStdInLines;

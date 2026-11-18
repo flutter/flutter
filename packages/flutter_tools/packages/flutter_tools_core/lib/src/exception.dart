@@ -19,9 +19,9 @@ import 'package:meta/meta.dart';
 /// or executing an explicitly requested configuration action.
 @immutable
 class ToolExtensionException implements Exception {
-  /// Creates a [ToolExtensionException] with a user-facing [message] and
-  /// JSON-RPC 2.0 error [code].
-  const ToolExtensionException(this.message, {this.code = domainErrorCode});
+  /// Creates a [ToolExtensionException] with a user-facing [message], optional
+  /// JSON-RPC 2.0 error [code], and optional structured diagnostic [data].
+  const ToolExtensionException(this.message, {this.code = domainErrorCode, this.data});
 
   /// JSON-RPC 2.0 error code for intentional, user-actionable domain errors.
   ///
@@ -29,13 +29,15 @@ class ToolExtensionException implements Exception {
   /// exception in the extension isolate.
   static const int domainErrorCode = -32001;
 
-  /// JSON-RPC 2.0 error code returned when an interactive terminal prompt is
-  /// requested while the host tool is running in non-interactive or `--machine`
-  /// mode.
-  static const int nonInteractiveErrorCode = -32002;
+  /// JSON-RPC 2.0 error code returned when an optional capability is not
+  /// supported by the extension.
+  static const int unsupportedCapabilityErrorCode = -32002;
 
   /// JSON-RPC 2.0 error code associated with this exception.
   final int code;
+
+  /// Optional structured error details serialized into the JSON-RPC error data.
+  final Map<String, Object?>? data;
 
   /// Human-readable error message surfaced by the Flutter Tool.
   final String message;

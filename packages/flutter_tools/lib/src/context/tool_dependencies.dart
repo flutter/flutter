@@ -622,6 +622,7 @@ class ToolDependencies {
     final extensionManager = ExtensionManager(
       config: finalConfig,
       entryPoints: extensionEntryPoints,
+      environment: finalPlatform.environment,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
