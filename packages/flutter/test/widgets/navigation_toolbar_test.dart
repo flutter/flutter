@@ -6,61 +6,68 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const toolbarWidth = 360.0;
+  const leadingWidth = 48.0;
+  const trailingWidth = 120.0;
+  const middleSpacing = 4.0;
+  const leadingKey = ValueKey<String>('leading');
+  const middleKey = ValueKey<String>('middle');
+  const trailingKey = ValueKey<String>('trailing');
+
   testWidgets('NavigationToolbar centers middle within the toolbar when there is room', (
     WidgetTester tester,
   ) async {
-    const middleKey = ValueKey<String>('middle');
-
+    const middleWidth = 104.0; // Leaves an 8-pixel trailing gap when centered.
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.pumpWidget(
         Directionality(
           textDirection: textDirection,
           child: const Center(
             child: SizedBox(
-              width: 360.0,
-              height: 56.0,
+              width: toolbarWidth,
               child: NavigationToolbar(
                 centerMiddle: true,
-                middleSpacing: 4.0,
-                leading: SizedBox(width: 48.0),
-                middle: SizedBox(key: middleKey, width: 100.0, height: 56.0),
-                trailing: SizedBox(width: 120.0, height: 56.0),
+                middleSpacing: middleSpacing,
+                leading: SizedBox(key: leadingKey, width: leadingWidth),
+                middle: SizedBox(key: middleKey, width: middleWidth),
+                trailing: SizedBox(key: trailingKey, width: trailingWidth),
               ),
             ),
           ),
         ),
       );
 
-      // The toolbar is centered in the 800 pixel wide test surface. The middle
-      // is centered within the toolbar, not within the space between the
-      // leading and trailing widgets, whose center is 36 pixels away.
-      expect(tester.getCenter(find.byKey(middleKey)).dx, 400.0);
+      // The leading and trailing widgets have different widths, so centering
+      // the middle between them would place it off the toolbar's center.
+      expect(
+        tester.getCenter(find.byKey(middleKey)).dx,
+        tester.getCenter(find.byType(NavigationToolbar)).dx,
+      );
     }
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/196207.
   for (final TextDirection textDirection in TextDirection.values) {
-    for (final middleWidth in <double>[112.0, 116.0, 120.0, 124.0]) {
+    for (final middleWidth in <double>[
+      112.0, // Centering leaves the required 4-pixel trailing gap.
+      116.0, // Centering leaves only a 2-pixel trailing gap.
+      120.0, // The centered middle touches the trailing widget.
+      124.0, // The centered middle overlaps the trailing widget by 2 pixels.
+    ]) {
       testWidgets('NavigationToolbar preserves middleSpacing when centered '
-          '($textDirection, middle: $middleWidth)', (WidgetTester tester) async {
-        const leadingKey = ValueKey<String>('leading');
-        const middleKey = ValueKey<String>('middle');
-        const trailingKey = ValueKey<String>('trailing');
-        const middleSpacing = 4.0;
-
+          '($textDirection, middle width: $middleWidth)', (WidgetTester tester) async {
         await tester.pumpWidget(
           Directionality(
             textDirection: textDirection,
             child: Center(
               child: SizedBox(
-                width: 360.0,
-                height: 56.0,
+                width: toolbarWidth,
                 child: NavigationToolbar(
                   centerMiddle: true,
                   middleSpacing: middleSpacing,
-                  leading: const SizedBox(key: leadingKey, width: 48.0),
-                  middle: SizedBox(key: middleKey, width: middleWidth, height: 56.0),
-                  trailing: const SizedBox(key: trailingKey, width: 120.0, height: 56.0),
+                  leading: const SizedBox(key: leadingKey, width: leadingWidth),
+                  middle: SizedBox(key: middleKey, width: middleWidth),
+                  trailing: const SizedBox(key: trailingKey, width: trailingWidth),
                 ),
               ),
             ),
