@@ -83,7 +83,8 @@ class SelectableTextGroup extends _SelectableTextGroupBase with Selectable, Sele
   }
 }
 
-// Provides the concrete dispose that SelectionRegistrant.dispose calls.
+// Selectable.dispose is abstract and SelectionRegistrant.dispose calls
+// super.dispose, so the mixins need a concrete dispose below them.
 abstract class _SelectableTextGroupBase {
   void dispose() {}
 }

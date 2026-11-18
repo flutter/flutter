@@ -4437,6 +4437,67 @@ void main() {
         );
         expect(selectedContent?.plainText, 'Hi x end');
       });
+
+      testWidgets('can be removed while it is selected', (WidgetTester tester) async {
+        final show = ValueNotifier<bool>(true);
+        addTearDown(show.dispose);
+        final focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: _selectableRegion(
+              focusNode: focusNode,
+              onSelectionChanged: (SelectedContent? content) => selectedContent = content,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: show,
+                builder: (BuildContext context, bool visible, Widget? child) {
+                  return Column(
+                    children: <Widget>[
+                      const Text('top'),
+                      if (visible)
+                        Builder(
+                          builder: (BuildContext context) {
+                            return RichText(
+                              selectionRegistrar: SelectionContainer.maybeOf(context),
+                              selectionColor: const Color(0x660000FF),
+                              text: const TextSpan(
+                                text: 'abc ',
+                                style: TextStyle(color: Color(0xFF000000)),
+                                children: <InlineSpan>[
+                                  WidgetSpan(child: Text('mid')),
+                                  TextSpan(text: ' def'),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      const Text('bottom'),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        focusNode.requestFocus();
+        await tester.pump();
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+        );
+        await tester.pump();
+        expect(selectedContent?.plainText, 'topabc mid defbottom');
+
+        show.value = false;
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+        );
+        await tester.pump();
+        expect(selectedContent?.plainText, 'topbottom');
+      });
     });
 
     testWidgets(

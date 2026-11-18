@@ -6707,6 +6707,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// The [SelectionRegistrar] this rich text is subscribed to.
   ///
   /// If this is set, [selectionColor] must be non-null.
+  ///
+  /// Changing this between null and non-null recreates the widgets of the
+  /// [WidgetSpan]s in [text], so their state is lost.
   final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
@@ -6872,6 +6875,8 @@ class _RichTextSelectionScope extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SelectionRegistrar? registrar;
+    // This widget is always a direct child of the RichText, so only the
+    // parent element needs to be checked.
     context.visitAncestorElements((Element element) {
       if (element is _RichTextElement) {
         registrar = element._selectionGroup?.delegate;
