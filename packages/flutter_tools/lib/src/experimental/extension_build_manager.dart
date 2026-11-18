@@ -62,6 +62,20 @@ base class ExtensionBuildManager {
   List<ExtensionAssembleTarget> get cachedAssembleTargets =>
       _cachedAssembleTargets ?? const <ExtensionAssembleTarget>[];
 
+  /// Returns the name of the extension that registered the custom `flutter build`
+  /// target [targetName], or [ExtensionConnection.defaultExtensionName] if no
+  /// extension registered it.
+  String extensionNameForBuildTarget(String targetName) =>
+      _buildTargetToConnection[targetName]?.extensionName ??
+      ExtensionConnection.defaultExtensionName;
+
+  /// Returns the name of the extension that registered the custom `flutter assemble`
+  /// target [targetName], or [ExtensionConnection.defaultExtensionName] if no
+  /// extension registered it.
+  String extensionNameForAssembleTarget(String targetName) =>
+      _assembleTargetToConnection[targetName]?.extensionName ??
+      ExtensionConnection.defaultExtensionName;
+
   /// Retrieve `flutter build` targets by routing `build.getBuildTargets` to active tool extensions.
   Future<List<ExtensionBuildTarget>> getBuildTargets() async {
     if (!_featureFlags.isToolExtensionsEnabled) {
@@ -134,6 +148,9 @@ base class ExtensionBuildManager {
         try {
           final Object? result = await connection.sendRequest(rpcMethod);
           return (connection, listFromJson(result));
+        } on ToolExtensionException catch (e) {
+          _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+          return (connection, <T>[]);
         } on Object catch (e) {
           _logger.printWarning(
             'Failed to query $targetKind targets from extension "${connection.extensionName}": $e',
@@ -149,9 +166,10 @@ base class ExtensionBuildManager {
         if (name.isEmpty) {
           continue;
         }
-        if (connectionMap.containsKey(name)) {
+        if (connectionMap[name] case final ExtensionConnection existingConnection) {
           _logger.printWarning(
-            'Skipping duplicate $targetKind target "$name" from extension "${connection.extensionName}".',
+            'Skipping duplicate $targetKind target "$name" from extension "${connection.extensionName}" '
+            '(already registered by extension "${existingConnection.extensionName}").',
           );
           continue;
         }
@@ -499,6 +517,8 @@ base class ExtensionBuildManager {
         success: false,
         errorMessage: 'Invalid $targetKind result from extension.',
       );
+    } on ToolExtensionException catch (e) {
+      return ExtensionBuildResult(success: false, errorMessage: e.message);
     } on Object catch (e) {
       _logger.printTrace('Failed to run $targetKind from extension: $e');
       return ExtensionBuildResult(success: false, errorMessage: e.toString());

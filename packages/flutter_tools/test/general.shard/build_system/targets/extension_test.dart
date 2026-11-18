@@ -25,7 +25,7 @@ import '../../../src/fakes.dart';
 final class FakeExtensionManager extends Fake implements ExtensionManager {}
 
 final class FakeExtensionBuildManager extends ExtensionBuildManager {
-  FakeExtensionBuildManager({this.buildResult})
+  FakeExtensionBuildManager({this.buildResult, this.onAssemble})
     : super(
         extensionManager: FakeExtensionManager(),
         featureFlags: TestFeatureFlags(),
@@ -33,7 +33,9 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
       );
 
   final ExtensionBuildResult? buildResult;
+  final void Function(Uri buildDir)? onAssemble;
 
+  int assembleCount = 0;
   Uri? invokedBuildDir;
   Map<String, bool>? invokedBuildFlags;
   BuildMode? invokedBuildMode;
@@ -88,6 +90,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
   }) async {
+    assembleCount += 1;
     invokedBuildDir = buildDir;
     invokedBuildFlags = buildFlags;
     invokedBuildMode = buildMode;
@@ -113,6 +116,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     invokedTargetPlatform = targetPlatform;
     invokedTrackWidgetCreation = trackWidgetCreation;
     invokedTreeShakeIcons = treeShakeIcons;
+    onAssemble?.call(buildDir);
     return buildResult ?? const ExtensionBuildResult(success: true);
   }
 }
@@ -260,55 +264,69 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionTarget throws Exception if assemble fails', () async {
-    final buildManager = FakeExtensionBuildManager(
-      buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
-    );
-    final ExtensionTarget target = _createTarget(buildManager: buildManager);
+  testWithoutContext(
+    'ExtensionTarget throws ExtensionAssembleException if assemble fails',
+    () async {
+      final buildManager = FakeExtensionBuildManager(
+        buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
+      );
+      final ExtensionTarget target = _createTarget(buildManager: buildManager);
 
-    await expectLater(
-      () => target.build(environment),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'toString',
-          contains('Extension assemble target "custom-target" failed: Build failed error'),
+      await expectLater(
+        () => target.build(environment),
+        throwsA(
+          isA<ExtensionAssembleException>()
+              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
+              .having(
+                (ExtensionAssembleException e) => e.errorMessage,
+                'errorMessage',
+                'Build failed error',
+              )
+              .having(
+                (ExtensionAssembleException e) => e.toString(),
+                'toString',
+                equals('Extension assemble target "custom-target" failed: Build failed error'),
+              ),
         ),
-      ),
-    );
+      );
 
-    final ExtensionTarget emptyMessageTarget = _createTarget(
-      buildManager: FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
-      ),
-    );
-    await expectLater(
-      () => emptyMessageTarget.build(environment),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'toString',
-          contains('Extension assemble target "custom-target" failed.'),
+      final ExtensionTarget emptyMessageTarget = _createTarget(
+        buildManager: FakeExtensionBuildManager(
+          buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
         ),
-      ),
-    );
+      );
+      await expectLater(
+        () => emptyMessageTarget.build(environment),
+        throwsA(
+          isA<ExtensionAssembleException>()
+              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
+              .having(
+                (ExtensionAssembleException e) => e.toString(),
+                'toString',
+                equals('Extension assemble target "custom-target" failed.'),
+              ),
+        ),
+      );
 
-    final ExtensionTarget nullMessageTarget = _createTarget(
-      buildManager: FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false),
-      ),
-    );
-    await expectLater(
-      () => nullMessageTarget.build(environment),
-      throwsA(
-        isA<Exception>().having(
-          (Exception e) => e.toString(),
-          'toString',
-          contains('Extension assemble target "custom-target" failed.'),
+      final ExtensionTarget nullMessageTarget = _createTarget(
+        buildManager: FakeExtensionBuildManager(
+          buildResult: const ExtensionBuildResult(success: false),
         ),
-      ),
-    );
-  });
+      );
+      await expectLater(
+        () => nullMessageTarget.build(environment),
+        throwsA(
+          isA<ExtensionAssembleException>()
+              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
+              .having(
+                (ExtensionAssembleException e) => e.toString(),
+                'toString',
+                equals('Extension assemble target "custom-target" failed.'),
+              ),
+        ),
+      );
+    },
+  );
 
   testWithoutContext('ExtensionTarget maps pattern, artifact, and hostArtifact sources', () {
     final ExtensionTarget target = _createTarget(
@@ -431,37 +449,157 @@ void main() {
     expect(target.dependencies, equals(<Target>[depTarget]));
   });
 
+  testWithoutContext('ExtensionTarget normalizes declared depfiles', () async {
+    final buildManager = FakeExtensionBuildManager(
+      onAssemble: (Uri buildDir) {
+        fileSystem
+            .directory(buildDir)
+            .childFile('custom_target.d')
+            .writeAsStringSync(
+              const Depfile(
+                inputs: <String>['lib/extra_input.dart'],
+                outputs: <String>['build/extra_output.txt'],
+              ).format(),
+            );
+      },
+    );
+    final ExtensionTarget target = _createTarget(
+      buildManager: buildManager,
+      depfiles: const <String>['custom_target.d'],
+    );
+    expect(target.depfiles, equals(const <String>['custom_target.d']));
+
+    environment.buildDir.createSync(recursive: true);
+
+    await target.build(environment);
+
+    final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
+    expect(resolvedInputs.sources.map((File f) => f.path), contains('/lib/extra_input.dart'));
+    final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
+    expect(resolvedOutputs.sources.map((File f) => f.path), contains('/build/extra_output.txt'));
+  });
+
+  testWithoutContext('ExtensionTarget logs error and disables incremental caching when declared depfile is missing or omitted on rebuild', () async {
+    final logger = BufferLogger.test();
+    final buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      logger: logger,
+    );
+    final File trackedInput = fileSystem.file('/lib/tracked.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('v1');
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      inputs: <String, String>{},
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: FakeProcessManager.any(),
+    );
+    var writeDepfile = true;
+    final buildManager = FakeExtensionBuildManager(
+      onAssemble: (Uri buildDir) {
+        if (writeDepfile) {
+          fileSystem
+              .directory(buildDir)
+              .childFile('missing.d')
+              .writeAsStringSync(const Depfile(inputs: <String>['lib/tracked.dart']).format());
+        }
+      },
+    );
+    final ExtensionTarget missingDepfileTarget = _createTarget(
+      buildManager: buildManager,
+      depfiles: const <String>['missing.d'],
+    );
+
+    // Run 1 writes missing.d; an unchanged incremental build skips cleanly.
+    final BuildResult firstResult = await buildSystem.build(missingDepfileTarget, testEnvironment);
+    expect(firstResult.success, isTrue);
+    expect(buildManager.assembleCount, 1);
+    expect(logger.errorText, isEmpty);
+
+    final BuildResult cachedResult = await buildSystem.build(missingDepfileTarget, testEnvironment);
+    expect(cachedResult.success, isTrue);
+    expect(buildManager.assembleCount, 1);
+
+    // Run 2 omits missing.d after trackedInput changes: stale missing.d is cleared,
+    // an error is logged, and the subsequent build does not skip.
+    writeDepfile = false;
+    trackedInput.writeAsStringSync('v2');
+    final BuildResult rebuildWithoutDepfile = await buildSystem.build(
+      missingDepfileTarget,
+      testEnvironment,
+    );
+    expect(rebuildWithoutDepfile.success, isTrue);
+    expect(buildManager.assembleCount, 2);
+    expect(
+      logger.errorText,
+      contains(
+        'Extension assemble target "custom-target" declared depfile "missing.d", '
+        'but it was not written to the build directory.',
+      ),
+    );
+    expect(logger.errorText, contains('Try upgrading the extension or running "flutter clean".'));
+
+    final BuildResult thirdResult = await buildSystem.build(missingDepfileTarget, testEnvironment);
+    expect(thirdResult.success, isTrue);
+    expect(buildManager.assembleCount, 3);
+  });
+
   testWithoutContext(
-    'ExtensionTarget merges extraDefines into environment.defines and normalizes declared depfiles',
+    'ExtensionTarget logs error, deletes malformed depfile, and disables incremental caching',
     () async {
+      final logger = BufferLogger.test();
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: logger,
+      );
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        inputs: <String, String>{},
+        fileSystem: fileSystem,
+        logger: logger,
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+      );
       final buildManager = FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(
-          success: true,
-          extraDefines: <String, String>{'CustomDefine': 'custom-value'},
+        onAssemble: (Uri buildDir) {
+          fileSystem
+              .directory(buildDir)
+              .childFile('malformed.d')
+              .writeAsStringSync('not a valid depfile');
+        },
+      );
+      final ExtensionTarget malformedDepfileTarget = _createTarget(
+        buildManager: buildManager,
+        depfiles: const <String>['malformed.d'],
+      );
+
+      final BuildResult firstResult = await buildSystem.build(
+        malformedDepfileTarget,
+        testEnvironment,
+      );
+      expect(firstResult.success, isTrue);
+      expect(buildManager.assembleCount, 1);
+      expect(
+        logger.errorText,
+        contains(
+          'Invalid depfile "malformed.d" produced by extension assemble target "custom-target":',
         ),
       );
-      final ExtensionTarget target = _createTarget(
-        buildManager: buildManager,
-        depfiles: const <String>['custom_target.d'],
+      expect(logger.errorText, isNot(contains('Invalid depfile: ')));
+      expect(testEnvironment.buildDir.childFile('malformed.d').existsSync(), isFalse);
+
+      final BuildResult secondResult = await buildSystem.build(
+        malformedDepfileTarget,
+        testEnvironment,
       );
-      expect(target.depfiles, equals(const <String>['custom_target.d']));
-
-      environment.buildDir.createSync(recursive: true);
-      final File depfile = environment.buildDir.childFile('custom_target.d');
-      depfile.writeAsStringSync(
-        const ExtensionDepfile(
-          inputs: <String>['lib/extra_input.dart'],
-          outputs: <String>['build/extra_output.txt'],
-        ).format(),
-      );
-
-      await target.build(environment);
-
-      expect(environment.defines['CustomDefine'], equals('custom-value'));
-      final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
-      expect(resolvedInputs.sources.map((File f) => f.path), contains('/lib/extra_input.dart'));
-      final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
-      expect(resolvedOutputs.sources.map((File f) => f.path), contains('/build/extra_output.txt'));
+      expect(secondResult.success, isTrue);
+      expect(buildManager.assembleCount, 2);
     },
   );
 
@@ -496,13 +634,82 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionTarget supports custom targetPlatform and throws ToolExit for invalid artifact platformName', () async {
+  testWithoutContext(
+    'ExtensionTarget throws ToolExit when same artifact is requested for multiple platforms',
+    () async {
+      final ExtensionTarget conflictingPlatformTarget = _createTarget(
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, platform: 'linux-arm64'),
+        ],
+      );
+
+      await expectLater(
+        () => conflictingPlatformTarget.build(environment),
+        throwsToolExit(
+          message:
+              'Assemble target "custom-target" requested artifact "genSnapshot" '
+              'for multiple target platforms or build modes.',
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'ExtensionTarget throws ToolExit when same artifact is requested for multiple modes',
+    () async {
+      final ExtensionTarget conflictingModeTarget = _createTarget(
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot, mode: .release),
+        ],
+      );
+
+      await expectLater(
+        () => conflictingModeTarget.build(environment),
+        throwsToolExit(
+          message:
+              'Assemble target "custom-target" requested artifact "genSnapshot" '
+              'for multiple target platforms or build modes.',
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'ExtensionTarget allows duplicate artifact sources that resolve to the same path',
+    () async {
+      final buildManager = FakeExtensionBuildManager();
+      final ExtensionTarget matchingDuplicateArtifactTarget = _createTarget(
+        buildManager: buildManager,
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
+          ExtensionSource.artifact(
+            BuiltInArtifacts.genSnapshot,
+            platform: 'linux-x64',
+            mode: .debug,
+          ),
+        ],
+      );
+
+      await matchingDuplicateArtifactTarget.build(environment);
+      expect(
+        buildManager.invokedResolvedArtifacts,
+        equals(<String, String>{
+          'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_x64.debug',
+        }),
+      );
+    },
+  );
+
+  testWithoutContext('ExtensionTarget supports custom targetPlatform on target with built-in platform override on genSnapshot', () async {
     final buildManager = FakeExtensionBuildManager();
     final ExtensionTarget customTargetPlatformTarget = _createTarget(
       buildManager: buildManager,
       targetPlatform: 'custom-embedder-arm64',
       inputs: const <ExtensionSource>[
         ExtensionSource.artifact(BuiltInArtifacts.icuData),
+        ExtensionSource.artifact(BuiltInArtifacts.flutterPatchedSdkPath),
         ExtensionSource.artifact(
           BuiltInArtifacts.genSnapshot,
           platform: 'linux-arm64',
@@ -511,26 +718,154 @@ void main() {
       ],
     );
 
+    final ResolvedFiles resolvedInputs = customTargetPlatformTarget.resolveInputs(environment);
+    expect(
+      resolvedInputs.sources.map((File file) => file.path),
+      containsAll(<String>[
+        'Artifact.icuData.debug',
+        'Artifact.flutterPatchedSdkPath.debug',
+        'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
+      ]),
+    );
+
     await customTargetPlatformTarget.build(environment);
 
     expect(
       buildManager.invokedResolvedArtifacts,
       equals(<String, String>{
         'icuData': 'Artifact.icuData.debug',
+        'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.debug',
         'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
       }),
     );
+  });
 
-    final ExtensionTarget invalidArtifactPlatformTarget = _createTarget(
-      inputs: const <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-artifact-platform'),
-      ],
+  testWithoutContext(
+    'ExtensionTarget throws ToolExit when artifact source specifies unsupported target platform',
+    () async {
+      const expectedMessage =
+          'Unsupported target platform "custom-artifact-platform" '
+          'for artifact "flutterPatchedSdkPath".';
+      final ExtensionTarget targetWithUnsupportedSourcePlatform = _createTarget(
+        inputs: const <ExtensionSource>[
+          ExtensionSource.artifact(
+            BuiltInArtifacts.flutterPatchedSdkPath,
+            platform: 'custom-artifact-platform',
+          ),
+        ],
+      );
+
+      expect(
+        () => targetWithUnsupportedSourcePlatform.resolveInputs(environment),
+        throwsToolExit(message: expectedMessage),
+      );
+
+      await expectLater(
+        () => targetWithUnsupportedSourcePlatform.build(environment),
+        throwsToolExit(message: expectedMessage),
+      );
+    },
+  );
+
+  testWithoutContext('ExtensionTarget throws ToolExit when target-specific artifact resolves to null target platform', () async {
+    const expectedGenSnapshotMessage =
+        'Artifact "genSnapshot" requires a built-in target platform; specify a built-in '
+        '"platform" on the artifact source when targeting out-of-tree platform '
+        '"custom-embedder-arm64".';
+    final ExtensionTarget outOfTreeGenSnapshotTarget = _createTarget(
+      targetPlatform: 'custom-embedder-arm64',
+      inputs: const <ExtensionSource>[ExtensionSource.artifact(BuiltInArtifacts.genSnapshot)],
+    );
+
+    expect(
+      () => outOfTreeGenSnapshotTarget.resolveInputs(environment),
+      throwsToolExit(message: expectedGenSnapshotMessage),
     );
 
     await expectLater(
-      () => invalidArtifactPlatformTarget.build(environment),
+      () => outOfTreeGenSnapshotTarget.build(environment),
+      throwsToolExit(message: expectedGenSnapshotMessage),
+    );
+
+    const expectedLinuxDesktopMessage =
+        'Artifact "linuxDesktopPath" requires a built-in target platform; specify a built-in '
+        '"platform" on the artifact source when targeting out-of-tree platform '
+        '"custom-embedder-arm64".';
+    final ExtensionTarget outOfTreeLinuxDesktopTarget = _createTarget(
+      targetPlatform: 'custom-embedder-arm64',
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(ExtensionArtifact('linuxDesktopPath')),
+      ],
+    );
+
+    expect(
+      () => outOfTreeLinuxDesktopTarget.resolveInputs(environment),
+      throwsToolExit(message: expectedLinuxDesktopMessage),
+    );
+
+    await expectLater(
+      () => outOfTreeLinuxDesktopTarget.build(environment),
+      throwsToolExit(message: expectedLinuxDesktopMessage),
+    );
+  });
+
+  testWithoutContext('resolveExtensionBuildTargetArtifacts resolves target-independent artifacts and throws ToolExit when target-specific artifact is requested for out-of-tree platform', () {
+    final Map<String, String> resolvedIndependent = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: .release,
+      target: ExtensionBuildTarget(
+        description: 'Out-of-tree build target with target-independent artifacts',
+        name: 'custom-target',
+        outputDir: '{OUTPUT_DIR}/custom',
+        targetPlatform: 'custom-embedder-arm64',
+        artifacts: const <ExtensionArtifact>{
+          BuiltInArtifacts.flutterPatchedSdkPath,
+          BuiltInArtifacts.icuData,
+        },
+      ),
+    );
+    expect(
+      resolvedIndependent,
+      equals(<String, String>{
+        'flutterPatchedSdkPath': 'Artifact.flutterPatchedSdkPath.release',
+        'icuData': 'Artifact.icuData.release',
+      }),
+    );
+
+    expect(
+      () => resolveExtensionBuildTargetArtifacts(
+        artifacts: artifacts,
+        buildMode: .release,
+        target: ExtensionBuildTarget(
+          description: 'Out-of-tree build target with genSnapshot',
+          name: 'custom-target',
+          outputDir: '{OUTPUT_DIR}/custom',
+          targetPlatform: 'custom-embedder-arm64',
+          artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
+        ),
+      ),
       throwsToolExit(
-        message: 'Invalid platform name "invalid-artifact-platform" for artifact "icuData".',
+        message:
+            'Artifact "genSnapshot" requires a built-in target platform, '
+            'but build target "custom-target" targets out-of-tree platform "custom-embedder-arm64".',
+      ),
+    );
+
+    expect(
+      () => resolveExtensionBuildTargetArtifacts(
+        artifacts: artifacts,
+        buildMode: .release,
+        target: ExtensionBuildTarget(
+          description: 'Platform-agnostic build target with genSnapshot',
+          name: 'agnostic-target',
+          outputDir: '{OUTPUT_DIR}/agnostic',
+          artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
+        ),
+      ),
+      throwsToolExit(
+        message:
+            'Artifact "genSnapshot" requires a built-in target platform, '
+            'but build target "agnostic-target" does not specify a targetPlatform.',
       ),
     );
   });
@@ -691,11 +1026,11 @@ void main() {
       ]),
     );
 
-    const assembleTarget = ExtensionAssembleTarget(
+    final assembleTarget = ExtensionAssembleTarget(
       description: 'Contract check assemble target',
       name: 'contract-assemble-target',
       targetPlatform: 'linux-x64',
-      inputs: <ExtensionSource>[
+      inputs: const <ExtensionSource>[
         ExtensionSource.artifact(BuiltInArtifacts.flutterPatchedSdkPath),
         ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
         ExtensionSource.artifact(BuiltInArtifacts.icuData),

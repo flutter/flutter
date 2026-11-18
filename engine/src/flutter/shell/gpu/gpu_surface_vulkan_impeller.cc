@@ -114,12 +114,15 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
         return false;
       }
 
-      return impeller::RenderToTarget(
-          aiks_context->GetContentContext(),                                //
-          render_target,                                                    //
-          display_list,                                                     //
-          cull_rect,                                                        //
-          /*reset_host_buffer=*/surface_frame.submit_info().frame_boundary  //
+      // This surface owns its AiksContext, so no other surface encodes into
+      // its transient host buffers. Reset them after every frame, including
+      // frames that are not the last surface submitted (such as platform
+      // view overlays, which set frame_boundary to false).
+      return impeller::RenderToTarget(aiks_context->GetContentContext(),  //
+                                      render_target,                      //
+                                      display_list,                       //
+                                      cull_rect,                          //
+                                      /*reset_host_buffer=*/true          //
       );
     };
 

@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:io' hide Platform;
 
 import 'package:flutter_tools/src/android/android_builder.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as file_system;
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
 import '../integration.shard/test_utils.dart';
@@ -57,8 +60,23 @@ class FakeAndroidBuilder implements AndroidBuilder {
 /// Creates a [FlutterProject] in a directory named `flutter_project`
 /// within [directoryOverride].
 class FakeFlutterProjectFactory extends FlutterProjectFactory {
-  FakeFlutterProjectFactory(this.directoryOverride)
-    : super(fileSystem: globals.fs, logger: globals.logger);
+  FakeFlutterProjectFactory(
+    this.directoryOverride, {
+    Config? config,
+    file_system.FileSystem? fileSystem,
+    Logger? logger,
+  }) : super(
+         config: config ?? Config.test(),
+         fileSystem:
+             fileSystem ??
+             (directoryOverride.fileSystem is ErrorHandlingFileSystem
+                 ? directoryOverride.fileSystem
+                 : ErrorHandlingFileSystem(
+                     delegate: directoryOverride.fileSystem,
+                     platform: const LocalPlatform(),
+                   )),
+         logger: logger ?? BufferLogger.test(),
+       );
 
   final file_system.Directory directoryOverride;
 

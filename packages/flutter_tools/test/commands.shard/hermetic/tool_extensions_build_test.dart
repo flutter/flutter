@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -138,7 +137,6 @@ final class _TestAssembleTarget extends AssembleTarget {
     this.dependencies = const <String>[],
     this.depfiles = const <String>[],
     this.errorMessage,
-    this.extraDefines = const <String, String>{},
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
   });
@@ -153,13 +151,12 @@ final class _TestAssembleTarget extends AssembleTarget {
   final List<String> depfiles;
 
   final String? errorMessage;
-  final Map<String, String> extraDefines;
   final bool shouldSucceed;
 
   @override
   Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
     return shouldSucceed
-        ? ExtensionBuildResult(success: true, extraDefines: extraDefines)
+        ? const ExtensionBuildResult(success: true)
         : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Assemble failed.');
   }
 }
@@ -185,8 +182,6 @@ final class _SucceedingBuildService extends BuildService {
     _TestAssembleTarget(
       description: 'Hermetic assemble-only target.',
       name: 'custom-hermetic-assemble-only',
-      depfiles: <String>['custom_hermetic.d'],
-      extraDefines: <String, String>{'HermeticDefine': 'enabled'},
     ),
   ];
 }
@@ -220,7 +215,6 @@ final class _FailingAndConflictingBuildService extends BuildService {
       artifacts: const <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
     ),
     _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
-    _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
   ];
 
   @override
@@ -229,6 +223,7 @@ final class _FailingAndConflictingBuildService extends BuildService {
     _TestAssembleTarget(
       description: 'Succeeding custom assemble target.',
       name: 'custom-assemble-target',
+      depfiles: <String>['custom_assemble.d'],
     ),
     _TestAssembleTarget(
       description: 'Assemble target with unknown dependency.',
@@ -246,6 +241,35 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FailingAndConflictingBuildService()],
+    extensionName: 'failing_extension',
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _InvalidTargetBuildService extends ToolExtensionService {
+  @override
+  String get namespace => BuildService.serviceNamespace;
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    return <String, ExtensionRpcHandler>{
+      'getBuildTargets': (_) async => <Map<String, Object?>>[
+        <String, Object?>{
+          'description': 'Target with invalid name',
+          'name': 'Invalid-Name',
+          'outputDir': '{OUTPUT_DIR}',
+          'targetPlatform': 'linux-x64',
+        },
+      ],
+    };
+  }
+}
+
+void _invalidTargetBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_InvalidTargetBuildService()],
+    extensionName: 'invalid_target_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -269,6 +293,7 @@ void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_FirstDuplicateBuildService()],
+    extensionName: 'first_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -299,6 +324,7 @@ void _secondDuplicateExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(
     sendPort,
     <ToolExtensionService>[_SecondDuplicateBuildService()],
+    extensionName: 'second_extension',
     supportedPlatforms: const <String>{'linux'},
   );
 }
@@ -477,10 +503,40 @@ final class _DeviceIdExtensionBuildSubCommand extends ExtensionBuildSubCommand {
   ArgResults? get globalResults => _deviceGlobalResults;
 }
 
+final class _DomainErrorBuildTarget extends BuildTarget {
+  _DomainErrorBuildTarget()
+    : super(
+        description: 'Custom target throwing ToolExtensionException',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom_os',
+        targetPlatform: 'linux-x64',
+      );
+
+  @override
+  String get name => 'custom-os-bundle';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    throw const ToolExtensionException('Custom compiler missing.');
+  }
+}
+
+final class _DomainErrorBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[_DomainErrorBuildTarget()];
+}
+
+void _domainErrorBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_DomainErrorBuildService()],
+    extensionName: 'custom_build_ext',
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = '/flutter';
   });
 
   group('Tool Extensions Build Integration - Disabled', () {
@@ -596,16 +652,14 @@ void main() {
 
   group('Tool Extensions Build Integration - Enabled', () {
     late MemoryFileSystem fs;
+    late Cache cache;
 
     setUp(() {
-      final String? oldFlutterRoot = Cache.flutterRoot;
-      addTearDown(() => Cache.flutterRoot = oldFlutterRoot);
-      Cache.flutterRoot = '/flutter';
-
       fs = MemoryFileSystem.test();
       fs.directory('/flutter').createSync(recursive: true);
       fs.file('/pubspec.yaml').createSync();
       fs.file('/lib/main.dart').createSync(recursive: true);
+      cache = FakeCache(fileSystem: fs, flutterRoot: '/flutter');
     });
 
     testWithoutContext('ExtensionBuildManager.getBuildTargets() and getAssembleTargets() return custom targets when feature flag enabled', () async {
@@ -840,7 +894,8 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Skipping duplicate build target "shared-target" from extension "unknown_extension".',
+            'Skipping duplicate build target "shared-target" from extension "second_extension" '
+            '(already registered by extension "first_extension").',
           ),
         );
 
@@ -863,7 +918,8 @@ void main() {
         expect(
           logger.warningText,
           contains(
-            'Skipping duplicate assemble target "shared-assemble-target" from extension "unknown_extension".',
+            'Skipping duplicate assemble target "shared-assemble-target" from extension "second_extension" '
+            '(already registered by extension "first_extension").',
           ),
         );
 
@@ -878,6 +934,36 @@ void main() {
           targetName: 'shared-assemble-target',
         );
         expect(assembleResult.success, isTrue);
+
+        await manager.dispose();
+      },
+    );
+
+    testWithoutContext(
+      'ExtensionBuildManager logs warning when extension returns invalid build target name',
+      () async {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_invalidTargetBuildExtensionEntryPoint],
+          featureFlags: featureFlags,
+        );
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: logger,
+        );
+
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+        expect(targets, isEmpty);
+        expect(
+          logger.warningText,
+          contains(
+            'Failed to query build targets from extension "invalid_target_extension": FormatException: Invalid "name" field: "Invalid-Name".',
+          ),
+        );
 
         await manager.dispose();
       },
@@ -908,6 +994,7 @@ void main() {
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
+            cache: cache,
             fs: fs,
             logger: testLogger,
           ),
@@ -956,6 +1043,7 @@ void main() {
       );
 
       final defaultCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -965,6 +1053,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> defaultRunner = createTestCommandRunner(defaultCommand);
       await defaultRunner.run(<String>[
@@ -981,6 +1070,7 @@ void main() {
       expect(buildManager.cachedAssembleTargets, isEmpty);
 
       final customCommand = AssembleCommand(
+        androidContext: FakeAndroidContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -990,6 +1080,7 @@ void main() {
         extensionBuildManager: buildManager,
         featureFlags: featureFlags,
         toolContext: toolContext,
+        xcode: null,
       );
       final CommandRunner<void> customRunner = createTestCommandRunner(customCommand);
       await customRunner.run(<String>[
@@ -1033,6 +1124,7 @@ void main() {
           platform: FakePlatform(),
         );
         final command = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: buildSystem,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
@@ -1043,6 +1135,7 @@ void main() {
             logger: logger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -1057,10 +1150,6 @@ void main() {
 
         expect(logger.traceText, contains('build succeeded.'));
         expect(fs.directory('/out').existsSync(), isTrue);
-        expect(
-          buildManager.cachedAssembleTargets.single.depfiles,
-          equals(<String>['custom_hermetic.d']),
-        );
 
         await manager.dispose();
       },
@@ -1079,7 +1168,7 @@ void main() {
       final subCommand = ExtensionBuildSubCommand(
         buildManager: fakeBuildManager,
         target: target,
-        toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
+        toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
         verboseHelp: false,
       );
 
@@ -1109,7 +1198,12 @@ void main() {
       final subCommand = ExtensionBuildSubCommand(
         buildManager: buildManager,
         target: target,
-        toolContext: FakeToolContext(config: config, fs: fs, logger: BufferLogger.test()),
+        toolContext: FakeToolContext(
+          cache: cache,
+          config: config,
+          fs: fs,
+          logger: BufferLogger.test(),
+        ),
         verboseHelp: false,
       );
 
@@ -1134,7 +1228,7 @@ void main() {
         final subCommand = ExtensionBuildSubCommand(
           buildManager: buildManager,
           target: target,
-          toolContext: FakeToolContext(fs: fs, logger: BufferLogger.test()),
+          toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
           verboseHelp: false,
         );
 
@@ -1172,6 +1266,7 @@ void main() {
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
+            cache: cache,
             fs: fs,
             logger: testLogger,
           ),
@@ -1196,18 +1291,24 @@ void main() {
         expect(
           testLogger.warningText,
           contains(
-            'Skipping custom build target "bundle" because a subcommand with that name already exists.',
+            'Skipping custom build target "bundle" from extension "failing_extension" because a subcommand with that name already exists.',
           ),
         );
         expect(command.subcommands['bundle'], isA<BuildBundleCommand>());
-        expect(command.subcommands.containsKey(''), isFalse);
 
         final assembleCommand = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
           ) {
             target.dependencies;
+            if (target is CompositeTarget) {
+              final Target customTarget = target.dependencies.firstWhere(
+                (Target t) => t.name == 'custom-assemble-target',
+              );
+              expect(customTarget.depfiles, equals(<String>['custom_assemble.d']));
+            }
           }),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
@@ -1218,6 +1319,7 @@ void main() {
             logger: testLogger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
         await assembleRunner.run(<String>[
@@ -1232,7 +1334,7 @@ void main() {
         expect(
           testLogger.warningText,
           contains(
-            'Skipping custom assemble target "copy_assets" because a target with that name already exists.',
+            'Skipping custom assemble target "copy_assets" from extension "failing_extension" because a target with that name already exists.',
           ),
         );
 
@@ -1247,7 +1349,7 @@ void main() {
           ]),
           throwsToolExit(
             message:
-                'Target "non-existent-dep" required by "unknown-dep-assemble-target" not found. '
+                'Target "non-existent-dep" required by "unknown-dep-assemble-target" from extension "failing_extension" not found. '
                 'It might not be registered.',
           ),
         );
@@ -1286,6 +1388,7 @@ void main() {
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
+            cache: cache,
             fs: fs,
             logger: testLogger,
           ),
@@ -1479,6 +1582,7 @@ void main() {
       final pendingTargetBuilds = <Future<void>>[];
       Future<void> runAssemble(List<String> targetNames) async {
         final command = AssembleCommand(
+          androidContext: FakeAndroidContext(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
@@ -1502,6 +1606,7 @@ void main() {
             logger: logger,
             processManager: FakeProcessManager.any(),
           ),
+          xcode: null,
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>[
@@ -1550,6 +1655,36 @@ void main() {
       );
 
       await manager.dispose();
+    });
+
+    testWithoutContext('ExtensionBuildManager.build returns failed ExtensionBuildResult when build target throws ToolExtensionException', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_domainErrorBuildExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      addTearDown(manager.dispose);
+
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final ExtensionBuildResult result = await buildManager.build(
+        buildMode: .debug,
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: 'lib/main.dart',
+        outputDir: Uri.directory('/project/build/custom_os'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{},
+        targetName: 'custom-os-bundle',
+      );
+      expect(result.success, isFalse);
+      expect(result.errorMessage, 'Custom compiler missing.');
     });
   });
 }

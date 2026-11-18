@@ -348,6 +348,158 @@ TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {
   EXPECT_FALSE(bundle.has_value());
 }
 
+static std::optional<fb::shaderbundle::ShaderBundleT> GenerateComputeBundle(
+    const std::string& fixture_name) {
+  std::string config = "{\"Compute\": {\"type\": \"compute\", \"file\": \"" +
+                       std::string(flutter::testing::GetFixturesPath()) + "/" +
+                       fixture_name + "\"}}";
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+  return GenerateShaderBundleFlatbuffer(config, options);
+}
+
+TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferReflectsComputeShader) {
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateComputeBundle("flutter_gpu_compute.comp");
+  ASSERT_TRUE(bundle.has_value());
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  const auto* compute = FindByName(bundle->shaders, "Compute");
+  ASSERT_NE(compute, nullptr);
+
+  // Every backend gets a variant, including OpenGL ES and desktop OpenGL.
+  const std::vector<const fb::shaderbundle::BackendShaderT*> variants = {
+      compute->metal_ios.get(), compute->metal_desktop.get(),
+      compute->opengl_es.get(), compute->opengl_desktop.get(),
+      compute->vulkan.get()};
+  for (const auto* variant : variants) {
+    ASSERT_NE(variant, nullptr);
+    EXPECT_EQ(variant->stage, fb::shaderbundle::ShaderStage::kCompute);
+    ASSERT_NE(variant->workgroup_size, nullptr);
+    EXPECT_EQ(variant->workgroup_size->x(), 8u);
+    EXPECT_EQ(variant->workgroup_size->y(), 4u);
+    EXPECT_EQ(variant->workgroup_size->z(), 2u);
+
+    const auto* input = FindByName(variant->storage_buffers, "InputData");
+    ASSERT_NE(input, nullptr);
+    EXPECT_EQ(input->binding, 0u);
+    EXPECT_EQ(input->access, fb::shaderbundle::ShaderResourceAccess::kReadOnly);
+    EXPECT_EQ(input->size_in_bytes, 16u);
+    EXPECT_EQ(input->runtime_array_stride, 16u);
+
+    const auto* output = FindByName(variant->storage_buffers, "OutputData");
+    ASSERT_NE(output, nullptr);
+    EXPECT_EQ(output->binding, 1u);
+    EXPECT_EQ(output->access,
+              fb::shaderbundle::ShaderResourceAccess::kWriteOnly);
+    EXPECT_EQ(output->size_in_bytes, 0u);
+    EXPECT_EQ(output->runtime_array_stride, 16u);
+
+    const auto* accumulator =
+        FindByName(variant->storage_buffers, "Accumulator");
+    ASSERT_NE(accumulator, nullptr);
+    EXPECT_EQ(accumulator->binding, 2u);
+    EXPECT_EQ(accumulator->access,
+              fb::shaderbundle::ShaderResourceAccess::kReadWrite);
+    EXPECT_EQ(accumulator->size_in_bytes, 16u);
+    EXPECT_EQ(accumulator->runtime_array_stride, 0u);
+
+    // Uniform blocks are still reflected separately.
+    EXPECT_NE(FindByName(variant->uniform_structs, "Params"), nullptr);
+  }
+
+  // Vulkan binds by binding number, so the extended resource index is the
+  // binding itself.
+  for (const auto& storage_buffer : compute->vulkan->storage_buffers) {
+    EXPECT_EQ(storage_buffer->ext_res_0, storage_buffer->binding);
+  }
+
+  // Metal assigns buffer indices only to live resources. The storage buffer
+  // whose read is overwritten is dead and carries the optimized-out sentinel.
+  const auto* unused =
+      FindByName(compute->metal_desktop->storage_buffers, "Unused");
+  ASSERT_NE(unused, nullptr);
+  EXPECT_EQ(unused->ext_res_0, kOptimizedOutBinding);
+  const auto* live =
+      FindByName(compute->metal_desktop->storage_buffers, "InputData");
+  ASSERT_NE(live, nullptr);
+  EXPECT_NE(live->ext_res_0, kOptimizedOutBinding);
+
+  // The OpenGL variants are emitted at the first versions with compute.
+  const auto starts_with = [](const std::vector<uint8_t>& code,
+                              const std::string& prefix) {
+    return code.size() >= prefix.size() &&
+           std::equal(prefix.begin(), prefix.end(), code.begin());
+  };
+  EXPECT_TRUE(starts_with(compute->opengl_es->shader, "#version 310 es"));
+  EXPECT_TRUE(starts_with(compute->opengl_desktop->shader, "#version 430"));
+}
+
+TEST(ShaderBundleTest, ComputeMetadataRoundTripsThroughSerialization) {
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateComputeBundle("flutter_gpu_compute.comp");
+  ASSERT_TRUE(bundle.has_value());
+
+  flatbuffers::FlatBufferBuilder builder;
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  builder.Finish(fb::shaderbundle::ShaderBundle::Pack(builder, &bundle.value()),
+                 fb::shaderbundle::ShaderBundleIdentifier());
+  flatbuffers::Verifier verifier(builder.GetBufferPointer(), builder.GetSize());
+  ASSERT_TRUE(fb::shaderbundle::VerifyShaderBundleBuffer(verifier));
+
+  const auto* read =
+      fb::shaderbundle::GetShaderBundle(builder.GetBufferPointer());
+  EXPECT_EQ(read->format_version(),
+            static_cast<uint32_t>(
+                fb::shaderbundle::ShaderBundleFormatVersion::kVersion));
+  ASSERT_EQ(read->shaders()->size(), 1u);
+  const auto* vulkan = read->shaders()->Get(0)->vulkan();
+  ASSERT_NE(vulkan, nullptr);
+  ASSERT_NE(vulkan->workgroup_size(), nullptr);
+  EXPECT_EQ(vulkan->workgroup_size()->x(), 8u);
+  EXPECT_EQ(vulkan->workgroup_size()->y(), 4u);
+  EXPECT_EQ(vulkan->workgroup_size()->z(), 2u);
+  ASSERT_NE(vulkan->storage_buffers(), nullptr);
+  bool found_output = false;
+  for (const auto* storage_buffer : *vulkan->storage_buffers()) {
+    if (storage_buffer->name()->str() == "OutputData") {
+      found_output = true;
+      EXPECT_EQ(storage_buffer->access(),
+                fb::shaderbundle::ShaderResourceAccess::kWriteOnly);
+      EXPECT_EQ(storage_buffer->runtime_array_stride(), 16u);
+    }
+  }
+  EXPECT_TRUE(found_output);
+}
+
+TEST(ShaderBundleTest, RejectsComputeShaderWithSpecializedWorkgroupSize) {
+  EXPECT_FALSE(
+      GenerateComputeBundle("flutter_gpu_compute_specialized_size.comp")
+          .has_value());
+}
+
+TEST(ShaderBundleTest, RenderShadersCarryNoComputeMetadata) {
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config =
+      "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"" +
+      fixtures_path +
+      "/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": "
+      "\"vertex\", \"file\": \"" +
+      fixtures_path + "/flutter_gpu_unlit.vert\"}}";
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options);
+  ASSERT_TRUE(bundle.has_value());
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  for (const auto& shader : bundle->shaders) {
+    EXPECT_EQ(shader->vulkan->workgroup_size, nullptr);
+    EXPECT_TRUE(shader->vulkan->storage_buffers.empty());
+  }
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

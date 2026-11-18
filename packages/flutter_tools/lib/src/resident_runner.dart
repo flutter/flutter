@@ -49,6 +49,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
+import 'windows/visual_studio.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -156,8 +157,13 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = _toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -215,6 +221,7 @@ class FlutterDevice {
         try {
           await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
             vmServiceUri,
+            artifacts: artifacts,
             debuggingOptions: debuggingOptions,
             appName:
                 'Kind: Flutter - Device: ${device!.displayName} - '
@@ -268,6 +275,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+          flutterVersion: flutterVersion,
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
           logger: logger,
@@ -1023,11 +1031,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     cacheDir: cache.getRoot(),
     engineVersion: flutterVersion.engineRevision,
     fileSystem: fileSystem,
-    flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+    flutterRootDir: fileSystem.directory(cache.flutterRoot),
     outputDir: fileSystem.directory(getBuildDirectory(config, fileSystem)),
     processManager: processManager,
     platform: platform,
     analytics: analytics,
+    androidSdkBuilder: null,
+    projectFactory: toolContext.projectFactory,
+    visualStudio: VisualStudio(toolContext: toolContext),
+    xcode: xcode,
     projectDir: fileSystem.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,

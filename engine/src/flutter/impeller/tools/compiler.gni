@@ -146,6 +146,9 @@ template("impellerc") {
         invoker.require_framebuffer_fetch) {
       args += [ "--require-framebuffer-fetch" ]
     }
+    if (defined(invoker.minify) && invoker.minify) {
+      args += [ "--minify" ]
+    }
 
     if (defined(invoker.entry_point_prefix)) {
       args += [ "--entry-point-prefix=${invoker.entry_point_prefix}" ]

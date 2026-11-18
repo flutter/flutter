@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 
@@ -15,7 +16,7 @@ import 'protocol_base/service.dart';
 /// Extensions should extend this class to contribute top-level `flutter build`
 /// subcommands via [BuildService.buildTargets].
 @immutable
-abstract class BuildTarget {
+abstract base class BuildTarget {
   BuildTarget({
     required this.description,
     required this.outputDir,
@@ -34,6 +35,8 @@ abstract class BuildTarget {
        );
 
   /// The user-readable name of the target (exposed as `flutter build <name>`).
+  ///
+  /// Must match [ExtensionBuildTarget.isValidName].
   String get name;
 
   /// Description of what this target builds.
@@ -46,6 +49,12 @@ abstract class BuildTarget {
   /// embedders can declare platform identifiers that are not built into Flutter.
   /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
+  ///
+  /// When `null`, [outputDir] must not reference
+  /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
+  /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
+  /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
+  // TODO(bkonyi): Replace with declared supported target platforms on BuildTarget and a selected target platform on ExtensionBuildContext, https://github.com/flutter/flutter/issues/194810.
   final String? targetPlatform;
 
   final Set<String> _targetPlatforms;
@@ -67,7 +76,8 @@ abstract class BuildTarget {
   /// Supports [BuiltInPlaceholders.outputDir] (the project's configured build
   /// output root from `flutter config --build-dir`, defaulting to
   /// `<project>/build`), [BuiltInPlaceholders.projectDir],
-  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform]
+  /// (when [targetPlatform] is non-null).
   final String outputDir;
 
   /// Engine artifacts required by this build target, resolved for [targetPlatform]
@@ -96,7 +106,7 @@ abstract class BuildTarget {
 /// Extensions should extend this class to contribute `flutter assemble` targets
 /// with tracked [dependencies], [inputs], and [outputs] via [BuildService.assembleTargets].
 @immutable
-abstract class AssembleTarget {
+abstract base class AssembleTarget {
   const AssembleTarget({required this.description, required this.targetPlatform});
 
   /// The user-readable name of the assemble target.
@@ -117,9 +127,19 @@ abstract class AssembleTarget {
 
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
+  /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
+  /// files into their build directory and [Depfile.parse] to read them back.
+  ///
+  /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName].
+  /// Relative paths inside each depfile are resolved against the project root
+  /// directory and rewritten in place with normalized paths by the host after
+  /// a successful build. If a declared depfile is missing or invalid after a
+  /// successful build, the host logs an error and disables incremental build
+  /// caching for this target without failing the build.
+  ///
   /// See also:
   ///
-  /// * [ExtensionDepfile], which formats and parses `.d` dependency files.
+  /// * [Depfile], which formats and parses `.d` dependency files.
   List<String> get depfiles => const <String>[];
 
   /// The input [ExtensionSource]s for this target.

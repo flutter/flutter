@@ -6,10 +6,12 @@ assert(is_linux)
 
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/platform/glfw/config.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 group("linux") {
   deps = [
+    ":check_native_symbols",
     ":flutter_linux_gtk",
     ":publish_headers_linux",
   ]
@@ -348,6 +350,13 @@ shared_library("flutter_linux_gtk") {
   public_configs = [ "//flutter:config" ]
 }
 
+check_forbidden_native_symbols("check_native_symbols") {
+  deps = [ ":flutter_linux_gtk" ]
+  _out_dir = get_label_info(":flutter_linux_gtk", "root_out_dir")
+  _lib_name = get_label_info(":flutter_linux_gtk", "name")
+  library = "$_out_dir/lib$_lib_name.so"
+}
+
 copy("publish_headers_linux") {
   sources = _public_headers
   outputs = [ "$root_out_dir/flutter_linux/{{source_file_part}}" ]
@@ -357,6 +366,7 @@ zip_bundle("flutter_gtk") {
   prefix = "$full_target_platform_name-$flutter_runtime_mode/"
   output = "${prefix}${full_target_platform_name}-flutter-gtk.zip"
   deps = [
+    ":check_native_symbols",
     ":flutter_linux_gtk",
     ":publish_headers_linux",
     "$dart_src/runtime/bin:gen_snapshot",

@@ -4,17 +4,29 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.
 typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> params);
 
+/// Callback signature for sending a JSON-RPC 2.0 notification from an extension
+/// service to the host tool.
+typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
+
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
-/// Extension authors implement this class to group related RPC endpoints under
-/// a specific [namespace] (e.g. `diagnostics`, `configuration`, `device`, `build`, `templates`).
-abstract class ToolExtensionService {
+/// Extension authors extend this class (via specific service base classes) to
+/// group related RPC endpoints under a specific [namespace] (e.g.
+/// `diagnostics`, `config`, `device`, `build`, `template`).
+abstract base class ToolExtensionService {
+  /// Internal JSON-RPC notification sender callback used by [sendNotification].
+  ///
+  /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
+  /// listening for RPC requests.
+  @internal
+  ExtensionNotificationSender? notificationSender;
+
   /// The namespace string of the service (e.g. `'diagnostics'`).
   String get namespace;
 
@@ -23,7 +35,28 @@ abstract class ToolExtensionService {
   /// The returned map maps method names (without namespace prefix) to handler functions.
   Future<Map<String, ExtensionRpcHandler>> initialize();
 
+  /// Sends a fire-and-forget JSON-RPC 2.0 notification with [method] and
+  /// [params] to the host tool.
+  ///
+  /// Throws a [StateError] if called before this service has been attached to
+  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  void sendNotification(String method, Map<String, Object?> params) {
+    final ExtensionNotificationSender? sender = notificationSender;
+    if (sender == null) {
+      throw StateError(
+        'Cannot send notification "$method": service "$namespace" is not attached to an active peer.',
+      );
+    }
+    sender(method, params);
+  }
+
   /// Cleans up resources held by the service when the extension is shut down.
+  ///
+  /// Invoked by `ToolExtensionEntryPoint.run` when the host tool sends an
+  /// `extension.shutdown` RPC on CLI exit or connection disposal. Runs
+  /// concurrently across all registered services in the isolate via
+  /// `Future.wait`, with a bounded grace period of approximately 2 seconds on
+  /// the host before the extension isolate is terminated.
   Future<void> shutdown() async {}
 }
 

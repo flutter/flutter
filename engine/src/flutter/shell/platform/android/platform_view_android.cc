@@ -34,6 +34,7 @@
 
 #include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/entity/contents/content_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -50,18 +51,25 @@ namespace flutter {
 
 namespace {
 
+// Minimum Android SDK version required for Hybrid Composition++ (HCPP) and
+// SurfaceControl-backed swapchains (Android 14 / API 34, which introduced
+// ASurfaceTransaction_fromJava).
 static constexpr int kMinAPILevelHCPP = 34;
 static constexpr int64_t kImplicitViewId = 0;
 
-AndroidContext::ContextSettings CreateContextSettings(
-    const Settings& p_settings) {
+}  // namespace
+
+AndroidContext::ContextSettings PlatformViewAndroid::CreateContextSettings(
+    const Settings& p_settings,
+    int api_level) {
   AndroidContext::ContextSettings settings;
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
-  settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.enable_surface_control =
+      p_settings.enable_surface_control && api_level >= kMinAPILevelHCPP;
+  settings.impeller_flags.use_sdfs = p_settings.impeller_use_sdfs;
   return settings;
 }
-}  // namespace
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
@@ -123,7 +131,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     case AndroidRenderingAPI::kImpellerOpenGLES:
       return std::make_unique<AndroidContextGLImpeller>(
           std::make_unique<impeller::egl::Display>(), enable_opengl_gpu_tracing,
-          std::move(io_task_runner));
+          settings.impeller_flags, std::move(io_task_runner));
     case AndroidRenderingAPI::kImpellerAutoselect:
       // Determine if we're using GL or Vulkan.
       return std::make_unique<AndroidContextDynamicImpeller>(
@@ -145,7 +153,8 @@ PlatformViewAndroid::PlatformViewAndroid(
               task_runners,
               rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
-              CreateContextSettings(delegate.OnPlatformViewGetSettings()),
+              CreateContextSettings(delegate.OnPlatformViewGetSettings(),
+                                    android_get_device_api_level()),
               delegate.OnPlatformViewGetShutdownSafeIOTaskRunner())) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
@@ -427,8 +436,34 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
   if (!android_surface_) {
     return nullptr;
   }
-  return android_surface_->CreateGPUSurface(
+  std::unique_ptr<Surface> surface = android_surface_->CreateGPUSurface(
       android_context_->GetMainSkiaContext().get());
+  // Creating the GPU surface sets up the swapchain, which is what may change
+  // the context's default color format.
+  CheckWarmedColorFormat();
+  return surface;
+}
+
+void PlatformViewAndroid::CheckWarmedColorFormat() const {
+  if (!warmed_color_format_.has_value()) {
+    return;
+  }
+  std::shared_ptr<impeller::Context> impeller_context =
+      android_context_->GetImpellerContext();
+  if (!impeller_context) {
+    return;
+  }
+  // Only read by the DCHECK below, which compiles out of release builds.
+  [[maybe_unused]] const impeller::PixelFormat surface_color_format =
+      impeller_context->GetCapabilities()->GetDefaultColorFormat();
+  FML_DCHECK(surface_color_format == warmed_color_format_.value())
+      << "The default pipelines were warmed for "
+      << impeller::PixelFormatToString(warmed_color_format_.value())
+      << " but the surface renders to "
+      << impeller::PixelFormatToString(surface_color_format)
+      << ", so they will be compiled again. Reevaluate the call to "
+         "ContentContext::WarmDefaultPipelines in "
+         "PlatformViewAndroid::SetupImpellerContext.";
 }
 
 // |PlatformView|
@@ -567,6 +602,23 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
   android_surface_->SetupImpellerSurface();
+
+  // Start compiling the default pipelines now, on the raster thread where the
+  // surface's ContentContext will later look them up, instead of waiting for
+  // the first surface to be created. Compilation happens off this thread (on
+  // the IO thread for OpenGL ES, on worker threads for Vulkan), so no rendering
+  // context needs to be current here.
+  //
+  // The pipelines are keyed on the context's default color format, which the
+  // Vulkan swapchain may change once a surface exists. On Android it is always
+  // R8G8B8A8, so the pipelines warmed here are the ones the surface uses.
+  // |CheckWarmedColorFormat| asserts that this stays true.
+  if (std::shared_ptr<impeller::Context> impeller_context =
+          android_context_->GetImpellerContext()) {
+    warmed_color_format_ =
+        impeller_context->GetCapabilities()->GetDefaultColorFormat();
+    impeller::ContentContext::WarmDefaultPipelines(*impeller_context);
+  }
 }
 
 }  // namespace flutter

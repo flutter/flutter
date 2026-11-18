@@ -2,36 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
-import '../build.dart';
+const _listEquality = ListEquality<String>();
 
-/// Representation of a `.d` dependency file containing [inputs] and [outputs]
-/// file paths for an [ExtensionAssembleTarget].
-///
-/// Extensions that declare [ExtensionAssembleTarget.depfiles] can use
-/// [ExtensionDepfile.format] to write `.d` files into their build directory
-/// and [ExtensionDepfile.parse] to read them back.
+/// Unresolved [inputs] and [outputs] file paths parsed from or formatted to a
+/// `.d` dependency file.
 @immutable
-class ExtensionDepfile {
-  const ExtensionDepfile({this.inputs = const <String>[], this.outputs = const <String>[]});
+final class Depfile {
+  const Depfile({this.inputs = const <String>[], this.outputs = const <String>[]});
 
-  /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into an [ExtensionDepfile].
+  /// Parses `.d` depfile [contents] (`<outputs>: <inputs>`) into a [Depfile].
   ///
   /// Throws a [FormatException] if [contents] does not contain a single `": "`
   /// separator between outputs and inputs.
-  factory ExtensionDepfile.parse(String contents) {
+  factory Depfile.parse(String contents) {
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
       throw const FormatException('Invalid depfile syntax: expected "<outputs>: <inputs>".');
     }
     final List<String> outputs = _processList(colonSeparated[0].trim());
     final List<String> inputs = _processList(colonSeparated[1].trim());
-    return ExtensionDepfile(inputs: inputs, outputs: outputs);
+    return Depfile(inputs: inputs, outputs: outputs);
   }
 
-  static final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-  static final RegExp _escapeExpr = RegExp(r'\\(.)');
+  // Matches unescaped spaces separating file paths in a depfile rule.
+  static final _separatorExpr = RegExp(r'([^\\]) ');
+
+  // Matches backslash-escaped characters (such as `\ ` or `\\`) in a file path.
+  static final _escapeExpr = RegExp(r'\\(.)');
 
   /// The input file paths recorded in this depfile.
   final List<String> inputs;
@@ -81,31 +81,16 @@ class ExtensionDepfile {
   }
 
   @override
-  String toString() => 'ExtensionDepfile(inputs: $inputs, outputs: $outputs)';
+  String toString() => 'Depfile(inputs: $inputs, outputs: $outputs)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other is ExtensionDepfile &&
-            _listEquals(other.inputs, inputs) &&
-            _listEquals(other.outputs, outputs));
+        (other is Depfile &&
+            _listEquality.equals(other.inputs, inputs) &&
+            _listEquality.equals(other.outputs, outputs));
   }
 
   @override
-  int get hashCode => Object.hash(Object.hashAll(inputs), Object.hashAll(outputs));
-}
-
-bool _listEquals<T>(List<T> a, List<T> b) {
-  if (identical(a, b)) {
-    return true;
-  }
-  if (a.length != b.length) {
-    return false;
-  }
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return false;
-    }
-  }
-  return true;
+  int get hashCode => Object.hash(_listEquality.hash(inputs), _listEquality.hash(outputs));
 }

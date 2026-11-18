@@ -205,6 +205,17 @@ class ChromiumLauncher {
         return userDataDir;
       }
     }
+    // WARNING: `flutter test --platform chrome` depends on this directory being
+    // new for every launch. The test server in `FlutterWebPlatform` sends
+    // `Cache-Control: max-age` with no validator (`ETag` or `Last-Modified`),
+    // so Chrome serves cached test assets without asking the server. A fresh
+    // directory means an empty HTTP cache, which limits that to one invocation.
+    //
+    // If this directory (or its `Cache` and `Code Cache` subdirectories) is
+    // ever reused across invocations, a later run that binds the same port can
+    // load stale compiled test code from an earlier run. Before reusing it,
+    // either add a per-invocation validator to those responses or put a
+    // per-invocation token in the asset URLs.
     return _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
   }
 
@@ -461,7 +472,7 @@ class ChromiumLauncher {
           throwToolExit(
             'Failed to launch browser. Make sure you are using an up-to-date '
             'Chrome or Edge. Otherwise, consider using -d web-server instead '
-            'and filing an issue at https://github.com/flutter/flutter/issues.\n'
+            'and filing an issue at https://github.com/flutter/flutter/issues\n'
             'Error: $error',
           );
         }
@@ -576,7 +587,11 @@ class ChromiumLauncher {
     }
   }
 
-  // Cache, Code Cache, and GPUCache are nearly 1GB of data
+  // Cache, Code Cache, and GPUCache are nearly 1GB of data.
+  //
+  // Skipping `Cache` and `Code Cache` also keeps Chrome's HTTP cache from
+  // outliving a launch, which `flutter test --platform chrome` depends on. See
+  // the warning in [_createUserDataDirectory].
   bool _isNotCacheDirectory(Directory directory) {
     return !directory.path.endsWith('Cache') &&
         !directory.path.endsWith('Code Cache') &&
