@@ -6,10 +6,8 @@
 
 #import <WebKit/WebKit.h>
 
-#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -173,6 +171,29 @@ static BOOL _preparedOnce = NO;
 
 @end
 
+// Returns YES if `size` has no area.
+static BOOL IsEmpty(CGSize size) {
+  return !(size.width > 0 && size.height > 0);
+}
+
+// Returns YES if none of the corners in `radii` are rounded.
+static BOOL AreAllCornersSquare(FlutterPlatformViewCornerRadii radii) {
+  return IsEmpty(radii.topLeft) && IsEmpty(radii.topRight) && IsEmpty(radii.bottomLeft) &&
+         IsEmpty(radii.bottomRight);
+}
+
+// Returns YES if all of the corners in `radii` have the same radii.
+static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
+  // The tolerance that `impeller::RoundingRadii::AreAllCornersSame` uses.
+  static const CGFloat kTolerance = 1e-3;
+  return fabs(radii.topLeft.width - radii.topRight.width) <= kTolerance &&
+         fabs(radii.topLeft.width - radii.bottomRight.width) <= kTolerance &&
+         fabs(radii.topLeft.width - radii.bottomLeft.width) <= kTolerance &&
+         fabs(radii.topLeft.height - radii.topRight.height) <= kTolerance &&
+         fabs(radii.topLeft.height - radii.bottomRight.height) <= kTolerance &&
+         fabs(radii.topLeft.height - radii.bottomLeft.height) <= kTolerance;
+}
+
 @interface FlutterClippingMaskView ()
 
 // A `CATransform3D` matrix represnts a scale transform that revese UIScreen.scale.
@@ -267,12 +288,10 @@ static BOOL _preparedOnce = NO;
   }
 }
 
-- (void)clipRect:(const flutter::DlRect&)clipDlRect matrix:(const flutter::DlMatrix&)matrix {
-  CGRect clipRect = flutter::GetCGRectFromDlRect(clipDlRect);
+- (void)clipRect:(CGRect)clipRect matrix:(CATransform3D)matrix {
   fml::CFRef<CGPathRef> path(CGPathCreateWithRect(clipRect, nil));
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
-  CATransform3D matrixInPoints =
-      CATransform3DConcat(flutter::GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseScreenScale);
   paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
   CGAffineTransform affine = [self affineWithMatrix:matrixInPoints];
   // Make sure the rect is not rotated (only translated or scaled).
@@ -283,34 +302,32 @@ static BOOL _preparedOnce = NO;
   }
 }
 
-- (void)clipRRect:(const flutter::DlRoundRect&)clipDlRRect matrix:(const flutter::DlMatrix&)matrix {
-  if (clipDlRRect.IsEmpty()) {
+- (void)clipRRect:(CGRect)clipRect
+            radii:(FlutterPlatformViewCornerRadii)radii
+           matrix:(CATransform3D)matrix {
+  if (IsEmpty(clipRect.size)) {
     return;
-  } else if (clipDlRRect.IsRect()) {
-    [self clipRect:clipDlRRect.GetBounds() matrix:matrix];
+  } else if (AreAllCornersSquare(radii)) {
+    [self clipRect:clipRect matrix:matrix];
     return;
   } else {
     fml::CFRef<CGPathRef> pathRef;
     containsNonRectPath_ = YES;
 
-    if (clipDlRRect.GetRadii().AreAllCornersSame()) {
-      CGRect clipRect = flutter::GetCGRectFromDlRect(clipDlRRect.GetBounds());
-      auto radii = clipDlRRect.GetRadii();
+    if (AreAllCornersSame(radii)) {
       pathRef.Reset(
-          CGPathCreateWithRoundedRect(clipRect, radii.top_left.width, radii.top_left.height, nil));
+          CGPathCreateWithRoundedRect(clipRect, radii.topLeft.width, radii.topLeft.height, nil));
     } else {
       CGMutablePathRef mutablePathRef = CGPathCreateMutable();
       // Complex types, we manually add each corner.
-      flutter::DlRect clipDlRect = clipDlRRect.GetBounds();
-      auto left = clipDlRect.GetLeft();
-      auto top = clipDlRect.GetTop();
-      auto right = clipDlRect.GetRight();
-      auto bottom = clipDlRect.GetBottom();
-      flutter::DlRoundingRadii radii = clipDlRRect.GetRadii();
-      auto& top_left = radii.top_left;
-      auto& top_right = radii.top_right;
-      auto& bottom_left = radii.bottom_left;
-      auto& bottom_right = radii.bottom_right;
+      CGFloat left = CGRectGetMinX(clipRect);
+      CGFloat top = CGRectGetMinY(clipRect);
+      CGFloat right = CGRectGetMaxX(clipRect);
+      CGFloat bottom = CGRectGetMaxY(clipRect);
+      CGSize top_left = radii.topLeft;
+      CGSize top_right = radii.topRight;
+      CGSize bottom_left = radii.bottomLeft;
+      CGSize bottom_right = radii.bottomRight;
 
       // Start drawing RRect
       // These calculations are off, the AddCurve methods add a Bezier curve
@@ -351,8 +368,7 @@ static BOOL _preparedOnce = NO;
       pathRef.Reset(mutablePathRef);
     }
     // The `matrix` is based on the physical pixels, convert it to UIKit points.
-    CATransform3D matrixInPoints =
-        CATransform3DConcat(flutter::GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+    CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseScreenScale);
     // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated
     // that the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard
     // edge clipping on iOS.
@@ -360,14 +376,11 @@ static BOOL _preparedOnce = NO;
   }
 }
 
-- (void)clipPath:(const flutter::DlPath&)dlPath matrix:(const flutter::DlMatrix&)matrix {
+- (void)clipPath:(CGPathRef)path matrix:(CATransform3D)matrix {
   containsNonRectPath_ = YES;
 
-  fml::CFRef<CGPathRef> path = flutter::GetCGPathFromDlPath(dlPath);
-
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
-  CATransform3D matrixInPoints =
-      CATransform3DConcat(flutter::GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseScreenScale);
   paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
 }
 
