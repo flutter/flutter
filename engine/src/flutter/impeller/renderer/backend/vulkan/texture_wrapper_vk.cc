@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -64,6 +65,8 @@ std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
     const TextureDescriptor& desc,
     vk::Image image,
     std::function<void()> cleanup) {
+  // Runs `cleanup` on every return that does not hand it to a source.
+  fml::ScopedCleanupClosure cleanup_on_failure(std::move(cleanup));
   if (!image) {
     return nullptr;
   }
@@ -86,8 +89,8 @@ std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(
     return nullptr;
   }
 
-  return std::make_shared<WrappedTextureSourceVK>(image, std::move(image_view),
-                                                  desc, std::move(cleanup));
+  return std::make_shared<WrappedTextureSourceVK>(
+      image, std::move(image_view), desc, cleanup_on_failure.Release());
 }
 
 }  // namespace impeller

@@ -23,10 +23,11 @@ namespace impeller {
 ///             a layout the intended usage allows. An image view is created for
 ///             it and owned by the returned source.
 ///
-///             Returns nullptr if the view could not be created. If `cleanup`
-///             is provided and this succeeds, `cleanup` is invoked when the
+///             Returns nullptr if the view could not be created.
+///
+///             If `cleanup` is provided it is invoked exactly once: when the
 ///             returned source is destroyed (after its framebuffer and image
-///             view are released).
+///             view are released), or before returning if this fails.
 ///
 /// @see        `WrapTextureMTL`, the Metal equivalent.
 std::shared_ptr<TextureSourceVK> WrapTextureSourceVK(

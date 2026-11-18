@@ -1253,17 +1253,18 @@ MakeRenderTargetFromBackingStoreImpeller(
 static std::unique_ptr<flutter::EmbedderRenderTarget>
 MakeRenderTargetFromBackingStoreImpeller(
     FlutterBackingStore backing_store,
-    fml::ScopedCleanupClosure& on_release,
+    fml::ScopedCleanupClosure on_release,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     const FlutterBackingStoreConfig& config,
     const FlutterVulkanBackingStore* vulkan) {
-  auto on_destruct = [callback = vulkan->destruction_callback,
-                      user_data = vulkan->user_data]() {
-    if (callback) {
-      callback(user_data);
-    }
-  };
-  fml::ScopedCleanupClosure vulkan_destruct(on_destruct);
+  FML_DCHECK(vulkan != nullptr);
+  fml::ScopedCleanupClosure vulkan_destruct(
+      [callback = vulkan->destruction_callback,
+       user_data = vulkan->user_data]() {
+        if (callback) {
+          callback(user_data);
+        }
+      });
 
 #if defined(SHELL_ENABLE_VULKAN) && defined(IMPELLER_SUPPORTS_RENDERING)
   if (!aiks_context || !aiks_context->GetContext()) {
@@ -1305,13 +1306,11 @@ MakeRenderTargetFromBackingStoreImpeller(
   auto texture_source = impeller::WrapTextureSourceVK(
       vk_context, desc,
       impeller::vk::Image(reinterpret_cast<VkImage>(vulkan->image->image)),
-      on_destruct);
+      vulkan_destruct.Release());
   if (!texture_source) {
     FML_LOG(ERROR) << "Could not wrap embedder supplied Vulkan image.";
     return nullptr;
   }
-  // Disarm the failure guard since `texture_source` owns the callback.
-  vulkan_destruct.Release();
 
   // TODO(https://github.com/flutter/flutter/issues/194239): Cache swapchain
   // transients in ContextVK instead of allocating per backing store.
@@ -1333,7 +1332,7 @@ MakeRenderTargetFromBackingStoreImpeller(
 
   return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
       backing_store, aiks_context, std::move(render_target),
-      on_release.Release(), fml::closure());
+      on_release.Release(), /*framebuffer_destruction_callback=*/nullptr);
 #else
   return nullptr;
 #endif
@@ -1624,7 +1623,7 @@ CreateEmbedderRenderTarget(
     case kFlutterBackingStoreTypeVulkan: {
       if (enable_impeller) {
         render_target = MakeRenderTargetFromBackingStoreImpeller(
-            backing_store, collect_callback, aiks_context, config,
+            backing_store, std::move(collect_callback), aiks_context, config,
             &backing_store.vulkan);
         break;
       } else {
