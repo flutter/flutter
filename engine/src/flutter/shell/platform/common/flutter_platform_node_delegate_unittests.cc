@@ -755,7 +755,8 @@ TEST(FlutterPlatformNodeDelegateTest,
   EXPECT_EQ(parent_result, ui::AXOffscreenResult::kOnscreen);
 
   // Sized child under empty parent is not clipped to the parent's 0x0 bounds.
-  auto sized_child_node = bridge->GetFlutterPlatformNodeDelegateFromID(3).lock();
+  auto sized_child_node =
+      bridge->GetFlutterPlatformNodeDelegateFromID(3).lock();
   ui::AXOffscreenResult child_result;
   gfx::Rect child_bounds = sized_child_node->GetBoundsRect(
       ui::AXCoordinateSystem::kScreenDIPs, ui::AXClippingBehavior::kClipped,
@@ -845,9 +846,9 @@ TEST(FlutterPlatformNodeDelegateTest,
 
   auto child_node = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
   ui::AXOffscreenResult result;
-  gfx::Rect bounds = child_node->GetBoundsRect(
-      ui::AXCoordinateSystem::kScreenDIPs, ui::AXClippingBehavior::kClipped,
-      &result);
+  gfx::Rect bounds =
+      child_node->GetBoundsRect(ui::AXCoordinateSystem::kScreenDIPs,
+                                ui::AXClippingBehavior::kClipped, &result);
   EXPECT_EQ(bounds.x(), 10);
   EXPECT_EQ(bounds.y(), 199);
   EXPECT_EQ(bounds.width(), 20);
