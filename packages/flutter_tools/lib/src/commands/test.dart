@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -852,7 +853,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
+    if (await _needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
@@ -876,15 +877,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needsRebuild(
+  Future<bool> _needsRebuild(
     Map<String, AssetBundleEntry> entries,
     String? flavor,
     FlutterHookResult? flutterHookResult,
-  ) {
-    // TODO(andrewkolos): This logic might fail in the future if we change the
-    //  schema of the contents of the asset manifest file and the user does not
-    //  perform a `flutter clean` after upgrading.
-    //  See https://github.com/flutter/flutter/issues/128563.
+  ) async {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final String unitTestAssetsDir = fs.path.join(
       getBuildDirectory(config, fs),
@@ -900,13 +897,24 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final MapEntry<String, AssetBundleEntry> entry in entries.entries) {
-      final DevFSContent content = entry.value.content;
+    for (final MapEntry(key: String assetPath, value: AssetBundleEntry assetEntry)
+        in entries.entries) {
+      final File file = fs.file(fs.path.join(unitTestAssetsDir, assetPath));
+      if (!file.existsSync()) {
+        return true;
+      }
+      final DevFSContent content = assetEntry.content;
       if (content is DevFSFileContent) {
-        if (!fs.file(fs.path.join(unitTestAssetsDir, entry.key)).existsSync()) {
+        if (content.isModifiedAfter(lastModified)) {
           return true;
         }
-        if (content.isModifiedAfter(lastModified)) {
+      } else {
+        final List<int> entryBytes = await assetEntry.contentsAsBytes();
+        if (entryBytes.length != await file.length()) {
+          return true;
+        }
+        final List<int> fileBytes = await file.readAsBytes();
+        if (!listEquals(entryBytes, fileBytes)) {
           return true;
         }
       }
