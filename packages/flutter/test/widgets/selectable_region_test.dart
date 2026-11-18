@@ -2213,6 +2213,59 @@ void main() {
       await gesture.up();
     });
 
+    testWidgets('triple click selects a RichText paragraph across a WidgetSpan', (
+      WidgetTester tester,
+    ) async {
+      const richTextKey = ValueKey<String>('rich-text');
+      SelectedContent? content;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _selectableRegion(
+            onSelectionChanged: (SelectedContent? selection) => content = selection,
+            child: Builder(
+              builder: (BuildContext context) => Center(
+                child: RichText(
+                  key: richTextKey,
+                  selectionRegistrar: SelectionContainer.maybeOf(context),
+                  selectionColor: const Color(0xAFAFAFAA),
+                  text: const TextSpan(
+                    style: TextStyle(fontFamily: 'Ahem', fontSize: 14),
+                    children: <InlineSpan>[
+                      TextSpan(text: 'Hello world '),
+                      WidgetSpan(child: SizedBox(width: 14, height: 14)),
+                      TextSpan(text: 'again\nNext paragraph'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.byKey(richTextKey),
+      );
+
+      for (final offset in <int>[2, 15, 22]) {
+        final Offset position = textOffsetToPosition(paragraph, offset);
+        for (var click = 0; click < 3; click += 1) {
+          await tester.tapAt(position, kind: PointerDeviceKind.mouse);
+          await tester.pump();
+        }
+        expect(
+          paragraph.selections,
+          offset < 19
+              ? <TextSelection>[
+                  const TextSelection(baseOffset: 0, extentOffset: 12),
+                  const TextSelection(baseOffset: 13, extentOffset: 19),
+                ]
+              : <TextSelection>[const TextSelection(baseOffset: 19, extentOffset: 33)],
+        );
+        expect(content?.plainText, offset < 19 ? 'Hello world again\n' : 'Next paragraph');
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+    });
+
     testWidgets('mouse can select paragraph-by-paragraph on triple click drag', (
       WidgetTester tester,
     ) async {
