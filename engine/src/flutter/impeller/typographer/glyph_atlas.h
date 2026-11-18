@@ -230,7 +230,7 @@ class GlyphAtlasContext {
   std::shared_ptr<GlyphAtlas> atlas_;
   ISize atlas_size_;
   std::shared_ptr<RectanglePacker> rect_packer_;
-  int64_t height_adjustment_;
+  int64_t height_adjustment_ = 0;
 
   GlyphAtlasContext(const GlyphAtlasContext&) = delete;
 

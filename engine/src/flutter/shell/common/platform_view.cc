@@ -84,6 +84,10 @@ void PlatformView::NotifyCreated() {
   delegate_.OnPlatformViewCreated(std::move(surface));
 }
 
+void PlatformView::NotifyCreatedDeferred(SurfaceFactory surface_factory) {
+  delegate_.OnPlatformViewCreatedDeferred(std::move(surface_factory));
+}
+
 void PlatformView::NotifyDestroyed() {
   delegate_.OnPlatformViewDestroyed();
 }
@@ -118,12 +122,6 @@ std::shared_ptr<impeller::Context> PlatformView::GetImpellerContext() const {
 }
 
 void PlatformView::ReleaseResourceContext() const {}
-
-PointerDataDispatcherMaker PlatformView::GetDispatcherMaker() {
-  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<DefaultPointerDataDispatcher>(delegate);
-  };
-}
 
 fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();

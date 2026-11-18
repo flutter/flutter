@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'android_builder.dart';
 import 'android_console.dart';
+import 'android_engine_cli_flags.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
 import 'gradle_utils.dart' as gradle_utils;
@@ -59,15 +60,17 @@ const kKnownHardware = <String, HardwareType>{
 class AndroidDevice extends Device {
   AndroidDevice(
     super.id, {
-    this.productID,
-    required this.modelID,
-    this.deviceCodeName,
-    required super.logger,
-    required ProcessManager processManager,
-    required this._platform,
     required this._androidSdk,
     required this._fileSystem,
+    required super.logger,
+    required this.modelID,
+    required this._platform,
+    required ProcessManager processManager,
+    this._androidBuilder,
     this._androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    this._applicationPackageFactory,
+    this.deviceCodeName,
+    this.productID,
   }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -79,7 +82,9 @@ class AndroidDevice extends Device {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
+  final AndroidBuilder? _androidBuilder;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
+  final ApplicationPackageFactory? _applicationPackageFactory;
 
   final String? productID;
   final String modelID;
@@ -189,10 +194,10 @@ class AndroidDevice extends Device {
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
     return switch (await cpuArch) {
-      CpuArch.arm64 => TargetPlatform.android_arm64,
-      CpuArch.armv7 => TargetPlatform.android_arm,
-      CpuArch.x64 => TargetPlatform.android_x64,
-      CpuArch.x86 || CpuArch.riscv64 || CpuArch.unknown => TargetPlatform.unsupported,
+      .arm64 => TargetPlatform.android_arm64,
+      .armv7 => TargetPlatform.android_arm,
+      .x64 => TargetPlatform.android_x64,
+      _ => TargetPlatform.unsupported,
     };
   }();
 
@@ -223,26 +228,10 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
-    switch (await targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        return buildMode != BuildMode.jitRelease;
-      case TargetPlatform.android:
-      case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
-      case TargetPlatform.unsupported:
-        throw UnsupportedError('Invalid target platform for Android');
+    if ((await targetPlatform).os != .android) {
+      throw UnsupportedError('Invalid target platform for Android');
     }
+    return buildMode != BuildMode.jitRelease;
   }
 
   @override
@@ -547,31 +536,30 @@ class AndroidDevice extends Device {
     var builtPackage = package;
     final CpuArch cpuArch = await this.cpuArch;
     switch (cpuArch) {
-      case CpuArch.armv7:
-      case CpuArch.arm64:
-      case CpuArch.x64:
+      case .armv7:
+      case .arm64:
+      case .x64:
         break;
-      case CpuArch.x86:
-      case CpuArch.riscv64:
-      case CpuArch.unknown:
-        _logger.printError('Android platforms are only supported.');
+      default:
+        _logger.printError('Unsupported Android CPU architecture: $cpuArch');
         return LaunchResult.failed();
     }
 
     if (!prebuiltApplication ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.current(_fileSystem, logger: _logger);
 
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
           ...debuggingOptions.getAndroidLaunchArguments(),
-          if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
-          if (route != null) '--route=$route',
+          if (platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false)
+            '--${AndroidEngineCliFlags.traceStartup}',
+          if (route != null) '--${AndroidEngineCliFlags.route}=$route',
         ],
       ];
 
-      await androidBuilder!.buildApk(
+      await _androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
         androidBuildInfo: AndroidBuildInfo(
@@ -584,7 +572,7 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+      builtPackage = await _applicationPackageFactory!.getPackageForPlatform(
         devicePlatform,
         buildInfo: debuggingOptions.buildInfo,
       ) as AndroidApk?;
@@ -601,7 +589,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
+    final bool traceStartup = platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false;
     ProtocolDiscovery? vmServiceDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
@@ -628,9 +616,11 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
-      if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
-      if (route != null) ...<String>['--es', 'route', route],
+      if (debuggingOptions.buildInfo.mode != BuildMode.release) ...<String>[
+        ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+        if (traceStartup) ...<String>['--ez', AndroidEngineCliFlags.traceStartup, 'true'],
+        if (route != null) ...<String>['--es', AndroidEngineCliFlags.route, route],
+      ],
       if (debuggingOptions.debuggingEnabled && userIdentifier != null) ...<String>[
         '--user',
         userIdentifier,
@@ -814,14 +804,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> isSupported() async {
-    final TargetPlatform platform = await targetPlatform;
-    return switch (platform) {
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => true,
-      _ => false,
-    };
+    return (await targetPlatform).os == .android;
   }
 
   @override
@@ -845,8 +828,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _logReader?._stop();
-    _pastLogReader?._stop();
+    await Future.wait(<Future<void>>[?_logReader?.dispose(), ?_pastLogReader?.dispose()]);
   }
 }
 
@@ -1075,7 +1057,7 @@ class AdbLogReader extends DeviceLogReader {
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {
-    final VM? vm = await connectedVmService.getVmGuarded();
+    final VM? vm = await connectedVmService.getVmGuarded(logger: _logger);
     if (vm == null) {
       _logger.printError(
         'An error occurred when setting up filtering for adb logs. '
@@ -1224,14 +1206,15 @@ class AdbLogReader extends DeviceLogReader {
     }
   }
 
-  void _stop() {
-    _linesController.close();
+  Future<void> _stop() async {
+    final Future<void> closed = _linesController.close();
     _adbProcess.kill();
+    await closed;
   }
 
   @override
-  void dispose() {
-    _stop();
+  Future<void> dispose() async {
+    await _stop();
   }
 }
 

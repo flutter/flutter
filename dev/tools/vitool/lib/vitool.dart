@@ -149,7 +149,7 @@ class PathCommandAnimation {
 
   /// A matrix with the command's points in different frames.
   ///
-  /// points[i][j] is the i-th point of the command at frame j.
+  /// `points[i][j]` is the i-th point of the command at frame j.
   final List<List<Point<double>>> points;
 
   @override

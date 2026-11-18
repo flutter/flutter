@@ -34,7 +34,7 @@ external void paragraphBuilderAddPlaceholder(
   double width,
   double height,
   int alignment,
-  double baslineOffset,
+  double baselineOffset,
   int baseline,
 );
 

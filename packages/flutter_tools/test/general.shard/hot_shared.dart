@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+
+import '../src/fakes.dart';
 
 class FakeDevFs extends Fake implements DevFS {
   @override
@@ -147,7 +150,8 @@ class TestFlutterDevice extends FlutterDevice {
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
-         targetPlatform: TargetPlatform.unsupported,
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),

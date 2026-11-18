@@ -4,7 +4,9 @@
 
 import 'dart:ffi' show Abi;
 
+import 'package:archive/archive.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' show HostPlatform;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -14,6 +16,8 @@ import 'io.dart';
 import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
+
+export 'package:flutter_tools_core/flutter_tools_core.dart' show HostPlatform;
 
 /// Utilities for interacting with the host operating system.
 abstract class OperatingSystemUtils {
@@ -530,63 +534,58 @@ class _WindowsUtils extends OperatingSystemUtils {
     return <File>[_fileSystem.file(lines.first.trim())];
   }
 
-  void _unpackWithTar(File file, Directory targetDirectory) {
-    _processUtils.runSync(
-      <String>['tar', '-xf', file.path, '-C', targetDirectory.path],
-      throwOnError: true,
-      verboseExceptions: true,
-    );
-  }
-
   @override
   void unzip(File file, Directory targetDirectory) {
-    if (!targetDirectory.existsSync()) {
-      targetDirectory.createSync(recursive: true);
-    }
-    // Windows 10 build 17063+ includes bsdtar in System32, which can unpack both
-    // zip and tar archives significantly faster than starting a PowerShell host.
-    if (_processManager.canRun('tar')) {
-      _unpackWithTar(file, targetDirectory);
-      return;
-    }
-    // Fall back to PowerShell's Expand-Archive on older Windows versions.
-    // Check for both Windows PowerShell ('powershell') and PowerShell Core ('pwsh').
-    final String? powershellExec = switch (true) {
-      _ when _processManager.canRun('powershell') => 'powershell',
-      _ when _processManager.canRun('pwsh') => 'pwsh',
-      _ => null,
-    };
-    if (powershellExec != null) {
-      final String escapedFilePath = file.path.replaceAll("'", "''");
-      final String escapedTargetPath = targetDirectory.path.replaceAll("'", "''");
-      final script =
-          r"$ErrorActionPreference = 'Stop'; "
-          "Expand-Archive -LiteralPath '$escapedFilePath' -DestinationPath '$escapedTargetPath' -Force";
-      _processUtils.runSync(
-        <String>[powershellExec, '-NoProfile', '-NonInteractive', '-Command', script],
-        throwOnError: true,
-        verboseExceptions: true,
-      );
-      return;
-    }
-    throwToolExit(
-      'Missing "tar" or "powershell" tool. Unable to extract ${file.path}.\n'
-      'Ensure System32 and PowerShell are on the PATH.',
-    );
+    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
+    _unpackArchive(archive, targetDirectory);
   }
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    if (!_processManager.canRun('tar')) {
-      throwToolExit(
-        'Missing "tar" tool. Unable to extract ${gzippedTarFile.path}.\n'
-        'Ensure System32 is on the PATH.',
+    final Archive archive = TarDecoder().decodeBytes(
+      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    );
+    _unpackArchive(archive, targetDirectory);
+  }
+
+  void _unpackArchive(Archive archive, Directory targetDirectory) {
+    // The target directory does not change across entries, so compute its
+    // canonical form once instead of per file.
+    final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(targetDirectory.path);
+    for (final ArchiveFile archiveFile in archive.files) {
+      // The archive package doesn't correctly set isFile.
+      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
+        continue;
+      }
+
+      final File destFile = _fileSystem.file(
+        _fileSystem.path.canonicalize(
+          _fileSystem.path.join(targetDirectory.path, archiveFile.name),
+        ),
       );
+
+      // Validate that the destFile is within the targetDirectory we want to
+      // extract to.
+      //
+      // See https://snyk.io/research/zip-slip-vulnerability for more context.
+      final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
+      final bool isAtRoot = _fileSystem.path.equals(
+        targetDirectoryCanonicalPath,
+        destinationFileCanonicalPath,
+      );
+      if (!isAtRoot &&
+          !_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
+        throw StateError(
+          'Tried to extract the file $destinationFileCanonicalPath outside of the '
+          'target directory $targetDirectoryCanonicalPath',
+        );
+      }
+
+      if (!destFile.parent.existsSync()) {
+        destFile.parent.createSync(recursive: true);
+      }
+      destFile.writeAsBytesSync(archiveFile.content as List<int>);
     }
-    if (!targetDirectory.existsSync()) {
-      targetDirectory.createSync(recursive: true);
-    }
-    _unpackWithTar(gzippedTarFile, targetDirectory);
   }
 
   @override
@@ -629,39 +628,5 @@ String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
       return null;
     }
     currentDirectory = currentDirectory.parent;
-  }
-}
-
-enum HostPlatform {
-  darwin_x64('darwin-x64', 'x64'),
-  darwin_arm64('darwin-arm64', 'arm64'),
-  linux_x64('linux-x64', 'x64'),
-  linux_arm64('linux-arm64', 'arm64'),
-  linux_riscv64('linux-riscv64', 'riscv64'),
-  windows_x64('windows-x64', 'x64'),
-  windows_arm64('windows-arm64', 'arm64');
-
-  const HostPlatform(this.cliName, this.platformName);
-
-  final String cliName;
-  final String platformName;
-
-  /// Returns the host platform for the specified OS and architecture.
-  ///
-  /// [os] is an operating system name as returned by
-  /// [Platform.operatingSystem]. [arch] is an architecture name matching the
-  /// [platformName] of one of the values of this enum. Returns null if no match
-  /// is found.
-  static HostPlatform? fromOsAndArch(String os, String arch) {
-    return switch ((os, arch.toLowerCase())) {
-      ('macos', 'x64') => darwin_x64,
-      ('macos', 'arm64') => darwin_arm64,
-      ('linux', 'x64') => linux_x64,
-      ('linux', 'arm64') => linux_arm64,
-      ('linux', 'riscv64') => linux_riscv64,
-      ('windows', 'x64') => windows_x64,
-      ('windows', 'arm64') => windows_arm64,
-      _ => null,
-    };
   }
 }

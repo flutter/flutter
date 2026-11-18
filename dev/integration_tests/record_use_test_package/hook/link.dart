@@ -67,7 +67,7 @@ Set<String> _extractUsedPhrases(Recordings recordings) {
 
   for (final CallReference call in recordings.calls[translateDef] ?? const <CallReference>[]) {
     switch (call) {
-      case CallWithArguments(positionalArguments: [StringConstant(:final value), ...]):
+      case CallWithArguments(positionalArguments: [StringConstant(:final String value), ...]):
         usedPhrases.add(value);
       case _:
         throw UnsupportedError('Cannot determine which translations are used.');

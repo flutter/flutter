@@ -68,3 +68,16 @@ TEST_F(FlViewRendererSubsurfaceTest, RealizeWithoutWayland) {
   // Unrealizing a widget that has no subsurface must not fail.
   gtk_widget_destroy(window);
 }
+
+TEST_F(FlViewRendererSubsurfaceTest, PresentLayersAfterDestroy) {
+  // Create a renderer and destroy it.
+  FlViewRendererSubsurface* renderer =
+      fl_view_renderer_subsurface_new(engine, FALSE);
+  g_object_ref_sink(renderer);
+  fl_gtk_widget_destroy(GTK_WIDGET(renderer));
+
+  // Present a frame on a destroyed widget.
+  fl_view_renderer_present_layers(FL_VIEW_RENDERER(renderer), nullptr, 0);
+
+  g_object_unref(renderer);
+}

@@ -18,9 +18,8 @@ Future<void> main() async {
         String deviceId,
       ) async {
         simulatorDeviceId = deviceId;
-        result = await createExternalTexturesFrameRateIntegrationTest(
-          deviceIdOverride: deviceId,
-        ).call();
+        result = await createExternalTexturesFrameRateIntegrationTest(deviceIdOverride: deviceId)
+            .call();
       });
     } finally {
       if (simulatorDeviceId != null) {

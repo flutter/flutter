@@ -2395,8 +2395,9 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   RenderEditable get renderEditable => editableText.renderEditable;
 
-  /// Returns `true` if a widget with the global key [delegate.editableTextKey]
-  /// is in the tree and the widget is mounted.
+  /// Returns `true` if a widget with the global key
+  /// [TextSelectionGestureDetectorBuilderDelegate.editableTextKey] is in the
+  /// tree and the widget is mounted.
   ///
   /// Otherwise returns `false`.
   bool get _isEditableTextMounted => delegate.editableTextKey.currentContext?.mounted ?? false;

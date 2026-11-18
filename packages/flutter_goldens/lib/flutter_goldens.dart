@@ -732,10 +732,10 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// cross-platform rasterization variations (e.g. subpixel antialiasing and
   /// glyph rounding). To accommodate these without false positives:
   ///
-  /// 1. Pixels whose Manhattan color delta is within [maxColorDelta] pass.
+  /// 1. Pixels whose Manhattan color delta is within `maxColorDelta` pass.
   /// 2. If the direct pixel mismatches, a 3x3 neighborhood search in the expected
   ///    image is performed to allow for 1-pixel subpixel layout shifts.
-  /// 3. The test passes if the overall differing pixel ratio is <= [maxDifferentPixelsRate].
+  /// 3. The test passes if the overall differing pixel ratio is <= `maxDifferentPixelsRate`.
   ///
   /// If the comparison fails, failure artifacts (`actual.png`, `expected.png`,
   /// `diff.png`) are written to disk and a [FlutterError] is thrown.

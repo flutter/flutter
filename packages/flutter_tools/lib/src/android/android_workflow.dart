@@ -8,7 +8,6 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -24,10 +23,6 @@ import 'android_sdk.dart';
 import 'gradle_utils.dart' as gradle_utils;
 import 'java.dart';
 
-AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
-AndroidValidator? get androidValidator => context.get<AndroidValidator>();
-AndroidLicenseValidator? get androidLicenseValidator => context.get<AndroidLicenseValidator>();
-
 enum LicensesAccepted { none, some, all, unknown }
 
 final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
@@ -39,9 +34,10 @@ final licensesNoLongerNeeded = RegExp(
 );
 
 class AndroidWorkflow implements Workflow {
-  AndroidWorkflow({required this._androidSdk, required this._featureFlags});
+  AndroidWorkflow({required this._androidSdkBuilder, required this._featureFlags});
 
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
   final FeatureFlags _featureFlags;
 
   @override

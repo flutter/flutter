@@ -870,7 +870,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
     final Rect boundsInScreen = getBoundsInScreen(bounds);
     result.setBoundsInScreen(boundsInScreen);
-    result.setVisibleToUser(true);
+    result.setVisibleToUser(!semanticsNode.hasFlag(Flag.IS_HIDDEN));
     result.setEnabled(
         !semanticsNode.hasFlag(Flag.HAS_ENABLED_STATE) || semanticsNode.hasFlag(Flag.IS_ENABLED));
 
@@ -2070,7 +2070,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     CONTENT_INFO(29),
     MAIN(30),
     NAVIGATION(31),
-    REGION(32);
+    REGION(32),
+    SLIDER(33),
+    LIST_BOX(34),
+    OPTION(35);
 
     final int value;
 

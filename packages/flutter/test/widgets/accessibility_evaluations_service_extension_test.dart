@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,7 +57,7 @@ void main() {
 
       // Run MinimumTapTargetEvaluation
       final Map<String, Object?> tapTargetResult = await _runEvaluation(tester, <String, String>{
-        'type': 'MinimumTapTargetEvaluation',
+        'type': AccessibilityEvaluationType.minimumTapTarget.name,
         'targetSize': '48.0',
       });
 
@@ -91,15 +92,16 @@ void main() {
       );
 
       // Run LabeledTapTargetEvaluation
-      final Map<String, Object?> labeledResult = await _runEvaluation(tester, <String, String>{
-        'type': 'LabeledTapTargetEvaluation',
-      });
+      final Map<String, Object?> labeledTapTargetResult = await _runEvaluation(
+        tester,
+        <String, String>{'type': AccessibilityEvaluationType.labeledTapTarget.name},
+      );
 
-      expect(labeledResult.keys, contains('result'));
-      final labeledViolations = labeledResult['result']! as List<Object?>;
-      expect(labeledViolations, isNotEmpty);
+      expect(labeledTapTargetResult.keys, contains('result'));
+      final labeledTapTargetViolations = labeledTapTargetResult['result']! as List<Object?>;
+      expect(labeledTapTargetViolations, isNotEmpty);
       expect(
-        labeledViolations.any(
+        labeledTapTargetViolations.any(
           (Object? v) => (v! as Map<String, Object?>)['message'].toString().contains(
             'expected tappable node to have semantic label',
           ),
@@ -138,7 +140,7 @@ void main() {
 
       // Run MinimumTextContrastEvaluation
       final Map<String, Object?> contrastResult = await _runEvaluation(tester, <String, String>{
-        'type': 'MinimumTextContrastEvaluation',
+        'type': AccessibilityEvaluationType.minimumTextContrast.name,
         'minNormalTextContrastRatio': '4.5',
         'minLargeTextContrastRatio': '3.0',
       });
@@ -178,20 +180,21 @@ void main() {
 
     // Run MinimumTapTargetEvaluation
     final Map<String, Object?> tapTargetResult = await _runEvaluation(tester, <String, String>{
-      'type': 'MinimumTapTargetEvaluation',
+      'type': AccessibilityEvaluationType.minimumTapTarget.name,
       'targetSize': '48.0',
     });
     expect(tapTargetResult['result'], isEmpty);
 
     // Run LabeledTapTargetEvaluation
-    final Map<String, Object?> labeledResult = await _runEvaluation(tester, <String, String>{
-      'type': 'LabeledTapTargetEvaluation',
-    });
-    expect(labeledResult['result'], isEmpty);
+    final Map<String, Object?> labeledTapTargetResult = await _runEvaluation(
+      tester,
+      <String, String>{'type': AccessibilityEvaluationType.labeledTapTarget.name},
+    );
+    expect(labeledTapTargetResult['result'], isEmpty);
 
     // Run MinimumTextContrastEvaluation
     final Map<String, Object?> contrastResult = await _runEvaluation(tester, <String, String>{
-      'type': 'MinimumTextContrastEvaluation',
+      'type': AccessibilityEvaluationType.minimumTextContrast.name,
       'minNormalTextContrastRatio': '4.5',
       'minLargeTextContrastRatio': '3.0',
     });
@@ -219,7 +222,7 @@ void main() {
 
     // Run MinimumTapTargetEvaluation with default size - should pass (no violations)
     final Map<String, Object?> defaultResult = await _runEvaluation(tester, <String, String>{
-      'type': 'MinimumTapTargetEvaluation',
+      'type': AccessibilityEvaluationType.minimumTapTarget.name,
       'targetSize': '48.0',
     });
 
@@ -227,7 +230,7 @@ void main() {
 
     // Run MinimumTapTargetEvaluation with custom size 50 - should fail (violations)
     final Map<String, Object?> customResult = await _runEvaluation(tester, <String, String>{
-      'type': 'MinimumTapTargetEvaluation',
+      'type': AccessibilityEvaluationType.minimumTapTarget.name,
       'targetSize': '50.0',
     });
 
@@ -294,7 +297,9 @@ void main() {
 
       expect(
         () async {
-          await _runEvaluation(tester, <String, String>{'type': 'MinimumTextContrastEvaluation'});
+          await _runEvaluation(tester, <String, String>{
+            'type': AccessibilityEvaluationType.minimumTextContrast.name,
+          });
         },
         throwsA(
           isA<Exception>().having(
@@ -317,7 +322,7 @@ void main() {
 
       expect(() async {
         await _runEvaluation(tester, <String, String>{
-          'type': 'MinimumTextContrastEvaluation',
+          'type': AccessibilityEvaluationType.minimumTextContrast.name,
           'minNormalTextContrastRatio': 'foo',
           'minLargeTextContrastRatio': '3.0',
         });
@@ -335,7 +340,9 @@ void main() {
 
       expect(
         () async {
-          await _runEvaluation(tester, <String, String>{'type': 'MinimumTapTargetEvaluation'});
+          await _runEvaluation(tester, <String, String>{
+            'type': AccessibilityEvaluationType.minimumTapTarget.name,
+          });
         },
         throwsA(
           isA<Exception>().having(
@@ -358,7 +365,7 @@ void main() {
 
       expect(() async {
         await _runEvaluation(tester, <String, String>{
-          'type': 'MinimumTapTargetEvaluation',
+          'type': AccessibilityEvaluationType.minimumTapTarget.name,
           'targetSize': 'foo',
         });
       }, throwsA(isA<FormatException>()));
