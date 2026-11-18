@@ -24,6 +24,7 @@ void main() {
                 width: 360.0,
                 height: 56.0,
                 child: NavigationToolbar(
+                  centerMiddle: true,
                   middleSpacing: middleSpacing,
                   leading: const SizedBox(key: leadingKey, width: 48.0),
                   middle: SizedBox(key: middleKey, width: middleWidth, height: 56.0),
