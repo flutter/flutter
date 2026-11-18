@@ -144,8 +144,8 @@ class ManifestVersionCodeTaskHelperTest {
         assertContains(message, "variant 'freeRelease'")
         assertContains(message, "the manifest does not set android:versionCode")
         assertContains(message, "versionCode = flutter.versionCode")
-        // With no positive versionCode in the manifest, that flag builds APKs that Android
-        // refuses to install.
+        assertContains(message, "versionCode 0")
+        // The build fails with that flag too, so suggesting it would not help.
         assertFalse(message.contains("force-version-code-ignoring-abi"))
     }
 }

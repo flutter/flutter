@@ -26,6 +26,7 @@ import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
 import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.ManifestVersionCodeTask
+import com.flutter.gradle.tasks.ManifestVersionCodeTaskHelper
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.testing.mockAbiFilters
 import com.flutter.gradle.testing.mockProductFlavors
@@ -565,7 +566,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants leaves versionCodes unchanged when force-version-code-ignoring-abi is set`(
+    fun `onVariants leaves DSL versionCodes unchanged when force-version-code-ignoring-abi is set`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -577,6 +578,32 @@ class FlutterPluginTest {
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+        verify(exactly = 0) { arm64.versionCode.set(any<Provider<Int>>()) }
+    }
+
+    @Test
+    fun `onVariants uses the checked main manifest versionCode without an offset when force-version-code-ignoring-abi is set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        every { env.project.findProperty("force-version-code-ignoring-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        // Stands in for the ManifestVersionCodeTask output, which fails the build when the main
+        // manifest sets no positive versionCode.
+        mockkObject(ManifestVersionCodeTaskHelper)
+        every { ManifestVersionCodeTaskHelper.registerTask(env.project, variant) } returns
+            ProjectBuilder.builder().build().provider { 7 }
+
+        onVariant(variant)
+
+        verify(exactly = 1) { ManifestVersionCodeTaskHelper.registerTask(env.project, variant) }
+        // 7, not 2007: with the flag, every split APK gets the manifest versionCode.
+        assertEquals(7, versionCodeProvider.captured.get())
     }
 
     @Test

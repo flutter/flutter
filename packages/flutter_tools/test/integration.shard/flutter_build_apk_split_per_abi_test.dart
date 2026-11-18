@@ -450,15 +450,21 @@ androidComponents {
       },
     );
 
-    testWithoutContext(
-      '--split-per-abi fails when the main manifest sets no versionCode either',
-      () {
-        final ProcessResult build = _buildSplitPerAbiApks(appDir);
+    testWithoutContext('--split-per-abi fails without a versionCode, with or without force-version-code-ignoring-abi', () {
+      // Without a versionCode, Android reads each APK as versionCode 0, which Google Play
+      // rejects and which cannot be installed over a build of the app that has a versionCode.
+      for (final extraArgs in <List<String>>[
+        <String>[],
+        <String>['-P', 'force-version-code-ignoring-abi=true'],
+      ]) {
+        final ProcessResult build = _buildSplitPerAbiApks(appDir, extraArgs);
 
-        // Split APKs that share a versionCode would be rejected by Google Play.
-        expect(build.exitCode, isNot(0));
-        expect('${build.stdout}${build.stderr}', contains('cannot give each split APK of variant'));
-      },
-    );
+        expect(build.exitCode, isNot(0), reason: 'flutter build apk $extraArgs');
+        expect(
+          '${build.stdout}${build.stderr}',
+          contains("cannot give the split APKs of variant 'debug' a versionCode"),
+        );
+      }
+    });
   });
 }

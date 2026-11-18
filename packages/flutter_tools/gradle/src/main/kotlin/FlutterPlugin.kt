@@ -654,11 +654,14 @@ class FlutterPlugin : Plugin<Project> {
          * Uses [baseVersionCode] from the DSL ([DslVersionCodes]), or falls back to
          * `android:versionCode` in the main `AndroidManifest.xml`
          * ([ManifestVersionCodeTaskHelper]). If neither sets a valid `versionCode`, the build fails
-         * because Google Play rejects split APKs that share one.
+         * (see [ManifestVersionCodeTaskHelper.errorMessage]).
          *
-         * Skipped with `force-version-code-ignoring-abi`. Outputs without an ABI filter are left
-         * unchanged. An `onVariants` block in the app's build script runs after this one, so a
-         * value it sets wins. See "Setting per-ABI or per-variant versionCode" in
+         * With `force-version-code-ignoring-abi`, no offset is added. A DSL `versionCode` is left
+         * for AGP to apply. Without one, each output gets the main manifest `versionCode`, the
+         * value AGP would use anyway, after the same check. So the flag never produces APKs
+         * without a `versionCode`. Outputs without an ABI filter are left unchanged. An
+         * `onVariants` block in the app's build script runs after this one, so a value it sets
+         * wins. See "Setting per-ABI or per-variant versionCode" in
          * docs/platforms/android/website-page-draft.md.
          *
          * TODO(reidbaker): Link to the docs.flutter.dev page once it is published.
@@ -669,9 +672,11 @@ class FlutterPlugin : Plugin<Project> {
             variant: ApplicationVariant,
             baseVersionCode: Int?
         ) {
-            if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project) ||
-                FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)
-            ) {
+            if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
+                return
+            }
+            val ignoreAbi = FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)
+            if (ignoreAbi && baseVersionCode != null) {
                 return
             }
             // Lazily register the manifest fallback task so it is only created when the DSL omits
@@ -683,12 +688,22 @@ class FlutterPlugin : Plugin<Project> {
             variant.outputs.forEach { output ->
                 val abi = CopyFlutterApksTask.abiOf(output.filters)
                 val abiVersionCode = FlutterPluginConstants.ABI_VERSION[abi] ?: return@forEach
-                if (baseVersionCode != null) {
-                    output.versionCode.set(splitApkVersionCode(variantName, abi, abiVersionCode, baseVersionCode))
-                } else {
-                    output.versionCode.set(
-                        manifestVersionCode.map { splitApkVersionCode(variantName, abi, abiVersionCode, it) }
-                    )
+                when {
+                    ignoreAbi -> {
+                        // Wiring the provider into the output makes AGP's manifest task run the
+                        // check first.
+                        output.versionCode.set(manifestVersionCode)
+                    }
+
+                    baseVersionCode != null -> {
+                        output.versionCode.set(splitApkVersionCode(variantName, abi, abiVersionCode, baseVersionCode))
+                    }
+
+                    else -> {
+                        output.versionCode.set(
+                            manifestVersionCode.map { splitApkVersionCode(variantName, abi, abiVersionCode, it) }
+                        )
+                    }
                 }
             }
         }

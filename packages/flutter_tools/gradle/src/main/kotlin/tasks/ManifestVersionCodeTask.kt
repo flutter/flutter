@@ -17,7 +17,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
 /**
- * Extracts `android:versionCode` from [mainManifest] into [versionCodeFile] as the fallback base
+ * Extracts `android:versionCode` from [mainManifest] into [versionCodeFile] as the fallback
  * `versionCode` for `--split-per-abi` builds (see [ManifestVersionCodeTaskHelper.registerTask]).
  *
  * Runs as a task rather than a `Provider` transform because [mainManifest] is selected from

@@ -142,18 +142,19 @@ object ManifestVersionCodeTaskHelper {
      * Formats the `--split-per-abi` error for [variantName] when `android {}` omits `versionCode`
      * and reading the main manifest fails ([reason]).
      *
-     * Does not suggest `force-version-code-ignoring-abi`, because it cannot help here. When the
-     * manifest has no positive `versionCode`, the flag builds APKs with no `versionCode`, which
-     * Android reads as 0. Google Play rejects those APKs, and installing one over a build with a
-     * positive `versionCode` fails with `INSTALL_FAILED_VERSION_DOWNGRADE`. When the value is not a
-     * decimal integer, AGP fails the build.
+     * Used with and without `force-version-code-ignoring-abi`, so it does not suggest that flag.
+     * Without a positive `versionCode`, AGP builds APKs with no `versionCode`, which Android reads
+     * as 0. Such an APK installs on a device that does not have the app, but Google Play rejects
+     * it, and installing it over a build with a positive `versionCode` fails with
+     * `INSTALL_FAILED_VERSION_DOWNGRADE`.
      */
     internal fun errorMessage(
         variantName: String,
         reason: String
     ): String =
-        "Flutter cannot give each split APK of variant '$variantName' a distinct " +
-            "versionCode: its android {} block sets no versionCode, and $reason. " +
-            "Google Play does not accept split APKs that share a versionCode. Set " +
+        "Flutter cannot give the split APKs of variant '$variantName' a versionCode: its " +
+            "android {} block sets no versionCode, and $reason. Android reads an APK without a " +
+            "versionCode as versionCode 0. Google Play rejects such APKs, and they cannot be " +
+            "installed over a build of the app that has a versionCode. Set " +
             "versionCode = flutter.versionCode in defaultConfig (or on each product flavor)."
 }
