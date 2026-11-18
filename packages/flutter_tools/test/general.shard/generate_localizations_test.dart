@@ -3886,5 +3886,40 @@ flutter:
 '''),
       );
     });
+
+    testWithoutContext('uses package:material_ui/material_ui.dart when both material_ui and cupertino_ui are in dependencies', () {
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.0.0
+  cupertino_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains("import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;"),
+      );
+      expect(localizationsFile, isNot(contains('package:cupertino_ui/cupertino_ui.dart')));
+      expect(
+        localizationsFile,
+        isNot(contains('package:flutter_localizations/flutter_localizations.dart')),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+      );
+    });
   });
 }
