@@ -80,7 +80,7 @@ class ManifestVersionCodeTaskHelperTest {
     @Test
     fun `zero or a negative versionCode is not found`() {
         // AGP does not write these into the merged manifest, and Google Play rejects them.
-        for (value in listOf("0", "-1", "-99999999999")) {
+        for (value in listOf("0", "-1", "+-7", "-99999999999")) {
             val result = assertIs<Result.NotFound>(readVersionCode("android:versionCode=\"$value\""))
             assertContains(result.reason, "is not positive")
         }
