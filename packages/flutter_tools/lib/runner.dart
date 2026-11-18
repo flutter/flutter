@@ -311,12 +311,15 @@ Future<int> run(
         }) =>
             overriddenDoctorValidatorsProvider ??
             DoctorValidatorsProvider.create(
+              androidContext: androidContext,
+              androidWorkflow: androidWorkflow,
               appleContext: appleContext,
               deviceManager: deviceManager,
               extensionManager: extensionManager,
               featureFlags: featureFlags,
               httpClientFactory: httpClientFactory,
               toolContext: toolContext,
+              windowsWorkflow: windowsWorkflow,
             );
         return context.run<int>(
           overrides: <Type, Generator>{

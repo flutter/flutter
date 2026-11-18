@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../features.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_windows.dart';
@@ -19,10 +20,11 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
-  WindowsDevice({required this._analytics, required super.toolContext})
+  WindowsDevice({required this._analytics, required this._featureFlags, required super.toolContext})
     : super('windows', platformType: PlatformType.windows, ephemeral: false);
 
   final Analytics _analytics;
+  final FeatureFlags _featureFlags;
 
   @override
   Future<bool> isSupported() async => true;
@@ -61,6 +63,7 @@ class WindowsDevice extends DesktopDevice {
       buildInfo,
       _targetPlatform,
       analytics: _analytics,
+      featureFlags: _featureFlags,
       target: mainPath,
       toolContext: toolContext,
     );
@@ -75,11 +78,13 @@ class WindowsDevice extends DesktopDevice {
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
     required this._analytics,
+    required this._featureFlags,
     required ToolContext super.toolContext,
     required this._windowsWorkflow,
   }) : super('windows devices');
 
   final Analytics _analytics;
+  final FeatureFlags _featureFlags;
   final WindowsWorkflow _windowsWorkflow;
 
   @override
@@ -96,7 +101,9 @@ class WindowsDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[WindowsDevice(analytics: _analytics, toolContext: toolContext)];
+    return <Device>[
+      WindowsDevice(analytics: _analytics, featureFlags: _featureFlags, toolContext: toolContext),
+    ];
   }
 
   @override
