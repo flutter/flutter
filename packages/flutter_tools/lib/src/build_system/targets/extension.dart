@@ -46,31 +46,31 @@ const _standardAssembleDefineKeys = <String>{
 
 /// Encodes [configuration] deterministically (sorted by key) into a JSON
 /// string suitable for [Environment.defines].
-String encodeExtensionConfigDefines(Map<String, String?> configuration) {
+String encodeExtensionConfigDefines(Map<String, Object?> configuration) {
   final List<String> sortedKeys = configuration.keys.toList()..sort();
-  final sorted = <String, String?>{for (final String key in sortedKeys) key: configuration[key]};
+  final sorted = <String, Object?>{for (final String key in sortedKeys) key: configuration[key]};
   return json.encode(sorted);
 }
 
 /// Encodes per-target extension configurations deterministically (sorted by
 /// target name and configuration key) into a JSON string suitable for
 /// [Environment.defines].
-String encodeTargetExtensionConfigDefines(Map<String, Map<String, String?>> targetConfigurations) {
+String encodeTargetExtensionConfigDefines(Map<String, Map<String, Object?>> targetConfigurations) {
   final List<String> sortedTargets = targetConfigurations.keys.toList()..sort();
-  final sorted = <String, Map<String, String?>>{};
+  final sorted = <String, Map<String, Object?>>{};
   for (final targetName in sortedTargets) {
-    final Map<String, String?> config = targetConfigurations[targetName]!;
+    final Map<String, Object?> config = targetConfigurations[targetName]!;
     final List<String> sortedKeys = config.keys.toList()..sort();
-    sorted[targetName] = <String, String?>{for (final String key in sortedKeys) key: config[key]};
+    sorted[targetName] = <String, Object?>{for (final String key in sortedKeys) key: config[key]};
   }
   return json.encode(sorted);
 }
 
 /// Decodes a [kExtensionConfigDefines] JSON string back into a configuration map.
 ///
-/// Supports both a flat `Map<String, String?>` encoding and a per-target
-/// `Map<String, Map<String, String?>>` encoding (when [targetName] is provided).
-Map<String, String?>? decodeExtensionConfigDefines(String? encoded, {String? targetName}) {
+/// Supports both a flat `Map<String, Object?>` encoding and a per-target
+/// `Map<String, Map<String, Object?>>` encoding (when [targetName] is provided).
+Map<String, Object?>? decodeExtensionConfigDefines(String? encoded, {String? targetName}) {
   if (encoded == null || encoded.isEmpty) {
     return null;
   }
@@ -84,16 +84,16 @@ Map<String, String?>? decodeExtensionConfigDefines(String? encoded, {String? tar
           return null;
         }
         if (map[targetName] case final Map<String, Object?> targetMap) {
-          return <String, String?>{
+          return <String, Object?>{
             for (final MapEntry(:String key, :Object? value) in targetMap.entries)
-              if (value == null || value is String) key: value as String?,
+              if (value is bool || value is String) key: value,
           };
         }
         return null;
       }
-      return <String, String?>{
+      return <String, Object?>{
         for (final MapEntry(:String key, :Object? value) in map.entries)
-          if (value == null || value is String) key: value as String?,
+          if (value is bool || value is String) key: value,
       };
     }
   } on FormatException {
@@ -265,7 +265,7 @@ class ExtensionTarget extends Target {
     final bool treeShakeIcons = defines[kIconTreeShakerFlag] != null
         ? defines[kIconTreeShakerFlag] == 'true'
         : mode.isPrecompiled;
-    final Map<String, String?>? configuration = decodeExtensionConfigDefines(
+    final Map<String, Object?>? configuration = decodeExtensionConfigDefines(
       defines[kExtensionConfigDefines],
       targetName: assembleTarget.name,
     );
@@ -278,33 +278,33 @@ class ExtensionTarget extends Target {
       ErrorHandlingFileSystem.deleteIfExists(buildDir.childFile(depfileName));
     }
 
-    final ExtensionBuildResult result = await _buildManager.assemble(
-      buildDir: buildDir.uri,
-      buildMode: mode,
-      buildName: buildName,
-      buildNumber: buildNumber,
-      codeSizeDirectory: codeSizeDirectory,
-      configuration: configuration,
-      dartDefines: dartDefines,
-      dartObfuscation: dartObfuscation,
-      extraDefines: extraDefines,
-      extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
-      flavor: flavor,
-      flutterRoot: environment.flutterRootDir.uri,
-      mainPath: mainPath,
-      outputDir: outputDir.uri,
-      projectRoot: projectDir.uri,
-      resolvedArtifacts: resolvedArtifacts,
-      splitDebugInfo: splitDebugInfo,
-      targetName: assembleTarget.name,
-      targetPlatform: targetPlatform,
-      trackWidgetCreation: trackWidgetCreation,
-      treeShakeIcons: treeShakeIcons,
-    );
-
-    if (!result.success) {
-      throw ExtensionAssembleException(assembleTarget.name, errorMessage: result.errorMessage);
+    try {
+      await _buildManager.assemble(
+        buildDir: buildDir.uri,
+        buildMode: mode,
+        buildName: buildName,
+        buildNumber: buildNumber,
+        codeSizeDirectory: codeSizeDirectory,
+        configuration: configuration,
+        dartDefines: dartDefines,
+        dartObfuscation: dartObfuscation,
+        extraDefines: extraDefines,
+        extraFrontEndOptions: extraFrontEndOptions,
+        extraGenSnapshotOptions: extraGenSnapshotOptions,
+        flavor: flavor,
+        flutterRoot: environment.flutterRootDir.uri,
+        mainPath: mainPath,
+        outputDir: outputDir.uri,
+        projectRoot: projectDir.uri,
+        resolvedArtifacts: resolvedArtifacts,
+        splitDebugInfo: splitDebugInfo,
+        targetName: assembleTarget.name,
+        targetPlatform: targetPlatform,
+        trackWidgetCreation: trackWidgetCreation,
+        treeShakeIcons: treeShakeIcons,
+      );
+    } on ToolExtensionException catch (e) {
+      throw ExtensionAssembleException(assembleTarget.name, errorMessage: e.message);
     }
 
     for (final String depfileName in depfiles) {
@@ -355,7 +355,7 @@ const _supportedOutputDirPlaceholders = <String>{
 /// Relative paths are resolved relative to [projectDir].
 /// Throws a [ToolExit] if [ExtensionBuildTarget.outputDir] contains an
 /// unsupported `{...}` placeholder or uses `{TARGET_PLATFORM}` when
-/// [ExtensionBuildTarget.targetPlatform] is `null`.
+/// [ExtensionBuildTarget.targetPlatforms] is empty and [targetPlatform] is `null`.
 Directory resolveExtensionOutputDir({
   required BuildMode buildMode,
   required Directory buildOutputDir,
@@ -364,7 +364,7 @@ Directory resolveExtensionOutputDir({
   required ExtensionBuildTarget target,
   String? targetPlatform,
 }) {
-  final String? resolvedTargetPlatform = targetPlatform ?? target.targetPlatform;
+  final String? resolvedTargetPlatform = targetPlatform ?? target.targetPlatforms.firstOrNull;
   for (final RegExpMatch match in _placeholderRegex.allMatches(target.outputDir)) {
     final String? placeholder = match[0];
     if (!_supportedOutputDirPlaceholders.contains(placeholder)) {
@@ -412,7 +412,7 @@ Map<String, String> resolveExtensionBuildTargetArtifacts({
   required ExtensionBuildTarget target,
   String? targetPlatform,
 }) {
-  final String? resolvedPlatformName = targetPlatform ?? target.targetPlatform;
+  final String? resolvedPlatformName = targetPlatform ?? target.targetPlatforms.firstOrNull;
   final TargetPlatform? resolvedPlatform = _tryResolveTargetPlatform(resolvedPlatformName);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionArtifact artifact in target.artifacts) {

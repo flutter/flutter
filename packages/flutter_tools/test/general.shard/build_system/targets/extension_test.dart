@@ -25,14 +25,14 @@ import '../../../src/fakes.dart';
 final class FakeExtensionManager extends Fake implements ExtensionManager {}
 
 final class FakeExtensionBuildManager extends ExtensionBuildManager {
-  FakeExtensionBuildManager({this.buildResult, this.onAssemble})
+  FakeExtensionBuildManager({this.assembleError, this.onAssemble})
     : super(
         extensionManager: FakeExtensionManager(),
         featureFlags: TestFeatureFlags(),
         logger: BufferLogger.test(),
       );
 
-  final ExtensionBuildResult? buildResult;
+  final ToolExtensionException? assembleError;
   final void Function(Uri buildDir)? onAssemble;
 
   int assembleCount = 0;
@@ -41,9 +41,9 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   BuildMode? invokedBuildMode;
   String? invokedBuildName;
   String? invokedBuildNumber;
-  Map<String, String?>? invokedBuildOptions;
+  Map<String, String>? invokedBuildOptions;
   Uri? invokedCodeSizeDirectory;
-  Map<String, String?>? invokedConfiguration;
+  Map<String, Object?>? invokedConfiguration;
   Map<String, String>? invokedDartDefines;
   bool? invokedDartObfuscation;
   Map<String, String>? invokedExtraDefines;
@@ -63,7 +63,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   bool? invokedTreeShakeIcons;
 
   @override
-  Future<ExtensionBuildResult> assemble({
+  Future<void> assemble({
     required Uri buildDir,
     required BuildMode buildMode,
     required Uri flutterRoot,
@@ -75,9 +75,9 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String?> buildOptions = const <String, String?>{},
+    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, String?>? configuration,
+    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     Map<String, String> extraDefines = const <String, String>{},
@@ -117,7 +117,9 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     invokedTrackWidgetCreation = trackWidgetCreation;
     invokedTreeShakeIcons = treeShakeIcons;
     onAssemble?.call(buildDir);
-    return buildResult ?? const ExtensionBuildResult(success: true);
+    if (assembleError case final ToolExtensionException error) {
+      throw error;
+    }
   }
 }
 
@@ -268,7 +270,7 @@ void main() {
     'ExtensionTarget throws ExtensionAssembleException if assemble fails',
     () async {
       final buildManager = FakeExtensionBuildManager(
-        buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
+        assembleError: const ToolExtensionException('Build failed error'),
       );
       final ExtensionTarget target = _createTarget(buildManager: buildManager);
 
@@ -291,30 +293,10 @@ void main() {
       );
 
       final ExtensionTarget emptyMessageTarget = _createTarget(
-        buildManager: FakeExtensionBuildManager(
-          buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
-        ),
+        buildManager: FakeExtensionBuildManager(assembleError: const ToolExtensionException('')),
       );
       await expectLater(
         () => emptyMessageTarget.build(environment),
-        throwsA(
-          isA<ExtensionAssembleException>()
-              .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
-              .having(
-                (ExtensionAssembleException e) => e.toString(),
-                'toString',
-                equals('Extension assemble target "custom-target" failed.'),
-              ),
-        ),
-      );
-
-      final ExtensionTarget nullMessageTarget = _createTarget(
-        buildManager: FakeExtensionBuildManager(
-          buildResult: const ExtensionBuildResult(success: false),
-        ),
-      );
-      await expectLater(
-        () => nullMessageTarget.build(environment),
         throwsA(
           isA<ExtensionAssembleException>()
               .having((ExtensionAssembleException e) => e.target, 'target', 'custom-target')
@@ -817,7 +799,7 @@ void main() {
         description: 'Out-of-tree build target with target-independent artifacts',
         name: 'custom-target',
         outputDir: '{OUTPUT_DIR}/custom',
-        targetPlatform: 'custom-embedder-arm64',
+        targetPlatforms: const <String>{'custom-embedder-arm64'},
         artifacts: const <ExtensionArtifact>{
           BuiltInArtifacts.flutterPatchedSdkPath,
           BuiltInArtifacts.icuData,
@@ -840,7 +822,7 @@ void main() {
           description: 'Out-of-tree build target with genSnapshot',
           name: 'custom-target',
           outputDir: '{OUTPUT_DIR}/custom',
-          targetPlatform: 'custom-embedder-arm64',
+          targetPlatforms: const <String>{'custom-embedder-arm64'},
           artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
         ),
       ),
@@ -902,7 +884,7 @@ void main() {
             description: 'description',
             name: 'custom-target',
             outputDir: pattern,
-            targetPlatform: 'linux-x64',
+            targetPlatforms: const <String>{'linux-x64'},
           ),
         );
         expect(resolved.path, equals(expectedPath));
@@ -921,7 +903,7 @@ void main() {
           description: 'description',
           name: 'custom-target',
           outputDir: '{OUTPUT_DIR}/custom/{BUILD_MODE}',
-          targetPlatform: 'linux-x64',
+          targetPlatforms: const <String>{'linux-x64'},
         ),
       );
       expect(resolved.path, equals('/home/user/{client}/project/build/custom/profile'));
@@ -942,7 +924,7 @@ void main() {
               description: 'description',
               name: 'custom-target',
               outputDir: '{BUILD_DIR}/custom-out',
-              targetPlatform: 'linux-x64',
+              targetPlatforms: const <String>{'linux-x64'},
             ),
           ),
           throwsToolExit(
@@ -952,7 +934,7 @@ void main() {
       },
     );
 
-    testWithoutContext('resolves outputDir without {TARGET_PLATFORM} when targetPlatform is null and throws ToolExit if {TARGET_PLATFORM} is used', () {
+    testWithoutContext('resolves outputDir without {TARGET_PLATFORM} when targetPlatforms is empty and throws ToolExit if {TARGET_PLATFORM} is used', () {
       final Directory projectDir = fileSystem.directory('/project');
       final Directory buildOutputDir = projectDir.childDirectory('build');
       final Directory resolved = resolveExtensionOutputDir(
@@ -994,7 +976,7 @@ void main() {
       description: 'Contract check build target',
       name: 'contract-build-target',
       outputDir: '{OUTPUT_DIR}/contract-build',
-      targetPlatform: 'linux-x64',
+      targetPlatforms: const <String>{'linux-x64'},
       artifacts: const <ExtensionArtifact>{
         BuiltInArtifacts.flutterPatchedSdkPath,
         BuiltInArtifacts.genSnapshot,
@@ -1072,9 +1054,9 @@ void main() {
         kExtraGenSnapshotOptions: '--gs-opt1',
         kTrackWidgetCreation: 'false',
         kIconTreeShakerFlag: 'true',
-        kExtensionConfigDefines: encodeExtensionConfigDefines(const <String, String?>{
+        kExtensionConfigDefines: encodeExtensionConfigDefines(const <String, Object?>{
           'sdk-dir': '/opt/custom',
-          'enable-feature': 'true',
+          'enable-feature': true,
         }),
         'CustomUserDefine': 'user-val',
       },
@@ -1109,7 +1091,7 @@ void main() {
     expect(buildManager.invokedTreeShakeIcons, isTrue);
     expect(
       buildManager.invokedConfiguration,
-      equals(const <String, String?>{'enable-feature': 'true', 'sdk-dir': '/opt/custom'}),
+      equals(const <String, Object?>{'enable-feature': true, 'sdk-dir': '/opt/custom'}),
     );
     expect(
       buildManager.invokedExtraDefines,
@@ -1125,9 +1107,9 @@ void main() {
         kSplitDebugInfo: 'rel_symbols',
         kCodeSizeDirectory: 'rel_code_size',
         kExtensionConfigDefines: encodeTargetExtensionConfigDefines(
-          const <String, Map<String, String?>>{
-            'custom-target': <String, String?>{'target-key': 'target-val'},
-            'other-target': <String, String?>{'other-key': 'other-val'},
+          const <String, Map<String, Object?>>{
+            'custom-target': <String, Object?>{'enable-target': false, 'target-key': 'target-val'},
+            'other-target': <String, Object?>{'other-key': 'other-val'},
           },
         ),
       },
@@ -1147,7 +1129,7 @@ void main() {
     );
     expect(
       buildManager.invokedConfiguration,
-      equals(const <String, String?>{'target-key': 'target-val'}),
+      equals(const <String, Object?>{'enable-target': false, 'target-key': 'target-val'}),
     );
   });
 
@@ -1158,7 +1140,6 @@ void main() {
       description: 'Multi-arch target',
       name: 'multi-arch',
       outputDir: '{OUTPUT_DIR}/{TARGET_PLATFORM}/{BUILD_MODE}',
-      targetPlatform: 'linux-x64',
       targetPlatforms: const <String>{'linux-x64', 'linux-arm64'},
       artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
     );

@@ -426,9 +426,9 @@ class AssembleCommand extends FlutterCommand {
         _collectExtensionTargets(target, visited, extensionTargets);
       }
       if (extensionTargets.isNotEmpty) {
-        final targetConfigs = <String, Map<String, String?>>{};
+        final targetConfigs = <String, Map<String, Object?>>{};
         for (final extTarget in extensionTargets) {
-          final Map<String, String?> config = await extensionBuildManager
+          final Map<String, Object?> config = await extensionBuildManager
               .getAssembleTargetConfiguration(extTarget.name);
           if (config.isNotEmpty) {
             targetConfigs[extTarget.name] = config;

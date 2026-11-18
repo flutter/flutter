@@ -731,6 +731,7 @@ class ToolDependencies {
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       logger: finalLogger,
+      platform: finalPlatform,
     );
 
     final extensionCleanManager = ExtensionCleanManager(

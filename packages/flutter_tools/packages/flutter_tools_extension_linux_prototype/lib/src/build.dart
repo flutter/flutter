@@ -27,14 +27,13 @@ const String _kAppDill = 'app.dill';
 const String _kGeneratedConfigCmake = 'generated_config.cmake';
 
 /// Top-level Linux build target contributed by the prototype extension.
-// TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
 final class CustomLinuxBuildTarget extends BuildTarget {
-  CustomLinuxBuildTarget()
+  const CustomLinuxBuildTarget()
     : super(
         description: 'A custom Linux build target from prototype extension.',
         outputDir:
             '${BuiltInPlaceholders.outputDir}/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
-        targetPlatform: _kLinuxX64Platform,
+        targetPlatforms: const <String>{_kLinuxX64Platform},
       );
 
   /// Custom build flag to write a build metadata marker file in the output directory.
@@ -57,16 +56,16 @@ final class CustomLinuxBuildTarget extends BuildTarget {
   };
 
   @override
-  List<BuildFlag> get buildFlags => const <BuildFlag>[
-    BuildFlag(
+  List<ExtensionFlag> get flags => const <ExtensionFlag>[
+    ExtensionFlag(
       help: 'Whether to write a build metadata file to the output directory.',
       name: bundleMetadataFlag,
     ),
   ];
 
   @override
-  List<BuildOption> get buildOptions => const <BuildOption>[
-    BuildOption(
+  List<ExtensionOption> get options => const <ExtensionOption>[
+    ExtensionOption(
       help: 'Optional label written to the build metadata file.',
       name: bundleLabelOption,
       valueHelp: 'label',
@@ -79,10 +78,7 @@ final class CustomLinuxBuildTarget extends BuildTarget {
     final outputDir = Directory.fromUri(context.outputDir);
     final cmakeFile = File('${projectDir.path}/linux/CMakeLists.txt');
     if (!cmakeFile.existsSync()) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Missing linux/CMakeLists.txt in ${projectDir.path}.',
-      );
+      throw ToolExtensionException('Missing linux/CMakeLists.txt in ${projectDir.path}.');
     }
 
     final String flutterRoot = Directory.fromUri(context.flutterRoot).path;
@@ -92,7 +88,7 @@ final class CustomLinuxBuildTarget extends BuildTarget {
       resolvedArtifacts: context.resolvedArtifacts,
     );
     if (unpackError != null) {
-      return ExtensionBuildResult(success: false, errorMessage: unpackError);
+      throw ToolExtensionException(unpackError);
     }
 
     final ephemeralDir = Directory('${projectDir.path}/linux/flutter/ephemeral');
@@ -149,31 +145,26 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       environment: const <String, String>{'CC': 'clang', 'CXX': 'clang++'},
     );
     if (cmakeExitCode != 0) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'cmake failed with exit code $cmakeExitCode.',
-      );
+      throw ToolExtensionException('cmake failed with exit code $cmakeExitCode.');
     }
 
     // TODO(bkonyi): Route extension build output through the host logger.
     stdout.writeln('Running ninja...');
     final int ninjaExitCode = await _runProcess('ninja', <String>['-C', outputDir.path, 'install']);
     if (ninjaExitCode != 0) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'ninja failed with exit code $ninjaExitCode.',
-      );
+      throw ToolExtensionException('ninja failed with exit code $ninjaExitCode.');
     }
 
     final String? appName = _getCmakeBinaryName(projectDir.uri);
     if (appName == null) {
-      return const ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Could not find BINARY_NAME in linux/CMakeLists.txt.',
-      );
+      throw const ToolExtensionException('Could not find BINARY_NAME in linux/CMakeLists.txt.');
     }
-    final executableFile = File('${outputDir.path}/bundle/$appName');
-    return ExtensionBuildResult(success: true, executableUri: executableFile.absolute.uri);
+    final bundleDir = Directory('${outputDir.path}/bundle');
+    final executableFile = File('${bundleDir.path}/$appName');
+    return ExtensionBuildResult(
+      bundleDirectoryUri: bundleDir.absolute.uri,
+      executableUri: executableFile.absolute.uri,
+    );
   }
 }
 
@@ -214,7 +205,7 @@ final class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   ];
 
   @override
-  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+  Future<void> build(ExtensionAssembleContext context) async {
     final outputDir = Directory.fromUri(context.outputDir);
     final buildDir = Directory.fromUri(context.buildDir);
 
@@ -230,45 +221,31 @@ final class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
     // TODO(bkonyi): Move engine artifact bundling into a separate assemble target.
     final String? desktopPath = context.resolvedArtifacts[LinuxArtifacts.linuxDesktopPath.name];
     if (desktopPath == null) {
-      return const ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Missing linuxDesktopPath artifact.',
-      );
+      throw const ToolExtensionException('Missing linuxDesktopPath artifact.');
     }
     final srcLib = File('$desktopPath/$_kLibFlutterLinuxGtk');
     if (!srcLib.existsSync()) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Missing $_kLibFlutterLinuxGtk at ${srcLib.path}.',
-      );
+      throw ToolExtensionException('Missing $_kLibFlutterLinuxGtk at ${srcLib.path}.');
     }
     _copyFile(srcLib, File('${outputDir.path}/bundle/lib/$_kLibFlutterLinuxGtk'));
 
     // 3. Copy icudtl.dat
     final String? icuDataPath = context.resolvedArtifacts[BuiltInArtifacts.icuData.name];
     if (icuDataPath == null) {
-      return const ExtensionBuildResult(success: false, errorMessage: 'Missing icuData artifact.');
+      throw const ToolExtensionException('Missing icuData artifact.');
     }
     final srcIcu = File(icuDataPath);
     if (!srcIcu.existsSync()) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Missing $_kIcuData at ${srcIcu.path}.',
-      );
+      throw ToolExtensionException('Missing $_kIcuData at ${srcIcu.path}.');
     }
     _copyFile(srcIcu, File('${outputDir.path}/bundle/data/$_kIcuData'));
 
     // 4. Copy application binary
     final srcApp = File('${buildDir.path}/$_kAppDill');
     if (!srcApp.existsSync()) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Missing $_kAppDill at ${srcApp.path}.',
-      );
+      throw ToolExtensionException('Missing $_kAppDill at ${srcApp.path}.');
     }
     _copyFile(srcApp, File('${outputDir.path}/bundle/data/$_kFlutterAssets/$_kKernelBlob'));
-
-    return const ExtensionBuildResult(success: true);
   }
 }
 
@@ -296,7 +273,7 @@ final class LinuxBuildService extends BuildService {
   static const String customLinuxBuildTargetName = 'custom-linux-build';
 
   @override
-  List<BuildTarget> get buildTargets => <BuildTarget>[CustomLinuxBuildTarget()];
+  List<BuildTarget> get buildTargets => const <BuildTarget>[CustomLinuxBuildTarget()];
 
   @override
   List<AssembleTarget> get assembleTargets => const <AssembleTarget>[

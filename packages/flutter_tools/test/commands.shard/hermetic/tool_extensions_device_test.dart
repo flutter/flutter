@@ -29,10 +29,12 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart'
     show
         BuiltInPlaceholders,
+        ExtensionBuildContext,
         ExtensionBuildResult,
         ExtensionDebuggingOptions,
         ExtensionFlutterProject,
-        TargetDevice;
+        TargetDevice,
+        ToolExtensionException;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
@@ -50,7 +52,7 @@ final class _TestBuildTarget extends BuildTarget {
     this.executableUri,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
-  }) : super(targetPlatform: 'linux-x64');
+  }) : super(targetPlatforms: const <String>{'linux-x64'});
 
   @override
   final String name;
@@ -61,9 +63,10 @@ final class _TestBuildTarget extends BuildTarget {
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
-    return shouldSucceed
-        ? ExtensionBuildResult(success: true, executableUri: executableUri)
-        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
+    if (!shouldSucceed) {
+      throw ToolExtensionException(errorMessage ?? 'Build failed.');
+    }
+    return ExtensionBuildResult(executableUri: executableUri);
   }
 }
 

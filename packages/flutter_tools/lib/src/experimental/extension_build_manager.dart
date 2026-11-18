@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../features.dart';
 import 'config.dart';
 import 'extension_discovery.dart';
@@ -40,12 +42,14 @@ base class ExtensionBuildManager {
     required this._featureFlags,
     required this._logger,
     this._config,
+    this._platform,
   });
 
   final Config? _config;
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final Logger _logger;
+  final Platform? _platform;
 
   List<ExtensionBuildTarget>? _cachedBuildTargets;
   List<ExtensionAssembleTarget>? _cachedAssembleTargets;
@@ -183,31 +187,31 @@ base class ExtensionBuildManager {
 
   /// Returns the snapshot of extension-owned `flutter config` values for the
   /// extension that owns assemble target [targetName].
-  Future<Map<String, String?>> getAssembleTargetConfiguration(String targetName) async {
+  Future<Map<String, Object?>> getAssembleTargetConfiguration(String targetName) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <String, String?>{};
+      return const <String, Object?>{};
     }
     try {
       await _extensionManager.ensureInitialized();
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
-      return const <String, String?>{};
+      return const <String, Object?>{};
     }
     if (_cachedAssembleTargets == null) {
       await getAssembleTargets();
     }
     final ExtensionConnection? connection = _assembleTargetToConnection[targetName];
     if (connection == null) {
-      return const <String, String?>{};
+      return const <String, Object?>{};
     }
     return _resolveExtensionConfiguration(connection);
   }
 
-  Future<Map<String, String?>> _resolveExtensionConfiguration(
+  Future<Map<String, Object?>> _resolveExtensionConfiguration(
     ExtensionConnection connection,
   ) async {
     if (!connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)) {
-      return const <String, String?>{};
+      return const <String, Object?>{};
     }
     (List<FeatureFlag>, List<ConfigOption>)? schema = _connectionConfigSchema[connection];
     if (schema == null) {
@@ -218,31 +222,56 @@ base class ExtensionBuildManager {
       _connectionConfigSchema[connection] = schema;
     }
     final (List<FeatureFlag> featureFlags, List<ConfigOption> configOptions) = schema;
-    final snapshot = <String, String?>{};
-    for (final FeatureFlag(:String name, :bool enabledByDefault) in featureFlags) {
+    Map<String, Object?>? extensionSettings;
+    if (_config?.getValue('extensions') case final Map<String, Object?> extensionsMap) {
+      if (extensionsMap[connection.extensionName] case final Map<String, Object?> extMap) {
+        extensionSettings = extMap;
+      }
+    }
+
+    Object? lookupPersistedSetting(String key) {
+      if (extensionSettings != null && extensionSettings.containsKey(key)) {
+        return extensionSettings[key];
+      }
+      return _config?.getValue(key);
+    }
+
+    final snapshot = <String, Object?>{};
+    for (final FeatureFlag(:String name, :String? environmentVariable, :bool enabledByDefault)
+        in featureFlags) {
       if (name.isEmpty) {
         continue;
       }
-      final Object? rawValue = _config?.getValue(name);
-      final bool resolved = switch (rawValue) {
-        final bool b => b,
-        final String s when s.toLowerCase() == 'true' => true,
-        final String s when s.toLowerCase() == 'false' => false,
-        _ => enabledByDefault,
-      };
-      snapshot[name] = resolved.toString();
+      bool? envOverride;
+      if (environmentVariable != null && environmentVariable.isNotEmpty) {
+        envOverride = _parseOptionalBool(_platform?.environment[environmentVariable]);
+      }
+      final bool resolved =
+          envOverride ?? _parseOptionalBool(lookupPersistedSetting(name)) ?? enabledByDefault;
+      snapshot[name] = resolved;
     }
     for (final ConfigOption(:String name, :String? value) in configOptions) {
       if (name.isEmpty) {
         continue;
       }
-      final Object? rawValue = _config?.getValue(name);
-      snapshot[name] = rawValue != null ? rawValue.toString() : value;
+      final Object? rawValue = lookupPersistedSetting(name);
+      final String? resolved = rawValue != null ? '$rawValue' : value;
+      if (resolved != null) {
+        snapshot[name] = resolved;
+      }
     }
     return snapshot;
   }
 
-  /// Triggers a custom `flutter build` target for the given [targetName] by routing to the active extension.
+  static bool? _parseOptionalBool(Object? rawValue) => switch (rawValue) {
+    final bool b => b,
+    final String s when s.toLowerCase() == 'true' || s == '1' => true,
+    final String s when s.toLowerCase() == 'false' || s == '0' => false,
+    _ => null,
+  };
+
+  /// Triggers a custom `flutter build` target for [targetName] by routing to the
+  /// owning extension, throwing a [ToolExtensionException] if the build fails.
   Future<ExtensionBuildResult> build({
     required BuildMode buildMode,
     required Uri flutterRoot,
@@ -254,9 +283,9 @@ base class ExtensionBuildManager {
     Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String?> buildOptions = const <String, String?>{},
+    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, String?>? configuration,
+    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     List<String> extraFrontEndOptions = const <String>[],
@@ -267,8 +296,8 @@ base class ExtensionBuildManager {
     String? targetPlatform,
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
-  }) {
-    return _executeBuildRpc(
+  }) async {
+    final (ExtensionConnection connection, Object? result) = await _sendBuildOrAssembleRpc(
       buildFlags: buildFlags,
       buildMode: buildMode,
       buildName: buildName,
@@ -301,10 +330,23 @@ base class ExtensionBuildManager {
       trackWidgetCreation: trackWidgetCreation ?? (buildMode == BuildMode.debug),
       treeShakeIcons: treeShakeIcons ?? buildMode.isPrecompiled,
     );
+    if (result case final Map<String, Object?> resultMap) {
+      try {
+        return ExtensionBuildResult.fromJson(resultMap);
+      } on FormatException catch (e) {
+        throw ToolExtensionException(
+          'Invalid build result from extension "${connection.extensionName}": ${e.message}',
+        );
+      }
+    }
+    throw ToolExtensionException(
+      'Invalid build result from extension "${connection.extensionName}".',
+    );
   }
 
-  /// Triggers a custom `flutter assemble` target for the given [targetName] by routing to the active extension.
-  Future<ExtensionBuildResult> assemble({
+  /// Triggers a custom `flutter assemble` target for [targetName] by routing to
+  /// the owning extension, throwing a [ToolExtensionException] if the step fails.
+  Future<void> assemble({
     required Uri buildDir,
     required BuildMode buildMode,
     required Uri flutterRoot,
@@ -316,9 +358,9 @@ base class ExtensionBuildManager {
     Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String?> buildOptions = const <String, String?>{},
+    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, String?>? configuration,
+    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     Map<String, String> extraDefines = const <String, String>{},
@@ -330,8 +372,8 @@ base class ExtensionBuildManager {
     String? targetPlatform,
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
-  }) {
-    return _executeBuildRpc(
+  }) async {
+    await _sendBuildOrAssembleRpc(
       buildDir: buildDir,
       buildFlags: buildFlags,
       buildMode: buildMode,
@@ -368,7 +410,7 @@ base class ExtensionBuildManager {
     );
   }
 
-  Future<ExtensionBuildResult> _executeBuildRpc({
+  Future<(ExtensionConnection, Object?)> _sendBuildOrAssembleRpc({
     required BuildMode buildMode,
     required Map<String, ExtensionConnection> connectionMap,
     required Future<void> Function() ensureTargetsLoaded,
@@ -386,9 +428,9 @@ base class ExtensionBuildManager {
     Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String?> buildOptions = const <String, String?>{},
+    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, String?>? configuration,
+    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     Map<String, String> extraDefines = const <String, String>{},
@@ -426,36 +468,29 @@ base class ExtensionBuildManager {
       );
     }
     if (!_featureFlags.isToolExtensionsEnabled) {
-      return const ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Tool extensions are disabled.',
-      );
+      throw const ToolExtensionException('Tool extensions are disabled.');
     }
 
     try {
       await _extensionManager.ensureInitialized();
+    } on ToolExtensionException {
+      rethrow;
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Failed to initialize extension manager: $e',
-      );
+      throw ToolExtensionException('Failed to initialize extension manager: $e');
     }
 
     await ensureTargetsLoaded();
 
     final ExtensionConnection? connection = connectionMap[targetName];
     if (connection == null) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'No extension found to handle $targetKind target $targetName.',
-      );
+      throw ToolExtensionException('No extension found to handle $targetKind target $targetName.');
     }
 
-    final Map<String, String?> resolvedConfiguration =
+    final Map<String, Object?> resolvedConfiguration =
         connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)
         ? await _resolveExtensionConfiguration(connection)
-        : (configuration ?? const <String, String?>{});
+        : (configuration ?? const <String, Object?>{});
 
     var resolvedTargetPlatform = targetPlatform;
     if (resolvedTargetPlatform == null) {
@@ -463,7 +498,8 @@ base class ExtensionBuildManager {
         resolvedTargetPlatform = _cachedBuildTargets
             ?.where((ExtensionBuildTarget t) => t.name == targetName)
             .firstOrNull
-            ?.targetPlatform;
+            ?.targetPlatforms
+            .firstOrNull;
       } else {
         resolvedTargetPlatform = _cachedAssembleTargets
             ?.where((ExtensionAssembleTarget t) => t.name == targetName)
@@ -510,18 +546,12 @@ base class ExtensionBuildManager {
         // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
-      if (result case final Map<String, Object?> resultMap) {
-        return ExtensionBuildResult.fromJson(resultMap);
-      }
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Invalid $targetKind result from extension.',
-      );
-    } on ToolExtensionException catch (e) {
-      return ExtensionBuildResult(success: false, errorMessage: e.message);
+      return (connection, result);
+    } on ToolExtensionException {
+      rethrow;
     } on Object catch (e) {
       _logger.printTrace('Failed to run $targetKind from extension: $e');
-      return ExtensionBuildResult(success: false, errorMessage: e.toString());
+      throw ToolExtensionException(e.toString());
     }
   }
 }

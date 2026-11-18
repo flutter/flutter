@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
@@ -33,8 +32,19 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+const _sampleAotSizeJson = '''
+[
+  {
+    "l": "dart:core",
+    "c": "RangeError",
+    "n": "[Optimized] new RangeError.range",
+    "s": 3920
+  }
+]
+''';
+
 final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
-  _RecordingExtensionBuildManager()
+  _RecordingExtensionBuildManager({this.resultToReturn = const ExtensionBuildResult()})
     : super(
         extensionManager: ExtensionManager(
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -45,6 +55,7 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
         logger: BufferLogger.test(),
       );
 
+  final ExtensionBuildResult resultToReturn;
   Map<String, Object?>? lastBuildArgs;
 
   @override
@@ -59,9 +70,9 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String?> buildOptions = const <String, String?>{},
+    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, String?>? configuration,
+    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     List<String> extraFrontEndOptions = const <String>[],
@@ -98,19 +109,19 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
       'trackWidgetCreation': trackWidgetCreation,
       'treeShakeIcons': treeShakeIcons,
     };
-    return const ExtensionBuildResult(success: true);
+    return resultToReturn;
   }
 }
 
 final class _TestBuildTarget extends BuildTarget {
-  _TestBuildTarget({
+  const _TestBuildTarget({
     required super.description,
     required this.name,
     this.artifacts = const <ExtensionArtifact>{},
     this.errorMessage,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
-    super.targetPlatform = 'linux-x64',
+    super.targetPlatforms = const <String>{'linux-x64'},
   });
 
   @override
@@ -124,9 +135,10 @@ final class _TestBuildTarget extends BuildTarget {
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
-    return shouldSucceed
-        ? const ExtensionBuildResult(success: true)
-        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
+    if (!shouldSucceed) {
+      throw ToolExtensionException(errorMessage ?? 'Build failed.');
+    }
+    return const ExtensionBuildResult();
   }
 }
 
@@ -154,16 +166,16 @@ final class _TestAssembleTarget extends AssembleTarget {
   final bool shouldSucceed;
 
   @override
-  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
-    return shouldSucceed
-        ? const ExtensionBuildResult(success: true)
-        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Assemble failed.');
+  Future<void> build(ExtensionAssembleContext context) async {
+    if (!shouldSucceed) {
+      throw ToolExtensionException(errorMessage ?? 'Assemble failed.');
+    }
   }
 }
 
 final class _SucceedingBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => <BuildTarget>[
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
     _TestBuildTarget(
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
@@ -173,7 +185,7 @@ final class _SucceedingBuildService extends BuildService {
       description: 'Hermetic platform-agnostic build target.',
       name: 'custom-agnostic-build',
       outputDir: '${BuiltInPlaceholders.outputDir}/agnostic/${BuiltInPlaceholders.buildMode}',
-      targetPlatform: null,
+      targetPlatforms: <String>{},
     ),
   ];
 
@@ -196,7 +208,7 @@ void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FailingAndConflictingBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => <BuildTarget>[
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
     _TestBuildTarget(
       description: 'Failing custom build target.',
       name: 'failing-build',
@@ -206,13 +218,13 @@ final class _FailingAndConflictingBuildService extends BuildService {
     _TestBuildTarget(
       description: 'Custom build target with custom embedder platform.',
       name: 'custom-platform-build',
-      targetPlatform: 'custom-embedder-arm64',
-      artifacts: const <ExtensionArtifact>{BuiltInArtifacts.icuData},
+      targetPlatforms: <String>{'custom-embedder-arm64'},
+      artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData},
     ),
     _TestBuildTarget(
       description: 'Custom build target with unsupported artifact.',
       name: 'unsupported-artifact-build',
-      artifacts: const <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
+      artifacts: <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
     ),
     _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
   ];
@@ -258,7 +270,7 @@ final class _InvalidTargetBuildService extends ToolExtensionService {
           'description': 'Target with invalid name',
           'name': 'Invalid-Name',
           'outputDir': '{OUTPUT_DIR}',
-          'targetPlatform': 'linux-x64',
+          'targetPlatforms': const <String>['linux-x64'],
         },
       ],
     };
@@ -276,7 +288,7 @@ void _invalidTargetBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FirstDuplicateBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => <BuildTarget>[
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
     _TestBuildTarget(description: 'First extension shared target.', name: 'shared-target'),
   ];
 
@@ -300,7 +312,7 @@ void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
 
 final class _SecondDuplicateBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => <BuildTarget>[
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
     _TestBuildTarget(
       description: 'Second extension shared target.',
       name: 'shared-target',
@@ -355,6 +367,7 @@ final class _TestConfigService extends ConfigurationExtension {
     FeatureFlag(
       help: 'Enable custom embedder support.',
       enabledByDefault: true,
+      environmentVariable: 'CUSTOM_EMBEDDER_ENABLED',
       name: 'enable-custom-embedder',
     ),
   ];
@@ -366,6 +379,7 @@ final class _TestConfigService extends ConfigurationExtension {
       name: 'custom-embedder-sdk',
       value: '/default/sdk',
     ),
+    ConfigOption(help: 'Unset optional profile path.', name: 'unset-embedder-profile'),
   ];
 }
 
@@ -384,12 +398,11 @@ final class _SecondaryConfigService extends ConfigurationExtension {
 }
 
 final class _CapturingBuildTarget extends BuildTarget {
-  _CapturingBuildTarget(this._capturePort)
+  const _CapturingBuildTarget(this._capturePort)
     : super(
         description: 'Capturing build target.',
         outputDir:
             '${BuiltInPlaceholders.outputDir}/captured/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
-        targetPlatform: 'linux-x64',
         targetPlatforms: const <String>{'linux-x64', 'linux-arm64'},
       );
 
@@ -399,27 +412,45 @@ final class _CapturingBuildTarget extends BuildTarget {
   String get name => 'capturing-build';
 
   @override
-  List<BuildFlag> get buildFlags => const <BuildFlag>[
-    BuildFlag(help: 'Sign the output bundle.', name: 'sign-bundle', abbr: 's'),
-    BuildFlag(help: 'Collides with built-in --pub.', name: 'pub'),
-    BuildFlag(help: 'Collides with built-in -t.', name: 'collide-abbr', abbr: 't'),
+  bool get supportsFlavors => true;
+
+  @override
+  bool get supportsSizeAnalysis => true;
+
+  @override
+  List<ExtensionFlag> get flags => const <ExtensionFlag>[
+    ExtensionFlag(help: 'Sign the output bundle.', name: 'sign-bundle'),
+    ExtensionFlag(help: 'Hidden internal flag.', hide: true, name: 'hidden-flag'),
+    ExtensionFlag(
+      deprecated: 'Use --sign-bundle instead.',
+      help: 'Legacy signing flag.',
+      name: 'legacy-sign',
+    ),
+    ExtensionFlag(help: 'Collides with built-in --pub.', name: 'pub'),
   ];
 
   @override
-  List<BuildOption> get buildOptions => const <BuildOption>[
-    BuildOption(
+  List<ExtensionOption> get options => const <ExtensionOption>[
+    ExtensionOption(
       help: 'Select bundle format.',
       name: 'bundle-format',
       allowed: <String>['ipk', 'tar'],
       defaultsTo: 'ipk',
     ),
-    BuildOption(help: 'Collides with built-in --flavor.', name: 'flavor'),
+    ExtensionOption(help: 'Optional label omitted when unset.', name: 'optional-label'),
+    ExtensionOption(help: 'Hidden internal option.', hide: true, name: 'hidden-option'),
+    ExtensionOption(
+      deprecated: 'Use --bundle-format instead.',
+      help: 'Legacy format option.',
+      name: 'legacy-format',
+    ),
+    ExtensionOption(help: 'Collides with built-in --flavor.', name: 'flavor'),
   ];
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     _capturePort.send(context.toMap());
-    return const ExtensionBuildResult(success: true);
+    return const ExtensionBuildResult();
   }
 }
 
@@ -444,9 +475,8 @@ final class _CapturingAssembleTarget extends AssembleTarget {
   ];
 
   @override
-  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+  Future<void> build(ExtensionAssembleContext context) async {
     _capturePort.send(context.toMap());
-    return const ExtensionBuildResult(success: true);
   }
 }
 
@@ -470,6 +500,7 @@ ExtensionEntryPoint _createCapturingExtensionEntryPoint(SendPort capturePort) {
     ToolExtensionEntryPoint.run(
       sendPort,
       <ToolExtensionService>[_TestConfigService(), _CapturingBuildService(capturePort)],
+      extensionName: 'capturing_extension',
       supportedPlatforms: const <String>{'linux'},
     );
   };
@@ -483,6 +514,7 @@ ExtensionEntryPoint _createSecondaryCapturingExtensionEntryPoint(SendPort captur
         _SecondaryConfigService(),
         _CapturingBuildService(capturePort, assembleTargetName: 'secondary-capturing-assemble'),
       ],
+      extensionName: 'secondary_extension',
       supportedPlatforms: const <String>{'linux'},
     );
   };
@@ -504,11 +536,11 @@ final class _DeviceIdExtensionBuildSubCommand extends ExtensionBuildSubCommand {
 }
 
 final class _DomainErrorBuildTarget extends BuildTarget {
-  _DomainErrorBuildTarget()
+  const _DomainErrorBuildTarget()
     : super(
         description: 'Custom target throwing ToolExtensionException',
         outputDir: '${BuiltInPlaceholders.outputDir}/custom_os',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64'},
       );
 
   @override
@@ -522,7 +554,7 @@ final class _DomainErrorBuildTarget extends BuildTarget {
 
 final class _DomainErrorBuildService extends BuildService {
   @override
-  List<BuildTarget> get buildTargets => <BuildTarget>[_DomainErrorBuildTarget()];
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_DomainErrorBuildTarget()];
 }
 
 void _domainErrorBuildExtensionEntryPoint(SendPort sendPort) {
@@ -563,51 +595,62 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext(
-      'ExtensionBuildManager.build() and assemble() return failure when feature flag disabled',
-      () async {
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags();
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: logger,
-        );
+    testWithoutContext('ExtensionBuildManager.build() and assemble() throw ToolExtensionException when feature flag disabled', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags();
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-        final ExtensionBuildResult buildResult = await buildManager.build(
+      await expectLater(
+        () => buildManager.build(
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/build'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'custom-linux-build',
-        );
-        expect(buildResult.success, isFalse);
-        expect(buildResult.errorMessage, 'Tool extensions are disabled.');
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Tool extensions are disabled.',
+          ),
+        ),
+      );
 
-        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+      await expectLater(
+        () => buildManager.assemble(
           buildDir: Uri.parse('/.dart_tool/flutter_build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/build'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'custom-linux-assemble-only-debug',
-        );
-        expect(assembleResult.success, isFalse);
-        expect(assembleResult.errorMessage, 'Tool extensions are disabled.');
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Tool extensions are disabled.',
+          ),
+        ),
+      );
 
-        await manager.dispose();
-      },
-    );
+      await manager.dispose();
+    });
 
     testUsingContext(
       'BuildCommand does not include custom subcommands when feature flag disabled',
@@ -657,7 +700,7 @@ void main() {
     setUp(() {
       fs = MemoryFileSystem.test();
       fs.directory('/flutter').createSync(recursive: true);
-      fs.file('/pubspec.yaml').createSync();
+      fs.file('/pubspec.yaml').writeAsStringSync('name: test_app\nversion: 2.4.6+88\n');
       fs.file('/lib/main.dart').createSync(recursive: true);
       cache = FakeCache(fileSystem: fs, flutterRoot: '/flutter');
     });
@@ -730,7 +773,7 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext('ExtensionBuildManager.build() and assemble() throw ArgumentError when directories are relative', () async {
+    testWithoutContext('ExtensionBuildManager.build() and assemble() throw ArgumentError when directories are invalid', () async {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
@@ -749,7 +792,7 @@ void main() {
         () => buildManager.build(
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('relative/path'),
           resolvedArtifacts: const <String, String>{},
@@ -762,7 +805,7 @@ void main() {
         () => buildManager.build(
           buildMode: .debug,
           flutterRoot: Uri.parse('relative/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
@@ -775,10 +818,38 @@ void main() {
         () => buildManager.build(
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('relative/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-linux-build',
+        ),
+        throwsArgumentError,
+      );
+
+      await expectLater(
+        () => buildManager.build(
+          buildMode: .release,
+          codeSizeDirectory: Uri.parse('file:///no_trailing_slash'),
+          flutterRoot: Uri.parse('/flutter'),
+          mainPath: '/lib/main.dart',
+          outputDir: Uri.parse('/out'),
+          projectRoot: Uri.parse('/'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-linux-build',
+        ),
+        throwsArgumentError,
+      );
+
+      await expectLater(
+        () => buildManager.build(
+          buildMode: .release,
+          flutterRoot: Uri.parse('/flutter'),
+          mainPath: '/lib/main.dart',
+          outputDir: Uri.parse('/out'),
+          projectRoot: Uri.parse('/'),
+          resolvedArtifacts: const <String, String>{},
+          splitDebugInfo: Uri.parse('file:///no_trailing_slash'),
           targetName: 'custom-linux-build',
         ),
         throwsArgumentError,
@@ -789,7 +860,7 @@ void main() {
           buildDir: Uri.parse('relative/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
@@ -803,7 +874,7 @@ void main() {
           buildDir: Uri.parse('/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('relative/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
@@ -815,57 +886,62 @@ void main() {
       await manager.dispose();
     });
 
-    testWithoutContext(
-      'ExtensionBuildManager.build() and assemble() return failure for unknown target',
-      () async {
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: logger,
-        );
+    testWithoutContext('ExtensionBuildManager.build() and assemble() throw ToolExtensionException for unknown target', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-        final ExtensionBuildResult buildResult = await buildManager.build(
+      await expectLater(
+        () => buildManager.build(
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'non-existent-target',
-        );
-        expect(buildResult.success, isFalse);
-        expect(
-          buildResult.errorMessage,
-          'No extension found to handle build target non-existent-target.',
-        );
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'No extension found to handle build target non-existent-target.',
+          ),
+        ),
+      );
 
-        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+      await expectLater(
+        () => buildManager.assemble(
           buildDir: Uri.parse('/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'non-existent-assemble-target',
-        );
-        expect(assembleResult.success, isFalse);
-        expect(
-          assembleResult.errorMessage,
-          'No extension found to handle assemble target non-existent-assemble-target.',
-        );
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'No extension found to handle assemble target non-existent-assemble-target.',
+          ),
+        ),
+      );
 
-        await manager.dispose();
-      },
-    );
+      await manager.dispose();
+    });
 
     testWithoutContext(
       'ExtensionBuildManager deduplicates targets across multiple extension entrypoints in order',
@@ -902,13 +978,13 @@ void main() {
         final ExtensionBuildResult buildResult = await buildManager.build(
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'shared-target',
         );
-        expect(buildResult.success, isTrue);
+        expect(buildResult.aotSnapshotFileName, 'libapp.so');
 
         final List<ExtensionAssembleTarget> assembleTargets = await buildManager
             .getAssembleTargets();
@@ -923,17 +999,16 @@ void main() {
           ),
         );
 
-        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+        await buildManager.assemble(
           buildDir: Uri.parse('/build'),
           buildMode: .debug,
           flutterRoot: Uri.parse('/flutter'),
-          mainPath: 'lib/main.dart',
+          mainPath: '/lib/main.dart',
           outputDir: Uri.parse('/out'),
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'shared-assemble-target',
         );
-        expect(assembleResult.success, isTrue);
 
         await manager.dispose();
       },
@@ -1155,28 +1230,36 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionBuildSubCommand forwards flutterRoot, outputDir, and resolvedArtifacts in build parameters', () async {
+    testWithoutContext('ExtensionBuildSubCommand forwards absolute mainPath, manifest buildName/buildNumber, flutterRoot, outputDir, and resolvedArtifacts', () async {
       final fakeBuildManager = _RecordingExtensionBuildManager();
       final target = ExtensionBuildTarget(
         description: 'Custom hermetic build target.',
         name: 'custom-hermetic-build',
         outputDir:
             '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64'},
       );
-
+      final toolContext = FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test());
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final subCommand = ExtensionBuildSubCommand(
         buildManager: fakeBuildManager,
         target: target,
-        toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
+        toolContext: toolContext,
         verboseHelp: false,
       );
 
-      final FlutterCommandResult result = await subCommand.runCommand();
-      expect(result.exitStatus, ExitStatus.success);
+      await createTestCommandRunner(
+        subCommand,
+        null,
+        toolContext,
+        featureFlags,
+      ).run(<String>['custom-hermetic-build', '--no-pub']);
 
       expect(fakeBuildManager.lastBuildArgs, isNotNull);
       expect(fakeBuildManager.lastBuildArgs!['targetName'], equals('custom-hermetic-build'));
+      expect(fakeBuildManager.lastBuildArgs!['mainPath'], equals('/lib/main.dart'));
+      expect(fakeBuildManager.lastBuildArgs!['buildName'], equals('2.4.6'));
+      expect(fakeBuildManager.lastBuildArgs!['buildNumber'], equals('88'));
       expect(fakeBuildManager.lastBuildArgs!['flutterRoot'], equals(fs.directory('/flutter').uri));
       expect(
         fakeBuildManager.lastBuildArgs!['outputDir'],
@@ -1192,23 +1275,29 @@ void main() {
         name: 'custom-hermetic-build',
         outputDir:
             '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
-        targetPlatform: 'linux-x64',
+        targetPlatforms: const <String>{'linux-x64'},
       );
       final config = Config.test()..setValue('build-dir', 'custom_build_root');
+      final toolContext = FakeToolContext(
+        cache: cache,
+        config: config,
+        fs: fs,
+        logger: BufferLogger.test(),
+      );
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final subCommand = ExtensionBuildSubCommand(
         buildManager: buildManager,
         target: target,
-        toolContext: FakeToolContext(
-          cache: cache,
-          config: config,
-          fs: fs,
-          logger: BufferLogger.test(),
-        ),
+        toolContext: toolContext,
         verboseHelp: false,
       );
 
-      final FlutterCommandResult result = await subCommand.runCommand();
-      expect(result.exitStatus, ExitStatus.success);
+      await createTestCommandRunner(
+        subCommand,
+        null,
+        toolContext,
+        featureFlags,
+      ).run(<String>['custom-hermetic-build', '--no-pub']);
       expect(
         buildManager.lastBuildArgs!['outputDir'],
         equals(fs.directory('/custom_build_root/custom/linux-x64/release').uri),
@@ -1223,17 +1312,24 @@ void main() {
           description: 'Custom hermetic build target.',
           name: 'custom-hermetic-build',
           outputDir: '${BuiltInPlaceholders.buildDir}/custom',
-          targetPlatform: 'linux-x64',
+          targetPlatforms: const <String>{'linux-x64'},
         );
+        final toolContext = FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test());
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final subCommand = ExtensionBuildSubCommand(
           buildManager: buildManager,
           target: target,
-          toolContext: FakeToolContext(cache: cache, fs: fs, logger: BufferLogger.test()),
+          toolContext: toolContext,
           verboseHelp: false,
         );
 
         await expectLater(
-          subCommand.runCommand(),
+          () => createTestCommandRunner(
+            subCommand,
+            null,
+            toolContext,
+            featureFlags,
+          ).run(<String>['custom-hermetic-build', '--no-pub']),
           throwsToolExit(
             message: 'Unsupported placeholder "{BUILD_DIR}" in outputDir "{BUILD_DIR}/custom" for build target "custom-hermetic-build".',
           ),
@@ -1409,7 +1505,7 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionBuildSubCommand registers custom flags, options, and multi-arch --target-platform and forwards full ExtensionBuildContext', () async {
+    testWithoutContext('ExtensionBuildSubCommand registers custom flags, options, hide/deprecated behavior, and forwards full ExtensionBuildContext', () async {
       final captureReceivePort = ReceivePort();
       addTearDown(captureReceivePort.close);
       final capturedContexts = <ExtensionBuildContext>[];
@@ -1420,7 +1516,13 @@ void main() {
       });
 
       final logger = BufferLogger.test();
-      final config = Config.test()..setValue('custom-embedder-sdk', '/opt/custom-sdk');
+      final config = Config.test()
+        ..setValue('extensions', <String, Object?>{
+          'capturing_extension': <String, Object?>{'custom-embedder-sdk': '/opt/nested-sdk'},
+        });
+      final platform = FakePlatform(
+        environment: const <String, String>{'CUSTOM_EMBEDDER_ENABLED': 'false'},
+      );
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
@@ -1435,6 +1537,7 @@ void main() {
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,
+        platform: platform,
       );
       final toolContext = FakeToolContext(
         artifacts: Artifacts.test(fileSystem: fs),
@@ -1442,6 +1545,7 @@ void main() {
         config: config,
         fs: fs,
         logger: logger,
+        platform: platform,
         processManager: FakeProcessManager.any(),
       );
 
@@ -1454,6 +1558,28 @@ void main() {
         toolContext: toolContext,
         verboseHelp: false,
       );
+
+      // Standard --help hides flags and options with hide: true or deprecated != null.
+      final String standardUsage = subCommand.argParser.usage;
+      expect(standardUsage, contains('--[no-]sign-bundle'));
+      expect(standardUsage, contains('--bundle-format'));
+      expect(standardUsage, isNot(contains('--[no-]hidden-flag')));
+      expect(standardUsage, isNot(contains('--[no-]legacy-sign')));
+      expect(standardUsage, isNot(contains('--hidden-option')));
+      expect(standardUsage, isNot(contains('--legacy-format')));
+
+      // --help --verbose shows hidden and deprecated flags/options.
+      final verboseSubCommand = ExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: target,
+        toolContext: toolContext,
+        verboseHelp: true,
+      );
+      final String verboseUsage = verboseSubCommand.argParser.usage;
+      expect(verboseUsage, contains('--[no-]hidden-flag'));
+      expect(verboseUsage, contains('--[no-]legacy-sign'));
+      expect(verboseUsage, contains('--hidden-option'));
+      expect(verboseUsage, contains('--legacy-format'));
 
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         subCommand,
@@ -1484,18 +1610,27 @@ void main() {
         logger.warningText,
         allOf(
           contains('Skipping custom build flag "--pub" on build target "capturing-build"'),
-          contains('Skipping custom build flag "--collide-abbr" on build target "capturing-build"'),
           contains('Skipping custom build option "--flavor" on build target "capturing-build"'),
+          isNot(contains('is deprecated')),
         ),
       );
 
       expect(capturedContexts, hasLength(1));
       final ExtensionBuildContext captured = capturedContexts.single;
       expect(captured.buildMode, BuildMode.release);
+      expect(captured.mainPath, '/lib/main.dart');
       expect(captured.targetPlatform, 'linux-arm64');
       expect(captured.outputDir, fs.directory('/build/captured/linux-arm64/release').uri);
-      expect(captured.buildFlags, equals(const <String, bool>{'sign-bundle': true}));
-      expect(captured.buildOptions, equals(const <String, String?>{'bundle-format': 'tar'}));
+      expect(
+        captured.buildFlags,
+        equals(const <String, bool>{
+          'sign-bundle': true,
+          'hidden-flag': false,
+          'legacy-sign': false,
+        }),
+      );
+      // Unset options without defaults ('optional-label', 'hidden-option', 'legacy-format') are omitted.
+      expect(captured.buildOptions, equals(const <String, String>{'bundle-format': 'tar'}));
       expect(captured.flavor, 'production');
       expect(captured.buildName, '3.4.5');
       expect(captured.buildNumber, '12');
@@ -1509,22 +1644,38 @@ void main() {
       expect(captured.treeShakeIcons, isFalse);
       expect(captured.trackWidgetCreation, isFalse);
       expect(captured.targetDeviceId, isNull);
+      // FeatureFlag resolves environmentVariable override to typed bool false;
+      // ConfigOption resolves nested extensions map to String and omits unset keys.
       expect(
         captured.configuration,
-        equals(const <String, String?>{
-          'enable-custom-embedder': 'true',
-          'custom-embedder-sdk': '/opt/custom-sdk',
+        equals(const <String, Object?>{
+          'enable-custom-embedder': false,
+          'custom-embedder-sdk': '/opt/nested-sdk',
         }),
       );
 
+      // Explicitly passing deprecated flag/option emits deprecation warnings, and
+      // omitting --build-name/--build-number falls back to pubspec.yaml manifest.
+      logger.clear();
       await commandRunner.run(<String>[
         'capturing-build',
         '--no-pub',
         '--release',
+        '--legacy-sign',
+        '--legacy-format=tar',
         '--analyze-size',
         '--code-size-directory=rel_code_size',
       ]);
+      expect(
+        logger.warningText,
+        allOf(
+          contains('Warning: "--legacy-sign" is deprecated: Use --sign-bundle instead.'),
+          contains('Warning: "--legacy-format" is deprecated: Use --bundle-format instead.'),
+        ),
+      );
       expect(capturedContexts, hasLength(2));
+      expect(capturedContexts[1].buildName, '2.4.6');
+      expect(capturedContexts[1].buildNumber, '88');
       expect(capturedContexts[1].codeSizeDirectory, Uri.parse('file:///rel_code_size/'));
       expect(capturedContexts[1].trackWidgetCreation, isTrue);
       expect(capturedContexts[1].treeShakeIcons, isTrue);
@@ -1545,6 +1696,193 @@ void main() {
       expect(capturedContexts[2].targetDeviceId, 'custom-device-1');
 
       await manager.dispose();
+    });
+
+    testWithoutContext('ExtensionBuildSubCommand gates build modes, --flavor, and --analyze-size per target capabilities', () async {
+      final buildManager = _RecordingExtensionBuildManager();
+      final fsWithDefaultFlavor = MemoryFileSystem.test();
+      fsWithDefaultFlavor.directory('/flutter').createSync(recursive: true);
+      fsWithDefaultFlavor
+          .file('/pubspec.yaml')
+          .writeAsStringSync('name: test_app\nflutter:\n  default-flavor: staging\n');
+      fsWithDefaultFlavor.file('/lib/main.dart').createSync(recursive: true);
+      final toolContext = FakeToolContext(
+        cache: FakeCache(fileSystem: fsWithDefaultFlavor, flutterRoot: '/flutter'),
+        fs: fsWithDefaultFlavor,
+        logger: BufferLogger.test(),
+      );
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+
+      final debugOnlyTarget = ExtensionBuildTarget(
+        description: 'Debug-only restricted target.',
+        name: 'restricted-target',
+        outputDir: '{OUTPUT_DIR}/restricted/{BUILD_MODE}',
+        supportedBuildModes: const <BuildMode>{.debug},
+        targetPlatforms: const <String>{'linux-x64'},
+      );
+
+      CommandRunner<void> createRestrictedRunner() => createTestCommandRunner(
+        ExtensionBuildSubCommand(
+          buildManager: buildManager,
+          target: debugOnlyTarget,
+          toolContext: toolContext,
+          verboseHelp: false,
+        ),
+        null,
+        toolContext,
+        featureFlags,
+      );
+
+      // Unsupported mode, --flavor, and --analyze-size are rejected at CLI parse time.
+      await expectLater(
+        () => createRestrictedRunner().run(<String>['restricted-target', '--no-pub', '--release']),
+        throwsA(isA<UsageException>()),
+      );
+      await expectLater(
+        () => createRestrictedRunner().run(<String>['restricted-target', '--no-pub', '--profile']),
+        throwsA(isA<UsageException>()),
+      );
+      await expectLater(
+        () =>
+            createRestrictedRunner().run(<String>['restricted-target', '--no-pub', '--flavor=dev']),
+        throwsA(isA<UsageException>()),
+      );
+      await expectLater(
+        () => createRestrictedRunner().run(<String>[
+          'restricted-target',
+          '--no-pub',
+          '--analyze-size',
+        ]),
+        throwsA(isA<UsageException>()),
+      );
+
+      // Default mode falls back to BuildMode.debug, and manifest default-flavor is suppressed.
+      await createRestrictedRunner().run(<String>['restricted-target', '--no-pub']);
+      expect(buildManager.lastBuildArgs!['buildMode'], BuildMode.debug);
+      expect(buildManager.lastBuildArgs!['flavor'], isNull);
+    });
+
+    testWithoutContext('ExtensionBuildSubCommand runs SizeAnalyzer when supportsSizeAnalysis and bundleDirectoryUri are active and errors on missing files', () async {
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(environment: const <String, String>{'HOME': '/home/tester'});
+      fs.directory('/home/tester').createSync(recursive: true);
+      final Directory bundleDir = fs.directory('/build/size_target/release/bundle')
+        ..createSync(recursive: true);
+      bundleDir.childDirectory('lib').childFile('custom_app.so')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(2048, 1));
+
+      final Directory codeSizeDir = fs.directory('/code_size')..createSync(recursive: true);
+      codeSizeDir.childFile('snapshot.linux-x64.json').writeAsStringSync(_sampleAotSizeJson);
+      codeSizeDir.childFile('trace.linux-x64.json').writeAsStringSync('{}');
+
+      final sizeTarget = ExtensionBuildTarget(
+        description: 'Target supporting code size analysis.',
+        name: 'size-target',
+        outputDir: '{OUTPUT_DIR}/size_target/{BUILD_MODE}',
+        supportsSizeAnalysis: true,
+        targetPlatforms: const <String>{'linux-x64'},
+      );
+      final toolContext = FakeToolContext(cache: cache, fs: fs, logger: logger, platform: platform);
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+
+      final buildManager = _RecordingExtensionBuildManager(
+        resultToReturn: ExtensionBuildResult(
+          aotSnapshotFileName: 'custom_app.so',
+          bundleDirectoryUri: bundleDir.uri,
+        ),
+      );
+      await createTestCommandRunner(
+        ExtensionBuildSubCommand(
+          buildManager: buildManager,
+          target: sizeTarget,
+          toolContext: toolContext,
+          verboseHelp: false,
+        ),
+        null,
+        toolContext,
+        featureFlags,
+      ).run(<String>[
+        'size-target',
+        '--no-pub',
+        '--release',
+        '--analyze-size',
+        '--code-size-directory=/code_size',
+      ]);
+
+      expect(
+        buildManager.lastBuildArgs!['codeSizeDirectory'],
+        equals(Uri.parse('file:///code_size/')),
+      );
+      final File analysisJson = fs.file(
+        '/home/tester/.flutter-devtools/linux-x64-code-size-analysis_01.json',
+      );
+      expect(analysisJson.existsSync(), isTrue);
+      expect(
+        logger.statusText,
+        contains('A summary of your size-target bundle analysis can be found at:'),
+      );
+
+      // Missing snapshot/trace JSON files in codeSizeDirectory throws actionable ToolExit.
+      final Directory emptyCodeSizeDir = fs.directory('/empty_code_size')..createSync();
+      await expectLater(
+        () =>
+            createTestCommandRunner(
+              ExtensionBuildSubCommand(
+                buildManager: buildManager,
+                target: sizeTarget,
+                toolContext: toolContext,
+                verboseHelp: false,
+              ),
+              null,
+              toolContext,
+              featureFlags,
+            ).run(<String>[
+              'size-target',
+              '--no-pub',
+              '--release',
+              '--analyze-size',
+              '--code-size-directory=${emptyCodeSizeDir.path}',
+            ]),
+        throwsToolExit(
+          message:
+              'Code size analysis failed for "size-target": expected '
+              '"snapshot.linux-x64.json" and "trace.linux-x64.json"',
+        ),
+      );
+
+      // Missing AOT snapshot file inside bundleDirectoryUri throws actionable ToolExit.
+      final missingAotBuildManager = _RecordingExtensionBuildManager(
+        resultToReturn: ExtensionBuildResult(
+          aotSnapshotFileName: 'missing_snapshot.so',
+          bundleDirectoryUri: bundleDir.uri,
+        ),
+      );
+      await expectLater(
+        () =>
+            createTestCommandRunner(
+              ExtensionBuildSubCommand(
+                buildManager: missingAotBuildManager,
+                target: sizeTarget,
+                toolContext: toolContext,
+                verboseHelp: false,
+              ),
+              null,
+              toolContext,
+              featureFlags,
+            ).run(<String>[
+              'size-target',
+              '--no-pub',
+              '--release',
+              '--analyze-size',
+              '--code-size-directory=/code_size',
+            ]),
+        throwsToolExit(
+          message:
+              'Code size analysis failed for "size-target": could not find AOT snapshot '
+              '"missing_snapshot.so"',
+        ),
+      );
     });
 
     testWithoutContext('AssembleCommand hashes extension configuration into Environment.defines and isolates configurations across multiple extensions', () async {
@@ -1645,19 +1983,16 @@ void main() {
       expect(capturedAssembleContexts, hasLength(2));
       expect(
         capturedAssembleContexts.map((ExtensionAssembleContext c) => c.configuration),
-        unorderedEquals(<Map<String, String?>>[
-          const <String, String?>{
-            'enable-custom-embedder': 'true',
-            'custom-embedder-sdk': '/sdk/v2',
-          },
-          const <String, String?>{'secondary-embedder-sdk': '/secondary/v1'},
+        unorderedEquals(<Map<String, Object?>>[
+          const <String, Object?>{'enable-custom-embedder': true, 'custom-embedder-sdk': '/sdk/v2'},
+          const <String, Object?>{'secondary-embedder-sdk': '/secondary/v1'},
         ]),
       );
 
       await manager.dispose();
     });
 
-    testWithoutContext('ExtensionBuildManager.build returns failed ExtensionBuildResult when build target throws ToolExtensionException', () async {
+    testWithoutContext('ExtensionBuildManager.build rethrows ToolExtensionException when build target throws ToolExtensionException', () async {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
@@ -1674,17 +2009,24 @@ void main() {
         logger: logger,
       );
 
-      final ExtensionBuildResult result = await buildManager.build(
-        buildMode: .debug,
-        flutterRoot: Uri.directory('/flutter'),
-        mainPath: 'lib/main.dart',
-        outputDir: Uri.directory('/project/build/custom_os'),
-        projectRoot: Uri.directory('/project'),
-        resolvedArtifacts: const <String, String>{},
-        targetName: 'custom-os-bundle',
+      await expectLater(
+        () => buildManager.build(
+          buildMode: .debug,
+          flutterRoot: Uri.directory('/flutter'),
+          mainPath: '/project/lib/main.dart',
+          outputDir: Uri.directory('/project/build/custom_os'),
+          projectRoot: Uri.directory('/project'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-os-bundle',
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Custom compiler missing.',
+          ),
+        ),
       );
-      expect(result.success, isFalse);
-      expect(result.errorMessage, 'Custom compiler missing.');
     });
   });
 }

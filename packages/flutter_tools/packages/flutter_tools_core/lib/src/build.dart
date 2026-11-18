@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import 'build_system/constants.dart';
 import 'build_system/source.dart';
 import 'json_utils.dart';
+import 'options.dart';
 
 export 'build_system/constants.dart';
 export 'build_system/depfile.dart';
@@ -91,277 +92,10 @@ enum BuildMode {
   String toString() => cliName;
 }
 
-/// A boolean CLI flag declared by a custom [ExtensionBuildTarget].
-@immutable
-class BuildFlag {
-  const BuildFlag({
-    required this.help,
-    required this.name,
-    this.abbr,
-    this.defaultsTo = false,
-    this.negatable = true,
-  }) : assert(name != ''),
-       assert(abbr == null || abbr.length == 1);
-
-  /// Deserializes a [BuildFlag] from a JSON-serializable map.
-  factory BuildFlag.fromJson(Map<String, Object?> json) {
-    final String name = json.requiredField<String>(nameKey);
-    if (name.isEmpty) {
-      throw const FormatException('Invalid "$nameKey" in BuildFlag: must not be empty.');
-    }
-    final String? abbr = json.nullableField<String>(abbrKey);
-    if (abbr != null && abbr.length != 1) {
-      throw const FormatException('Invalid "$abbrKey" in BuildFlag: must be a single character.');
-    }
-    return BuildFlag(
-      help: json.requiredField<String>(helpKey),
-      name: name,
-      abbr: abbr,
-      defaultsTo: json.requiredField<bool>(defaultsToKey),
-      negatable: json.requiredField<bool>(negatableKey),
-    );
-  }
-
-  /// Map key for [abbr].
-  static const String abbrKey = 'abbr';
-
-  /// Map key for [defaultsTo].
-  static const String defaultsToKey = 'defaultsTo';
-
-  /// Map key for [help].
-  static const String helpKey = 'help';
-
-  /// Map key for [name].
-  static const String nameKey = 'name';
-
-  /// Map key for [negatable].
-  static const String negatableKey = 'negatable';
-
-  /// Deserializes a list of [BuildFlag] objects from JSON.
-  static List<BuildFlag> listFromJson(Object? raw) {
-    if (raw == null) {
-      return const <BuildFlag>[];
-    }
-    if (raw is! List<Object?>) {
-      throw FormatException('Invalid BuildFlag list: expected List, got ${raw.runtimeType}.');
-    }
-    return <BuildFlag>[
-      for (final Object? item in raw)
-        if (item case final Map<String, Object?> map)
-          BuildFlag.fromJson(map)
-        else
-          throw FormatException(
-            'Invalid BuildFlag element: expected Map<String, Object?>, got ${item.runtimeType}.',
-          ),
-    ];
-  }
-
-  /// Optional single-character abbreviation for this flag.
-  final String? abbr;
-
-  /// The default boolean value for this flag when not specified on the CLI.
-  final bool defaultsTo;
-
-  /// Help text displayed in `flutter build <target> --help`.
-  final String help;
-
-  /// The CLI flag name (without leading `--`).
-  final String name;
-
-  /// Whether this flag supports `--no-<name>`.
-  final bool negatable;
-
-  /// Serializes this [BuildFlag] to a JSON-serializable map.
-  Map<String, Object?> toMap() => <String, Object?>{
-    abbrKey: ?abbr,
-    defaultsToKey: defaultsTo,
-    helpKey: help,
-    nameKey: name,
-    negatableKey: negatable,
-  };
-
-  @override
-  String toString() =>
-      'BuildFlag(name: $name, help: $help, abbr: $abbr, '
-      'defaultsTo: $defaultsTo, negatable: $negatable)';
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is BuildFlag &&
-            other.abbr == abbr &&
-            other.defaultsTo == defaultsTo &&
-            other.help == help &&
-            other.name == name &&
-            other.negatable == negatable);
-  }
-
-  @override
-  int get hashCode => Object.hash(abbr, defaultsTo, help, name, negatable);
-}
-
-/// A string-valued CLI option declared by a custom [ExtensionBuildTarget].
-@immutable
-class BuildOption {
-  const BuildOption({
-    required this.help,
-    required this.name,
-    this.abbr,
-    this.allowed,
-    this.allowedHelp,
-    this.defaultsTo,
-    this.mandatory = false,
-    this.valueHelp,
-  }) : assert(name != ''),
-       assert(abbr == null || abbr.length == 1);
-
-  /// Deserializes a [BuildOption] from a JSON-serializable map.
-  factory BuildOption.fromJson(Map<String, Object?> json) {
-    final String name = json.requiredField<String>(nameKey);
-    if (name.isEmpty) {
-      throw const FormatException('Invalid "$nameKey" in BuildOption: must not be empty.');
-    }
-    final String? abbr = json.nullableField<String>(abbrKey);
-    if (abbr != null && abbr.length != 1) {
-      throw const FormatException('Invalid "$abbrKey" in BuildOption: must be a single character.');
-    }
-    final List<String>? allowed = json.containsKey(allowedKey) && json[allowedKey] != null
-        ? json.stringIterable(allowedKey).toList()
-        : null;
-    final Map<String, Object?>? rawAllowedHelp = json.nullableField<Map<String, Object?>>(
-      allowedHelpKey,
-    );
-    final Map<String, String>? allowedHelp = rawAllowedHelp != null
-        ? _parseStringMap(rawAllowedHelp, allowedHelpKey)
-        : null;
-    return BuildOption(
-      help: json.requiredField<String>(helpKey),
-      name: name,
-      abbr: abbr,
-      allowed: allowed,
-      allowedHelp: allowedHelp,
-      defaultsTo: json.nullableField<String>(defaultsToKey),
-      mandatory: json.requiredField<bool>(mandatoryKey),
-      valueHelp: json.nullableField<String>(valueHelpKey),
-    );
-  }
-
-  /// Map key for [abbr].
-  static const String abbrKey = 'abbr';
-
-  /// Map key for [allowed].
-  static const String allowedKey = 'allowed';
-
-  /// Map key for [allowedHelp].
-  static const String allowedHelpKey = 'allowedHelp';
-
-  /// Map key for [defaultsTo].
-  static const String defaultsToKey = 'defaultsTo';
-
-  /// Map key for [help].
-  static const String helpKey = 'help';
-
-  /// Map key for [mandatory].
-  static const String mandatoryKey = 'mandatory';
-
-  /// Map key for [name].
-  static const String nameKey = 'name';
-
-  /// Map key for [valueHelp].
-  static const String valueHelpKey = 'valueHelp';
-
-  /// Deserializes a list of [BuildOption] objects from JSON.
-  static List<BuildOption> listFromJson(Object? raw) {
-    if (raw == null) {
-      return const <BuildOption>[];
-    }
-    if (raw is! List<Object?>) {
-      throw FormatException('Invalid BuildOption list: expected List, got ${raw.runtimeType}.');
-    }
-    return <BuildOption>[
-      for (final Object? item in raw)
-        if (item case final Map<String, Object?> map)
-          BuildOption.fromJson(map)
-        else
-          throw FormatException(
-            'Invalid BuildOption element: expected Map<String, Object?>, got ${item.runtimeType}.',
-          ),
-    ];
-  }
-
-  /// Optional single-character abbreviation for this option.
-  final String? abbr;
-
-  /// Optional list of allowed string values for this option.
-  final List<String>? allowed;
-
-  /// Optional map from allowed values to their help descriptions.
-  final Map<String, String>? allowedHelp;
-
-  /// Optional default string value when not specified on the CLI.
-  final String? defaultsTo;
-
-  /// Help text displayed in `flutter build <target> --help`.
-  final String help;
-
-  /// Whether this option must be provided by the user.
-  final bool mandatory;
-
-  /// The CLI option name (without leading `--`).
-  final String name;
-
-  /// Optional placeholder name for the option value in `--help` output.
-  final String? valueHelp;
-
-  /// Serializes this [BuildOption] to a JSON-serializable map.
-  Map<String, Object?> toMap() => <String, Object?>{
-    abbrKey: ?abbr,
-    allowedKey: ?allowed,
-    allowedHelpKey: ?allowedHelp,
-    defaultsToKey: ?defaultsTo,
-    helpKey: help,
-    mandatoryKey: mandatory,
-    nameKey: name,
-    valueHelpKey: ?valueHelp,
-  };
-
-  @override
-  String toString() =>
-      'BuildOption(name: $name, help: $help, abbr: $abbr, defaultsTo: $defaultsTo, '
-      'allowed: $allowed, allowedHelp: $allowedHelp, valueHelp: $valueHelp, '
-      'mandatory: $mandatory)';
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is BuildOption &&
-            other.abbr == abbr &&
-            _nullableListEquals(other.allowed, allowed) &&
-            _nullableMapEquals(other.allowedHelp, allowedHelp) &&
-            other.defaultsTo == defaultsTo &&
-            other.help == help &&
-            other.mandatory == mandatory &&
-            other.name == name &&
-            other.valueHelp == valueHelp);
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    abbr,
-    allowed == null ? null : Object.hashAll(allowed!),
-    allowedHelp == null ? null : _mapHash(allowedHelp!),
-    defaultsTo,
-    help,
-    mandatory,
-    name,
-    valueHelp,
-  );
-}
-
 /// Context passed to an extension target's `BuildTarget.build` method.
 @immutable
 class ExtensionBuildContext {
-  ExtensionBuildContext({
+  const ExtensionBuildContext({
     required this.buildMode,
     required this.flutterRoot,
     required this.mainPath,
@@ -373,9 +107,9 @@ class ExtensionBuildContext {
     this.buildFlags = const <String, bool>{},
     this.buildName,
     this.buildNumber,
-    this.buildOptions = const <String, String?>{},
+    this.buildOptions = const <String, String>{},
     this.codeSizeDirectory,
-    this.configuration = const <String, String?>{},
+    this.configuration = const <String, Object?>{},
     this.dartDefines = const <String, String>{},
     this.dartObfuscation = false,
     this.extraFrontEndOptions = const <String>[],
@@ -384,14 +118,7 @@ class ExtensionBuildContext {
     this.splitDebugInfo,
     this.targetDeviceId,
     this.targetPlatform,
-  }) : assert(
-         codeSizeDirectory == null || codeSizeDirectory.isValidDirectoryUri,
-         'codeSizeDirectory must be an absolute file:// directory URI ending with "/".',
-       ),
-       assert(
-         splitDebugInfo == null || splitDebugInfo.isValidDirectoryUri,
-         'splitDebugInfo must be an absolute file:// directory URI ending with "/".',
-       );
+  });
 
   /// Deserializes an [ExtensionBuildContext] from a JSON-serializable map.
   factory ExtensionBuildContext.fromJson(Map<String, Object?> json) {
@@ -415,9 +142,9 @@ class ExtensionBuildContext {
       buildFlags: _parseOptionalBoolMap(json, buildFlagsKey),
       buildName: json.nullableField<String>(buildNameKey),
       buildNumber: json.nullableField<String>(buildNumberKey),
-      buildOptions: _parseOptionalNullableStringMap(json, buildOptionsKey),
+      buildOptions: _parseOptionalStringMap(json, buildOptionsKey),
       codeSizeDirectory: _parseOptionalDirectoryUri(json, codeSizeDirectoryKey),
-      configuration: _parseOptionalNullableStringMap(json, configurationKey),
+      configuration: _parseOptionalConfigurationMap(json, configurationKey),
       dartDefines: _parseOptionalStringMap(json, dartDefinesKey),
       dartObfuscation: json.requiredField<bool>(dartObfuscationKey),
       extraFrontEndOptions: json.stringIterable(extraFrontEndOptionsKey).toList(),
@@ -495,7 +222,7 @@ class ExtensionBuildContext {
   /// Map key for [treeShakeIcons].
   static const String treeShakeIconsKey = 'treeShakeIcons';
 
-  /// Values of custom [BuildFlag]s registered by the build target.
+  /// Values of custom [ExtensionFlag]s registered by the build target.
   final Map<String, bool> buildFlags;
 
   /// The compilation mode for the build.
@@ -507,14 +234,16 @@ class ExtensionBuildContext {
   /// The build number (e.g. `'42'`), if specified.
   final String? buildNumber;
 
-  /// Values of custom [BuildOption]s registered by the build target.
-  final Map<String, String?> buildOptions;
+  /// Values of custom [ExtensionOption]s registered by the build target,
+  /// omitting options that were neither passed nor given a default.
+  final Map<String, String> buildOptions;
 
   /// Directory `file:` URI where code size analysis files should be written, if requested.
   final Uri? codeSizeDirectory;
 
-  /// Snapshot of the extension's owned `flutter config` settings.
-  final Map<String, String?> configuration;
+  /// Snapshot of the extension's owned `flutter config` settings (`bool` for
+  /// feature flags and `String` for string options, omitting unset keys).
+  final Map<String, Object?> configuration;
 
   /// Compile-time environment declarations passed via `--dart-define` and `--dart-define-from-file`.
   final Map<String, String> dartDefines;
@@ -534,7 +263,7 @@ class ExtensionBuildContext {
   /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
   final Uri flutterRoot;
 
-  /// The path to the main entrypoint file (typically `lib/main.dart`).
+  /// The path to the main entrypoint file (typically `<project>/lib/main.dart`).
   final String mainPath;
 
   /// The absolute directory URI (ending with `/`) where final build outputs should be placed.
@@ -668,7 +397,7 @@ class ExtensionBuildContext {
 /// Context passed to an extension target's `AssembleTarget.build` method.
 @immutable
 class ExtensionAssembleContext extends ExtensionBuildContext {
-  ExtensionAssembleContext({
+  const ExtensionAssembleContext({
     required this.buildDir,
     required super.buildMode,
     required super.flutterRoot,
@@ -785,22 +514,18 @@ class ExtensionBuildTarget {
     required this.name,
     required this.outputDir,
     this.artifacts = const <ExtensionArtifact>{},
-    this.buildFlags = const <BuildFlag>[],
-    this.buildOptions = const <BuildOption>[],
+    this.flags = const <ExtensionFlag>[],
     this.hostArtifacts = const <ExtensionHostArtifact>{},
-    this.targetPlatform,
-    this._targetPlatforms = const <String>{},
+    this.options = const <ExtensionOption>[],
+    this.supportedBuildModes = const <BuildMode>{.debug, .profile, .release},
+    this.supportsFlavors = false,
+    this.supportsSizeAnalysis = false,
+    this.targetPlatforms = const <String>{},
   }) : assert(isValidName(name), 'Invalid build target name "$name". $_invalidNameMessage'),
-       assert(targetPlatform == null || targetPlatform != ''),
+       assert(supportedBuildModes.isNotEmpty, 'supportedBuildModes must not be empty.'),
        assert(
-         _targetPlatforms.every((String platform) => platform.isNotEmpty),
+         targetPlatforms.every((String platform) => platform.isNotEmpty),
          'targetPlatforms must not contain empty platform names.',
-       ),
-       assert(
-         targetPlatform == null ||
-             _targetPlatforms.isEmpty ||
-             _targetPlatforms.contains(targetPlatform),
-         'targetPlatforms must contain targetPlatform when both are specified.',
        );
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
@@ -809,40 +534,45 @@ class ExtensionBuildTarget {
     if (!isValidName(name)) {
       throw FormatException('Invalid "$nameKey" field: "$name". $_invalidNameMessage');
     }
-    final String? targetPlatform = json.nullableField<String>(targetPlatformKey);
-    if (targetPlatform != null && targetPlatform.isEmpty) {
-      throw const FormatException(
-        'Invalid "$targetPlatformKey" in ExtensionBuildTarget: must not be empty.',
-      );
-    }
-    final Set<String> targetPlatforms = json.stringIterable(targetPlatformsKey).toSet();
-    if (targetPlatforms.any((String platform) => platform.isEmpty)) {
-      throw const FormatException(
-        'Invalid "$targetPlatformsKey" in ExtensionBuildTarget: platform names must not be empty.',
-      );
-    }
-    if (targetPlatform != null &&
-        targetPlatforms.isNotEmpty &&
-        !targetPlatforms.contains(targetPlatform)) {
-      throw const FormatException(
-        'Invalid "$targetPlatformsKey" in ExtensionBuildTarget: must contain "$targetPlatformKey" when both are specified.',
-      );
+    final Set<BuildMode> supportedBuildModes;
+    if (json[supportedBuildModesKey] == null) {
+      supportedBuildModes = const <BuildMode>{.debug, .profile, .release};
+    } else {
+      final modes = <BuildMode>{};
+      for (final String rawMode in json.stringIterable(supportedBuildModesKey)) {
+        try {
+          modes.add(BuildMode.fromCliName(rawMode));
+        } on ArgumentError {
+          throw FormatException(
+            'Invalid "$supportedBuildModesKey" element in ExtensionBuildTarget: "$rawMode".',
+          );
+        }
+      }
+      if (modes.isEmpty) {
+        throw const FormatException(
+          'Invalid "$supportedBuildModesKey" in ExtensionBuildTarget: must not be empty.',
+        );
+      }
+      supportedBuildModes = Set<BuildMode>.unmodifiable(modes);
     }
     return ExtensionBuildTarget(
       description: json.requiredField<String>(descriptionKey),
       name: name,
       outputDir: json.requiredField<String>(outputDirKey),
       artifacts: <ExtensionArtifact>{
-        for (final String name in json.stringIterable(artifactsKey)) ExtensionArtifact(name),
+        for (final String artifactName in json.stringIterable(artifactsKey))
+          ExtensionArtifact(artifactName),
       },
-      buildFlags: BuildFlag.listFromJson(json[buildFlagsKey]),
-      buildOptions: BuildOption.listFromJson(json[buildOptionsKey]),
+      flags: ExtensionFlag.listFromJson(json[flagsKey]),
       hostArtifacts: <ExtensionHostArtifact>{
-        for (final String name in json.stringIterable(hostArtifactsKey))
-          ExtensionHostArtifact(name),
+        for (final String artifactName in json.stringIterable(hostArtifactsKey))
+          ExtensionHostArtifact(artifactName),
       },
-      targetPlatform: targetPlatform,
-      targetPlatforms: targetPlatforms,
+      options: ExtensionOption.listFromJson(json[optionsKey]),
+      supportedBuildModes: supportedBuildModes,
+      supportsFlavors: json.optionalField<bool>(supportsFlavorsKey, defaultValue: false),
+      supportsSizeAnalysis: json.optionalField<bool>(supportsSizeAnalysisKey, defaultValue: false),
+      targetPlatforms: json.stringSet(targetPlatformsKey, rejectEmpty: true),
     );
   }
 
@@ -861,14 +591,11 @@ class ExtensionBuildTarget {
   /// Map key for [artifacts].
   static const String artifactsKey = 'artifacts';
 
-  /// Map key for [buildFlags].
-  static const String buildFlagsKey = 'buildFlags';
-
-  /// Map key for [buildOptions].
-  static const String buildOptionsKey = 'buildOptions';
-
   /// Map key for [description].
   static const String descriptionKey = 'description';
+
+  /// Map key for [flags].
+  static const String flagsKey = 'flags';
 
   /// Map key for [hostArtifacts].
   static const String hostArtifactsKey = 'hostArtifacts';
@@ -876,11 +603,20 @@ class ExtensionBuildTarget {
   /// Map key for [name].
   static const String nameKey = 'name';
 
+  /// Map key for [options].
+  static const String optionsKey = 'options';
+
   /// Map key for [outputDir].
   static const String outputDirKey = 'outputDir';
 
-  /// Map key for [targetPlatform].
-  static const String targetPlatformKey = 'targetPlatform';
+  /// Map key for [supportedBuildModes].
+  static const String supportedBuildModesKey = 'supportedBuildModes';
+
+  /// Map key for [supportsFlavors].
+  static const String supportsFlavorsKey = 'supportsFlavors';
+
+  /// Map key for [supportsSizeAnalysis].
+  static const String supportsSizeAnalysisKey = 'supportsSizeAnalysis';
 
   /// Map key for [targetPlatforms].
   static const String targetPlatformsKey = 'targetPlatforms';
@@ -904,42 +640,37 @@ class ExtensionBuildTarget {
   /// Must match [isValidName].
   final String name;
 
-  /// The default target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`),
-  /// or `null` if this target is platform-agnostic.
+  /// The set of target platform identifiers supported by this build target,
+  /// preserving insertion order.
   ///
-  /// This is an open [String] rather than an enum so that extensions for custom
-  /// embedders can declare platform identifiers that are not built into Flutter.
-  /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
-  /// default artifact platform when it matches a built-in Flutter target platform.
-  ///
-  /// When `null`, [outputDir] must not reference
-  /// [BuiltInPlaceholders.targetPlatform], and only target-platform-independent
-  /// engine artifacts ([BuiltInArtifacts.flutterPatchedSdkPath] and
-  /// [BuiltInArtifacts.icuData]) can be resolved in [artifacts].
-  // TODO(bkonyi): Replace with declared supported target platforms on BuildTarget and a selected target platform on ExtensionBuildContext, https://github.com/flutter/flutter/issues/194810.
-  final String? targetPlatform;
+  /// * When empty (`const <String>{}`), no `--target-platform` CLI option is
+  ///   registered and [ExtensionBuildContext.targetPlatform] is `null`.
+  /// * When containing a single platform, `targetPlatforms.single` is passed
+  ///   automatically as [ExtensionBuildContext.targetPlatform] without adding a
+  ///   redundant `--target-platform` CLI option.
+  /// * When containing multiple platforms, `flutter build <name>` registers a
+  ///   `--target-platform` CLI option defaulting to `targetPlatforms.first`.
+  final Set<String> targetPlatforms;
 
-  final Set<String> _targetPlatforms;
-
-  /// The set of target platform identifiers supported by this build target.
-  ///
-  /// Defaults to `{targetPlatform!}` when [targetPlatform] is non-null and no
-  /// explicit `targetPlatforms` set was provided, or `{}` when platform-agnostic.
-  /// When [targetPlatforms] contains more than one platform, `flutter build <name>`
-  /// registers a `--target-platform` CLI option allowing the user to select among them.
-  Set<String> get targetPlatforms => _targetPlatforms.isNotEmpty
-      ? _targetPlatforms
-      : (targetPlatform != null ? <String>{targetPlatform!} : const <String>{});
-
-  /// Engine artifacts required by this build target, resolved for [targetPlatform]
-  /// and the active [BuildMode].
+  /// Engine artifacts required by this build target, resolved for the active
+  /// target platform and [BuildMode].
   final Set<ExtensionArtifact> artifacts;
 
   /// Custom boolean CLI flags exposed on `flutter build <name>`.
-  final List<BuildFlag> buildFlags;
+  final List<ExtensionFlag> flags;
 
   /// Custom string CLI options exposed on `flutter build <name>`.
-  final List<BuildOption> buildOptions;
+  final List<ExtensionOption> options;
+
+  /// Compilation modes supported by this target on `flutter build <name>`.
+  final Set<BuildMode> supportedBuildModes;
+
+  /// Whether this target supports `--flavor` on `flutter build <name>`.
+  final bool supportsFlavors;
+
+  /// Whether this target supports `--analyze-size` and `--code-size-directory`
+  /// on `flutter build <name>`.
+  final bool supportsSizeAnalysis;
 
   /// Host-side build tool or library artifacts required by this build target.
   final Set<ExtensionHostArtifact> hostArtifacts;
@@ -952,30 +683,31 @@ class ExtensionBuildTarget {
   /// output root from `flutter config --build-dir`, defaulting to
   /// `<project>/build`), [BuiltInPlaceholders.projectDir],
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform]
-  /// (when [targetPlatform] is non-null).
+  /// (when [targetPlatforms] is non-empty).
   final String outputDir;
 
   /// Serializes the build target to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    descriptionKey: description,
-    nameKey: name,
-    targetPlatformKey: ?targetPlatform,
-    if (targetPlatforms.isNotEmpty) targetPlatformsKey: targetPlatforms.toList(),
     artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
-    if (buildFlags.isNotEmpty) buildFlagsKey: buildFlags.map((BuildFlag f) => f.toMap()).toList(),
-    if (buildOptions.isNotEmpty)
-      buildOptionsKey: buildOptions.map((BuildOption o) => o.toMap()).toList(),
+    descriptionKey: description,
+    if (flags.isNotEmpty) flagsKey: flags.map((ExtensionFlag f) => f.toMap()).toList(),
     hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
+    nameKey: name,
+    if (options.isNotEmpty) optionsKey: options.map((ExtensionOption o) => o.toMap()).toList(),
     outputDirKey: outputDir,
+    supportedBuildModesKey: supportedBuildModes.map((BuildMode m) => m.cliName).toList(),
+    if (supportsFlavors) supportsFlavorsKey: supportsFlavors,
+    if (supportsSizeAnalysis) supportsSizeAnalysisKey: supportsSizeAnalysis,
+    if (targetPlatforms.isNotEmpty) targetPlatformsKey: targetPlatforms.toList(),
   };
 
   @override
   String toString() =>
-      'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
-      'targetPlatforms: $targetPlatforms, description: $description, '
-      'artifacts: $artifacts, hostArtifacts: $hostArtifacts, '
-      'buildFlags: $buildFlags, buildOptions: $buildOptions, '
-      'outputDir: $outputDir)';
+      'ExtensionBuildTarget(name: $name, targetPlatforms: $targetPlatforms, '
+      'description: $description, artifacts: $artifacts, '
+      'hostArtifacts: $hostArtifacts, flags: $flags, options: $options, '
+      'supportedBuildModes: $supportedBuildModes, supportsFlavors: $supportsFlavors, '
+      'supportsSizeAnalysis: $supportsSizeAnalysis, outputDir: $outputDir)';
 
   @override
   bool operator ==(Object other) {
@@ -983,12 +715,14 @@ class ExtensionBuildTarget {
         (other is ExtensionBuildTarget &&
             other.description == description &&
             other.name == name &&
-            other.targetPlatform == targetPlatform &&
             _setEquality.equals(other.targetPlatforms, targetPlatforms) &&
             other.outputDir == outputDir &&
             _setEquality.equals(other.artifacts, artifacts) &&
-            _listEquality.equals(other.buildFlags, buildFlags) &&
-            _listEquality.equals(other.buildOptions, buildOptions) &&
+            _listEquality.equals(other.flags, flags) &&
+            _listEquality.equals(other.options, options) &&
+            _setEquality.equals(other.supportedBuildModes, supportedBuildModes) &&
+            other.supportsFlavors == supportsFlavors &&
+            other.supportsSizeAnalysis == supportsSizeAnalysis &&
             _setEquality.equals(other.hostArtifacts, hostArtifacts));
   }
 
@@ -996,12 +730,14 @@ class ExtensionBuildTarget {
   int get hashCode => Object.hash(
     description,
     name,
-    targetPlatform,
     Object.hashAllUnordered(targetPlatforms),
     outputDir,
     Object.hashAllUnordered(artifacts),
-    Object.hashAll(buildFlags),
-    Object.hashAll(buildOptions),
+    Object.hashAll(flags),
+    Object.hashAll(options),
+    Object.hashAllUnordered(supportedBuildModes),
+    supportsFlavors,
+    supportsSizeAnalysis,
     Object.hashAllUnordered(hostArtifacts),
   );
 }
@@ -1047,8 +783,7 @@ class ExtensionAssembleTarget {
   ///
   /// A valid depfile name must be non-empty, must not be `'.'` or `'..'`, and
   /// must not contain `/` or `\` path separators.
-  static bool isValidDepfileName(String name) =>
-      name.isNotEmpty && name != '.' && name != '..' && !name.contains('/') && !name.contains(r'\');
+  static bool isValidDepfileName(String name) => _isValidFileName(name);
 
   static List<ExtensionSource> _parseSources(Map<String, Object?> json, String key) {
     final List<Object?> rawSources = json.optionalField<List<Object?>>(
@@ -1176,19 +911,34 @@ class ExtensionAssembleTarget {
   );
 }
 
-/// Representation of a build result returned by a tool extension.
+/// Representation of a build result returned by a tool extension on success.
 @immutable
 class ExtensionBuildResult {
-  const ExtensionBuildResult({required this.success, this.errorMessage, this.executableUri});
+  const ExtensionBuildResult({
+    this.aotSnapshotFileName = 'libapp.so',
+    this.bundleDirectoryUri,
+    this.executableUri,
+  }) : assert(aotSnapshotFileName != '');
 
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   ///
-  /// Throws a [FormatException] if [executableUriKey] is present and is not a
-  /// valid absolute `file:` URI.
+  /// Throws a [FormatException] if [aotSnapshotFileNameKey] is invalid, if
+  /// [bundleDirectoryUriKey] is present and not a valid directory `file:` URI,
+  /// or if [executableUriKey] is present and not a valid artifact `file:` URI.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
+    final String aotSnapshotFileName = json.optionalField<String>(
+      aotSnapshotFileNameKey,
+      defaultValue: 'libapp.so',
+    );
+    if (!_isValidFileName(aotSnapshotFileName)) {
+      throw const FormatException(
+        'Invalid "$aotSnapshotFileNameKey" in ExtensionBuildResult: '
+        'must be a non-empty file name without path separators.',
+      );
+    }
     return ExtensionBuildResult(
-      success: json.optionalField<bool>(successKey, defaultValue: false),
-      errorMessage: json.nullableField<String>(errorMessageKey),
+      aotSnapshotFileName: aotSnapshotFileName,
+      bundleDirectoryUri: _parseOptionalDirectoryUri(json, bundleDirectoryUriKey),
       executableUri: _parseExecutableUri(json),
     );
   }
@@ -1199,7 +949,7 @@ class ExtensionBuildResult {
       return null;
     }
     final Uri? uri = Uri.tryParse(raw);
-    if (uri != null && uri.isValidFileUri) {
+    if (uri != null && uri.isValidArtifactUri) {
       return uri;
     }
     throw const FormatException(
@@ -1207,48 +957,53 @@ class ExtensionBuildResult {
     );
   }
 
-  /// Map key for [errorMessage].
-  static const String errorMessageKey = 'errorMessage';
+  /// Map key for [aotSnapshotFileName].
+  static const String aotSnapshotFileNameKey = 'aotSnapshotFileName';
+
+  /// Map key for [bundleDirectoryUri].
+  static const String bundleDirectoryUriKey = 'bundleDirectoryUri';
 
   /// Map key for [executableUri].
   static const String executableUriKey = 'executableUri';
 
-  /// Map key for [success].
-  static const String successKey = 'success';
+  /// File name of the compiled AOT snapshot inside [bundleDirectoryUri] used
+  /// during `--analyze-size` inspection.
+  final String aotSnapshotFileName;
 
-  /// Whether the build succeeded.
-  final bool success;
-
-  /// Optional error message if the build failed.
-  final String? errorMessage;
+  /// Optional trailing-slash-terminated `file:` directory URI to the unpacked
+  /// output bundle directory inspected during `--analyze-size`.
+  final Uri? bundleDirectoryUri;
 
   /// Optional absolute `file:` URI to the built application executable or bundle.
   final Uri? executableUri;
 
   /// Serializes the build result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    successKey: success,
-    errorMessageKey: ?errorMessage,
+    aotSnapshotFileNameKey: aotSnapshotFileName,
+    bundleDirectoryUriKey: ?bundleDirectoryUri?.toString(),
     executableUriKey: ?executableUri?.toString(),
   };
 
   @override
   String toString() =>
-      'ExtensionBuildResult(success: $success, errorMessage: $errorMessage, '
-      'executableUri: $executableUri)';
+      'ExtensionBuildResult(aotSnapshotFileName: $aotSnapshotFileName, '
+      'bundleDirectoryUri: $bundleDirectoryUri, executableUri: $executableUri)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionBuildResult &&
-            other.success == success &&
-            other.errorMessage == errorMessage &&
+            other.aotSnapshotFileName == aotSnapshotFileName &&
+            other.bundleDirectoryUri == bundleDirectoryUri &&
             other.executableUri == executableUri);
   }
 
   @override
-  int get hashCode => Object.hash(success, errorMessage, executableUri);
+  int get hashCode => Object.hash(aotSnapshotFileName, bundleDirectoryUri, executableUri);
 }
+
+bool _isValidFileName(String name) =>
+    name.isNotEmpty && name != '.' && name != '..' && !name.contains('/') && !name.contains(r'\');
 
 Uri _parseDirectoryUri(Map<String, Object?> json, String key) {
   final String raw = json.requiredField<String>(key);
@@ -1299,19 +1054,19 @@ Map<String, String> _parseStringMap(Map<String, Object?> raw, String key) {
   return result;
 }
 
-Map<String, String?> _parseOptionalNullableStringMap(Map<String, Object?> json, String key) {
+Map<String, Object?> _parseOptionalConfigurationMap(Map<String, Object?> json, String key) {
   final Map<String, Object?>? raw = json.nullableField<Map<String, Object?>>(key);
   if (raw == null) {
-    return const <String, String?>{};
+    return const <String, Object?>{};
   }
-  final result = <String, String?>{};
+  final result = <String, Object?>{};
   for (final MapEntry(key: String entryKey, :Object? value) in raw.entries) {
-    if (value != null && value is! String) {
+    if (value is! bool && value is! String) {
       throw FormatException(
-        'Invalid "$key" entry for "$entryKey": expected String?, got ${value.runtimeType}.',
+        'Invalid "$key" entry for "$entryKey": expected bool or String, got ${value.runtimeType}.',
       );
     }
-    result[entryKey] = value as String?;
+    result[entryKey] = value;
   }
   return result;
 }
@@ -1331,15 +1086,6 @@ Map<String, bool> _parseOptionalBoolMap(Map<String, Object?> json, String key) {
     result[entryKey] = value;
   }
   return result;
-}
-
-bool _nullableListEquals<T>(List<T>? a, List<T>? b) => _listEquality.equals(a, b);
-
-bool _nullableMapEquals<K, V>(Map<K, V>? a, Map<K, V>? b) {
-  if (a == null || b == null) {
-    return a == b;
-  }
-  return _mapEquals(a, b);
 }
 
 int _mapHash<K, V>(Map<K, V> map) => Object.hashAllUnordered(<int>[

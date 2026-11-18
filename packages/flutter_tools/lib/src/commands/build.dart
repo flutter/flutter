@@ -8,10 +8,12 @@ import 'package:meta/meta.dart';
 import '../android/android_builder.dart';
 import '../android/gradle.dart';
 import '../artifacts.dart';
+import '../base/analyze_size.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -20,9 +22,11 @@ import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
+import '../convert.dart';
 import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../windows/visual_studio.dart';
 import 'build_aar.dart';
@@ -270,18 +274,33 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     required super.toolContext,
     required super.verboseHelp,
   }) : super(logger: toolContext.logger) {
-    registerOptionBundle(const BuildModeOptionsBundle());
+    final Set<BuildMode> supportedModes = target.supportedBuildModes;
+    if (supportedModes.contains(BuildMode.release)) {
+      defaultBuildMode = BuildMode.release;
+    } else if (supportedModes.contains(BuildMode.debug)) {
+      defaultBuildMode = BuildMode.debug;
+    } else if (supportedModes.contains(BuildMode.profile)) {
+      defaultBuildMode = BuildMode.profile;
+    } else {
+      defaultBuildMode = supportedModes.first;
+    }
     registerOptionBundle(const CommonBuildOptionsBundle());
     registerOptionBundle(const DartCompileOptionsBundle());
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      BuildInfoOptions.flavor,
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      if (supportedModes.contains(BuildMode.debug)) CommonOptions.debugMode,
+      if (supportedModes.contains(BuildMode.profile)) CommonOptions.profileMode,
+      if (supportedModes.contains(BuildMode.release)) CommonOptions.releaseMode,
+      if (supportedModes.contains(BuildMode.jitRelease)) CommonOptions.jitReleaseMode,
+      if (target.supportsFlavors) BuildInfoOptions.flavor,
       BuildInfoOptions.splitDebugInfo,
       BuildInfoOptions.obfuscate,
       BuildInfoOptions.extraFrontEndOptions,
       BuildInfoOptions.extraGenSnapshotOptions,
       BuildInfoOptions.trackWidgetCreation,
-      BuildInfoOptions.analyzeSize,
-      BuildInfoOptions.codeSizeDirectory,
+      if (target.supportsSizeAnalysis) ...const <OptionDescriptor<Object?>>[
+        BuildInfoOptions.analyzeSize,
+        BuildInfoOptions.codeSizeDirectory,
+      ],
       BuildInfoOptions.performanceMeasurementFile,
     ], verboseHelp: verboseHelp);
 
@@ -289,48 +308,49 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       argParser.addOption(
         _targetPlatformOption,
         allowed: target.targetPlatforms,
-        defaultsTo: target.targetPlatform ?? target.targetPlatforms.first,
+        defaultsTo: target.targetPlatforms.first,
         help: 'The target platform for which the app is compiled.',
       );
     }
 
-    for (final BuildFlag flag in target.buildFlags) {
-      if (_hasOptionOrAbbrCollision(name: flag.name, abbr: flag.abbr)) {
+    final String extensionName = _buildManager.extensionNameForBuildTarget(target.name);
+    for (final ExtensionFlag flag in target.flags) {
+      if (argParser.options.containsKey(flag.name)) {
         logger.printWarning(
           'Skipping custom build flag "--${flag.name}" on build target "${target.name}" '
-          'because an option or abbreviation with that name already exists.',
+          'from extension "$extensionName" because an option with that name already exists.',
         );
         continue;
       }
       argParser.addFlag(
         flag.name,
-        abbr: flag.abbr,
         defaultsTo: flag.defaultsTo,
         help: flag.help,
+        hide: !verboseHelp && (flag.hide || flag.deprecated != null),
         negatable: flag.negatable,
       );
-      _registeredFlagNames.add(flag.name);
+      _registeredFlags.add(flag);
     }
 
-    for (final BuildOption option in target.buildOptions) {
-      if (_hasOptionOrAbbrCollision(name: option.name, abbr: option.abbr)) {
+    for (final ExtensionOption option in target.options) {
+      if (argParser.options.containsKey(option.name)) {
         logger.printWarning(
           'Skipping custom build option "--${option.name}" on build target "${target.name}" '
-          'because an option or abbreviation with that name already exists.',
+          'from extension "$extensionName" because an option with that name already exists.',
         );
         continue;
       }
       argParser.addOption(
         option.name,
-        abbr: option.abbr,
         allowed: option.allowed,
         allowedHelp: option.allowedHelp,
         defaultsTo: option.defaultsTo,
         help: option.help,
+        hide: !verboseHelp && (option.hide || option.deprecated != null),
         mandatory: option.mandatory,
         valueHelp: option.valueHelp,
       );
-      _registeredOptionNames.add(option.name);
+      _registeredOptions.add(option);
     }
   }
 
@@ -338,21 +358,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   static const String _deviceIdGlobalOption = 'device-id';
 
   final ExtensionBuildManager _buildManager;
-  final _registeredFlagNames = <String>{};
-  final _registeredOptionNames = <String>{};
+  final _registeredFlags = <ExtensionFlag>[];
+  final _registeredOptions = <ExtensionOption>[];
 
   /// The custom build target definition provided by the tool extension.
   final ExtensionBuildTarget target;
-
-  bool _hasOptionOrAbbrCollision({required String name, String? abbr}) {
-    if (argParser.options.containsKey(name)) {
-      return true;
-    }
-    if (abbr != null && argParser.findByAbbreviation(abbr) != null) {
-      return true;
-    }
-    return false;
-  }
 
   @override
   String get name => target.name;
@@ -362,13 +372,31 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Artifacts artifacts, :Cache cache, :Config config, :FileSystem fs) =
-        toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FileSystem fs,
+      :Platform platform,
+    ) = toolContext;
+
+    for (final ExtensionFlag(:String? deprecated, :String name) in _registeredFlags) {
+      if (deprecated != null && argResults!.wasParsed(name)) {
+        logger.printWarning('Warning: "--$name" is deprecated: $deprecated');
+      }
+    }
+    for (final ExtensionOption(:String? deprecated, :String name) in _registeredOptions) {
+      if (deprecated != null && argResults!.wasParsed(name)) {
+        logger.printWarning('Warning: "--$name" is deprecated: $deprecated');
+      }
+    }
+
     final Directory projectDir = fs.currentDirectory;
+    final FlutterProject flutterProject = project;
     final BuildInfo buildInfo = await getBuildInfo();
     final String? selectedTargetPlatform = target.targetPlatforms.length > 1
         ? stringArg(_targetPlatformOption)
-        : (target.targetPlatform ?? target.targetPlatforms.firstOrNull);
+        : target.targetPlatforms.firstOrNull;
     final Directory outputDir = resolveExtensionOutputDir(
       buildMode: buildInfo.mode,
       buildOutputDir: projectDir.childDirectory(getBuildDirectory(config, fs)),
@@ -385,10 +413,11 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
     );
 
     final buildFlags = <String, bool>{
-      for (final String flagName in _registeredFlagNames) flagName: boolArg(flagName),
+      for (final ExtensionFlag(:String name) in _registeredFlags) name: boolArg(name),
     };
-    final buildOptions = <String, String?>{
-      for (final String optionName in _registeredOptionNames) optionName: stringArg(optionName),
+    final buildOptions = <String, String>{
+      for (final ExtensionOption(:String name) in _registeredOptions)
+        if (stringArg(name) case final String value) name: value,
     };
     final String? targetDeviceId = switch (globalResults?[_deviceIdGlobalOption]) {
       final String id when id.isNotEmpty => id,
@@ -406,40 +435,95 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       _ => null,
     };
 
-    final ExtensionBuildResult result = await _buildManager.build(
-      buildFlags: buildFlags,
-      buildMode: buildInfo.mode,
-      buildName: buildInfo.buildName,
-      buildNumber: buildInfo.buildNumber,
-      buildOptions: buildOptions,
-      codeSizeDirectory: codeSizeDirectory,
-      dartDefines: parseExtensionDartDefines(buildInfo.dartDefines),
-      dartObfuscation: buildInfo.dartObfuscation,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-      extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-      flavor: buildInfo.flavor,
-      flutterRoot: fs.directory(cache.flutterRoot).uri,
-      mainPath: targetFile,
-      outputDir: outputDir.uri,
-      projectRoot: projectDir.uri,
-      resolvedArtifacts: resolvedArtifacts,
-      splitDebugInfo: splitDebugInfo,
-      targetDeviceId: targetDeviceId,
-      targetName: target.name,
-      targetPlatform: selectedTargetPlatform,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      treeShakeIcons: buildInfo.treeShakeIcons,
-    );
+    final ExtensionBuildResult result;
+    try {
+      result = await _buildManager.build(
+        buildFlags: buildFlags,
+        buildMode: buildInfo.mode,
+        buildName: buildInfo.buildName ?? flutterProject.manifest.buildName,
+        buildNumber: buildInfo.buildNumber ?? flutterProject.manifest.buildNumber,
+        buildOptions: buildOptions,
+        codeSizeDirectory: codeSizeDirectory,
+        dartDefines: parseExtensionDartDefines(buildInfo.dartDefines),
+        dartObfuscation: buildInfo.dartObfuscation,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+        flavor: target.supportsFlavors ? buildInfo.flavor : null,
+        flutterRoot: fs.directory(cache.flutterRoot).uri,
+        mainPath: fs.file(targetFile).absolute.path,
+        outputDir: outputDir.uri,
+        projectRoot: projectDir.uri,
+        resolvedArtifacts: resolvedArtifacts,
+        splitDebugInfo: splitDebugInfo,
+        targetDeviceId: targetDeviceId,
+        targetName: target.name,
+        targetPlatform: selectedTargetPlatform,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        treeShakeIcons: buildInfo.treeShakeIcons,
+      );
+    } on ToolExtensionException catch (e) {
+      throwToolExit(e.message.isNotEmpty ? 'Build failed: ${e.message}' : 'Build failed.');
+    }
 
-    if (result.success) {
-      return FlutterCommandResult.success();
-    } else {
-      final String? errorMessage = result.errorMessage;
-      throwToolExit(
-        errorMessage != null && errorMessage.isNotEmpty
-            ? 'Build failed: $errorMessage'
-            : 'Build failed.',
+    final Uri? bundleDirectoryUri = result.bundleDirectoryUri;
+    if (codeSizeDirectory != null && bundleDirectoryUri != null) {
+      final String analysisPlatform = selectedTargetPlatform ?? target.name;
+      final Directory codeSizeDir = fs.directory(codeSizeDirectory);
+      final File codeSizeFile = codeSizeDir.childFile('snapshot.$analysisPlatform.json');
+      final File precompilerTrace = codeSizeDir.childFile('trace.$analysisPlatform.json');
+      if (!codeSizeFile.existsSync() || !precompilerTrace.existsSync()) {
+        throwToolExit(
+          'Code size analysis failed for "${target.name}": expected '
+          '"${codeSizeFile.basename}" and "${precompilerTrace.basename}" in '
+          '"${codeSizeDir.path}".',
+        );
+      }
+      final Directory bundleDir = fs.directory(bundleDirectoryUri);
+      if (!_containsFileNamed(bundleDir, result.aotSnapshotFileName)) {
+        throwToolExit(
+          'Code size analysis failed for "${target.name}": could not find AOT snapshot '
+          '"${result.aotSnapshotFileName}" in bundle directory "${bundleDir.path}".',
+        );
+      }
+      final sizeAnalyzer = SizeAnalyzer(
+        fileSystem: fs,
+        logger: logger,
+        analytics: analytics,
+        appFilenamePattern: result.aotSnapshotFileName,
+      );
+      final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
+        aotSnapshot: codeSizeFile,
+        outputDirectory: bundleDir,
+        precompilerTrace: precompilerTrace,
+        type: target.name,
+      );
+      final fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
+      final File outputFile = fileSystemUtils.getUniqueFile(
+        fs.directory(fileSystemUtils.homeDirPath).childDirectory('.flutter-devtools'),
+        '$analysisPlatform-code-size-analysis',
+        'json',
+      )..writeAsStringSync(jsonEncode(output));
+      logger.printStatus(
+        'A summary of your ${target.name} bundle analysis can be found at: ${outputFile.path}',
+      );
+      logger.printStatus(
+        '\nTo analyze your app size in Dart DevTools, run the following command:\n'
+        'dart devtools --appSizeBase=${outputFile.path}',
       );
     }
+
+    return FlutterCommandResult.success();
+  }
+
+  static bool _containsFileNamed(Directory directory, String fileName) {
+    if (!directory.existsSync()) {
+      return false;
+    }
+    for (final FileSystemEntity entity in directory.listSync(recursive: true, followLinks: false)) {
+      if (entity is File && entity.basename == fileName) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -5,6 +5,15 @@
 /// Validation helpers for file system [Uri]s exchanged over the tool
 /// extension protocol.
 extension ExtensionUriValidation on Uri {
+  /// Whether this URI is an absolute `file:` URI pointing to a non-root file or
+  /// bundle directory, with no query or fragment components.
+  bool get isValidArtifactUri =>
+      isScheme('file') &&
+      hasAbsolutePath &&
+      !hasQuery &&
+      !hasFragment &&
+      pathSegments.any((String segment) => segment.isNotEmpty);
+
   /// Whether this URI is an absolute `file:` directory URI ending with a
   /// trailing slash (`/`).
   bool get isValidDirectoryUri =>

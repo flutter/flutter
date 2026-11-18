@@ -61,11 +61,11 @@ void main() {
           }),
         );
         expect(
-          buildTargets.single.buildFlags.map((BuildFlag f) => f.name),
+          buildTargets.single.flags.map((ExtensionFlag f) => f.name),
           contains(CustomLinuxBuildTarget.bundleMetadataFlag),
         );
         expect(
-          buildTargets.single.buildOptions.map((BuildOption o) => o.name),
+          buildTargets.single.options.map((ExtensionOption o) => o.name),
           contains(CustomLinuxBuildTarget.bundleLabelOption),
         );
         expect(buildTargets.single.targetPlatforms, equals(const <String>{'linux-x64'}));
@@ -79,64 +79,71 @@ void main() {
         expect(assembleTargets, hasLength(1));
         expect(assembleTargets.single.name, 'custom-linux-assemble-only-debug');
 
-        final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
-          BuildService.buildModeParam: 'debug',
-          BuildService.dartObfuscationParam: false,
-          BuildService.flutterRootParam: '/flutter',
-          BuildService.mainPathParam: 'lib/main.dart',
-          BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-          BuildService.projectRootParam: '/project',
-          BuildService.resolvedArtifactsParam: const <String, String>{},
-          BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
-          BuildService.trackWidgetCreationParam: true,
-          BuildService.treeShakeIconsParam: false,
-        });
-        final missingCmakeResult = ExtensionBuildResult.fromJson(
-          missingCmakeResultObj! as Map<String, Object?>,
+        await expectLater(
+          () => handlers['build']!(<String, Object?>{
+            BuildService.buildModeParam: 'debug',
+            BuildService.dartObfuscationParam: false,
+            BuildService.flutterRootParam: '/flutter',
+            BuildService.mainPathParam: '/project/lib/main.dart',
+            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+            BuildService.projectRootParam: '/project',
+            BuildService.resolvedArtifactsParam: const <String, String>{},
+            BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
+            BuildService.trackWidgetCreationParam: true,
+            BuildService.treeShakeIconsParam: false,
+          }),
+          throwsA(
+            isA<ToolExtensionException>().having(
+              (ToolExtensionException e) => e.message,
+              'message',
+              contains('Missing linux/CMakeLists.txt'),
+            ),
+          ),
         );
-        expect(missingCmakeResult.success, isFalse);
-        expect(missingCmakeResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
 
-        final Object? unknownBuildTargetResultObj = await handlers['build']!(<String, Object?>{
-          BuildService.buildModeParam: 'debug',
-          BuildService.dartObfuscationParam: false,
-          BuildService.flutterRootParam: '/flutter',
-          BuildService.mainPathParam: 'lib/main.dart',
-          BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-          BuildService.projectRootParam: '/project',
-          BuildService.resolvedArtifactsParam: const <String, String>{},
-          BuildService.targetNameParam: 'unknown-target',
-          BuildService.trackWidgetCreationParam: true,
-          BuildService.treeShakeIconsParam: false,
-        });
-        final unknownBuildResult = ExtensionBuildResult.fromJson(
-          unknownBuildTargetResultObj! as Map<String, Object?>,
+        await expectLater(
+          () => handlers['build']!(<String, Object?>{
+            BuildService.buildModeParam: 'debug',
+            BuildService.dartObfuscationParam: false,
+            BuildService.flutterRootParam: '/flutter',
+            BuildService.mainPathParam: '/project/lib/main.dart',
+            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+            BuildService.projectRootParam: '/project',
+            BuildService.resolvedArtifactsParam: const <String, String>{},
+            BuildService.targetNameParam: 'unknown-target',
+            BuildService.trackWidgetCreationParam: true,
+            BuildService.treeShakeIconsParam: false,
+          }),
+          throwsA(
+            isA<ToolExtensionException>().having(
+              (ToolExtensionException e) => e.message,
+              'message',
+              contains('Unknown build target: unknown-target'),
+            ),
+          ),
         );
-        expect(unknownBuildResult.success, isFalse);
-        expect(unknownBuildResult.errorMessage, contains('Unknown build target: unknown-target'));
 
-        final Object? unknownAssembleTargetResultObj = await handlers['assemble']!(
-          <String, Object?>{
+        await expectLater(
+          () => handlers['assemble']!(<String, Object?>{
             BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
             BuildService.buildModeParam: 'debug',
             BuildService.dartObfuscationParam: false,
             BuildService.flutterRootParam: '/flutter',
-            BuildService.mainPathParam: 'lib/main.dart',
+            BuildService.mainPathParam: '/project/lib/main.dart',
             BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
             BuildService.projectRootParam: '/project',
             BuildService.resolvedArtifactsParam: const <String, String>{},
             BuildService.targetNameParam: 'unknown-assemble-target',
             BuildService.trackWidgetCreationParam: true,
             BuildService.treeShakeIconsParam: false,
-          },
-        );
-        final unknownAssembleResult = ExtensionBuildResult.fromJson(
-          unknownAssembleTargetResultObj! as Map<String, Object?>,
-        );
-        expect(unknownAssembleResult.success, isFalse);
-        expect(
-          unknownAssembleResult.errorMessage,
-          contains('Unknown assemble target: unknown-assemble-target'),
+          }),
+          throwsA(
+            isA<ToolExtensionException>().having(
+              (ToolExtensionException e) => e.message,
+              'message',
+              contains('Unknown assemble target: unknown-assemble-target'),
+            ),
+          ),
         );
 
         await service.shutdown();
@@ -157,12 +164,12 @@ void main() {
       File('${assetsDir.path}/AssetManifest.bin').writeAsStringSync('manifest');
 
       const target = CustomLinuxAssembleOnlyDebug();
-      final ExtensionBuildResult result = await target.build(
+      await target.build(
         ExtensionAssembleContext(
           buildDir: buildDir.uri,
           buildMode: .debug,
           flutterRoot: tempDir.uri,
-          mainPath: 'lib/main.dart',
+          mainPath: '${tempDir.path}/lib/main.dart',
           outputDir: outputDir.uri,
           projectRoot: tempDir.uri,
           resolvedArtifacts: <String, String>{
@@ -174,7 +181,6 @@ void main() {
         ),
       );
 
-      expect(result.success, isTrue);
       expect(File('${outputDir.path}/bundle/lib/libflutter_linux_gtk.so').existsSync(), isTrue);
       expect(File('${outputDir.path}/bundle/data/icudtl.dat').existsSync(), isTrue);
       expect(
@@ -192,22 +198,28 @@ void main() {
       addTearDown(() => tempDir.deleteSync(recursive: true));
 
       const target = CustomLinuxAssembleOnlyDebug();
-      final ExtensionBuildResult result = await target.build(
-        ExtensionAssembleContext(
-          buildDir: tempDir.uri,
-          buildMode: .debug,
-          flutterRoot: tempDir.uri,
-          mainPath: 'lib/main.dart',
-          outputDir: tempDir.uri,
-          projectRoot: tempDir.uri,
-          resolvedArtifacts: const <String, String>{},
-          trackWidgetCreation: true,
-          treeShakeIcons: false,
+      await expectLater(
+        () => target.build(
+          ExtensionAssembleContext(
+            buildDir: tempDir.uri,
+            buildMode: .debug,
+            flutterRoot: tempDir.uri,
+            mainPath: '${tempDir.path}/lib/main.dart',
+            outputDir: tempDir.uri,
+            projectRoot: tempDir.uri,
+            resolvedArtifacts: const <String, String>{},
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+          ),
+        ),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            contains('Missing linuxDesktopPath artifact.'),
+          ),
         ),
       );
-
-      expect(result.success, isFalse);
-      expect(result.errorMessage, contains('Missing linuxDesktopPath artifact.'));
     });
 
     test('_copyDirectory preserves symbolic links', () async {
@@ -229,12 +241,12 @@ void main() {
       final outputDir = Directory('${tempDir.path}/output_dir')..createSync(recursive: true);
 
       const target = CustomLinuxAssembleOnlyDebug();
-      final ExtensionBuildResult result = await target.build(
+      await target.build(
         ExtensionAssembleContext(
           buildDir: buildDir.uri,
           buildMode: .debug,
           flutterRoot: tempDir.uri,
-          mainPath: 'lib/main.dart',
+          mainPath: '${tempDir.path}/lib/main.dart',
           outputDir: outputDir.uri,
           projectRoot: tempDir.uri,
           resolvedArtifacts: <String, String>{
@@ -246,7 +258,6 @@ void main() {
         ),
       );
 
-      expect(result.success, isTrue);
       final copiedLink = Link('${outputDir.path}/bundle/data/flutter_assets/symlink_asset.bin');
       expect(copiedLink.existsSync(), isTrue);
       expect(copiedLink.targetSync(), equals(targetFile.path));
@@ -256,7 +267,7 @@ void main() {
       const validParams = <String, Object?>{
         BuildService.targetNameParam: 'custom-linux-build',
         BuildService.projectRootParam: '/project',
-        BuildService.mainPathParam: 'lib/main.dart',
+        BuildService.mainPathParam: '/project/lib/main.dart',
         BuildService.buildModeParam: 'debug',
         BuildService.dartObfuscationParam: false,
         BuildService.flutterRootParam: '/flutter',

@@ -130,7 +130,7 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
                description: 'Custom Linux Build',
                name: 'custom-linux-build',
                outputDir: '{OUTPUT_DIR}/linux',
-               targetPlatform: 'linux-x64',
+               targetPlatforms: const <String>{'linux-x64'},
              ),
            ];
 
@@ -148,7 +148,23 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-  }) async => const ExtensionBuildResult(success: true);
+    Map<String, bool> buildFlags = const <String, bool>{},
+    String? buildName,
+    String? buildNumber,
+    Map<String, String> buildOptions = const <String, String>{},
+    Uri? codeSizeDirectory,
+    Map<String, Object?>? configuration,
+    Map<String, String> dartDefines = const <String, String>{},
+    bool dartObfuscation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    String? flavor,
+    Uri? splitDebugInfo,
+    String? targetDeviceId,
+    String? targetPlatform,
+    bool? trackWidgetCreation,
+    bool? treeShakeIcons,
+  }) async => const ExtensionBuildResult();
 }
 
 ExtensionBuildManager _createBuildManager({

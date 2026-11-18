@@ -662,6 +662,8 @@ class ExtensionBackedDevice extends Device {
     final Directory buildOutputDir = projectDir.childDirectory(
       _config != null ? getBuildDirectory(_config, _fileSystem) : 'build',
     );
+    final String? selectedTargetPlatform =
+        _targetDevice.targetPlatform ?? target.targetPlatforms.firstOrNull;
     final Directory outputDir = target.outputDir.contains('{')
         ? resolveExtensionOutputDir(
             buildMode: buildMode,
@@ -669,6 +671,7 @@ class ExtensionBackedDevice extends Device {
             fileSystem: _fileSystem,
             projectDir: projectDir,
             target: target,
+            targetPlatform: selectedTargetPlatform,
           )
         : _fileSystem.directory(
             _fileSystem.path.isRelative(target.outputDir)
@@ -680,31 +683,30 @@ class ExtensionBackedDevice extends Device {
             artifacts: _artifacts,
             buildMode: buildMode,
             target: target,
+            targetPlatform: selectedTargetPlatform,
           )
         : const <String, String>{};
 
     final String flutterRootPath = _cache?.flutterRoot ?? projectDir.path;
 
-    final ExtensionBuildResult result = await _buildManager.build(
-      buildMode: buildMode,
-      flutterRoot: _fileSystem.directory(flutterRootPath).uri,
-      mainPath: targetMainPath,
-      outputDir: outputDir.uri,
-      projectRoot: projectDir.uri,
-      resolvedArtifacts: resolvedArtifacts,
-      targetName: buildTargetName,
-    );
-    if (!result.success) {
-      final String? errorMessage = result.errorMessage;
-      logger.printError(
-        errorMessage != null && errorMessage.isNotEmpty
-            ? 'Build failed: $errorMessage'
-            : 'Build failed.',
+    final ExtensionBuildResult result;
+    try {
+      result = await _buildManager.build(
+        buildMode: buildMode,
+        flutterRoot: _fileSystem.directory(flutterRootPath).uri,
+        mainPath: targetMainPath,
+        outputDir: outputDir.uri,
+        projectRoot: projectDir.uri,
+        resolvedArtifacts: resolvedArtifacts,
+        targetName: buildTargetName,
+        targetPlatform: selectedTargetPlatform,
       );
+    } on ToolExtensionException catch (e) {
+      logger.printError(e.message.isNotEmpty ? 'Build failed: ${e.message}' : 'Build failed.');
       return LaunchResult.failed();
     }
     final Uri? executableUri = result.executableUri;
-    if (executableUri == null || !executableUri.isValidFileUri) {
+    if (executableUri == null || !executableUri.isValidArtifactUri) {
       logger.printError(
         'Extension build target "$buildTargetName" did not return a valid executableUri.',
       );

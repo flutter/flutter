@@ -191,20 +191,23 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
-  testWithoutContext('flutter build custom-linux-build --help displays extension buildFlags and buildOptions when enabled', () async {
-    final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'build', 'custom-linux-build', '--help'],
-      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
-    );
+  testWithoutContext(
+    'flutter build custom-linux-build --help displays extension flags and options when enabled',
+    () async {
+      final ProcessResult result = await processManager.run(
+        <String>[flutterBin, 'build', 'custom-linux-build', '--help'],
+        environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
 
-    if (isLinux) {
-      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-      expect(result.stdout, contains('--[no-]bundle-metadata'));
-      expect(result.stdout, contains('--bundle-label'));
-    } else {
-      expect(result.exitCode, isNot(0));
-    }
-  });
+      if (isLinux) {
+        expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+        expect(result.stdout, contains('--[no-]bundle-metadata'));
+        expect(result.stdout, contains('--bundle-label'));
+      } else {
+        expect(result.exitCode, isNot(0));
+      }
+    },
+  );
 
   testWithoutContext(
     'flutter devices -v gracefully shuts down active tool extensions on exit',
