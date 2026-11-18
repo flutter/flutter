@@ -1124,6 +1124,59 @@ Future<void> testMain() async {
     });
   });
 
+  group('IOSTextEditingStrategy autofill', () {
+    late HybridTextEditing testTextEditing;
+    late IOSTextEditingStrategySpy editingStrategySpy;
+
+    setUp(() {
+      testTextEditing = HybridTextEditing();
+      editingStrategySpy = IOSTextEditingStrategySpy(testTextEditing);
+      testTextEditing.debugTextEditingStrategyOverride = editingStrategySpy;
+      testTextEditing.configuration = multilineConfig;
+    });
+
+    tearDown(() {
+      editingStrategySpy.disable();
+      // placeElement checks for an iframe and caches the answer.
+      debugResetIframeDetectionCache();
+    });
+
+    test('placeElement stacks the other autofill fields under the field', () {
+      // Any geometry will do; what is checked is where the other field ends up
+      // relative to this one. Layout can round to a fraction of a pixel.
+      const fieldWidth = 200.0;
+      const fieldHeight = 40.0;
+      const fieldLeft = 50.0;
+      const fieldTop = 60.0;
+      const tolerance = 0.5;
+      final config = InputConfiguration.fromFrameworkMessage(
+        createFlutterConfig(
+          'text',
+          autofillHint: 'email',
+          autofillHintsForFields: <String>['email', 'password'],
+        ),
+      );
+      editingStrategySpy.enable(config, onChange: trackEditingState, onAction: trackInputAction);
+      editingStrategySpy.geometry = EditableTextGeometry(
+        width: fieldWidth,
+        height: fieldHeight,
+        globalTransform: Matrix4.translationValues(fieldLeft, fieldTop, 0).storage,
+      );
+
+      // iOS places the field after a delay, here, while it has the focus.
+      editingStrategySpy.placeElement();
+
+      final DomHTMLElement field = editingStrategySpy.domElement!;
+      final DomHTMLElement other = config.autofillGroup!.elements.values.firstWhere(
+        (DomHTMLElement element) => !identical(element, field),
+      );
+      final DomRect focused = field.getBoundingClientRect();
+      final DomRect stacked = other.getBoundingClientRect();
+      expect(stacked.left, closeTo(focused.left, tolerance));
+      expect(stacked.top, closeTo(focused.bottom, tolerance));
+    });
+  });
+
   group('Iframe detection utilities', () {
     tearDown(() {
       debugResetIframeDetectionCache();
@@ -2120,14 +2173,17 @@ Future<void> testMain() async {
       final formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
       // The form has 4 input elements and one submit button.
       expect(formElement.childNodes, hasLength(5));
-      final Iterable<DomHTMLInputElement> fieldInputs = formElement.childNodes
-          .toList()
-          .whereType<DomHTMLInputElement>()
-          .where((DomHTMLInputElement input) => input.type != 'submit');
+      // All five are <input> elements, the submit button included.
+      final Iterable<DomHTMLInputElement> fieldInputs =
+          (formElement.childNodes.toList() as List<DomHTMLInputElement>).where(
+            (DomHTMLInputElement input) => input.type != 'submit',
+          );
       expect(fieldInputs, hasLength(4));
       // Placement clustered the non-focused proxies under the focused field.
       expect(
-        fieldInputs.where((DomHTMLInputElement input) => input.style.position == 'fixed'),
+        fieldInputs.where(
+          (DomHTMLInputElement input) => input.style.transform.contains('translateY('),
+        ),
         isNotEmpty,
       );
 
@@ -2140,11 +2196,11 @@ Future<void> testMain() async {
       expect(defaultTextEditingRoot.querySelectorAll('form'), isNotEmpty);
       expect(dormantForms, hasLength(1));
 
-      // The dismissed proxies must not stay pinned to the viewport: goDormant
+      // The dismissed proxies must not stay over the app: goDormant
       // parked them off screen, and disable parked the focused field the same
       // way, so nothing of the dormant form is left over the app.
       for (final input in fieldInputs) {
-        expect(input.style.position, isNot('fixed'));
+        expect(input.style.transform, isNot(contains('translateY(')));
         final DomRect rect = input.getBoundingClientRect();
         expect(
           rect.left + rect.width <= 0 || rect.top + rect.height <= 0,
@@ -3868,9 +3924,11 @@ Future<void> testMain() async {
       final DefaultTextEditingStrategy strategy = textEditing!.strategy;
       final EngineAutofillForm group = strategy.inputConfiguration.autofillGroup!;
       expect(
-        group.elements.values.where((DomHTMLElement e) => e.style.position == 'fixed'),
+        group.elements.values.where(
+          (DomHTMLElement e) => e.style.transform.contains('translateY('),
+        ),
         isNotEmpty,
-        reason: 'placement clusters and pins the non-focused proxy',
+        reason: 'placement stacks the non-focused proxy under the focused field',
       );
       expect(group.formElement!.classList.contains(autofillFormClass), isTrue);
       return (group: group, active: strategy.activeDomElement);
@@ -3880,7 +3938,7 @@ Future<void> testMain() async {
     // password managers use, and out of the tab order.
     void expectFormParked(EngineAutofillForm group) {
       for (final DomHTMLElement element in group.elements.values) {
-        expect(element.style.position, isNot('fixed'));
+        expect(element.style.transform, isNot(contains('translateY(')));
         expect(element.tabIndex, -1, reason: 'a parked field is not reachable with Tab');
         final DomRect rect = element.getBoundingClientRect();
         expect(
@@ -3925,7 +3983,7 @@ Future<void> testMain() async {
           if (identical(element, active)) {
             continue;
           }
-          expect(element.style.position, 'fixed');
+          expect(element.style.transform, contains('translateY('));
           final DomRect rect = element.getBoundingClientRect();
           expect(
             rect.left + rect.width > 0 && rect.top + rect.height > 0,
@@ -4175,6 +4233,92 @@ Future<void> testMain() async {
       expect((domDocument.activeElement! as DomHTMLInputElement).name, 'current-password');
       expect(domDocument.activeElement, fieldsAfterMove.password);
       expect(domDocument.activeElement, textEditing!.strategy.domElement);
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('only the fields that are not focused swallow taps, after the focus moved', () async {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      // A tap's default action moves the browser's focus to the field it hits.
+      // Preventing it is what keeps a tap on an invisible field from focusing
+      // it, so that typing does not go to a field the app does not show as
+      // focused.
+      bool defaultPreventedOn(DomElement element, String type) {
+        final DomEvent event = domDocument.createEvent('Event')..initEvent(type, false, true);
+        element.dispatchEvent(event);
+        return event.defaultPrevented;
+      }
+
+      // The username field is focused first, so the password field is built
+      // as a field that is not focused. The focused field's mousedown is
+      // prevented by the strategy itself (preventDefaultForMouseEvents), so
+      // only pointerdown tells the two apart there.
+      ({DomHTMLInputElement username, DomHTMLInputElement password}) fields = openFormFocusing(
+        'email',
+        send,
+      );
+      expect(defaultPreventedOn(fields.username, 'pointerdown'), isFalse);
+      expect(defaultPreventedOn(fields.password, 'pointerdown'), isTrue);
+
+      // The focus moves to the password field and the elements are reused, so
+      // the roles of the two elements swap.
+      fields = openFormFocusing('password', send);
+      expect(defaultPreventedOn(fields.password, 'pointerdown'), isFalse);
+      for (final type in <String>['pointerdown', 'mousedown']) {
+        expect(defaultPreventedOn(fields.username, type), isTrue, reason: type);
+      }
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('the fields show the mouse cursor the framework set on the view', () async {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      final ({DomHTMLInputElement username, DomHTMLInputElement password}) fields =
+          openFormFocusing('password', send);
+      // The username field is stacked under the focused one, over whatever the
+      // app draws there. MouseCursor sets the cursor on the view's root.
+      implicitViewRootElement.style.setProperty('cursor', 'pointer');
+      try {
+        for (final field in <DomHTMLInputElement>[fields.username, fields.password]) {
+          expect(
+            domWindow.getComputedStyle(field).getPropertyValue('cursor'),
+            'pointer',
+            reason: field.name,
+          );
+        }
+      } finally {
+        implicitViewRootElement.style.removeProperty('cursor');
+      }
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('the fields stay under the focused field inside a transformed ancestor', () async {
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      // A host page can put the view under an ancestor with a transform, which
+      // becomes the containing block of fixed positioned descendants. The
+      // fields must still end up directly under the focused field. Any
+      // translation will do; layout can round to a fraction of a pixel.
+      const hostTransform = 'translate(200px, 120px)';
+      const tolerance = 0.5;
+      implicitViewRootElement.style.transform = hostTransform;
+      try {
+        final ({DomHTMLInputElement username, DomHTMLInputElement password}) fields =
+            openFormFocusing('password', send);
+        final DomRect focused = fields.password.getBoundingClientRect();
+        final DomRect other = fields.username.getBoundingClientRect();
+        expect(other.left, closeTo(focused.left, tolerance));
+        expect(other.top, closeTo(focused.bottom, tolerance));
+        expect(other.width, closeTo(focused.width, tolerance));
+      } finally {
+        implicitViewRootElement.style.removeProperty('transform');
+      }
 
       send(const MethodCall('TextInput.clearClient'));
       dormantForms.clear();
@@ -4630,11 +4774,13 @@ Future<void> testMain() async {
       expect(form, formOnDom);
 
       // The wake-up scan clustered the non-focused proxies under the focused
-      // element, pinning them to the viewport.
+      // element.
       expect(
-        autofillForm.elements.values.where((DomHTMLElement e) => e.style.position == 'fixed'),
+        autofillForm.elements.values.where(
+          (DomHTMLElement e) => e.style.transform.contains('translateY('),
+        ),
         isNotEmpty,
-        reason: 'the wake-up scan pins the non-focused proxies',
+        reason: 'the wake-up scan stacks the non-focused proxies',
       );
 
       autofillForm.goDormant();
@@ -4642,11 +4788,11 @@ Future<void> testMain() async {
       expect(dormantForms, hasLength(1));
       expect(dormantForms, {autofillForm.formIdentifier: autofillForm});
 
-      // A dismissed proxy must not stay pinned over the app: goDormant parks
-      // each pinned proxy off screen at its real size. The focused element was
-      // never pinned and is left alone.
+      // A dismissed proxy must not stay over the app: goDormant parks
+      // each stacked proxy off screen at its real size. The focused element was
+      // never stacked and is left alone.
       for (final MapEntry<String, DomHTMLElement> entry in autofillForm.elements.entries) {
-        expect(entry.value.style.position, isNot('fixed'));
+        expect(entry.value.style.transform, isNot(contains('translateY(')));
         if (entry.key != 'field1') {
           expect(entry.value.style.position, 'absolute');
           expect(entry.value.style.top, '-9999px');
@@ -4833,6 +4979,7 @@ Future<void> testMain() async {
       );
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/174773.
     test(
       'non-focused autofill fields are discoverable and hit-testable on non-Safari browsers',
       () {
