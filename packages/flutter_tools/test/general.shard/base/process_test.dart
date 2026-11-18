@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' hide FakeProcess;
 
@@ -475,46 +474,52 @@ void main() {
       );
     });
 
-    testUsingContext('prints analytics welcome message', () async {
+    testWithoutContext('prints analytics welcome message', () async {
       setExitFunctionForTests((int exitCode) {});
       final shutdownHooks = ShutdownHooks();
-      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      await exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
       expect(logger.statusText, contains(analytics.getConsentMessage));
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
 
-    testUsingContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
+    testWithoutContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
       setExitFunctionForTests((int exitCode) {});
 
       analytics.clientShowedMessage();
 
       final shutdownHooks = ShutdownHooks();
-      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      await exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
       expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
 
-    testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
+    testWithoutContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});
 
       final shutdownHooks = ShutdownHooks();
       shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
-      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      await expectLater(
+        exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks),
+        completes,
+      );
       expect(
         logger.warningText,
         stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
       );
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
 
-    testUsingContext('[async] exceptions thrown from a hook do not crash the tool', () async {
+    testWithoutContext('[async] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});
 
       final shutdownHooks = ShutdownHooks();
       shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
-      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      await expectLater(
+        exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks),
+        completes,
+      );
       expect(
         logger.warningText,
         stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
       );
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
   });
 
   group('Environment variable propagation', () {
@@ -529,7 +534,7 @@ void main() {
 
     const expectedEnvWithParentTool = <String, String>{
       'DASH__SUPPRESS_ANALYTICS': 'true',
-      'DASH__TOOL': 'parent-tool',
+      'DASH__TOOL': 'vscode-plugins',
     };
 
     const expectedEnvNotSuppressed = <String, String>{
@@ -577,7 +582,7 @@ void main() {
       processUtils = createProcessUtils();
     });
 
-    testUsingContext(
+    testWithoutContext(
       'propagates DASH__SUPPRESS_ANALYTICS and DASH__TOOL when running a command',
       () async {
         fakeProcessManager.addCommand(
@@ -589,14 +594,13 @@ void main() {
         expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'preserves parent DASH__TOOL if already specified in the environment',
       () async {
         final ProcessUtils localProcessUtils = createProcessUtils(
-          platformEnvironment: const <String, String>{'DASH__TOOL': 'parent-tool'},
+          platformEnvironment: const <String, String>{'DASH__TOOL': 'vscode-plugins'},
         );
 
         fakeProcessManager.addCommand(
@@ -608,7 +612,78 @@ void main() {
         expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics},
+    );
+
+    for (final invalidTool in <String>['parent-tool', 'analysis-server']) {
+      testWithoutContext(
+        'does not pass on a parent DASH__TOOL of "$invalidTool", which cannot be a root tool',
+        () async {
+          final ProcessUtils localProcessUtils = createProcessUtils(
+            platformEnvironment: <String, String>{'DASH__TOOL': invalidTool},
+          );
+
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>['whoohoo'],
+              environment: expectedEnvWithDefaultTool,
+            ),
+          );
+
+          await analytics.setTelemetry(false);
+
+          expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
+    }
+
+    for (final callerTool in <String>['dart-mcp-server', 'vscode-plugins']) {
+      testWithoutContext(
+        'ignores a caller-supplied DASH__TOOL of "$callerTool" when the parent has none',
+        () async {
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>['whoohoo'],
+              environment: expectedEnvWithDefaultTool,
+            ),
+          );
+
+          await analytics.setTelemetry(false);
+
+          expect(
+            (await processUtils.run(
+              <String>['whoohoo'],
+              environment: <String, String>{'DASH__TOOL': callerTool},
+            )).exitCode,
+            0,
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
+    }
+
+    testWithoutContext(
+      'prefers a valid parent DASH__TOOL over a different caller-supplied value',
+      () async {
+        final ProcessUtils localProcessUtils = createProcessUtils(
+          platformEnvironment: const <String, String>{'DASH__TOOL': 'vscode-plugins'},
+        );
+
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithParentTool),
+        );
+
+        await analytics.setTelemetry(false);
+
+        expect(
+          (await localProcessUtils.run(
+            <String>['whoohoo'],
+            environment: const <String, String>{'DASH__TOOL': 'intellij-plugins'},
+          )).exitCode,
+          0,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
     );
 
     testWithoutContext('sets DASH__SUPPRESS_ANALYTICS to false when analytics can be sent and suppression is not requested', () async {

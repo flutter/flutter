@@ -1,0 +1,20 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// The edited version of flutter_gpu_compute_scale.comp that the shader reload
+// tests swap in: it quadruples each position instead of doubling it.
+
+layout(local_size_x = 3) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) buffer Vertices {
+  vec2 positions[];
+}
+vertices;
+
+void main() {
+  uint index = gl_GlobalInvocationID.x;
+  vertices.positions[index] = vertices.positions[index] * 4.0;
+}

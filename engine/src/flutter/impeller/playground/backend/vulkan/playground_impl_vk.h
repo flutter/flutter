@@ -18,7 +18,7 @@ class PlaygroundImplVK final : public PlaygroundImpl {
 
   ~PlaygroundImplVK();
 
-  fml::Status SetCapabilities(
+  absl::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) override;
 
   RuntimeStageBackend GetRuntimeStageBackend() const override;

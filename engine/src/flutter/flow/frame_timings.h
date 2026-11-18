@@ -10,9 +10,9 @@
 #include "flutter/common/settings.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/status.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 #define TRACE_EVENT_WITH_FRAME_NUMBER(recorder, category_group, name,       \
                                       flow_id_count, flow_ids)              \
@@ -131,11 +131,11 @@ class FrameTimingsRecorder {
   FML_FRIEND_TEST(FrameTimingsRecorderTest,
                   ThrowWhenRecordRasterBeforeBuildEnd);
 
-  [[nodiscard]] fml::Status RecordVsyncImpl(fml::TimePoint vsync_start,
-                                            fml::TimePoint vsync_target);
-  [[nodiscard]] fml::Status RecordBuildStartImpl(fml::TimePoint build_start);
-  [[nodiscard]] fml::Status RecordBuildEndImpl(fml::TimePoint build_end);
-  [[nodiscard]] fml::Status RecordRasterStartImpl(fml::TimePoint raster_start);
+  [[nodiscard]] absl::Status RecordVsyncImpl(fml::TimePoint vsync_start,
+                                             fml::TimePoint vsync_target);
+  [[nodiscard]] absl::Status RecordBuildStartImpl(fml::TimePoint build_start);
+  [[nodiscard]] absl::Status RecordBuildEndImpl(fml::TimePoint build_end);
+  [[nodiscard]] absl::Status RecordRasterStartImpl(fml::TimePoint raster_start);
 
   static std::atomic<uint64_t> frame_number_gen_;
 

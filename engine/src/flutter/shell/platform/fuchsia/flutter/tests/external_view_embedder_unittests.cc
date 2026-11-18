@@ -1672,4 +1672,80 @@ TEST_F(ExternalViewEmbedderTest, ViewportCoveredWithInputInterceptor) {
           {kInvDPR, kInvDPR}));
 }
 
+TEST_F(ExternalViewEmbedderTest, ViewportWithoutInputInterceptorWhenFlagFalse) {
+  fuchsia::ui::composition::ParentViewportWatcherPtr parent_viewport_watcher;
+  fuchsia::ui::views::ViewportCreationToken viewport_creation_token;
+  fuchsia::ui::views::ViewCreationToken view_creation_token;
+  fuchsia::ui::views::ViewRef view_ref_clone;
+  auto view_creation_token_status = zx::channel::create(
+      0u, &viewport_creation_token.value, &view_creation_token.value);
+  ASSERT_EQ(view_creation_token_status, ZX_OK);
+
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ASSERT_EQ(status, ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
+  view_ref.Clone(&view_ref_clone);
+
+  // Create the `ExternalViewEmbedder` with `intercept_all_input = false` and
+  // verify that SetInfiniteHitRegion (IsInputShield) is NOT installed.
+  ExternalViewEmbedder external_view_embedder(
+      std::move(view_creation_token),
+      fuchsia::ui::views::ViewIdentityOnCreation{
+          .view_ref = std::move(view_ref),
+          .view_ref_control = std::move(view_ref_control),
+      },
+      fuchsia::ui::composition::ViewBoundProtocols{},
+      parent_viewport_watcher.NewRequest(), flatland_connection(),
+      fake_surface_producer(),
+      /*intercept_all_input=*/false);
+  flatland_connection()->Present();
+  loop().RunUntilIdle();
+  fake_flatland().FireOnNextFrameBeginEvent(WithPresentCredits(1u));
+  loop().RunUntilIdle();
+
+  // Root transform should have no children (no input shield).
+  EXPECT_THAT(fake_flatland().graph(),
+              IsFlutterGraph(parent_viewport_watcher, viewport_creation_token,
+                             view_ref_clone, /*layers=*/{}));
+
+  const DlISize frame_size_signed = DlISize(512, 512);
+  const fuchsia::math::SizeU frame_size{
+      static_cast<uint32_t>(frame_size_signed.width),
+      static_cast<uint32_t>(frame_size_signed.height)};
+  DrawSimpleFrame(
+      external_view_embedder, frame_size_signed, 1.f,
+      [](flutter::DlCanvas* canvas) {
+        const DlSize canvas_size(canvas->GetBaseLayerDimensions());
+        flutter::DlPaint rect_paint;
+        rect_paint.setColor(flutter::DlColor::kGreen());
+        canvas->Translate(canvas_size.width / 4.f, canvas_size.height / 2.f);
+        canvas->DrawRect(DlRect::MakeSize(canvas_size / 32.f), rect_paint);
+      });
+  loop().RunUntilIdle();
+  fake_flatland().FireOnNextFrameBeginEvent(WithPresentCredits(1u));
+  loop().RunUntilIdle();
+
+  // Only the painted image layer should be in the scene graph; no input shield.
+  EXPECT_THAT(
+      fake_flatland().graph(),
+      IsFlutterGraph(
+          parent_viewport_watcher, viewport_creation_token, view_ref_clone,
+          /*layers*/
+          {IsImageLayer(
+              frame_size, kFirstLayerBlendMode,
+              {IsHitRegion(
+                  /* x */ 128.f,
+                  /* y */ 256.f,
+                  /* width */ 16.f,
+                  /* height */ 16.f,
+                  /* hit_test */
+                  fuchsia::ui::composition::HitTestInteraction::DEFAULT)})}));
+}
+
 }  // namespace flutter_runner::testing

@@ -34,7 +34,6 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_framework",
@@ -56,8 +55,7 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -100,9 +98,7 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
-
             ],
             "name": "ci/host_debug",
             "description": "Produces debug mode x64 macOS host-side tooling.",
@@ -124,8 +120,7 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -155,9 +150,7 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
-
             ],
             "name": "ci/host_debug_gen_snapshot",
             "description": "Produces debug mode x64 macOS gen_snapshot.",
@@ -177,8 +170,7 @@
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -214,11 +206,10 @@
                 "ci/host_profile",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_profile",
@@ -235,11 +226,10 @@
                     "ci/host_profile",
                     "--runtime-mode",
                     "profile",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -264,11 +254,10 @@
                 "ci/host_profile_framework",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_profile_framework",
@@ -285,11 +274,10 @@
                     "ci/host_profile_framework",
                     "--runtime-mode",
                     "profile",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -314,11 +302,10 @@
                 "ci/host_profile_gen_snapshot",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_profile_gen_snapshot",
@@ -335,11 +322,10 @@
                     "ci/host_profile_gen_snapshot",
                     "--runtime-mode",
                     "profile",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -376,12 +362,11 @@
                 "ci/host_release",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_release",
@@ -399,12 +384,11 @@
                     "ci/host_release",
                     "--runtime-mode",
                     "release",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -429,12 +413,11 @@
                 "ci/host_release_framework",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_release_framework",
@@ -451,12 +434,11 @@
                     "ci/host_release_framework",
                     "--runtime-mode",
                     "release",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -481,12 +463,11 @@
                 "ci/host_release_gen_snapshot",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/host_release_gen_snapshot",
@@ -503,12 +484,11 @@
                     "ci/host_release_gen_snapshot",
                     "--runtime-mode",
                     "release",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--build-embedder-examples",
                     "--use-glfw-swiftshader",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -552,7 +532,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/mac_debug_arm64",
@@ -576,8 +555,7 @@
                     "debug",
                     "--no-lto",
                     "--prebuilt-dart-sdk",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -608,7 +586,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/mac_debug_framework_arm64",
@@ -631,8 +608,7 @@
                     "debug",
                     "--no-lto",
                     "--prebuilt-dart-sdk",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -663,7 +639,6 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/mac_debug_gen_snapshot_arm64",
@@ -685,8 +660,7 @@
                     "debug",
                     "--no-lto",
                     "--prebuilt-dart-sdk",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -725,10 +699,9 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/mac_profile_arm64",
@@ -748,10 +721,9 @@
                     "arm64",
                     "--runtime-mode",
                     "profile",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -779,10 +751,9 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/mac_profile_framework_arm64",
@@ -802,10 +773,9 @@
                     "arm64",
                     "--runtime-mode",
                     "profile",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -833,10 +803,9 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/mac_profile_gen_snapshot_arm64",
@@ -856,10 +825,9 @@
                     "arm64",
                     "--runtime-mode",
                     "profile",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -899,10 +867,9 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
             ],
@@ -924,10 +891,9 @@
                     "arm64",
                     "--runtime-mode",
                     "release",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--use-glfw-swiftshader"
                 ]
             },
@@ -956,10 +922,9 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
             ],
@@ -980,10 +945,9 @@
                     "arm64",
                     "--runtime-mode",
                     "release",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--use-glfw-swiftshader"
                 ]
             },
@@ -1012,10 +976,9 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--prebuilt-dart-sdk",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks",
                 "--use-glfw-swiftshader"
             ],
@@ -1036,10 +999,9 @@
                     "arm64",
                     "--runtime-mode",
                     "release",
-                    "--no-lto",
+                    "--thin-lto",
                     "--prebuilt-dart-sdk",
                     "--no-rbe",
-                    "--no-goma",
                     "--use-glfw-swiftshader"
                 ]
             },

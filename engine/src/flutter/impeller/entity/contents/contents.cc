@@ -82,7 +82,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
   }
 
   ISize subpass_size = ISize::Ceil(coverage->GetSize());
-  fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
+  absl::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
       options.label, subpass_size, command_buffer,
       [&contents = *this, &entity, &coverage](const ContentContext& renderer,
                                               RenderPass& pass) -> bool {
