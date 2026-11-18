@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
-#include <algorithm>
 #include <future>
 #include <memory>
 
@@ -12,6 +11,7 @@
 #include "flutter/lib/gpu/shader.h"
 #include "fml/make_copyable.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -39,6 +39,7 @@ const std::shared_ptr<const impeller::Context>& RenderPass::GetContext() const {
 }
 
 impeller::RenderTarget& RenderPass::GetRenderTarget() {
+  pipeline_state_dirty_ = true;
   return render_target_;
 }
 
@@ -46,7 +47,7 @@ const impeller::RenderTarget& RenderPass::GetRenderTarget() const {
   return render_target_;
 }
 
-impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
+impeller::ColorAttachmentDescriptor& RenderPass::ColorAttachmentDescriptorAt(
     size_t color_attachment_index) {
   auto color = color_descriptors_.find(color_attachment_index);
   if (color == color_descriptors_.end()) {
@@ -55,23 +56,41 @@ impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
   return color->second;
 }
 
+impeller::ColorAttachmentDescriptor& RenderPass::GetColorAttachmentDescriptor(
+    size_t color_attachment_index) {
+  pipeline_state_dirty_ = true;
+  return ColorAttachmentDescriptorAt(color_attachment_index);
+}
+
 impeller::DepthAttachmentDescriptor&
 RenderPass::GetDepthAttachmentDescriptor() {
+  pipeline_state_dirty_ = true;
   return depth_desc_;
 }
 
 impeller::StencilAttachmentDescriptor&
 RenderPass::GetStencilFrontAttachmentDescriptor() {
+  pipeline_state_dirty_ = true;
   return stencil_front_desc_;
 }
 
 impeller::StencilAttachmentDescriptor&
 RenderPass::GetStencilBackAttachmentDescriptor() {
+  pipeline_state_dirty_ = true;
   return stencil_back_desc_;
 }
 
 impeller::PipelineDescriptor& RenderPass::GetPipelineDescriptor() {
+  pipeline_state_dirty_ = true;
   return pipeline_descriptor_;
+}
+
+bool RenderPass::IsPipelineStateDirtyForTesting() const {
+  return pipeline_state_dirty_;
+}
+
+void RenderPass::ClearPipelineStateDirtyForTesting() {
+  pipeline_state_dirty_ = false;
 }
 
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
@@ -85,9 +104,60 @@ bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
+  if (render_pipeline_.get() == pipeline.get()) {
+    return;
+  }
+  pipeline_state_dirty_ = true;
   // On debug this makes a difference, but not on release builds.
   // NOLINTNEXTLINE(performance-move-const-arg)
   render_pipeline_ = std::move(pipeline);
+}
+
+// The setters below assign through the pipeline descriptor directly rather
+// than through GetPipelineDescriptor, which would dirty the state
+// unconditionally. Callers re-send the same fixed-function state ahead of
+// most draws, and dirtying on a redundant assignment would rebuild the
+// pipeline for every one of them.
+
+void RenderPass::SetCullMode(impeller::CullMode mode) {
+  if (pipeline_descriptor_.GetCullMode() == mode) {
+    return;
+  }
+  pipeline_descriptor_.SetCullMode(mode);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::SetWindingOrder(impeller::WindingOrder order) {
+  if (pipeline_descriptor_.GetWindingOrder() == order) {
+    return;
+  }
+  pipeline_descriptor_.SetWindingOrder(order);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::SetPrimitiveType(impeller::PrimitiveType type) {
+  if (pipeline_descriptor_.GetPrimitiveType() == type) {
+    return;
+  }
+  pipeline_descriptor_.SetPrimitiveType(type);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::SetPolygonMode(impeller::PolygonMode mode) {
+  if (pipeline_descriptor_.GetPolygonMode() == mode) {
+    return;
+  }
+  pipeline_descriptor_.SetPolygonMode(mode);
+  pipeline_state_dirty_ = true;
+}
+
+void RenderPass::BindSet(size_t slot, fml::RefPtr<BindingSet> set) {
+  if (slot >= kMaxBindingSets) {
+    return;
+  }
+  // On debug this makes a difference, but not on release builds.
+  // NOLINTNEXTLINE(performance-move-const-arg)
+  binding_sets[slot] = std::move(set);
 }
 
 void RenderPass::ClearBindings() {
@@ -95,6 +165,9 @@ void RenderPass::ClearBindings() {
   vertex_texture_bindings.clear();
   fragment_uniform_bindings.clear();
   fragment_texture_bindings.clear();
+  for (auto& set : binding_sets) {
+    set = nullptr;
+  }
   for (auto& buffer : vertex_buffers) {
     buffer = {};
   }
@@ -105,6 +178,19 @@ void RenderPass::ClearBindings() {
 
 std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
 RenderPass::GetOrCreatePipeline() {
+  // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
+  // descriptor rebuild, hash, and pipeline-library lookup entirely until a
+  // state mutation marks it dirty. Draw rates reach tens of thousands per
+  // frame, so this path stays free of per-draw allocation and hashing. A
+  // memoized null is a build failure that was already reported for this
+  // exact state; returning it without retrying keeps a broken pipeline from
+  // re-logging on every draw.
+  if (!pipeline_state_dirty_) {
+    return memoized_pipeline_;
+  }
+  pipeline_state_dirty_ = false;
+  memoized_pipeline_ = nullptr;
+
   // Infer the pipeline layout based on the shape of the RenderTarget.
   auto pipeline_desc = pipeline_descriptor_;
 
@@ -112,7 +198,7 @@ RenderPass::GetOrCreatePipeline() {
 
   render_target_.IterateAllColorAttachments(
       [&](size_t index, const impeller::ColorAttachment& attachment) -> bool {
-        auto& color = GetColorAttachmentDescriptor(index);
+        auto& color = ColorAttachmentDescriptorAt(index);
         color.format = render_target_.GetRenderTargetPixelFormat();
         return true;
       });
@@ -146,8 +232,10 @@ RenderPass::GetOrCreatePipeline() {
 
   auto& context = *GetContext();
 
-  render_pipeline_->BindToPipelineDescriptor(*context.GetShaderLibrary(),
-                                             pipeline_desc);
+  if (!render_pipeline_->BindToPipelineDescriptor(*context.GetShaderLibrary(),
+                                                  pipeline_desc)) {
+    return nullptr;
+  }
 
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
 
@@ -179,7 +267,14 @@ RenderPass::GetOrCreatePipeline() {
     pipeline = context.GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   }
 
-  FML_DCHECK(pipeline) << "Couldn't resolve render pipeline";
+  if (!pipeline) {
+    VALIDATION_LOG << "Failed to build the render pipeline. The vertex and "
+                      "fragment shaders may be incompatible (for example, a "
+                      "fragment input with no matching vertex output).";
+    return nullptr;
+  }
+
+  memoized_pipeline_ = pipeline;
   return pipeline;
 }
 
@@ -195,7 +290,33 @@ bool RenderPass::Draw(size_t element_count,
     return false;
   }
 
-  render_pass_->SetPipeline(impeller::PipelineRef(GetOrCreatePipeline()));
+  auto pipeline = GetOrCreatePipeline();
+  if (!pipeline) {
+    // The failure was already validation-logged with the specifics; failing
+    // the draw surfaces a Dart exception instead of crashing on a null
+    // pipeline in the backend.
+    return false;
+  }
+  render_pass_->SetPipeline(impeller::PipelineRef(pipeline));
+
+  // Binding sets are replayed first, so an individual bind that collides
+  // with a set member overrides it for this draw. Their metadata is borrowed
+  // from the shader rather than copied, so no allocation happens here.
+  for (const auto& set : binding_sets) {
+    if (!set) {
+      continue;
+    }
+    for (const auto& buffer : set->GetBufferBindings()) {
+      render_pass_->BindResource(buffer.stage,
+                                 impeller::DescriptorType::kUniformBuffer,
+                                 buffer.slot, buffer.metadata, buffer.view);
+    }
+    for (const auto& texture : set->GetTextureBindings()) {
+      render_pass_->BindResource(
+          texture.stage, impeller::DescriptorType::kSampledImage, texture.slot,
+          texture.metadata, texture.texture, texture.sampler);
+    }
+  }
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
     render_pass_->BindDynamicResource(
@@ -405,18 +526,13 @@ void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
                   length_in_bytes, index_type);
 }
 
-static bool BindUniform(
+static bool BindUniformStruct(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
-    Dart_Handle uniform_name_handle,
+    const flutter::gpu::Shader::UniformBinding* uniform_struct,
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  const flutter::gpu::Shader::UniformBinding* uniform_struct =
-      shader->GetUniformStruct(uniform_name);
-  // TODO(bdero): Return an error string stating that no uniform struct with
-  //              this name exists and throw an exception.
   if (!uniform_struct) {
     return false;
   }
@@ -458,15 +574,28 @@ bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  return BindUniform(wrapper, shader, uniform_name_handle,
-                     device_buffer->GetBuffer(), offset_in_bytes,
-                     length_in_bytes);
+  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
+  return BindUniformStruct(
+      wrapper, shader, shader->GetUniformStruct(uniform_name),
+      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
 }
 
-bool InternalFlutterGpu_RenderPass_BindTexture(
+bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
-    Dart_Handle uniform_name_handle,
+    int uniform_struct_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes) {
+  return BindUniformStruct(
+      wrapper, shader, shader->GetUniformStructAt(uniform_struct_index),
+      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
+}
+
+static bool BindTextureBinding(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    const flutter::gpu::Shader::TextureBinding* texture_binding,
     flutter::gpu::Texture* texture,
     int min_filter,
     int mag_filter,
@@ -474,27 +603,14 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy) {
-  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
-  const flutter::gpu::Shader::TextureBinding* texture_binding =
-      shader->GetUniformTexture(uniform_name);
-  // TODO(bdero): Return an error string stating that no uniform texture with
-  //              this name exists and throw an exception.
   if (!texture_binding) {
     return false;
   }
 
-  impeller::SamplerDescriptor sampler_desc;
-  sampler_desc.min_filter = flutter::gpu::ToImpellerMinMagFilter(min_filter);
-  sampler_desc.mag_filter = flutter::gpu::ToImpellerMinMagFilter(mag_filter);
-  sampler_desc.mip_filter = flutter::gpu::ToImpellerMipFilter(mip_filter);
-  sampler_desc.width_address_mode =
-      flutter::gpu::ToImpellerSamplerAddressMode(width_address_mode);
-  sampler_desc.height_address_mode =
-      flutter::gpu::ToImpellerSamplerAddressMode(height_address_mode);
-  // Backends clamp this to the device limit reported by
-  // Capabilities::GetMaxSamplerAnisotropy.
-  sampler_desc.max_anisotropy =
-      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
+  const impeller::SamplerDescriptor sampler_desc =
+      flutter::gpu::ToImpellerSamplerDescriptor(
+          min_filter, mag_filter, mip_filter, width_address_mode,
+          height_address_mode, max_anisotropy);
   auto sampler =
       wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
 
@@ -518,6 +634,51 @@ bool InternalFlutterGpu_RenderPass_BindTexture(
           .sampler = sampler,
       });
   return true;
+}
+
+bool InternalFlutterGpu_RenderPass_BindTexture(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    Dart_Handle uniform_name_handle,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
+  auto uniform_name = tonic::StdStringFromDart(uniform_name_handle);
+  return BindTextureBinding(
+      wrapper, shader, shader->GetUniformTexture(uniform_name), texture,
+      min_filter, mag_filter, mip_filter, width_address_mode,
+      height_address_mode, max_anisotropy);
+}
+
+bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_texture_index,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
+  return BindTextureBinding(
+      wrapper, shader, shader->GetUniformTextureAt(uniform_texture_index),
+      texture, min_filter, mag_filter, mip_filter, width_address_mode,
+      height_address_mode, max_anisotropy);
+}
+
+void InternalFlutterGpu_RenderPass_BindSet(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::BindingSet* binding_set,
+    int slot) {
+  if (slot < 0) {
+    return;
+  }
+  wrapper->BindSet(slot, fml::RefPtr<flutter::gpu::BindingSet>(binding_set));
 }
 
 void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -640,36 +801,26 @@ void InternalFlutterGpu_RenderPass_SetStencilConfig(
 void InternalFlutterGpu_RenderPass_SetCullMode(
     flutter::gpu::RenderPass* wrapper,
     int cull_mode) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetCullMode(flutter::gpu::ToImpellerCullMode(cull_mode));
+  wrapper->SetCullMode(flutter::gpu::ToImpellerCullMode(cull_mode));
 }
 
 void InternalFlutterGpu_RenderPass_SetPrimitiveType(
     flutter::gpu::RenderPass* wrapper,
     int primitive_type) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetPrimitiveType(
+  wrapper->SetPrimitiveType(
       flutter::gpu::ToImpellerPrimitiveType(primitive_type));
 }
 
 void InternalFlutterGpu_RenderPass_SetWindingOrder(
     flutter::gpu::RenderPass* wrapper,
     int winding_order) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetWindingOrder(
-      flutter::gpu::ToImpellerWindingOrder(winding_order));
+  wrapper->SetWindingOrder(flutter::gpu::ToImpellerWindingOrder(winding_order));
 }
 
 void InternalFlutterGpu_RenderPass_SetPolygonMode(
     flutter::gpu::RenderPass* wrapper,
     int polygon_mode) {
-  impeller::PipelineDescriptor& pipeline_descriptor =
-      wrapper->GetPipelineDescriptor();
-  pipeline_descriptor.SetPolygonMode(
-      flutter::gpu::ToImpellerPolygonMode(polygon_mode));
+  wrapper->SetPolygonMode(flutter::gpu::ToImpellerPolygonMode(polygon_mode));
 }
 
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper,

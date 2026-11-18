@@ -10,8 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 class _MockAnimationController extends AnimationController {
   _MockAnimationController()
     : super(duration: const Duration(minutes: 1), vsync: const TestVSync());

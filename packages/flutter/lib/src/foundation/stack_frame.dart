@@ -183,22 +183,23 @@ class StackFrame {
     );
   }
 
+  /// The async-gap marker emitted by `package:stack_trace` between Dart-VM
+  /// stack chains. Older versions of this parser asserted on this line; it is
+  /// now treated as equivalent to the VM's `<asynchronous suspension>` marker
+  /// so that already-mangled stacks (e.g. those carried by `ParallelWaitError`
+  /// or by stacks that pass through the test runner) round-trip cleanly.
+  static const String _packageStackTraceAsyncGap =
+      '===== asynchronous gap ===========================';
+
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
   ///
   /// Returns null if format is not as expected.
   static StackFrame? fromStackTraceLine(String line) {
-    if (line == '<asynchronous suspension>') {
+    if (line == '<asynchronous suspension>' || line == _packageStackTraceAsyncGap) {
       return asynchronousSuspension;
     } else if (line == '...') {
       return stackOverFlowElision;
     }
-
-    assert(
-      line != '===== asynchronous gap ===========================',
-      'Got a stack frame from package:stack_trace, where a vm or web frame was expected. '
-      'This can happen if FlutterError.demangleStackTrace was not set in an environment '
-      'that propagates non-standard stack traces to the framework, such as during tests.',
-    );
 
     // Web frames.
     if (!line.startsWith('#')) {

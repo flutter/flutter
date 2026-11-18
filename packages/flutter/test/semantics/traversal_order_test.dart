@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
-import '../widgets/widgets_app_tester.dart';
 
 void main() {
   testWidgets('Traversal order handles touching elements', (WidgetTester tester) async {

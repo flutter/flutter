@@ -41,8 +41,10 @@ impeller_component("vulkan_unittests") {
     "surface_context_vk_unittests.cc",
     "test/gpu_tracer_unittests.cc",
     "test/mock_vulkan_unittests.cc",
+    "test/pipeline_compile_queue_vulkan_unittests.cc",
     "test/sampler_library_vk_unittests.cc",
     "test/swapchain_unittests.cc",
+    "texture_vk_unittests.cc",
   ]
   deps = [
     ":mock_vulkan",
@@ -94,6 +96,8 @@ impeller_component("vulkan") {
     "pipeline_cache_data_vk.h",
     "pipeline_cache_vk.cc",
     "pipeline_cache_vk.h",
+    "pipeline_compile_queue_vulkan.cc",
+    "pipeline_compile_queue_vulkan.h",
     "pipeline_library_vk.cc",
     "pipeline_library_vk.h",
     "pipeline_vk.cc",
@@ -134,6 +138,8 @@ impeller_component("vulkan") {
     "texture_source_vk.h",
     "texture_vk.cc",
     "texture_vk.h",
+    "texture_wrapper_vk.cc",
+    "texture_wrapper_vk.h",
     "tracked_objects_vk.cc",
     "tracked_objects_vk.h",
     "vertex_descriptor_vk.cc",
@@ -172,6 +178,7 @@ impeller_component("vulkan") {
     "//flutter/fml",
     "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//flutter/third_party/vulkan_memory_allocator",
+    "//third_party/abseil-cpp/absl/container:linked_hash_map",
   ]
 
   if (is_android) {
@@ -196,13 +203,15 @@ if (is_android) {
     sources = [
       "android/ahb_swapchain_vk_unittests.cc",
       "android/ahb_texture_source_vk_unittests.cc",
+      "android/android_test_utils.cc",
+      "android/android_test_utils.h",
     ]
 
     deps = [
       ":mock_vulkan",
       ":unittests_fixtures",
       ":vulkan",
-      "//flutter/testing",
+      "//flutter/testing:testing_lib",
     ]
 
     defines = [ "TESTING" ]
@@ -215,7 +224,10 @@ if (is_android) {
 
     output_name = "impeller_vulkan_android_unittests"
 
-    deps = [ ":unittests_lib" ]
+    deps = [
+      ":unittests_lib",
+      "//flutter/testing",
+    ]
   }
 
   native_activity_apk("vulkan_android_apk_unittests") {

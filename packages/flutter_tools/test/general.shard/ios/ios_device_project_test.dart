@@ -8,7 +8,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+<<<<<<< HEAD
 import 'package:flutter_tools/src/build_info.dart';
+=======
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
@@ -120,7 +123,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     platform: platform,
     name: 'iPhone 1',
     sdkVersion: '13.3',
-    cpuArchitecture: DarwinArch.arm64,
+    cpuArch: .arm64,
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: DeviceConnectionInterface.attached,
     isConnected: true,

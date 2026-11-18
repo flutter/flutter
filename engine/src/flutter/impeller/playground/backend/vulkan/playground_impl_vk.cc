@@ -63,7 +63,7 @@ void PlaygroundImplVK::DestroyWindowHandle(WindowHandle handle) {
   ::glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(handle));
 }
 
-PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
+PlaygroundImplVK::PlaygroundImplVK(const PlaygroundSwitches& switches)
     : PlaygroundImpl(switches), handle_(nullptr, &DestroyWindowHandle) {
   FML_CHECK(IsVulkanDriverPresent());
 

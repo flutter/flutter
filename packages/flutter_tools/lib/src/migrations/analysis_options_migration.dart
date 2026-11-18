@@ -13,10 +13,16 @@ import '../project.dart';
 
 /// Migrates analysis_options.yaml to exclude build and platform directories.
 class AnalysisOptionsMigration extends ProjectMigrator {
+<<<<<<< HEAD
   AnalysisOptionsMigration(FlutterProject project, super.logger, {PackageConfig? packageConfig})
     : _project = project,
       _analysisOptionsFile = project.directory.childFile('analysis_options.yaml'),
       _packageConfig = packageConfig;
+=======
+  AnalysisOptionsMigration(FlutterProject project, super.logger, {this._packageConfig})
+    : _project = project,
+      _analysisOptionsFile = project.directory.childFile('analysis_options.yaml');
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 
   final FlutterProject _project;
   final File _analysisOptionsFile;

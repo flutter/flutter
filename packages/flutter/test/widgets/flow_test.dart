@@ -206,4 +206,15 @@ void main() {
       expect(renderObject.clipBehavior, clip);
     }
   });
+
+  testWidgets('Flow does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Center(
+        child: Flow(delegate: OpacityFlowDelegate(0.2), children: const <Widget>[Placeholder()]),
+      ),
+    );
+    expect(tester.getSize(find.byType(Flow)), Size.zero);
+  });
 }

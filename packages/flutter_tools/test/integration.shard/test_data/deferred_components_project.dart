@@ -111,8 +111,13 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+<<<<<<< HEAD
     id "com.android.application" version "8.11.1" apply false
     id "org.jetbrains.kotlin.android" version "2.2.20" apply false
+=======
+    id "com.android.application" version "9.3.1" apply false
+    id "org.jetbrains.kotlin.android" version "2.4.20" apply false
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 }
 
 include ":app", ":component1"
@@ -144,7 +149,6 @@ tasks.register("clean", Delete) {
   String get appBuild => r'''
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -161,12 +165,8 @@ android {
     ndkVersion flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -202,6 +202,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 flutter {
     source '../..'
 }
@@ -226,6 +232,7 @@ flutter.versionCode=22
   String get androidGradleProperties => '''
 org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=4G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
 android.useAndroidX=true
+android.newDsl=false
 ''';
 
   @override

@@ -7,12 +7,15 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -42,19 +45,23 @@ const kServiceWorkerStrategy = 'ServiceWorkerStrategy';
 const kWebDefinePrefix = 'webDefine:';
 
 class WebBuilder {
+  // TODO(bkonyi): Take a ToolContext instead of individual dependencies once
+  // ResidentWebRunner is migrated to ToolContext
+  // (https://github.com/flutter/flutter/issues/188471).
   WebBuilder({
-    required Logger logger,
-    required ProcessManager processManager,
-    required BuildSystem buildSystem,
-    required Analytics analytics,
-    required FlutterVersion flutterVersion,
-    required FileSystem fileSystem,
-  }) : _logger = logger,
-       _processManager = processManager,
-       _buildSystem = buildSystem,
-       _analytics = analytics,
-       _flutterVersion = flutterVersion,
-       _fileSystem = fileSystem;
+    required this._logger,
+    required this._processManager,
+    required this._buildSystem,
+    required this._analytics,
+    required this._flutterVersion,
+    required this._fileSystem,
+    required this._artifacts,
+    required this._buildTargets,
+    required this._cache,
+    required this._config,
+    required this._platform,
+    required this._terminal,
+  });
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -62,6 +69,12 @@ class WebBuilder {
   final Analytics _analytics;
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
+  final Artifacts _artifacts;
+  final BuildTargets _buildTargets;
+  final Cache _cache;
+  final Config _config;
+  final Platform _platform;
+  final Terminal _terminal;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -85,10 +98,14 @@ class WebBuilder {
 
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
+      logger: _logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(
-            _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
+            _fileSystem.path.join(
+              flutterProject.directory.path,
+              getWebBuildDirectory(config: _config, fileSystem: _fileSystem),
+            ),
           )
         : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
@@ -101,11 +118,12 @@ class WebBuilder {
     final migration = ProjectMigration(migrators);
     await migration.run();
 
+    final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
+        _buildTargets.webServiceWorker(_fileSystem, compilerConfigs, _analytics),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,
@@ -123,16 +141,14 @@ class WebBuilder {
             for (final MapEntry(:key, :value) in webDefines.entries) '$kWebDefinePrefix$key': value,
           },
           packageConfigPath: buildInfo.packageConfigPath,
-          artifacts: globals.artifacts!,
+          artifacts: _artifacts,
           fileSystem: _fileSystem,
           logger: _logger,
           processManager: _processManager,
-          platform: globals.platform,
+          platform: _platform,
           analytics: _analytics,
-          cacheDir: globals.cache.getRoot(),
-          engineVersion: globals.artifacts!.usesLocalArtifacts
-              ? null
-              : _flutterVersion.engineRevision,
+          cacheDir: _cache.getRoot(),
+          engineVersion: _artifacts.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
           flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
@@ -148,6 +164,11 @@ class WebBuilder {
                 : null,
           );
         }
+        _sendFailedBuildAnalytics(
+          compilerConfigs: compilerConfigs,
+          exceptions: result.exceptions,
+          settings: buildSettingsString,
+        );
         throwToolExit('Failed to compile application for the Web.');
       }
     } on Exception catch (err) {
@@ -158,13 +179,11 @@ class WebBuilder {
 
     // We don't print a size because the output directory can contain
     // optional files not needed by the user.
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+    _logger.printStatus(
+      '${_terminal.successMark} '
+      'Built ${_fileSystem.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
-
-    final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
 
     _analytics.send(
       Event.flutterBuildInfo(label: 'web-compile', buildType: 'web', settings: buildSettingsString),
@@ -177,6 +196,35 @@ class WebBuilder {
         workflow: 'build',
         variableName: variableName,
         elapsedMilliseconds: elapsedDuration.inMilliseconds,
+      ),
+    );
+  }
+
+  void _sendFailedBuildAnalytics({
+    required List<WebCompilerConfig> compilerConfigs,
+    required Map<String, ExceptionMeasurement> exceptions,
+    required String settings,
+  }) {
+    final bool hasDeprecatedJsInteropFlag = compilerConfigs.any(
+      (WebCompilerConfig config) =>
+          config is JsCompilerConfig && config.deprecatedJsInterop != null,
+    );
+    if (!hasDeprecatedJsInteropFlag) {
+      return;
+    }
+    final List<String> failedTargets = <String>{
+      for (final ExceptionMeasurement measurement in exceptions.values) measurement.target,
+    }.toList()..sort();
+    final rawError = failedTargets.isEmpty
+        ? 'web-compile-failure'
+        : '${failedTargets.join(',')}-failure';
+    final error = rawError.length > 100 ? '${rawError.substring(0, 92)}...-fail' : rawError;
+    _analytics.send(
+      Event.flutterBuildInfo(
+        label: 'web-compile',
+        buildType: 'web',
+        settings: settings,
+        error: error,
       ),
     );
   }
@@ -233,28 +281,24 @@ enum WebRendererMode {
   }
 }
 
-/// The correct precompiled artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for DDC with AMD modules.
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-const kAmdDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for stable DDC.
+const kDDCStableSdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCStableSdkSourcemaps,
 };
 
-/// The correct precompiled artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
+/// The correct precompiled artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdk,
 };
 
-/// The correct source map artifact to use for each build and render mode for
-/// DDC with DDC library bundle module format.
-const kDdcLibraryBundleDartSdkJsMapArtifactMap = <WebRendererMode, HostArtifact>{
-  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
+/// The correct source map artifact to use for each build and render mode for canary DDC.
+const kDDCCanarySdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
+  WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
 };
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
@@ -269,8 +313,41 @@ String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) 
   values['web-renderer'] = renderers.join(',');
   values['web-target'] = targets.join(',');
 
-  final List<String> sortedList =
-      values.entries.map((MapEntry<String, Object> e) => '${e.key}: ${e.value};').toList()..sort();
+  String formatValues(Map<String, Object> entries) {
+    final List<String> sortedList =
+        entries.entries.map((MapEntry<String, Object> e) => '${e.key}: ${e.value};').toList()
+          ..sort();
+    return sortedList.join(' ');
+  }
 
-  return sortedList.join(' ');
+  final String result = formatValues(values);
+  // GA4 / package:unified_analytics enforces a 100-character limit on event
+  // parameter values. Drop `optimizationLevel` if the combined settings
+  // exceed the limit.
+  if (result.length > 100 && values.remove('optimizationLevel') != null) {
+    return formatValues(values);
+  }
+  return result;
+}
+
+/// Sends an [Event.flutterBuildInfo] event for a DDC web compilation when
+/// `--[no-]deprecated-js-interop` (`[deprecatedJsInterop]`) was explicitly set.
+void sendDdcCompileAnalytics({
+  required bool? deprecatedJsInterop,
+  required String command,
+  required bool succeeded,
+  Analytics? analytics,
+}) {
+  if (deprecatedJsInterop == null) {
+    return;
+  }
+  (analytics ?? globals.analytics).send(
+    Event.flutterBuildInfo(
+      label: 'web-compile',
+      buildType: 'web',
+      command: command,
+      settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+      error: succeeded ? null : 'ddc-compile-failure',
+    ),
+  );
 }

@@ -27,11 +27,10 @@ class SnapshotType {
 /// Interface to the gen_snapshot command-line tool.
 class GenSnapshot {
   GenSnapshot({
-    required Artifacts artifacts,
+    required this._artifacts,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _artifacts = artifacts,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Artifacts _artifacts;
   final ProcessUtils _processUtils;
@@ -57,20 +56,23 @@ class GenSnapshot {
 
   Future<int> run({
     required SnapshotType snapshotType,
-    DarwinArch? darwinArch,
+    // TODO(chingjun): The [CpuArch] parameter is only used for iOS builds (to
+    // select the correct per-architecture gen_snapshot). This architecture
+    // information should instead be consolidated into [TargetPlatform] so that
+    // callers do not need to pass it separately.
+    CpuArch? cpuArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
-    assert(darwinArch != DarwinArch.armv7);
-    assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
+    assert(cpuArch != CpuArch.armv7);
+    assert(snapshotType.platform != TargetPlatform.ios || cpuArch != null);
     final args = <String>[...additionalArgs];
 
     // iOS and macOS have separate gen_snapshot binaries for each target
     // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
     // one for the target architecture in question.
     Artifact genSnapshotArtifact;
-    if (snapshotType.platform == TargetPlatform.ios ||
-        snapshotType.platform == TargetPlatform.darwin) {
-      genSnapshotArtifact = darwinArch == DarwinArch.arm64
+    if (snapshotType.platform.os case .ios || .macos) {
+      genSnapshotArtifact = cpuArch == CpuArch.arm64
           ? Artifact.genSnapshotArm64
           : Artifact.genSnapshotX64;
     } else {
@@ -88,14 +90,12 @@ class GenSnapshot {
 
 class AOTSnapshotter {
   AOTSnapshotter({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Xcode xcode,
-    required ProcessManager processManager,
     required Artifacts artifacts,
+    required this._fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    this._xcode,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _xcode = xcode,
        _genSnapshot = GenSnapshot(
          artifacts: artifacts,
          processManager: processManager,
@@ -104,7 +104,7 @@ class AOTSnapshotter {
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  final Xcode _xcode;
+  final Xcode? _xcode;
   final GenSnapshot _genSnapshot;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
@@ -113,14 +113,14 @@ class AOTSnapshotter {
     required BuildMode buildMode,
     required String mainPath,
     required String outputPath,
-    DarwinArch? darwinArch,
+    CpuArch? cpuArch,
     String? sdkRoot,
     List<String> extraGenSnapshotOptions = const <String>[],
     String? splitDebugInfo,
     required bool dartObfuscation,
     bool quiet = false,
   }) async {
-    assert(platform != TargetPlatform.ios || darwinArch != null);
+    assert(platform != TargetPlatform.ios || cpuArch != null);
 
     if (!_isValidAotPlatform(platform, buildMode)) {
       _logger.printError('${platform.getName()} does not support AOT compilation.');
@@ -132,19 +132,14 @@ class AOTSnapshotter {
 
     final genSnapshotArgs = <String>['--deterministic'];
 
-    final bool targetingApplePlatform =
-        platform == TargetPlatform.ios || platform == TargetPlatform.darwin;
+    final bool targetingApplePlatform = platform.os == .ios || platform.os == .macos;
     _logger.printTrace('targetingApplePlatform = $targetingApplePlatform');
 
     final bool extractAppleDebugSymbols =
         buildMode == BuildMode.profile || buildMode == BuildMode.release;
     _logger.printTrace('extractAppleDebugSymbols = $extractAppleDebugSymbols');
 
-    final bool targetingAndroidPlatform =
-        platform == TargetPlatform.android ||
-        platform == TargetPlatform.android_arm ||
-        platform == TargetPlatform.android_arm64 ||
-        platform == TargetPlatform.android_x64;
+    final targetingAndroidPlatform = platform.os == .android;
     _logger.printTrace('targetingAndroidPlatform = $targetingAndroidPlatform');
 
     // We strip snapshot by default, but allow to suppress this behavior
@@ -168,7 +163,7 @@ class AOTSnapshotter {
       // library that the end-developer can link into their app.
       const frameworkName = 'App.framework';
       if (!quiet) {
-        final String targetArch = darwinArch!.name;
+        final String targetArch = cpuArch!.darwinArchName;
         _logger.printStatus('Building $frameworkName for $targetArch...');
       }
       frameworkPath = _fileSystem.path.join(outputPath, frameworkName);
@@ -215,10 +210,6 @@ class AOTSnapshotter {
     }
 
     if (platform == TargetPlatform.android_arm) {
-      // Use softfp for Android armv7 devices.
-      // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
-      genSnapshotArgs.add('--no-sim-use-hardfp');
-
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }
@@ -226,7 +217,7 @@ class AOTSnapshotter {
     // The name of the debug file must contain additional information about
     // the architecture, since a single build command may produce
     // multiple debug files.
-    final String archName = platform.getName(darwinArch: darwinArch);
+    final String archName = platform.getName(cpuArch: cpuArch);
     final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
     if (shouldSplitDebugInfo) {
@@ -249,7 +240,7 @@ class AOTSnapshotter {
     final int genSnapshotExitCode = await _genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
-      darwinArch: darwinArch,
+      cpuArch: cpuArch,
     );
     if (genSnapshotExitCode != 0) {
       _logger.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
@@ -258,7 +249,11 @@ class AOTSnapshotter {
 
     if (targetingApplePlatform) {
       if (extractAppleDebugSymbols) {
-        final RunResult dsymResult = await _xcode.dsymutil(<String>[
+        final Xcode? xcode = _xcode;
+        if (xcode == null) {
+          throw StateError('Xcode must be provided when targeting Apple platforms.');
+        }
+        final RunResult dsymResult = await xcode.dsymutil(<String>[
           '-o',
           '$frameworkPath.dSYM',
           aotSharedLibrary,
@@ -272,7 +267,7 @@ class AOTSnapshotter {
 
         if (stripAfterBuild) {
           // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-          final RunResult stripResult = await _xcode.strip(<String>[
+          final RunResult stripResult = await xcode.strip(<String>[
             '-x',
             aotSharedLibrary,
             '-o',

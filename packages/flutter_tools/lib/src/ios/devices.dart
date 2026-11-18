@@ -90,14 +90,11 @@ enum IOSDeploymentMethod {
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
-    required Platform platform,
+    required this._platform,
     required this.xcdevice,
-    required IOSWorkflow iosWorkflow,
-    required Logger logger,
-  }) : _platform = platform,
-       _iosWorkflow = iosWorkflow,
-       _logger = logger,
-       super('iOS devices');
+    required this._iosWorkflow,
+    required this._logger,
+  }) : super('iOS devices');
 
   final Platform _platform;
   final IOSWorkflow _iosWorkflow;
@@ -308,17 +305,27 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(
     super.id, {
+<<<<<<< HEAD
     required FileSystem fileSystem,
     required FileSystemUtils fileSystemUtils,
     required ProcessUtils processUtils,
     required this.name,
     required this.cpuArchitecture,
     String? cpuArchitectureString,
+=======
+    required this._fileSystem,
+    required this._fileSystemUtils,
+    required this._processUtils,
+    required this.name,
+    required this._cpuArch,
+    this._cpuArchitectureString,
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
     required this.connectionInterface,
     required this.isConnected,
     required this.isPaired,
     required this.devModeEnabled,
     required this.isCoreDevice,
+<<<<<<< HEAD
     String? sdkVersion,
     String? modelCode,
     String? operatingSystemVersion,
@@ -346,9 +353,23 @@ class IOSDevice extends Device {
        _fileSystem = fileSystem,
        _fileSystemUtils = fileSystemUtils,
        _processUtils = processUtils,
+=======
+    this._sdkVersion,
+    this._modelCode,
+    this._operatingSystemVersion,
+    required this._platform,
+    required this._iosDeploy,
+    required this._iMobileDevice,
+    required this._coreDeviceControl,
+    required this._coreDeviceLauncher,
+    required this._xcodeDebug,
+    required IProxy iProxy,
+    required super.logger,
+    required this._analytics,
+    required this._xcode,
+  }) : _iproxy = iProxy,
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
        _logger = logger,
-       _analytics = analytics,
-       _platform = platform,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
@@ -401,7 +422,12 @@ class IOSDevice extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
-  final DarwinArch cpuArchitecture;
+  final CpuArch _cpuArch;
+
+  final String? _cpuArchitectureString;
+
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
 
   final String? _cpuArchitectureString;
 
@@ -528,7 +554,7 @@ class IOSDevice extends Device {
 
   @override
   // 32-bit devices are not supported.
-  Future<bool> isSupported() async => cpuArchitecture == DarwinArch.arm64;
+  Future<bool> isSupported() async => _cpuArch == .arm64;
 
   @override
   Future<LaunchResult> startApp(
@@ -561,7 +587,7 @@ class IOSDevice extends Device {
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
-        activeArch: cpuArchitecture,
+        activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
@@ -966,13 +992,14 @@ class IOSDevice extends Device {
   }) async {
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
-    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
-      usesIpv6: debuggingOptions.ipv6,
+      // If mDNS fails, don't throw if the URL may still be findable through
+      // log-based discovery (vmServiceDiscovery).
+      throwOnError: !discoverVMUrlFromLogs,
       useDeviceIPAsHost: isWirelesslyConnected,
-      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
+      usesIpv6: debuggingOptions.ipv6,
     );
 
     final discoveryOptions = <Future<Uri?>>[
@@ -1132,8 +1159,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = globals.xcode?.currentVersion;
-    final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,
@@ -1356,8 +1382,12 @@ class IOSDevice extends Device {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      // If compatible with protocol discovery via logs, do not throw on mDNS
+      // error so DelegateVMServiceDiscoveryForAttach can fall back to log-based
+      // discovery.
+      throwOnError: !compatibleWithProtocolDiscovery,
       useDeviceIPAsHost: isWirelesslyConnected,
+      usesIpv6: ipv6,
     );
 
     if (compatibleWithProtocolDiscovery) {
@@ -1379,17 +1409,42 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    if (isCoreDevice) {
-      // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
-      // (https://github.com/flutter/flutter/issues/128598).
-      return false;
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      return globals.xcode!.isDevicectlInstalled;
     }
-    return _iMobileDevice.isInstalled;
+    return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await _iMobileDevice.takeScreenshot(outputFile, id, connectionInterface);
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
+      var success = false;
+      try {
+        success = await _coreDeviceControl.takeScreenshot(
+          deviceId: id,
+          destination: outputFile.path,
+        );
+      } on Exception catch (error) {
+        final errorMessage = error.toString();
+        if (errorMessage.contains('CoreDeviceError error 4000') ||
+            errorMessage.contains('CoreDeviceError error 4016') ||
+            errorMessage.contains('RemotePairingError error 2') ||
+            errorMessage.contains('Connection was invalidated')) {
+          throwToolExit(
+            'Failed to establish a connection to the device. '
+            'Please make sure the device is available and try again.',
+          );
+        }
+        throwToolExit('Failed to take screenshot with devicectl: $error');
+      }
+      if (success) {
+        return;
+      }
+      throwToolExit('Failed to take screenshot with devicectl.');
+    }
+    throwToolExit('flutter screenshot requires Xcode 27 or higher.');
   }
 
   @override
@@ -2042,14 +2097,11 @@ class CoreDeviceLoggingSource {
 class IOSDevicePortForwarder extends DevicePortForwarder {
   /// Create a new [IOSDevicePortForwarder].
   IOSDevicePortForwarder({
-    required Logger logger,
-    required String id,
-    required IProxy iproxy,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _id = id,
-       _iproxy = iproxy,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._logger,
+    required this._id,
+    required this._iproxy,
+    required this._operatingSystemUtils,
+  });
 
   /// Create a [IOSDevicePortForwarder] for testing.
   ///

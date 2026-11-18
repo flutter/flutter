@@ -23,8 +23,10 @@ import 'transitions.dart';
 ///
 ///   * [Expansible.headerBuilder], which is of this type.
 ///   * [Expansible.bodyBuilder], which is also of this type.
-typedef ExpansibleComponentBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef ExpansibleComponentBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 /// The type of the callback that uses the header and body of an [Expansible]
 /// widget to build the widget.
@@ -42,8 +44,12 @@ typedef ExpansibleComponentBuilder =
 /// See also:
 ///
 ///   * [Expansible.expansibleBuilder], which is of this type.
-typedef ExpansibleBuilder =
-    Widget Function(BuildContext context, Widget header, Widget body, Animation<double> animation);
+typedef ExpansibleBuilder = Widget Function(
+  BuildContext context,
+  Widget header,
+  Widget body,
+  Animation<double> animation,
+);
 
 /// A controller for managing the expansion state of an [Expansible].
 ///
@@ -203,6 +209,8 @@ class ExpansibleController extends ChangeNotifier {
 
 /// A [StatefulWidget] that expands and collapses.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=TfoJ55nx1S4}
+///
 /// An [Expansible] consists of a header, which is always shown, and a
 /// body, which is hidden in its collapsed state and shown in its expanded
 /// state.
@@ -230,7 +238,7 @@ class ExpansibleController extends ChangeNotifier {
 /// This example demonstrates how to use the [Expansible] widget and how an
 /// [ExpansibleController] can be used to programmatically expand or collapse it.
 ///
-/// ** See code in examples/api/lib/material/expansible/expansible.0.dart **
+/// ** See code in examples/api/lib/widgets/expansible/expansible.0.dart **
 /// {@end-tool}
 ///
 /// See also:

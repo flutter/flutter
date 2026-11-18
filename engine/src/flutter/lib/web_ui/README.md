@@ -185,6 +185,8 @@ The available versions of Chrome for Testing available can be found [here](https
   The script uploads the specified versions of Chromium (and Chromedriver) to the
   right locations in CIPD: [Chrome](https://chrome-infra-packages.appspot.com/p/flutter_internal/browsers/chrome),
   [Chromedriver](https://chrome-infra-packages.appspot.com/p/flutter_internal/browser-drivers/chrome).
+- Run `felt generate-builder-json` to update engine CI configuration.
+- Manually update the version of all `chrome_and_driver` dependencies listed in `.ci.yaml`.
 - Send a pull request containing the above file changes. Newer versions of Chromium
   might break some tests or Goldens. Get those fixed too!
 
@@ -225,7 +227,7 @@ The script has the following command-line options:
 
 In general, the manual process goes like this:
 
-1. Dowload the binaries for the new browser/driver for each operating system
+1. Download the binaries for the new browser/driver for each operating system
    (macOS, linux, windows).
 2. Create CIPD packages for these packages (more documentation is available for
    Googlers at go/cipd-flutter-web)

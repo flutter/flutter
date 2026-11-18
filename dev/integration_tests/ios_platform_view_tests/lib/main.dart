@@ -4,18 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_driver/driver_extension.dart';
+
+import 'drag.dart';
+import 'reorderable_list_semantics.dart';
 
 import 'drag.dart';
 import 'reorderable_list_semantics.dart';
 
 void main() {
-  // enableFlutterDriverExtension() will disable keyboard,
-  // which is required for flutter_driver tests
-  // But breaks the XCUITests
-  if (const bool.fromEnvironment('ENABLE_DRIVER_EXTENSION')) {
-    enableFlutterDriverExtension();
-  }
   runApp(const MyApp());
 }
 
@@ -51,24 +47,6 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(title: Text(widget.title ?? '')),
       body: Column(
         children: <Widget>[
-          TextButton(
-            key: const ValueKey<String>('platform_view_button'),
-            child: const Text('show platform view'),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<MergeThreadTestPage>(
-                  builder: (BuildContext context) => const MergeThreadTestPage(),
-                ),
-              );
-            },
-          ),
-          // Push this button to perform an animation, which ensure the threads are unmerged after the animation.
-          ElevatedButton(
-            key: const ValueKey<String>('unmerge_button'),
-            child: const Text('Tap to unmerge threads'),
-            onPressed: () {},
-          ),
           TextButton(
             key: const ValueKey<String>('platform_view_focus_test'),
             child: const Text('platform view focus test'),
@@ -151,6 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               );
             },
+<<<<<<< HEAD
           ),
         ],
       ),
@@ -172,8 +151,9 @@ class MergeThreadTestPage extends StatelessWidget {
         children: <Widget>[
           const Expanded(
             child: SizedBox(width: 300, child: UiKitView(viewType: 'platform_view')),
+=======
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
           ),
-          ElevatedButton(key: button, child: const Text('button'), onPressed: () {}),
         ],
       ),
     );

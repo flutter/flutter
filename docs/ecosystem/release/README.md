@@ -42,7 +42,7 @@ To enable batch release for a package:
         release:
           batch: true
         ```
-    *   Create a `pending_changes` directory in the package root containing a `template.yaml` file:
+    *   Create a `pending_changelogs` directory in the package root containing a `template.yaml` file:
         ```yaml
         # Use this file as a template to draft an unreleased changelog file.
         # Make a copy of this file in the same directory, give it an appropriate name, and fill in the details.
@@ -91,12 +91,12 @@ To enable batch release for a package:
 
 ### Workflow
 
-Once enabled, contributors **should not** modify `CHANGELOG.md` or `pubspec.yaml` directly. Instead, they must add a new file to the `pending_changes` directory for each PR.
+Once enabled, contributors **should not** modify `CHANGELOG.md` or `pubspec.yaml` directly. Instead, they must add a new file to the `pending_changelogs` directory for each PR.
 
 The release process runs automatically:
 
 1.  The cron job in `<package_name>_batch.yml` triggers a new release PR targeting the `release-<package_name>-<version>` branch.
-2.  The PR aggregates all files in `pending_changes` to update `CHANGELOG.md` and `pubspec.yaml`.
+2.  The PR aggregates all files in `pending_changelogs` to update `CHANGELOG.md` and `pubspec.yaml`.
 3.  A package owner reviews and merges the PR.
 4.  Merging triggers [release_from_branches.yml](https://github.com/flutter/packages/blob/main/.github/workflows/release_from_branches.yml), which publishes the package to pub.dev.
 5.  Simultaneously, [sync_release_pr.yml](https://github.com/flutter/packages/blob/main/.github/workflows/sync_release_pr.yml) creates a "sync PR" targeting the `main` branch.

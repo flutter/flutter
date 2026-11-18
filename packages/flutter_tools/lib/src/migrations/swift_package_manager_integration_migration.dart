@@ -33,8 +33,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     XcodeBasedProject project,
     FlutterDarwinPlatform platform,
     BuildInfo buildInfo, {
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required this._xcodeProjectInterpreter,
     required Logger logger,
+<<<<<<< HEAD
     required FileSystem fileSystem,
     required PlistParser plistParser,
     required Config config,
@@ -43,10 +44,21 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required OperatingSystemUtils operatingSystemUtils,
     required FlutterVersion flutterVersion,
     required bool reportCrashes,
+=======
+    required this._fileSystem,
+    required this._plistParser,
+    required this._config,
+    required this._analytics,
+    required this._hostPlatform,
+    required this._operatingSystemUtils,
+    required this._flutterVersion,
+    required this._reportCrashes,
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
+<<<<<<< HEAD
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
        _fileSystem = fileSystem,
        _plistParser = plistParser,
@@ -56,6 +68,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _operatingSystemUtils = operatingSystemUtils,
        _flutterVersion = flutterVersion,
        _reportCrashes = reportCrashes,
+=======
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -349,9 +363,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
       throw SwiftPackageManagerMigrationException('Unable to get Xcode project info.');
+<<<<<<< HEAD
     }
     if (_xcodeProject.xcodeWorkspace == null) {
       throw Exception('Xcode workspace not found.');
+=======
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
     }
     final String? scheme = projectInfo.schemeFor(_buildInfo);
     if (scheme == null) {
@@ -453,11 +470,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
     final String scriptText;
     if (_platform == FlutterDarwinPlatform.ios) {
-      scriptText =
-          r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
+      scriptText = r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
     } else {
-      scriptText =
-          r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
+      scriptText = r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
     }
 
     var newContent =

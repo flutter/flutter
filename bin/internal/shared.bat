@@ -72,7 +72,11 @@ GOTO :after_subroutine
     REM before getting the git revision.
     REM
     REM See https://github.com/flutter/flutter/issues/159018
+<<<<<<< HEAD
     FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& git rev-parse HEAD') DO (
+=======
+    FOR /f %%r IN ('PUSHD "%FLUTTER_ROOT%" ^&^& git rev-parse HEAD') DO (
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       SET revision=%%r
     )
   )

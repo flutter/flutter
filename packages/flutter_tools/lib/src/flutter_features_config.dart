@@ -14,17 +14,15 @@ import 'flutter_manifest.dart';
 interface class FlutterFeaturesConfig {
   /// Creates a feature configuration reader from the provided sources.
   ///
-  /// [globalConfig] reads values stored by the `flutter config` tool, which
+  /// [_globalConfig] reads values stored by the `flutter config` tool, which
   /// are normally in the user's `%HOME` directory (varies by system), while
-  /// [projectManifest] reads values from the _current_ Flutter project's
+  /// [_projectManifest] reads values from the _current_ Flutter project's
   /// `pubspec.yaml`
   const FlutterFeaturesConfig({
-    required Config globalConfig,
-    required Platform platform,
-    required FlutterManifest? projectManifest,
-  }) : _globalConfig = globalConfig,
-       _platform = platform,
-       _projectManifest = projectManifest;
+    required this._globalConfig,
+    required this._platform,
+    required this._projectManifest,
+  });
 
   final Config _globalConfig;
   final Platform _platform;

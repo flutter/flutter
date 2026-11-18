@@ -61,6 +61,10 @@ Map<String, _ScenarioFactory> _scenarios = <String, _ScenarioFactory>{
       PlatformViewClipRRectScenario(view, id: _viewId++),
   'platform_view_cliprrect_multiple_clips': (FlutterView view) =>
       PlatformViewClipRRectMultipleClipsScenario(view, id: _viewId++),
+  'platform_view_clip_rsuperellipse': (FlutterView view) =>
+      PlatformViewClipRSuperellipseScenario(view, id: _viewId++),
+  'platform_view_clip_rsuperellipse_multiple_clips': (FlutterView view) =>
+      PlatformViewClipRSuperellipseMultipleClipsScenario(view, id: _viewId++),
   'platform_view_large_cliprrect': (FlutterView view) =>
       PlatformViewLargeClipRRectScenario(view, id: _viewId++),
   'platform_view_large_cliprrect_multiple_clips': (FlutterView view) =>

@@ -117,6 +117,21 @@ TEST(EntityGeometryTest, UberSDFGeometryPaddingIsAdjustedByInverseMaxBasis) {
                                       .TransformAndClipBounds(matrix));
     }
   }
+
+  // Under skew, padding should account for non-orthogonal axis scaling and
+  // determinant.
+  {
+    auto matrix = Matrix::MakeSkew(0.75f, 0.5f);
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      Vector2 pixel_size = matrix.GetTransformedPixelSize();
+      EXPECT_EQ(coverage.value(),
+                Rect::MakeLTRB(-pixel_size.x, -pixel_size.y,
+                               100.0f + pixel_size.x, 100.0f + pixel_size.y)
+                    .TransformAndClipBounds(matrix));
+    }
+  }
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {

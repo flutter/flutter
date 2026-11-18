@@ -17,7 +17,7 @@ import 'package:webdriver/async_io.dart' hide Browser;
 
 import '../../integration.shard/test_driver.dart';
 
-const reloadRestartTimeout = Duration(seconds: 5);
+const reloadRestartTimeout = Duration(seconds: 30);
 const createWebDriverTimeout = Duration(seconds: 25);
 
 class WebServerDeviceTestRunner {
@@ -115,6 +115,7 @@ class WebServerDeviceTestRunner {
       desired: getDesiredCapabilities(
         Browser.chrome,
         true, // headless
+        platform: const LocalPlatform(),
         chromeBinary: const LocalPlatform().environment[kChromeEnvironment],
       ),
     );

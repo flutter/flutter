@@ -47,6 +47,53 @@ TEST(TextInputModel, SetTextResetsSelection) {
   EXPECT_EQ(model->selection(), TextRange(0));
 }
 
+TEST(TextInputModel, SetTextRejectingSelectionLeavesModelUnchanged) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE", TextRange(3), TextRange(0)));
+  // A rejected update must not apply the text either. Applying it alone would
+  // leave the selection pointing past the end of the new text, and every
+  // subsequent edit indexes into the text with that selection.
+  EXPECT_FALSE(model->SetText("AB", TextRange(5), TextRange(0)));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+  EXPECT_EQ(model->selection(), TextRange(3));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+}
+
+TEST(TextInputModel, SetTextRejectingComposingRangeLeavesModelUnchanged) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE", TextRange(2), TextRange(1, 3)));
+  EXPECT_FALSE(model->SetText("AB", TextRange(2), TextRange(1, 3)));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+  EXPECT_EQ(model->selection(), TextRange(2));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 3));
+  EXPECT_TRUE(model->composing());
+}
+
+TEST(TextInputModel, UpdateComposingTextWithSelectionPastComposingText) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE", TextRange(5), TextRange(0)));
+  model->BeginComposing();
+
+  // The selection accompanying composing text is relative to that text, but an
+  // input method is free to report one that does not fit inside it. The offset
+  // must not reach the text buffer, where a later edit would index out of
+  // bounds and abort the process from inside the standard library.
+  model->UpdateComposingText(u"n", TextRange(99));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDEn");
+  EXPECT_EQ(model->selection(), TextRange(6));
+  EXPECT_EQ(model->composing_range(), TextRange(5, 6));
+
+  // Clearing the composing text collapses the composing range, which makes the
+  // next update replace the selection instead. This is the point at which an
+  // unclamped offset becomes an out of bounds index into the text.
+  model->UpdateComposingText(u"", TextRange(99));
+  EXPECT_EQ(model->composing_range(), TextRange(5));
+  EXPECT_EQ(model->selection(), TextRange(5));
+  model->UpdateComposingText(u"m", TextRange(1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDEm");
+  EXPECT_EQ(model->selection(), TextRange(6));
+}
+
 TEST(TextInputModel, SetSelectionStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -215,6 +262,19 @@ TEST(TextInputModel, SetComposingRangeReverseExtent) {
   EXPECT_EQ(model->selection(), TextRange(4));
   EXPECT_EQ(model->composing_range(), TextRange(4, 1));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SetComposingRangeWithOffsetOutsideString) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  // The offset positions the caret relative to the composing range, and reaches
+  // the text as an index. An offset that runs past the end of the text must be
+  // rejected rather than stored as a selection.
+  EXPECT_FALSE(model->SetComposingRange(TextRange(1, 4), 5));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 4));
+  EXPECT_EQ(model->selection(), TextRange(5));
 }
 
 TEST(TextInputModel, SetComposingRangeOutsideString) {
@@ -853,6 +913,108 @@ TEST(TextInputModel, DeleteSurroundingReverseSelection) {
   EXPECT_EQ(model->selection(), TextRange(3));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "ABCE");
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/190046.
+// Deleting across a non-BMP code point must not leave a lone surrogate behind,
+// which would abort the process on the next UTF-16 to UTF-8 conversion.
+TEST(TextInputModel, DeleteSurroundingWideCharacterAfterCursor) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharacterBeforeCursor) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄");
+  EXPECT_TRUE(model->SetSelection(TextRange(3)));
+  EXPECT_TRUE(model->DeleteSurrounding(-2, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "");
+}
+
+// The same defect over-deletes when the first code point is non-BMP and a
+// later one is not.
+TEST(TextInputModel, DeleteSurroundingWideCharacterFirst) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("😄AB");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharactersAfterCursorOffset) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄🙃B");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(1, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "AB");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharacterGreedy) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 5));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "");
+}
+
+TEST(TextInputModel, DeleteSurroundingWideCharacterComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(0, 3), 0));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0, 0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+// Regression test isolating the `end != max_pos` -> `end < max_pos` guard
+// change: a surrogate pair straddling the end of the composing range forces
+// |end| past |max_pos| in a single 2-wide step. With the old `!=` guard the
+// loop would never see |end| land exactly on |max_pos| and would keep
+// deleting past the composing range; `<` stops it as soon as |end| reaches
+// or passes |max_pos|.
+TEST(TextInputModel, DeleteSurroundingGuardStopsAtComposingEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  model->BeginComposing();
+  // Composing range deliberately ends in the middle of the surrogate pair.
+  EXPECT_TRUE(model->SetComposingRange(TextRange(0, 2), 0));
+  EXPECT_TRUE(model->DeleteSurrounding(0, 3));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0, 0));
+  EXPECT_STREQ(model->GetText().c_str(), "B");
+}
+
+// Regression test for the mirror-image guard on the backward walk that
+// computes |start|: stepping back by 2 across a surrogate pair can land
+// |start| before the start of the editable range instead of exactly on it,
+// the same hazard fixed above for |end|. The old `start ==
+// editable_range().start()` check could never fire in that case, letting the
+// loop keep reading backward past the start of the composing range.
+TEST(TextInputModel, DeleteSurroundingGuardStopsAtComposingStart) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("A😄B");
+  model->BeginComposing();
+  // Composing range deliberately starts in the middle of the surrogate pair.
+  EXPECT_TRUE(model->SetComposingRange(TextRange(2, 4), 2));
+  EXPECT_TRUE(model->DeleteSurrounding(-3, 1));
+  EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "A");
 }
 
 TEST(TextInputModel, BackspaceStart) {

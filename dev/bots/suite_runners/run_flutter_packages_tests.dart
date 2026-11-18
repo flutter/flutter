@@ -50,7 +50,6 @@ Future<void> flutterPackagesRunner() async {
       // https://github.com/flutter/flutter/issues/129633
       '--downgrade',
       '--base-branch=$packagesCommit',
-      '--custom-analysis=script/configs/custom_analysis.yaml',
     ], workingDirectory: checkout.path);
   }
 
@@ -66,7 +65,7 @@ Future<void> flutterPackagesRunner() async {
 ///
 /// The `filesystem` parameter specified filesystem to read the packages version file from.
 /// The `packagesVersionFile` parameter allows specifying an alternative path for the
-/// packages version file, when null [flutterPackagesVersionFile] is used.
+/// packages version file, when null `flutterPackagesVersionFile` is used.
 Future<String> getFlutterPackagesVersion({
   fs.FileSystem fileSystem = const LocalFileSystem(),
   String? packagesVersionFile,

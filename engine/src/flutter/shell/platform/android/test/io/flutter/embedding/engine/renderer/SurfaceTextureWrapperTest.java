@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.renderer;
 
-import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
 import android.graphics.SurfaceTexture;

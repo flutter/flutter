@@ -196,10 +196,10 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 
 /// The matcher created by [matchesGoldenFile].
 final class _MatchesGoldenFile extends AsyncMatcher {
-  /// Creates an instance of [MatchesGoldenFile].
+  /// Creates an instance of [_MatchesGoldenFile].
   const _MatchesGoldenFile(this.key, this.version);
 
-  /// Creates an instance of [MatchesGoldenFile] from a [String] path.
+  /// Creates an instance of [_MatchesGoldenFile] from a [String] path.
   _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
   /// The [key] to the golden image.

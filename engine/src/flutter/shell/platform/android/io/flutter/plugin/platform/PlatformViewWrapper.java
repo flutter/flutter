@@ -47,6 +47,8 @@ public class PlatformViewWrapper extends FrameLayout {
   private AndroidTouchProcessor touchProcessor;
   private PlatformViewRenderTarget renderTarget;
 
+  private final PlatformViewGestureTracker gestureTracker = new PlatformViewGestureTracker();
+
   private ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
 
   public PlatformViewWrapper(@NonNull Context context) {
@@ -187,12 +189,46 @@ public class PlatformViewWrapper extends FrameLayout {
     }
   }
 
+  /**
+   * Informs this view that Flutter has won the gesture arena for the active touch sequence.
+   *
+   * <p>Subsequent {@link MotionEvent#ACTION_MOVE} events will request unbuffered dispatch to
+   * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
+   *
+   * @param gestureId The identifier (downTime) of the gesture that Flutter won. Unbuffered dispatch
+   *     is only enabled if this matches the currently active gesture's downTime.
+   */
+  public void onFlutterWonGesture(long gestureId) {
+    gestureTracker.onFlutterWonGesture(gestureId);
+  }
+
+  @VisibleForTesting
+  boolean getFlutterWonGesture() {
+    return gestureTracker.getFlutterWonGesture();
+  }
+
+  @VisibleForTesting
+  boolean isGestureActive() {
+    return gestureTracker.isGestureActive();
+  }
+
+  @VisibleForTesting
+  long getCurrentDownTime() {
+    return gestureTracker.getCurrentDownTime();
+  }
+
+  @VisibleForTesting
+  void requestUnbuffered(MotionEvent event) {
+    requestUnbufferedDispatch(event);
+  }
+
   @Override
   @SuppressLint("ClickableViewAccessibility")
   public boolean onTouchEvent(@NonNull MotionEvent event) {
     if (touchProcessor == null) {
       return super.onTouchEvent(event);
     }
+    gestureTracker.onTouchEvent(event, this::requestUnbuffered);
     final Matrix screenMatrix = new Matrix();
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
@@ -208,6 +244,7 @@ public class PlatformViewWrapper extends FrameLayout {
         prevTop = top;
         break;
       case MotionEvent.ACTION_UP:
+      case MotionEvent.ACTION_CANCEL:
       default:
         screenMatrix.postTranslate(left, top);
         break;

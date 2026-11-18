@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/dap.dart' hide PidTracker;
+import 'package:dap_adapters/dap_adapters.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/file_system.dart';
@@ -58,10 +58,20 @@ abstract class FlutterBaseDebugAdapter
 
   @override
   void handleSessionTerminate([String exitSuffix = '']) {
+<<<<<<< HEAD
     if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
       debuggerInitializationFailedCompleter.completeError(
         DebugAdapterException('Session terminated before debugger initialized: $exitSuffix'),
       );
+=======
+    isTerminating = true;
+    if (waitingForDebugger && !debuggerInitializationFailedCompleter.isCompleted) {
+      final String suffix = exitSuffix.trim();
+      final message = suffix.isNotEmpty
+          ? 'Session terminated before debugger initialized: $suffix'
+          : 'Session terminated before debugger initialized';
+      debuggerInitializationFailedCompleter.completeError(DebugAdapterException(message));
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
     }
     super.handleSessionTerminate(exitSuffix);
   }

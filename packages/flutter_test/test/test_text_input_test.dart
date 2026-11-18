@@ -8,29 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  PageRoute<T> defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-    return PageRouteBuilder<T>(
-      settings: settings,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) => child,
-    );
-  }
-
   Widget buildTestApp({required TextEditingController controller, required FocusNode focusNode}) {
-    return WidgetsApp(
-      color: const Color(0xFFFFFFFF),
-      pageRouteBuilder: defaultPageRouteBuilder,
+    return TestWidgetsApp(
       home: SizedBox.expand(
         child: Center(
           child: EditableText(

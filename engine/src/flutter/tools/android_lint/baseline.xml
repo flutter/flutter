@@ -6,7 +6,11 @@
     <issue
         id="OldTargetApi"
         message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details."
+<<<<<<< HEAD
         errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;24&quot; android:targetSdkVersion=&quot;36&quot; />"
+=======
+        errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;24&quot; android:targetSdkVersion=&quot;37&quot; />"
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
         errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/AndroidManifest.xml"

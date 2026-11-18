@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string>
 #include <thread>
+#include <vector>
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
 #include "flutter/fml/logging.h"
@@ -199,7 +201,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -341,7 +343,7 @@ TEST_F(FlutterWindowsEngineTest, RunSkiaWithoutANGLEUsesSoftware) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
         // We don't have an EGL Manager, so we should be using software.
@@ -442,7 +444,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithDefaultEnablesImpeller) {
       Run, ([&run_called, engine_instance = engine.get()](
                 size_t version, const FlutterRendererConfig* config,
                 const FlutterProjectArgs* args, void* user_data,
-                FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -503,7 +505,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -534,6 +536,84 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
   modifier.ReleaseEGLManager();
 }
 
+<<<<<<< HEAD
+=======
+namespace {
+// Runs |engine| with Impeller enabled and an EGL manager whose
+// |surface_origin_is_top_left| returns |top_left|. Returns the command line
+// switches that were forwarded to the embedder API's |Run|.
+std::vector<std::string> RunImpellerWithSurfaceOrigin(
+    FlutterWindowsEngine* engine,
+    bool top_left) {
+  EngineModifier modifier(engine);
+  modifier.embedder_api().NotifyDisplayUpdate = MOCK_ENGINE_PROC(
+      NotifyDisplayUpdate, ([](auto engine, auto update_type, auto displays,
+                               auto display_count) { return kSuccess; }));
+  modifier.embedder_api().UpdateAccessibilityFeatures =
+      MOCK_ENGINE_PROC(UpdateAccessibilityFeatures,
+                       ([](auto engine, auto flags) { return kSuccess; }));
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales,
+      ([](auto engine, auto locales, auto locales_count) { return kSuccess; }));
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  std::vector<std::string> switches;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&switches](size_t version, const FlutterRendererConfig* config,
+                        const FlutterProjectArgs* args, void* user_data,
+                        FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+        switches.assign(args->command_line_argv,
+                        args->command_line_argv + args->command_line_argc);
+        return kSuccess;
+      }));
+
+  auto egl_manager = std::make_unique<NiceMock<egl::MockManager>>();
+  ON_CALL(*egl_manager, surface_origin_is_top_left())
+      .WillByDefault(Return(top_left));
+  // The manager is intentionally leaked by |ReleaseEGLManager| below.
+  ::testing::Mock::AllowLeak(egl_manager.get());
+  modifier.SetEGLManager(std::move(egl_manager));
+
+  EXPECT_TRUE(engine->Run());
+
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.ReleaseEGLManager();
+  return switches;
+}
+
+constexpr char kTopLeftOriginSwitch[] =
+    "--impeller-top-left-default-framebuffer-origin";
+}  // namespace
+
+TEST_F(FlutterWindowsEngineTest,
+       RunWithTopLeftSurfaceOriginPassesTopLeftFramebufferSwitch) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(EnabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
+  std::vector<std::string> switches =
+      RunImpellerWithSurfaceOrigin(engine.get(), /*top_left=*/true);
+
+  EXPECT_THAT(switches, ::testing::Contains(kTopLeftOriginSwitch));
+}
+
+TEST_F(FlutterWindowsEngineTest,
+       RunWithBottomLeftSurfaceOriginOmitsTopLeftFramebufferSwitch) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetImpellerSwitch(EnabledImpeller);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+
+  std::vector<std::string> switches =
+      RunImpellerWithSurfaceOrigin(engine.get(), /*top_left=*/false);
+
+  EXPECT_THAT(switches,
+              ::testing::Not(::testing::Contains(kTopLeftOriginSwitch)));
+}
+
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableFlutterGpu) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   builder.SetEnableFlutterGpu(true);
@@ -564,7 +644,11 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableFlutterGpu) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
+<<<<<<< HEAD
                           FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+=======
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -618,7 +702,11 @@ TEST_F(FlutterWindowsEngineTest, RunWithoutProjectFlagEnableFlutterGpu) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
+<<<<<<< HEAD
                           FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+=======
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -673,7 +761,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagDisableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -725,7 +813,7 @@ TEST_F(FlutterWindowsEngineTest, RunWithCommandLineDisableImpeller) {
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
       Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
                           const FlutterProjectArgs* args, void* user_data,
-                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+                          FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
         run_called = true;
         *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
 
@@ -1132,9 +1220,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncement) {
   builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
@@ -1170,9 +1257,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityAnnouncementHeadless) {
   builder.SetDartEntrypoint("sendAccessibilityAnnouncement");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
@@ -1196,9 +1282,8 @@ TEST_F(FlutterWindowsEngineTest, AccessibilityTooltip) {
   builder.SetDartEntrypoint("sendAccessibilityTooltipEvent");
 
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -1771,7 +1856,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
 
   std::unique_ptr<FlutterWindowsView> implicit_view =
       engine->CreateView(std::move(implicit_window),
-                         /*is_sized_to_content=*/false, BoxConstraints());
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
 
   EXPECT_TRUE(implicit_view);
 
@@ -1780,7 +1866,8 @@ TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {
 
   EXPECT_DEBUG_DEATH(
       engine->CreateView(std::move(second_window),
-                         /*is_sized_to_content=*/false, BoxConstraints()),
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/false),
       "FlutterEngineAddView returned an unexpected result");
 }
 
@@ -1810,10 +1897,9 @@ TEST_F(FlutterWindowsEngineTest, MergedUIThread) {
 
   std::optional<std::thread::id> ui_thread_id;
 
-  auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    ui_thread_id = std::this_thread::get_id();
-  });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry =
+      CREATE_FFI_LAMBDA([&]() { ui_thread_id = std::this_thread::get_id(); });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   EnginePtr engine{builder.RunHeadless()};
   while (!ui_thread_id) {
@@ -1846,9 +1932,8 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
   // Setup: a signal for when we have send out all of our semantics updates
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   // Setup: Create the engine and two views + enable semantics
   EnginePtr engine{builder.RunHeadless()};
@@ -1880,10 +1965,12 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
   auto view1 = windows_engine->CreateView(std::move(window_binding_handler1),
                                           /*is_sized_to_content=*/false,
-                                          BoxConstraints());
+                                          BoxConstraints(),
+                                          /*allow_implicit_view=*/false);
   auto view2 = windows_engine->CreateView(std::move(window_binding_handler2),
                                           /*is_sized_to_content=*/false,
-                                          BoxConstraints());
+                                          BoxConstraints(),
+                                          /*allow_implicit_view=*/false);
 
   // Act: UpdateSemanticsEnabled will trigger the semantics updates
   // to get sent.

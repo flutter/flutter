@@ -7,8 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 const Color _kBlue = Color(0xFF0000FF);
 const Color _kRed = Color(0xFFFF0000);
 

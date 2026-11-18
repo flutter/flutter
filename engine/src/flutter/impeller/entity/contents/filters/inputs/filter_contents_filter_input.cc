@@ -58,6 +58,10 @@ void FilterContentsFilterInput::SetEffectTransform(const Matrix& matrix) {
   filter_->SetEffectTransform(matrix);
 }
 
+void FilterContentsFilterInput::SetLocalToPassTransform(const Matrix& matrix) {
+  filter_->SetLocalToPassTransform(matrix);
+}
+
 void FilterContentsFilterInput::SetRenderingMode(
     Entity::RenderingMode rendering_mode) {
   filter_->SetRenderingMode(rendering_mode);

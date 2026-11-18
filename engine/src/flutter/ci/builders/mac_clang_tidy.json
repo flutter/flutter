@@ -3,12 +3,11 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -36,12 +35,11 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -74,12 +72,11 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -129,12 +126,11 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -184,12 +180,11 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -239,12 +234,11 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [
@@ -294,12 +288,11 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=arm64"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "dependencies": [

@@ -308,7 +308,10 @@ GtkWidget* gtk_widget_get_toplevel(GtkWidget* widget) {
 
 GdkWindow* gtk_widget_get_window(GtkWidget* widget) {
   check_thread();
-  return nullptr;
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gtk_widget_get_window(widget);
 }
 
 void gtk_im_context_set_client_window(GtkIMContext* context,

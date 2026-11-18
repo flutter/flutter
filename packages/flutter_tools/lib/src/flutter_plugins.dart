@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
@@ -104,6 +105,7 @@ Future<Plugin?> _pluginFromPackage(
   Uri packageRoot,
   Set<String> appDependencies, {
   required bool isDevDependency,
+  required Logger logger,
   FileSystem? fileSystem,
   PubspecCache? pubspecCache,
 }) async {
@@ -123,10 +125,10 @@ Future<Plugin?> _pluginFromPackage(
       final Object? parsed = loadYaml(await pubspecFile.readAsString());
       pubspec = parsed is YamlMap ? parsed : null;
     } on YamlException catch (err) {
-      globals.printTrace('Failed to parse plugin manifest for $name: $err');
+      logger.printTrace('Failed to parse plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     } on FileSystemException catch (err) {
-      globals.printTrace('Failed to read plugin manifest for $name: $err');
+      logger.printTrace('Failed to read plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     }
   }
@@ -143,7 +145,7 @@ Future<Plugin?> _pluginFromPackage(
       : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final dependencies = pubspec['dependencies'] as YamlMap?;
-  globals.printTrace('Found plugin $name at $packageRootPath');
+  logger.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
@@ -161,10 +163,11 @@ Future<Plugin?> _pluginFromPackage(
 /// If [throwOnError] is `true`, an empty package configuration is an error.
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
-  bool throwOnError = true,
-  PubspecCache? pubspecCache,
-  PackageGraph? packageGraph,
+  required Logger logger,
   PackageConfig? packageConfig,
+  PackageGraph? packageGraph,
+  PubspecCache? pubspecCache,
+  bool throwOnError = true,
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
@@ -183,7 +186,7 @@ Future<List<Plugin>> findPlugins(
     final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
     resolvedPackageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: globals.logger,
+      logger: logger,
       throwOnError: throwOnError,
     );
   }
@@ -199,7 +202,7 @@ Future<List<Plugin>> findPlugins(
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
       } else {
-        globals.logger.printTrace('Could not locate package:$packageName');
+        logger.printTrace('Could not locate package:$packageName');
         continue;
       }
     }
@@ -208,6 +211,7 @@ Future<List<Plugin>> findPlugins(
       dependency.rootUri,
       project.manifest.dependencies,
       isDevDependency: dependency.isExclusiveDevDependency,
+      logger: logger,
       fileSystem: fs,
       pubspecCache: pubspecCache,
     );
@@ -215,7 +219,77 @@ Future<List<Plugin>> findPlugins(
       plugins.add(plugin);
     }
   }
-  return plugins;
+  return sortByDependencies(plugins);
+}
+
+/// Sorts [plugins] according to their dependency graph so that dependencies
+/// are listed before dependent plugins.
+///
+/// If multiple plugins have no dependency relationship with each other, they are
+/// sorted alphabetically by name to keep ordering stable and deterministic.
+/// If dependency cycles exist, cycles are broken predictably.
+List<Plugin> sortByDependencies(Iterable<Plugin> plugins) {
+  final pluginMap = <String, Plugin>{for (final Plugin p in plugins) p.name: p};
+  if (pluginMap.length <= 1) {
+    return plugins.toList();
+  }
+
+  final inDegree = <String, int>{};
+  final dependents = <String, List<String>>{
+    for (final String name in pluginMap.keys) name: <String>[],
+  };
+
+  for (final Plugin p in pluginMap.values) {
+    final Set<String> directDeps = p.dependencies
+        .where((String dep) => dep != p.name && pluginMap.containsKey(dep))
+        .toSet();
+    inDegree[p.name] = directDeps.length;
+    for (final dep in directDeps) {
+      dependents[dep]!.add(p.name);
+    }
+  }
+
+  final List<String> available =
+      inDegree.entries
+          .where((MapEntry<String, int> entry) => entry.value == 0)
+          .map((MapEntry<String, int> entry) => entry.key)
+          .toList()
+        ..sort();
+
+  final sortedPlugins = <Plugin>[];
+  final placed = <String>{};
+
+  while (placed.length < pluginMap.length) {
+    if (available.isEmpty) {
+      // Cycle detected among remaining unplaced plugins.
+      // Select the unplaced plugin with smallest in-degree, breaking ties alphabetically.
+      final List<String> unplaced = pluginMap.keys
+          .where((String k) => !placed.contains(k))
+          .toList();
+      unplaced.sort((String a, String b) {
+        final int degComp = inDegree[a]!.compareTo(inDegree[b]!);
+        return degComp != 0 ? degComp : a.compareTo(b);
+      });
+      available.add(unplaced.first);
+    }
+    final String current = available.removeAt(0);
+    if (placed.add(current)) {
+      sortedPlugins.add(pluginMap[current]!);
+      final newlyAvailable = <String>[];
+      for (final String dependent in dependents[current]!) {
+        inDegree[dependent] = inDegree[dependent]! - 1;
+        if (inDegree[dependent] == 0 && !placed.contains(dependent)) {
+          newlyAvailable.add(dependent);
+        }
+      }
+      if (newlyAvailable.isNotEmpty) {
+        available.addAll(newlyAvailable);
+        available.sort();
+      }
+    }
+  }
+
+  return sortedPlugins;
 }
 
 /// Plugin resolution type to determine the injection mechanism.
@@ -399,27 +473,6 @@ bool _writeFlutterPluginsList(
   } on FormatException catch (_) {
     return (pluginsChanged: true, contentsChanged: true);
   }
-}
-
-/// Checks if the .flutter-plugins-dependencies file has any plugin
-/// dev dependencies with platform-specific implementations.
-bool flutterPluginsListHasDevDependencies(File pluginsFile) {
-  final String pluginsString = pluginsFile.readAsStringSync();
-  final pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
-  final plugins = pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
-
-  for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
-    final platformPlugins = pluginEntries.value as List<dynamic>;
-    final bool hasDevDependencies = platformPlugins.cast<Map<String, dynamic>>().any(
-      (Map<String, dynamic> plugin) => plugin[_kFlutterPluginsDevDependencyKey] == true,
-    );
-
-    if (hasDevDependencies) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 /// Creates a map representation of the [plugins] for those supported by [platformKey].
@@ -1269,8 +1322,26 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
-      continue;
+    // Inspect the entity on disk without following links. Link.existsSync()
+    // only returns true if the entity is specifically a link; if a conflicting
+    // non-link file or directory occupies link.path, or if an existing link
+    // points to an outdated target, it must be cleaned up before creating the
+    // new link to avoid FileSystemException collisions (such as
+    // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        final String target = link.targetSync();
+        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
+            link.existsSync()) {
+          continue;
+        }
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
@@ -1299,22 +1370,25 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  bool forceSwiftPM = false,
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
   );
-  // Sort the plugins by name to keep ordering stable in generated files.
-  plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
 
   var swiftPackageManagerEnabledIos = false;
   var swiftPackageManagerEnabledMacos = false;
-  if (!forceCocoaPodsOnly) {
+  if (forceSwiftPM) {
+    swiftPackageManagerEnabledIos = true;
+    swiftPackageManagerEnabledMacos = true;
+  } else if (!forceCocoaPodsOnly) {
     if (iosPlatform) {
       swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
     }
@@ -1360,7 +1434,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, logger: globals.logger);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
@@ -1399,6 +1473,7 @@ Future<void> injectPlugins(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1705,9 +1780,8 @@ _resolvePluginImplementationsByPlatform(
     }
   }
 
-  // Sort the plugins by name to keep ordering stable in generated files.
-  final List<Plugin> pluginImplementations = pluginResolution.values.toList()
-    ..sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
+  // Sort the plugins by dependency order to ensure dependencies are initialized first.
+  final List<Plugin> pluginImplementations = sortByDependencies(pluginResolution.values);
   return (pluginImplementations, hasPluginPubspecError, hasResolutionError);
 }
 
@@ -1937,7 +2011,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   PackageConfig packageConfig,
   File mainFile,
 ) async {
-  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,

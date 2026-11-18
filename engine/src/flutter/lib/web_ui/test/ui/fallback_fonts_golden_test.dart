@@ -405,7 +405,7 @@ void testMain() {
 
       expect(supportedUniqueCodePoints.length, greaterThan(10000)); // sanity check
       final allFonts = <String>{
-        ...[for (int i = 0; i <= 11; i++) 'Noto Color Emoji $i'],
+        ...[for (int i = 0; i <= 9; i++) 'Noto Color Emoji $i'],
         ...[for (int i = 0; i <= 5; i++) 'Noto Sans Symbols 2 $i'],
         ...[for (int i = 0; i <= 2; i++) 'Noto Sans Cuneiform $i'],
         ...[for (int i = 0; i <= 2; i++) 'Noto Sans Duployan $i'],
@@ -415,6 +415,11 @@ void testMain() {
         ...[for (int i = 0; i <= 123; i++) 'Noto Sans KR $i'],
         ...[for (int i = 0; i <= 100; i++) 'Noto Sans SC $i'],
         ...[for (int i = 0; i <= 104; i++) 'Noto Sans TC $i'],
+        'Noto Sans HK',
+        'Noto Sans JP',
+        'Noto Sans KR',
+        'Noto Sans SC',
+        'Noto Sans TC',
         'Noto Music',
         'Noto Sans',
         'Noto Sans Symbols',
@@ -513,7 +518,7 @@ void testMain() {
         'Noto Sans Pahawh Hmong',
         'Noto Sans Palmyrene',
         'Noto Sans Pau Cin Hau',
-        'Noto Sans Phags Pa',
+        'Noto Sans PhagsPa',
         'Noto Sans Phoenician',
         'Noto Sans Psalter Pahlavi',
         'Noto Sans Rejang',

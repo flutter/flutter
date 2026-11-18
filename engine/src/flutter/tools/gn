@@ -891,6 +891,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_webgl'] = True
   gn_args['skia_canvaskit_enable_webgpu'] = False
   gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
+  gn_args['flutter_runtime_mode'] = args.runtime_mode
   gn_args['flutter_prebuilt_dart_sdk'] = True
 
   if get_host_os() == 'mac':

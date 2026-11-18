@@ -30,6 +30,16 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+<<<<<<< HEAD
+=======
+## Flutter 3.50 Changes
+
+### [3.50.0](https://github.com/flutter/flutter/releases/tag/3.50.0)
+
+Learn about what's new in this release in [the blog post](https://flutter.dev/blog/whats-new-in-flutter-3-50), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.50.0) for a detailed list of all the new changes.
+
+
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 ## Flutter 3.47 Changes
 
 ### [3.47.7](https://github.com/flutter/flutter/releases/tag/3.47.7)

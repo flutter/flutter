@@ -27,6 +27,7 @@
 @implementation FakePluginRegistrar
 
 // Synthesize properties declared in FlutterPluginRegistrar protocol.
+@synthesize engineIdentifier;
 @synthesize messenger;
 @synthesize textures;
 @synthesize view;
@@ -48,6 +49,10 @@
 }
 
 - (void)publish:(nonnull NSObject*)value {
+}
+
+- (nullable NSObject*)valuePublishedByPlugin:(nonnull NSString*)pluginKey {
+  return nil;
 }
 
 - (nonnull NSString*)lookupKeyForAsset:(nonnull NSString*)asset {

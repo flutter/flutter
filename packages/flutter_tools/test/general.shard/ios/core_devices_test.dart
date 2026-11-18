@@ -1041,7 +1041,7 @@ void main() {
     });
   });
 
-  group('Xcode prior to Core Device Control/Xcode 15', () {
+  group('Xcode when devicectl is not installed', () {
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
     late Xcode xcode;
@@ -1050,14 +1050,7 @@ void main() {
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      final xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
-        version: Version(14, 0, 0),
-      );
-      xcode = Xcode.test(
-        processManager: fakeProcessManager,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      );
+      xcode = FakeXcodeNotInstalled();
       deviceControl = IOSCoreDeviceControl(
         logger: logger,
         processManager: fakeProcessManager,
@@ -1099,6 +1092,16 @@ void main() {
         final bool status = await deviceControl.isAppInstalled(
           deviceId: 'device-id',
           bundleId: 'com.example.flutterApp',
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.errorText, contains('devicectl is not installed.'));
+        expect(status, isFalse);
+      });
+
+      testWithoutContext('fails to take screenshot', () async {
+        final bool status = await deviceControl.takeScreenshot(
+          deviceId: 'device-id',
+          destination: '/path/to/screenshot.png',
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(logger.errorText, contains('devicectl is not installed.'));
@@ -1681,6 +1684,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1771,6 +1775,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1846,6 +1851,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1923,6 +1929,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -1964,6 +1971,7 @@ ERROR: The operation couldn?t be completed. (OSStatus error -10814.) (NSOSStatus
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -2003,6 +2011,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--json-output',
               tempFile.path,
               bundleId,
@@ -2042,6 +2051,7 @@ invalid JSON
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -2085,6 +2095,7 @@ Waiting for the application to terminate...
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -2130,6 +2141,7 @@ Waiting for the application to terminate...
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -2203,6 +2215,7 @@ Waiting for the application to terminate...
               'launch',
               '--device',
               deviceId,
+              '--terminate-existing',
               '--start-stopped',
               '--console',
               '--environment-variables',
@@ -4038,6 +4051,116 @@ invalid JSON
         expect(logger.traceText, contains('Error reading output file'));
       });
     });
+
+    group('take screenshot', () {
+      const deviceId = 'device-id';
+      const destination = '/path/to/screenshot.png';
+
+      testWithoutContext('Successful screenshot', () async {
+        const deviceControlOutput =
+            '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "capture",
+      "screenshot",
+      "--device",
+      "$deviceId",
+      "--destination",
+      "$destination"
+    ],
+    "outcome" : "success"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool success = await deviceControl.takeScreenshot(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(success, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+      });
+
+      testWithoutContext('failed screenshot', () async {
+        const deviceControlOutput =
+            '''
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "capture",
+      "screenshot",
+      "--device",
+      "$deviceId",
+      "--destination",
+      "$destination"
+    ],
+    "outcome" : "failure"
+  }
+}
+''';
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('screenshot_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'capture',
+              'screenshot',
+              '--device',
+              deviceId,
+              '--destination',
+              destination,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync(deviceControlOutput);
+            },
+          ),
+        );
+
+        final bool success = await deviceControl.takeScreenshot(
+          deviceId: deviceId,
+          destination: destination,
+        );
+        expect(success, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(tempFile, isNot(exists));
+        expect(logger.errorText, contains('devicectl returned unexpected JSON response'));
+      });
+    });
   });
 }
 
@@ -4049,6 +4172,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     this.launchResult,
     this.terminateSuccess = true,
     this.runningProcesses = const <IOSCoreDeviceRunningProcess>[],
+    this.takeScreenshotSuccess = true,
   });
 
   bool installSuccess;
@@ -4060,6 +4184,12 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
   int? processTerminated;
   List<IOSCoreDeviceRunningProcess> runningProcesses;
   bool get terminateProcessCalled => processTerminated != null;
+  bool takeScreenshotSuccess;
+
+  @override
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    return takeScreenshotSuccess;
+  }
 
   @override
   Future<List<IOSCoreDevice>> getCoreDevices({
@@ -4353,3 +4483,11 @@ IOSDeviceSupport createDeviceSupport({
     deviceId: deviceId,
   );
 }
+<<<<<<< HEAD
+=======
+
+class FakeXcodeNotInstalled extends Fake implements Xcode {
+  @override
+  bool get isDevicectlInstalled => false;
+}
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb

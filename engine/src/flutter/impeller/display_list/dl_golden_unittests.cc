@@ -4,15 +4,20 @@
 
 #include "impeller/display_list/dl_golden_unittests.h"
 
+#include <memory>
+#include <utility>
+
 #include "display_list/dl_color.h"
 #include "display_list/dl_paint.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/dl_builder.h"
+#include "flutter/fml/closure.h"
 #include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
 #include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter {
 namespace testing {
@@ -391,9 +396,14 @@ int32_t CalculateMaxY(const impeller::testing::Screenshot* img) {
   return max_y;
 }
 
-int32_t CalculateSpaceBetweenUI(const impeller::testing::Screenshot* img) {
+std::optional<int32_t> CalculateSpaceBetweenUI(
+    const impeller::testing::Screenshot* img,
+    int32_t y) {
+  if (y < 0 || std::cmp_greater_equal(y, img->GetHeight())) {
+    return {};
+  }
   const uint32_t* ptr = reinterpret_cast<const uint32_t*>(img->GetBytes());
-  ptr += img->GetWidth() * static_cast<int32_t>(img->GetHeight() / 2.0);
+  ptr += img->GetWidth() * y;
   std::vector<size_t> boundaries;
   uint32_t value = *ptr++;
   for (size_t i = 1; i < img->GetWidth(); ++i) {
@@ -403,7 +413,9 @@ int32_t CalculateSpaceBetweenUI(const impeller::testing::Screenshot* img) {
     value = *ptr++;
   }
 
-  assert(boundaries.size() == 6);
+  if (boundaries.size() != 6) {
+    return {};
+  }
   return boundaries[4] - boundaries[3];
 }
 }  // namespace
@@ -418,11 +430,14 @@ TEST_P(DlGoldenTest, BaselineHE) {
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Scale(scale, scale);
-    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(10, 300),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                           });
+    if (!RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
+                                DlPoint::MakeXY(10, 300),
+                                TextRenderOptions{
+                                    .font_size = font_size,
+                                })
+             .ok()) {
+      return nullptr;
+    }
     return builder.Build();
   };
 
@@ -443,35 +458,41 @@ TEST_P(DlGoldenTest, BaselineHE) {
 TEST_P(DlGoldenTest, MaintainsSpace) {
   SetWindowSize(impeller::ISize(1024, 200));
   impeller::Scalar font_size = 300;
-  auto callback = [&](const char* text,
-                      impeller::Scalar scale) -> sk_sp<DisplayList> {
-    DisplayListBuilder builder;
-    DlPaint paint;
-    paint.setColor(DlColor::ARGB(1, 0, 0, 0));
-    builder.DrawPaint(paint);
-    builder.Scale(scale, scale);
-    RenderTextInCanvasSkia(&builder, text, "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(10, 300),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                           });
-    return builder.Build();
-  };
 
+  int32_t middle = 0;
   std::optional<int32_t> last_space;
   for (int i = 0; i <= 100; ++i) {
     Scalar scale = 0.440 + i / 1000.0;
+    absl::StatusOr<DlRect> text_bounds_or;
+    sk_sp<DisplayList> display_list;
+    {
+      DisplayListBuilder builder;
+      DlPaint paint;
+      paint.setColor(DlColor::ARGB(1, 0, 0, 0));
+      builder.DrawPaint(paint);
+      builder.Scale(scale, scale);
+      text_bounds_or = RenderTextInCanvasSkia(
+          &builder, "ui", "Roboto-Regular.ttf", DlPoint::MakeXY(10, 300),
+          TextRenderOptions{
+              .font_size = font_size,
+          });
+      display_list = builder.Build();
+    }
+    ASSERT_TRUE(text_bounds_or.ok());
+    ASSERT_TRUE(display_list);
     std::unique_ptr<impeller::testing::Screenshot> right =
-        MakeScreenshot(callback("ui", scale));
+        MakeScreenshot(display_list);
     if (!right) {
       GTEST_SKIP() << "making screenshots not supported.";
     }
+    middle = std::rint(scale * text_bounds_or->GetCenter().y);
 
-    int32_t space = CalculateSpaceBetweenUI(right.get());
-    if (last_space.has_value()) {
-      int32_t diff = abs(space - *last_space);
+    std::optional<int32_t> space = CalculateSpaceBetweenUI(right.get(), middle);
+    ASSERT_TRUE(space.has_value());
+    if (space.has_value() && last_space.has_value()) {
+      int32_t diff = abs(*space - *last_space);
       EXPECT_TRUE(diff <= 1)
-          << "i:" << i << " space:" << space << " last_space:" << *last_space;
+          << "i:" << i << " space:" << *space << " last_space:" << *last_space;
     }
     last_space = space;
   }
@@ -518,12 +539,13 @@ TEST_P(DlGoldenTest, Subpixel) {
     DlPaint paint;
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
-    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(offset_x, 180),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .is_subpixel = true,
-                           });
+    EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                                       DlPoint::MakeXY(offset_x, 180),
+                                       TextRenderOptions{
+                                           .font_size = font_size,
+                                           .is_subpixel = true,
+                                       })
+                    .ok());
     return builder.Build();
   };
 
@@ -558,12 +580,13 @@ TEST_P(DlGoldenTest, SubpixelScaled) {
     DlPaint paint;
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
-    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(offset_x, 180),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .is_subpixel = true,
-                           });
+    EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                                       DlPoint::MakeXY(offset_x, 180),
+                                       TextRenderOptions{
+                                           .font_size = font_size,
+                                           .is_subpixel = true,
+                                       })
+                    .ok());
     return builder.Build();
   };
 
@@ -600,12 +623,13 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
     paint.setColor(DlColor::ARGB(1, 0, 0, 0));
     builder.DrawPaint(paint);
     builder.Translate(offset_x, 180);
-    RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
-                           DlPoint::MakeXY(0, 0),
-                           TextRenderOptions{
-                               .font_size = font_size,
-                               .is_subpixel = true,
-                           });
+    EXPECT_TRUE(RenderTextInCanvasSkia(&builder, "ui", "Roboto-Regular.ttf",
+                                       DlPoint::MakeXY(0, 0),
+                                       TextRenderOptions{
+                                           .font_size = font_size,
+                                           .is_subpixel = true,
+                                       })
+                    .ok());
     return builder.Build();
   };
 
@@ -627,6 +651,174 @@ TEST_P(DlGoldenTest, SubpixelScaledTranslated) {
         << i;
   }
   EXPECT_EQ(intensity[4].x - intensity[0].x, 1);
+}
+
+namespace {
+// Returns capabilities that forward to |capabilities| but report no
+// framebuffer fetch, which forces advanced blends into an offscreen subpass.
+std::shared_ptr<impeller::testing::MockCapabilities>
+MakeCapabilitiesWithoutFramebufferFetch(
+    const std::shared_ptr<const impeller::Capabilities>& capabilities) {
+  auto mock_capabilities =
+      std::make_shared<impeller::testing::MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AnyNumber())
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, capabilities, GetMinimumUniformAlignment);
+  return mock_capabilities;
+}
+}  // namespace
+
+// Advanced blends on devices without framebuffer fetch are rendered in an
+// offscreen subpass whose render target has an integral size. The texture
+// coordinates used to sample the inputs must describe exactly the rect that
+// render target covers; if they describe the fractional coverage instead, the
+// contents are rescaled on every blend. Stacking blends makes that error
+// accumulate into a visible drift, which is what this test checks. Lighten is
+// idempotent, so any number of stacked blends must produce the same image as a
+// single one.
+//
+// Regression test for https://github.com/flutter/flutter/issues/192980.
+TEST_P(DlGoldenTest, StackedOffscreenAdvancedBlendsDoNotResample) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  std::shared_ptr<const impeller::Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  ASSERT_TRUE(
+      SetCapabilities(MakeCapabilitiesWithoutFramebufferFetch(old_capabilities))
+          .ok());
+  // The playground context is shared across tests, so the mocked capabilities
+  // have to be undone however this test exits.
+  fml::ScopedCleanupClosure restore_capabilities([&]() {
+    EXPECT_TRUE(SetCapabilities(std::const_pointer_cast<impeller::Capabilities>(
+                                    old_capabilities))
+                    .ok());
+  });
+
+  auto draw = [](DlCanvas* canvas, int blend_count) {
+    canvas->DrawColor(DlColor(0xFF404040));
+    // The per-draw blend path computes its coverage from the whole pass, so
+    // the coverage is only fractional through floating point error in the
+    // transform. A 0.4x scale (which the ColorFilterAdvancedBlendNoFbFetch
+    // golden also uses) does not round trip exactly through its inverse and
+    // leaves a 2048 pixel pass at 2047.99988. A pure scale keeps the origin at
+    // exactly zero, isolating the size mismatch from compositing at a
+    // fractional origin.
+    canvas->Scale(0.4f, 0.4f);
+
+    // A backdrop with a hard vertical edge for the blends to resample.
+    DlPaint backdrop;
+    backdrop.setColor(DlColor(0xFFA0A0A0));
+    canvas->DrawRect(DlRect::MakeLTRB(750, 0, 5120, 3840), backdrop);
+
+    DlPaint blend;
+    blend.setColor(DlColor(0xFF808080));
+    blend.setBlendMode(DlBlendMode::kLighten);
+    for (int i = 0; i < blend_count; ++i) {
+      canvas->DrawRect(DlRect::MakeLTRB(250, 250, 1750, 1250), blend);
+    }
+  };
+
+  auto make_screenshot = [&](int blend_count) {
+    DisplayListBuilder builder;
+    draw(&builder, blend_count);
+    return MakeScreenshot(builder.Build());
+  };
+
+  std::unique_ptr<impeller::testing::Screenshot> once = make_screenshot(1);
+  if (!once) {
+    GTEST_SKIP() << "making screenshots not supported.";
+  }
+  std::unique_ptr<impeller::testing::Screenshot> stacked = make_screenshot(30);
+  ASSERT_TRUE(stacked);
+
+  double rmse = RMSE(once.get(), stacked.get());
+  // Without the fix the thirty stacked blends drift the backdrop edge by
+  // several pixels and the RMSE is about 5.75; with it the images are equal.
+  EXPECT_LT(rmse, 1.0) << "rmse: " << rmse;
+}
+
+// The offscreen subpass of an advanced blend must cover exactly the pixels its
+// coverage touches. The backdrop's coverage goes through the transform and its
+// inverse, so for a 2048x1536 pass it lands slightly below or slightly above
+// the integral size depending on the scale. Rounding the render target down
+// drops the last column and row when it lands below, and rounding it up adds
+// one when it lands above. Framebuffer fetch blends in place without a
+// subpass, so its output is the reference the offscreen path has to match.
+TEST_P(DlGoldenTest, OffscreenAdvancedBlendMatchesFramebufferFetch) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  std::shared_ptr<const impeller::Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  if (!old_capabilities->SupportsFramebufferFetch()) {
+    GTEST_SKIP() << "The reference image needs framebuffer fetch.";
+  }
+  std::shared_ptr<impeller::Capabilities> no_fb_fetch_capabilities =
+      MakeCapabilitiesWithoutFramebufferFetch(old_capabilities);
+  // The playground context is shared across tests, so the mocked capabilities
+  // have to be undone however this test exits.
+  fml::ScopedCleanupClosure restore_capabilities([&]() {
+    EXPECT_TRUE(SetCapabilities(std::const_pointer_cast<impeller::Capabilities>(
+                                    old_capabilities))
+                    .ok());
+  });
+
+  // A 0.4x scale leaves the pass coverage at 2047.99988x1535.99988 and a 0.43x
+  // scale at 2048.00024x1536.00024.
+  for (Scalar scale : {0.4f, 0.43f}) {
+    SCOPED_TRACE(scale);
+    DisplayListBuilder builder;
+    builder.DrawColor(DlColor(0xFF404040), DlBlendMode::kSrcOver);
+    builder.Scale(scale, scale);
+    DlPaint backdrop;
+    backdrop.setColor(DlColor(0xFFA0A0A0));
+    builder.DrawRect(
+        DlRect::MakeLTRB(300 / scale, 0, 2048 / scale, 1536 / scale), backdrop);
+    // A blend that reaches into the last column and row of the pass.
+    DlPaint blend;
+    blend.setColor(DlColor(0xFF20C020));
+    blend.setBlendMode(DlBlendMode::kLighten);
+    builder.DrawRect(DlRect::MakeLTRB(100 / scale, 100 / scale, 2047.5f / scale,
+                                      1535.5f / scale),
+                     blend);
+    sk_sp<DisplayList> display_list = builder.Build();
+
+    ASSERT_TRUE(SetCapabilities(std::const_pointer_cast<impeller::Capabilities>(
+                                    old_capabilities))
+                    .ok());
+    std::unique_ptr<impeller::testing::Screenshot> reference =
+        MakeScreenshot(display_list);
+    if (!reference) {
+      GTEST_SKIP() << "making screenshots not supported.";
+    }
+
+    ASSERT_TRUE(SetCapabilities(no_fb_fetch_capabilities).ok());
+    std::unique_ptr<impeller::testing::Screenshot> offscreen =
+        MakeScreenshot(display_list);
+    ASSERT_TRUE(offscreen);
+
+    double rmse = RMSE(reference.get(), offscreen.get());
+    EXPECT_LT(rmse, 0.1) << "rmse: " << rmse;
+  }
 }
 
 }  // namespace testing

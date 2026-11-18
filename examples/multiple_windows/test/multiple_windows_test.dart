@@ -4,9 +4,9 @@
 
 // ignore_for_file: invalid_use_of_internal_member
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // ignore: avoid_relative_lib_imports
 import '../lib/main.dart' as multiple_windows;
@@ -135,5 +135,70 @@ See: https://github.com/flutter/flutter/issues/30701.
     await tester.pump();
 
     expect(find.text('Popup Window'), findsOneWidget);
+  });
+
+  testWidgets('Can create a satellite of the main window', (WidgetTester tester) async {
+    multiple_windows.main();
+    await tester.pump();
+
+    final Finder toTap = find.widgetWithText(OutlinedButton, 'Satellite');
+    expect(toTap, findsOneWidget);
+    await tester.tap(toTap);
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Satellite'), findsOneWidget);
+  });
+
+  testWidgets('Can create a satellite of a regular window', (WidgetTester tester) async {
+    multiple_windows.main();
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Regular'));
+    await tester.pump();
+
+    final Finder createSatelliteButton = find.widgetWithText(
+      ElevatedButton,
+      'Create Satellite Window',
+    );
+    expect(createSatelliteButton, findsOneWidget);
+    await tester.tap(createSatelliteButton);
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Satellite'), findsOneWidget);
+  });
+
+  testWidgets('Can close a satellite of a regular window', (WidgetTester tester) async {
+    multiple_windows.main();
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Regular'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Create Satellite Window'));
+    await tester.pump();
+
+    final Finder closeSatelliteButton = find.widgetWithText(ElevatedButton, 'Close');
+    expect(closeSatelliteButton, findsOneWidget);
+    await tester.tap(closeSatelliteButton);
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Satellite'), findsNothing);
+    expect(find.widgetWithText(AppBar, 'Regular Window'), findsOneWidget);
+  });
+
+  testWidgets('Closing a regular window also closes its satellite', (WidgetTester tester) async {
+    multiple_windows.main();
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Regular'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Create Satellite Window'));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.delete_outlined).at(1));
+    await tester.pump();
+
+    expect(find.widgetWithText(AppBar, 'Satellite'), findsNothing);
+    expect(find.widgetWithText(AppBar, 'Regular Window'), findsNothing);
+    expect(tester.widget<DataTable>(find.byType(DataTable)).rows, hasLength(1));
   });
 }

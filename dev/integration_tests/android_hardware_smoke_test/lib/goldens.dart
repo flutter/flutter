@@ -64,9 +64,8 @@ Future<void> _handlePlatformViewRequest(
   if (settleFuture != null) {
     await settleFuture;
   }
-  for (var i = 0; i < 3; i++) {
-    await WidgetsBinding.instance.endOfFrame;
-  }
+  // Wait 1 frame to ensure the platform view composite is fully submitted.
+  await WidgetsBinding.instance.endOfFrame;
 
   final BuildContext? context = targetKey.currentContext;
   if (context == null || !context.mounted) {

@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -109,21 +110,40 @@ enum PubOutputMode {
 abstract class Pub {
   /// Create a default [Pub] instance.
   factory Pub({
+    required BotDetector botDetector,
     required FileSystem fileSystem,
     required Logger logger,
-    required ProcessManager processManager,
     required Platform platform,
-    required BotDetector botDetector,
-  }) = _DefaultPub;
+    required ProcessManager processManager,
+    Stdio? stdio,
+  }) {
+    if (stdio != null) {
+      return _DefaultPub.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        platform: platform,
+        botDetector: botDetector,
+        stdio: stdio,
+      );
+    }
+    return _DefaultPub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: platform,
+      botDetector: botDetector,
+    );
+  }
 
   /// Create a [Pub] instance with a mocked [stdio].
   @visibleForTesting
   factory Pub.test({
+    required BotDetector botDetector,
     required FileSystem fileSystem,
     required Logger logger,
-    required ProcessManager processManager,
     required Platform platform,
-    required BotDetector botDetector,
+    required ProcessManager processManager,
     required Stdio stdio,
   }) = _DefaultPub.test;
 
@@ -147,13 +167,13 @@ abstract class Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    String? flutterRootOverride,
     bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
     bool enforceLockfile = false,
+    String? flutterRootOverride,
+    bool offline = false,
     PubOutputMode outputMode = PubOutputMode.all,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool upgrade = false,
   });
 
   /// Runs pub in 'batch' mode.
@@ -188,25 +208,23 @@ abstract class Pub {
   /// create a new `.dart_tool/package_config.json` file.
   Future<void> interactively(
     List<String> arguments, {
-    FlutterProject? project,
-    required PubContext context,
     required String command,
-    bool touchesPackageConfig = false,
+    required PubContext context,
     PubOutputMode outputMode = PubOutputMode.all,
+    FlutterProject? project,
+    bool touchesPackageConfig = false,
   });
 }
 
 class _DefaultPub implements Pub {
   _DefaultPub({
-    required FileSystem fileSystem,
+    required this._botDetector,
+    required this._fileSystem,
     required Logger logger,
-    required ProcessManager processManager,
     required Platform platform,
-    required BotDetector botDetector,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
+    required ProcessManager processManager,
+  }) : _logger = logger,
        _platform = platform,
-       _botDetector = botDetector,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = null {
@@ -215,19 +233,16 @@ class _DefaultPub implements Pub {
 
   @visibleForTesting
   _DefaultPub.test({
-    required FileSystem fileSystem,
+    required this._botDetector,
+    required this._fileSystem,
     required Logger logger,
-    required ProcessManager processManager,
     required Platform platform,
-    required BotDetector botDetector,
-    required Stdio stdio,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
+    required ProcessManager processManager,
+    required Stdio this._stdio,
+  }) : _logger = logger,
        _platform = platform,
-       _botDetector = botDetector,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager,
-       _stdio = stdio {
+       _processManager = processManager {
     _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
   }
 
@@ -244,13 +259,13 @@ class _DefaultPub implements Pub {
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    String? flutterRootOverride,
     bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
     bool enforceLockfile = false,
+    String? flutterRootOverride,
+    bool offline = false,
     PubOutputMode outputMode = PubOutputMode.all,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool upgrade = false,
   }) async {
     final String directory = project.directory.path;
 
@@ -269,10 +284,21 @@ class _DefaultPub implements Pub {
         .childFile('workspace_ref.json');
     final File packageConfigFile;
     if (workspaceRefFile.existsSync()) {
-      switch (jsonDecode(workspaceRefFile.readAsStringSync())) {
+      Object? decoded;
+      try {
+        decoded = jsonDecode(workspaceRefFile.readAsStringSync());
+      } on Exception {
+        // Fall through to default.
+      }
+      switch (decoded) {
         case {'workspaceRoot': final String workspaceRoot}:
           packageConfigFile = _fileSystem.file(
-            _fileSystem.path.join(workspaceRefFile.parent.path, workspaceRoot),
+            _fileSystem.path.join(
+              workspaceRefFile.parent.path,
+              workspaceRoot,
+              '.dart_tool',
+              'package_config.json',
+            ),
           );
         default:
           // The workspace_ref.json file was malformed. Attempt to load the
@@ -289,15 +315,13 @@ class _DefaultPub implements Pub {
     }
 
     if (packageConfigFile.existsSync()) {
-      final Directory workspaceRoot = packageConfigFile.parent.parent;
-      final File lastVersion = workspaceRoot.childDirectory('.dart_tool').childFile('version');
+      final File lastVersion = packageConfigFile.parent.childFile('version');
       final versionFromFile = FlutterVersion(
         flutterRoot: Cache.flutterRoot!,
         fs: _fileSystem,
         git: _git,
+        platform: _platform,
       );
-      final File pubspecYaml = project.pubspecFile;
-      final File pubLockFile = workspaceRoot.childFile('pubspec.lock');
 
       if (shouldSkipThirdPartyGenerator) {
         Map<String, Object?> packageConfigMap;
@@ -317,18 +341,14 @@ class _DefaultPub implements Pub {
         }
       }
 
-      // If the pubspec.yaml is older than the package config file and the last
-      // flutter version used is the same as the current version skip pub get.
-      // This will incorrectly skip pub on the master branch if dependencies
-      // are being added/removed from the flutter framework packages, but this
-      // can be worked around by manually running pub.
-      if (checkUpToDate &&
-          pubLockFile.existsSync() &&
-          pubspecYaml.lastModifiedSync().isBefore(pubLockFile.lastModifiedSync()) &&
-          pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
+      final bool versionMatch =
           lastVersion.existsSync() &&
-          lastVersion.readAsStringSync() == versionFromFile.frameworkVersion) {
-        _logger.printTrace('Skipping pub get: version match.');
+          lastVersion.readAsStringSync() == versionFromFile.frameworkVersion;
+
+      if (checkUpToDate &&
+          versionMatch &&
+          await _checkResolutionUpToDate(directory, context, flutterRootOverride)) {
+        _logger.printTrace('Skipping pub get: resolution up-to-date.');
         return;
       }
     }
@@ -353,6 +373,33 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
+  }
+
+  Future<bool> _checkResolutionUpToDate(
+    String directory,
+    PubContext context,
+    String? flutterRootOverride,
+  ) async {
+    final pubCommand = <String>[
+      ..._pubCommand,
+      '--directory',
+      _fileSystem.path.relative(directory),
+      'check-resolution-up-to-date',
+    ];
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+      context: context,
+      flutterRootOverride: flutterRootOverride,
+    );
+    try {
+      final RunResult result = await _processUtils.run(
+        pubCommand,
+        workingDirectory: _fileSystem.path.current,
+        environment: pubEnvironment,
+      );
+      return result.exitCode == 0;
+    } on io.ProcessException {
+      return false;
+    }
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
@@ -549,12 +596,12 @@ class _DefaultPub implements Pub {
   @override
   Future<void> interactively(
     List<String> arguments, {
-    FlutterProject? project,
-    required PubContext context,
     required String command,
-    bool touchesPackageConfig = false,
+    required PubContext context,
     bool generateSyntheticPackage = false,
     PubOutputMode outputMode = PubOutputMode.all,
+    FlutterProject? project,
+    bool touchesPackageConfig = false,
   }) async {
     await _runWithStdioInherited(
       arguments,
@@ -687,6 +734,7 @@ class _DefaultPub implements Pub {
       flutterRoot: Cache.flutterRoot!,
       fs: _fileSystem,
       git: _git,
+      platform: _platform,
     );
     lastVersion.writeAsStringSync(versionFromFile.frameworkVersion);
 

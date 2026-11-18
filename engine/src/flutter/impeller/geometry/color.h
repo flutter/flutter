@@ -220,6 +220,14 @@ struct Color {
     return {red / alpha, green / alpha, blue / alpha, alpha};
   }
 
+  /// @brief Returns true if any color channel lies outside the standard
+  ///        [0.0, 1.0] sRGB gamut.
+  constexpr bool IsWideGamut() const {
+    return red < -kEhCloseEnough || red > 1.0f + kEhCloseEnough ||
+           green < -kEhCloseEnough || green > 1.0f + kEhCloseEnough ||
+           blue < -kEhCloseEnough || blue > 1.0f + kEhCloseEnough;
+  }
+
   /**
    * @brief Return a color that is linearly interpolated between colors a
    *        and b, according to the value of t.

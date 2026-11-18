@@ -7,8 +7,8 @@
 
 import 'dart:io' show Platform;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TooltipWindowContent extends StatelessWidget {
   /// Creates a tooltip window widget.

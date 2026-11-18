@@ -54,7 +54,7 @@ void main() {
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
         kTargetPlatform: TargetPlatform.android.getName(),
-        kAndroidArchs: AndroidArch.arm64_v8a.platformName,
+        kAndroidArchs: CpuArch.arm64.androidPlatformName,
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -104,6 +104,29 @@ void main() {
       expect(
         BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
         throwsA(isA<MissingDefineException>()),
+      );
+    },
+  );
+
+  testUsingContext(
+    'NativeAssets throws error if sdk root is unrecognized iOS SDK',
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
+    () async {
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+
+      final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <String>['foo'],
+      );
+
+      iosEnvironment.defines[kSdkRoot] = 'path/to/XROS1.0.sdk';
+      expect(
+        BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
+        throwsToolExit(
+          message:
+              'Unsupported iOS SDK root "path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+              "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+              '(SDKROOT) and Supported Destinations in Xcode.',
+        ),
       );
     },
   );
@@ -392,6 +415,46 @@ void main() {
       },
     );
   }
+
+  testUsingContext(
+    'createFlutterNativeAssetsBuildRunner includes dev dependencies for release test targets',
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+    () async {
+      writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+      androidEnvironment.defines[kBuildMode] = BuildMode.release.cliName;
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('lib', 'main.dart');
+      final FlutterNativeAssetsBuildRunner mainRunner = await createFlutterNativeAssetsBuildRunner(
+        androidEnvironment,
+      );
+      expect((mainRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isFalse);
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join(
+        'integration_test',
+        'app_test.dart',
+      );
+      final FlutterNativeAssetsBuildRunner integrationTestRunner =
+          await createFlutterNativeAssetsBuildRunner(androidEnvironment);
+      expect(
+        (integrationTestRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies,
+        isTrue,
+      );
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('test_driver', 'app.dart');
+      final FlutterNativeAssetsBuildRunner driverRunner =
+          await createFlutterNativeAssetsBuildRunner(androidEnvironment);
+      expect((driverRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('test', 'app_test.dart');
+      final FlutterNativeAssetsBuildRunner testRunner = await createFlutterNativeAssetsBuildRunner(
+        androidEnvironment,
+      );
+      expect((testRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
+    },
+  );
 }
 
 List<String> _resolvedOutputs(Target target, Environment environment) {

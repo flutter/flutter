@@ -23,6 +23,17 @@ void main() {
     expect(decoder.convert(passedString.codeUnits), passedString);
   });
 
+  testWithoutContext('Decode a string containing a valid replacement character', () async {
+    expect(
+      decoder.convert(utf8ForTesting.encode('normal string => \u{FFFD}')),
+      'normal string => \u{FFFD}',
+    );
+  });
+
+  testWithoutContext('Throw on malformed UTF-8 bytes', () async {
+    expect(() => decoder.convert(<int>[0xc3, 0x28]), throwsToolExit());
+  });
+
   testWithoutContext('Decode a malformed string without throwing', () async {
     expect(utf8AllowMalformed.decode(nonpassString.codeUnits), nonpassString);
   });

@@ -28,6 +28,8 @@ impeller_component("metal") {
     "gpu_tracer_mtl.mm",
     "pass_bindings_cache_mtl.h",
     "pass_bindings_cache_mtl.mm",
+    "pending_image_upload_schedule_tracker.cc",
+    "pending_image_upload_schedule_tracker.h",
     "pipeline_library_mtl.h",
     "pipeline_library_mtl.mm",
     "pipeline_mtl.h",
@@ -57,6 +59,7 @@ impeller_component("metal") {
   public_deps = [
     "../../:renderer",
     "//flutter/fml",
+    "//third_party/abseil-cpp/absl/container:flat_hash_map",
   ]
 
   frameworks = [
@@ -71,6 +74,7 @@ impeller_component("metal_unittests") {
   sources = [
     "allocator_mtl_unittests.mm",
     "context_mtl_unittests.mm",
+    "pending_image_upload_schedule_tracker_unittests.cc",
     "swapchain_transients_mtl_unittests.mm",
     "texture_mtl_unittests.mm",
   ]

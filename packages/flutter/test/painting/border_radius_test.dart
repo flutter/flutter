@@ -84,15 +84,13 @@ void main() {
     );
 
     expect(
-      const BorderRadius.only(
-        topLeft: Radius.elliptical(1.0, 2.0),
-      ).subtract(const BorderRadius.only(topLeft: Radius.elliptical(3.0, 5.0))),
+      const BorderRadius.only(topLeft: Radius.elliptical(1.0, 2.0))
+          .subtract(const BorderRadius.only(topLeft: Radius.elliptical(3.0, 5.0))),
       const BorderRadius.only(topLeft: Radius.elliptical(-2.0, -3.0)),
     );
     expect(
-      const BorderRadius.only(
-        topRight: Radius.elliptical(1.0, 2.0),
-      ).add(const BorderRadius.only(topLeft: Radius.elliptical(3.0, 5.0))),
+      const BorderRadius.only(topRight: Radius.elliptical(1.0, 2.0))
+          .add(const BorderRadius.only(topLeft: Radius.elliptical(3.0, 5.0))),
       const BorderRadius.only(
         topLeft: Radius.elliptical(3.0, 5.0),
         topRight: Radius.elliptical(1.0, 2.0),
@@ -288,15 +286,13 @@ void main() {
     );
 
     expect(
-      const BorderRadiusDirectional.only(
-        topStart: Radius.elliptical(1.0, 2.0),
-      ).subtract(const BorderRadiusDirectional.only(topStart: Radius.elliptical(3.0, 5.0))),
+      const BorderRadiusDirectional.only(topStart: Radius.elliptical(1.0, 2.0))
+          .subtract(const BorderRadiusDirectional.only(topStart: Radius.elliptical(3.0, 5.0))),
       const BorderRadiusDirectional.only(topStart: Radius.elliptical(-2.0, -3.0)),
     );
     expect(
-      const BorderRadiusDirectional.only(
-        topEnd: Radius.elliptical(1.0, 2.0),
-      ).add(const BorderRadiusDirectional.only(topStart: Radius.elliptical(3.0, 5.0))),
+      const BorderRadiusDirectional.only(topEnd: Radius.elliptical(1.0, 2.0))
+          .add(const BorderRadiusDirectional.only(topStart: Radius.elliptical(3.0, 5.0))),
       const BorderRadiusDirectional.only(
         topStart: Radius.elliptical(3.0, 5.0),
         topEnd: Radius.elliptical(1.0, 2.0),

@@ -48,20 +48,15 @@ config("compiler") {
   # when their commandline changes). Nothing should ever read this define.
   #defines = [ "CR_XCODE_VERSION=$xcode_version" ]
 
+  _target_triple =
+      "$darwin_target_arch-$_triplet_os$_deployment_target$darwin_target_sim"
+
   swiftflags = [
     "-sdk",
     _sdk_root,
-    "--target-cpu",
-    current_cpu,
-    "--target-os",
-    _triplet_os,
-    "--deployment-target",
-    _deployment_target,
+    "-target",
+    _target_triple,
     "-swift-version",
     _swift_version,
   ]
-
-  if (use_ios_simulator) {
-    swiftflags += [ "--use-simulator" ]
-  }
 }

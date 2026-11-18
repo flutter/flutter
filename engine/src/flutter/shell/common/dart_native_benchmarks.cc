@@ -12,7 +12,7 @@
 #include "fml/synchronization/count_down_latch.h"
 #include "runtime/dart_vm_lifecycle.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter::testing {
@@ -35,10 +35,8 @@ BENCHMARK_F(DartNativeBenchmarks, TimeToFirstNativeMessageFromIsolateInNewVM)
     fml::AutoResetWaitableEvent latch;
     st.PauseTiming();
     ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-    AddNativeCallback("NotifyNative",
-                      CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
-                        latch.Signal();
-                      })));
+    AddFfiNativeCallback("NotifyNative",
+                         CREATE_FFI_LAMBDA(([&latch]() { latch.Signal(); })));
 
     const auto settings = CreateSettingsForFixture();
     DartVMRef vm_ref = DartVMRef::Create(settings);
@@ -72,10 +70,8 @@ BENCHMARK_F(DartNativeBenchmarks, MultipleDartToNativeMessages)
     fml::CountDownLatch latch(1000);
     st.PauseTiming();
     ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-    AddNativeCallback("NotifyNative",
-                      CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
-                        latch.CountDown();
-                      })));
+    AddFfiNativeCallback(
+        "NotifyNative", CREATE_FFI_LAMBDA(([&latch]() { latch.CountDown(); })));
 
     const auto settings = CreateSettingsForFixture();
     DartVMRef vm_ref = DartVMRef::Create(settings);

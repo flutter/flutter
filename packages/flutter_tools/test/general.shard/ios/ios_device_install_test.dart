@@ -9,7 +9,10 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+<<<<<<< HEAD
 import 'package:flutter_tools/src/build_info.dart';
+=======
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -371,7 +374,7 @@ IOSDevice setUpIOSDevice({
     processUtils: ProcessUtils(processManager: processManager, logger: logger),
     xcode: null,
     sdkVersion: '13.3',
-    cpuArchitecture: DarwinArch.arm64,
+    cpuArch: .arm64,
     platform: platform,
     iMobileDevice: IMobileDevice(
       logger: logger,

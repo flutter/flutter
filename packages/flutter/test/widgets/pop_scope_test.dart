@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'navigator_utils.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   bool? lastFrameworkHandlesBack;

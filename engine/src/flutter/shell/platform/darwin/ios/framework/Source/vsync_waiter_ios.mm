@@ -15,9 +15,17 @@ const static double kRefreshRateDiffToIgnore = 0.1;
 
 namespace flutter {
 
-VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
-    : VsyncWaiter(task_runners) {
+VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners,
+                               FlutterDisplayLinkManager* display_link_manager)
+    : VsyncWaiter(task_runners), display_link_manager_(display_link_manager) {
+  FML_DCHECK(display_link_manager);
   auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    if (!waiting_for_vsync_) {
+      [client_ pause];
+      return;
+    }
+    waiting_for_vsync_ = false;
+
     // Compute delay using the same CACurrentMediaTime() clock.
     CFTimeInterval delay = CACurrentMediaTime() - startTime;
     if (delay < 0.0) {
@@ -33,16 +41,17 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
 
     // Align target time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
-    FireCallback(start_time, target_time, true);
+    FireCallback(start_time, target_time);
   };
   FlutterFMLTaskRunner* uiTaskRunner =
       [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
   client_ = [[FlutterVSyncClient alloc]
                 initWithTaskRunner:uiTaskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+      isVariableRefreshRateEnabled:display_link_manager_.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:display_link_manager_.displayRefreshRate
                           callback:vsyncCallback];
-  max_refresh_rate_ = FlutterDisplayLinkManager.displayRefreshRate;
+  client_.allowPauseAfterVsync = NO;
+  max_refresh_rate_ = display_link_manager_.displayRefreshRate;
 }
 
 VsyncWaiterIOS::~VsyncWaiterIOS() {
@@ -52,12 +61,29 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
 }
 
 void VsyncWaiterIOS::AwaitVSync() {
-  double new_max_refresh_rate = FlutterDisplayLinkManager.displayRefreshRate;
+  double new_max_refresh_rate = display_link_manager_.displayRefreshRate;
   if (fabs(new_max_refresh_rate - max_refresh_rate_) > kRefreshRateDiffToIgnore) {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_ setMaxRefreshRate:max_refresh_rate_];
   }
-  [client_ await];
+
+  if (client_.displayLink.paused) {
+    [client_ await];
+    if (dispatching_event_) {
+      // This vsync request came synchronously while dispatching UIKit event and
+      // there is an entire frame ahead - the vsync callback can be short-circuited.
+      const fml::TimePoint frame_start_time = fml::TimePoint::Now();
+      const fml::TimePoint frame_target_time =
+          frame_start_time + fml::TimeDelta::FromSecondsF(SnapDuration(0.0, max_refresh_rate_));
+      FireCallback(frame_start_time, frame_target_time);
+    } else {
+      // This vsync request came at an unknown phase of the frame so wait for
+      // the next display link callback.
+      waiting_for_vsync_ = true;
+    }
+  } else {
+    waiting_for_vsync_ = true;
+  }
 }
 
 // |VariableRefreshRateReporter|

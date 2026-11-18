@@ -13,8 +13,11 @@ import 'widget_tester.dart';
 
 /// A function which takes the name of the method channel, it's handler,
 /// platform message and asynchronously returns an encoded response.
-typedef AllMessagesHandler =
-    Future<ByteData?>? Function(String channel, MessageHandler? handler, ByteData? message);
+typedef AllMessagesHandler = Future<ByteData?>? Function(
+  String channel,
+  MessageHandler? handler,
+  ByteData? message,
+);
 
 /// A [BinaryMessenger] subclass that is used as the default binary messenger
 /// under testing environment.

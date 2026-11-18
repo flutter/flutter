@@ -18,6 +18,10 @@ std::shared_ptr<YUVConversionVK> TextureSourceVK::GetYUVConversion() const {
   return nullptr;
 }
 
+vk::ImageView TextureSourceVK::GetBaseMipImageView() const {
+  return VK_NULL_HANDLE;
+}
+
 vk::ImageLayout TextureSourceVK::GetLayout() const {
   return layout_;
 }
@@ -45,7 +49,7 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   image_barrier.subresourceRange.levelCount =
       desc_.mip_count - barrier.base_mip_level;
   image_barrier.subresourceRange.baseArrayLayer = 0u;
-  image_barrier.subresourceRange.layerCount = ToArrayLayerCount(desc_.type);
+  image_barrier.subresourceRange.layerCount = ToArrayLayerCount(desc_);
 
   barrier.cmd_buffer.pipelineBarrier(barrier.src_stage,  // src stage
                                      barrier.dst_stage,  // dst stage

@@ -40,7 +40,11 @@ final RegExp _pluginIdentifierPattern = RegExp(
 /// Whether [value] is a valid native plugin class or dot-separated package
 /// identifier. Callers first confirm the value is a String via the schema type
 /// checks; absent fields are not validated here.
+<<<<<<< HEAD
 bool _isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch(value);
+=======
+bool isValidPluginIdentifier(String value) => _pluginIdentifierPattern.hasMatch(value);
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
 
 /// Matches a safe relative Dart source path (e.g. `src/foo_web.dart`) ending in
 /// `.dart`. Plugin `fileName`/`dartFileName` values are interpolated into an
@@ -115,9 +119,8 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.dartFileName,
     bool? ffiPlugin,
     this.defaultPackage,
-    required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem,
-       ffiPlugin = ffiPlugin ?? false;
+    required this._fileSystem,
+  }) : ffiPlugin = ffiPlugin ?? false;
 
   factory AndroidPlugin.fromYaml(
     String name,
@@ -125,7 +128,9 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     String pluginPath,
     FileSystem fileSystem,
   ) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "android" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -178,6 +183,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     // Validate every identifier that is present, not just the ones that made
     // the declaration above valid, so a plugin cannot smuggle an unsafe
     // identifier in alongside an `ffiPlugin` or `default_package` entry.
+<<<<<<< HEAD
     if (package is String && !_isValidPluginIdentifier(package)) {
       return false;
     }
@@ -185,6 +191,15 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
       return false;
     }
     if (dartPluginClass is String && !_isValidPluginIdentifier(dartPluginClass)) {
+=======
+    if (package is String && !isValidPluginIdentifier(package)) {
+      return false;
+    }
+    if (pluginClass is String && !isValidPluginIdentifier(pluginClass)) {
+      return false;
+    }
+    if (dartPluginClass is String && !isValidPluginIdentifier(dartPluginClass)) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       return false;
     }
 
@@ -318,7 +333,9 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
        sharedDarwinSource = sharedDarwinSource ?? false;
 
   factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "ios" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -358,10 +375,17 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
 
     // Validate every identifier that is present, not just the ones that made
     // the declaration above valid.
+<<<<<<< HEAD
     if (pluginClass is String && !_isValidPluginIdentifier(pluginClass)) {
       return false;
     }
     if (dartPluginClass is String && !_isValidPluginIdentifier(dartPluginClass)) {
+=======
+    if (pluginClass is String && !isValidPluginIdentifier(pluginClass)) {
+      return false;
+    }
+    if (dartPluginClass is String && !isValidPluginIdentifier(dartPluginClass)) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       return false;
     }
 
@@ -431,7 +455,9 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
        sharedDarwinSource = sharedDarwinSource ?? false;
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "macos" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -470,10 +496,17 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
 
     // Validate every identifier that is present, not just the ones that made
     // the declaration above valid.
+<<<<<<< HEAD
     if (pluginClass is String && !_isValidPluginIdentifier(pluginClass)) {
       return false;
     }
     if (dartPluginClass is String && !_isValidPluginIdentifier(dartPluginClass)) {
+=======
+    if (pluginClass is String && !isValidPluginIdentifier(pluginClass)) {
+      return false;
+    }
+    if (dartPluginClass is String && !isValidPluginIdentifier(dartPluginClass)) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       return false;
     }
 
@@ -541,7 +574,9 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
        );
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "windows" plugin specification for plugin "$name".');
+    }
     final pluginClass = yaml[kPluginClass] as String?;
     final variants = <PluginPlatformVariant>{};
     final variantList = yaml[kSupportedVariants] as YamlList?;
@@ -595,10 +630,17 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
 
     // Validate every identifier that is present, not just the ones that made
     // the declaration above valid.
+<<<<<<< HEAD
     if (pluginClass is String && !_isValidPluginIdentifier(pluginClass)) {
       return false;
     }
     if (dartPluginClass is String && !_isValidPluginIdentifier(dartPluginClass)) {
+=======
+    if (pluginClass is String && !isValidPluginIdentifier(pluginClass)) {
+      return false;
+    }
+    if (dartPluginClass is String && !isValidPluginIdentifier(dartPluginClass)) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       return false;
     }
 
@@ -664,7 +706,9 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
        );
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "linux" plugin specification for plugin "$name".');
+    }
 
     final dartPluginClass = yaml[kDartPluginClass] as String?;
     final dartFileName = yaml[kDartFileName] as String?;
@@ -701,10 +745,17 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 
     // Validate every identifier that is present, not just the ones that made
     // the declaration above valid.
+<<<<<<< HEAD
     if (pluginClass is String && !_isValidPluginIdentifier(pluginClass)) {
       return false;
     }
     if (dartPluginClass is String && !_isValidPluginIdentifier(dartPluginClass)) {
+=======
+    if (pluginClass is String && !isValidPluginIdentifier(pluginClass)) {
+      return false;
+    }
+    if (dartPluginClass is String && !isValidPluginIdentifier(dartPluginClass)) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       return false;
     }
 
@@ -762,7 +813,11 @@ class WebPlugin extends PluginPlatform {
     if (fileName is! String) {
       throwToolExit('The plugin `$name` is missing the required field `fileName` in pubspec.yaml');
     }
+<<<<<<< HEAD
     if (!_isValidPluginIdentifier(pluginClass)) {
+=======
+    if (!isValidPluginIdentifier(pluginClass)) {
+>>>>>>> ab2912035e160d9cad6306df307576da6128ebdb
       throwToolExit(
         'The plugin `$name` has an invalid `pluginClass` in its web plugin declaration.',
       );

@@ -1359,6 +1359,64 @@ void testMain() {
     ui_web.browser.debugOperatingSystemOverride = null;
   });
 
+  test('does reverse flip of scroll axis when "shift" key is pressed (macOS)', () {
+    final _ButtonedEventMixin context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
+
+    // Without Shift: axes are not flipped.
+    rootElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 200, deltaY: 100),
+    );
+
+    // With Shift pressed: macOS flips the axis, so we flip it back to normalize.
+    rootElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 210, deltaY: 110, shiftKey: true),
+    );
+
+    // After Shift is released: axes are not flipped again.
+    rootElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 220, deltaY: 120),
+    );
+
+    expect(packets, hasLength(3));
+
+    // An add will be synthesized.
+    expect(packets[0].data, hasLength(2));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+    expect(packets[0].data[0].synthesized, isTrue);
+    // No Shift: scroll axes are not flipped.
+    expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
+    expect(packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
+    expect(packets[0].data[1].scrollDeltaX, equals(200.0));
+    expect(packets[0].data[1].scrollDeltaY, equals(100.0));
+
+    // Shift held: deltaX and deltaY are swapped.
+    expect(packets[1].data, hasLength(1));
+    expect(packets[1].data[0].change, equals(ui.PointerChange.hover));
+    expect(packets[1].data[0].signalKind, equals(ui.PointerSignalKind.scroll));
+    expect(packets[1].data[0].scrollDeltaX, equals(110.0));
+    // Actually "scrollDeltaY" is the important thing to test:
+    // - User scrolls on the y axis while pressing "Shift".
+    // - MacOS converts / flips it to "deltaX", when pressing "Shift".
+    // - The Web engine reverts this flip to "scrollDeltaY".
+    // - Flutter framework flips it again (for all platforms) depending on the modifier key (default: "Shift") to "deltaX" again.
+    expect(packets[1].data[0].scrollDeltaY, equals(210.0));
+
+    // Shift released: axes are not flipped.
+    expect(packets[2].data, hasLength(1));
+    expect(packets[2].data[0].change, equals(ui.PointerChange.hover));
+    expect(packets[2].data[0].signalKind, equals(ui.PointerSignalKind.scroll));
+    expect(packets[2].data[0].scrollDeltaX, equals(220.0));
+    expect(packets[2].data[0].scrollDeltaY, equals(120.0));
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+  });
+
   test('does calculate delta and pointer identifier correctly', () {
     final _ButtonedEventMixin context = _PointerEventContext();
     final packets = <ui.PointerDataPacket>[];
@@ -3623,6 +3681,35 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     return mouseUp(button: 0, clientX: clientX, clientY: clientY);
   }
 
+  /// Creates a synthetic DOM `WheelEvent` for testing. It inherits from DOM
+  /// `MouseEvent` and `Event` classes.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+  ///
+  /// [buttons] is a bitmask of pressed mouse buttons (0 = none, 1 = primary,
+  /// 2 = secondary). See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
+  ///
+  /// [clientX] and [clientY] are the pointer position in CSS pixels relative
+  /// to the viewport. See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/clientX
+  ///
+  /// [deltaX] and [deltaY] are the horizontal and vertical scroll distances in
+  /// pixels (positive = right/down). See MDN: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaX
+  ///
+  /// [wheelDeltaX] and [wheelDeltaY] are the legacy equivalents of [deltaX]
+  /// and [deltaY] with opposite sign, only available in Chromium-based browsers
+  /// (absent in Firefox).
+  ///
+  /// [timeStamp] overrides the browser-assigned event time in milliseconds.
+  /// It must be set via a property descriptor because it cannot be passed
+  /// through the constructor. See MDN: https://developer.mozilla.org/en-US/docs/Web/API/Event/timeStamp
+  ///
+  /// [ctrlKey] signals a pinch-to-zoom gesture. The browser sets this even when
+  /// "Ctrl" is not physically held. Flutter uses it to emit
+  /// [ui.PointerSignalKind.scale] instead of [ui.PointerSignalKind.scroll],
+  /// unless the physical "Ctrl" key is also down.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/ctrlKey
+  ///
+  /// [shiftKey] emulates a left or right "Shift" key press.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey
   DomEvent wheel({
     required int? buttons,
     required double? clientX,
@@ -3633,6 +3720,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     double? wheelDeltaY,
     int? timeStamp,
     bool ctrlKey = false,
+    bool shiftKey = false,
   }) {
     final DomEvent event = createDomWheelEvent('wheel', <String, Object>{
       'buttons': ?buttons,
@@ -3643,6 +3731,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
       'wheelDeltaX': ?wheelDeltaX,
       'wheelDeltaY': ?wheelDeltaY,
       'ctrlKey': ctrlKey,
+      'shiftKey': shiftKey,
       'cancelable': true,
       'bubbles': true,
       'composed': true,

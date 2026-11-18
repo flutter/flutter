@@ -338,6 +338,27 @@ flutter:
     expect(await device.emulatorId, isNull);
   });
 
+  testWithoutContext(
+    'AndroidConsole handles socket.done completing with a SocketException',
+    () async {
+      final doneCompleter = Completer<void>();
+      final socket = FakeWorkingAndroidConsoleSocket('dummyEmulatorId', done: doneCompleter.future);
+      final console = AndroidConsole(socket);
+      await console.connect();
+
+      doneCompleter.completeError(
+        const SocketException(
+          'Error event raised in event handler : error condition has been reset',
+          port: 0,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(await console.getAvdName(), equals('dummyEmulatorId'));
+      console.destroy();
+    },
+  );
+
   testWithoutContext('AndroidDevice clearLogs does not crash', () async {
     final AndroidDevice device = setUpAndroidDevice(
       processManager: FakeProcessManager.list(<FakeCommand>[
@@ -546,6 +567,51 @@ Uptime: 441088659 Realtime: 521464097
     },
     overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
   );
+
+  testWithoutContext('AdbLogReader filters logs by default (adbLogFiltering = true)', () async {
+    final logger = BufferLogger.test();
+    final logReader = AdbLogReader.test(
+      FakeProcess(
+        stdout: utf8.encode(
+          '05-12 00:00:00.000 I/some_tag( 123): secret log\n'
+          '05-12 00:00:00.000 I/flutter( 123): allowed log\n',
+        ),
+      ),
+      'foo',
+      logger,
+    );
+    final List<String> receivedLines = [];
+    final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+    await Future<void>.delayed(Duration.zero);
+    await subscription.cancel();
+
+    expect(receivedLines, isNot(contains('I/some_tag( 123): secret log')));
+    expect(receivedLines, contains('I/flutter( 123): allowed log'));
+  });
+
+  testWithoutContext('AdbLogReader does not filter logs if adbLogFiltering = false', () async {
+    final logger = BufferLogger.test();
+    final logReader = AdbLogReader.test(
+      FakeProcess(
+        stdout: utf8.encode(
+          '05-12 00:00:00.000 I/some_tag( 123): secret log\n'
+          '05-12 00:00:00.000 I/flutter( 123): allowed log\n',
+        ),
+      ),
+      'foo',
+      logger,
+      adbLogFiltering: false,
+    );
+    final List<String> receivedLines = [];
+    final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+    await Future<void>.delayed(Duration.zero);
+    await subscription.cancel();
+
+    expect(receivedLines, contains('I/some_tag( 123): secret log'));
+    expect(receivedLines, contains('I/flutter( 123): allowed log'));
+  });
 }
 
 /// A mock VM Service that throws a generic [RPCErrorKind.kServerError] error
@@ -756,7 +822,8 @@ const kAdbShellGetprop = '''
 /// A mock Android Console that presents a connection banner and responds to
 /// "avd name" requests with the supplied name.
 class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
-  FakeWorkingAndroidConsoleSocket(this.avdName) {
+  FakeWorkingAndroidConsoleSocket(this.avdName, {Future<void>? done})
+    : done = done ?? Completer<void>().future {
     _controller.add('Android Console: Welcome!\n');
     // Include OK in the same packet here. In the response to "avd name"
     // it's sent alone to ensure both are handled.
@@ -765,6 +832,9 @@ class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
 
   final String avdName;
   final _controller = StreamController<String>();
+
+  @override
+  final Future<void> done;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>
@@ -792,6 +862,9 @@ class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final _controller = StreamController<String>();
 
   @override
+  final Future<void> done = Completer<void>().future;
+
+  @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>
       _controller.stream as Stream<E>;
 
@@ -812,6 +885,9 @@ class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   }
 
   final _controller = StreamController<String>();
+
+  @override
+  final Future<void> done = Completer<void>().future;
 
   @override
   Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) =>

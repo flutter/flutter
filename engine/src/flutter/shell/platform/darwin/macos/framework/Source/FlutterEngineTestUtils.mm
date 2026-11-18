@@ -73,6 +73,10 @@ void FlutterEngineTest::AddNativeCallback(const char* name, Dart_NativeFunction 
   native_resolver_->AddNativeCallback({name}, function);
 }
 
+void FlutterEngineTest::AddFfiNativeCallback(const char* name, void* function) {
+  native_resolver_->AddFfiNativeCallback({name}, function);
+}
+
 id CreateMockFlutterEngine(NSString* pasteboardString) {
   NSString* fixtures = @(testing::GetFixturesPath());
   FlutterDartProject* project = [[FlutterDartProject alloc]
