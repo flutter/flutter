@@ -371,6 +371,7 @@ void main() {
       analytics: fakeAnalytics,
       logger: logger,
       interfaceType: DeviceConnectionInterface.wireless,
+      mdnsVmServiceDiscovery: FakeMDnsVmServiceDiscovery(),
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -425,7 +426,7 @@ void main() {
       ),
     ]);
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery()});
+  });
 
   testUsingContext(
     'IOSDevice.startApp retries when ios-deploy loses connection the first time in CI',
@@ -1297,6 +1298,8 @@ void main() {
             isCoreDevice: true,
             analytics: fakeAnalytics,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            // If mDNS is not the only method of discovery, it shouldn't throw on error.
+            mdnsVmServiceDiscovery: FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1337,10 +1340,6 @@ void main() {
               result: 'debugging success',
             ),
           ]);
-        },
-        // If mDNS is not the only method of discovery, it shouldn't throw on error.
-        overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
         },
       );
 
@@ -1442,6 +1441,7 @@ void main() {
             fileSystem: fileSystem,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            mdnsVmServiceDiscovery: mdnsDiscovery,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1493,7 +1493,7 @@ void main() {
               result: 'debugging success',
             ),
           ]);
-        }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery});
+        });
       });
 
       group('IOSDevice.startApp fails to find Dart VM', () {
@@ -1519,6 +1519,7 @@ void main() {
             fileSystem: fileSystem,
             isCoreDevice: true,
             coreDeviceControl: FakeIOSCoreDeviceControl(),
+            mdnsVmServiceDiscovery: mdnsDiscovery,
             xcodeDebug: FakeXcodeDebug(
               expectedProject: XcodeDebugProject(
                 scheme: 'Runner',
@@ -1578,7 +1579,7 @@ void main() {
           );
 
           await completer.future;
-        }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery});
+        });
       });
 
       testUsingContext(
@@ -2038,6 +2039,7 @@ IOSDevice setUpIOSDevice({
   IOSCoreDeviceControl? coreDeviceControl,
   IOSCoreDeviceLauncher? coreDeviceLauncher,
   Analytics? analytics,
+  MDnsVmServiceDiscovery? mdnsVmServiceDiscovery,
   FakeXcodeDebug? xcodeDebug,
   FakePlatform? platform,
   Xcode? xcode,
@@ -2091,6 +2093,13 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    mdnsVmServiceDiscovery:
+        mdnsVmServiceDiscovery ??
+        MDnsVmServiceDiscovery(
+          analytics: analytics ?? FakeAnalytics(),
+          logger: logger,
+          platform: macPlatform,
+        ),
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
   );
 }
