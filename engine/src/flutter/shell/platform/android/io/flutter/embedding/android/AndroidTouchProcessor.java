@@ -159,6 +159,9 @@ public class AndroidTouchProcessor {
    * @return True if the event was handled.
    */
   public boolean onTouchEvent(@NonNull MotionEvent event, @NonNull Matrix transformMatrix) {
+    if (!hasFiniteCoordinates(event, transformMatrix)) {
+      return false;
+    }
     int maskedAction = event.getActionMasked();
     int pointerChange = getPointerChangeForAction(event.getActionMasked());
     boolean updateForSinglePointer =
@@ -257,6 +260,9 @@ public class AndroidTouchProcessor {
     if (!isPointerEvent || !isMovementEvent) {
       return false;
     }
+    if (!hasFiniteCoordinates(event, IDENTITY_TRANSFORM)) {
+      return false;
+    }
 
     int pointerChange = getPointerChangeForAction(event.getActionMasked());
     ByteBuffer packet =
@@ -271,6 +277,30 @@ public class AndroidTouchProcessor {
       throw new AssertionError("Packet position is not on field boundary.");
     }
     renderer.dispatchPointerDataPacket(packet, packet.position());
+    return true;
+  }
+
+  // Android occasionally delivers MotionEvents with NaN or infinite coordinates (similar to
+  // AndroidComposeView.isBadMotionEvent in AndroidX Compose UI). Drop the event before packing
+  // non-finite values into PointerDataPacket.
+  private static boolean hasFiniteCoordinates(
+      @NonNull MotionEvent event, @NonNull Matrix transformMatrix) {
+    final int pointerCount = event.getPointerCount();
+    for (int i = 0; i < pointerCount; i++) {
+      final float x = event.getX(i);
+      final float y = event.getY(i);
+      if (!Float.isFinite(x) || !Float.isFinite(y)) {
+        return false;
+      }
+      if (transformMatrix != IDENTITY_TRANSFORM) {
+        // Index 0 is x and index 1 is y, matching addPointerForIndex.
+        float[] viewToScreenCoords = {x, y};
+        transformMatrix.mapPoints(viewToScreenCoords);
+        if (!Float.isFinite(viewToScreenCoords[0]) || !Float.isFinite(viewToScreenCoords[1])) {
+          return false;
+        }
+      }
+    }
     return true;
   }
 

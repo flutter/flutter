@@ -6,8 +6,11 @@ package io.flutter.embedding.android;
 
 import static io.flutter.Build.API_LEVELS;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -784,5 +788,137 @@ public class AndroidTouchProcessorTest {
     assertEquals(0.0, readPointerPhysicalX(packet));
     assertEquals(0.0, readPointerPhysicalY(packet));
     inOrder.verifyNoMoreInteractions();
+  }
+
+  private MotionEvent mockMultiPointerEvent(
+      int actionMasked, int actionIndex, int[] pointerIds, float[] xs, float[] ys) {
+    MotionEvent event = mock(MotionEvent.class);
+    when(event.getDevice()).thenReturn(null);
+    when(event.getSource()).thenReturn(InputDevice.SOURCE_TOUCHSCREEN);
+    when(event.getEventTime()).thenReturn(eventTimeMilliseconds);
+    when(event.getPointerCount()).thenReturn(pointerIds.length);
+    when(event.getActionMasked()).thenReturn(actionMasked);
+    when(event.getActionIndex()).thenReturn(actionIndex);
+    when(event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)).thenReturn(true);
+    for (int i = 0; i < pointerIds.length; i++) {
+      when(event.getPointerId(i)).thenReturn(pointerIds[i]);
+      when(event.getX(i)).thenReturn(xs[i]);
+      when(event.getY(i)).thenReturn(ys[i]);
+      when(event.getToolType(i)).thenReturn(MotionEvent.TOOL_TYPE_FINGER);
+      when(event.getPressure(i)).thenReturn(pressure);
+    }
+    return event;
+  }
+
+  @Test
+  public void onTouchEvent_ignoresNonFiniteCoordinates() {
+    final int primaryPointerId = 0;
+    final int noButtons = 0;
+    final float finiteX = 10.0f;
+    final float finiteY = 20.0f;
+    MotionEventMocker mocker =
+        new MotionEventMocker(
+            primaryPointerId, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER);
+
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_DOWN, Float.NaN, finiteY, noButtons)));
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(
+                MotionEvent.ACTION_MOVE, finiteX, Float.POSITIVE_INFINITY, noButtons)));
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_UP, Float.NEGATIVE_INFINITY, finiteY, noButtons)));
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_CANCEL, finiteX, Float.NaN, noButtons)));
+    verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
+
+    // Subsequent finite events still dispatch normally.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_DOWN, finiteX, finiteY, noButtons)));
+    verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.DOWN, readPointerChange(packet));
+    assertEquals((double) finiteX, readPointerPhysicalX(packet));
+    assertEquals((double) finiteY, readPointerPhysicalY(packet));
+  }
+
+  @Test
+  public void onTouchEvent_ignoresSecondaryPointerWithNonFiniteCoordinates() {
+    final int primaryPointerId = 0;
+    final int secondaryPointerId = 1;
+    final int secondaryActionIndex = 1;
+    final float primaryX = 100.0f;
+    final float primaryY = 200.0f;
+    final float secondaryFiniteY = 300.0f;
+
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_POINTER_DOWN,
+                secondaryActionIndex,
+                new int[] {primaryPointerId, secondaryPointerId},
+                new float[] {primaryX, Float.NaN},
+                new float[] {primaryY, secondaryFiniteY})));
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_MOVE,
+                primaryPointerId,
+                new int[] {primaryPointerId, secondaryPointerId},
+                new float[] {primaryX, secondaryFiniteY},
+                new float[] {primaryY, Float.NEGATIVE_INFINITY})));
+    verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
+  }
+
+  @Test
+  public void onTouchEvent_ignoresNonFiniteTransformedCoordinates() {
+    final int primaryPointerId = 0;
+    final int noButtons = 0;
+    final float finiteX = 10.0f;
+    final float finiteY = 20.0f;
+    final float unitScale = 1.0f;
+    final float zeroEntry = 0.0f;
+    MotionEventMocker mocker =
+        new MotionEventMocker(
+            primaryPointerId, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER);
+    Matrix nonFiniteMatrix = new Matrix();
+    nonFiniteMatrix.setValues(
+        new float[] {
+          Float.NaN, zeroEntry, zeroEntry, zeroEntry, unitScale, zeroEntry, zeroEntry, zeroEntry,
+          unitScale
+        });
+
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_DOWN, finiteX, finiteY, noButtons),
+            nonFiniteMatrix));
+    verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
+  }
+
+  @Test
+  public void onGenericMotionEvent_ignoresNonFiniteCoordinates() {
+    final int primaryPointerId = 0;
+    final int noButtons = 0;
+    final float finiteCoord = 15.0f;
+    MotionEventMocker mocker =
+        new MotionEventMocker(
+            primaryPointerId, InputDevice.SOURCE_CLASS_POINTER, MotionEvent.TOOL_TYPE_MOUSE);
+    Context context = ApplicationProvider.getApplicationContext();
+
+    assertFalse(
+        touchProcessor.onGenericMotionEvent(
+            mocker.mockEvent(MotionEvent.ACTION_HOVER_MOVE, Float.NaN, finiteCoord, noButtons),
+            context));
+    assertFalse(
+        touchProcessor.onGenericMotionEvent(
+            mocker.mockEvent(
+                MotionEvent.ACTION_SCROLL, finiteCoord, Float.POSITIVE_INFINITY, noButtons),
+            context));
+    verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
   }
 }
