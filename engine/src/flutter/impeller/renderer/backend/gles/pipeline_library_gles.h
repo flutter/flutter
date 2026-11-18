@@ -10,7 +10,9 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/task_runner.h"
+#include "impeller/base/promise.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/gles/capabilities_gles.h"
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/unique_handle_gles.h"
@@ -35,6 +37,26 @@ class PipelineLibraryGLES final
   PipelineLibraryGLES(const PipelineLibraryGLES&) = delete;
 
   PipelineLibraryGLES& operator=(const PipelineLibraryGLES&) = delete;
+
+  //----------------------------------------------------------------------------
+  /// @brief      The maximum number of pipeline compile jobs that are started
+  ///             but not yet finished for a device with the given
+  ///             capabilities.
+  ///
+  ///             Jobs only overlap if the driver supports compiling shaders in
+  ///             parallel (GL_KHR_parallel_shader_compile). Otherwise, starting
+  ///             more jobs before finishing earlier ones only delays when the
+  ///             earlier pipelines become available, so jobs are run one at a
+  ///             time.
+  ///
+  /// @param[in]  capabilities  The capabilities of the device.
+  ///
+  /// @return     The maximum number of active compile jobs, at least 1. This
+  ///             is the driver's reported maximum number of shader compiler
+  ///             threads, or `PipelineCompileQueueGLES::kDefaultMaxActiveJobs`
+  ///             if the driver reports the implementation-dependent maximum.
+  ///
+  static size_t GetMaxActiveCompileJobs(const CapabilitiesGLES& capabilities);
 
  private:
   friend ContextGLES;
@@ -197,6 +219,51 @@ class PipelineLibraryGLES final
       const std::shared_ptr<ReactorGLES>& reactor,
       const PipelineDescriptor& desc,
       std::shared_ptr<UniqueHandleGLES> program_handle);
+
+  /// The reactor operations that fulfill the promise may be dropped without
+  /// running (e.g. if the reactor is collected at shutdown), so the promise
+  /// must fulfill itself when destroyed. Destroying an unfulfilled
+  /// `std::promise` aborts because exceptions are disabled.
+  using PipelinePromise =
+      NoExceptionPromise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      The state of a pipeline being created, shared between
+  ///             `StartPipelineCreation` and `FinishPipelineCreation`.
+  ///
+  struct PipelineCreation {
+    std::shared_ptr<PipelinePromise> promise;
+    std::weak_ptr<PipelineLibrary> weak_library;
+    PipelineDescriptor descriptor;
+    std::shared_ptr<const ShaderFunction> vert_function;
+    std::shared_ptr<const ShaderFunction> frag_function;
+    bool threadsafe = false;
+    /// Set by `StartPipelineCreation` if a program is being compiled, and
+    /// consumed by `FinishPipelineCreation`.
+    std::unique_ptr<PendingProgram> pending_program;
+  };
+
+  //----------------------------------------------------------------------------
+  /// @brief      The first step of creating a pipeline. Uses a cached program
+  ///             if there is one, otherwise starts compiling a new one that
+  ///             `FinishPipelineCreation` will wait on. Must be called on the
+  ///             reactor.
+  ///
+  static void StartPipelineCreation(PipelineCreation& creation);
+
+  //----------------------------------------------------------------------------
+  /// @brief      The second step of creating a pipeline. If a program was
+  ///             compiled, waits for it to link, caches it, and fulfills the
+  ///             promise with the new pipeline. Must be called on the reactor,
+  ///             on the same thread that called `StartPipelineCreation`.
+  ///
+  static void FinishPipelineCreation(PipelineCreation& creation);
+
+  //----------------------------------------------------------------------------
+  /// @brief      A compile job whose steps run `StartPipelineCreation` and
+  ///             `FinishPipelineCreation` on the reactor.
+  ///
+  class PipelineCompileJob;
 
   std::shared_ptr<UniqueHandleGLES> GetCachedProgram(const ProgramKey& key);
 

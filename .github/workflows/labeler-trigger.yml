@@ -1,0 +1,41 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Unprivileged half of the pull request labeler.
+#
+# This workflow runs on `pull_request` with a read-only token and no access to
+# secrets. It records the pull request number in a `labeler-metadata` artifact
+# so that the privileged `labeler.yml` workflow can apply labels via
+# `workflow_run`. The labels themselves are computed in `labeler.yml` from the
+# trusted `.github/labeler.yml` on the default branch.
+
+name: Pull Request Labeler Trigger
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    name: Record PR for labeling
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
+    steps:
+      - name: Record PR number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p labeler-metadata
+          jq -n --arg pr "$PR_NUMBER" '{pr_number: $pr}' > labeler-metadata/metadata.json
+
+      - name: Upload labeler metadata
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: labeler-metadata
+          path: labeler-metadata/
+          retention-days: 1
+          if-no-files-found: error

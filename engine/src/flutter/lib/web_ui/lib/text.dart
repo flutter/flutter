@@ -341,29 +341,53 @@ abstract class TextStyle {
     List<Shadow>? shadows,
     List<FontFeature>? fontFeatures,
     List<FontVariation>? fontVariations,
-  }) => engine.renderer.createTextStyle(
-    color: color,
-    decoration: decoration,
-    decorationColor: decorationColor,
-    decorationStyle: decorationStyle,
-    decorationThickness: decorationThickness,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    textBaseline: textBaseline,
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    letterSpacing: letterSpacing,
-    wordSpacing: wordSpacing,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    locale: locale,
-    background: background,
-    foreground: foreground,
-    shadows: shadows,
-    fontFeatures: fontFeatures,
-    fontVariations: fontVariations,
-  );
+  }) => engine.isWebParagraphEnabled
+      ? engine.WebTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background,
+          foreground: foreground,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
+        )
+      : engine.EngineTextStyle(
+          color: color,
+          decoration: decoration,
+          decorationColor: decorationColor,
+          decorationStyle: decorationStyle,
+          decorationThickness: decorationThickness,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          textBaseline: textBaseline,
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          letterSpacing: letterSpacing,
+          wordSpacing: wordSpacing,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          locale: locale,
+          background: background,
+          foreground: foreground,
+          shadows: shadows,
+          fontFeatures: fontFeatures,
+          fontVariations: fontVariations,
+        );
 }
 
 abstract class ParagraphStyle {
@@ -382,21 +406,37 @@ abstract class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
     Hyphens? hyphens,
-  }) => engine.renderer.createParagraphStyle(
-    textAlign: textAlign,
-    textDirection: textDirection,
-    maxLines: maxLines,
-    fontFamily: fontFamily,
-    fontSize: fontSize,
-    height: height,
-    textHeightBehavior: textHeightBehavior,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    strutStyle: strutStyle,
-    ellipsis: ellipsis,
-    locale: locale,
-    hyphens: hyphens,
-  );
+  }) => engine.isWebParagraphEnabled
+      ? engine.WebParagraphStyle(
+          textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle,
+          ellipsis: ellipsis,
+          locale: locale,
+          hyphens: hyphens,
+        )
+      : engine.EngineParagraphStyle(
+          textAlign: textAlign,
+          textDirection: textDirection,
+          maxLines: maxLines,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          textHeightBehavior: textHeightBehavior,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          strutStyle: strutStyle,
+          ellipsis: ellipsis,
+          locale: locale,
+          hyphens: hyphens,
+        );
 }
 
 abstract class StrutStyle {
@@ -445,17 +485,29 @@ abstract class StrutStyle {
     FontWeight? fontWeight,
     FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) => engine.renderer.createStrutStyle(
-    fontFamily: fontFamily,
-    fontFamilyFallback: fontFamilyFallback,
-    fontSize: fontSize,
-    height: height,
-    leadingDistribution: leadingDistribution,
-    leading: leading,
-    fontWeight: fontWeight,
-    fontStyle: fontStyle,
-    forceStrutHeight: forceStrutHeight,
-  );
+  }) => engine.isWebParagraphEnabled
+      ? engine.WebStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        )
+      : engine.EngineStrutStyle(
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: leadingDistribution,
+          leading: leading,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          forceStrutHeight: forceStrutHeight,
+        );
 }
 
 // The order of this enum must match the order of the values in TextDirection.h's TextDirection.
@@ -616,17 +668,7 @@ abstract class LineMetrics {
     required double left,
     required double baseline,
     required int lineNumber,
-  }) => engine.renderer.createLineMetrics(
-    hardBreak: hardBreak,
-    ascent: ascent,
-    descent: descent,
-    unscaledAscent: unscaledAscent,
-    height: height,
-    width: width,
-    left: left,
-    baseline: baseline,
-    lineNumber: lineNumber,
-  );
+  }) = engine.EngineLineMetrics;
 
   bool get hardBreak;
   double get ascent;
@@ -670,7 +712,9 @@ abstract class Paragraph {
 }
 
 abstract class ParagraphBuilder {
-  factory ParagraphBuilder(ParagraphStyle style) => engine.renderer.createParagraphBuilder(style);
+  factory ParagraphBuilder(ParagraphStyle style) => engine.isWebParagraphEnabled
+      ? engine.WebParagraphBuilder(style)
+      : engine.EngineParagraphBuilder(style as engine.EngineParagraphStyle);
 
   void pushStyle(TextStyle style);
   void pop();

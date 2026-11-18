@@ -93,14 +93,18 @@ configuration file (i.e. to build and run tests on CI), such as
 [`standalone/mac_host_debug_unopt_arm64.json`](../../ci/builders/standalone/mac_host_debug_unopt_arm64.json),
 or one of many
 configurations that are used only for local development and iteration in
-[`local_engine.json`](../../ci/builders/local_engine.json). The builds specified
-in these files are referenced _by name_ as `--config`:
+[`local_engine.json`](../../ci/builders/local_engine.json) and
+[`local_engine_common.json`](../../ci/builders/local_engine_common.json).
+`local_engine_common.json` holds the handful of debug unopt configurations most
+contributors build day to day and is verified on every PR. `local_engine.json`
+holds everything else and is only verified after merge. The builds specified in
+these files are referenced _by name_ as `--config`:
 
 ```sh
 # Implicitly references ci/builders/standalone/mac_host_debug_unopt_arm64.json
 et build --config ci/host_debug_unopt_arm64
 
-# Implicitly references ci/builders/local_engine.json
+# Implicitly references ci/builders/local_engine_common.json
 et build --config host_debug_unopt_arm64
 ```
 

@@ -33,14 +33,16 @@ void main() {
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: FakeProcessManager.empty(),
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: BufferLogger.test(),
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: BufferLogger.test(),
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: FakeProcessManager.empty(),
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
       });
@@ -50,14 +52,16 @@ void main() {
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{'DEVELOPMENT_TEAM': 'abc'},
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: FakeProcessManager.empty(),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: FakeProcessManager.empty(),
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
         expect(
@@ -78,14 +82,16 @@ void main() {
                 'DEVELOPMENT_TEAM': 'abc',
                 'CODE_SIGN_STYLE': 'Manual',
               },
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: FakeProcessManager.empty(),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: FakeProcessManager.empty(),
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
         // Should not log "Automatically signing..." when CODE_SIGN_STYLE is Manual.
@@ -108,14 +114,16 @@ void main() {
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{'PROVISIONING_PROFILE': 'abc'},
-                platform: FakePlatform(operatingSystem: 'macos'),
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-                config: Config.test(),
-                terminal: FakeTerminal(),
-                fileSystem: MemoryFileSystem.test(),
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: Config.test(),
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: MemoryFileSystem.test(),
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: FakeProcessManager.empty(),
+                  terminal: FakeTerminal(),
+                ),
               );
           expect(signingConfigs, isNull);
           expect(logger.errorText, isEmpty);
@@ -138,14 +146,16 @@ void main() {
           await expectLater(
             () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: processManager,
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             ),
             throwsToolExit(
               message:
@@ -193,14 +203,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
         expect(processManager, hasNoRemainingExpectations);
@@ -215,14 +227,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(signingConfigs, isNull);
@@ -291,14 +305,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: fileSystem,
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(processManager, hasNoRemainingExpectations);
@@ -335,14 +351,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: fileSystem,
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(processManager, hasNoRemainingExpectations);
@@ -388,14 +406,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -441,14 +461,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -495,14 +517,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -571,14 +595,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -646,14 +672,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -725,14 +753,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -783,14 +813,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{'bogus': 'bogus'},
-                platform: FakePlatform(operatingSystem: 'macos'),
-                processManager: processManager,
-                logger: logger,
-                config: Config.test(),
-                terminal: FakeTerminal(),
-                fileSystem: MemoryFileSystem.test(),
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: Config.test(),
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: MemoryFileSystem.test(),
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(logger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
@@ -1088,14 +1120,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(
@@ -1179,14 +1213,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: testTerminal,
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: testTerminal,
+              ),
             );
 
         expect(
@@ -1218,14 +1254,16 @@ Or run on an iOS simulator without code signing
         await expectLater(
           () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
             buildSettings: <String, String>{},
-            platform: FakePlatform(operatingSystem: 'macos'),
-            processManager: processManager,
-            logger: BufferLogger.test(),
-            config: Config.test(),
-            terminal: FakeTerminal(),
-            fileSystem: MemoryFileSystem.test(),
-            fileSystemUtils: FakeFileSystemUtils(),
             plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: Config.test(),
+              fileSystemUtils: FakeFileSystemUtils(),
+              fs: MemoryFileSystem.test(),
+              logger: BufferLogger.test(),
+              platform: FakePlatform(operatingSystem: 'macos'),
+              processManager: processManager,
+              terminal: FakeTerminal(),
+            ),
           ),
           throwsToolExit(
             message: 'No development certificates available to code sign app for device deployment',
@@ -1277,14 +1315,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: Config.test(),
-              terminal: testTerminal,
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: testTerminal,
+              ),
             );
         expect(signingConfigs, isNull);
         expect(processManager, hasNoRemainingExpectations);
@@ -1320,14 +1360,16 @@ Or run on an iOS simulator without code signing
         Future<Map<String, String>?> getCodeSigningIdentities() =>
             getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: const <String, String>{'bogus': 'bogus'},
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: processManager,
-              logger: BufferLogger.test(),
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: BufferLogger.test(),
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         await expectLater(

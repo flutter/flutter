@@ -94,13 +94,21 @@ void RenderPass::ClearPipelineStateDirtyForTesting() {
 }
 
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
-  render_pass_ =
-      command_buffer.GetCommandBuffer()->CreateRenderPass(render_target_);
+  render_pass_ = command_buffer.CreateRenderPass(render_target_);
   if (!render_pass_) {
     return false;
   }
-  command_buffer.AddRenderPass(render_pass_);
+  command_buffer_ = fml::Ref(&command_buffer);
   return true;
+}
+
+bool RenderPass::End() {
+  if (!command_buffer_) {
+    return true;
+  }
+  bool result = command_buffer_->EndRenderPass(render_pass_.get());
+  command_buffer_ = nullptr;
+  return result;
 }
 
 void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
@@ -302,16 +310,23 @@ bool RenderPass::Draw(size_t element_count,
   // Binding sets are replayed first, so an individual bind that collides
   // with a set member overrides it for this draw. Their metadata is borrowed
   // from the shader rather than copied, so no allocation happens here.
+  // A set's compute bindings belong to compute passes.
   for (const auto& set : binding_sets) {
     if (!set) {
       continue;
     }
     for (const auto& buffer : set->GetBufferBindings()) {
+      if (buffer.stage == impeller::ShaderStage::kCompute) {
+        continue;
+      }
       render_pass_->BindResource(buffer.stage,
                                  impeller::DescriptorType::kUniformBuffer,
                                  buffer.slot, buffer.metadata, buffer.view);
     }
     for (const auto& texture : set->GetTextureBindings()) {
+      if (texture.stage == impeller::ShaderStage::kCompute) {
+        continue;
+      }
       render_pass_->BindResource(
           texture.stage, impeller::DescriptorType::kSampledImage, texture.slot,
           texture.metadata, texture.texture, texture.sampler);
@@ -467,6 +482,14 @@ Dart_Handle InternalFlutterGpu_RenderPass_Begin(
     flutter::gpu::CommandBuffer* command_buffer) {
   if (!wrapper->Begin(*command_buffer)) {
     return tonic::ToDart("Failed to begin RenderPass");
+  }
+  return Dart_Null();
+}
+
+Dart_Handle InternalFlutterGpu_RenderPass_End(
+    flutter::gpu::RenderPass* wrapper) {
+  if (!wrapper->End()) {
+    return tonic::ToDart("Failed to end RenderPass");
   }
   return Dart_Null();
 }

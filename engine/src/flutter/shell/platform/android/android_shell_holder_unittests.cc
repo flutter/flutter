@@ -103,6 +103,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
               createTransaction,
               (std::function<void()>&),
               (override));
+  MOCK_METHOD(void, sealFrameTransactions, (), (override));
   MOCK_METHOD(void, swapTransaction, (), (override));
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));
   MOCK_METHOD(std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>,

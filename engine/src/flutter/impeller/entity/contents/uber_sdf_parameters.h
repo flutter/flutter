@@ -42,7 +42,7 @@ struct UberSDFParameters {
     };
 
     /// The type of gradient.
-    Type type;
+    Type type = Type::kLinear;
 
     /// Gradient start point (for linear gradients) or center (for radial
     /// gradients).
@@ -103,7 +103,7 @@ struct UberSDFParameters {
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
-  Type type;
+  Type type = Type::kCircle;
 
   /// The color used for filling or stroking the shape.
   Color color;

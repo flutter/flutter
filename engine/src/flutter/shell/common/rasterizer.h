@@ -663,14 +663,14 @@ class Rasterizer final : public SnapshotDelegate,
 
   // |SnapshotDelegate|
   void MakeImpellerSnapshot(
-      sk_sp<DisplayList> display_list,
+      SnapshotDisplayListProvider provider,
       DlISize picture_size,
       std::function<void(std::shared_ptr<impeller::Texture>)> callback,
       SnapshotPixelFormat pixel_format) override;
 
   // |SnapshotDelegate|
   std::shared_ptr<impeller::Texture> MakeImpellerSnapshotSync(
-      sk_sp<DisplayList> display_list,
+      SnapshotDisplayListProvider provider,
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) override;
 
@@ -720,6 +720,18 @@ class Rasterizer final : public SnapshotDelegate,
     if (surface_) {
       return surface_->GetAiksContext();
     }
+    // There is no surface to get an AiksContext from, so construct a new one.
+    // On OpenGL ES, that requires a current context, so we can't construct one
+    // directly. Create a snapshot surface to make an offscreen context current,
+    // then return the snapshot surface's AiksContext. Only OpenGL ES provides a
+    // snapshot surface, so other backends skip this.
+    if (snapshot_surface_producer_) {
+      if (std::unique_ptr<Surface> snapshot_surface =
+              snapshot_surface_producer_->CreateSnapshotSurface()) {
+        return snapshot_surface->GetAiksContext();
+      }
+    }
+    // Other backends can construct an AiksContext directly.
     if (auto context = impeller_context_->GetContext()) {
       return std::make_shared<impeller::AiksContext>(
           context, impeller::TypographerContextSkia::Make());

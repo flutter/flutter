@@ -23,7 +23,7 @@ final _FakeAnalytics fakeAnalytics = _FakeAnalytics();
 
 class _FakeAnalytics extends Fake implements Analytics {
   @override
-  bool get telemetryEnabled => false;
+  bool get okToSend => false;
 }
 
 final Platform windowsPlatform = FakePlatform(

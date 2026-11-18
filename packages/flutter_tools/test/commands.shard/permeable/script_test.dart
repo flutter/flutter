@@ -22,7 +22,7 @@ void main() {
 
       final ProcessResult exec = await Process.run(flutterBin, <String>[
         '!',
-      ], workingDirectory: Cache.flutterRoot);
+      ], workingDirectory: getFlutterRoot());
       // If ENABLEDELAYEDEXPANSION is enabled, the argument `!` is removed,
       // and flutter runs without any arguments.
       expect(exec.exitCode, 64);

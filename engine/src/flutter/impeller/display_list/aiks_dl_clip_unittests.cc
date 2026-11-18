@@ -9,6 +9,7 @@
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 
@@ -135,6 +136,23 @@ TEST_P(AiksTest, FramebufferBlendsRespectClips) {
   paint.setColor(DlColor::kGreen());
   paint.setBlendMode(DlBlendMode::kSrcOver);
   builder.DrawCircle(DlPoint(150, 150), 50, paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DilatedContentOutsideClip) {
+  SetWindowSize(impeller::ISize(160, 100));
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+  builder.ClipRect(DlRect::MakeXYWH(20, 20, 100, 60));
+
+  DlPaint layer_paint;
+  layer_paint.setImageFilter(DlImageFilter::MakeDilate(10, 10));
+  builder.SaveLayer(DlRect::MakeXYWH(0, 0, 160, 100), &layer_paint);
+  // The rectangle is outside the clip, but its dilated right edge is inside.
+  builder.DrawRect(DlRect::MakeXYWH(15, 45, 4, 10),
+                   DlPaint().setColor(DlColor::kWhite()));
+  builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

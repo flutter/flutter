@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -21,7 +22,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/content_hash.dart';
-import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -31,6 +31,8 @@ import '../../../src/fake_process_manager.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
 import '../../../src/throwing_pub.dart';
+
+const _kEngineRevision = 'abcdefghijklmnopqrstuvwxyz';
 
 const _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
@@ -65,6 +67,14 @@ void main() {
     operatingSystem: 'windows',
     environment: <String, String>{},
   );
+  final String serviceWorkerStub = globals.localFileSystem
+      .directory(
+        Artifacts.test(fileSystem: globals.localFileSystem)
+            .getArtifactPath(Artifact.flutterToolsFileGenerators),
+      )
+      .childDirectory('js')
+      .childFile('flutter_service_worker.js')
+      .readAsStringSync();
 
   setUp(() {
     testbed = TestBed(
@@ -99,11 +109,25 @@ name: foo
             kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
             kBuildMode: BuildMode.debug.cliName,
           },
-          artifacts: Artifacts.test(),
+          artifacts: Artifacts.test(fileSystem: globals.fs),
           processManager: processManager,
           logger: globals.logger,
           fileSystem: globals.fs,
         );
+        globals.fs
+            .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory))
+            .childFile('flutter.js')
+            .createSync(recursive: true);
+        globals.fs
+            .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory))
+            .childFile('flutter.js.map')
+            .createSync(recursive: true);
+        globals.fs
+            .directory(environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators))
+            .childDirectory('js')
+            .childFile('flutter_service_worker.js')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(serviceWorkerStub);
         environment.buildDir.createSync(recursive: true);
       },
       overrides: <Type, Generator>{Platform: () => linux},
@@ -173,9 +197,11 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(environment.outputDir.childFile('version.json'), exists);
     }),
@@ -190,9 +216,11 @@ name: foo
       final Directory webResources = environment.projectDir.childDirectory('web');
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       final String versionFile = environment.outputDir.childFile('version.json').readAsStringSync();
       expect(versionFile, contains('"version":"2.0.0"'));
@@ -211,7 +239,10 @@ name: foo
 <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+      await WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(
         environment.outputDir.childFile('index.html').readAsStringSync(),
@@ -230,7 +261,10 @@ name: foo
 <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+      await WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
@@ -240,36 +274,19 @@ name: foo
   );
 
   test(
-    'WebTemplatedFiles includes serviceWorkerSettings in flutter_bootstrap.js by default',
+    'WebTemplatedFiles generates default _flutter.loader.load() in flutter_bootstrap.js',
     () => testbed.run(() async {
       final Directory webResources = environment.projectDir.childDirectory('web');
-      environment.defines[kServiceWorkerStrategy] = 'none';
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+      await WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(
         environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
         contains('_flutter.loader.load();'),
-      );
-    }),
-  );
-
-  test(
-    'WebTemplatedFiles omits serviceWorkerSettings in flutter_bootstrap.js when environment specifies',
-    () => testbed.run(() async {
-      final Directory webResources = environment.projectDir.childDirectory('web');
-      webResources.childFile('index.html').createSync(recursive: true);
-      environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
-
-      expect(
-        environment.outputDir.childFile('flutter_bootstrap.js').readAsStringSync(),
-        stringContainsInOrder(<String>[
-          '_flutter.loader.load({',
-          'serviceWorkerSettings',
-          'serviceWorkerVersion',
-        ]),
       );
     }),
   );
@@ -284,7 +301,10 @@ name: foo
 <!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
     ''');
       environment.buildDir.childFile('main.dart.js').createSync();
-      await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+      await WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(
         environment.outputDir.childFile('index.html').readAsStringSync(),
@@ -304,7 +324,10 @@ name: foo
 <!DOCTYPE html><html><body><script>const staticAssetsUrl = "$kStaticAssetsUrlPlaceholder";</script></body></html>
     ''');
         environment.buildDir.childFile('main.dart.js').createSync();
-        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+        await WebTemplatedFiles(
+          <Map<String, Object?>>[],
+          engineRevision: _kEngineRevision,
+        ).build(environment);
 
         expect(
           environment.outputDir.childFile('index.html').readAsStringSync(),
@@ -322,7 +345,10 @@ name: foo
 <!DOCTYPE html><html><body><script>const staticAssetsUrl = "$kStaticAssetsUrlPlaceholder";</script></body></html>
     ''');
         environment.buildDir.childFile('main.dart.js').createSync();
-        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+        await WebTemplatedFiles(
+          <Map<String, Object?>>[],
+          engineRevision: _kEngineRevision,
+        ).build(environment);
 
         expect(
           environment.outputDir.childFile('index.html').readAsStringSync(),
@@ -349,7 +375,10 @@ name: foo
 </body></html>
     ''');
         environment.buildDir.childFile('main.dart.js').createSync();
-        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+        await WebTemplatedFiles(
+          <Map<String, Object?>>[],
+          engineRevision: _kEngineRevision,
+        ).build(environment);
 
         final String outputHtml = environment.outputDir.childFile('index.html').readAsStringSync();
         expect(outputHtml, contains("const version = 'v1.2.3'"));
@@ -369,7 +398,10 @@ const appVersion = '{{APP_VERSION}}';
 _flutter.loader.load();
 ''');
         environment.buildDir.childFile('main.dart.js').createSync();
-        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+        await WebTemplatedFiles(
+          <Map<String, Object?>>[],
+          engineRevision: _kEngineRevision,
+        ).build(environment);
 
         final String outputBootstrap = environment.outputDir
             .childFile('flutter_bootstrap.js')
@@ -387,7 +419,10 @@ _flutter.loader.load();
 <!DOCTYPE html><html><head><base href="/"></head><body></body></html>
     ''');
         environment.buildDir.childFile('main.dart.js').createSync();
-        await WebTemplatedFiles(<Map<String, Object?>>[]).build(environment);
+        await WebTemplatedFiles(
+          <Map<String, Object?>>[],
+          engineRevision: _kEngineRevision,
+        ).build(environment);
 
         expect(
           environment.outputDir.childFile('index.html').readAsStringSync(),
@@ -406,9 +441,11 @@ _flutter.loader.load();
       webResources.childFile('index.html').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync();
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       final fontManifest = jsonDecode(
         environment.outputDir
@@ -458,9 +495,11 @@ _flutter.loader.load();
       environment.buildDir.childFile('main.dart.js_1.part.js').createSync();
       environment.buildDir.childFile('main.dart.js_1.part.js.map').createSync();
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(dumpInfo: true),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig(dumpInfo: true)],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'A');
       expect(environment.outputDir.childFile('main.dart.js').existsSync(), true);
@@ -479,9 +518,11 @@ _flutter.loader.load();
       // Update to arbitrary resource file triggers rebuild.
       webResources.childFile('foo.txt').writeAsStringSync('B');
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(environment.outputDir.childFile('foo.txt').readAsStringSync(), 'B');
     }),
@@ -501,9 +542,11 @@ _flutter.loader.load();
       environment.buildDir.childFile('main.dart.mjs')
         ..createSync()
         ..writeAsStringSync('old mjs');
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const WasmCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const WasmCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'old wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'old mjs');
 
@@ -514,9 +557,11 @@ _flutter.loader.load();
         ..createSync()
         ..writeAsStringSync('new mjs');
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const WasmCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const WasmCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(environment.outputDir.childFile('main.dart.wasm').readAsStringSync(), 'new wasm');
       expect(environment.outputDir.childFile('main.dart.mjs').readAsStringSync(), 'new mjs');
@@ -744,7 +789,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(csp: true, sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(csp: true, sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -781,7 +829,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(minify: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(minify: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -818,7 +869,10 @@ _flutter.loader.load();
         FakeCommand(command: dart2jsCompileCommand(releaseDeprecatedJsInteropDisabledArgs)),
       ]);
 
-      await Dart2JSTarget(const JsCompilerConfig(deprecatedJsInterop: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(deprecatedJsInterop: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
@@ -852,7 +906,10 @@ _flutter.loader.load();
       );
 
       await expectLater(
-        Dart2JSTarget(const JsCompilerConfig(deprecatedJsInterop: false)).build(environment),
+        Dart2JSTarget(
+          const JsCompilerConfig(deprecatedJsInterop: false),
+          engineRevision: _kEngineRevision,
+        ).build(environment),
         throwsToolExit(message: 'Failed to compile application for the Web.'),
       );
 
@@ -899,7 +956,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -939,7 +999,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -977,7 +1040,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1015,7 +1081,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1054,8 +1123,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(nativeNullAssertions: true, sourceMaps: false))
-          .build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(nativeNullAssertions: true, sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1093,8 +1164,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(optimizationLevel: 3, sourceMaps: false))
-          .build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(optimizationLevel: 3, sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1135,7 +1208,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(environment.buildDir.childFile('dart2js.d'), exists);
       final Depfile depfile = environment.depFileService.parse(
@@ -1187,7 +1263,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1225,7 +1304,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig()).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1266,7 +1348,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1307,7 +1392,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(sourceMaps: false)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1347,8 +1435,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(dumpInfo: true, sourceMaps: false))
-          .build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(dumpInfo: true, sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
 
@@ -1391,6 +1481,7 @@ _flutter.loader.load();
 
       await Dart2JSTarget(
         const JsCompilerConfig(useFrequencyBasedMinification: false, sourceMaps: false),
+        engineRevision: _kEngineRevision,
       ).build(environment);
     }, overrides: <Type, Generator>{ProcessManager: () => processManager}),
   );
@@ -1474,6 +1565,7 @@ _flutter.loader.load();
                         minify: minify,
                       ),
                       const NoOpAnalytics(),
+                      engineRevision: _kEngineRevision,
                     ).build(environment);
 
                     expect(outputJsFile.existsSync(), isTrue);
@@ -1540,6 +1632,7 @@ _flutter.loader.load();
             minify: false,
           ),
           const NoOpAnalytics(),
+          engineRevision: _kEngineRevision,
         ).build(environment);
         fail('Expected exception');
       } on Exception catch (e) {
@@ -1586,6 +1679,7 @@ _flutter.loader.load();
             minify: false,
           ),
           const NoOpAnalytics(),
+          engineRevision: _kEngineRevision,
         ).build(environment);
         fail('Expected exception');
       } on Exception catch (e) {
@@ -1619,6 +1713,7 @@ _flutter.loader.load();
             minify: false,
           ),
           const NoOpAnalytics(),
+          engineRevision: _kEngineRevision,
         ).build(environment);
         fail('Expected exception');
       } on Exception catch (e) {
@@ -1643,7 +1738,11 @@ _flutter.loader.load();
     final File partMapFile = environment.buildDir.childFile('main.dart_module1.wasm.map')
       ..createSync();
 
-    final targetWithMaps = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+    final targetWithMaps = Dart2WasmTarget(
+      const WasmCompilerConfig(),
+      const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
+    );
     expect(
       targetWithMaps.buildFiles(environment).map((f) => f.path),
       containsAll(<File>[wasmFile, mjsFile, mapFile, partWasmFile, partMapFile].map((f) => f.path)),
@@ -1652,6 +1751,7 @@ _flutter.loader.load();
     final targetWithoutMaps = Dart2WasmTarget(
       const WasmCompilerConfig(sourceMaps: false),
       const NoOpAnalytics(),
+      engineRevision: _kEngineRevision,
     );
     expect(
       targetWithoutMaps.buildFiles(environment).map((f) => f.path),
@@ -1690,7 +1790,7 @@ _flutter.loader.load();
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((JsCompilerConfig config) {
-      final target = Dart2JSTarget(config);
+      final target = Dart2JSTarget(config, engineRevision: _kEngineRevision);
       return target.buildKey;
     });
 
@@ -1721,7 +1821,11 @@ _flutter.loader.load();
     ];
 
     final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
-      final target = Dart2WasmTarget(config, const NoOpAnalytics());
+      final target = Dart2WasmTarget(
+        config,
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      );
       return target.buildKey;
     });
 
@@ -1800,30 +1904,20 @@ _flutter.loader.load();
   });
 
   test(
-    'Generated service worker is empty with none-strategy',
-    () => testbed.run(() {
-      final String fileGeneratorsPath = environment.artifacts.getArtifactPath(
-        Artifact.flutterToolsFileGenerators,
-      );
-      final String result = generateServiceWorker(
-        fileGeneratorsPath,
-        serviceWorkerStrategy: ServiceWorkerStrategy.none,
-      );
-
-      expect(result, '');
-    }),
-  );
-
-  test(
     'WebBuiltInAssets declares and copies the Flutter loader source map',
     () => testbed.run(() async {
-      final File flutterJsMapInput = globals.fs.file(
-        'bin/cache/flutter_web_sdk/flutter_js/flutter.js.map',
-      )..createSync(recursive: true);
+      final File flutterJsMapInput =
+          globals.fs
+              .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterJsDirectory))
+              .childFile('flutter.js.map')
+            ..createSync(recursive: true);
       flutterJsMapInput.writeAsStringSync('source map', flush: true);
-      globals.fs.directory('bin/cache/flutter_web_sdk/canvaskit').createSync(recursive: true);
+      globals.fs
+          .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk))
+          .childDirectory('canvaskit')
+          .createSync(recursive: true);
 
-      final target = WebBuiltInAssets(globals.fs);
+      final target = WebBuiltInAssets(globals.fs, environment.artifacts);
       expect(target.outputs, contains(const Source.pattern('{BUILD_DIR}/flutter.js.map')));
       await target.build(environment);
 
@@ -1836,12 +1930,15 @@ _flutter.loader.load();
   test(
     'WebBuiltInAssets copies over canvaskit again if the web sdk changes',
     () => testbed.run(() async {
-      final File canvasKitInput = globals.fs.file(
-        'bin/cache/flutter_web_sdk/canvaskit/canvaskit.wasm',
-      )..createSync(recursive: true);
+      final File canvasKitInput =
+          globals.fs
+              .directory(environment.artifacts.getHostArtifact(HostArtifact.flutterWebSdk))
+              .childDirectory('canvaskit')
+              .childFile('canvaskit.wasm')
+            ..createSync(recursive: true);
       canvasKitInput.writeAsStringSync('foo', flush: true);
 
-      await WebBuiltInAssets(globals.fs).build(environment);
+      await WebBuiltInAssets(globals.fs, environment.artifacts).build(environment);
 
       final File canvasKitOutputBefore = environment.outputDir
           .childDirectory('canvaskit')
@@ -1851,7 +1948,7 @@ _flutter.loader.load();
 
       canvasKitInput.writeAsStringSync('bar', flush: true);
 
-      await WebBuiltInAssets(globals.fs).build(environment);
+      await WebBuiltInAssets(globals.fs, environment.artifacts).build(environment);
 
       final File canvasKitOutputAfter = environment.outputDir
           .childDirectory('canvaskit')
@@ -1865,7 +1962,10 @@ _flutter.loader.load();
     'Dart2JSTarget getBuildConfig dynamically discovers hashed output',
     () => testbed.run(() {
       environment.buildDir.childFile('main.dart.01234567.js').createSync();
-      final target = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final target = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       expect(target.getBuildConfig(environment)['mainJsPath'], 'main.dart.01234567.js');
       final List<String> files = target
           .buildFiles(environment)
@@ -1883,6 +1983,7 @@ _flutter.loader.load();
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final Map<String, Object?> buildConfig = target.getBuildConfig(environment);
       expect(buildConfig['mainWasmPath'], 'main.dart.89abcdef.wasm');
@@ -1900,10 +2001,14 @@ _flutter.loader.load();
     () => testbed.run(() async {
       environment.projectDir.childDirectory('web').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.01234567.js').createSync();
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       final target = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[jsTarget],
+        engineRevision: _kEngineRevision,
       );
       await target.build(environment);
       final File bootstrapJs = environment.outputDir.childFile('flutter_bootstrap.js');
@@ -1970,7 +2075,10 @@ _flutter.loader.load();
           .substring(0, 8);
       final String newBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
 
-      final target = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final target = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       final List<String> files = target
           .buildFiles(environment)
           .map((File f) => f.basename)
@@ -1995,12 +2103,16 @@ _flutter.loader.load();
   test(
     'getBuildConfig falls back to unhashed names when no hashed output exists',
     () => testbed.run(() {
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       expect(jsTarget.getBuildConfig(environment)['mainJsPath'], 'main.dart.js');
 
       final wasmTarget = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final Map<String, Object?> wasmConfig = wasmTarget.getBuildConfig(environment);
       expect(wasmConfig['mainWasmPath'], 'main.dart.wasm');
@@ -2014,6 +2126,7 @@ _flutter.loader.load();
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true, dryRun: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       expect(target.getBuildConfig(environment), isEmpty);
     }),
@@ -2025,6 +2138,7 @@ _flutter.loader.load();
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       expect(target.buildPatternStems, contains('main.dart.wasm.map'));
       expect(target.buildPatternStems, isNot(contains('main.dart.*.wasm.map')));
@@ -2079,6 +2193,7 @@ _flutter.loader.load();
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
 
       final List<String> files = target
@@ -2176,7 +2291,10 @@ _flutter.loader.load();
         ),
       );
 
-      await Dart2JSTarget(const JsCompilerConfig(webContentHash: true)).build(environment);
+      await Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       final String expectedMapHash = crypto.sha256
           .convert(utf8.encode(mapContent))
@@ -2245,7 +2363,10 @@ _flutter.loader.load();
       );
 
       await expectLater(
-        Dart2JSTarget(const JsCompilerConfig(webContentHash: true)).build(environment),
+        Dart2JSTarget(
+          const JsCompilerConfig(webContentHash: true),
+          engineRevision: _kEngineRevision,
+        ).build(environment),
         throwsToolExit(
           message:
               '"--web-content-hash" does not yet support deferred imports: '
@@ -2298,6 +2419,7 @@ _flutter.loader.load();
         Dart2WasmTarget(
           const WasmCompilerConfig(webContentHash: true),
           const NoOpAnalytics(),
+          engineRevision: _kEngineRevision,
         ).build(environment),
         throwsToolExit(
           message:
@@ -2352,6 +2474,7 @@ _flutter.loader.load();
       await Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       ).build(environment);
 
       final String wasmHash = crypto.sha256.convert(wasmBytes).toString().substring(0, 8);
@@ -2396,9 +2519,11 @@ _flutter.loader.load();
         ..createSync(recursive: true)
         ..writeAsStringSync('_flutter.buildConfig = {"engineRevision":"abc","builds":[]};\n');
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(webContentHash: true),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(staleJs, isNot(exists));
       expect(staleMap, isNot(exists));
@@ -2413,10 +2538,14 @@ _flutter.loader.load();
   test(
     'WebTemplatedFiles buildKey, dependencies, and inputs derive from compile targets when provided',
     () => testbed.run(() {
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       final target = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[jsTarget],
+        engineRevision: _kEngineRevision,
       );
       expect(target.buildKey, jsonEncode(<String>[jsTarget.buildKey]));
       expect(target.dependencies, <Object>[jsTarget]);
@@ -2426,7 +2555,10 @@ _flutter.loader.load();
 
       final noHashTarget = WebTemplatedFiles(
         <Map<String, Object?>>[],
-        compileTargets: <Dart2WebTarget>[Dart2JSTarget(const JsCompilerConfig())],
+        compileTargets: <Dart2WebTarget>[
+          Dart2JSTarget(const JsCompilerConfig(), engineRevision: _kEngineRevision),
+        ],
+        engineRevision: _kEngineRevision,
       );
       expect(noHashTarget.buildKey, isNot(target.buildKey));
     }),
@@ -2442,12 +2574,16 @@ _flutter.loader.load();
       environment.buildDir.childFile('main.dart.mjs').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.33333333.mjs').createSync(recursive: true);
 
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       expect(jsTarget.getBuildConfig(environment)['mainJsPath'], 'main.dart.11111111.js');
 
       final wasmTarget = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final Map<String, Object?> wasmConfig = wasmTarget.getBuildConfig(environment);
       expect(wasmConfig['mainWasmPath'], 'main.dart.22222222.wasm');
@@ -2562,9 +2698,11 @@ console.log(mapName);
       final File staleHashedJs = environment.outputDir.childFile('main.dart.11111111.js')
         ..createSync(recursive: true);
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(staleHashedJs, isNot(exists));
       expect(environment.outputDir.childFile('main.dart.js'), exists);
@@ -2640,9 +2778,11 @@ flutter:
           .toString()
           .substring(0, 8);
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(webContentHash: true),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       final Directory assetsDir = environment.outputDir.childDirectory('assets');
 
@@ -2766,9 +2906,11 @@ flutter:
       logo.writeAsBytesSync(<int>[5, 6, 7, 8]);
       const newLogoHash = '55e5509f'; // sha256 of [5,6,7,8]
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(webContentHash: true),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(
         assetsDir.childDirectory('images').childFile('logo.$newLogoHash.png').existsSync(),
@@ -2799,9 +2941,11 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       final Directory assetsDir = environment.outputDir.childDirectory('assets');
       expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), true);
@@ -2820,10 +2964,12 @@ flutter:
       final wasmTarget = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final target = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[wasmTarget],
+        engineRevision: _kEngineRevision,
       );
 
       final String configString = target.buildConfigString(environment);
@@ -2855,10 +3001,12 @@ flutter:
       final wasmTarget = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final target = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[wasmTarget],
+        engineRevision: _kEngineRevision,
       );
 
       final String configString = target.buildConfigString(environment);
@@ -2870,7 +3018,10 @@ flutter:
   test(
     'Dart2JSTarget getBuildConfig safely returns defaultName when buildDir does not exist',
     () => testbed.run(() async {
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       // environment.buildDir does not exist yet.
       final Map<String, Object?> config = jsTarget.getBuildConfig(environment);
       expect(config['mainJsPath'], 'main.dart.js');
@@ -2880,7 +3031,10 @@ flutter:
   test(
     'Dart2JSTarget getBuildConfig picks the newest modified file when multiple hashed files exist',
     () => testbed.run(() async {
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(webContentHash: true),
+        engineRevision: _kEngineRevision,
+      );
       final File olderFile = environment.buildDir.childFile('main.dart.11111111.js')
         ..createSync(recursive: true)
         ..setLastModifiedSync(DateTime(2026));
@@ -2900,7 +3054,10 @@ flutter:
   test(
     'Dart2JSTarget buildFiles does not match .part.js.map when sourceMaps is false',
     () => testbed.run(() async {
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig(sourceMaps: false));
+      final jsTarget = Dart2JSTarget(
+        const JsCompilerConfig(sourceMaps: false),
+        engineRevision: _kEngineRevision,
+      );
       environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js_1.part.js').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js_1.part.js.map').createSync(recursive: true);
@@ -2930,9 +3087,11 @@ flutter:
       final File stalePartMap = environment.outputDir.childFile('main.dart.js_1.part.js.map')
         ..createSync(recursive: true);
 
-      await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(),
-      ], const NoOpAnalytics()).build(environment);
+      await WebReleaseBundle(
+        <WebCompilerConfig>[const JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      ).build(environment);
 
       expect(stalePartJs, isNot(exists));
       expect(stalePartMap, isNot(exists));
@@ -2947,7 +3106,7 @@ flutter:
         environment.fileSystem.directory('/work/canvaskit/app'),
         projectDir: environment.fileSystem.directory('/work/canvaskit/app/foo'),
         outputDir: environment.fileSystem.directory('/work/canvaskit/app/bar'),
-        artifacts: Artifacts.test(),
+        artifacts: Artifacts.test(fileSystem: environment.fileSystem),
         processManager: processManager,
         logger: environment.logger,
         fileSystem: environment.fileSystem,
@@ -2959,10 +3118,12 @@ flutter:
       final wasmTarget = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final target = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[wasmTarget],
+        engineRevision: _kEngineRevision,
       );
 
       final String configString = target.buildConfigString(customEnv);
@@ -2973,20 +3134,6 @@ flutter:
   test(
     'WebServiceWorker emits precache_manifest.json and excludes non-runtime bloat when webContentHash is true',
     () => testbed.run(() async {
-      final File fileGenerators =
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators).isEmpty
-          ? environment.fileSystem.file('flutter_service_worker.js')
-          : environment.fileSystem.file(
-              environment.fileSystem.path.join(
-                environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-                'js',
-                'flutter_service_worker.js',
-              ),
-            );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
-
       const indexBytes = <int>[1, 2, 3, 4];
       const bootstrapBytes = <int>[5, 6, 7, 8, 9];
       const mainJsBytes = <int>[10, 20, 30, 40, 50, 60];
@@ -3043,9 +3190,13 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[0, 97, 115, 109]);
 
-      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
-        JsCompilerConfig(webContentHash: true),
-      ], const NoOpAnalytics());
+      final target = WebServiceWorker(
+        environment.fileSystem,
+        const <WebCompilerConfig>[JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        environment.artifacts,
+        engineRevision: _kEngineRevision,
+      );
       await target.build(environment);
 
       final File manifestFile = environment.outputDir.childFile('precache_manifest.json');
@@ -3094,9 +3245,41 @@ flutter:
         },
       ]);
 
+      final File serviceWorkerFile = environment.outputDir.childFile('flutter_service_worker.js');
+      expect(serviceWorkerFile, exists);
+      expect(serviceWorkerFile.readAsStringSync(), contains('self.registration.unregister()'));
+      expect(serviceWorkerFile.readAsStringSync(), contains("'flutter-app-cache'"));
+
       final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
       expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), contains('flutter_service_worker.js'));
       expect(serviceWorkerDepfile.readAsStringSync(), contains('precache_manifest.json:'));
+    }),
+  );
+
+  test(
+    'WebServiceWorker preserves custom web/flutter_service_worker.js when present in project',
+    () => testbed.run(() async {
+      environment.projectDir.childDirectory('web').childFile('flutter_service_worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// custom user service worker');
+      final File outputServiceWorker = environment.outputDir.childFile('flutter_service_worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// custom user service worker');
+
+      final target = WebServiceWorker(
+        environment.fileSystem,
+        const <WebCompilerConfig>[JsCompilerConfig()],
+        const NoOpAnalytics(),
+        environment.artifacts,
+        engineRevision: _kEngineRevision,
+      );
+      await target.build(environment);
+
+      expect(outputServiceWorker.readAsStringSync(), '// custom user service worker');
+      final File serviceWorkerDepfile = environment.buildDir.childFile('service_worker.d');
+      expect(serviceWorkerDepfile, exists);
+      expect(serviceWorkerDepfile.readAsStringSync(), isNot(contains('flutter_service_worker.js')));
     }),
   );
 
@@ -3104,16 +3287,6 @@ flutter:
     'WebServiceWorker includes canvaskit in precache_manifest.json when kUseLocalCanvasKitFlag is true',
     () => testbed.run(() async {
       environment.defines[kUseLocalCanvasKitFlag] = 'true';
-      final File fileGenerators = environment.fileSystem.file(
-        environment.fileSystem.path.join(
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-          'js',
-          'flutter_service_worker.js',
-        ),
-      );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
 
       const wasmBytes = <int>[0, 97, 115, 109];
       final String wasmHash = crypto.sha256.convert(wasmBytes).toString().substring(0, 8);
@@ -3121,9 +3294,13 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsBytesSync(wasmBytes);
 
-      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
-        JsCompilerConfig(webContentHash: true),
-      ], const NoOpAnalytics());
+      final target = WebServiceWorker(
+        environment.fileSystem,
+        const <WebCompilerConfig>[JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        environment.artifacts,
+        engineRevision: _kEngineRevision,
+      );
       await target.build(environment);
 
       final File manifestFile = environment.outputDir.childFile('precache_manifest.json');
@@ -3142,27 +3319,21 @@ flutter:
   test(
     'WebServiceWorker deletes stale precache_manifest.json when webContentHash is false',
     () => testbed.run(() async {
-      final File fileGenerators = environment.fileSystem.file(
-        environment.fileSystem.path.join(
-          environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators),
-          'js',
-          'flutter_service_worker.js',
-        ),
-      );
-      fileGenerators
-        ..createSync(recursive: true)
-        ..writeAsStringSync('// service worker stub');
-
       final File staleManifest = environment.outputDir.childFile('precache_manifest.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{"version":1,"entries":[]}');
 
-      final target = WebServiceWorker(environment.fileSystem, const <WebCompilerConfig>[
-        JsCompilerConfig(),
-      ], const NoOpAnalytics());
+      final target = WebServiceWorker(
+        environment.fileSystem,
+        const <WebCompilerConfig>[JsCompilerConfig()],
+        const NoOpAnalytics(),
+        environment.artifacts,
+        engineRevision: _kEngineRevision,
+      );
       await target.build(environment);
 
       expect(staleManifest, isNot(exists));
+      expect(environment.buildDir.childFile('service_worker.d'), exists);
     }),
   );
 
@@ -3210,12 +3381,16 @@ _flutter.loader.load({
   test(
     'WebReleaseBundle includes templated index.html and flutter_bootstrap.js in inputs and outputs only when webContentHash is true',
     () => testbed.run(() async {
-      final hashedBundle = WebReleaseBundle(const <WebCompilerConfig>[
-        JsCompilerConfig(webContentHash: true),
-      ], const NoOpAnalytics());
-      final unhashedBundle = WebReleaseBundle(const <WebCompilerConfig>[
-        JsCompilerConfig(),
-      ], const NoOpAnalytics());
+      final hashedBundle = WebReleaseBundle(
+        const <WebCompilerConfig>[JsCompilerConfig(webContentHash: true)],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      );
+      final unhashedBundle = WebReleaseBundle(
+        const <WebCompilerConfig>[JsCompilerConfig()],
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      );
 
       final File indexHtml = environment.outputDir.childFile('index.html')
         ..createSync(recursive: true);
@@ -3379,10 +3554,15 @@ _flutter.loader.load({
         ..createSync(recursive: true)
         ..writeAsStringSync('$supportExpression\n');
 
-      final wasmTarget = Dart2WasmTarget(const WasmCompilerConfig(), const NoOpAnalytics());
+      final wasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(),
+        const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
+      );
       final templatedWithWasm = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[wasmTarget],
+        engineRevision: _kEngineRevision,
       );
       expect(
         templatedWithWasm.inputs,
@@ -3408,14 +3588,16 @@ _flutter.loader.load({
       // A dart2js-only build (including one with a dry-run Dart2WasmTarget) must not emit
       // _flutter.supportsDart2Wasm or track main.dart.support.js in inputs even if a stale
       // main.dart.support.js exists in buildDir.
-      final jsTarget = Dart2JSTarget(const JsCompilerConfig());
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig(), engineRevision: _kEngineRevision);
       final dryRunWasmTarget = Dart2WasmTarget(
         const WasmCompilerConfig(dryRun: true),
         const NoOpAnalytics(),
+        engineRevision: _kEngineRevision,
       );
       final templatedWithJsOnly = WebTemplatedFiles(
         <Map<String, Object?>>[],
         compileTargets: <Dart2WebTarget>[jsTarget, dryRunWasmTarget],
+        engineRevision: _kEngineRevision,
       );
       expect(
         templatedWithJsOnly.inputs,
@@ -3427,4 +3609,39 @@ _flutter.loader.load({
       );
     }),
   );
+
+  testWithoutContext('WebReleaseBundle propagates engineRevision to Dart2JSTarget and WebTemplatedFiles', () {
+    final fileSystem = MemoryFileSystem.test();
+    final testEnvironment = Environment.test(
+      fileSystem.currentDirectory,
+      projectDir: fileSystem.currentDirectory.childDirectory('foo'),
+      outputDir: fileSystem.currentDirectory.childDirectory('bar'),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+    );
+    testEnvironment.buildDir.createSync(recursive: true);
+
+    final releaseBundle = WebReleaseBundle(
+      <WebCompilerConfig>[const JsCompilerConfig()],
+      const NoOpAnalytics(),
+      engineRevision: 'local-engine-git-rev',
+    );
+    final jsTarget = releaseBundle.compileTargets.single as Dart2JSTarget;
+    expect(
+      jsTarget.computeDartDefines(testEnvironment),
+      contains(
+        'FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/local-engine-git-rev/',
+      ),
+    );
+
+    final WebTemplatedFiles templatedFiles = releaseBundle.dependencies
+        .whereType<WebTemplatedFiles>()
+        .single;
+    expect(
+      templatedFiles.buildConfigString(testEnvironment),
+      contains('"engineRevision":"local-engine-git-rev"'),
+    );
+  });
 }

@@ -4,7 +4,10 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
+
+import '../context/tool_context.dart';
 
 /// A remote device where tests can be executed on.
 ///
@@ -13,6 +16,11 @@ import 'package:stream_channel/stream_channel.dart';
 ///
 /// Methods may throw [TestDeviceException] if a problem is encountered.
 abstract class TestDevice {
+  TestDevice({required this.toolContext});
+
+  @protected
+  final ToolContext toolContext;
+
   /// Starts the test device with the provided entrypoint.
   ///
   /// Returns a channel that can be used to communicate with the test process.

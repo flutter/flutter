@@ -221,6 +221,7 @@ class SkwasmSurface implements OffscreenSurface {
         pictures.length,
         size.width,
         size.height,
+        true,
       );
     });
     final rasterResult =

@@ -26,7 +26,7 @@ const rootLoadingUnitId = 1;
 /// over stdout.
 class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
-    required ToolContext super.toolContext,
+    required super.toolContext,
     this._dwarfSymbolizationService = const DwarfSymbolizationService(),
   }) : _toolContext = toolContext {
     argParser.addOption(

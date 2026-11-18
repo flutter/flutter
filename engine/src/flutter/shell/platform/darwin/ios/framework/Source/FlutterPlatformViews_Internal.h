@@ -204,7 +204,6 @@
 @end
 
 @interface PendingRRectClip : NSObject
-@property(nonatomic) flutter::DlRect rect;
 @property(nonatomic) CGFloat topLeftRadius;
 @property(nonatomic) CGFloat topRightRadius;
 @property(nonatomic) CGFloat bottomRightRadius;

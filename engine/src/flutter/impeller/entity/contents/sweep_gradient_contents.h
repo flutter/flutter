@@ -62,11 +62,11 @@ class SweepGradientContents final : public ColorSourceContents {
 
   const Geometry* geometry_ = nullptr;
   Point center_;
-  Scalar bias_;
-  Scalar scale_;
+  Scalar bias_ = 0.0f;
+  Scalar scale_ = 0.0f;
   std::vector<Color> colors_;
   std::vector<Scalar> stops_;
-  Entity::TileMode tile_mode_;
+  Entity::TileMode tile_mode_ = Entity::TileMode::kClamp;
   Color decal_border_color_ = Color::BlackTransparent();
 
   SweepGradientContents(const SweepGradientContents&) = delete;

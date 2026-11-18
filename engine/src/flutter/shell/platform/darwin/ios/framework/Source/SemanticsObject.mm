@@ -861,8 +861,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
     return false;
   }
 
-  // Return true only if the node contains actions other than system actions.
-  if ((self.node.actions & ~flutter::kSystemActions) != 0) {
+  // Return true only if the node contains actions other than system, scroll, or
+  // dismiss actions.
+  if ((self.node.actions & ~(flutter::kSystemActions | flutter::kScrollableSemanticsActions |
+                             static_cast<int32_t>(flutter::SemanticsAction::kDismiss))) != 0) {
     return true;
   }
 
