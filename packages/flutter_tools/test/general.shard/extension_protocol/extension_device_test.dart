@@ -1318,6 +1318,106 @@ void main() {
       );
     });
 
+    testWithoutContext('surfaces clean ToolExtensionException (-32001) messages across resolveApplication, install, and capture RPCs', () async {
+      void domainErrorEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _TestDeviceService(
+                onResolveApplication: (ExtensionApplicationResolutionContext _) async {
+                  throw const ToolExtensionException('Invalid platform manifest.');
+                },
+                onInstallApp: (String _, Uri _, bool _) async {
+                  throw const ToolExtensionException('Insufficient device storage.');
+                },
+                onUninstallApp: (String _, String _) async {
+                  throw const ToolExtensionException('Package manager locked.');
+                },
+                onIsAppInstalled: (String _, String _) async {
+                  throw const ToolExtensionException('Cannot query installed packages.');
+                },
+                onTakeScreenshot: (String _, Uri _) async {
+                  throw const ToolExtensionException('Display output is disabled.');
+                },
+                onStartScreenRecording: (String _, Uri _, Duration? _) async {
+                  throw const ToolExtensionException('Video encoder unavailable.');
+                },
+                onWaitForScreenRecording: (String _) async {
+                  throw const ToolExtensionException('Screen recording interrupted.');
+                },
+                onStopScreenRecording: (String _) async {
+                  throw const ToolExtensionException('Failed to finalize recording.');
+                },
+              ),
+            ],
+            supportedPlatforms: const <String>{'linux'},
+          ),
+        );
+      }
+
+      final ExtensionConnection domainConn = await ExtensionConnection.spawn(
+        domainErrorEntryPoint,
+        logger: logger,
+      );
+      addTearDown(domainConn.dispose);
+      final domainClient = ExtensionDeviceClient(domainConn, logger: logger);
+
+      const deviceId = 'device-errors';
+      final project = ExtensionFlutterProject(
+        appName: 'error_app',
+        buildDirectory: Uri.directory('/tmp/project/build/'),
+        directory: Uri.directory('/tmp/project/'),
+      );
+      final resolutionContext = ExtensionApplicationResolutionContext(
+        buildMode: .debug,
+        deviceId: deviceId,
+        project: project,
+      );
+
+      Matcher isDomainError(String expectedMessage) => isA<ToolExtensionException>().having(
+        (ToolExtensionException e) => e.message,
+        'message',
+        expectedMessage,
+      );
+
+      await expectLater(
+        domainClient.resolveApplication(resolutionContext),
+        throwsA(isDomainError('Invalid platform manifest.')),
+      );
+      await expectLater(
+        domainClient.installApp(bundleUri: Uri.file('/tmp/app.pkg'), deviceId: deviceId),
+        throwsA(isDomainError('Insufficient device storage.')),
+      );
+      await expectLater(
+        domainClient.uninstallApp(appId: 'com.example.app', deviceId: deviceId),
+        throwsA(isDomainError('Package manager locked.')),
+      );
+      await expectLater(
+        domainClient.isAppInstalled(appId: 'com.example.app', deviceId: deviceId),
+        throwsA(isDomainError('Cannot query installed packages.')),
+      );
+      await expectLater(
+        domainClient.takeScreenshot(deviceId: deviceId, outputFileUri: Uri.file('/tmp/out.png')),
+        throwsA(isDomainError('Display output is disabled.')),
+      );
+      await expectLater(
+        domainClient.startScreenRecording(
+          deviceId: deviceId,
+          outputFileUri: Uri.file('/tmp/out.mp4'),
+        ),
+        throwsA(isDomainError('Video encoder unavailable.')),
+      );
+      await expectLater(
+        domainClient.waitForScreenRecording(deviceId: deviceId),
+        throwsA(isDomainError('Screen recording interrupted.')),
+      );
+      await expectLater(
+        domainClient.stopScreenRecording(deviceId: deviceId),
+        throwsA(isDomainError('Failed to finalize recording.')),
+      );
+    });
+
     testWithoutContext(
       'returns INVALID_PARAMS (-32602) on missing or invalid RPC parameters',
       () async {
@@ -1954,6 +2054,9 @@ void main() {
                 onUninstallApp: (String _, String _) async {
                   throw StateError('Simulated uninstall failure');
                 },
+                onTakeScreenshot: (String _, Uri _) async {
+                  throw StateError('Simulated screenshot failure');
+                },
               ),
             ],
             extensionName: 'failing_device_extension',
@@ -2000,6 +2103,7 @@ void main() {
         id: 'ext-device-fail',
         name: 'Failing Extension Device',
         supportsInstall: true,
+        supportsScreenshot: true,
       );
       final device = ExtensionBackedDevice(
         buildManager: _createBuildManager(logger: logger),
@@ -2011,39 +2115,126 @@ void main() {
 
       expect(await device.resolveApplicationPackage(buildInfo: BuildInfo.debug), isNull);
       expect(
-        logger.errorText,
-        contains(
-          'Failed to resolve application for "ext-device-fail" ("failing_device_extension")',
-        ),
+        logger.errorText.trim(),
+        'Failed to resolve application for "ext-device-fail" '
+        '("failing_device_extension"): Bad state: Simulated resolve failure',
       );
 
       logger.clear();
       expect(await device.isAppInstalled(app), isFalse);
       expect(
-        logger.errorText,
-        contains(
-          'Failed to check if application "com.example.app" is installed on '
-          '"ext-device-fail" ("failing_device_extension")',
-        ),
+        logger.errorText.trim(),
+        'Failed to check if application "com.example.app" is installed on '
+        '"ext-device-fail" ("failing_device_extension"): Bad state: Simulated isAppInstalled failure',
       );
 
       logger.clear();
       expect(await device.installApp(app), isFalse);
       expect(
-        logger.errorText,
-        contains(
-          'Failed to install application "com.example.app" on '
-          '"ext-device-fail" ("failing_device_extension")',
-        ),
+        logger.errorText.trim(),
+        'Failed to install application "com.example.app" on '
+        '"ext-device-fail" ("failing_device_extension"): Bad state: Simulated install failure',
       );
 
       logger.clear();
       expect(await device.uninstallApp(app), isFalse);
       expect(
-        logger.errorText,
-        contains(
-          'Failed to uninstall application "com.example.app" from '
-          '"ext-device-fail" ("failing_device_extension")',
+        logger.errorText.trim(),
+        'Failed to uninstall application "com.example.app" from '
+        '"ext-device-fail" ("failing_device_extension"): Bad state: Simulated uninstall failure',
+      );
+
+      await expectLater(
+        device.takeScreenshot(fs.file('/captures/fail.png')),
+        throwsToolExit(
+          message:
+              'Failed to take screenshot on "ext-device-fail" '
+              '("failing_device_extension"): Bad state: Simulated screenshot failure',
+        ),
+      );
+
+      // ToolExtensionException (-32001) surfaces clean domain messages without
+      // "JSON-RPC error -32001:" or "ToolExtensionException:" prefixes.
+      void domainFailingEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _TestDeviceService(
+                onResolveApplication: (ExtensionApplicationResolutionContext _) async {
+                  throw const ToolExtensionException('Manifest missing appId.');
+                },
+                onInstallApp: (String _, Uri _, bool _) async {
+                  throw const ToolExtensionException('Device storage full.');
+                },
+                onIsAppInstalled: (String _, String _) async {
+                  throw const ToolExtensionException('Device offline.');
+                },
+                onUninstallApp: (String _, String _) async {
+                  throw const ToolExtensionException('App is system-protected.');
+                },
+                onTakeScreenshot: (String _, Uri _) async {
+                  throw const ToolExtensionException('Screen is locked.');
+                },
+              ),
+            ],
+            extensionName: 'domain_error_extension',
+            supportedPlatforms: const <String>{'linux'},
+          ),
+        );
+      }
+
+      final ExtensionConnection domainConn = await ExtensionConnection.spawn(
+        domainFailingEntryPoint,
+        logger: logger,
+      );
+      addTearDown(domainConn.dispose);
+      final domainDevice = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
+        connection: domainConn,
+        deviceService: ExtensionDeviceClient(domainConn, logger: logger),
+        targetDevice: targetDevice,
+        toolContext: _createToolContext(fs: fs, logger: logger),
+      );
+
+      logger.clear();
+      expect(await domainDevice.resolveApplicationPackage(buildInfo: BuildInfo.debug), isNull);
+      expect(
+        logger.errorText.trim(),
+        'Failed to resolve application for "ext-device-fail" '
+        '("domain_error_extension"): Manifest missing appId.',
+      );
+
+      logger.clear();
+      expect(await domainDevice.isAppInstalled(app), isFalse);
+      expect(
+        logger.errorText.trim(),
+        'Failed to check if application "com.example.app" is installed on '
+        '"ext-device-fail" ("domain_error_extension"): Device offline.',
+      );
+
+      logger.clear();
+      expect(await domainDevice.installApp(app), isFalse);
+      expect(
+        logger.errorText.trim(),
+        'Failed to install application "com.example.app" on '
+        '"ext-device-fail" ("domain_error_extension"): Device storage full.',
+      );
+
+      logger.clear();
+      expect(await domainDevice.uninstallApp(app), isFalse);
+      expect(
+        logger.errorText.trim(),
+        'Failed to uninstall application "com.example.app" from '
+        '"ext-device-fail" ("domain_error_extension"): App is system-protected.',
+      );
+
+      await expectLater(
+        domainDevice.takeScreenshot(fs.file('/captures/domain_fail.png')),
+        throwsToolExit(
+          message:
+              'Failed to take screenshot on "ext-device-fail" '
+              '("domain_error_extension"): Screen is locked.',
         ),
       );
 
@@ -2083,35 +2274,48 @@ void main() {
       expect(await exitingDevice.installApp(app), isFalse);
       expect(
         logger.errorText,
-        contains(
-          'Failed to install application "com.example.app" on '
-          '"ext-device-fail" ("exiting_device_extension")',
+        allOf(
+          contains(
+            'Failed to install application "com.example.app" on '
+            '"ext-device-fail" ("exiting_device_extension"): ',
+          ),
+          isNot(contains('ExtensionConnectionException')),
         ),
       );
       logger.clear();
       expect(await exitingDevice.isAppInstalled(app), isFalse);
       expect(
-        logger.errorText,
-        contains(
-          'Failed to check if application "com.example.app" is installed on '
-          '"ext-device-fail" ("exiting_device_extension")',
-        ),
+        logger.errorText.trim(),
+        'Failed to check if application "com.example.app" is installed on '
+        '"ext-device-fail" ("exiting_device_extension"): '
+        'ExtensionConnection for "exiting_device_extension" has been disposed.',
       );
 
       final directErrorDevice = ExtensionBackedDevice(
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: _TestDeviceService(
+          onResolveApplication: (ExtensionApplicationResolutionContext _) =>
+              Future<ExtensionApplicationPackage?>.error(StateError('Host bug')),
           onInstallApp: (String _, Uri _, bool _) => Future<void>.error(StateError('Host bug')),
           onIsAppInstalled: (String _, String _) => Future<bool>.error(StateError('Host bug')),
           onUninstallApp: (String _, String _) => Future<void>.error(StateError('Host bug')),
+          onTakeScreenshot: (String _, Uri _) => Future<void>.error(StateError('Host bug')),
         ),
         targetDevice: targetDevice,
         toolContext: _createToolContext(fs: fs, logger: logger),
       );
+      await expectLater(
+        directErrorDevice.resolveApplicationPackage(buildInfo: BuildInfo.debug),
+        throwsStateError,
+      );
       await expectLater(directErrorDevice.isAppInstalled(app), throwsStateError);
       await expectLater(directErrorDevice.installApp(app), throwsStateError);
       await expectLater(directErrorDevice.uninstallApp(app), throwsStateError);
+      await expectLater(
+        directErrorDevice.takeScreenshot(fs.file('/captures/bug.png')),
+        throwsStateError,
+      );
     });
   });
 }

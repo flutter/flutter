@@ -12,6 +12,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -704,16 +705,12 @@ class ExtensionBackedDevice extends Device {
           '"${DeviceService.resolveApplicationMethod}"; falling back to pubspec app name.',
         );
       } else {
-        logger.printError(
-          'Failed to resolve application for "$id" ("${connection.extensionName}"): $err',
-        );
+        logger.printError(_formatDeviceError('Failed to resolve application for "$id"', err));
         logger.printTrace('$stack');
         return null;
       }
     } on Exception catch (err, stack) {
-      logger.printError(
-        'Failed to resolve application for "$id" ("${connection.extensionName}"): $err',
-      );
+      logger.printError(_formatDeviceError('Failed to resolve application for "$id"', err));
       logger.printTrace('$stack');
       return null;
     }
@@ -887,6 +884,16 @@ class ExtensionBackedDevice extends Device {
     return fs.file(path);
   }
 
+  String _formatDeviceError(String summary, Object error) {
+    final String detail = switch (error) {
+      ToolExtensionException(:final String message) ||
+      json_rpc.RpcException(:final String message) ||
+      ExtensionConnectionException(:final String message) => message,
+      _ => '$error',
+    };
+    return '$summary ("${connection.extensionName}"): $detail';
+  }
+
   @override
   Future<bool> installApp(ApplicationPackage app, {String? userIdentifier}) async {
     if (!supportsInstall) {
@@ -905,8 +912,7 @@ class ExtensionBackedDevice extends Device {
       return true;
     } on Exception catch (err, stack) {
       logger.printError(
-        'Failed to install application "${app.id}" on "$id" '
-        '("${connection.extensionName}"): $err',
+        _formatDeviceError('Failed to install application "${app.id}" on "$id"', err),
       );
       logger.printTrace('$stack');
       return false;
@@ -1058,8 +1064,7 @@ class ExtensionBackedDevice extends Device {
       return true;
     } on Exception catch (err, stack) {
       logger.printError(
-        'Failed to uninstall application "${app.id}" from "$id" '
-        '("${connection.extensionName}"): $err',
+        _formatDeviceError('Failed to uninstall application "${app.id}" from "$id"', err),
       );
       logger.printTrace('$stack');
       return false;
@@ -1081,8 +1086,7 @@ class ExtensionBackedDevice extends Device {
       return await _deviceService.isAppInstalled(appId: app.id, deviceId: id);
     } on Exception catch (err, stack) {
       logger.printError(
-        'Failed to check if application "${app.id}" is installed on "$id" '
-        '("${connection.extensionName}"): $err',
+        _formatDeviceError('Failed to check if application "${app.id}" is installed on "$id"', err),
       );
       logger.printTrace('$stack');
       return false;
@@ -1093,6 +1097,12 @@ class ExtensionBackedDevice extends Device {
   bool get supportsScreenshot => _targetDevice.supportsScreenshot;
 
   @override
-  Future<void> takeScreenshot(File outputFile) =>
-      _deviceService.takeScreenshot(deviceId: id, outputFileUri: outputFile.absolute.uri);
+  Future<void> takeScreenshot(File outputFile) async {
+    try {
+      await _deviceService.takeScreenshot(deviceId: id, outputFileUri: outputFile.absolute.uri);
+    } on Exception catch (err, stack) {
+      logger.printTrace('$stack');
+      throwToolExit(_formatDeviceError('Failed to take screenshot on "$id"', err));
+    }
+  }
 }

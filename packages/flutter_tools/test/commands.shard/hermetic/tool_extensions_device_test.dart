@@ -40,7 +40,8 @@ import 'package:flutter_tools_core/flutter_tools_core.dart'
         ExtensionBuildResult,
         ExtensionDebuggingOptions,
         ExtensionFlutterProject,
-        TargetDevice;
+        TargetDevice,
+        ToolExtensionException;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
@@ -145,6 +146,7 @@ final class _FakeTestDeviceService extends DeviceService {
         buildTarget: 'fake-failing-build',
         ephemeral: false,
         supportsInstall: true,
+        supportsScreenshot: true,
         targetPlatform: 'custom-embedder-arm64',
       ),
       TargetDevice(
@@ -201,7 +203,7 @@ final class _FakeTestDeviceService extends DeviceService {
     bool prebuiltApplication = false,
   }) async {
     if (deviceId != 'fake_test_device') {
-      throw StateError('Simulated install error on $deviceId');
+      throw ToolExtensionException('Simulated install error on $deviceId');
     }
     _installedAppIds.add(resolvedAppId);
     eventSendPort?.send(<String, Object?>{
@@ -221,7 +223,7 @@ final class _FakeTestDeviceService extends DeviceService {
   Future<void> uninstallApp({required String appId, required String deviceId}) async {
     eventSendPort?.send(<String, Object?>{'event': 'uninstall', 'appId': appId});
     if (deviceId != 'fake_test_device') {
-      throw StateError('Simulated uninstall error on $deviceId');
+      throw ToolExtensionException('Simulated uninstall error on $deviceId');
     }
     _installedAppIds.remove(appId);
   }
@@ -229,7 +231,7 @@ final class _FakeTestDeviceService extends DeviceService {
   @override
   Future<void> takeScreenshot({required String deviceId, required Uri outputFileUri}) async {
     if (deviceId != 'fake_test_device') {
-      throw StateError('Simulated screenshot error on $deviceId');
+      throw ToolExtensionException('Simulated screenshot error on $deviceId');
     }
     eventSendPort?.send(<String, Object?>{
       'event': 'screenshot',
@@ -1021,6 +1023,21 @@ flutter:
             runner.run(<String>['screenshot', '-d', 'no_target_device', '--out', outputFile.path]),
             throwsToolExit(message: 'Screenshot not supported for No Target Device.'),
           );
+
+          await expectLater(
+            runner.run(<String>[
+              'screenshot',
+              '-d',
+              'failing_build_device',
+              '--out',
+              outputFile.path,
+            ]),
+            throwsToolExit(
+              message:
+                  'Failed to take screenshot on "failing_build_device" '
+                  '("unknown_extension"): Simulated screenshot error on failing_build_device',
+            ),
+          );
         });
 
         testWithoutContext('FlutterDriverService resolves extension package on TargetPlatform.unsupported and tears down cleanly regardless of supportsInstall', () async {
@@ -1036,7 +1053,7 @@ flutter:
 
           final fakeVmServiceHost = FakeVmServiceHost(requests: const <VmServiceExpectation>[]);
           final driverService = FlutterDriverService(
-            applicationPackages: _FakeApplicationPackageFactory(),
+            applicationPackageFactory: _FakeApplicationPackageFactory(),
             dartSdkPath: 'dart',
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: toolContext,
@@ -1084,7 +1101,7 @@ flutter:
           logger.clear();
           final fakeVmServiceHost2 = FakeVmServiceHost(requests: const <VmServiceExpectation>[]);
           final driverService2 = FlutterDriverService(
-            applicationPackages: _FakeApplicationPackageFactory(),
+            applicationPackageFactory: _FakeApplicationPackageFactory(),
             dartSdkPath: 'dart',
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: toolContext,
@@ -1122,7 +1139,7 @@ flutter:
           expect(await device.targetPlatform, TargetPlatform.unsupported);
 
           final testDevice = IntegrationTestTestDevice(
-            applicationPackages: _FakeApplicationPackageFactory(),
+            applicationPackageFactory: _FakeApplicationPackageFactory(),
             compileExpression: null,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
             device: device,
