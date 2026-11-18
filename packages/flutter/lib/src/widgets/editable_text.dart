@@ -4738,9 +4738,6 @@ class EditableTextState extends State<EditableText>
         return;
       }
 
-      // Rebuild rather than assign renderEditable.text here: this runs whenever
-      // the service's future completes, usually between frames, and the text
-      // layout must not be invalidated outside of the build and layout phases.
       setState(() {
         spellCheckResults = SpellCheckResults(text, suggestions);
       });
