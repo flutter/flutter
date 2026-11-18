@@ -52,7 +52,7 @@ if (![string]::IsNullOrEmpty($env:FLUTTER_PREBUILT_ENGINE_VERSION)) {
 # has a specific (pinned) engine artifacts version.
 #
 # If set, it takes precedence over the git hash.
-} elseif (git -C "$flutterRoot" ls-files bin/internal/engine.version) {
+} elseif (Test-Path "$flutterRoot/bin/internal/engine.version") {
   $engineVersion = Get-Content -Path "$flutterRoot/bin/internal/engine.version"
 
 # Fallback to using git to triangulate which upstream/master (or origin/master)

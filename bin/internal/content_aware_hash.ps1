@@ -26,7 +26,7 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # bin/internal/release-candidate-branch.version: release marker
 $trackedFiles = "DEPS", "engine", "bin/internal/release-candidate-branch.version"
 $baseRef = "HEAD"
-$currentBranch = (git -C "$flutterRoot" rev-parse --abbrev-ref HEAD).Trim()
+$currentBranch = (git.exe -C "$flutterRoot" rev-parse --abbrev-ref HEAD).Trim()
 
 # By default, the content hash is based on HEAD.
 # For local development branches, we want to base the hash on the merge-base
@@ -59,9 +59,9 @@ if (($currentBranch -ne "main") -and
     }
 
     # Try to find the merge-base with master, then main.
-    $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/master" 2>$null).Trim()
+    $mergeBase = (git.exe -C "$flutterRoot" merge-base HEAD "$remote/master" 2>$null).Trim()
     if ([string]::IsNullOrEmpty($mergeBase)) {
-        $mergeBase = (git -C "$flutterRoot" merge-base HEAD "$remote/main" 2>$null).Trim()
+        $mergeBase = (git.exe -C "$flutterRoot" merge-base HEAD "$remote/main" 2>$null).Trim()
     }
     $ErrorActionPreference = "Stop"
 
@@ -79,6 +79,6 @@ if (($currentBranch -ne "main") -and
 # 3. Out-File -NoNewline -Encoding ascii outputs 8bit ascii
 # 4. git hash-object with stdin from a pipeline consumes UTF-16, so consume
 #.   the contents of hash.txt
-(git -C "$flutterRoot" ls-tree "$baseRef" -- $trackedFiles | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
+(git.exe -C "$flutterRoot" ls-tree "$baseRef" -- $trackedFiles | Out-String) -replace "`r`n", "`n"  | Out-File -NoNewline -Encoding ascii hash.txt
 git hash-object hash.txt
 Remove-Item hash.txt

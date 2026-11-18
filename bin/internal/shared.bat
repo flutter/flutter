@@ -72,7 +72,7 @@ GOTO :after_subroutine
     REM before getting the git revision.
     REM
     REM See https://github.com/flutter/flutter/issues/159018
-    FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& $git rev-parse HEAD') DO (
+    FOR /f %%r IN ('PUSHD %FLUTTER_ROOT% ^& git rev-parse HEAD') DO (
       SET revision=%%r
     )
   )
@@ -92,11 +92,11 @@ GOTO :after_subroutine
   IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
-  IF %dart_required_version% NEQ %dart_installed_version% GOTO do_sdk_update_and_snapshot
+  IF "%dart_required_version%" NEQ "%dart_installed_version%" GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
-  IF %stamp_value% NEQ %compilekey% GOTO do_snapshot
+  IF "%stamp_value%" NEQ %compilekey% GOTO do_snapshot
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
   SET pubspec_lock_path=%flutter_tools_dir%\pubspec.lock
   FOR /F %%i IN ('DIR /B /O:D "%pubspec_yaml_path%" "%pubspec_lock_path%"') DO SET newer_file=%%i
