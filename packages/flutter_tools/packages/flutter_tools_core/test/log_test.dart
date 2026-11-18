@@ -6,6 +6,12 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('ExtensionLogLevel', () {
+    test('values are ordered by ascending severity', () {
+      expect(ExtensionLogLevel.values, <ExtensionLogLevel>[.trace, .info, .warning, .error]);
+    });
+  });
+
   group('ExtensionLogMessage', () {
     test('round-trips via toMap and fromJson and supports equality', () {
       final message = ExtensionLogMessage(
@@ -26,6 +32,19 @@ void main() {
       expect(parsed.hashCode, equals(message.hashCode));
       expect(parsed.toString(), contains('level: warning'));
       expect(parsed.toString(), contains('SDK path looks unusual'));
+    });
+
+    test('round-trips local DateTime via UTC and preserves equality and hashCode', () {
+      final message = ExtensionLogMessage(
+        level: .warning,
+        message: 'SDK path looks unusual',
+        timestamp: DateTime(2026, 11, 11, 12, 30),
+      );
+
+      final parsed = ExtensionLogMessage.fromJson(message.toMap());
+      expect(parsed.timestamp?.isUtc, isTrue);
+      expect(parsed, equals(message));
+      expect(parsed.hashCode, equals(message.hashCode));
     });
 
     test('round-trips when timestamp is omitted', () {

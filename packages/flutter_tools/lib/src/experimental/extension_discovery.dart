@@ -345,14 +345,14 @@ class ExtensionConnection {
         }
         final formatted = '[$currentExtensionName] $message';
         switch (logMessage.level) {
+          case .trace:
+            logger.printTrace(formatted);
           case .info:
             logger.printStatus(formatted);
           case .warning:
             logger.printWarning(formatted);
           case .error:
             logger.printError(formatted);
-          case .trace:
-            logger.printTrace(formatted);
         }
       });
 
