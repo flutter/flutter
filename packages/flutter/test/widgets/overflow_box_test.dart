@@ -68,6 +68,10 @@ void main() {
     testWidgets(
       'dry layout and dry baseline match layout when min or max overrides the incoming constraints',
       (WidgetTester tester) async {
+        // Layout checks the dry size, and paint checks the dry baselines,
+        // against the laid-out ones while debugCheckIntrinsicSizes is on.
+        final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+        debugCheckIntrinsicSizes = true;
         final cases = <({BoxConstraints incoming, OverflowBox box})>[
           (
             incoming: const BoxConstraints(maxWidth: 400, maxHeight: 400),
@@ -106,19 +110,18 @@ void main() {
             ),
           ),
         ];
-        for (final c in cases) {
-          // debugCheckIntrinsicSizes (on in these tests) makes layout check the
-          // dry size, and paint check the dry baselines, against the laid-out ones.
+        for (final testCase in cases) {
           await tester.pumpWidget(
             Align(
               alignment: Alignment.topLeft,
-              child: ConstrainedBox(constraints: c.incoming, child: c.box),
+              child: ConstrainedBox(constraints: testCase.incoming, child: testCase.box),
             ),
           );
           expect(tester.takeException(), isNull);
           final RenderBox box = tester.renderObject(find.byType(OverflowBox));
-          expect(box.getDryLayout(c.incoming), box.size);
+          expect(box.getDryLayout(testCase.incoming), box.size);
         }
+        debugCheckIntrinsicSizes = checkIntrinsicSizes;
       },
     );
 
