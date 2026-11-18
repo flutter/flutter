@@ -3411,6 +3411,7 @@ BuildSwiftPackageUtils _createTestUtils({
     analytics: FakeAnalytics(),
     buildSystem: buildSystem ?? FakeBuildSystem(),
     cocoaPods: cocoaPods ?? FakeCocoaPods(),
+    featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
     flutterRoot: _flutterRoot,
     project:
         project ?? FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),

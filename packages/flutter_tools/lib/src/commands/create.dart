@@ -51,6 +51,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   CreateCommand({
     required this.androidContext,
     required this.appleContext,
+    required this.featureFlags,
     required this.pub,
     required this.templatePathProvider,
     required this.templateRenderer,
@@ -63,6 +64,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   final AndroidContext androidContext;
   final AppleContext appleContext;
   final ExtensionTemplateManager? extensionTemplateManager;
+  final FeatureFlags featureFlags;
   final Net? net;
   final Pub pub;
 
@@ -855,7 +857,10 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         _printNoPluginMessage(logger: logger);
       }
 
-      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      final List<String> platformsToWarn = _getPlatformWarningList(
+        requestedPlatforms,
+        featureFlags: featureFlags,
+      );
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
@@ -892,7 +897,10 @@ $commandsToRun
 Your $application code is in $relativeAppMain.
 ''');
       // Show warning if any selected platform is not enabled
-      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      final List<String> platformsToWarn = _getPlatformWarningList(
+        requestedPlatforms,
+        featureFlags: featureFlags,
+      );
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
@@ -1375,7 +1383,10 @@ For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 }
 
 // returns a list disabled, but requested platforms
-List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+List<String> _getPlatformWarningList(
+  List<String> requestedPlatforms, {
+  required FeatureFlags featureFlags,
+}) {
   final platformsToWarn = <String>[
     if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled) 'web',
     if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled) 'macos',

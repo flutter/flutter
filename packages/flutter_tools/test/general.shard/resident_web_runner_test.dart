@@ -193,6 +193,7 @@ name: my_app
         platform: FakePlatform(),
       ),
       buildTargets: const BuildTargetsImpl(),
+      featureFlags: test_fakes.TestFeatureFlags(),
       toolContext: toolContext,
     );
   }
@@ -221,6 +222,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -262,6 +264,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -295,6 +298,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -318,6 +322,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -574,6 +579,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -612,6 +618,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -650,6 +657,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -697,6 +705,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -960,6 +969,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1605,6 +1615,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1651,6 +1662,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -1699,6 +1711,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -2013,6 +2026,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -2067,6 +2081,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem, logger: logger),
         analytics: fakeAnalytics,
       );
@@ -2122,6 +2137,7 @@ name: my_app
           platform: FakePlatform(),
         ),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: test_fakes.TestFeatureFlags(),
         toolContext: test_fakes.FakeToolContext(fs: fileSystem),
         analytics: fakeAnalytics,
       );
@@ -2441,6 +2457,7 @@ flutter:
             platform: FakePlatform(),
           ),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
@@ -2483,6 +2500,7 @@ flutter:
             platform: FakePlatform(),
           ),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
@@ -2534,6 +2552,7 @@ flutter:
             platform: FakePlatform(),
           ),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(fs: fileSystem),
           analytics: fakeAnalytics,
           webDefines: const <String, String>{'VERSION': 'v1.2.3'},
@@ -2588,6 +2607,7 @@ flutter:
             platform: FakePlatform(),
           ),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
@@ -2651,6 +2671,7 @@ flutter:
             platform: FakePlatform(),
           ),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),
@@ -2725,6 +2746,7 @@ flutter:
               platform: FakePlatform(),
             ),
             buildTargets: const BuildTargetsImpl(),
+            featureFlags: test_fakes.TestFeatureFlags(),
             toolContext: test_fakes.FakeToolContext(
               fs: fileSystem,
               systemClock: SystemClock.fixed(DateTime(2001)),
@@ -2901,6 +2923,7 @@ flutter:
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           assetBundleFactory: FakeAssetBundleFactory(),
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: test_fakes.TestFeatureFlags(),
           toolContext: test_fakes.FakeToolContext(
             fs: fileSystem,
             systemClock: SystemClock.fixed(DateTime(2001)),

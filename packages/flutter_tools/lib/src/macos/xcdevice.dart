@@ -21,6 +21,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../features.dart';
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
@@ -58,6 +59,7 @@ class XCDevice {
   XCDevice({
     required this._analytics,
     required this._cocoaPods,
+    required this._featureFlags,
     required IProxy iproxy,
     required this._mdnsVmServiceDiscovery,
     required this._plistParser,
@@ -125,6 +127,7 @@ class XCDevice {
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
@@ -652,6 +655,7 @@ class XCDevice {
           toolContext: _toolContext,
           analytics: _analytics,
           cocoaPods: _cocoaPods,
+          featureFlags: _featureFlags,
           mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
           plistParser: _plistParser,
           iosDeploy: _iosDeploy,
