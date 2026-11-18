@@ -282,6 +282,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry'},
         );
@@ -296,6 +297,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug'},
         );
@@ -317,6 +319,7 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
+            featureFlags: TestFeatureFlags(),
             processManager: FakeProcessManager.any(),
             defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-vanilla'},
           );
@@ -340,6 +343,7 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
+            featureFlags: TestFeatureFlags(),
             processManager: FakeProcessManager.any(),
             defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug vanilla'},
           );
@@ -361,6 +365,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-random'},
         );
