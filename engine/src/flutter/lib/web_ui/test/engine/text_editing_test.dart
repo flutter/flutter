@@ -1175,6 +1175,37 @@ Future<void> testMain() async {
       expect(stacked.left, closeTo(focused.left, tolerance));
       expect(stacked.top, closeTo(focused.bottom, tolerance));
     });
+
+    test('a mousedown on the view keeps the focus on an autofill field', () {
+      // Safari on iOS follows a tap that switches between autofill fields with
+      // a synthesized click. Its mousedown must not move the focus to the view,
+      // which closes the keyboard.
+      final config = InputConfiguration.fromFrameworkMessage(
+        createFlutterConfig(
+          'text',
+          autofillHint: 'email',
+          autofillHintsForFields: <String>['email', 'password'],
+        ),
+      );
+      editingStrategySpy.enable(config, onChange: trackEditingState, onAction: trackInputAction);
+
+      final DomEvent onView = createDomEvent('Event', 'mousedown');
+      implicitViewRootElement.dispatchEvent(onView);
+      expect(onView.defaultPrevented, isTrue);
+
+      // The field's own mousedown keeps its native behavior.
+      final DomEvent onField = createDomEvent('Event', 'mousedown');
+      editingStrategySpy.domElement!.dispatchEvent(onField);
+      expect(onField.defaultPrevented, isFalse);
+
+      // So does the page outside the view.
+      final DomElement page = createDomElement('div');
+      domDocument.body!.append(page);
+      final DomEvent onPage = createDomEvent('Event', 'mousedown');
+      page.dispatchEvent(onPage);
+      expect(onPage.defaultPrevented, isFalse);
+      page.remove();
+    });
   });
 
   group('Iframe detection utilities', () {

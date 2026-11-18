@@ -2807,6 +2807,33 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     );
 
     _addTapListener();
+
+    // Safari on iOS follows a tap that switches between autofill fields with a
+    // synthesized click about 100 ms later. When it lands on the view before
+    // this field is placed under the finger, its mousedown moves the focus to
+    // the view, and the keyboard closes although [handleBlur] hands the focus
+    // straight back. The framework has already handled the tap through pointer
+    // events, so the focus stays on the field.
+    //
+    // This prevents only the focus moves that [handleBlur] reverts anyway, to
+    // another element of the same view. If [handleBlur] stops reverting them
+    // (https://github.com/flutter/flutter/issues/166857), remove this as well.
+    if (hasAutofillGroup) {
+      subscriptions.add(
+        DomSubscription(
+          domDocument,
+          'mousedown',
+          createDomEventListener((DomEvent event) {
+            final target = event.target as DomElement?;
+            if (target != null &&
+                target != activeDomElement &&
+                _viewForElement(target) == activeDomElementView) {
+              event.preventDefault();
+            }
+          }),
+        ),
+      );
+    }
   }
 
   @override
