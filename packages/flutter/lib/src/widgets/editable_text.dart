@@ -4738,18 +4738,12 @@ class EditableTextState extends State<EditableText>
         return;
       }
 
-      spellCheckResults = SpellCheckResults(text, suggestions);
-      final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(
-        context,
-      );
-      final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
-      final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);
-      renderEditable.text = _OverridingTextStyleTextSpanUtils.applyTextSpacingOverrides(
-        lineHeightScaleFactor: lineHeightScaleFactor,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-        textSpan: buildTextSpan(),
-      );
+      // Rebuild rather than assign renderEditable.text here: this runs whenever
+      // the service's future completes, usually between frames, and the text
+      // layout must not be invalidated outside of the build and layout phases.
+      setState(() {
+        spellCheckResults = SpellCheckResults(text, suggestions);
+      });
     } catch (exception, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
