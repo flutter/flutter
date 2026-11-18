@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../cache.dart';
 import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
@@ -28,12 +28,14 @@ base class ExtensionTemplateManager extends TemplateService {
     required this._extensionManager,
     required this._featureFlags,
     required this._fileSystem,
+    required this._flutterRoot,
     required this._logger,
   });
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
   final FileSystem _fileSystem;
+  final String _flutterRoot;
   final Logger _logger;
 
   List<ProjectTemplate>? _cachedTemplates;
@@ -99,6 +101,9 @@ base class ExtensionTemplateManager extends TemplateService {
               .sendRequest(TemplateService.getProjectTemplatesMethod)
               .timeout(_kRpcTimeout);
           return ExtensionProjectTemplate.listFromJson(rpcResult);
+        } on ToolExtensionException catch (e) {
+          _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+          return const <ExtensionProjectTemplate>[];
         } on Object catch (e) {
           _logger.printTrace(
             'Failed to get results from extension for ${TemplateService.getProjectTemplatesMethod}: $e',
@@ -213,7 +218,7 @@ base class ExtensionTemplateManager extends TemplateService {
         final String relativePath = withoutScheme.substring(slashIndex + 1);
         if (packageName == 'flutter_tools') {
           final String absolutePath = _fileSystem.path.join(
-            Cache.flutterRoot!,
+            _flutterRoot,
             'packages',
             'flutter_tools',
             'lib',
@@ -243,7 +248,7 @@ base class ExtensionTemplateManager extends TemplateService {
         }
         if (packageName == 'flutter_tools_extension_linux_prototype') {
           final String absolutePath = _fileSystem.path.join(
-            Cache.flutterRoot!,
+            _flutterRoot,
             'packages',
             'flutter_tools',
             'packages',
@@ -292,6 +297,8 @@ base class ExtensionTemplateManager extends TemplateService {
         if (result is Map) {
           return result.cast<String, Object?>();
         }
+      } on ToolExtensionException catch (e) {
+        throwToolExit(e.message);
       } on Object catch (e) {
         _logger.printTrace('Failed to generate template parameters from extension: $e');
       }

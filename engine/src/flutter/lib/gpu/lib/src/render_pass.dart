@@ -371,7 +371,8 @@ void _validateAttachmentSubresource(
 /// A pass records until [end] is called, or until its command buffer creates
 /// the next pass, records a copy, or is submitted. After that, every method
 /// except [end] throws a [StateError] naming what ended the pass.
-base class RenderPass extends NativeFieldWrapperClass1 {
+base class RenderPass extends NativeFieldWrapperClass1
+    implements _CommandBufferPass {
   /// The maximum number of vertex buffer slots that can be bound to a single
   /// draw. Matches `flutter::gpu::RenderPass::kMaxVertexBufferSlots` on the
   /// native side, which in turn matches `impeller::kMaxVertexBuffers`; keep
@@ -454,6 +455,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       throw Exception(error);
     }
     _commandBuffer._openPass = this;
+  }
+
+  @override
+  void _markEnded(String endedBy) {
+    _endedBy = endedBy;
   }
 
   /// Ends this pass. Nothing more can be recorded into it.

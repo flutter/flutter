@@ -27,7 +27,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = flutterRoot;
   });
 
   setUp(() {
@@ -38,13 +37,18 @@ void main() {
 
   CommandRunner<void> createRunner({FlutterVersion? flutterVersion}) {
     final toolContext = FakeToolContext(
+      cache: Cache.test(flutterRoot: flutterRoot, processManager: processManager),
       flutterVersion: flutterVersion,
       fs: fileSystem,
       logger: logger,
       processManager: processManager,
       systemClock: SystemClock.fixed(DateTime.utc(2026)),
     );
-    final command = UpgradeCommand(toolContext: toolContext, verboseHelp: false);
+    final command = UpgradeCommand(
+      featureFlags: TestFeatureFlags(),
+      toolContext: toolContext,
+      verboseHelp: false,
+    );
     return createTestCommandRunner(command, null, toolContext);
   }
 
@@ -191,7 +195,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
     expect(
       logger.statusText,
-      'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
+      'Upgrading Flutter to 3.1.0 from 3.0.0 in $flutterRoot...\n'
       '\n'
       'Upgrading engine...\n'
       '\n'
@@ -289,7 +293,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
     expect(
       logger.statusText,
-      'Upgrading Flutter to 3.1.0 from 3.0.0 in ${Cache.flutterRoot}...\n'
+      'Upgrading Flutter to 3.1.0 from 3.0.0 in $flutterRoot...\n'
       '\n'
       'Upgrading engine...\n'
       '\n'

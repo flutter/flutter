@@ -7,7 +7,6 @@ import 'dart:isolate';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -208,5 +207,70 @@ void main() {
         expect(receivedEnv.buildDir, buildDir.absolute.uri);
       },
     );
+
+    test('logs error and continues cleaning sibling extensions when clean RPC throws ToolExtensionException', () async {
+      final verifyPort = ReceivePort();
+      addTearDown(verifyPort.close);
+      final SendPort verifySendPort = verifyPort.sendPort;
+
+      void domainErrorEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeCleanService((CleanEnvironment _) async {
+              throw const ToolExtensionException('Clean failed: build directory locked.');
+            }),
+          ],
+          extensionName: 'locked_clean_extension',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      void succeedingEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeCleanService((CleanEnvironment env) async {
+              verifySendPort.send(env.toMap());
+            }),
+          ],
+          extensionName: 'succeeding_clean_extension',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[domainErrorEntryPoint, succeedingEntryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      final cleanManager = ExtensionCleanManager(
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        logger: logger,
+      );
+
+      final Directory projectDir = fs.directory('/my_project')..createSync(recursive: true);
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger);
+      final Directory buildDir = projectDir.childDirectory('build');
+
+      await cleanManager.cleanProject(project, buildDirectory: buildDir);
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to clean extension artifacts for "locked_clean_extension": '
+          'Clean failed: build directory locked.',
+        ),
+      );
+
+      final Object? rawReceived = await verifyPort.first;
+      final receivedEnv = CleanEnvironment.fromJson(rawReceived! as Map<String, Object?>);
+      expect(receivedEnv.projectRoot, project.directory.absolute.uri);
+      expect(receivedEnv.buildDir, buildDir.absolute.uri);
+    });
   });
 }

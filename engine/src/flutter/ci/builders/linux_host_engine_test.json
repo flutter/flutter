@@ -21,8 +21,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/host_debug_test",
             "description": "Builds host-side unit tests for Linux.",
@@ -66,9 +65,9 @@
                 "profile",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--use-glfw-swiftshader",
+                "--rbe"
             ],
             "name": "ci/host_profile_test",
             "description": "Builds host-side unit tests for Linux.",
@@ -82,6 +81,17 @@
                 ]
             },
              "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller tests for host_profile",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_profile_test",
+                        "--type",
+                        "impeller"
+                    ]
+                },
                 {
                     "language": "python3",
                     "name": "Host Tests for host_profile",
@@ -118,9 +128,9 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--use-glfw-swiftshader",
+                "--rbe"
             ],
             "name": "ci/host_release_test",
             "description": "Builds host-side unit tests and benchmarks for Linux.",
@@ -144,6 +154,17 @@
                 ]
             },
             "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller tests for host_release",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_release_test",
+                        "--type",
+                        "impeller"
+                    ]
+                },
                 {
                     "language": "python3",
                     "name": "Host Tests for host_release",

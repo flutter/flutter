@@ -99,9 +99,10 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice(
         'flutter-tester',
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          cache: Cache.test(processManager: fakeProcessManager),
           config: Config.test(),
           flutterVersion: FakeFlutterVersion(),
           fs: fileSystem,
@@ -239,16 +240,18 @@ Hello!
 }
 
 FlutterTesterDevices setUpFlutterTesterDevices() {
+  final processManager = FakeProcessManager.any();
   return FlutterTesterDevices(
+    featureFlags: TestFeatureFlags(),
     toolContext: FakeToolContext(
       artifacts: Artifacts.test(),
-      cache: Cache.test(processManager: FakeProcessManager.any()),
+      cache: Cache.test(processManager: processManager),
       config: Config.test(),
       flutterVersion: FakeFlutterVersion(),
       fs: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-      processManager: FakeProcessManager.any(),
+      processManager: processManager,
     ),
     analytics: const NoOpAnalytics(),
     buildSystem: TestBuildSystem.all(BuildResult(success: true)),

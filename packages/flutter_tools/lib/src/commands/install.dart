@@ -8,12 +8,15 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required ToolContext super.toolContext, required super.verboseHelp}) {
+  InstallCommand({
+    required super.toolContext,
+    required super.verboseHelp,
+    super.applicationPackages,
+  }) {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(),
@@ -28,9 +31,6 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
       help: 'Uninstall the app if already on the device. Skip install.',
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   Logger get _logger => toolContext.logger;
 
@@ -73,7 +73,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final ApplicationPackage? package = await applicationPackages?.getPackageForPlatform(
+    final ApplicationPackage? package = await applicationPackages.getPackageForPlatform(
       await targetDevice.targetPlatform,
       applicationBinary: _applicationBinary,
       buildInfo: await getBuildInfo(),

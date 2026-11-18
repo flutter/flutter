@@ -31,7 +31,9 @@ static_library("brotli") {
     "$source_root/c/dec/bit_reader.c",
     "$source_root/c/dec/decode.c",
     "$source_root/c/dec/huffman.c",
+    "$source_root/c/dec/prefix.c",
     "$source_root/c/dec/state.c",
+    "$source_root/c/dec/static_init.c",
   ]
 
   public_configs = [ ":brotli_public" ]
