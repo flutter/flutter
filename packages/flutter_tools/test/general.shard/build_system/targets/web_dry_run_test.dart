@@ -77,6 +77,7 @@ name: my_app
             kBuildMode: BuildMode.debug.cliName,
           },
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
           processManager: processManager,
           logger: BufferLogger.test(),
           fileSystem: fs,
