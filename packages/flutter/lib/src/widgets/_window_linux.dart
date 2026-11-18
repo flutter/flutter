@@ -813,6 +813,14 @@ class DialogWindowControllerLinux extends DialogWindowController
         _window.present();
       },
     );
+
+    // Popups stay open while they have a dialog descendant, see
+    // PopupWindowControllerLinux._hasOpenDialog.
+    for (var ancestor = parent; ancestor != null; ancestor = _parentOf(ancestor)) {
+      if (ancestor is PopupWindowControllerLinux) {
+        ancestor._dialogDescendants.add(this);
+      }
+    }
   }
 
   final DialogWindowControllerDelegate _delegate;
@@ -881,6 +889,17 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   final TooltipWindowControllerDelegate _delegate;
 }
 
+/// Returns the window [window] was created as a child of, if any.
+BaseWindowController? _parentOf(BaseWindowController window) {
+  return switch (window) {
+    WindowController() => null,
+    DialogWindowController(:final BaseWindowController? parent) => parent,
+    TooltipWindowController(:final BaseWindowController parent) => parent,
+    PopupWindowController(:final BaseWindowController parent) => parent,
+    SatelliteWindowController(:final BaseWindowController parent) => parent,
+  };
+}
+
 /// Implementation of [PopupWindowController] for the Linux platform.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -946,6 +965,17 @@ class PopupWindowControllerLinux extends PopupWindowController
   late final BaseWindowController _toplevel;
   bool _toplevelWasActive = false;
 
+  // Dialogs opened from this popup or its descendants. Registered by
+  // DialogWindowControllerLinux.
+  final List<DialogWindowControllerLinux> _dialogDescendants = <DialogWindowControllerLinux>[];
+
+  // A dialog opened from this popup takes input focus from the top level
+  // window, so the popup is kept open while such a dialog exists.
+  bool get _hasOpenDialog {
+    _dialogDescendants.removeWhere((DialogWindowControllerLinux dialog) => dialog.isDestroyed);
+    return _dialogDescendants.isNotEmpty;
+  }
+
   @override
   Offset get offsetFromParent {
     return _offsetFromParent ?? Offset.zero;
@@ -984,7 +1014,7 @@ class PopupWindowControllerLinux extends PopupWindowController
     final bool wasActive = _toplevelWasActive;
     final bool isActive = toplevelWindow?.isActive() ?? false;
     _toplevelWasActive = isActive;
-    if (toplevelWindow == null || (wasActive && !isActive)) {
+    if (toplevelWindow == null || (wasActive && !isActive && !_hasOpenDialog)) {
       // Deferred so the native window is not destroyed while GTK is still
       // emitting the signal that caused this change.
       scheduleMicrotask(() {

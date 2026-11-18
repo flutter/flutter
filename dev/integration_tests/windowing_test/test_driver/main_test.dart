@@ -260,6 +260,21 @@ void main() {
       testOn: 'linux',
     );
 
+    test(
+      'Popup window is not closed when a dialog opened from it is focused',
+      () async {
+        final String response = await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'popup_focus_loss', 'with_dialog': true}),
+          maxRetries: 1,
+        );
+        final data = jsonDecode(response) as Map<String, Object?>;
+        expect(data['popupDestroyed'], false);
+      },
+      timeout: Timeout.none,
+      testOn: 'linux',
+    );
+
     test('Satellite window is not destroyed until closed', () async {
       await _expectIsDestroyedTransition(driver, 'satellite');
     }, timeout: Timeout.none);
