@@ -16,14 +16,11 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Reads `android:versionCode` from the main `AndroidManifest.xml` for `--split-per-abi` builds
- * that do not set `versionCode` in the `android {}` block.
+ * that omit `versionCode` in the `android {}` block.
  *
- * This matches AGP's fallback behavior. When the DSL omits `versionCode`, AGP reads it only from
- * the main source set's manifest (`src/main/AndroidManifest.xml` by default) and ignores
- * build-type, flavor, and generated manifests. If the main manifest sets a positive integer, AGP
- * injects that value into the merged manifest over any overlay manifest.
- *
- * Kept separate from [ManifestVersionCodeTask] so unit tests can call [readVersionCode] directly.
+ * Matches AGP's fallback: when the DSL omits `versionCode`, AGP reads only the main source set's
+ * manifest (`src/main/AndroidManifest.xml` by default) and ignores build-type, flavor, and
+ * generated manifests.
  */
 object ManifestVersionCodeTaskHelper {
     private const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
@@ -42,33 +39,33 @@ object ManifestVersionCodeTaskHelper {
     }
 
     /**
-     * Registers a [ManifestVersionCodeTask] for [variant] and returns a lazy [Provider] for the
-     * parsed `versionCode`.
+     * Registers a [ManifestVersionCodeTask] for [variant] and returns the main manifest's
+     * `versionCode` as a [Provider].
      *
-     * No manifest file is read during configuration. Any task that consumes the returned provider
-     * automatically runs after [ManifestVersionCodeTask].
+     * Tasks that consume the returned provider run after [ManifestVersionCodeTask].
      */
     internal fun registerTask(
         project: Project,
         variant: ApplicationVariant
     ): Provider<Int> {
+        // Use a task rather than a Provider transform so Gradle resolves `mainManifest` only at
+        // execution time, after any manifest-generating tasks in `manifests.all` have run.
         val task =
             project.tasks.register(
                 "resolveManifestVersionCode${FlutterPluginUtils.capitalize(variant.name)}",
                 ManifestVersionCodeTask::class.java
             ) {
-                // AGP's Variant API has no direct getter for the main manifest; see
-                // `manifestOverlayFiles` in AGP's `SourcesImpl.kt` for `manifests.all` ordering:
+                // AGP's Variant API has no direct getter for the main manifest; `manifests.all`
+                // puts it last (see `manifestOverlayFiles` in AGP's `SourcesImpl.kt`):
                 // https://android.googlesource.com/platform/tools/base/+/refs/heads/mirror-goog-studio-main/build-system/gradle-core/src/main/java/com/android/build/api/variant/impl/SourcesImpl.kt
-                // Using `map` keeps this lazy because `manifests.all` can contain task outputs.
+                // Using `map` keeps this lazy while `manifests.all` has unbuilt task outputs.
                 mainManifest.set(
                     variant.sources.manifests.all
                         .map { it.last() }
                 )
                 variantName.set(variant.name)
-                // Internal output read only by the provider below, not by AGP. Keep this outside
-                // intermediates/flutter/<variant>/ because FlutterTask claims that directory as an
-                // @OutputDirectory, and overlapping outputs disable Gradle caching.
+                // Keep outside intermediates/flutter/<variant>/, which FlutterTask claims as an
+                // @OutputDirectory; overlapping task outputs disable Gradle caching.
                 versionCodeFile.set(
                     project.layout.buildDirectory.file(
                         "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter_manifest_version_code/" +
@@ -76,19 +73,17 @@ object ManifestVersionCodeTaskHelper {
                     )
                 )
             }
-        // Map through task.flatMap (not providers.fileContents, which drops task dependencies)
-        // so wiring this provider into output.versionCode runs this task before AGP's manifest
-        // task.
+        // task.flatMap preserves the task dependency (unlike providers.fileContents) so AGP's
+        // manifest task runs ManifestVersionCodeTask first.
         return task.flatMap { it.versionCodeFile }.map { it.asFile.readText().toInt() }
     }
 
     /**
-     * Reads the `android:versionCode` attribute from [manifest]'s root `<manifest>` element.
+     * Reads `android:versionCode` from [manifest]'s root `<manifest>` element.
      *
-     * Returns [Result.Found] when `android:versionCode` is a positive 32-bit decimal integer (for
-     * example, `android:versionCode="7"` returns `Result.Found(7)`). Returns [Result.NotFound]
-     * otherwise, including when [manifest] cannot be read, omits `android:versionCode`, or uses a
-     * placeholder such as `${versionCode}`.
+     * Returns [Result.Found] if the attribute is a positive 32-bit decimal integer, or
+     * [Result.NotFound] otherwise (for example, if [manifest] cannot be read, omits
+     * `android:versionCode`, or uses a placeholder such as `${versionCode}`).
      */
     internal fun readVersionCode(manifest: File): Result {
         val root =
@@ -100,17 +95,14 @@ object ManifestVersionCodeTaskHelper {
                 return Result.NotFound("$manifest could not be read (${e.message})")
             }
         val value = root.getAttributeNS(ANDROID_NAMESPACE, "versionCode").trim()
-        // Reject non-decimal values (${versionCode}, @integer/..., 0x10) and values <= 0 to match
-        // AGP. When the DSL omits versionCode, AGP's ManifestData parser runs Integer.parseInt on
-        // the raw main manifest before ProcessApplicationManifest replaces manifestPlaceholders.
-        // AGP also ignores values <= 0, and Google Play rejects them. Reading
-        // SingleArtifact.MERGED_MANIFEST instead would create a task cycle because
-        // ProcessApplicationManifest takes VariantOutput.versionCode as an input.
+        // Match AGP's ManifestData parser, which runs Integer.parseInt on the raw main manifest
+        // (before manifestPlaceholders substitution) and ignores values <= 0. Reading
+        // SingleArtifact.MERGED_MANIFEST instead would create a task cycle with
+        // ProcessApplicationManifest, which consumes VariantOutput.versionCode.
         //
-        // Parse as a BigInteger so values outside the Int range get a specific reason. Strip a
-        // leading + first: Integer.parseInt (and so AGP) accepts it, but toBigIntegerOrNull() does
-        // not. Reject "+-7" before stripping, or it would parse as -7.
-        val versionCode = value.takeUnless { it.startsWith("+-") }?.removePrefix("+")?.toBigIntegerOrNull()
+        // Use BigInteger to separate Int overflow from non-decimal input, and strip a leading '+'
+        // that Integer.parseInt accepts but toBigIntegerOrNull() rejects.
+        val versionCode = value.removePrefix("+").toBigIntegerOrNull()
         return when {
             value.isEmpty() -> Result.NotFound("$manifest does not set android:versionCode")
             versionCode == null -> Result.NotFound("android:versionCode=\"$value\" in $manifest is not a decimal integer")
@@ -139,14 +131,8 @@ object ManifestVersionCodeTaskHelper {
             }.parse(manifest)
 
     /**
-     * Formats the `--split-per-abi` error for [variantName] when `android {}` omits `versionCode`
-     * and reading the main manifest fails ([reason]).
-     *
-     * Used with and without `force-version-code-ignoring-abi`, so it does not suggest that flag.
-     * Without a positive `versionCode`, AGP builds APKs with no `versionCode`, which Android reads
-     * as 0. Such an APK installs on a device that does not have the app, but Google Play rejects
-     * it, and installing it over a build with a positive `versionCode` fails with
-     * `INSTALL_FAILED_VERSION_DOWNGRADE`.
+     * Returns the `--split-per-abi` failure message for [variantName] when `android {}` omits
+     * `versionCode` and reading the main manifest fails with [reason] (from [Result.NotFound]).
      */
     internal fun errorMessage(
         variantName: String,

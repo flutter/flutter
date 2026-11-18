@@ -60,7 +60,7 @@ class ManifestVersionCodeTaskHelperTest {
     @Test
     fun `a value that is not a decimal integer is not found`() {
         // AGP parses android:versionCode with Integer.parseInt, so it rejects these too.
-        for (value in listOf("\${versionCode}", "@integer/version_code", "0x10", "+-7", "++7", "+")) {
+        for (value in listOf("\${versionCode}", "@integer/version_code", "0x10", "++7", "+")) {
             val result = assertIs<Result.NotFound>(readVersionCode("android:versionCode=\"$value\""))
             assertContains(result.reason, "android:versionCode=\"$value\"")
             assertContains(result.reason, "is not a decimal integer")

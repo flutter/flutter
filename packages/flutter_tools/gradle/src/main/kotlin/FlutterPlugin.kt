@@ -328,9 +328,8 @@ class FlutterPlugin : Plugin<Project> {
                 registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
                 registerFlutterJniLibsTask(projectToAddTasksTo, variant, compileTaskProvider, targetPlatforms)
                 if (variant is ApplicationVariant) {
-                    // Read the DSL here, not earlier in `apply()`. AGP runs `onVariants` after
-                    // every `finalizeDsl` callback, including ones registered after Flutter's, so
-                    // this sees any `versionCode` that those callbacks set.
+                    // Read the DSL inside `onVariants`, which AGP runs after all `finalizeDsl`
+                    // callbacks have finished configuring `versionCode`.
                     val dslVersionCodes =
                         DslVersionCodes.from(FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo))
                     configureApplicationOutputs(projectToAddTasksTo, variant, dslVersionCodes)
@@ -656,13 +655,11 @@ class FlutterPlugin : Plugin<Project> {
          * ([ManifestVersionCodeTaskHelper]). If neither sets a valid `versionCode`, the build fails
          * (see [ManifestVersionCodeTaskHelper.errorMessage]).
          *
-         * With `force-version-code-ignoring-abi`, no offset is added. A DSL `versionCode` is left
-         * for AGP to apply. Without one, each output gets the main manifest `versionCode`, the
-         * value AGP would use anyway, after the same check. So the flag never produces APKs
-         * without a `versionCode`. Outputs without an ABI filter are left unchanged. An
-         * `onVariants` block in the app's build script runs after this one, so a value it sets
-         * wins. See "Setting per-ABI or per-variant versionCode" in
-         * docs/platforms/android/website-page-draft.md.
+         * With `force-version-code-ignoring-abi`, no ABI offset is added, and AGP applies
+         * [baseVersionCode] if set. If the DSL sets none, each ABI output gets the main-manifest
+         * `versionCode` after the same validity check. Outputs without an ABI filter are
+         * unchanged, and an app `onVariants` block runs later and wins. See "Setting per-ABI or
+         * per-variant versionCode" in docs/platforms/android/website-page-draft.md.
          *
          * TODO(reidbaker): Link to the docs.flutter.dev page once it is published.
          * https://github.com/flutter/flutter/issues/193713
@@ -690,8 +687,8 @@ class FlutterPlugin : Plugin<Project> {
                 val abiVersionCode = FlutterPluginConstants.ABI_VERSION[abi] ?: return@forEach
                 when {
                     ignoreAbi -> {
-                        // Wiring the provider into the output makes AGP's manifest task run the
-                        // check first.
+                        // Wiring the provider makes ManifestVersionCodeTask validate the
+                        // versionCode before AGP's manifest task runs.
                         output.versionCode.set(manifestVersionCode)
                     }
 
@@ -709,11 +706,10 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * Returns `abiVersionCode * 1000 + baseVersionCode`, the `versionCode` of the [abi] split
-         * APK of [variantName].
+         * Returns `abiVersionCode * 1000 + baseVersionCode` as the `versionCode` for the [abi]
+         * split APK of [variantName].
          *
-         * @throws GradleException if the sum is larger than [Int.MAX_VALUE], the largest
-         *   `versionCode` Android accepts, instead of letting it wrap around to a negative number.
+         * @throws GradleException if the sum exceeds [Int.MAX_VALUE].
          */
         internal fun splitApkVersionCode(
             variantName: String,
