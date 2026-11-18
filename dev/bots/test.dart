@@ -155,6 +155,7 @@ Future<void> main(List<String> args) async {
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
+      'customer_testing_devtools': customerTestingDevtoolsRunner,
       'analyze': analyzeRunner,
       'fuchsia_precache': fuchsiaPrecacheRunner,
       'snippets': _runSnippetsTests,
