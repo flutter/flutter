@@ -76,6 +76,18 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   return area > kSrgbGamutArea;
 }
 
+bool IsHdr(const SkColorSpace* color_space) {
+  if (!color_space || color_space->isSRGB()) {
+    return false;
+  }
+  skcms_TransferFunction fn;
+  color_space->transferFn(&fn);
+  skcms_TFType type = skcms_TransferFunction_getType(&fn);
+  return type == skcms_TFType_PQ || type == skcms_TFType_PQish ||
+         type == skcms_TFType_HLG || type == skcms_TFType_HLGish ||
+         type == skcms_TFType_HLGinvish;
+}
+
 absl::StatusOr<ImageDecoderImpeller::ImageInfo> ToImageInfo(
     const SkImageInfo& sk_image_format) {
   const std::optional<impeller::PixelFormat> pixel_format =
@@ -121,8 +133,10 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkISize& decode_size,
     bool supports_wide_gamut,
     ImageDecoder::TargetPixelFormat target_format) {
-  const bool is_wide_gamut =
-      supports_wide_gamut ? IsWideGamut(base_image_info.colorSpace()) : false;
+  const SkColorSpace* color_space = base_image_info.colorSpace();
+  const bool is_hdr = IsHdr(color_space);
+  const bool is_extended_range =
+      supports_wide_gamut && (IsWideGamut(color_space) || is_hdr);
   SkAlphaType alpha_type =
       ChooseCompatibleAlphaType(base_image_info.alphaType());
   if (target_format != ImageDecoder::TargetPixelFormat::kDontCare) {
@@ -135,12 +149,13 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeColorType(target_skia_color_type.value())
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
-  } else if (is_wide_gamut) {
-    // Use 10-bit for opaque images (less memory: 4 bytes vs 8 bytes per pixel).
-    // Use F16 for images with alpha channel.
-    SkColorType color_type = alpha_type == SkAlphaType::kOpaque_SkAlphaType
-                                 ? kBGR_101010x_XR_SkColorType
-                                 : kRGBA_F16_SkColorType;
+  } else if (is_extended_range) {
+    // Use 10-bit for opaque SDR images (less memory: 4 bytes vs 8 bytes per
+    // pixel). Use F16 for HDR images or images with alpha channel.
+    SkColorType color_type =
+        (!is_hdr && alpha_type == SkAlphaType::kOpaque_SkAlphaType)
+            ? kBGR_101010x_XR_SkColorType
+            : kRGBA_F16_SkColorType;
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
         .makeColorType(color_type)
         .makeAlphaType(alpha_type)
@@ -533,20 +548,30 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     result_texture = std::move(resize_texture);
   }
   blit_pass->EncodeCommands();
-  if (!context->GetCommandQueue()
-           ->Submit(
-               {command_buffer},
-               [](impeller::CommandBuffer::Status status) {
-                 if (status == impeller::CommandBuffer::Status::kError) {
-                   FML_LOG(ERROR)
-                       << "GPU Error submitting image decoding command buffer.";
-                 }
-               },
-               /*block_on_schedule=*/true)
-           .ok()) {
-    std::string decode_error("Failed to submit image decoding command buffer.");
-    FML_DLOG(ERROR) << decode_error;
-    return std::make_pair(nullptr, decode_error);
+  {
+    TRACE_EVENT0("impeller", "ImpellerImageUploadSubmit");
+    impeller::CommandQueue::SubmitResult submit_result =
+        context->GetCommandQueue()->SubmitWithReceipt(
+            command_buffer, [](impeller::CommandBuffer::Status status) {
+              if (status == impeller::CommandBuffer::Status::kError) {
+                FML_LOG(ERROR)
+                    << "GPU Error submitting image decoding command buffer.";
+              }
+            });
+    if (!submit_result.status.ok()) {
+      std::string decode_error(
+          "Failed to submit image decoding command buffer.");
+      FML_DLOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+
+    if (submit_result.scheduling_receipt) {
+      // UploadTextureToPrivate calls this method while holding the shared side
+      // of the GPU SyncSwitch. Registering before returning ensures that a
+      // concurrent disable transition cannot pass the switch's unique lock and
+      // miss a committed upload.
+      context->TrackPendingImageUpload(submit_result.scheduling_receipt);
+    }
   }
 
   // Flush the pending command buffer to ensure that its output becomes visible
@@ -586,9 +611,8 @@ void ImageDecoderImpeller::UploadTextureToPrivate(
           .SetIfFalse([&result, context, buffer, image_info, resize_info] {
             sk_sp<DlImage> image;
             std::string decode_error;
-            std::tie(image, decode_error) = std::tie(image, decode_error) =
-                UnsafeUploadTextureToPrivate(context, buffer, image_info,
-                                             resize_info);
+            std::tie(image, decode_error) = UnsafeUploadTextureToPrivate(
+                context, buffer, image_info, resize_info);
             result(image, decode_error);
           })
           .SetIfTrue([&result, context, buffer, image_info, resize_info] {

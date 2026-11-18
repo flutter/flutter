@@ -235,32 +235,27 @@ void main() {
       },
     );
 
-    testWithoutContext('Precompiled web AMD module system artifact paths are correct', () {
+    testWithoutContext('Precompiled web DDC stable SDK artifact paths are correct', () {
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdk).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js',
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdk).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js',
       );
       expect(
-        artifacts.getHostArtifact(HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps).path,
-        'root/bin/cache/flutter_web_sdk/kernel/amd-canvaskit/dart_sdk.js.map',
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCStableSdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/stable/dart_sdk.js.map',
       );
     });
 
-    testWithoutContext(
-      'Precompiled web DDC library bundle module system artifact paths are correct',
-      () {
-        expect(
-          artifacts.getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk).path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js',
-        );
-        expect(
-          artifacts
-              .getHostArtifact(HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps)
-              .path,
-          'root/bin/cache/flutter_web_sdk/kernel/ddcLibraryBundle-canvaskit/dart_sdk.js.map',
-        );
-      },
-    );
+    testWithoutContext('Precompiled web DDC canary SDK artifact paths are correct', () {
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js',
+      );
+      expect(
+        artifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdkSourcemaps).path,
+        'root/bin/cache/flutter_web_sdk/kernel/ddc/canary/dart_sdk.js.map',
+      );
+    });
 
     testWithoutContext('getEngineType', () {
       expect(artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug), 'android-arm');
@@ -864,5 +859,51 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+  });
+
+  group('DeferredArtifacts', () {
+    late Artifacts cached;
+    late Artifacts localEngine;
+
+    setUp(() {
+      final fileSystem = MemoryFileSystem.test();
+      cached = Artifacts.test(fileSystem: fileSystem);
+      localEngine = Artifacts.testLocalEngine(
+        localEngine: '/out/host_debug',
+        localEngineHost: '/out/host_debug',
+        fileSystem: fileSystem,
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it was given', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      expect(artifacts.usesLocalArtifacts, isFalse);
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        cached.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it is resolved to', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(artifacts.usesLocalArtifacts, isTrue);
+      expect(artifacts.localEngineInfo?.targetOutPath, '/out/host_debug');
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        localEngine.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('cannot be resolved twice', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(() => artifacts.resolve(localEngine), throwsAssertionError);
+    });
   });
 }

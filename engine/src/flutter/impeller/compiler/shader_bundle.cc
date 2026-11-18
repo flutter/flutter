@@ -161,6 +161,10 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
     return nullptr;
   }
 
+  if (!compiler.GetWarningMessages().empty()) {
+    std::cerr << compiler.GetWarningMessages();
+  }
+
   // Record dependencies so the caller can emit a depfile. The shader's
   // source file plus every transitive `#include` that contributed to
   // the compilation. The same source is compiled across multiple

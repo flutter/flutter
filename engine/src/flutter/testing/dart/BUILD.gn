@@ -48,7 +48,6 @@ tests = [
   "plugin_utilities_test.dart",
   "process_test.dart",
   "semantics_test.dart",
-  "serial_gc_test.dart",
   "spawn_helper.dart",
   "spawn_test.dart",
   "stringification_test.dart",

@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugBlack54 = Color(0x8A000000);
 const Color _debugTeal = Color(0xFF009688);

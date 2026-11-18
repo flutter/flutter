@@ -93,9 +93,9 @@ class WebTemplate {
   }
 
   WebTemplateWarning _getWarningForMatch(Match match, String warningText) {
-    final int lineCount = RegExp(
-      r'(\r\n|\r|\n)',
-    ).allMatches(_content.substring(0, match.start)).length;
+    final int lineCount = RegExp(r'(\r\n|\r|\n)')
+        .allMatches(_content.substring(0, match.start))
+        .length;
     return WebTemplateWarning(warningText, lineCount + 1);
   }
 
@@ -137,8 +137,8 @@ class WebTemplate {
     }
     newContent = _applyVariableSubstitutions(newContent, logger, <String, String>{
       ...webDefines,
-      if (buildConfig != null) 'flutter_build_config': buildConfig,
-      if (flutterBootstrapJs != null) 'flutter_bootstrap_js': flutterBootstrapJs,
+      'flutter_build_config': ?buildConfig,
+      'flutter_bootstrap_js': ?flutterBootstrapJs,
       'flutter_js': flutterJsFile.readAsStringSync(),
       'flutter_service_worker_version': serviceWorkerVersion != null
           ? '"$serviceWorkerVersion" /* $_kServiceWorkerDeprecationNotice */'

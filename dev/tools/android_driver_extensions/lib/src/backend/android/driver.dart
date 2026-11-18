@@ -83,6 +83,11 @@ final class AndroidNativeDriver implements NativeDriver {
     return result['emulator']! as bool;
   }
 
+  @override
+  Future<void> waitUntilFirstFrameDisplayed() async {
+    await _driver.sendCommand(NativeCommand.waitForFirstFrameDisplayed);
+  }
+
   /// Waits for 2 seconds before completing.
   ///
   /// There is no perfect way, outside of polling, to know when the device is

@@ -14,7 +14,7 @@ namespace testing {
 #ifdef IMPELLER_GOLDEN_TESTS
 using DlGoldenTest = impeller::GoldenPlaygroundTest;
 #else
-using DlGoldenTest = impeller::DlPlayground;
+using DlGoldenTest = impeller::DlPlaygroundWithGoldens;
 #endif
 
 }  // namespace testing

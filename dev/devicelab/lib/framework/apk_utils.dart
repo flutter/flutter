@@ -466,9 +466,10 @@ Future<ProcessResult> _resultOfGradleTask({
   );
   print('┌── $gradle');
   print(
-    File(
-      path.join(workingDirectory, gradle),
-    ).readAsLinesSync().map((String line) => '| $line').join('\n'),
+    File(path.join(workingDirectory, gradle))
+        .readAsLinesSync()
+        .map((String line) => '| $line')
+        .join('\n'),
   );
   print('└─────────────────────────────────────────────────────────────────────────────────────');
   print(
@@ -486,7 +487,7 @@ Future<ProcessResult> _resultOfGradleTask({
   );
 }
 
-/// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
+/// Returns `null` if target matches [expectedTarget], otherwise returns an error message.
 String? validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final snapshotBlob = File(
     path.join(

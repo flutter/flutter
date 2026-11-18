@@ -17,6 +17,9 @@ import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 
+// macOS error code for EADDRINUSE.
+const _kMacOSAddressAlreadyInUseErrno = 48;
+
 String _missingLocalNetworkPermissionsInstructions(String err) =>
     '''
 Flutter could not access the local network.
@@ -28,20 +31,30 @@ You can grant this permission in System Settings > Privacy & Security > Local Ne
 $err
 ''';
 
+String _portAlreadyInUseInstructions(String err) =>
+    '''
+Flutter could not start mDNS discovery because UDP port 5353 is already in use.
+
+This can happen if another process on your machine is exclusively using port 5353, or if multiple network interfaces share the same IPv4 subnet.
+
+You can check which processes are using port 5353 by running:
+  sudo lsof -i :5353
+
+$err
+''';
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
   ///
   /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
   MDnsVmServiceDiscovery({
+    required this._analytics,
+    required this._logger,
     MDnsClient? mdnsClient,
     MDnsClient? preliminaryMDnsClient,
-    required Logger logger,
-    required Analytics analytics,
   }) : _client = mdnsClient ?? MDnsClient(),
-       _preliminaryClient = preliminaryMDnsClient,
-       _logger = logger,
-       _analytics = analytics;
+       _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClient _client;
 
@@ -92,9 +105,9 @@ class MDnsVmServiceDiscovery {
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     // Poll for 5 seconds to see if there are already services running.
     // Use a new instance of MDnsClient so results don't get cached in _client.
@@ -106,9 +119,9 @@ class MDnsVmServiceDiscovery {
       applicationId: applicationId,
       deviceVmServicePort: deviceVmservicePort,
       ipv6: ipv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: const Duration(seconds: 5),
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     if (results.isEmpty) {
       return firstMatchingVmService(
@@ -116,8 +129,9 @@ class MDnsVmServiceDiscovery {
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
-        useDeviceIPAsHost: useDeviceIPAsHost,
+        throwOnError: throwOnError,
         timeout: timeout,
+        useDeviceIPAsHost: useDeviceIPAsHost,
       );
     } else if (results.length > 1) {
       final buffer = StringBuffer();
@@ -164,12 +178,12 @@ class MDnsVmServiceDiscovery {
   @visibleForTesting
   Future<MDnsVmServiceDiscoveryResult?> queryForLaunch({
     required String applicationId,
-    int? deviceVmservicePort,
     String? deviceName,
+    int? deviceVmservicePort,
     bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     // Either the device port or the device name must be provided.
     assert(deviceVmservicePort != null || deviceName != null);
@@ -178,12 +192,12 @@ class MDnsVmServiceDiscovery {
     return firstMatchingVmService(
       _client,
       applicationId: applicationId,
-      deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceName,
+      deviceVmservicePort: deviceVmservicePort,
       ipv6: ipv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: timeout,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
   }
 
@@ -194,23 +208,23 @@ class MDnsVmServiceDiscovery {
   Future<MDnsVmServiceDiscoveryResult?> firstMatchingVmService(
     MDnsClient client, {
     String? applicationId,
-    int? deviceVmservicePort,
     String? deviceName,
+    int? deviceVmservicePort,
     bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
       client,
       applicationId: applicationId,
-      deviceVmServicePort: deviceVmservicePort,
       deviceName: deviceName,
+      deviceVmServicePort: deviceVmservicePort,
       ipv6: ipv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
-      timeout: timeout,
       quitOnFind: true,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      throwOnError: throwOnError,
+      timeout: timeout,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     if (results.isEmpty) {
       return null;
@@ -220,14 +234,14 @@ class MDnsVmServiceDiscovery {
 
   Future<List<MDnsVmServiceDiscoveryResult>> _pollingVmService(
     MDnsClient client, {
-    String? applicationId,
-    int? deviceVmServicePort,
-    String? deviceName,
-    bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
     required Duration timeout,
+    String? applicationId,
+    String? deviceName,
+    int? deviceVmServicePort,
+    bool ipv6 = false,
     bool quitOnFind = false,
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool throwOnError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     // macOS blocks mDNS unless the app has Local Network permissions.
     // Since the mDNS client does not handle errors from the socket's stream,
@@ -267,12 +281,14 @@ class MDnsVmServiceDiscovery {
       if (!globals.platform.isMacOS) {
         rethrow;
       }
-
-      _logger.printTrace(stackTrace.toString());
-      if (throwOnMissingLocalNetworkPermissionsError) {
-        throwToolExit(_missingLocalNetworkPermissionsInstructions(e.toString()));
+      _logger.printTrace('mDNS discovery failed: $e\n$stackTrace');
+      if (throwOnError) {
+        final String message = switch (e.osError?.errorCode) {
+          _kMacOSAddressAlreadyInUseErrno => _portAlreadyInUseInstructions(e.toString()),
+          _ => _missingLocalNetworkPermissionsInstructions(e.toString()),
+        };
+        throwToolExit(message);
       } else {
-        _logger.printError(_missingLocalNetworkPermissionsInstructions(e.toString()));
         return <MDnsVmServiceDiscoveryResult>[];
       }
     }
@@ -435,9 +451,8 @@ class MDnsVmServiceDiscovery {
 
   String _getAuthCode(String txtRecord) {
     const authCodePrefix = 'authCode=';
-    final Iterable<String> matchingRecords = LineSplitter.split(
-      txtRecord,
-    ).where((String record) => record.startsWith(authCodePrefix));
+    final Iterable<String> matchingRecords = LineSplitter.split(txtRecord)
+        .where((String record) => record.startsWith(authCodePrefix));
     if (matchingRecords.isEmpty) {
       return '';
     }
@@ -463,18 +478,20 @@ class MDnsVmServiceDiscovery {
   Future<Uri?> getVMServiceUriForAttach(
     String? applicationId,
     Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
     int? deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
+    int? hostVmservicePort,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
+    bool useDeviceIPAsHost = false,
+    bool usesIpv6 = false,
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForAttach(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: timeout,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     return _handleResult(
       result,
@@ -499,21 +516,21 @@ class MDnsVmServiceDiscovery {
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
     int? deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
+    int? hostVmservicePort,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
+    bool usesIpv6 = false,
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
-      deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceVmservicePort == null ? device.name : null,
+      deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: timeout,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     return _handleResult(
       result,
@@ -579,8 +596,8 @@ class MDnsVmServiceDiscovery {
       return;
     }
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    switch (targetPlatform) {
-      case TargetPlatform.ios:
+    switch (targetPlatform.os) {
+      case .ios:
         _analytics.send(
           Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'),
         );
@@ -591,22 +608,9 @@ class MDnsVmServiceDiscovery {
           'under System Preferences > Network > iPhone USB. '
           'See https://github.com/flutter/flutter/issues/46698 for details.',
         );
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+      case .android || .macos || .fuchsia || .linux || .tester || .web || .windows:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
-      case TargetPlatform.unsupported:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }

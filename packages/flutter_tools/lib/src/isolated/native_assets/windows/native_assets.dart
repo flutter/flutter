@@ -4,10 +4,16 @@
 
 import 'package:code_assets/code_assets.dart';
 
+import '../../../base/common.dart';
 import '../../../globals.dart' as globals;
 import '../../../windows/visual_studio.dart';
 
-Future<CCompilerConfig?> cCompilerConfigWindows() async {
+/// Returns the [CCompilerConfig] for Windows by locating the active Visual Studio toolchain.
+///
+/// If a suitable Visual Studio installation is not found:
+/// * Throws a [ToolExit] if [throwIfNotFound] is true.
+/// * Returns null if [throwIfNotFound] is false.
+Future<CCompilerConfig?> cCompilerConfigWindows({required bool throwIfNotFound}) async {
   final visualStudio = VisualStudio(
     fileSystem: globals.fs,
     platform: globals.platform,
@@ -22,7 +28,12 @@ Future<CCompilerConfig?> cCompilerConfigWindows() async {
   final Uri? envScript = _toOptionalFileUri(visualStudio.vcvarsPath);
 
   if (compiler == null || archiver == null || linker == null || envScript == null) {
-    // Visual Studio might not be installed, don't exit tool.
+    if (throwIfNotFound) {
+      throwToolExit(
+        'Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.',
+      );
+    }
     return null;
   }
 

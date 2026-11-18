@@ -37,6 +37,7 @@ template("skwasm_variant") {
       "text/text_style.cc",
       "text/text_types.h",
       "vertices.cc",
+      "wasm_worker_semaphore.cc",
       "wrappers.h",
     ]
 
@@ -44,6 +45,7 @@ template("skwasm_variant") {
 
     ldflags = [
       "-std=c++20",
+      "-Wl,--allow-multiple-definition",
       "-lGL",
       "-sUSE_WEBGL2=1",
       "-sMAX_WEBGL_VERSION=2",
@@ -75,6 +77,7 @@ template("skwasm_variant") {
     if (invoker.use_impeller) {
       sources += [
         "canvas_text_impeller.cc",
+        "image_precache_impeller.cc",
         "images_impeller.cc",
         "render_context_impeller.cc",
         "shaders_impeller.cc",

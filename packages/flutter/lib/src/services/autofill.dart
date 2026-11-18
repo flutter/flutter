@@ -362,6 +362,14 @@ abstract final class AutofillHints {
   /// * Otherwise, the hint string will be used as-is.
   static const String oneTimeCode = 'oneTimeCode';
 
+  /// The input field expects an email one-time code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_EMAIL_OTP](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_EMAIL_OTP).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String emailOTPCode = 'emailOTPCode';
+
   /// The input field expects an organization name corresponding to the person,
   /// address, or contact information in the other fields associated with this
   /// field.

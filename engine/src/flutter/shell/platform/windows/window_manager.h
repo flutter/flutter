@@ -21,6 +21,7 @@ namespace flutter {
 
 class FlutterWindowsEngine;
 class HostWindow;
+class HostWindowSatellite;
 
 // Specifies a preferred content size for the window.
 struct WindowSizeRequest {
@@ -70,9 +71,10 @@ struct DialogWindowCreationRequest {
   bool resizable = true;
 };
 
-typedef WindowRect* (*GetWindowPositionCallback)(const WindowSize& child_size,
-                                                 const WindowRect& parent_rect,
-                                                 const WindowRect& output_rect);
+typedef void (*GetWindowPositionCallback)(const WindowSize& child_size,
+                                          const WindowRect& parent_rect,
+                                          const WindowRect& display_rect,
+                                          WindowRect& output_rect);
 
 struct TooltipWindowCreationRequest {
   WindowConstraints preferred_constraints;
@@ -84,6 +86,16 @@ struct PopupWindowCreationRequest {
   WindowConstraints preferred_constraints;
   HWND parent;
   GetWindowPositionCallback get_position_callback;
+};
+
+struct SatelliteWindowCreationRequest {
+  WindowSizeRequest preferred_size;
+  WindowConstraints preferred_constraints;
+  HWND parent;
+  GetWindowPositionCallback get_position_callback;
+  LPCWSTR title;
+  bool sized_to_content = false;
+  bool resizable = true;
 };
 
 struct WindowsMessage {
@@ -132,6 +144,13 @@ class WindowManager {
 
   FlutterViewId CreatePopupWindow(const PopupWindowCreationRequest* request);
 
+  FlutterViewId CreateSatelliteWindow(
+      const SatelliteWindowCreationRequest* request);
+
+  // Returns the satellite window hosted by |hwnd|, or nullptr if |hwnd| does
+  // not host a satellite window.
+  static HostWindowSatellite* GetSatelliteWindowFromHandle(HWND hwnd);
+
   // Message handler called by |HostWindow::WndProc| to process window
   // messages before delegating them to the host window. This allows the
   // manager to process messages that affect the state of other host windows.
@@ -139,6 +158,8 @@ class WindowManager {
                                        UINT message,
                                        WPARAM wparam,
                                        LPARAM lparam);
+
+  void OnPreEngineRestart();
 
   void OnEngineShutdown();
 
@@ -227,6 +248,18 @@ void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd);
 
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd);
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreateSatelliteWindow(
+    int64_t engine_id,
+    const flutter::SatelliteWindowCreationRequest* request);
+
+// Re-anchors the satellite window |satellite_hwnd| to |new_parent|. The
+// satellite keeps its current screen position.
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_SetSatelliteParent(
+    HWND satellite_hwnd,
+    HWND new_parent);
 }
 
 #endif  // FLUTTER_SHELL_PLATFORM_WINDOWS_WINDOW_MANAGER_H_

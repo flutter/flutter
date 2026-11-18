@@ -59,6 +59,18 @@
 }
 @end
 
+// Matches an encoded JSON message whose content equals that of |expected|.
+//
+// The encoded bytes are not comparable directly: clang emits constant
+// dictionaries for literals, which order their keys differently to the
+// dictionaries the plugins build at runtime.
+static id JSONMessageWithContentOf(NSData* expected) {
+  id expectedContent = [[FlutterJSONMessageCodec sharedInstance] decode:expected];
+  return [OCMArg checkWithBlock:^BOOL(NSData* message) {
+    return [[[FlutterJSONMessageCodec sharedInstance] decode:message] isEqual:expectedContent];
+  }];
+}
+
 @interface FlutterInputPluginTestObjc : NSObject
 - (bool)testEmptyCompositionRange;
 - (bool)testClearClientDuringComposing;
@@ -224,11 +236,13 @@ static const FlutterViewIdentifier kViewId = 1;
                                           arguments:@[ @(1), expectedState ]]];
 
   OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+      [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                 message:JSONMessageWithContentOf(updateCall)]);
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -294,14 +308,195 @@ static const FlutterViewIdentifier kViewId = 1;
                                           arguments:@[ @(1), expectedState ]]];
 
   OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+      [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                 message:JSONMessageWithContentOf(updateCall)]);
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
+  return true;
+}
+
+- (bool)testSetMarkedTextWithSelectedRangeNotFound {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"Text",
+                                                                @"selectionBase" : @(4),
+                                                                @"selectionExtent" : @(4),
+                                                                @"composingBase" : @(-1),
+                                                                @"composingExtent" : @(-1),
+                                                              }];
+  [plugin handleMethodCall:call
+                    result:^(id){
+                    }];
+
+  [plugin setMarkedText:@"marked"
+          selectedRange:NSMakeRange(1, 0)
+       replacementRange:NSMakeRange(NSNotFound, 0)];
+
+  // IMEs report no selection within the marked text by passing NSNotFound,
+  // which is not a valid offset. Clearing the marked text and marking again is
+  // the sequence an input method produces when the input source is switched
+  // mid-composing.
+  [plugin setMarkedText:@""
+          selectedRange:NSMakeRange(NSNotFound, 0)
+       replacementRange:NSMakeRange(NSNotFound, 0)];
+  [plugin setMarkedText:@"n"
+          selectedRange:NSMakeRange(NSNotFound, 0)
+       replacementRange:NSMakeRange(NSNotFound, 0)];
+
+  // A missing selection places the caret at the end of the marked text.
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Textn");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 5);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 5);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], 4);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], 5);
+  return true;
+}
+
+- (bool)testSetMarkedTextWithOutOfBoundsRanges {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"1234",
+                                                                @"selectionBase" : @(3),
+                                                                @"selectionExtent" : @(3),
+                                                                @"composingBase" : @(-1),
+                                                                @"composingExtent" : @(-1),
+                                                              }];
+  [plugin handleMethodCall:call
+                    result:^(id){
+                    }];
+
+  // Both ranges are computed by the input method against its own version of the
+  // text, which can lag behind the engine's. Each is clamped to what actually
+  // exists rather than dropped.
+  [plugin setMarkedText:@"marked"
+          selectedRange:NSMakeRange(100, 20)
+       replacementRange:NSMakeRange(10, 2)];
+
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "1234marked");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 10);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 10);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], 4);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], 10);
+  return true;
+}
+
+- (bool)testSetEditingStateWithOutOfBoundsSelection {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  // The framework computes the selection against its own copy of the text and
+  // may send one that does not fit the text accompanying it. The text must
+  // still be applied, with the selection clamped to it, because a selection
+  // that outlives the text it was measured against would be carried into the
+  // next edit as an index into the text buffer.
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                              arguments:@{
+                                                                @"text" : @"Te",
+                                                                @"selectionBase" : @(4),
+                                                                @"selectionExtent" : @(4),
+                                                                @"composingBase" : @(-1),
+                                                                @"composingExtent" : @(-1),
+                                                              }];
+  [plugin handleMethodCall:call
+                    result:^(id){
+                    }];
+
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Te");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 2);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 2);
+
+  [plugin setMarkedText:@"m" selectedRange:NSMakeRange(1, 0)];
+
+  editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Tem");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 3);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 3);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], 2);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], 3);
   return true;
 }
 
@@ -1083,7 +1278,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1113,7 +1309,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1143,7 +1340,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1202,7 +1400,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1232,7 +1431,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1262,7 +1462,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1292,7 +1493,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1322,7 +1524,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1352,7 +1555,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1382,7 +1586,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1456,7 +1661,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1820,7 +2026,8 @@ static const FlutterViewIdentifier kViewId = 1;
                                           arguments:@[ @(1), expectedState ]]];
 
   OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+      [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                 message:JSONMessageWithContentOf(updateCall)]);
 
   [plugin handleMethodCall:call
                     result:^(id){
@@ -1836,7 +2043,8 @@ static const FlutterViewIdentifier kViewId = 1;
   // Input action should be notified.
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:performActionCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(performActionCall)]);
   } @catch (...) {
     return false;
   }
@@ -1859,7 +2067,8 @@ static const FlutterViewIdentifier kViewId = 1;
   // Verify that editing state was not be updated.
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
     return false;
   } @catch (...) {
     // Expected.
@@ -1920,7 +2129,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(updateCall)]);
   } @catch (...) {
     return false;
   }
@@ -1987,7 +2197,8 @@ static const FlutterViewIdentifier kViewId = 1;
 
   @try {
     OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:performSelectorCall]);
+        [binaryMessengerMock sendOnChannel:@"flutter/textinput"
+                                   message:JSONMessageWithContentOf(performSelectorCall)]);
   } @catch (...) {
     return false;
   }
@@ -2104,6 +2315,18 @@ TEST(FlutterTextInputPluginTest, TestSetMarkedTextWithSelectionChange) {
 
 TEST(FlutterTextInputPluginTest, TestSetMarkedTextWithReplacementRange) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSetMarkedTextWithReplacementRange]);
+}
+
+TEST(FlutterTextInputPluginTest, TestSetMarkedTextWithSelectedRangeNotFound) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSetMarkedTextWithSelectedRangeNotFound]);
+}
+
+TEST(FlutterTextInputPluginTest, TestSetMarkedTextWithOutOfBoundsRanges) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSetMarkedTextWithOutOfBoundsRanges]);
+}
+
+TEST(FlutterTextInputPluginTest, TestSetEditingStateWithOutOfBoundsSelection) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSetEditingStateWithOutOfBoundsSelection]);
 }
 
 TEST(FlutterTextInputPluginTest, TestComposingRegionRemovedByFramework) {
@@ -2528,6 +2751,55 @@ TEST(FlutterTextInputPluginTest, InsertTextHandlesNSAttributedString) {
   EXPECT_STREQ([editingState[@"text"] UTF8String], "attributed text");
   EXPECT_EQ([editingState[@"selectionBase"] intValue], 15);
   EXPECT_EQ([editingState[@"selectionExtent"] intValue], 15);
+}
+
+TEST(FlutterTextInputPluginTest, InsertTextWithReversedReplacementRange) {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPluginTestDelegate* delegate =
+      [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
+                                                           viewController:viewController];
+
+  FlutterTextInputPlugin* plugin = [[FlutterTextInputPlugin alloc] initWithDelegate:delegate];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(kViewId),
+    @"inputAction" : @"action",
+    @"inputType" : @{@"name" : @"inputName"},
+  };
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                                             arguments:@[ @(1), setClientConfig ]]
+                    result:^(id){
+                    }];
+
+  [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
+                                                             arguments:@{
+                                                               @"text" : @"12345",
+                                                               @"selectionBase" : @(5),
+                                                               @"selectionExtent" : @(5),
+                                                               @"composingBase" : @(-1),
+                                                               @"composingExtent" : @(-1),
+                                                             }]
+                    result:^(id){
+                    }];
+
+  // A selection made backwards arrives as a range whose length is negative when
+  // read as a signed value. The two characters before the location are the ones
+  // replaced; read unsigned, the range would instead cover the text after it.
+  [plugin insertText:@"X" replacementRange:NSMakeRange(4, static_cast<NSUInteger>(-2))];
+
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "12X5");
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 3);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 3);
 }
 
 TEST(FlutterTextInputPluginTest, InsertTextHandlesEmptyAttributedString) {

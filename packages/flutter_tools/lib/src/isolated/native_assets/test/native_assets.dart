@@ -26,7 +26,12 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) => testCompilerBuildNativeAssets(buildInfo);
+  Future<Uri?> build(BuildInfo buildInfo) async =>
+      (await buildWithHookResult(buildInfo)).nativeAssetsManifest;
+
+  @override
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
+      testCompilerBuildNativeAssets(buildInfo);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
@@ -41,10 +46,13 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 /// and install hooks for the host test platform ([TargetPlatform.tester]),
 /// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
 ///
-/// Returns the [Uri] to the generated `native_assets.json` file, or `null` if
+/// Returns the [TestCompilerNativeAssetsBuildResult] containing the [Uri] to the
+/// generated `native_assets.json` file and hook output, or `null` fields if
 /// native assets are disabled, unsupported on the host OS, or no package can
 /// be resolved.
-Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
+Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
+  BuildInfo buildInfo,
+) async {
   final BuildInfo(
     :bool buildNativeAssets,
     :BuildMode mode,
@@ -52,7 +60,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     :String packageConfigPath,
   ) = buildInfo;
   if (!buildNativeAssets) {
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
   final FlutterProject project = FlutterProject.current();
   final Uri projectUri = project.directory.uri;
@@ -67,16 +75,17 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       'Could not determine run package name for native assets testing '
       '(projectUri: $projectUri, packageConfigPath: $packageConfigPath).',
     );
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
-  final String pubspecPath = Uri.file(
-    packageConfigPath,
-  ).resolve('../$_pubspecYamlFileName').toFilePath();
+  final String pubspecPath = Uri.file(packageConfigPath)
+      .resolve('../$_pubspecYamlFileName')
+      .toFilePath();
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     packageConfigPath,
     packageConfig,
     globals.fs,
     globals.logger,
+    globals.platform,
     runPackageName,
     pubspecPath,
     includeDevDependencies: true,
@@ -89,7 +98,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       globals.fs,
       buildRunner,
     );
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
 
   // Only `flutter test` uses the
@@ -130,7 +139,10 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   );
   assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 
-  return nativeAssetsFileUri;
+  return (
+    nativeAssetsManifest: nativeAssetsFileUri,
+    flutterHookResult: dartHookResult.asFlutterResult,
+  );
 }
 
 /// Resolves the target package name for native assets builds using the following

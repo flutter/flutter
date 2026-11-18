@@ -56,7 +56,7 @@ Future<void> testMain() async {
     );
   });
 
-  test('Loading valid asset fonts succeds', () async {
+  test('Loading valid asset fonts succeeds', () async {
     testScope.setAssetPassthrough(robotoVariableFontUrl);
     testScope.setAssetPassthrough(robotoTestFontUrl);
     testScope.setAssetPassthrough(ahemFontUrl);

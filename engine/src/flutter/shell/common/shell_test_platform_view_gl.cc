@@ -8,6 +8,7 @@
 
 #include <EGL/egl.h>
 
+#include "flutter/fml/task_runner_util.h"
 #include "flutter/shell/gpu/gpu_surface_gl_skia.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 
@@ -61,7 +62,9 @@ ShellTestPlatformViewGL::ShellTestPlatformViewGL(
       return;
     }
     impeller_context_ = impeller::ContextGLES::Create(
-        impeller::Flags{}, std::move(gl), ShaderLibraryMappings(), true);
+        impeller::Flags{}, std::move(gl), ShaderLibraryMappings(), true,
+        std::make_shared<fml::WrapperBasicTaskRunner>(
+            task_runners.GetIOTaskRunner()));
   }
 }
 
@@ -85,13 +88,6 @@ std::unique_ptr<Surface> ShellTestPlatformViewGL::CreateRenderingSurface() {
 std::shared_ptr<ExternalViewEmbedder>
 ShellTestPlatformViewGL::CreateExternalViewEmbedder() {
   return shell_test_external_view_embedder_;
-}
-
-// |PlatformView|
-PointerDataDispatcherMaker ShellTestPlatformViewGL::GetDispatcherMaker() {
-  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
-  };
 }
 
 // |GPUSurfaceGLDelegate|

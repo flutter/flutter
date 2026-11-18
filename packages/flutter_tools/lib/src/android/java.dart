@@ -38,14 +38,11 @@ class Java {
     required this.binaryPath,
     required this.javaSource,
     required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils os,
-    required Platform platform,
+    required this._fileSystem,
+    required this._os,
+    required this._platform,
     required ProcessManager processManager,
   }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _os = os,
-       _platform = platform,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
@@ -158,6 +155,29 @@ class Java {
         _os.pathVarSeparator +
         _platform.environment['PATH']!,
   };
+
+  /// JVM flag that grants native access to code on the class path.
+  static const enableNativeAccessFlag = '--enable-native-access=ALL-UNNAMED';
+
+  /// Returns an environment variable map for invoking Gradle.
+  ///
+  /// This is [environment], plus [enableNativeAccessFlag] appended to
+  /// `GRADLE_OPTS`. The Gradle client loads a native library via
+  /// `System::load`, which on JDK 24+ prints a warning to stderr unless native
+  /// access is enabled. On earlier JDKs, the flag has no effect.
+  ///
+  /// See: https://openjdk.org/jeps/472.
+  Map<String, String> get gradleEnvironment {
+    final Map<String, String> env = environment;
+    final String existingOpts = _platform.environment['GRADLE_OPTS']?.trim() ?? '';
+    if (existingOpts.contains('--enable-native-access')) {
+      return env;
+    }
+    env['GRADLE_OPTS'] = existingOpts.isEmpty
+        ? enableNativeAccessFlag
+        : '$existingOpts $enableNativeAccessFlag';
+    return env;
+  }
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.

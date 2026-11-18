@@ -27,7 +27,7 @@ PipelineLibraryVK::PipelineLibraryVK(
                                                    device_holder,
                                                    std::move(cache_directory))),
       worker_task_runner_(std::move(worker_task_runner)),
-      compile_queue_(PipelineCompileQueue::Create(worker_task_runner_)) {
+      compile_queue_(PipelineCompileQueueVulkan::Create(worker_task_runner_)) {
   FML_DCHECK(worker_task_runner_);
   if (!pso_cache_->IsValid() || !worker_task_runner_) {
     return;
@@ -171,8 +171,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto promise = std::make_shared<
       NoExceptionPromise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto pipeline_future =
-      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
+  auto pipeline_future = PipelineFuture<PipelineDescriptor>{
+      descriptor, promise->get_future(), weak_from_this()};
   pipelines_[descriptor] = pipeline_future;
 
   auto weak_this = weak_from_this();
@@ -306,8 +306,9 @@ PipelineLibraryVK::GetWorkerTaskRunner() const {
   return worker_task_runner_;
 }
 
-PipelineCompileQueue* PipelineLibraryVK::GetPipelineCompileQueue() const {
-  return compile_queue_.get();
+// |PipelineLibrary|
+void PipelineLibraryVK::PerformEagerly(const PipelineDescriptor& descriptor) {
+  compile_queue_->PerformJobEagerly(descriptor);
 }
 
 }  // namespace impeller

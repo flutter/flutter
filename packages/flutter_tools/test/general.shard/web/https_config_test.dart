@@ -51,8 +51,7 @@ void main() {
         final https = HttpsConfig.fromYaml(
           loadYaml('''
 cert-path: /path/to/cert
-cert-key-path: /path/to/key''')
-              as YamlMap,
+cert-key-path: /path/to/key''') as YamlMap,
         );
 
         expect(https.certPath, '/path/to/cert');

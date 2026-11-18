@@ -33,8 +33,9 @@ base class ColorAttachment {
   int mipLevel;
 
   /// The slice of [texture] to render into. For cubemap textures this selects
-  /// the face in the order `+X, -X, +Y, -Y, +Z, -Z`. Must be in the range
-  /// `[0, texture.sliceCount)` (always 0 for non-cubemap textures).
+  /// the face in the order `+X, -X, +Y, -Y, +Z, -Z`; for 2D array textures it
+  /// selects the layer. Must be in the range `[0, texture.sliceCount)`
+  /// (always 0 for other texture types).
   int slice;
 
   void _validate() {
@@ -191,6 +192,34 @@ base class SamplerOptions {
   /// levels (via [Texture.overwrite] or by rendering into them) to get the
   /// full quality benefit.
   int maxAnisotropy;
+
+  void _validate() {
+    if (maxAnisotropy < 1) {
+      throw Exception("SamplerOptions.maxAnisotropy must be at least 1");
+    }
+    if (maxAnisotropy > 1 &&
+        (minFilter != MinMagFilter.linear ||
+            magFilter != MinMagFilter.linear ||
+            mipFilter != MipFilter.linear)) {
+      throw Exception(
+        "When SamplerOptions.maxAnisotropy is greater than 1, minFilter, "
+        "magFilter, and mipFilter must all be linear",
+      );
+    }
+  }
+}
+
+/// Textures the GPU only ever writes have no backing memory to sample, so
+/// they cannot be read by a shader.
+void _validateBindableTexture(Texture texture) {
+  assert(() {
+    if (texture.storageMode == StorageMode.deviceTransient) {
+      throw Exception(
+        "Textures with StorageMode.deviceTransient cannot be bound to a RenderPass",
+      );
+    }
+    return true;
+  }());
 }
 
 base class Scissor {
@@ -343,6 +372,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// them in sync.
   static const int _kMaxVertexBufferSlots = 16;
 
+  /// The number of binding set slots that can be bound to a single draw.
+  /// Matches `flutter::gpu::RenderPass::kMaxBindingSets` on the native side;
+  /// keep them in sync. See [bindSet].
+  static const int maxBindingSets = 4;
+
   /// Bitmask of slots that have been bound via [bindVertexBuffer] since the
   /// most recent [clearBindings] (or since this RenderPass was created).
   /// Bit `i` is set when slot `i` has been bound.
@@ -468,9 +502,18 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void bindUniform(UniformSlot slot, BufferView bufferView) {
+    // The slot's index is resolved once and cached, so steady-state binds
+    // pass an integer across the native boundary instead of the name.
+    int uniformStructIndex = slot._resolvedStructIndex;
+    if (uniformStructIndex < 0) {
+      throw Exception(
+        "Failed to bind uniform (no uniform struct named '${slot.uniformName}')",
+      );
+    }
     bool success = bufferView.buffer._bindAsUniform(
       this,
-      slot,
+      slot.shader,
+      uniformStructIndex,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
     );
@@ -488,31 +531,18 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       sampler = SamplerOptions();
     }
 
-    assert(() {
-      if (texture.storageMode == StorageMode.deviceTransient) {
-        throw Exception(
-          "Textures with StorageMode.deviceTransient cannot be bound to a RenderPass",
-        );
-      }
-      return true;
-    }());
+    _validateBindableTexture(texture);
+    sampler._validate();
 
-    if (sampler.maxAnisotropy < 1) {
-      throw Exception("SamplerOptions.maxAnisotropy must be at least 1");
-    }
-    if (sampler.maxAnisotropy > 1 &&
-        (sampler.minFilter != MinMagFilter.linear ||
-            sampler.magFilter != MinMagFilter.linear ||
-            sampler.mipFilter != MipFilter.linear)) {
+    int uniformTextureIndex = slot._resolvedTextureIndex;
+    if (uniformTextureIndex < 0) {
       throw Exception(
-        "When SamplerOptions.maxAnisotropy is greater than 1, minFilter, "
-        "magFilter, and mipFilter must all be linear",
+        "Failed to bind texture (no texture named '${slot.uniformName}')",
       );
     }
-
-    bool success = _bindTexture(
+    bool success = _bindTextureIndexed(
       slot.shader,
-      slot.uniformName,
+      uniformTextureIndex,
       texture,
       sampler.minFilter.index,
       sampler.magFilter.index,
@@ -524,6 +554,32 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     if (!success) {
       throw Exception("Failed to bind texture");
     }
+  }
+
+  /// Binds every resource in [bindingSet] for subsequent draws, replacing
+  /// whatever set was bound to [slot].
+  ///
+  /// This is O(1) regardless of how many resources the set holds, because the
+  /// set already resolved them against shader reflection when it was created.
+  ///
+  /// Set bindings are applied before individual [bindUniform] and
+  /// [bindTexture] calls, so an individual bind to the same shader binding
+  /// overrides the set's. Where two bound sets declare the same binding, the
+  /// higher slot wins. [clearBindings] empties every slot.
+  ///
+  /// [slot] must be in `[0, maxBindingSets)`.
+  void bindSet(BindingSet bindingSet, {int slot = 0}) {
+    if (slot < 0 || slot >= maxBindingSets) {
+      throw RangeError.range(
+        slot,
+        0,
+        maxBindingSets - 1,
+        'slot',
+        'bindSet slot must be in [0, $maxBindingSets)',
+      );
+    }
+    bindingSet._syncReloadEpoch();
+    _bindSet(bindingSet, slot);
   }
 
   void clearBindings() {
@@ -801,11 +857,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   );
 
   @Native<
-    Bool Function(Pointer<Void>, Pointer<Void>, Handle, Pointer<Void>, Int, Int)
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDevice')
-  external bool _bindUniformDevice(
+    Bool Function(Pointer<Void>, Pointer<Void>, Int, Pointer<Void>, Int, Int)
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed')
+  external bool _bindUniformDeviceIndexed(
     Shader shader,
-    String uniformName,
+    int uniformStructIndex,
     DeviceBuffer buffer,
     int offsetInBytes,
     int lengthInBytes,
@@ -827,7 +883,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     Bool Function(
       Pointer<Void>,
       Pointer<Void>,
-      Handle,
+      Int,
       Pointer<Void>,
       Int,
       Int,
@@ -836,10 +892,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       Int,
       Int,
     )
-  >(symbol: 'InternalFlutterGpu_RenderPass_BindTexture')
-  external bool _bindTexture(
+  >(symbol: 'InternalFlutterGpu_RenderPass_BindTextureIndexed')
+  external bool _bindTextureIndexed(
     Shader shader,
-    String uniformName,
+    int uniformTextureIndex,
     Texture texture,
     int minFilter,
     int magFilter,
@@ -848,6 +904,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int heightAddressMode,
     int maxAnisotropy,
   );
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_RenderPass_BindSet',
+  )
+  external void _bindSet(BindingSet bindingSet, int slot);
 
   @Native<Void Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_RenderPass_ClearBindings',

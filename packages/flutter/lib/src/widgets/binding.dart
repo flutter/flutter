@@ -4,6 +4,7 @@
 
 /// @docImport 'dart:ui';
 /// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
 ///
@@ -38,6 +39,7 @@ import 'package:flutter/services.dart';
 import '../foundation/_features.dart';
 import '_accessibility_evaluations.dart';
 import '_window.dart';
+import 'accessibility_inspector.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -762,8 +764,12 @@ mixin WidgetsBinding
             throw Exception('type parameter is required');
           }
 
-          switch (type) {
-            case 'MinimumTextContrastEvaluation':
+          final AccessibilityEvaluationType? evaluationType = AccessibilityEvaluationType.values
+              .where((AccessibilityEvaluationType e) => e.name == type)
+              .firstOrNull;
+
+          switch (evaluationType) {
+            case AccessibilityEvaluationType.minimumTextContrast:
               if (parameters case {
                 'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
                 'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
@@ -775,7 +781,7 @@ mixin WidgetsBinding
                 return _formatEvaluationResult(result.violations);
               }
               throw Exception('Invalid arguments');
-            case 'MinimumTapTargetEvaluation':
+            case AccessibilityEvaluationType.minimumTapTarget:
               if (parameters case {'targetSize': final String targetSize}) {
                 final EvaluationResult result = await MinimumTapTargetEvaluation(
                   size: Size.square(double.parse(targetSize)),
@@ -783,12 +789,15 @@ mixin WidgetsBinding
                 return _formatEvaluationResult(result.violations);
               }
               throw Exception('Invalid arguments');
-            case 'LabeledTapTargetEvaluation':
+            case AccessibilityEvaluationType.labeledTapTarget:
               final EvaluationResult result = await const LabeledTapTargetEvaluation().evaluate(
                 this,
               );
               return _formatEvaluationResult(result.violations);
-            default:
+            case AccessibilityEvaluationType.minimumNonTextContrast:
+            case AccessibilityEvaluationType.unlabeledLeafNode:
+            case AccessibilityEvaluationType.title:
+            case null:
               throw Exception('unknown type: $type');
           }
         },
@@ -807,7 +816,7 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
-
+      AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
@@ -895,6 +904,9 @@ mixin WidgetsBinding
   Future<AppExitResponse> handleRequestAppExit() async {
     var didCancel = false;
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (!_observers.contains(observer)) {
+        continue;
+      }
       try {
         if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
           didCancel = true;
@@ -1129,16 +1141,18 @@ mixin WidgetsBinding
         );
       }
     }
-    SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while popping route'),
-        ),
-      );
-    });
+    unawaited(
+      SystemNavigator.pop().catchError((Object exception, StackTrace stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription('while popping route'),
+          ),
+        );
+      }),
+    );
     return false;
   }
 

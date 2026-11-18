@@ -7,6 +7,12 @@
 
 #include "flutter/fml/endianness.h"
 #include "impeller/renderer/capabilities.h"
+
+#if IMPELLER_SUPPORTS_RENDERING
+#include "impeller/renderer/command_buffer_scheduling_receipt.h"
+#include "impeller/renderer/testing/mocks.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 #include "include/core/SkColorType.h"
 #include "third_party/skia/include/codec/SkPngDecoder.h"
 
@@ -75,6 +81,76 @@ float DecodeBGR10(uint32_t x) {
   const float intercept = min;
   const float slope = (max - min) / 1024.0f;
   return (x * slope) + intercept;
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerUploadTracksSchedulingReceipt) {
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "Test only supported with Impeller rendering.";
+#else
+  using ::impeller::testing::MockBlitPass;
+  using ::impeller::testing::MockCommandBuffer;
+  using ::impeller::testing::MockCommandQueue;
+  using ::impeller::testing::MockImpellerContext;
+  using ::testing::_;
+  using ::testing::Return;
+
+  auto context = std::make_shared<MockImpellerContext>();
+  auto allocator = std::make_shared<impeller::TestImpellerAllocator>();
+  auto command_buffer = std::make_shared<MockCommandBuffer>(context);
+  const std::shared_ptr<impeller::CommandBuffer> submitted_command_buffer =
+      command_buffer;
+  auto blit_pass = std::make_shared<MockBlitPass>();
+  auto command_queue = std::make_shared<MockCommandQueue>();
+  std::shared_ptr<impeller::CommandBufferSchedulingReceipt> receipt =
+      std::make_shared<impeller::CommandBufferSchedulingReceiptState>();
+
+  EXPECT_CALL(*context, GetBackendType)
+      .WillOnce(Return(impeller::Context::BackendType::kMetal));
+  EXPECT_CALL(*context, GetResourceAllocator).WillOnce(Return(allocator));
+  EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
+  EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
+  EXPECT_CALL(*context, TrackPendingImageUpload(receipt));
+  EXPECT_CALL(*command_buffer, SetLabel(_));
+  EXPECT_CALL(*command_buffer, OnCreateBlitPass).WillOnce(Return(blit_pass));
+  EXPECT_CALL(*command_buffer, OnWaitUntilCompleted);
+  EXPECT_CALL(*blit_pass, IsValid).WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, OnSetLabel(_)).Times(2);
+  EXPECT_CALL(*blit_pass, OnCopyBufferToTextureCommand(_, _, _, _, _, _, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, EncodeCommands).WillOnce(Return(true));
+  EXPECT_CALL(*command_queue, SubmitWithReceipt(submitted_command_buffer, _))
+      .WillOnce([receipt](const std::shared_ptr<impeller::CommandBuffer>&,
+                          const impeller::CommandQueue::CompletionCallback&) {
+        return impeller::CommandQueue::SubmitResult{
+            .status = fml::Status(),
+            .scheduling_receipt = receipt,
+        };
+      });
+
+  impeller::DeviceBufferDescriptor buffer_descriptor;
+  buffer_descriptor.size = 4u;
+  auto buffer =
+      std::make_shared<impeller::TestImpellerDeviceBuffer>(buffer_descriptor);
+  auto gpu_disabled_switch = std::make_shared<fml::SyncSwitch>(false);
+  sk_sp<DlImage> image;
+  std::string decode_error;
+  bool callback_called = false;
+
+  ImageDecoderImpeller::UploadTextureToPrivate(
+      [&](const sk_sp<DlImage>& result, const std::string& error) {
+        image = result;
+        decode_error = error;
+        callback_called = true;
+      },
+      context, buffer,
+      {.size = impeller::ISize(1, 1),
+       .format = impeller::PixelFormat::kR8G8B8A8UNormInt},
+      std::nullopt, gpu_disabled_switch);
+
+  EXPECT_TRUE(callback_called);
+  EXPECT_NE(image, nullptr);
+  EXPECT_TRUE(decode_error.empty());
+#endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {
@@ -368,6 +444,83 @@ TEST(ImageDecoderNoGLTest, ImpellerUnmultipliedAlphaPng) {
   // Test a pixel in the green box is still green.
   ASSERT_EQ(*(pixel_ptr + 11 * 4 + 4), (uint32_t)0xFF00FF00);
 
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+#if IMPELLER_SUPPORTS_RENDERING
+void ExpectDecodedFormat(sk_sp<SkColorSpace> color_space,
+                         bool supports_wide_gamut,
+                         impeller::PixelFormat expected_format) {
+  uint8_t pixel_data[] = {255, 255, 255, 255};
+  sk_sp<SkData> sk_data = SkData::MakeWithCopy(pixel_data, sizeof(pixel_data));
+  auto immutable_buffer =
+      fml::MakeRefCounted<ImmutableBuffer>(std::move(sk_data));
+
+  ImageDescriptor::ImageInfo image_info = {
+      .width = 1,
+      .height = 1,
+      .format = ImageDescriptor::PixelFormat::kRGBA8888,
+      .alpha_type = kOpaque_SkAlphaType,
+      .color_space = std::move(color_space),
+  };
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
+      immutable_buffer->data(), image_info, sizeof(pixel_data));
+
+  std::shared_ptr<impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .Build();
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), {.target_width = 1, .target_height = 1}, {1, 1},
+          supports_wide_gamut, capabilities, allocator);
+
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result->image_info.format, expected_format);
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
+TEST(ImageDecoderNoGLTest, ImpellerHdrPqImageDecodesToF16) {
+#if IMPELLER_SUPPORTS_RENDERING
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kR16G16B16A16Float);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerHdrHlgImageDecodesToF16) {
+#if IMPELLER_SUPPORTS_RENDERING
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kHLG, SkNamedGamut::kRec2020),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kR16G16B16A16Float);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerOpaqueSdrWideGamutDecodesToB10XR) {
+#if IMPELLER_SUPPORTS_RENDERING
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDisplayP3),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kB10G10R10XR);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerHdrImageWithoutWideGamutDecodesToF16) {
+#if IMPELLER_SUPPORTS_RENDERING
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kSRGB),
+      /*supports_wide_gamut=*/true, impeller::PixelFormat::kR16G16B16A16Float);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest,
+     ImpellerHdrImageWithoutWideGamutSupportDecodesToRGBA8888) {
+#if IMPELLER_SUPPORTS_RENDERING
+  ExpectDecodedFormat(
+      SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020),
+      /*supports_wide_gamut=*/false, impeller::PixelFormat::kR8G8B8A8UNormInt);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 

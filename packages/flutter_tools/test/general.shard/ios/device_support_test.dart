@@ -372,46 +372,43 @@ void main() {
           );
         });
 
-        testWithoutContext(
-          'returns incomplete copy warning when device directory exists but symbols folder does not',
-          () {
-            final FileSystem fileSystem = MemoryFileSystem.test();
-            final Directory homeDir = fileSystem.directory('/Users/username');
-            final Directory supportDir = homeDir
-                .childDirectory('Library')
-                .childDirectory('Developer')
-                .childDirectory('Xcode')
-                .childDirectory('iOS DeviceSupport');
-            supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
+        testWithoutContext('returns incomplete copy warning when device directory exists but symbols folder does not', () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final Directory homeDir = fileSystem.directory('/Users/username');
+          final Directory supportDir = homeDir
+              .childDirectory('Library')
+              .childDirectory('Developer')
+              .childDirectory('Xcode')
+              .childDirectory('iOS DeviceSupport');
+          supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
 
-            final deviceSupport = IOSDeviceSupport(
+          final deviceSupport = IOSDeviceSupport(
+            logger: BufferLogger.test(),
+            processUtils: ProcessUtils(
+              processManager: FakeProcessManager.empty(),
               logger: BufferLogger.test(),
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: BufferLogger.test(),
-              ),
-              xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-              homeDirectory: homeDir,
-              modelCode: 'iPhone15,2',
-              operatingSystemVersion: '17.0',
-              cpuArchitectureString: 'arm64e',
-              deviceId: 'id-123',
-            );
-            final String? warning = deviceSupport.missingSymbolsWarning();
-            expect(
-              warning,
-              'Xcode has not finished copying Device Support symbols for this device. This will '
-              'likely reduce debugging performance and may cause the app to hang on a white screen '
-              'during launch.\n'
-              'To trigger Device Symbols to be copied, connect the device via USB, close and then '
-              're-open Xcode. It may take several minutes for Xcode to copy symbols from the device.\n'
-              'Once Device Support symbols are finished being copied, they are expected to be found at '
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/Symbols or '
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/arm64e/Symbols\n'
-              'Please retry "flutter run" once symbols are finished being copied.',
-            );
-          },
-        );
+            ),
+            xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
+            homeDirectory: homeDir,
+            modelCode: 'iPhone15,2',
+            operatingSystemVersion: '17.0',
+            cpuArchitectureString: 'arm64e',
+            deviceId: 'id-123',
+          );
+          final String? warning = deviceSupport.missingSymbolsWarning();
+          expect(
+            warning,
+            'Xcode has not finished copying Device Support symbols for this device. This will '
+            'likely reduce debugging performance and may cause the app to hang on a white screen '
+            'during launch.\n'
+            'To trigger Device Symbols to be copied, connect the device via USB, close and then '
+            're-open Xcode. It may take several minutes for Xcode to copy symbols from the device.\n'
+            'Once Device Support symbols are finished being copied, they are expected to be found at '
+            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/Symbols or '
+            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/arm64e/Symbols\n'
+            'Please retry "flutter run" once symbols are finished being copied.',
+          );
+        });
 
         testWithoutContext('returns null when symbol directory exists', () {
           final FileSystem fileSystem = MemoryFileSystem.test();
@@ -576,46 +573,43 @@ void main() {
           );
         });
 
-        testWithoutContext(
-          'returns incomplete copy warning when device directory exists but symbols folder does not',
-          () {
-            final FileSystem fileSystem = MemoryFileSystem.test();
-            final Directory homeDir = fileSystem.directory('/Users/username');
-            final Directory supportDir = homeDir
-                .childDirectory('Library')
-                .childDirectory('Developer')
-                .childDirectory('Xcode')
-                .childDirectory('iOS DeviceSupport');
-            supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
+        testWithoutContext('returns incomplete copy warning when device directory exists but symbols folder does not', () {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final Directory homeDir = fileSystem.directory('/Users/username');
+          final Directory supportDir = homeDir
+              .childDirectory('Library')
+              .childDirectory('Developer')
+              .childDirectory('Xcode')
+              .childDirectory('iOS DeviceSupport');
+          supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
 
-            final deviceSupport = IOSDeviceSupport(
+          final deviceSupport = IOSDeviceSupport(
+            logger: BufferLogger.test(),
+            processUtils: ProcessUtils(
+              processManager: FakeProcessManager.empty(),
               logger: BufferLogger.test(),
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: BufferLogger.test(),
-              ),
-              xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-              homeDirectory: homeDir,
-              modelCode: 'iPhone15,2',
-              operatingSystemVersion: '17.0',
-              cpuArchitectureString: 'arm64e',
-              deviceId: 'id-123',
-            );
-            final String? warning = deviceSupport.missingSymbolsWarning();
-            expect(
-              warning,
-              'Xcode has not finished copying Device Support symbols for this device. This will '
-              'likely reduce debugging performance and may cause the app to hang on a white screen '
-              'during launch.\n'
-              'To trigger Device Symbols to be copied, connect the device via USB, and run this command:\n'
-              '  "xcrun xcodebuild -prepareDeviceSupport -destination id=id-123"\n'
-              'Once Device Support symbols are finished being copied, they are expected to be found at '
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/Symbols or '
-              '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/arm64e/Symbols\n'
-              'Please retry "flutter run" once symbols are finished being copied.',
-            );
-          },
-        );
+            ),
+            xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
+            homeDirectory: homeDir,
+            modelCode: 'iPhone15,2',
+            operatingSystemVersion: '17.0',
+            cpuArchitectureString: 'arm64e',
+            deviceId: 'id-123',
+          );
+          final String? warning = deviceSupport.missingSymbolsWarning();
+          expect(
+            warning,
+            'Xcode has not finished copying Device Support symbols for this device. This will '
+            'likely reduce debugging performance and may cause the app to hang on a white screen '
+            'during launch.\n'
+            'To trigger Device Symbols to be copied, connect the device via USB, and run this command:\n'
+            '  "xcrun xcodebuild -prepareDeviceSupport -destination id=id-123"\n'
+            'Once Device Support symbols are finished being copied, they are expected to be found at '
+            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/Symbols or '
+            '/Users/username/Library/Developer/Xcode/iOS DeviceSupport/iPhone15,2 17.0/arm64e/Symbols\n'
+            'Please retry "flutter run" once symbols are finished being copied.',
+          );
+        });
 
         testWithoutContext('returns null when symbol directory exists', () {
           final FileSystem fileSystem = MemoryFileSystem.test();

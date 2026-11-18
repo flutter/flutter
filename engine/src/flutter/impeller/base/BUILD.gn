@@ -45,6 +45,6 @@ impeller_component("base_unittests") {
   ]
   deps = [
     ":base",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }

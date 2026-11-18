@@ -12,7 +12,6 @@
 #include "impeller/base/thread.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/pipeline.h"
-#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
@@ -88,12 +87,14 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
   GetPipelineUseCounts() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      If this library has a configurable compile queue, return a
-  ///             pointer to it.
+  /// @brief      If creation of the pipeline for the descriptor is still
+  ///             pending, perform it eagerly on the calling thread. This can be
+  ///             used in lieu of an idle wait for the pipeline on the calling
+  ///             thread.
   ///
-  /// @return     The pipeline compile queue if one is present.
+  /// @param[in]  descriptor  The descriptor of the pipeline.
   ///
-  virtual PipelineCompileQueue* GetPipelineCompileQueue() const;
+  virtual void PerformEagerly(const PipelineDescriptor& descriptor);
 
  protected:
   PipelineLibrary();

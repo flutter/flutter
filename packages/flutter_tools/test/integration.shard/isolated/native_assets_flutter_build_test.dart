@@ -43,44 +43,40 @@ void main() {
 
   for (final String buildSubcommand in buildSubcommands) {
     for (final String buildMode in buildModes) {
-      testWithoutContext(
-        'flutter build $buildSubcommand with native assets $buildMode',
-        () async {
-          await inTempDir((Directory tempDirectory) async {
-            final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
-            final Directory exampleDirectory = packageDirectory.childDirectory('example');
+      testWithoutContext('flutter build $buildSubcommand with native assets $buildMode', () async {
+        await inTempDir((Directory tempDirectory) async {
+          final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
+          final Directory exampleDirectory = packageDirectory.childDirectory('example');
 
-            final ProcessResult result = processManager.runSync(<String>[
-              flutterBin,
-              'build',
-              buildSubcommand,
-              '--$buildMode',
-              if (buildSubcommand == 'ios') '--no-codesign',
-            ], workingDirectory: exampleDirectory.path);
-            if (result.exitCode != 0) {
-              throw Exception(
-                'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
-              );
-            }
+          final ProcessResult result = processManager.runSync(<String>[
+            flutterBin,
+            'build',
+            buildSubcommand,
+            '--$buildMode',
+            if (buildSubcommand == 'ios') '--no-codesign',
+          ], workingDirectory: exampleDirectory.path);
+          if (result.exitCode != 0) {
+            throw Exception(
+              'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
+            );
+          }
 
-            switch (buildSubcommand) {
-              case 'macos':
-                expectDylibIsBundledMacOS(exampleDirectory, buildMode);
-                _expectDylibIsCodeSignedMacOS(exampleDirectory, buildMode);
-              case 'ios':
-                _expectDylibIsBundledIos(exampleDirectory, buildMode);
-              case 'linux':
-                expectDylibIsBundledLinux(exampleDirectory, buildMode);
-              case 'windows':
-                expectDylibIsBundledWindows(exampleDirectory, buildMode);
-              case 'apk':
-                _expectDylibIsBundledAndroid(exampleDirectory, buildMode);
-            }
-            expectCCompilerIsConfigured(exampleDirectory);
-          });
-        },
-        tags: <String>['flutter-build-apk'],
-      );
+          switch (buildSubcommand) {
+            case 'macos':
+              expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+              _expectDylibIsCodeSignedMacOS(exampleDirectory, buildMode);
+            case 'ios':
+              _expectDylibIsBundledIos(exampleDirectory, buildMode);
+            case 'linux':
+              expectDylibIsBundledLinux(exampleDirectory, buildMode);
+            case 'windows':
+              expectDylibIsBundledWindows(exampleDirectory, buildMode);
+            case 'apk':
+              _expectDylibIsBundledAndroid(exampleDirectory, buildMode);
+          }
+          expectCCompilerIsConfigured(exampleDirectory);
+        });
+      }, tags: <String>['flutter-build-apk']);
     }
   }
 }

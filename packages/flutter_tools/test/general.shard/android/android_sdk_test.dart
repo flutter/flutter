@@ -36,15 +36,16 @@ void main() {
         config.setValue('android-sdk', sdkDir.path);
 
         try {
-          AndroidSdk.locateAndroidSdk()!;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+          sdk.latestVersion;
         } on StateError catch (err) {
           fail('sdk.reinitialize() threw a StateError:\n$err');
         }
       },
       overrides: <Type, Generator>{
+        Config: () => config,
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Config: () => config,
       },
     );
 
@@ -510,6 +511,79 @@ void main() {
         Config: () => config,
       },
     );
+
+    testUsingContext(
+      'does not initialize sdkVersions or latestVersion during constructor instantiation',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        final sdk = AndroidSdk(sdkDir);
+
+        // Constructor did not scan build-tools or platforms.
+        // We verify by modifying the directory before first access.
+        fileSystem
+            .directory(fileSystem.path.join(sdkDir.path, 'platforms', 'android-22'))
+            .deleteSync(recursive: true);
+
+        // First access to latestVersion triggers initialization and sees only remaining platforms.
+        expect(sdk.latestVersion, isNotNull);
+        expect(sdk.latestVersion!.sdkLevel, 23);
+        expect(sdk.sdkVersions.length, 1);
+      },
+      overrides: <Type, Generator>{
+        Config: () => config,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'evaluates sdkVersions and latestVersion lazily on first access',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+
+        // Accessing latestVersion triggers initialization.
+        final sdk1 = AndroidSdk(sdkDir);
+        expect(sdk1.latestVersion, isNotNull);
+        expect(sdk1.latestVersion!.sdkLevel, 23);
+        expect(sdk1.sdkVersions.length, 2);
+
+        // Accessing sdkVersions triggers initialization independently.
+        final sdk2 = AndroidSdk(sdkDir);
+        expect(sdk2.sdkVersions.length, 2);
+        expect(sdk2.latestVersion, isNotNull);
+        expect(sdk2.latestVersion!.sdkLevel, 23);
+      },
+      overrides: <Type, Generator>{
+        Config: () => config,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'reinitialize updates sdkVersions and latestVersion when new platforms are installed',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        final sdk = AndroidSdk(sdkDir);
+
+        expect(sdk.latestVersion!.sdkLevel, 23);
+
+        // Add android-34 platform.
+        fileSystem
+            .directory(fileSystem.path.join(sdkDir.path, 'platforms', 'android-34'))
+            .createSync(recursive: true);
+
+        sdk.reinitialize();
+
+        expect(sdk.latestVersion!.sdkLevel, 34);
+        expect(sdk.sdkVersions.length, 3);
+      },
+      overrides: <Type, Generator>{
+        Config: () => config,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   const llvmHostDirectoryName = <String, String>{
@@ -533,7 +607,7 @@ void main() {
       final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, platform: platform);
       config.setValue('android-sdk', sdkDir.path);
 
-      final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+      final sdk = AndroidSdk(sdkDir);
       late File clang;
       late File ar;
       late File ld;
@@ -584,7 +658,7 @@ void main() {
         final File ar = binDir.childFile('llvm-ar$extension')..createSync();
         final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-        final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+        final sdk = AndroidSdk(sdkDir);
         expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
         expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
         expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
@@ -612,7 +686,7 @@ void main() {
       final File ar = binDir.childFile('llvm-ar$extension')..createSync();
       final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-      final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+      final sdk = AndroidSdk(sdkDir);
       expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
       expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
       expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);
@@ -643,7 +717,7 @@ void main() {
         final File ar = binDir.childFile('llvm-ar$extension')..createSync();
         final File ld = binDir.childFile('ld.lld$extension')..createSync();
 
-        final sdk = AndroidSdk(sdkDir, fileSystem: fileSystem);
+        final sdk = AndroidSdk(sdkDir);
         expect(sdk.getNdkClangPath(platform: platform, config: config), clang.path);
         expect(sdk.getNdkArPath(platform: platform, config: config), ar.path);
         expect(sdk.getNdkLdPath(platform: platform, config: config), ld.path);

@@ -228,8 +228,7 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
     final testCases = <Map<String, String>>[
       // Standard cases
       <String, String>{
-        'input':
-            '015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper',
+        'input': '015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper',
         'expectedId': '015d172c98400a03',
         'expectedStatus': 'success',
       },
@@ -241,15 +240,13 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
       // ADB long listings use a minimum-width serial column, so a serial that
       // is 22 characters or longer can be followed by only one space.
       <String, String>{
-        'input':
-            'adb-0123456789abcdef._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
+        'input': 'adb-0123456789abcdef._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
         'expectedId': 'adb-0123456789abcdef._adb-tls-connect._tcp',
         'expectedStatus': 'success',
       },
       // mDNS conflict suffixes introduce whitespace into the serial itself.
       <String, String>{
-        'input':
-            'adb-0123456789abcdef (2)._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
         'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
         'expectedStatus': 'success',
       },
@@ -629,34 +626,31 @@ device4       unknown usb:3-7
   );
 
   // Related to https://github.com/flutter/flutter/issues/189274
-  testWithoutContext(
-    'AndroidDevices can parse output with extra non-key-value attributes without mis-matching device ID',
-    () async {
-      final androidDevices = AndroidDevices(
-        userMessages: UserMessages(),
-        androidWorkflow: androidWorkflow,
-        androidSdk: FakeAndroidSdk(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['adb', 'devices', '-l'],
-            stdout: '''
+  testWithoutContext('AndroidDevices can parse output with extra non-key-value attributes without mis-matching device ID', () async {
+    final androidDevices = AndroidDevices(
+      userMessages: UserMessages(),
+      androidWorkflow: androidWorkflow,
+      androidSdk: FakeAndroidSdk(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', 'devices', '-l'],
+          stdout: '''
 List of devices attached
 ABCDEFG           device 20-30 product:mokey model:mokey device:mokey transport_id:1
 ''',
-          ),
-        ]),
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-      );
+        ),
+      ]),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+    );
 
-      final List<Device> devices = await androidDevices.pollingGetDevices();
+    final List<Device> devices = await androidDevices.pollingGetDevices();
 
-      expect(devices, hasLength(1));
-      expect(devices.first.id, 'ABCDEFG');
-      expect(devices.first.name, 'mokey');
-    },
-  );
+    expect(devices, hasLength(1));
+    expect(devices.first.id, 'ABCDEFG');
+    expect(devices.first.name, 'mokey');
+  });
 
   testWithoutContext(
     'AndroidDevices handles serial containing spaces and state keywords correctly',

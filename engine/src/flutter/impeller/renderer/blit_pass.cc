@@ -152,7 +152,7 @@ bool BlitPass::AddCopy(BufferView source,
                    << destination->GetMipCount() << " mip levels.";
     return false;
   }
-  if (slice > 5) {
+  if (!destination->IsSliceValid(slice)) {
     VALIDATION_LOG << "Invalid value for slice: " << slice;
     return false;
   }

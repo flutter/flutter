@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -32,7 +33,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 
 void main() {
   final macPlatform = FakePlatform(operatingSystem: 'macos');
@@ -93,7 +94,7 @@ void main() {
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -122,7 +123,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           sdkVersion: '13.3',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
           isPaired: true,
@@ -171,7 +172,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.armv7,
+        cpuArch: .armv7,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -199,7 +200,7 @@ void main() {
           coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           sdkVersion: '1.0.0',
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
@@ -226,7 +227,7 @@ void main() {
           coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           sdkVersion: '13.1.1',
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
@@ -253,7 +254,7 @@ void main() {
           coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           sdkVersion: '10',
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
@@ -280,7 +281,7 @@ void main() {
           coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           sdkVersion: '0',
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
@@ -307,7 +308,7 @@ void main() {
           coreDeviceLauncher: coreDeviceLauncher,
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           sdkVersion: 'bogus',
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
@@ -336,7 +337,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         sdkVersion: '13.3.1',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
@@ -365,7 +366,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         sdkVersion: '13.3.1 (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
@@ -394,7 +395,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         sdkVersion: '16.4.1(a) (20ADBC)',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
@@ -423,7 +424,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         sdkVersion: '0',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
@@ -452,7 +453,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -477,7 +478,7 @@ void main() {
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         sdkVersion: 'bogus',
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
@@ -506,7 +507,7 @@ void main() {
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3 17C54',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -535,7 +536,7 @@ void main() {
         xcodeDebug: xcodeDebug,
         name: 'iPhone 1',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
@@ -571,7 +572,7 @@ void main() {
               xcodeDebug: xcodeDebug,
               name: 'iPhone 1',
               sdkVersion: '13.3',
-              cpuArchitecture: DarwinArch.arm64,
+              cpuArch: .arm64,
               connectionInterface: DeviceConnectionInterface.attached,
               isConnected: true,
               isPaired: true,
@@ -665,7 +666,7 @@ void main() {
           xcodeDebug: xcodeDebug,
           name: 'iPhone 1',
           sdkVersion: '13.3',
-          cpuArchitecture: DarwinArch.arm64,
+          cpuArch: .arm64,
           connectionInterface: DeviceConnectionInterface.attached,
           isConnected: true,
           isPaired: true,
@@ -687,6 +688,186 @@ void main() {
         expect(process2.killed, true);
         expect(process3.killed, true);
       });
+    });
+
+    group('screenshot', () {
+      late FakeIOSCoreDeviceControl fakeCoreDeviceControl;
+      late IOSDevice device;
+      late File outputFile;
+
+      setUp(() {
+        fakeCoreDeviceControl = coreDeviceControl as FakeIOSCoreDeviceControl;
+        outputFile = fileSystem.file('screenshot.png');
+      });
+
+      testUsingContext('supportsScreenshot is false on CoreDevice with Xcode < 27', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArch: CpuArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
+        );
+
+        expect(device.supportsScreenshot, isFalse);
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(15, 0, 0))});
+
+      testUsingContext(
+        'supportsScreenshot is true on CoreDevice with Xcode 27+ and devicectl installed',
+        () async {
+          device = IOSDevice(
+            'device-123',
+            iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
+            logger: logger,
+            platform: macPlatform,
+            iosDeploy: iosDeploy,
+            analytics: FakeAnalytics(),
+            iMobileDevice: iMobileDevice,
+            coreDeviceControl: fakeCoreDeviceControl,
+            coreDeviceLauncher: coreDeviceLauncher,
+            xcodeDebug: xcodeDebug,
+            name: 'iPhone 1',
+            sdkVersion: '17.0',
+            cpuArch: CpuArch.arm64,
+            connectionInterface: DeviceConnectionInterface.attached,
+            isConnected: true,
+            isPaired: true,
+            devModeEnabled: true,
+            isCoreDevice: true,
+            processUtils: processUtils,
+            xcode: null,
+          );
+
+          final fakeXcode = globals.xcode! as FakeXcode;
+          fakeXcode.isDevicectlInstalled = true;
+          expect(device.supportsScreenshot, isTrue);
+
+          fakeXcode.isDevicectlInstalled = false;
+          expect(device.supportsScreenshot, isFalse);
+        },
+        overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))},
+      );
+
+      testUsingContext('takeScreenshot uses devicectl on CoreDevice with Xcode 27+', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArch: CpuArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
+        );
+
+        fakeCoreDeviceControl.takeScreenshotSuccess = true;
+        await device.takeScreenshot(outputFile);
+
+        fakeCoreDeviceControl.takeScreenshotSuccess = false;
+        expect(() => device.takeScreenshot(outputFile), throwsToolExit());
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
+
+      testUsingContext('takeScreenshot throws a ToolExit with actionable message when CoreDevice is locked/unreachable', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArch: CpuArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
+        );
+
+        fakeCoreDeviceControl.takeScreenshotException = Exception(
+          'ERROR: A connection to this device could not be established. (com.apple.dt.CoreDeviceError error 4000 (0xFA0))',
+        );
+        expect(
+          () => device.takeScreenshot(outputFile),
+          throwsToolExit(
+            message: 'Failed to establish a connection to the device. Please make sure the device is available and try again.',
+          ),
+        );
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(27, 0, 0))});
+
+      testUsingContext('takeScreenshot throws ToolExit on CoreDevice with Xcode < 27', () async {
+        device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: fakeCoreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '17.0',
+          cpuArch: CpuArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: true,
+          processUtils: processUtils,
+          xcode: null,
+        );
+
+        expect(
+          () => device.takeScreenshot(outputFile),
+          throwsToolExit(message: 'flutter screenshot requires Xcode 27 or higher.'),
+        );
+      }, overrides: <Type, Generator>{Xcode: () => FakeXcode(currentVersion: Version(26, 0, 0))});
     });
   });
 
@@ -738,7 +919,7 @@ void main() {
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
         name: 'Paired iPhone',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -763,7 +944,7 @@ void main() {
         '00008027-00192736010F802E',
         name: 'iPad Pro',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1101,7 +1282,7 @@ void main() {
         '00000001-0000000000000000',
         name: 'iPad',
         sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
+        cpuArch: .arm64,
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
@@ -1287,10 +1468,29 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
   bool get debugStarted => false;
 }
 
-class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {}
+class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
+  bool takeScreenshotSuccess = true;
+  Exception? takeScreenshotException;
+
+  @override
+  Future<bool> takeScreenshot({required String deviceId, required String destination}) async {
+    if (takeScreenshotException != null) {
+      throw takeScreenshotException!;
+    }
+    return takeScreenshotSuccess;
+  }
+}
 
 class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {}
 
 class FakeAnalytics extends Fake implements Analytics {}
 
-class FakeXcode extends Fake implements Xcode {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.currentVersion, this.isDevicectlInstalled = true});
+
+  @override
+  final Version? currentVersion;
+
+  @override
+  bool isDevicectlInstalled;
+}

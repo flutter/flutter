@@ -11,6 +11,9 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/display_list_testing.h"
+#ifdef IMPELLER_SUPPORTS_RENDERING
+#include "flutter/impeller/display_list/dl_text_impeller.h"  // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -159,6 +162,7 @@ constexpr size_t kRRectsToDraw = 5000;
 constexpr size_t kRSEsToDraw = 5000;
 constexpr size_t kDRRectsToDraw = 2000;
 constexpr size_t kArcSweepSetsToDraw = 1000;
+constexpr size_t kPathsToDraw = 2000;
 constexpr size_t kImagesToDraw = 500;
 constexpr size_t kFixedCanvasSize = 1024;
 
@@ -940,6 +944,98 @@ void BM_DrawPath(benchmark::State& state,
                           "DrawPath-" + label);
 }
 
+void BM_DrawPathPrimitives(benchmark::State& state,
+                           BackendType backend_type,
+                           unsigned attributes,
+                           PathVerb type) {
+  auto surface_provider = DlSurfaceProvider::Create(backend_type);
+  DisplayListBuilder builder;
+  DlPaint paint = GetPaintForRun(attributes);
+
+  CheckAttributes(attributes, state, DisplayListOpFlags::kDrawPathFlags);
+
+  size_t length = state.range(0);
+  surface_provider->InitializeSurface(length * 2, length * 2);
+  auto surface = surface_provider->GetPrimarySurface();
+  surface->Clear(DlColor::kTransparent());
+  surface->FlushSubmitCpuSync();
+
+  DlPathBuilder path_builder;
+  DlPoint center = DlPoint(length / 2.0f, length / 2.0f);
+  float radius = length / 2.0f;
+
+  switch (type) {
+    case PathVerb::kLine:
+      GetLinesPath(path_builder, 10, center, radius);
+      break;
+    case PathVerb::kQuad:
+      GetQuadsPath(path_builder, 10, center, radius);
+      break;
+    case PathVerb::kConic:
+      GetConicsPath(path_builder, 10, center, radius);
+      break;
+    case PathVerb::kCubic:
+      GetCubicsPath(path_builder, 10, center, radius);
+      break;
+  }
+  DlPath path = path_builder.TakePath();
+
+  const DlPoint delta(0.5f, 0.5f);
+  RectAnimator animator(DlRect::MakeWH(length, length), delta, surface);
+
+  state.counters["DrawCallCount"] = kPathsToDraw;
+  for (size_t i = 0; i < kPathsToDraw; i++) {
+    builder.Save();
+    builder.Translate(animator.GetPoint().x, animator.GetPoint().y);
+    builder.DrawPath(path, paint);
+    builder.Restore();
+    animator.Animate();
+  }
+
+  auto display_list = builder.Build();
+
+  // Prime any path conversions
+  surface->RenderDisplayList(display_list);
+  surface->FlushSubmitCpuSync();
+
+  // We only want to time the actual rasterization.
+  size_t items_processed = 0;
+  for ([[maybe_unused]] auto _ : state) {
+    surface->RenderDisplayList(display_list);
+    items_processed += kPathsToDraw;
+    surface->FlushSubmitCpuSync();
+  }
+  state.SetItemsProcessed(items_processed);
+
+  std::string label = VerbToString(type);
+  SaveSnapshotIfNecessary(surface_provider, surface, state,
+                          "DrawPathPrimitives-" + label);
+}
+
+void BM_DrawPathLine(benchmark::State& state,
+                     BackendType backend_type,
+                     unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kLine);
+}
+
+void BM_DrawPathQuad(benchmark::State& state,
+                     BackendType backend_type,
+                     unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kQuad);
+}
+
+void BM_DrawPathConic(benchmark::State& state,
+                      BackendType backend_type,
+                      unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kConic);
+}
+
+void BM_DrawPathCubic(benchmark::State& state,
+                      BackendType backend_type,
+                      unsigned attributes) {
+  BM_DrawPathPrimitives(state, backend_type, attributes, PathVerb::kCubic);
+}
+
 // Returns a set of vertices that describe a circle that has a
 // radius of `radius` and outer vertex count of approximately
 // `vertex_count`. The final number of vertices will differ as we
@@ -1454,9 +1550,19 @@ void BM_DrawTextBlob(benchmark::State& state,
   state.counters["GlyphCount"] = draw_calls;
   char character[2] = {'A', '\0'};
 
+#ifdef IMPELLER_SUPPORTS_RENDERING
+  const bool targets_impeller = surface_provider->TargetsImpeller();
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
   for (size_t i = 0; i < draw_calls; i++) {
     character[0] = 'A' + (i % 26);
     auto blob = SkTextBlob::MakeFromString(character, CreateTestFontOfSize(20));
+#ifdef IMPELLER_SUPPORTS_RENDERING
+    if (targets_impeller) {
+      builder.DrawText(DlTextImpeller::MakeFromBlob(blob), 50.0f, 50.0f, paint);
+      continue;
+    }
+#endif  // IMPELLER_SUPPORTS_RENDERING
     builder.DrawText(DlTextSkia::Make(blob), 50.0f, 50.0f, paint);
   }
 
@@ -1676,6 +1782,12 @@ constexpr int kFilledShadow10Primitive =
   DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow5)              \
   DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow10)             \
 
+#define DRAW_BENCHMARK_PRIMITIVES_PATH(BACKEND)                              \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathLine)                          \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathQuad)                          \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathConic)                         \
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, PathCubic)
+
 #define DRAW_BENCHMARK_PRIMITIVE_SUITE(BACKEND)                              \
   BENCHMARK_OVERHEAD(SyncOverhead, BACKEND)                                  \
   BENCHMARK_OVERHEAD(EmptyDisplayList, BACKEND)                              \
@@ -1687,7 +1799,8 @@ constexpr int kFilledShadow10Primitive =
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRRect)                       \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRRect)                      \
   DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, SimpleRSE)                         \
-  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRSE)
+  DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, ComplexRSE)                        \
+  DRAW_BENCHMARK_PRIMITIVES_PATH(BACKEND)
 
 // clang-format on
 

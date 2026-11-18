@@ -36,12 +36,11 @@ class CustomDevicesConfig {
 
   @visibleForTesting
   CustomDevicesConfig.test({
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required Logger logger,
     Directory? directory,
     Platform? platform,
   }) : _platform = platform ?? FakePlatform(),
-       _fileSystem = fileSystem,
        _logger = logger,
        _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,

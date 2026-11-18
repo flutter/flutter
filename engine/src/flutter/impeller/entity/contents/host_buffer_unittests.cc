@@ -219,6 +219,61 @@ class FailingAllocator : public Allocator {
   std::shared_ptr<Allocator> delegate_;
 };
 
+TEST(GpuSubmissionTrackerTest, WatermarkHandlesOutOfOrderCompletion) {
+  GpuSubmissionTracker tracker;
+  EXPECT_EQ(tracker.CompletedThrough(), 0u);
+  uint64_t a = tracker.RecordSubmission();
+  uint64_t b = tracker.RecordSubmission();
+  uint64_t c = tracker.RecordSubmission();
+  EXPECT_EQ(tracker.LatestSubmission(), c);
+
+  tracker.RecordCompletion(b);
+  EXPECT_EQ(tracker.CompletedThrough(), 0u);
+  tracker.RecordCompletion(a);
+  EXPECT_EQ(tracker.CompletedThrough(), b);
+  tracker.RecordCompletion(c);
+  EXPECT_EQ(tracker.CompletedThrough(), c);
+}
+
+TEST_P(HostBufferTest, PendingEntriesAreReplacedNotReused) {
+  auto tracker = std::make_shared<GpuSubmissionTracker>();
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256, tracker);
+
+  // Write to the first arena entry and pretend its GPU work never completes.
+  const DeviceBuffer* first_entry = buffer->EmplaceUniform(0.0f).GetBuffer();
+  uint64_t pending = tracker->RecordSubmission();
+  for (size_t i = 0; i < kHostBufferArenaSize; i++) {
+    buffer->Reset();
+  }
+
+  // The entry must be replaced with a fresh allocation.
+  EXPECT_NE(buffer->EmplaceUniform(0.0f).GetBuffer(), first_entry);
+
+  // Once completed, entries are reused in place.
+  tracker->RecordCompletion(pending);
+  const DeviceBuffer* second_entry = buffer->EmplaceUniform(0.0f).GetBuffer();
+  for (size_t i = 0; i < kHostBufferArenaSize; i++) {
+    buffer->Reset();
+  }
+  EXPECT_EQ(buffer->EmplaceUniform(0.0f).GetBuffer(), second_entry);
+}
+
+TEST_P(HostBufferTest, CompletedEntriesAreReusedWithoutTrackerChurn) {
+  auto tracker = std::make_shared<GpuSubmissionTracker>();
+  auto buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
+                                   GetContext()->GetIdleWaiter(), 256, tracker);
+
+  // Simulate frames whose GPU work completes promptly. Entries must be
+  // reused, not replaced.
+  const DeviceBuffer* entry = buffer->EmplaceUniform(0.0f).GetBuffer();
+  for (size_t i = 0; i < kHostBufferArenaSize * 3; i++) {
+    tracker->RecordCompletion(tracker->RecordSubmission());
+    buffer->Reset();
+  }
+  EXPECT_EQ(buffer->EmplaceUniform(0.0f).GetBuffer(), entry);
+}
+
 TEST_P(HostBufferTest, EmplaceWithFailingAllocationDoesntCrash) {
   ScopedValidationDisable disable;
   std::shared_ptr<FailingAllocator> allocator =

@@ -9,14 +9,12 @@ library;
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const kYellowColor = Color(0xFFAABB11);
@@ -61,7 +59,7 @@ void main() {
     await tester.pump();
 
     await expectLater(find.byKey(key), matchesGoldenFile('raster_widget.red.png'));
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('Changing devicePixelRatio does not repaint if snapshotting is not enabled', (
     WidgetTester tester,
@@ -100,7 +98,7 @@ void main() {
 
     // Not repainted as dpr was not used.
     expect(painter.count, 1);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('Changing devicePixelRatio forces raster regeneration', (WidgetTester tester) async {
     final controller = SnapshotController(allowSnapshotting: true);
@@ -141,7 +139,7 @@ void main() {
 
     expect(painter.count, 2);
     expect(raster, isNot(newRaster));
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('SnapshotWidget paints its child as a single picture layer', (
     WidgetTester tester,
@@ -170,7 +168,7 @@ void main() {
 
     expect(tester.layers, hasLength(3));
     expect(tester.layers.last, isA<PictureLayer>());
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('SnapshotWidget can update the painter type', (WidgetTester tester) async {
     final controller = SnapshotController(allowSnapshotting: true);
@@ -197,7 +195,7 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('RenderSnapshotWidget does not error on rasterization of child with empty size', (
     WidgetTester tester,
@@ -214,7 +212,7 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('RenderSnapshotWidget throws assertion if platform view is encountered', (
     WidgetTester tester,
@@ -241,7 +239,7 @@ void main() {
         contains('SnapshotWidget used with a child that contains a PlatformView'),
       ),
     );
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets('RenderSnapshotWidget does not assert if SnapshotMode.forced', (
     WidgetTester tester,
@@ -262,7 +260,7 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-  }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
+  });
 
   testWidgets(
     'RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive',
@@ -285,54 +283,53 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(tester.layers.last, isA<PlatformViewLayer>());
     },
-    skip: kIsWeb, // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
   );
 
-  testWidgets(
-    'SnapshotWidget should have same result when enabled',
-    (WidgetTester tester) async {
-      addTearDown(tester.view.reset);
+  testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
 
-      tester.view
-        ..physicalSize = const Size(10, 10)
-        ..devicePixelRatio = 1;
+    tester.view
+      ..physicalSize = const Size(10, 10)
+      ..devicePixelRatio = 1;
 
-      const repaintBoundaryKey = ValueKey<String>('boundary');
-      final controller = SnapshotController();
-      addTearDown(controller.dispose);
+    const repaintBoundaryKey = ValueKey<String>('boundary');
+    final controller = SnapshotController();
+    addTearDown(controller.dispose);
 
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: repaintBoundaryKey,
-          child: TestWidgetsApp(
-            home: Container(
-              color: kBlackColor,
-              padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
-              child: SnapshotWidget(
-                controller: controller,
-                child: Container(
-                  margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
-                  color: kBlueColor,
-                ),
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: repaintBoundaryKey,
+        child: TestWidgetsApp(
+          home: Container(
+            color: kBlackColor,
+            padding: const EdgeInsets.only(right: 0.6, bottom: 0.6),
+            child: SnapshotWidget(
+              controller: controller,
+              child: Container(
+                margin: const EdgeInsets.only(right: 0.4, bottom: 0.4),
+                color: kBlueColor,
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final ui.Image imageWhenDisabled =
-          (tester.renderObject(find.byKey(repaintBoundaryKey)) as RenderRepaintBoundary)
-              .toImageSync();
-      addTearDown(imageWhenDisabled.dispose);
+    final ui.Image imageWhenDisabled = (tester.renderObject(
+      find.byKey(repaintBoundaryKey),
+    ) as RenderRepaintBoundary).toImageSync();
+    addTearDown(imageWhenDisabled.dispose);
 
-      controller.allowSnapshotting = true;
-      await tester.pump();
+    controller.allowSnapshotting = true;
+    await tester.pump();
 
-      await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
-    },
-    // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-    skip: kIsWeb || impellerEnabled,
-  );
+    final ui.Image imageWhenEnabled = (tester.renderObject(
+      find.byKey(repaintBoundaryKey),
+    ) as RenderRepaintBoundary).toImageSync();
+    addTearDown(imageWhenEnabled.dispose);
+
+    await expectLater(imageWhenEnabled, matchesReferenceImage(imageWhenDisabled));
+  }, skip: impellerEnabled);
 
   test('SnapshotPainter dispatches memory events', () async {
     await expectLater(

@@ -165,4 +165,18 @@ void main() {
       const Rect.fromLTRB(0.0, 600.0, 800.0, 700.0),
     );
   });
+
+  testWidgets('CustomScrollView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: CustomScrollView(slivers: [SliverToBoxAdapter(child: Placeholder())]),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CustomScrollView)), Size.zero);
+  });
 }

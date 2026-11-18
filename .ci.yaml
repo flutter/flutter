@@ -56,10 +56,11 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Ubuntu
       cores: "8"
@@ -77,12 +78,13 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8702262057250908257"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "android_virtual_device", "version": "android_37_google_apis_ps16k_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8670032186093418337"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Ubuntu
       cores: "8"
@@ -103,10 +105,11 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Ubuntu
       cores: "8"
@@ -118,8 +121,9 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:8.20.0"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "curl", "version": "version:8.20.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Ubuntu
       cores: "8"
@@ -130,8 +134,9 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:8.20.0"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "curl", "version": "version:8.20.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Linux
       device_type: "Pixel 7 Pro"
@@ -141,8 +146,9 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:8.20.0"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "curl", "version": "version:8.20.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Linux
       device_type: "mokey"
@@ -152,8 +158,9 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:8.20.0"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "curl", "version": "version:8.20.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Linux
       device_type: "SM-S921U1"
@@ -260,8 +267,9 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Mac-15.7|Mac-26.6
       cpu: x86
@@ -272,7 +280,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Mac-15.7|Mac-26.6
       cpu: arm64
@@ -350,8 +359,9 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       os: Windows-10
       device_type: "mokey"
@@ -365,7 +375,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "ktlint", "version": "version_1_5_0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
       tags: >
         ["framework","hostonly","shard","linux"]
@@ -383,8 +393,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:8.20.0"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "curl", "version": "version:8.20.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -418,7 +429,8 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
 
   - name: Linux_android_emu android views
@@ -438,10 +450,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab","hostonly"]
@@ -461,11 +474,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "1_5"
@@ -479,11 +493,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "2_5"
@@ -497,11 +512,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "3_5"
@@ -515,11 +531,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "4_5"
@@ -533,11 +550,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "5_5"
@@ -685,6 +703,20 @@ targets:
       - DEPS
       - dartdoc_options.yaml
 
+  - name: Linux snippets
+    recipe: flutter/flutter_drone
+    timeout: 30
+    properties:
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      shard: snippets
+    runIf:
+      - dev/snippets/**
+      - dev/bots/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Linux engine_dependency_proxy_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -692,7 +724,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -707,9 +740,9 @@ targets:
   - name: Linux flavors_test_linux
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
+      xvfb: "1"
       dependencies: >-
         [
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -734,10 +767,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["firebaselab"]
@@ -746,6 +780,7 @@ targets:
       # it is available in Firebase Test Lab.
       physical_devices: >-
         [
+          "--device", "model=cubs,version=37",
           "--device", "model=shiba,version=34",
           "--device", "model=redfin,version=30",
           "--device", "model=griffin,version=24"
@@ -823,10 +858,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: framework_tests
       subshard: slow
@@ -857,8 +893,9 @@ targets:
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:37v2"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: framework_tests
       subshard: misc
@@ -866,7 +903,7 @@ targets:
         ["framework", "hostonly", "shard", "linux"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -930,10 +967,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -952,10 +990,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -974,10 +1013,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -996,10 +1036,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1019,10 +1060,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1042,10 +1084,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1065,10 +1108,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1088,14 +1132,41 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: build_android_host_app_with_module_aar
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  # Gradle 8.4 cannot run on Java 25, so the pre-AGP 8.3 module test is pinned
+  # to Java 17 instead of the default JDK.
+  - name: Linux android_java17_build_android_host_app_with_module_aar
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: android_java17_build_android_host_app_with_module_aar
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -1112,10 +1183,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1136,10 +1208,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1159,10 +1232,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       # TODO(fujino): delete once propagation from
       # https://github.com/flutter/flutter/issues/158521 completes.
@@ -1186,10 +1260,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -1326,7 +1401,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1388,7 +1464,8 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:37v2"}
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1402,12 +1479,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "1_7"
@@ -1430,12 +1508,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "2_7"
@@ -1458,12 +1537,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "3_7"
@@ -1486,12 +1566,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "4_7"
@@ -1514,12 +1595,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "5_7"
@@ -1542,12 +1624,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "6_7"
@@ -1570,12 +1653,13 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "7_7"
@@ -1606,7 +1690,8 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: android_preview_tool_integration_tests
       tags: >
@@ -1632,7 +1717,8 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:17"}
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: android_java17_tool_integration_tests
       tags: >
@@ -1654,7 +1740,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       task_name: android_java11_dependency_smoke_tests
       tags: >
@@ -1680,7 +1767,8 @@ targets:
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       task_name: android_java17_dependency_smoke_tests
       tags: >
@@ -1703,10 +1791,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"}
+          {"dependency": "ninja", "version": "version:1.9.0"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests_commands
       subshard: 1_1
@@ -1728,7 +1817,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests
       subshard: general
@@ -1750,7 +1840,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests
       subshard: widget_preview_scaffold
@@ -1776,6 +1867,18 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
 
+  - name: Linux_android_emu_vulkan_stable android_engine_hcpp_tests
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      shard: android_engine_hcpp_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
   - name: Linux_android_emu android_engine_opengles_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -1786,12 +1889,12 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
 
   - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_tests
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       shard: android_hardware_smoke_vulkan_tests
@@ -1804,7 +1907,6 @@ targets:
 
   - name: Linux_android_emu android_hardware_smoke_opengles_tests
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       shard: android_hardware_smoke_opengles_tests
@@ -1813,7 +1915,38 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
+        ]
+
+  - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_instrumented_tests
+    recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_vulkan_instrumented_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
+  - name: Linux_android_emu android_hardware_smoke_opengles_instrumented_tests
+    recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_opengles_instrumented_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
 
   - name: Linux web_benchmarks_canvaskit
@@ -1823,7 +1956,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab","hostonly", "linux"]
@@ -1836,7 +1969,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab","hostonly", "linux"]
@@ -1850,7 +1983,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab","hostonly", "linux"]
@@ -1864,7 +1997,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab"]
@@ -1883,7 +2016,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab"]
@@ -1901,7 +2034,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_long_running_tests
@@ -1922,7 +2055,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_long_running_tests
@@ -1943,7 +2076,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_long_running_tests
@@ -1964,7 +2097,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_long_running_tests
@@ -1985,7 +2118,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_long_running_tests
@@ -2006,11 +2139,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "0"
+      subshard: "1_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2028,11 +2161,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "1"
+      subshard: "2_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2050,11 +2183,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "2"
+      subshard: "3_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2072,11 +2205,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "3"
+      subshard: "4_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2094,11 +2227,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "4"
+      subshard: "5_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2116,11 +2249,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "5"
+      subshard: "6_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2138,11 +2271,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "6"
+      subshard: "7_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2160,11 +2293,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_canvaskit_tests
-      subshard: "7_last"
+      subshard: "8_8"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "3600" # 60 minutes to match the global `timeout` property.
@@ -2182,11 +2315,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_skwasm_tests
-      subshard: "0"
+      subshard: "1_2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
@@ -2204,11 +2337,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_skwasm_tests
-      subshard: "1_last"
+      subshard: "2_2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
       test_timeout_secs: "2700" # 45 minutes to match the global `timeout` property.
@@ -2220,13 +2353,14 @@ targets:
       - engine/**
       - DEPS
 
+
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_tool_tests
@@ -2496,7 +2630,7 @@ targets:
       task_name: complex_layout_android__scroll_smoothness
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark
@@ -2510,7 +2644,7 @@ targets:
       task_name: complex_layout_scroll_perf__devtools_memory
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark
@@ -2524,7 +2658,7 @@ targets:
       task_name: complex_layout_scroll_perf__memory
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark
@@ -2538,7 +2672,7 @@ targets:
       task_name: complex_layout_scroll_perf__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf__timeline_summary
@@ -2551,7 +2685,7 @@ targets:
       task_name: complex_layout_scroll_perf__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller__timeline_summary
@@ -2564,7 +2698,7 @@ targets:
       task_name: complex_layout_scroll_perf_impeller__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller_gles__timeline_summary
@@ -2577,7 +2711,7 @@ targets:
       task_name: complex_layout_scroll_perf_impeller_gles__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark
@@ -2591,7 +2725,7 @@ targets:
       task_name: complex_layout_semantics_perf
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark
@@ -2605,7 +2739,7 @@ targets:
       task_name: complex_layout__start_up
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark - Impeller (OpenGLES) startup test
@@ -2613,14 +2747,13 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "mokey"]
       task_name: complex_layout_android__impeller_gles_start_up
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   # linux mokey benchmark
@@ -2682,7 +2815,6 @@ targets:
 
   - name: Linux_android_emu external_textures_integration_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     # Functionally the same as "presubmit: false", except that we will run on
     # presubmit during engine rolls. This test is the *only* automated e2e
@@ -3011,7 +3143,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
@@ -3064,6 +3196,14 @@ targets:
         ["devicelab", "linux"]
       task_name: android_engine_flags_debug_test
 
+  - name: Linux_android_emu android_intent_security_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_intent_security_test
+
   - name: Linux_android_emu android_engine_flags_release_test
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -3071,6 +3211,14 @@ targets:
       tags: >
         ["devicelab", "linux"]
       task_name: android_engine_flags_release_test
+
+  - name: Linux_android_emu android_intent_parsing_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_intent_parsing_test
 
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
@@ -3418,7 +3566,7 @@ targets:
       task_name: tiles_scroll_perf__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
   - name: Linux web_size__compile_test
@@ -3579,6 +3727,19 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
+  - name: Mac ios_universal_link_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: ios_universal_link_test
+
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3598,15 +3759,6 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: rrect_blur_perf__timeline_summary
 
-  - name: Mac_ios rrect_blur_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: rrect_blur_perf_ios__timeline_summary
-
   - name: Linux_pixel_7pro draw_arcs_all_fill_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3616,14 +3768,15 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_arcs_all_fill_styles_perf__timeline_summary
 
-  - name: Mac_ios draw_arcs_all_fill_styles_perf_ios__timeline_summary
+  - name: Mac_ios impeller_primitives_perf_suite_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: draw_arcs_all_fill_styles_perf_ios__timeline_summary
+      task_name: impeller_primitives_perf_suite_ios__timeline_summary
 
   - name: Linux_pixel_7pro draw_arcs_all_stroke_styles_perf__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -3633,15 +3786,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_arcs_all_stroke_styles_perf__timeline_summary
-
-  - name: Mac_ios draw_arcs_all_stroke_styles_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_arcs_all_stroke_styles_perf_ios__timeline_summary
 
   # Uses Impeller.
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
@@ -3672,60 +3816,6 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_vertices_perf__timeline_summary
-
-  - name: Mac_ios draw_vertices_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_vertices_perf_ios__timeline_summary
-
-  - name: Mac_ios draw_atlas_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_atlas_perf_ios__timeline_summary
-
-  - name: Mac_ios static_path_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: static_path_tessellation_perf_ios__timeline_summary
-
-  - name: Mac_ios dynamic_path_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: dynamic_path_tessellation_perf_ios__timeline_summary
-
-  - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: static_path_stroke_tessellation_perf_ios__timeline_summary
-
-  - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: dynamic_path_stroke_tessellation_perf_ios__timeline_summary
 
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
@@ -3768,6 +3858,9 @@ targets:
   - name: Mac_x64 build_tests_1_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3775,9 +3868,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "1_5"
@@ -3787,6 +3881,9 @@ targets:
   - name: Mac_x64 build_tests_2_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3794,9 +3891,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "2_5"
@@ -3806,6 +3904,9 @@ targets:
   - name: Mac_x64 build_tests_3_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3813,9 +3914,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "3_5"
@@ -3825,6 +3927,9 @@ targets:
   - name: Mac_x64 build_tests_4_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3832,9 +3937,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "4_5"
@@ -3844,6 +3950,9 @@ targets:
   - name: Mac_x64 build_tests_5_5
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       add_recipes_cq: "true"
@@ -3851,9 +3960,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "5_5"
@@ -3868,9 +3978,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "1_5"
@@ -3885,9 +3996,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "2_5"
@@ -3902,9 +4014,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "3_5"
@@ -3919,9 +4032,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "4_5"
@@ -3936,9 +4050,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "5_5"
@@ -4142,13 +4257,17 @@ targets:
   - name: Mac_x64 framework_tests_misc
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:37v2"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: framework_tests
       subshard: misc
@@ -4156,7 +4275,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4178,8 +4297,9 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:37v2"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: framework_tests
       subshard: misc
@@ -4187,7 +4307,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -4237,7 +4357,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4285,7 +4406,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4305,7 +4427,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4325,7 +4448,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4346,7 +4470,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4379,7 +4504,7 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac module_uiscene_test_ios
+  - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -4389,7 +4514,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_uiscene_test_ios
+      task_name: uiscene_plugin_lifecycle_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4428,8 +4553,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4445,6 +4571,9 @@ targets:
   - name: Mac_x64 plugin_lint_mac
     recipe: devicelab/devicelab_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
@@ -4490,7 +4619,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -4510,7 +4640,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -4534,9 +4665,25 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test_ios
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/151772
-      presubmit_max_attempts: "2"
-      test_timeout_secs: "3600"
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Mac plugin_test_darwin
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      task_name: plugin_test_darwin
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -4567,6 +4714,9 @@ targets:
   - name: Mac_x64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
@@ -4587,6 +4737,9 @@ targets:
   - name: Mac_arm64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189302): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189302): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
@@ -4606,7 +4759,6 @@ targets:
 
   - name: Mac tool_integration_tests_1
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4614,10 +4766,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "1_10"
@@ -4633,7 +4786,6 @@ targets:
 
   - name: Mac tool_integration_tests_2
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4641,10 +4793,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "2_10"
@@ -4660,7 +4813,6 @@ targets:
 
   - name: Mac tool_integration_tests_3
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4668,10 +4820,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "3_10"
@@ -4687,7 +4840,6 @@ targets:
 
   - name: Mac tool_integration_tests_4
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4695,10 +4847,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "4_10"
@@ -4714,7 +4867,6 @@ targets:
 
   - name: Mac tool_integration_tests_5
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4722,10 +4874,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "5_10"
@@ -4741,7 +4894,6 @@ targets:
 
   - name: Mac tool_integration_tests_6
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4750,9 +4902,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "6_10"
@@ -4768,7 +4921,6 @@ targets:
 
   - name: Mac tool_integration_tests_7
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4777,9 +4929,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "7_10"
@@ -4795,7 +4948,6 @@ targets:
 
   - name: Mac tool_integration_tests_8
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4804,9 +4956,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "8_10"
@@ -4822,7 +4975,6 @@ targets:
 
   - name: Mac tool_integration_tests_9
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4831,9 +4983,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "9_10"
@@ -4849,7 +5002,6 @@ targets:
 
   - name: Mac tool_integration_tests_10
     recipe: flutter/flutter_drone
-    bringup: true
     timeout: 60
     properties:
       cpu: arm64
@@ -4858,9 +5010,10 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
           {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "10_10"
@@ -4877,12 +5030,16 @@ targets:
   - name: Mac_x64 tool_tests_commands
     recipe: flutter/flutter_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests_commands
       subshard: 1_1
@@ -4897,7 +5054,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests_commands
       subshard: 1_1
@@ -4912,7 +5070,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests
       subshard: general
@@ -4980,7 +5139,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_tool_tests
@@ -5017,6 +5176,9 @@ targets:
   - name: Mac_mokey hello_world_android__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       tags: >
@@ -5037,7 +5199,6 @@ targets:
   - name: Mac_arm64_mokey hot_mode_dev_cycle__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5048,6 +5209,9 @@ targets:
   - name: Mac_mokey integration_test_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       tags: >
@@ -5078,7 +5242,6 @@ targets:
   - name: Mac_arm64_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5099,6 +5262,9 @@ targets:
   - name: Mac_mokey run_debug_test_android
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     runIf:
       - .ci.yaml
       - dev/**
@@ -5129,6 +5295,9 @@ targets:
   - name: Mac_mokey run_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     runIf:
       - .ci.yaml
       - engine/**
@@ -5176,19 +5345,20 @@ targets:
   - name: Mac_benchmark basic_material_app_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: basic_material_app_ios__compile
 
-  - name: Mac_ios channels_integration_test_ios
+  - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: channels_integration_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -5242,38 +5412,47 @@ targets:
   #
   # Also, rename this to "external_textures_integration_test" to be consistent
   # with the Android test, but that can wait until we've figured out the flake.
-  - name: Mac_ios external_ui_integration_test_ios
+  - name: Mac external_ui_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
-  - name: Mac_ios route_test_ios
+  - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: route_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
-  - name: Mac_ios flavors_test_ios
+  - name: Mac flavors_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: flavors_test_ios
 
   - name: Mac_benchmark flutter_gallery_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5303,7 +5482,6 @@ targets:
   - name: Mac_benchmark hello_world_ios__compile
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: hello_world_ios__compile
@@ -5311,7 +5489,6 @@ targets:
   - name: Mac_benchmark imitation_game_flutter
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       task_name: imitation_game_flutter__compile
@@ -5328,6 +5505,9 @@ targets:
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
@@ -5363,60 +5543,84 @@ targets:
   - name: Mac_x64_ios integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_test_test_ios
 
-  - name: Mac_arm64_ios integration_test_test_ios
+  - name: Mac integration_test_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: integration_test_test_ios
 
-  - name: Mac_ios integration_ui_ios_driver
+  - name: Mac integration_ui_ios_driver
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_driver
 
-  - name: Mac_ios integration_ui_ios_frame_number
+  - name: Mac integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_frame_number
 
-  - name: Mac_ios integration_ui_ios_keyboard_resize
+  - name: Mac integration_ui_ios_keyboard_resize
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_keyboard_resize
 
-  - name: Mac_ios integration_ui_ios_textfield
+  - name: Mac integration_ui_ios_textfield
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: integration_ui_ios_textfield
 
   - name: Mac_x64 ios_app_with_extensions_test
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       dependencies: >-
@@ -5440,32 +5644,29 @@ targets:
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: ios_app_with_extensions_test
 
-  - name: Mac_ios ios_defines_test
+  - name: Mac ios_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: ios_defines_test
 
-  - name: Mac_ios hello_world_impeller_ios_sdfs
+  - name: Mac hello_world_impeller_ios_sdfs
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: hello_world_impeller_ios_sdfs
-
-  - name: Mac_ios ios_platform_view_tests
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_platform_view_tests
 
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
@@ -5479,11 +5680,14 @@ targets:
   - name: Mac_x64 macos_chrome_dev_mode
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
@@ -5497,7 +5701,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
       tags: >
@@ -5535,13 +5739,15 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: native_assets_ios
 
-  - name: Mac_ios native_platform_view_ui_tests_ios
+  - name: Mac native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: native_platform_view_ui_tests_ios
 
   - name: Mac_ios new_gallery_ios__transition_perf
@@ -5553,22 +5759,26 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
 
-  - name: Mac_ios platform_channel_sample_test_ios
+  - name: Mac platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: platform_channel_sample_test_ios
 
-  - name: Mac_ios platform_channel_sample_test_swift
+  - name: Mac platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: platform_channel_sample_test_swift
 
   - name: Mac_ios platform_channels_benchmarks_ios
@@ -5580,14 +5790,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_channels_benchmarks_ios
 
-  - name: Mac_ios platform_interaction_test_ios
+  - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: platform_interaction_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -5677,6 +5889,9 @@ targets:
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
     presubmit: false
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     timeout: 60
     properties:
       tags: >
@@ -5695,7 +5910,6 @@ targets:
   - name: Mac_arm64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5754,15 +5968,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
-  - name: Mac_ios draw_points_perf_ios__timeline_summary
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: draw_points_perf_ios__timeline_summary
-
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5775,6 +5980,9 @@ targets:
   - name: Mac_x64 native_ui_tests_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
+    enabled_branches:
+      - beta # TODO(flutter/flutter#189295): Remove after 3.48.0-0.1.pre is released.
+      - stable # TODO(flutter/flutter#189295): Delete this builder after 3.50 is released.
     properties:
       dependencies: >-
         [
@@ -5907,13 +6115,15 @@ targets:
     properties:
       task_name: new_gallery_macos_impeller__transition_perf
 
-  - name: Mac_ios keyboard_hot_restart_ios
+  - name: Mac keyboard_hot_restart_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: keyboard_hot_restart_ios
 
   - name: Windows build_tests_1_9
@@ -5924,9 +6134,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "1_9"
@@ -5941,9 +6152,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "2_9"
@@ -5958,9 +6170,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "3_9"
@@ -5975,9 +6188,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "4_9"
@@ -5992,9 +6206,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "5_9"
@@ -6009,9 +6224,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "6_9"
@@ -6026,9 +6242,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "7_9"
@@ -6043,9 +6260,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "8_9"
@@ -6060,9 +6278,10 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: build_tests
       subshard: "9_9"
@@ -6146,8 +6365,9 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:37v2"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6155,7 +6375,7 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
     runIf:
       - dev/**
-      - examples/api/**
+      - examples/**
       - packages/flutter/**
       - packages/flutter_driver/**
       - packages/integration_test/**
@@ -6178,8 +6398,9 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
           {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:37v2"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "android_sdk", "version": "version:37v2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6266,7 +6487,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6311,7 +6533,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6331,7 +6554,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6351,7 +6575,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6373,7 +6598,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6420,7 +6646,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6440,7 +6667,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6460,7 +6688,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       tags: >
         ["devicelab", "hostonly", "windows"]
@@ -6495,7 +6724,6 @@ targets:
   - name: Windows flavors_test_windows
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -6622,10 +6850,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "1_10"
@@ -6648,10 +6877,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "2_10"
@@ -6674,10 +6904,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "3_10"
@@ -6700,10 +6931,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "4_10"
@@ -6726,10 +6958,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "5_10"
@@ -6752,10 +6985,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "6_10"
@@ -6778,10 +7012,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "7_10"
@@ -6804,10 +7039,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "8_10"
@@ -6830,10 +7066,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "9_10"
@@ -6856,10 +7093,11 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
-          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_integration_tests
       subshard: "10_10"
@@ -6882,8 +7120,9 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests_commands
       subshard: 1_2
@@ -6900,14 +7139,14 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:36v4"},
-          {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "vs_build", "version": "version:vs2019"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests_commands
       subshard: 2_2
@@ -6929,7 +7168,8 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:37v2"},
-          {"dependency": "open_jdk", "version": "version:21"}
+          {"dependency": "open_jdk", "version": "version:25.0.2"},
+          {"dependency": "gradle_dists", "version": "8.4-bin:8.14-bin:9.3.1-bin:9.5.0-bin:9.5.0-all"}
         ]
       shard: tool_tests
       subshard: general
@@ -6949,7 +7189,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_tool_tests
@@ -6971,7 +7211,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"},
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
       shard: web_tool_tests
@@ -7000,6 +7240,58 @@ targets:
         ]
       task_name: windows_home_scroll_perf__timeline_summary
 
+  - name: Windows windows_gradient_consistent_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_gradient_consistent_perf__e2e_summary
+
+  - name: Windows windows_gradient_dynamic_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_gradient_dynamic_perf__e2e_summary
+
+  - name: Windows windows_gradient_static_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_gradient_static_perf__e2e_summary
+
+  - name: Windows windows_text_shadow_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: windows_text_shadow_perf__timeline_summary
+
   - name: Windows_arm64 windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -7013,6 +7305,31 @@ targets:
         ]
       task_name: windows_home_scroll_perf__timeline_summary
 
+  - name: Windows new_gallery_windows_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: new_gallery_windows_impeller__transition_perf
+
+  - name: Windows new_gallery_windows_skia__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: new_gallery_windows_skia__transition_perf
 
   - name: Windows hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
@@ -7039,6 +7356,20 @@ targets:
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
       task_name: windows_desktop_impeller
+
+  - name: Windows windows_engine_integration_golden_test
+    recipe: devicelab/devicelab_drone
+    presubmit: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"},
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+      task_name: windows_engine_integration_golden_test
 
   - name: Windows texture_impeller_windows
     recipe: devicelab/devicelab_drone
@@ -7290,7 +7621,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+          {"dependency": "chrome_and_driver", "version": "version:145.0.7632.117"}
         ]
       tags: >
         ["devicelab", "android", "windows", "mokey"]
@@ -7356,6 +7687,13 @@ targets:
     bringup: true
     timeout: 60
     properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
       tags: >
         ["devicelab", "hostonly", "linux"]
       task_name: windowing_test_linux
@@ -7363,9 +7701,12 @@ targets:
   - name: Mac windowing_test
     recipe: devicelab/devicelab_drone
     presubmit: true
-    bringup: true
     timeout: 60
     properties:
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: windowing_test_macos

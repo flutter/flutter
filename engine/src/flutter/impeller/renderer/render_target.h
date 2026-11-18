@@ -196,6 +196,9 @@ class RenderTargetAllocator {
   ///        This may be used to deallocate any unused textures.
   virtual void End();
 
+  /// @brief Drop all cached render target textures immediately.
+  virtual void Clear() {}
+
  private:
   std::shared_ptr<Allocator> allocator_;
 };

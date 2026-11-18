@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'test_page_tester.dart';
 
 class TestIntent extends Intent {
   const TestIntent();
@@ -44,14 +47,12 @@ void main() {
       WidgetsApp(
         key: key,
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -76,14 +77,12 @@ void main() {
           SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -105,14 +104,12 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _BasicCheckbox(
+            value: checked,
+            autofocus: true,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -189,7 +186,7 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
+        widget: TestWidgetsApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
         errorMessage:
             'FlutterError\n'
             '   Could not find a generator for route RouteSettings("/path", null)\n'
@@ -213,7 +210,7 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(
+        widget: TestWidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
@@ -465,6 +462,235 @@ void main() {
     expect(find.text('/'), findsOneWidget);
   });
 
+  testWidgets('WidgetsApp.router wraps routing in FocusScope', (WidgetTester tester) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig wraps routing in FocusScope', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Router<Object>>());
+    expect(
+      delegate.navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel,
+      'Navigator Scope',
+    );
+  });
+
+  testWidgets('WidgetsApp wraps navigator in FocusScope', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+    expect(focusScope.child, isA<Navigator>());
+    expect(navigatorKey.currentState!.focusNode.enclosingScope?.debugLabel, 'Navigator Scope');
+  });
+
+  testWidgets('WidgetsApp.router passes FocusScope as child to builder', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    Widget? capturedChild;
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        builder: (BuildContext context, Widget? child) {
+          capturedChild = child;
+          return child!;
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    expect(capturedChild, isA<FocusScope>());
+    final focusScope = capturedChild! as FocusScope;
+    expect(focusScope.debugLabel, 'Navigator Scope');
+    expect(focusScope.child, isA<Router<Object>>());
+  });
+
+  testWidgets('WidgetsApp.router produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
+    // FocusScope's explicitChildNodes prevents WidgetsApp's Directionality from
+    // merging with the route's semantics node, ensuring the route remains an
+    // explicit child node even when it is the sole entry in the Navigator.
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+
+    // Inserting an overlay entry (such as Autocomplete options or a dialog) does
+    // not reparent the route's semantics node.
+    final entry = OverlayEntry(
+      builder: (BuildContext context) =>
+          const Text('overlay content', textDirection: TextDirection.ltr),
+    );
+    addTearDown(
+      () => entry
+        ..remove()
+        ..dispose(),
+    );
+    delegate.navigatorKey.currentState!.overlay!.insert(entry);
+    await tester.pump();
+
+    expect(tester.semantics.find(find.text('route content')).parent, same(routeScopeNode));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+    expect(tester.semantics.find(find.text('overlay content')).parent, same(focusScopeNode));
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return const Text('route content', textDirection: TextDirection.ltr);
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+  });
+
+  testWidgets('WidgetsApp with navigator produces expected semantics tree structure', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Text('route content', textDirection: TextDirection.ltr),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    final SemanticsNode focusScopeNode = tester.semantics.find(focusScopeFinder);
+    final SemanticsNode routeContentNode = tester.semantics.find(find.text('route content'));
+    final SemanticsNode routeScopeNode = routeContentNode.parent!;
+
+    expect(routeScopeNode, isNot(same(focusScopeNode)));
+    expect(routeScopeNode.parent, same(focusScopeNode));
+  });
+
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
@@ -555,8 +781,8 @@ void main() {
     late final List<Locale>? localesArg;
     late final Iterable<Locale> supportedLocalesArg;
     await tester.pumpWidget(
-      MaterialApp(
-        // This uses a MaterialApp because it introduces some actual localizations.
+      TestWidgetsApp(
+        localizationsDelegates: const <LocalizationsDelegate<Object?>>[TestLocalizationsDelegate()],
         localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
           localesArg = locales;
           supportedLocalesArg = supportedLocales;
@@ -791,10 +1017,15 @@ void main() {
   });
 }
 
-typedef SimpleRouterDelegateBuilder =
-    Widget Function(BuildContext context, RouteInformation information);
-typedef SimpleNavigatorRouterDelegatePopPage<T> =
-    bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleRouterDelegateBuilder = Widget Function(
+  BuildContext context,
+  RouteInformation information,
+);
+typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(
+  Route<T> route,
+  T result,
+  SimpleNavigatorRouterDelegate delegate,
+);
 
 class SelectAllSpy extends Action<SelectAllTextIntent> {
   bool invoked = false;
@@ -869,12 +1100,55 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(child: Text('base')),
-        MaterialPage<void>(
+        const TestPage<void>(child: Text('base')),
+        TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],
+    );
+  }
+}
+
+class TestLocalizationsDelegate extends LocalizationsDelegate<Object> {
+  const TestLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'en';
+
+  @override
+  Future<Object> load(Locale locale) {
+    return SynchronousFuture<Object>(const Object());
+  }
+
+  @override
+  bool shouldReload(TestLocalizationsDelegate old) => false;
+}
+
+class _BasicCheckbox extends StatefulWidget {
+  const _BasicCheckbox({required this.value, required this.onChanged, this.autofocus = false});
+
+  final bool? value;
+  final ValueChanged<bool?>? onChanged;
+  final bool autofocus;
+
+  @override
+  State<_BasicCheckbox> createState() => _BasicCheckboxState();
+}
+
+class _BasicCheckboxState extends State<_BasicCheckbox> {
+  @override
+  Widget build(BuildContext context) {
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onChanged?.call(!(widget.value ?? false));
+            return null;
+          },
+        ),
+      },
+      child: Focus(autofocus: widget.autofocus, child: const SizedBox()),
     );
   }
 }

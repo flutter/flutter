@@ -26,44 +26,41 @@ void main() {
       TextInput.setChannel(SystemChannels.textInput);
     });
 
-    test(
-      'DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly',
-      () async {
-        // Assemble a TextInputConnection so we can verify its change in state.
-        final client = FakeDeltaTextInputClient(TextEditingValue.empty);
-        const configuration = TextInputConfiguration(enableDeltaModel: true);
-        TextInput.attach(client, configuration);
-        expect(client.configuration.enableDeltaModel, true);
+    test('DeltaTextInputClient send the correct configuration to the platform and responds to updateEditingValueWithDeltas method correctly', () async {
+      // Assemble a TextInputConnection so we can verify its change in state.
+      final client = FakeDeltaTextInputClient(TextEditingValue.empty);
+      const configuration = TextInputConfiguration(enableDeltaModel: true);
+      TextInput.attach(client, configuration);
+      expect(client.configuration.enableDeltaModel, true);
 
-        expect(client.latestMethodCall, isEmpty);
+      expect(client.latestMethodCall, isEmpty);
 
-        const jsonDelta =
-            '{'
-            '"oldText": "",'
-            ' "deltaText": "let there be text",'
-            ' "deltaStart": 0,'
-            ' "deltaEnd": 0,'
-            ' "selectionBase": 17,'
-            ' "selectionExtent": 17,'
-            ' "selectionAffinity" : "TextAffinity.downstream" ,'
-            ' "selectionIsDirectional": false,'
-            ' "composingBase": -1,'
-            ' "composingExtent": -1}';
+      const jsonDelta =
+          '{'
+          '"oldText": "",'
+          ' "deltaText": "let there be text",'
+          ' "deltaStart": 0,'
+          ' "deltaEnd": 0,'
+          ' "selectionBase": 17,'
+          ' "selectionExtent": 17,'
+          ' "selectionAffinity" : "TextAffinity.downstream" ,'
+          ' "selectionIsDirectional": false,'
+          ' "composingBase": -1,'
+          ' "composingExtent": -1}';
 
-        // Send updateEditingValueWithDeltas message.
-        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-          'args': <dynamic>[1, jsonDecode('{"deltas": [$jsonDelta]}')],
-          'method': 'TextInputClient.updateEditingStateWithDeltas',
-        });
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/textinput',
-          messageBytes,
-          (ByteData? _) {},
-        );
+      // Send updateEditingValueWithDeltas message.
+      final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1, jsonDecode('{"deltas": [$jsonDelta]}')],
+        'method': 'TextInputClient.updateEditingStateWithDeltas',
+      });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData? _) {},
+      );
 
-        expect(client.latestMethodCall, 'updateEditingValueWithDeltas');
-      },
-    );
+      expect(client.latestMethodCall, 'updateEditingValueWithDeltas');
+    });
 
     test('Invalid TextRange fails loudly when being converted to JSON - NonTextUpdate', () async {
       final record = <FlutterErrorDetails>[];
@@ -115,56 +112,7 @@ void main() {
       );
     });
 
-    test(
-      'Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd',
-      () async {
-        final record = <FlutterErrorDetails>[];
-        FlutterError.onError = (FlutterErrorDetails details) {
-          record.add(details);
-        };
-
-        final client = FakeDeltaTextInputClient(TextEditingValue.empty);
-        const configuration = TextInputConfiguration(enableDeltaModel: true);
-        TextInput.attach(client, configuration);
-
-        const jsonDelta =
-            '{'
-            '"oldText": "",'
-            ' "deltaText": "hello",'
-            ' "deltaStart": 0,'
-            ' "deltaEnd": 1,'
-            ' "selectionBase": 5,'
-            ' "selectionExtent": 5,'
-            ' "selectionAffinity" : "TextAffinity.downstream" ,'
-            ' "selectionIsDirectional": false,'
-            ' "composingBase": -1,'
-            ' "composingExtent": -1}';
-
-        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-          'method': 'TextInputClient.updateEditingStateWithDeltas',
-          'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
-        });
-
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/textinput',
-          messageBytes,
-          (ByteData? _) {},
-        );
-        expect(record.length, 1);
-        // Verify the error message in parts because Web formats the message
-        // differently from others.
-        expect(
-          record[0].exception.toString(),
-          matches(RegExp(r'\bThe delta range: TextRange\(start: 0, end: 5\)(?!\w)')),
-        );
-        expect(
-          record[0].exception.toString(),
-          matches(RegExp(r'\bis not within the bounds of text:  of length: 0\b')),
-        );
-      },
-    );
-
-    test('Invalid TextRange fails loudly when being converted to JSON - Faulty Selection', () async {
+    test('Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd', () async {
       final record = <FlutterErrorDetails>[];
       FlutterError.onError = (FlutterErrorDetails details) {
         record.add(details);
@@ -179,9 +127,9 @@ void main() {
           '"oldText": "",'
           ' "deltaText": "hello",'
           ' "deltaStart": 0,'
-          ' "deltaEnd": 0,'
-          ' "selectionBase": 6,'
-          ' "selectionExtent": 6,'
+          ' "deltaEnd": 1,'
+          ' "selectionBase": 5,'
+          ' "selectionExtent": 5,'
           ' "selectionAffinity" : "TextAffinity.downstream" ,'
           ' "selectionIsDirectional": false,'
           ' "composingBase": -1,'
@@ -202,17 +150,66 @@ void main() {
       // differently from others.
       expect(
         record[0].exception.toString(),
-        matches(
-          RegExp(
-            r'\bThe selection range: TextSelection.collapsed\(offset: 6, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)',
-          ),
-        ),
+        matches(RegExp(r'\bThe delta range: TextRange\(start: 0, end: 5\)(?!\w)')),
       );
       expect(
         record[0].exception.toString(),
-        matches(RegExp(r'\bis not within the bounds of text: hello of length: 5\b')),
+        matches(RegExp(r'\bis not within the bounds of text:  of length: 0\b')),
       );
     });
+
+    test(
+      'Invalid TextRange fails loudly when being converted to JSON - Faulty Selection',
+      () async {
+        final record = <FlutterErrorDetails>[];
+        FlutterError.onError = (FlutterErrorDetails details) {
+          record.add(details);
+        };
+
+        final client = FakeDeltaTextInputClient(TextEditingValue.empty);
+        const configuration = TextInputConfiguration(enableDeltaModel: true);
+        TextInput.attach(client, configuration);
+
+        const jsonDelta =
+            '{'
+            '"oldText": "",'
+            ' "deltaText": "hello",'
+            ' "deltaStart": 0,'
+            ' "deltaEnd": 0,'
+            ' "selectionBase": 6,'
+            ' "selectionExtent": 6,'
+            ' "selectionAffinity" : "TextAffinity.downstream" ,'
+            ' "selectionIsDirectional": false,'
+            ' "composingBase": -1,'
+            ' "composingExtent": -1}';
+
+        final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'TextInputClient.updateEditingStateWithDeltas',
+          'args': <dynamic>[-1, jsonDecode('{"deltas": [$jsonDelta]}')],
+        });
+
+        await binding.defaultBinaryMessenger.handlePlatformMessage(
+          'flutter/textinput',
+          messageBytes,
+          (ByteData? _) {},
+        );
+        expect(record.length, 1);
+        // Verify the error message in parts because Web formats the message
+        // differently from others.
+        expect(
+          record[0].exception.toString(),
+          matches(
+            RegExp(
+              r'\bThe selection range: TextSelection.collapsed\(offset: 6, affinity: TextAffinity.downstream, isDirectional: false\)(?!\w)',
+            ),
+          ),
+        );
+        expect(
+          record[0].exception.toString(),
+          matches(RegExp(r'\bis not within the bounds of text: hello of length: 5\b')),
+        );
+      },
+    );
 
     test(
       'Invalid TextRange fails loudly when being converted to JSON - Faulty Composing Region',

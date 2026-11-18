@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
@@ -22,6 +22,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
+import 'resident_runner_helpers.dart' show createColdRunner;
 
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -39,10 +41,11 @@ void main() {
           'Connection closed before full header was received, '
           'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws',
         ),
+        vmServiceUri: Future<Uri>.value(Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws')),
       ),
     ];
 
-    final int exitCode = await ColdRunner(
+    final int exitCode = await createColdRunner(
       devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -59,7 +62,7 @@ void main() {
 
       final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
-      await ColdRunner(
+      await createColdRunner(
         devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
@@ -86,7 +89,7 @@ void main() {
       final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
-      final int result = await ColdRunner(
+      final int result = await createColdRunner(
         devices,
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -103,7 +106,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await ColdRunner(
+        final int result = await createColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -136,7 +139,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await ColdRunner(
+        final int result = await createColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -166,7 +169,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
+  Future<Uri>? get vmServiceUri => null;
 
   @override
   final Device device;
@@ -258,26 +261,29 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
+    Future<Uri>? vmServiceUri,
   }) : super(
-         targetPlatform: .unsupported,
          device,
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
-       );
+       ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
   }) async {
     throw exception;
   }

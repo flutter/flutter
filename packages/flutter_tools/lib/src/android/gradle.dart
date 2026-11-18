@@ -28,6 +28,8 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -36,8 +38,8 @@ import 'android_builder.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
-import 'gradle_utils.dart';
 import 'gradle_utils.dart' as gradle;
+import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -149,8 +151,8 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String productFlavor = androidBuildInfo.buildInfo.lowerCasedFlavor ?? '';
   final flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
-    return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
-      final String abi = arch.archName;
+    return androidBuildInfo.targetArchs.map<String>((CpuArch arch) {
+      final String abi = arch.androidArchName;
       return 'app$flavorString-$abi-$buildType.apk';
     });
   }
@@ -163,37 +165,45 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required Java? java,
-    required Logger logger,
-    required ProcessManager processManager,
+    required this._analytics,
+    required this._androidStudio,
+    required this._artifacts,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required Analytics analytics,
-    required GradleUtils gradleUtils,
+    required this._gradleUtils,
+    required this._java,
+    required Logger logger,
     required Platform platform,
-    required AndroidStudio? androidStudio,
-    AndroidSdk? androidSdk,
-  }) : _java = java,
+    required ProcessManager processManager,
+    this._androidSdk,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _analytics = analytics,
-       _gradleUtils = gradleUtils,
-       _androidStudio = androidStudio,
-       _androidSdk = androidSdk,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
+  AndroidGradleBuilder.fromContexts({
+    required this._analytics,
+    required AndroidContext androidContext,
+    required ToolContext toolContext,
+  }) : _artifacts = toolContext.artifacts,
+       _fileSystem = toolContext.fs,
+       _gradleUtils = androidContext.gradleUtils,
+       _java = androidContext.java,
+       _logger = toolContext.logger,
+       _androidStudio = androidContext.androidStudio,
+       _androidSdk = androidContext.androidSdk,
+       _fileSystemUtils = toolContext.fileSystemUtils,
+       _processUtils = toolContext.processUtils;
+
+  final Analytics _analytics;
   final Java? _java;
   final Logger _logger;
-  final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
-  final Analytics _analytics;
   final GradleUtils _gradleUtils;
-  final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
   final AndroidSdk? _androidSdk;
+  final FileSystemUtils _fileSystemUtils;
+  final ProcessUtils _processUtils;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -353,7 +363,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _java?.gradleEnvironment,
         mapFunction: consumeLog,
       );
     } on ProcessException catch (exception) {
@@ -526,7 +536,14 @@ To fix this, you can either:
 
     // The default Gradle script reads the version name and number
     // from the local.properties file.
-    updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+    updateLocalProperties(
+      project: project,
+      analytics: _analytics,
+      androidSdk: _androidSdk,
+      buildInfo: androidBuildInfo.buildInfo,
+      fileSystemUtils: _fileSystemUtils,
+      logger: _logger,
+    );
 
     final options = <String>[];
 
@@ -576,9 +593,17 @@ To fix this, you can either:
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map((AndroidArch e) => e.platformName)
+          .map((CpuArch e) => e.androidPlatformName)
           .join(',');
       options.add('-Ptarget-platform=$targetPlatforms');
+    }
+    if (androidBuildInfo.releaseManifestEngineShellArgs != null) {
+      // Base64-encode the JSON string to prevent shell or Gradle argument parser
+      // from splitting or stripping double quotes and spaces across operating systems.
+      final String base64JsonArgs = base64Encode(
+        utf8.encode(jsonEncode(androidBuildInfo.releaseManifestEngineShellArgs)),
+      );
+      options.add('-Pflutter.engineShellArgs=$base64JsonArgs');
     }
     options.add('-Ptarget=$target');
     // If using v1 embedding, we want to use FlutterApplication as the base app.
@@ -729,7 +754,7 @@ To fix this, you can either:
   Future<bool> _isAabStrippedOfDebugSymbols(
     FlutterProject project,
     String aabPath,
-    Iterable<AndroidArch> targetArchs,
+    Iterable<CpuArch> targetArchs,
   ) async {
     if (_androidSdk == null) {
       _logger.printTrace(
@@ -737,13 +762,14 @@ To fix this, you can either:
       );
       return false;
     }
-    if (!_androidSdk.cmdlineToolsAvailable) {
+    final AndroidSdk androidSdk = _androidSdk;
+    if (!androidSdk.cmdlineToolsAvailable) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
@@ -796,7 +822,7 @@ To fix this, you can either:
       logger: _logger,
       analytics: _analytics,
     );
-    final String archName = androidBuildInfo.targetArchs.single.archName;
+    final String archName = androidBuildInfo.targetArchs.single.androidArchName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final File aotSnapshot = _fileSystem
         .directory(buildInfo.codeSizeDirectory)
@@ -917,7 +943,7 @@ To fix this, you can either:
       );
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map((AndroidArch e) => e.platformName)
+          .map((CpuArch e) => e.androidPlatformName)
           .join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
@@ -931,7 +957,7 @@ To fix this, you can either:
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: _java?.environment,
+        environment: _java?.gradleEnvironment,
       );
     } finally {
       status.stop();
@@ -1181,7 +1207,25 @@ bool isAppUsingAndroidX(Directory androidDirectory) {
   if (!properties.existsSync()) {
     return false;
   }
-  return properties.readAsStringSync().contains('android.useAndroidX=true');
+  bool? usesAndroidX;
+  final androidXRegExp = RegExp(r'^android\.useAndroidX(?:\s*[=:]\s*|\s+)(\S+)');
+  for (final String rawLine in properties.readAsLinesSync()) {
+    final String line = rawLine.trimLeft();
+    if (line.isEmpty || line.startsWith('#') || line.startsWith('!')) {
+      continue;
+    }
+    final RegExpMatch? match = androidXRegExp.firstMatch(line);
+    if (match == null) {
+      continue;
+    }
+    final String value = match.group(1)!.toLowerCase();
+    if (value == 'true') {
+      usesAndroidX = true;
+    } else if (value == 'false') {
+      usesAndroidX = false;
+    }
+  }
+  return usesAndroidX ?? false;
 }
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
@@ -1240,8 +1284,8 @@ Iterable<String> listApkPaths(AndroidBuildInfo androidBuildInfo) {
   ];
   if (androidBuildInfo.splitPerAbi) {
     return <String>[
-      for (final AndroidArch androidArch in androidBuildInfo.targetArchs)
-        <String>['app', androidArch.archName, ...apkPartialName].join('-'),
+      for (final CpuArch cpuArch in androidBuildInfo.targetArchs)
+        <String>['app', cpuArch.androidArchName, ...apkPartialName].join('-'),
     ];
   }
   return <String>[

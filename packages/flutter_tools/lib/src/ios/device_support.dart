@@ -15,22 +15,15 @@ import '../macos/xcode.dart';
 /// A class to handle preparing the device support for an iOS/iPad device.
 class IOSDeviceSupport {
   IOSDeviceSupport({
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required Xcode? xcode,
-    required String deviceId,
-    required Directory? homeDirectory,
-    required String? modelCode,
-    required String? operatingSystemVersion,
-    required String? cpuArchitectureString,
-  }) : _xcode = xcode,
-       _logger = logger,
-       _processUtils = processUtils,
-       _deviceId = deviceId,
-       _homeDirectory = homeDirectory,
-       _modelCode = modelCode,
-       _operatingSystemVersion = operatingSystemVersion,
-       _cpuArchitectureString = cpuArchitectureString;
+    required this._logger,
+    required this._processUtils,
+    required this._xcode,
+    required this._deviceId,
+    required this._homeDirectory,
+    required this._modelCode,
+    required this._operatingSystemVersion,
+    required this._cpuArchitectureString,
+  });
 
   final Logger _logger;
   final ProcessUtils _processUtils;

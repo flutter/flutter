@@ -4772,8 +4772,7 @@ void main() {
           body: Center(
             child: Container(
               color: Colors.amber,
-              height:
-                  200, // This is to remove the lint on Container. Otherwise, linter suggests to use ColoredBox instead.
+              height: 200, // This is to remove the lint on Container. Otherwise, linter suggests to use ColoredBox instead.
               child: const ListTile(tileColor: Colors.red, title: Text('ListTile')),
             ),
           ),

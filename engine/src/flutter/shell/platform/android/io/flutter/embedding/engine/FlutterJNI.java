@@ -145,8 +145,27 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
+    // ReLinker's fallback path works around older loader bugs by copying the library out of the
+    // APK and modifying its file permissions. That is incompatible with the safer dynamic code
+    // loading requirements introduced in Android 17 (API 37), which require libraries loaded via
+    // System.load() to be read-only. On API 37+ the platform loader is used directly and ReLinker
+    // is not needed. See https://github.com/flutter/flutter/issues/184861.
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_37) {
+      loadFlutterLibraryWithSystemLinker();
+    } else {
+      loadFlutterLibraryWithReLinker(context);
+    }
     FlutterJNI.loadLibraryCalled = true;
+  }
+
+  @VisibleForTesting
+  void loadFlutterLibraryWithReLinker(@NonNull Context context) {
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
+  }
+
+  @VisibleForTesting
+  void loadFlutterLibraryWithSystemLinker() {
+    System.loadLibrary("flutter");
   }
 
   private static boolean loadLibraryCalled = false;
@@ -1339,14 +1358,29 @@ public class FlutterJNI {
 
   // ----- New Platform Views ----------
 
+  // Called from the raster thread for AHB swapchain presentation. The returned transaction is not
+  // yet visible to the platform thread; the caller must pass it to publishTransaction once it has
+  // finished writing into it.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  @UiThread
-  public SurfaceControl.Transaction createTransaction() {
+  public SurfaceControl.Transaction createUnpublishedTransaction() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
     }
-    return platformViewsController2.createTransaction();
+    return platformViewsController2.createUnpublishedTransaction();
+  }
+
+  // Called from the raster thread once it is done writing into a transaction returned by
+  // createUnpublishedTransaction. If this throws, the native caller logs the exception and applies
+  // the transaction itself rather than dropping it.
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void publishTransaction(SurfaceControl.Transaction tx) {
+    if (platformViewsController2 == null) {
+      throw new IllegalStateException(
+          "publishTransaction called without a PlatformViewsController2");
+    }
+    platformViewsController2.publishTransaction(tx);
   }
 
   @SuppressWarnings("unused")
@@ -1357,16 +1391,6 @@ public class FlutterJNI {
       throw new RuntimeException("");
     }
     platformViewsController2.swapTransactions();
-  }
-
-  @SuppressWarnings("unused")
-  @SuppressLint("NewApi")
-  @UiThread
-  public void applyTransactions() {
-    if (platformViewsController2 == null) {
-      throw new RuntimeException("");
-    }
-    platformViewsController2.applyTransactions();
   }
 
   @SuppressWarnings("unused")

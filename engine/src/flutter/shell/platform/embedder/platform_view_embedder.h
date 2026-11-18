@@ -136,6 +136,9 @@ class PlatformViewEmbedder final : public PlatformView {
   sk_sp<GrDirectContext> CreateResourceContext() const override;
 
   // |PlatformView|
+  void ReleaseResourceContext() const override;
+
+  // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   // |PlatformView|

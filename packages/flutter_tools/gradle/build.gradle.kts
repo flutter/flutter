@@ -49,26 +49,31 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
+// The AGP version to compile and test against. Namespaced with `flutter.internal.` to
+// avoid collision with user app properties when evaluated as an included build.
+val agpVersion: String = providers.gradleProperty("flutter.internal.agpVersion").getOrElse("9.1.1")
+
 dependencies {
     // Versions available https://mvnrepository.com/artifact/androidx.annotation/annotation-jvm.
     // Version release notes https://developer.android.com/jetpack/androidx/releases/annotation
     compileOnly("androidx.annotation:annotation-jvm:1.9.1")
     // When bumping, also update:
     //  * KGP error version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.0")
-    // Update to 1.8.0 when min kotlin is 2.1
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10")
+    // 1.11.0 is built with Kotlin 2.3.20. Update to 1.12.0 (built with Kotlin 2.4.10) once it is stable.
     // https://github.com/Kotlin/kotlinx.serialization/releases for kotlin version compatibility.
     // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.
     // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-    // When bumping, also update:
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    // When bumping the default agpVersion above, also update:
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
-    compileOnly("com.android.tools.build:gradle:8.11.1")
+    compileOnly("com.android.tools.build:gradle:$agpVersion")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.android.tools.build:gradle:8.11.1")
-    testImplementation("org.mockito:mockito-core:5.8.0")
-    testImplementation("io.mockk:mockk:1.13.16")
+    testImplementation("com.android.tools.build:gradle:$agpVersion")
+    // MockK bundles Byte Buddy for inline mocking. Byte Buddy must support the
+    // JDK that runs the tests (Java 25 requires Byte Buddy >= 1.17.5).
+    testImplementation("io.mockk:mockk:1.14.11")
 }
