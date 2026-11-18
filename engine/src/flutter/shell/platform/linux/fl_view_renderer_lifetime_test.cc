@@ -207,18 +207,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     gtk.realize_widgets = true;
-    // Supply bridge hooks so FlView construction does not depend on AT-SPI.
-    plug_class_ = ATK_PLUG_CLASS(g_type_class_ref(ATK_TYPE_PLUG));
-    get_object_id_ = plug_class_->get_object_id;
-    plug_class_->get_object_id = [](AtkPlug* plug) {
-      const gchar* key = "flutter-renderer-lifetime-plug-id";
-      gchar* id = static_cast<gchar*>(g_object_get_data(G_OBJECT(plug), key));
-      if (id == nullptr) {
-        id = g_strdup("flutter-renderer-lifetime-test");
-        g_object_set_data_full(G_OBJECT(plug), key, id, g_free);
-      }
-      return id;
-    };
+    // Keep FlView construction independent of the AT-SPI bridge.
     socket_class_ = ATK_SOCKET_CLASS(g_type_class_ref(ATK_TYPE_SOCKET));
     embed_ = socket_class_->embed;
     socket_class_->embed = [](AtkSocket*, const gchar*) {};
@@ -233,9 +222,7 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
 
   void TearDown() override {
     LinuxTest::TearDown();
-    plug_class_->get_object_id = get_object_id_;
     socket_class_->embed = embed_;
-    g_type_class_unref(plug_class_);
     g_type_class_unref(socket_class_);
   }
 
@@ -308,8 +295,6 @@ class FlViewRendererLifetimeTest : public flutter::testing::LinuxTest {
   ::testing::NiceMock<flutter::testing::MockGtk> gtk;
 
  private:
-  AtkPlugClass* plug_class_ = nullptr;
-  decltype(AtkPlugClass::get_object_id) get_object_id_ = nullptr;
   AtkSocketClass* socket_class_ = nullptr;
   decltype(AtkSocketClass::embed) embed_ = nullptr;
 };
