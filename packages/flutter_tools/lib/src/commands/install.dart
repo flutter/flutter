@@ -16,9 +16,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   InstallCommand({
     required super.toolContext,
     required super.verboseHelp,
-    ApplicationPackageFactory? applicationPackageFactory,
+    super.applicationPackages,
   }) {
-    applicationPackages = applicationPackageFactory;
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(),

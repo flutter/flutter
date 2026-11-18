@@ -191,7 +191,7 @@ void main() {
         processManager: FakeProcessManager.any(),
       );
       final command = InstallCommand(
-        applicationPackageFactory: FakeApplicationPackageFactory(FakeAndroidApk()),
+        applicationPackages: FakeApplicationPackageFactory(FakeAndroidApk()),
         toolContext: localContext,
         verboseHelp: false,
       );

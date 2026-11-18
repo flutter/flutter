@@ -98,23 +98,40 @@ void main() {
     });
   });
 
-  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
+  testWithoutContext('dartName returns name used in Dart SDK', () {
     expect(CpuArch.armv7.dartName, 'armv7');
     expect(CpuArch.arm64.dartName, 'arm64');
+    expect(CpuArch.x86.dartName, 'x86');
     expect(CpuArch.x64.dartName, 'x64');
+    expect(CpuArch.riscv64.dartName, 'riscv64');
+    expect(() => CpuArch.unknown.dartName, throwsUnsupportedError);
+    expect(() => CpuArch('ppc64le').dartName, throwsUnsupportedError);
   });
 
   testWithoutContext('darwinArchName returns Apple names', () {
     expect(CpuArch.armv7.darwinArchName, 'armv7');
     expect(CpuArch.arm64.darwinArchName, 'arm64');
     expect(CpuArch.x64.darwinArchName, 'x86_64');
+    expect(() => CpuArch.riscv64.darwinArchName, throwsUnsupportedError);
   });
 
-  testWithoutContext('CpuArch.fromHostPlatform maps standard and custom host platforms', () {
-    expect(CpuArch.fromHostPlatform(HostPlatform.linux_x64), CpuArch.x64);
-    expect(CpuArch.fromHostPlatform(HostPlatform.darwin_arm64), CpuArch.arm64);
-    expect(CpuArch.fromHostPlatform(HostPlatform.linux_riscv64), CpuArch.riscv64);
-    expect(CpuArch.fromHostPlatform(HostPlatform('freebsd-x64', 'x64')), CpuArch.x64);
+  testWithoutContext('androidArchName and androidPlatformName return Android names', () {
+    expect(CpuArch.armv7.androidArchName, 'armeabi-v7a');
+    expect(CpuArch.arm64.androidArchName, 'arm64-v8a');
+    expect(CpuArch.x64.androidArchName, 'x86_64');
+    expect(() => CpuArch.riscv64.androidArchName, throwsUnsupportedError);
+
+    expect(CpuArch.armv7.androidPlatformName, 'android-arm');
+    expect(CpuArch.arm64.androidPlatformName, 'android-arm64');
+    expect(CpuArch.x64.androidPlatformName, 'android-x64');
+    expect(() => CpuArch.riscv64.androidPlatformName, throwsUnsupportedError);
+  });
+
+  testWithoutContext('HostPlatform.cpuArch maps standard and custom host platforms', () {
+    expect(HostPlatform.linux_x64.cpuArch, CpuArch.x64);
+    expect(HostPlatform.darwin_arm64.cpuArch, CpuArch.arm64);
+    expect(HostPlatform.linux_riscv64.cpuArch, CpuArch.riscv64);
+    expect(HostPlatform('freebsd', .x64).cpuArch, CpuArch.x64);
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
@@ -150,6 +167,43 @@ void main() {
       expect(platform.os, os, reason: '$platform');
     }
   });
+
+  testWithoutContext(
+    'TargetPlatform.cpuArch maps architecture-specific platforms and throws for others',
+    () {
+      const expected = <TargetPlatform, CpuArch>{
+        .android_arm: .armv7,
+        .android_arm64: .arm64,
+        .android_x64: .x64,
+        .fuchsia_arm64: .arm64,
+        .fuchsia_x64: .x64,
+        .linux_arm64: .arm64,
+        .linux_riscv64: .riscv64,
+        .linux_x64: .x64,
+        .windows_arm64: .arm64,
+        .windows_x64: .x64,
+      };
+      const unsupported = <TargetPlatform>{
+        .android,
+        .darwin,
+        .ios,
+        .tester,
+        .web_javascript,
+        .unsupported,
+      };
+      // Every TargetPlatform value must be covered by this test.
+      expect(<TargetPlatform>{
+        ...expected.keys,
+        ...unsupported,
+      }, containsAll(TargetPlatform.values));
+      for (final MapEntry(:TargetPlatform key, :CpuArch value) in expected.entries) {
+        expect(key.cpuArch, value, reason: '$key');
+      }
+      for (final platform in unsupported) {
+        expect(() => platform.cpuArch, throwsUnsupportedError, reason: '$platform');
+      }
+    },
+  );
 
   testUsingContext(
     'defaultIOSArchsForEnvironment',
@@ -547,7 +601,8 @@ void main() {
     expect(CpuArch.fromName('x64'), CpuArch.x64);
     expect(CpuArch.fromName('x86_64'), CpuArch.x64);
     expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
-    expect(() => CpuArch.fromName('bogus'), throwsException);
+    expect(CpuArch.fromName('ppc64le'), CpuArch('ppc64le'));
+    expect(() => CpuArch.fromName('invalid-arch'), throwsFormatException);
 
     expect(CpuArch.unknown.name, 'unknown');
     expect(CpuArch.armv7.name, 'armv7');
@@ -668,6 +723,13 @@ void main() {
       );
       expect(
         getLinuxBuildDirectory(
+          TargetPlatform.linux_riscv64,
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
+        ),
+        fileSystem.path.join('custom_build_out', 'linux', 'riscv64'),
+      );
+      expect(
+        getLinuxBuildDirectory(
           null,
           toolContext: FakeToolContext(
             config: config,
@@ -686,6 +748,26 @@ void main() {
           flavor: 'prod',
         ),
         fileSystem.path.join('custom_build_out', 'windows', 'x64', 'prod'),
+      );
+      expect(
+        getWindowsBuildDirectory(
+          TargetPlatform.windows_arm64,
+          config: config,
+          fileSystem: fileSystem,
+        ),
+        fileSystem.path.join('custom_build_out', 'windows', 'arm64'),
+      );
+      expect(
+        () => getLinuxBuildDirectory(
+          TargetPlatform.darwin,
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(
+        () =>
+            getWindowsBuildDirectory(TargetPlatform.darwin, config: config, fileSystem: fileSystem),
+        throwsUnsupportedError,
       );
     });
   });

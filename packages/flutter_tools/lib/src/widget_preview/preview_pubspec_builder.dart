@@ -17,10 +17,11 @@ import 'preview_manifest.dart';
 class PreviewPubspecBuilder {
   const PreviewPubspecBuilder({
     required this.logger,
-    required this.verbose,
     required this.offline,
-    required this.rootProject,
     required this.previewManifest,
+    required this.pub,
+    required this.rootProject,
+    required this.verbose,
   });
 
   final Logger logger;
@@ -28,6 +29,9 @@ class PreviewPubspecBuilder {
 
   /// Set to true if pub should operate in offline mode.
   final bool offline;
+
+  /// The [Pub] instance used to resolve and update preview scaffold dependencies.
+  final Pub pub;
 
   /// The Flutter project that contains widget previews.
   final FlutterProject rootProject;

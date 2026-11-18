@@ -25,22 +25,22 @@ const kIntegrationTestMethod = 'ext.flutter.integrationTest';
 
 class IntegrationTestTestDevice extends TestDevice {
   IntegrationTestTestDevice({
-    required this.id,
-    required this.device,
-    required this.debuggingOptions,
-    required this.userIdentifier,
+    required this.applicationPackageFactory,
     required this.compileExpression,
+    required this.debuggingOptions,
+    required this.device,
+    required this.id,
     required super.toolContext,
-    this._applicationPackageFactory,
+    required this.userIdentifier,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 
+  final ApplicationPackageFactory applicationPackageFactory;
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
-  final ApplicationPackageFactory? _applicationPackageFactory;
   final Duration ddsShutdownTimeout;
   late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
 
@@ -57,7 +57,7 @@ class IntegrationTestTestDevice extends TestDevice {
         toolContext;
     _applicationPackage = await getApplicationPackageForDevice(
       device,
-      factoryBuilder: () => _applicationPackageFactory ?? ApplicationPackageFactory.instance!,
+      factoryBuilder: () => applicationPackageFactory,
       buildInfo: debuggingOptions.buildInfo,
     );
     final ApplicationPackage? package = _applicationPackage;

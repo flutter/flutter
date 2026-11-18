@@ -815,7 +815,7 @@ flutter:
         testWithoutContext('InstallCommand resolves appId via resolveApplication for --use-application-binary and --uninstall-only', () async {
           final File prebuiltFile = fileSystem.file('prebuilt.bin')..createSync();
           final command = InstallCommand(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
+            applicationPackages: _FakeApplicationPackageFactory(),
             toolContext: toolContext,
             verboseHelp: false,
           );
@@ -908,7 +908,7 @@ flutter:
         testWithoutContext('InstallCommand without --use-application-binary never builds, preserves installed app when bundle is missing, and installs existing built bundle', () async {
           fileSystem.file('prebuilt.bin').createSync();
           final command = InstallCommand(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
+            applicationPackages: _FakeApplicationPackageFactory(),
             toolContext: toolContext,
             verboseHelp: false,
           );
@@ -980,7 +980,7 @@ flutter:
           'InstallCommand throws ToolExit when extension device has supportsInstall false',
           () async {
             final command = InstallCommand(
-              applicationPackageFactory: _FakeApplicationPackageFactory(),
+              applicationPackages: _FakeApplicationPackageFactory(),
               toolContext: toolContext,
               verboseHelp: false,
             );
@@ -1036,7 +1036,7 @@ flutter:
 
           final fakeVmServiceHost = FakeVmServiceHost(requests: const <VmServiceExpectation>[]);
           final driverService = FlutterDriverService(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
+            applicationPackages: _FakeApplicationPackageFactory(),
             dartSdkPath: 'dart',
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: toolContext,
@@ -1084,7 +1084,7 @@ flutter:
           logger.clear();
           final fakeVmServiceHost2 = FakeVmServiceHost(requests: const <VmServiceExpectation>[]);
           final driverService2 = FlutterDriverService(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
+            applicationPackages: _FakeApplicationPackageFactory(),
             dartSdkPath: 'dart',
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: toolContext,
@@ -1122,7 +1122,7 @@ flutter:
           expect(await device.targetPlatform, TargetPlatform.unsupported);
 
           final testDevice = IntegrationTestTestDevice(
-            applicationPackageFactory: _FakeApplicationPackageFactory(),
+            applicationPackages: _FakeApplicationPackageFactory(),
             compileExpression: null,
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, enableDds: false),
             device: device,

@@ -32,6 +32,13 @@ void main() {
     late FileSystem testFileSystem;
     late Platform platform;
 
+    AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+      fileSystem: testFileSystem,
+      flutterRoot: getFlutterRoot(),
+      logger: testLogger,
+      platform: platform,
+    ).createBundle();
+
     setUp(() async {
       testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync(
@@ -43,7 +50,7 @@ void main() {
     testUsingContext(
       'nonempty',
       () async {
-        final AssetBundle ab = AssetBundleFactory.instance.createBundle();
+        final AssetBundle ab = createBundle();
         expect(
           await ab.build(
             packageConfigPath: '.dart_tool/package_config.json',
@@ -67,7 +74,7 @@ void main() {
           ..createSync()
           ..writeAsStringSync('');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -101,7 +108,7 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('hello');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -165,7 +172,7 @@ flutter:
           assetFile.createSync(recursive: true);
         }
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -208,7 +215,7 @@ flutter:
   assets:
     - assets/foo/
 ''');
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -268,7 +275,7 @@ flutter:
           directory: testFileSystem.currentDirectory,
           mainLibName: 'my_app',
         );
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -342,7 +349,7 @@ flutter:
     - assets/foo/
 ''');
         writePackageConfigFiles(directory: testFileSystem.currentDirectory, mainLibName: 'my_app');
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -441,7 +448,7 @@ flutter:
         - assets/bar/barbie.txt
         - assets/wild/
 ''');
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.tester,
@@ -697,6 +704,13 @@ flutter:
     late FileSystem testFileSystem;
     late Platform testPlatform;
 
+    AssetBundle createWebBundle() => AssetBundleFactory.defaultInstance(
+      fileSystem: testFileSystem,
+      flutterRoot: getFlutterRoot(),
+      logger: testLogger,
+      platform: testPlatform,
+    ).createBundle();
+
     setUp(() async {
       testFileSystem = MemoryFileSystem();
       testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync(
@@ -712,7 +726,7 @@ flutter:
           ..createSync()
           ..writeAsStringSync('');
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createWebBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.web_javascript,
@@ -751,7 +765,7 @@ flutter:
             .file(testFileSystem.path.joinAll(<String>['assets', 'bar', 'lizard.png']))
             .createSync(recursive: true);
 
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        final AssetBundle bundle = createWebBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           targetPlatform: TargetPlatform.web_javascript,

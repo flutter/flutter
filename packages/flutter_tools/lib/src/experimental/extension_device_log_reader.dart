@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../base/logger.dart';
@@ -131,16 +132,23 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
             },
           );
       await _deviceService.startLogStream(appId: _appId, deviceId: _deviceId);
+    } on ToolExtensionException catch (error) {
+      _logger.printWarning('Extension "${_connection.extensionName}": ${error.message}');
+      await _cleanupOnStartFailure();
     } on Object catch (error) {
       _logger.printWarning('Failed to start log stream for extension device "$_deviceId": $error');
-      if (!_isDisposed) {
-        _isDisposed = true;
-        _onDispose?.call();
-        await _notificationSubscription?.cancel();
-        _notificationSubscription = null;
-        if (!_logLinesController.isClosed) {
-          await _logLinesController.close();
-        }
+      await _cleanupOnStartFailure();
+    }
+  }
+
+  Future<void> _cleanupOnStartFailure() async {
+    if (!_isDisposed) {
+      _isDisposed = true;
+      _onDispose?.call();
+      await _notificationSubscription?.cancel();
+      _notificationSubscription = null;
+      if (!_logLinesController.isClosed) {
+        await _logLinesController.close();
       }
     }
   }
@@ -161,6 +169,8 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
     _appId = appId;
     try {
       await _deviceService.startLogStream(appId: appId, deviceId: _deviceId);
+    } on ToolExtensionException catch (error) {
+      _logger.printWarning('Extension "${_connection.extensionName}": ${error.message}');
     } on Object catch (error) {
       _logger.printWarning('Failed to update log stream for extension device "$_deviceId": $error');
     }

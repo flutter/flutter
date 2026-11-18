@@ -153,6 +153,7 @@ class BuildBundleCommand extends BuildSubCommand {
           androidSdkBuilder: () => _androidContext.androidSdk,
           buildSystem: buildSystem,
           buildTargets: const BuildTargetsImpl(),
+          featureFlags: featureFlags,
           toolContext: toolContext,
         );
 
