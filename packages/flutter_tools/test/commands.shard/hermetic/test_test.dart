@@ -1820,6 +1820,12 @@ dev_dependencies:
   integration_test:
     sdk: flutter''');
       final testCommand = TestCommand(
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fs,
+          flutterRoot: '',
+          logger: logger,
+          platform: toolContext.platform,
+        ),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
