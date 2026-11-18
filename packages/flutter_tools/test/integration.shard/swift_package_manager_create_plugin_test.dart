@@ -20,16 +20,12 @@ void main() {
         );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-
           final SwiftPackageManagerPlugin createdCocoaPodsPlugin =
               await SwiftPackageManagerUtils.createPlugin(
                 flutterBin,
                 workingDirectoryPath,
                 platform: platformName,
+                swiftPackageManagerEnabled: false,
               );
 
           final String appDirectoryPath = createdCocoaPodsPlugin.exampleAppPath;
@@ -94,10 +90,7 @@ void main() {
             ),
           );
 
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
+          SwiftPackageManagerUtils.setSwiftPackageManagerEnabled(appDirectoryPath, enabled: true);
 
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
@@ -117,10 +110,6 @@ void main() {
             isTrue,
           );
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
       },
@@ -136,16 +125,12 @@ void main() {
         );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-
           final SwiftPackageManagerPlugin createdSwiftPackagePlugin =
               await SwiftPackageManagerUtils.createPlugin(
                 flutterBin,
                 workingDirectoryPath,
                 platform: platformName,
+                swiftPackageManagerEnabled: true,
               );
 
           final String appDirectoryPath = createdSwiftPackagePlugin.exampleAppPath;
@@ -212,10 +197,6 @@ void main() {
             ),
           );
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
       },

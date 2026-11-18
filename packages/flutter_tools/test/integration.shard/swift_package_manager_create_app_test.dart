@@ -20,15 +20,11 @@ void main() {
         );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-
           final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
             flutterBin,
             workingDirectoryPath,
             platform: platformName,
+            swiftPackageManagerEnabled: false,
             options: <String>['--platforms=$platformName'],
           );
 
@@ -72,10 +68,6 @@ void main() {
             ),
           );
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
       },
@@ -90,15 +82,11 @@ void main() {
         );
         final String workingDirectoryPath = workingDirectory.path;
         try {
-          await SwiftPackageManagerUtils.enableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-
           final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
             flutterBin,
             workingDirectoryPath,
             platform: platformName,
+            swiftPackageManagerEnabled: true,
             options: <String>['--platforms=$platformName'],
           );
 
@@ -139,10 +127,6 @@ void main() {
             ),
           );
         } finally {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
       },

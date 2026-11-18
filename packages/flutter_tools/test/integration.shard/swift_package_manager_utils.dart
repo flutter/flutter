@@ -6,45 +6,33 @@ import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:yaml/yaml.dart';
+import 'package:yaml_edit/yaml_edit.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
 
 class SwiftPackageManagerUtils {
-  static Future<void> enableSwiftPackageManager(String flutterBin, String workingDirectory) async {
-    final ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'config',
-      '--enable-swift-package-manager',
-      '-v',
-    ], workingDirectory: workingDirectory);
-    expect(
-      result.exitCode,
-      0,
-      reason:
-          'Failed to enable Swift Package Manager: \n'
-          'stdout: \n${result.stdout}\n'
-          'stderr: \n${result.stderr}\n',
-    );
-  }
+  static void setSwiftPackageManagerEnabled(String directory, {required bool enabled}) {
+    const configKey = 'enable-swift-package-manager';
+    final File pubspec = fileSystem.directory(directory).childFile('pubspec.yaml');
+    // The create command reads feature flags from its working directory before
+    // the target project exists. Give that temporary directory its own config.
+    if (!pubspec.existsSync()) {
+      pubspec.writeAsStringSync(
+        'name: swift_package_manager_fixture\nflutter:\n  config:\n    $configKey: $enabled\n',
+      );
+      return;
+    }
 
-  static Future<void> disableSwiftPackageManager(String flutterBin, String workingDirectory) async {
-    final ProcessResult result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'config',
-      '--no-enable-swift-package-manager',
-      '-v',
-    ], workingDirectory: workingDirectory);
-    expect(
-      result.exitCode,
-      0,
-      reason:
-          'Failed to disable Swift Package Manager: \n'
-          'stdout: \n${result.stdout}\n'
-          'stderr: \n${result.stderr}\n',
-    );
+    final editor = YamlEditor(pubspec.readAsStringSync());
+    const configPath = <String>['flutter', 'config'];
+    if (editor.parseAt(configPath, orElse: () => YamlScalar.wrap(null)) is YamlMap) {
+      editor.update(<String>[...configPath, configKey], enabled);
+    } else {
+      editor.update(configPath, <String, Object?>{configKey: enabled});
+    }
+    pubspec.writeAsStringSync(editor.toString());
   }
 
   static Future<String> createApp(
@@ -53,11 +41,15 @@ class SwiftPackageManagerUtils {
     required String platform,
     required List<String> options,
     bool usesSwiftPackageManager = false,
+    bool? swiftPackageManagerEnabled,
     String? name,
   }) async {
     final appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
     final String appName = name ?? '${platform}_${appTemplateType}_app';
+    if (swiftPackageManagerEnabled != null) {
+      setSwiftPackageManagerEnabled(workingDirectory, enabled: swiftPackageManagerEnabled);
+    }
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -77,7 +69,11 @@ class SwiftPackageManagerUtils {
           'stderr: \n${result.stderr}\n',
     );
 
-    return fileSystem.path.join(workingDirectory, appName);
+    final String appDirectoryPath = fileSystem.path.join(workingDirectory, appName);
+    if (swiftPackageManagerEnabled != null) {
+      setSwiftPackageManagerEnabled(appDirectoryPath, enabled: swiftPackageManagerEnabled);
+    }
+    return appDirectoryPath;
   }
 
   static Future<void> buildApp(
@@ -225,12 +221,16 @@ class SwiftPackageManagerUtils {
     String workingDirectory, {
     required String platform,
     bool usesSwiftPackageManager = false,
+    bool? swiftPackageManagerEnabled,
     String? name,
   }) async {
     final dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
     // Create plugin
     final String pluginName = name ?? '${platform}_${dependencyManager}_plugin';
+    if (swiftPackageManagerEnabled != null) {
+      setSwiftPackageManagerEnabled(workingDirectory, enabled: swiftPackageManagerEnabled);
+    }
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
       ...getLocalEngineArguments(),
@@ -259,12 +259,16 @@ class SwiftPackageManagerUtils {
         .split('_')
         .map((String part) => _capitalize(part))
         .join();
-    return SwiftPackageManagerPlugin(
+    final plugin = SwiftPackageManagerPlugin(
       pluginName: pluginName,
       pluginPath: pluginDirectory.path,
       platform: platform,
       className: pluginClassName,
     );
+    if (swiftPackageManagerEnabled != null) {
+      setSwiftPackageManagerEnabled(plugin.exampleAppPath, enabled: swiftPackageManagerEnabled);
+    }
+    return plugin;
   }
 
   static Future<Directory> createPackage(
@@ -394,17 +398,6 @@ class SwiftPackageManagerUtils {
     expect(updatedPubspecContent, isNot(pubspecContent));
 
     pubspec.writeAsStringSync(updatedPubspecContent);
-  }
-
-  static void disableSwiftPackageManagerByPubspec({required String appDirectoryPath}) {
-    final File pubspec = fileSystem.file(fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'));
-    final String pubspecContent = pubspec.readAsStringSync();
-    pubspec.writeAsStringSync(
-      pubspecContent.replaceFirst(
-        '\n# The following section is specific to Flutter packages.\nflutter:\n',
-        '\n# The following section is specific to Flutter packages.\nflutter:\n  config: \n    enable-swift-package-manager: false\n',
-      ),
-    );
   }
 
   static SwiftPackageManagerPlugin integrationTestPlugin(String platform) {
