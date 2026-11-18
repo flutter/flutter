@@ -334,13 +334,16 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
     final violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
-      final layer = renderView.debugLayer! as OffsetLayer;
-      final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
+      final ContainerLayer? layer = renderView.debugLayer;
+      final SemanticsNode? root = renderView.owner?.semanticsOwner?.rootSemanticsNode;
+      if (layer is! OffsetLayer || root == null) {
+        continue;
+      }
 
       final double ratio = 1 / renderView.flutterView.devicePixelRatio;
       final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
       final ByteData byteData = (await image.toByteData())!;
-      violations.addAll(_evaluateNode(root, image, byteData, renderView));
+      violations.addAll(_evaluateNode(binding, root, image, byteData, renderView));
       image.dispose();
     }
 
@@ -348,6 +351,7 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   }
 
   List<Violation> _evaluateNode(
+    WidgetsBinding binding,
     SemanticsNode node,
     ui.Image image,
     ByteData byteData,
@@ -365,7 +369,7 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
       return true;
     });
     for (final child in children) {
-      violations.addAll(_evaluateNode(child, image, byteData, renderView));
+      violations.addAll(_evaluateNode(binding, child, image, byteData, renderView));
     }
 
     if (shouldSkipNode(node)) {
@@ -373,7 +377,7 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
     }
 
     // Preserve child violations when evaluating an ancestor node.
-    violations.addAll(_evaluateNodeContent(node, image, byteData, renderView));
+    violations.addAll(_evaluateNodeContent(binding, node, image, byteData, renderView));
     return violations;
   }
 
@@ -386,6 +390,7 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   }
 
   List<Violation> _evaluateNodeContent(
+    WidgetsBinding binding,
     SemanticsNode node,
     ui.Image image,
     ByteData byteData,
@@ -495,18 +500,23 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
 
   @override
   List<Violation> _evaluateNodeContent(
+    WidgetsBinding binding,
     SemanticsNode node,
     ui.Image image,
     ByteData byteData,
     RenderView renderView,
   ) {
+    final Element? rootElement = binding.rootElement;
+    if (rootElement == null) {
+      return <Violation>[];
+    }
     final violations = <Violation>[];
     final SemanticsData data = node.getSemanticsData();
     final String text = data.label.isEmpty ? data.value : data.label;
     final Iterable<Element> elements = _collectElementsByText(
-      WidgetsBinding.instance.rootElement!,
+      rootElement,
       text,
-    ).where(_isHitTestable);
+    ).where((Element element) => _isHitTestable(binding, element));
     for (final element in elements) {
       violations.addAll(_evaluateElement(node, element, image, byteData, renderView));
     }
@@ -671,6 +681,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
 
   @override
   List<Violation> _evaluateNodeContent(
+    WidgetsBinding binding,
     SemanticsNode node,
     ui.Image image,
     ByteData byteData,
@@ -857,7 +868,7 @@ bool _isRenderObjectAncestorOfTarget(RenderObject renderObject, HitTestTarget ta
 // Checks whether the center of [element] can be hit-tested in its enclosing
 // [RenderView], so obscured text (such as text behind a modal or backdrop) is
 // skipped.
-bool _isHitTestable(Element element) {
+bool _isHitTestable(WidgetsBinding binding, Element element) {
   final RenderObject? object = element.renderObject;
   final RenderObject? root = object?.owner?.rootNode;
   if (root is! RenderView || object is! RenderBox || !object.hasSize) {
@@ -865,7 +876,7 @@ bool _isHitTestable(Element element) {
   }
   final Offset absoluteOffset = object.localToGlobal(object.size.center(Offset.zero));
   final hitResult = HitTestResult();
-  WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, root.flutterView.viewId);
+  binding.hitTestInView(hitResult, absoluteOffset, root.flutterView.viewId);
   return hitResult.path.any(
     (HitTestEntry entry) => _isRenderObjectAncestorOfTarget(object, entry.target),
   );
