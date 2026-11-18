@@ -474,6 +474,11 @@ final class _ExtensionArtifactInputSource implements Source {
   }
 }
 
+/// Returns whether [name] matches a built-in engine or host artifact that
+/// always resolves from [Artifacts].
+bool isBuiltInArtifactName(String name) =>
+    _builtInArtifacts.containsKey(name) || _builtInHostArtifacts.containsKey(name);
+
 const _builtInArtifacts = <String, Artifact>{
   'flutterPatchedSdkPath': Artifact.flutterPatchedSdkPath,
   'genSnapshot': Artifact.genSnapshot,

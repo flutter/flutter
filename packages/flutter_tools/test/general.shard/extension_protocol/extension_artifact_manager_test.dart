@@ -54,6 +54,21 @@ final class _FakeArtifactService extends ArtifactService {
   }
 }
 
+final class _ThrowingArtifactService extends ArtifactService {
+  _ThrowingArtifactService(this.errorMessage);
+
+  final String errorMessage;
+
+  @override
+  Future<List<ArtifactDependency>> listRequiredArtifacts({
+    required String engineVersion,
+    required HostPlatform hostPlatform,
+    Set<String>? targetPlatforms,
+  }) async {
+    throw ToolExtensionException(errorMessage);
+  }
+}
+
 ExtensionEntryPoint _createMultiTargetEntryPoint({
   required List<ArtifactDependency> artifacts,
   Set<String>? supportedPlatforms = const <String>{'linux'},
@@ -1280,6 +1295,208 @@ void main() {
         expect(downloadCount, 2);
       },
     );
+
+    test('surfaces ToolExtensionException (-32001) via ToolExit on targeted calls while warning and continuing on aggregate precache', () async {
+      final List<int> content = utf8.encode('healthy payload');
+      final contentSha256 = sha256.convert(content).toString();
+
+      void failingEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _ThrowingArtifactService(
+              'No prebuilt binaries published for engine revision engine_rev_123.',
+            ),
+          ],
+          extensionName: 'failing_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      void healthyEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.remote(
+                name: 'healthy_bin',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/healthy_bin'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'healthy_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[failingEntryPoint, healthyEntryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      var downloadCount = 0;
+      final httpClient = _FakeHttpClient((Uri url) async {
+        downloadCount++;
+        return _FakeHttpClientResponse(HttpStatus.ok, content);
+      });
+
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: fs.directory('/domain_error_cache'),
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClientFactory: () => httpClient,
+        toolContext: FakeToolContext(
+          cache: FakeCache(engineRevision: 'engine_rev_123', fileSystem: fs),
+          fs: fs,
+          logger: logger,
+          os: osUtils,
+          platform: FakePlatform(),
+        ),
+      );
+
+      // Aggregate precache (`extensionName: null`) logs the clean message
+      // without raw ToolExtensionException/RpcException prefixes and continues.
+      final Map<String, ResolvedExtensionArtifact> precached = await artifactManager
+          .ensureArtifactsDownloaded();
+      expect(downloadCount, 1);
+      expect(precached.keys, equals(const <String>{'healthy_bin'}));
+      expect(
+        logger.warningText,
+        contains(
+          'Failed to query artifacts from extension (package:failing_ext): '
+          'No prebuilt binaries published for engine revision engine_rev_123.',
+        ),
+      );
+      expect(logger.warningText, isNot(contains('ToolExtensionException')));
+      expect(logger.warningText, isNot(contains('RpcException')));
+      expect(logger.warningText, isNot(contains('-32001')));
+
+      // Targeted build/run (`extensionName: 'failing_ext'`) surfaces ToolExit.
+      await expectLater(
+        artifactManager.ensureArtifactsDownloaded(
+          artifactNames: const <String>{'custom_bin'},
+          extensionName: 'failing_ext',
+        ),
+        throwsA(
+          isA<ToolExit>()
+              .having(
+                (ToolExit e) => e.message,
+                'message',
+                contains(
+                  'Failed to query artifacts from extension (package:failing_ext): '
+                  'No prebuilt binaries published for engine revision engine_rev_123.',
+                ),
+              )
+              .having(
+                (ToolExit e) => e.message,
+                'no ToolExtensionException prefix',
+                isNot(contains('ToolExtensionException')),
+              )
+              .having(
+                (ToolExit e) => e.message,
+                'no RpcException prefix',
+                isNot(contains('RpcException')),
+              ),
+        ),
+      );
+    });
+
+    test('warns naming (package:<extension_name>) and skips artifacts colliding with built-in artifacts', () async {
+      final List<int> content = utf8.encode('custom sdk payload');
+      final contentSha256 = sha256.convert(content).toString();
+
+      void collidingEntryPoint(SendPort sendPort) {
+        ToolExtensionEntryPoint.run(
+          sendPort,
+          <ToolExtensionService>[
+            _FakeArtifactService(<ArtifactDependency>[
+              ArtifactDependency.remote(
+                name: BuiltInArtifacts.icuData.name,
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/custom_icudtl.dat'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: BuiltInHostArtifacts.impellerc.name,
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/custom_impellerc'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: 'linuxHeaders',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/custom_linux_headers.zip'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+              ArtifactDependency.remote(
+                name: 'custom_embedder_sdk',
+                sha256: contentSha256,
+                url: Uri.parse('https://example.com/custom_embedder_sdk'),
+                hostPlatform: HostPlatform.linux_x64,
+              ),
+            ]),
+          ],
+          extensionName: 'colliding_ext',
+          supportedPlatforms: const <String>{'linux'},
+        );
+      }
+
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[collidingEntryPoint],
+      );
+      addTearDown(manager.dispose);
+
+      final downloadedUrls = <Uri>[];
+      final httpClient = _FakeHttpClient((Uri url) async {
+        downloadedUrls.add(url);
+        return _FakeHttpClientResponse(HttpStatus.ok, content);
+      });
+
+      final artifactManager = ExtensionArtifactManager(
+        cacheDir: fs.directory('/builtin_collision_cache'),
+        extensionManager: manager,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        httpClientFactory: () => httpClient,
+        toolContext: FakeToolContext(fs: fs, logger: logger, os: osUtils, platform: FakePlatform()),
+      );
+
+      final Map<String, ResolvedExtensionArtifact> resolved = await artifactManager
+          .ensureArtifactsDownloaded(
+            artifactNames: const <String>{'custom_embedder_sdk'},
+            extensionName: 'colliding_ext',
+          );
+      expect(downloadedUrls, <Uri>[Uri.parse('https://example.com/custom_embedder_sdk')]);
+      expect(resolved.keys, equals(const <String>{'custom_embedder_sdk'}));
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping custom artifact "${BuiltInArtifacts.icuData.name}" from extension '
+          '(package:colliding_ext) because it collides with a built-in engine artifact.',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping custom artifact "${BuiltInHostArtifacts.impellerc.name}" from extension '
+          '(package:colliding_ext) because it collides with a built-in engine artifact.',
+        ),
+      );
+      expect(
+        logger.warningText,
+        contains(
+          'Skipping custom artifact "linuxHeaders" from extension '
+          '(package:colliding_ext) because it collides with a built-in engine artifact.',
+        ),
+      );
+    });
   });
 }
 

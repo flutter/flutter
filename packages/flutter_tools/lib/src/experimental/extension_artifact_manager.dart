@@ -17,6 +17,7 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../build_system/targets/extension.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
@@ -184,6 +185,15 @@ class ExtensionArtifactManager {
   /// disabled, [artifactNames] is empty, extension initialization fails, or no
   /// matching active extension implements [ArtifactService].
   ///
+  /// When [extensionName] is specified (such as during a targeted `flutter build`
+  /// or `flutter run`), a [ToolExtensionException] thrown by
+  /// [ArtifactService.listRequiredArtifacts] exits via [ToolExit] with the
+  /// extension's clean error message; when [extensionName] is `null` (such as
+  /// during aggregate `flutter precache`), the clean message is logged as a
+  /// warning and remaining extensions continue. Artifacts whose
+  /// [ArtifactDependency.name] satisfies [isBuiltInArtifactName] log a warning
+  /// and are skipped.
+  ///
   /// When [force] is `true`, existing cached remote artifacts are re-downloaded.
   Future<Map<String, ResolvedExtensionArtifact>> ensureArtifactsDownloaded({
     Set<String>? artifactNames,
@@ -230,6 +240,7 @@ class ExtensionArtifactManager {
         ext,
         currentHostPlatform: currentHostPlatform,
         engineVersion: engineVersion,
+        failOnDomainError: extensionName != null,
         logger: logger,
         targetPlatforms: targetPlatforms,
       );
@@ -246,6 +257,13 @@ class ExtensionArtifactManager {
           logger.printWarning(
             'Extension "${ext.extensionName}" declared duplicate artifact "${dep.name}"; '
             'keeping the first declaration.',
+          );
+          continue;
+        }
+        if (isBuiltInArtifactName(dep.name)) {
+          logger.printWarning(
+            'Skipping custom artifact "${dep.name}" from extension '
+            '(package:${ext.extensionName}) because it collides with a built-in engine artifact.',
           );
           continue;
         }
@@ -273,13 +291,17 @@ class ExtensionArtifactManager {
   /// for the list of [ArtifactDependency] descriptors required for the given
   /// [engineVersion], [currentHostPlatform], and optional [targetPlatforms].
   ///
-  /// Logs a warning and returns an empty list if the RPC fails or returns
-  /// malformed data so a single failing extension does not abort artifact
-  /// resolution for other extensions.
+  /// When [ArtifactService.listRequiredArtifacts] throws a
+  /// [ToolExtensionException], throws a [ToolExit] if [failOnDomainError] is
+  /// `true`, or logs a warning and returns an empty list otherwise. Unexpected
+  /// RPC or deserialization errors log a warning and return an empty list so a
+  /// single failing extension does not abort artifact resolution for other
+  /// extensions.
   Future<List<ArtifactDependency>> _queryExtensionArtifacts(
     ExtensionConnection ext, {
     required HostPlatform currentHostPlatform,
     required String engineVersion,
+    required bool failOnDomainError,
     required Logger logger,
     required Set<String>? targetPlatforms,
   }) async {
@@ -294,6 +316,16 @@ class ExtensionArtifactManager {
         },
       );
       return ArtifactDependency.listFromJson(result);
+    } on ToolExtensionException catch (e) {
+      final String detail = e.message.trim();
+      final message = detail.isNotEmpty
+          ? 'Failed to query artifacts from extension (package:${ext.extensionName}): $detail'
+          : 'Failed to query artifacts from extension (package:${ext.extensionName}).';
+      if (failOnDomainError) {
+        throwToolExit(message);
+      }
+      logger.printWarning(message);
+      return const <ArtifactDependency>[];
     } on Object catch (e) {
       logger.printWarning('Failed to query artifacts from extension "${ext.extensionName}": $e');
       return const <ArtifactDependency>[];
