@@ -6,7 +6,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 /// Prototype Linux platform extension configuration and feature flag provider.
-class LinuxConfigurationExtension extends ConfigurationExtension {
+final class LinuxConfigurationExtension extends ConfigurationExtension {
   static const String kEnableLinuxCustomPrototype = 'enable-linux-custom-prototype';
   static const String kLinuxGtkVersion = 'linux-gtk-version';
 

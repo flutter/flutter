@@ -13,7 +13,11 @@ name: Material and Cupertino Code Freeze
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+    # Label events are intentionally not included. For first-time contributors,
+    # every run needs maintainer approval, and a pending run for a label change
+    # (e.g. `autosubmit`) blocks the pull request from entering the merge
+    # queue. After applying the `override code freeze` label, re-run this check.
+    types: [opened, reopened, synchronize, ready_for_review]
     branches:
       - master
   merge_group:
@@ -54,9 +58,23 @@ jobs:
               - 'packages/flutter/test_fixes/material/**'
               - 'packages/flutter/test_fixes/cupertino/**'
 
+      - name: Check for override label
+        id: override
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        # Read the labels from the API rather than the event payload, since a
+        # re-run reuses the original payload and would miss a newly added label.
+        run: |
+          if gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.labels[].name' | grep -Fxq 'override code freeze'; then
+            echo "overridden=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Record frozen changes
         id: record
-        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && steps.override.outputs.overridden != 'true'
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |

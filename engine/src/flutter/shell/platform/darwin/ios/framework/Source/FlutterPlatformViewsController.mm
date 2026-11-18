@@ -4,10 +4,7 @@
 
 #import "shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #include "display_list/geometry/dl_geometry_types.h"
-#include "impeller/geometry/rounding_radii.h"
 
-#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
-#include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
 #include "flutter/fml/logging.h"
@@ -19,11 +16,10 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
+#import "flutter/shell/platform/darwin/ios/platform_view_layer_conversion.h"
 
 using flutter::DlISize;
-using flutter::DlMatrix;
 using flutter::DlRect;
-using flutter::DlRoundRect;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
@@ -40,31 +36,6 @@ struct LayerData {
 };
 using LayersMap = std::unordered_map<int64_t, LayerData>;
 
-// Converts a DlMatrix to CATransform3D.
-static CATransform3D GetCATransform3DFromDlMatrix(const DlMatrix& matrix) {
-  CATransform3D transform = CATransform3DIdentity;
-  transform.m11 = matrix.m[0];
-  transform.m12 = matrix.m[1];
-  transform.m13 = matrix.m[2];
-  transform.m14 = matrix.m[3];
-
-  transform.m21 = matrix.m[4];
-  transform.m22 = matrix.m[5];
-  transform.m23 = matrix.m[6];
-  transform.m24 = matrix.m[7];
-
-  transform.m31 = matrix.m[8];
-  transform.m32 = matrix.m[9];
-  transform.m33 = matrix.m[10];
-  transform.m34 = matrix.m[11];
-
-  transform.m41 = matrix.m[12];
-  transform.m42 = matrix.m[13];
-  transform.m43 = matrix.m[14];
-  transform.m44 = matrix.m[15];
-  return transform;
-}
-
 // Reset the anchor of `layer` to match the transform operation from flow.
 //
 // The position of the `layer` should be unchanged after resetting the anchor.
@@ -72,13 +43,6 @@ static void ResetAnchor(CALayer* layer) {
   // Flow uses (0, 0) to apply transform matrix so we need to match that in Quartz.
   layer.anchorPoint = CGPointZero;
   layer.position = CGPointZero;
-}
-
-static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
-  return CGRectMake(clipDlRect.GetLeft(),   //
-                    clipDlRect.GetTop(),    //
-                    clipDlRect.GetWidth(),  //
-                    clipDlRect.GetHeight());
 }
 
 @interface FlutterPlatformViewsController ()
@@ -115,11 +79,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 @property(nonatomic, readonly)
     NSMutableDictionary<NSNumber*, FlutterPlatformViewInfo*>* platformViews;
 
-/// The composition parameters for each platform view.
+/// The composition parameters for each platform view in the current frame, keyed by view ID.
+/// Cleared at the start of each frame in `resetFrameState`.
 ///
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly)
     std::unordered_map<int64_t, flutter::EmbeddedViewParams>& currentCompositionParams;
+
+/// The composition parameters submitted for each platform view in the previous frame, indexed by
+/// view ID. Views will be recomposited in `submitFrame:` if their current parameters differ from
+/// this mapping, or if there was no entry.
+///
+/// When a view is recreated under a disposed ID, it will not be mapped. This is to ensure that it
+/// is composited even if the view is recreated with the same parameters. `onCreate:` rejects any ID
+/// that is still in `platformViews`. `computeViewsToDisposeWithCompositionOrder:` removes an ID
+/// only when presenting a frame that no longer includes that view.
+///
+/// This state is only modified on the raster thread.
+@property(nonatomic, readonly)
+    std::unordered_map<int64_t, flutter::EmbeddedViewParams>& previousCompositionParams;
 
 /// The IDs of views to be disposed, as requested via the `dispose` method channel call.
 ///
@@ -139,11 +117,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 ///
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly) std::vector<int64_t>& visitedPlatformViews;
-
-/// Only composite platform views in this set.
-///
-/// This state is only modified on the raster thread.
-@property(nonatomic, readonly) std::unordered_set<int64_t>& viewsToRecomposite;
 
 /// Whether the previous frame had any platform views in active composition order.
 ///
@@ -183,21 +156,22 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (void)clipViewSetMaskView:(UIView*)clipView;
 
-// Applies the mutators in the mutatorsStack to the UIView chain that was constructed by
+// Composites the platform view described by `layer`.
+//
+// This method sets the frames of the view's |ChildClippingView| and
+// |FlutterTouchInterceptingView|, then applies the layer's mutators.
+- (void)compositeLayer:(FlutterPlatformViewLayer*)layer;
+
+// Applies the mutators to the UIView chain that was constructed by
 // `ReconstructClipViewsChain`
 //
 // Clips are applied to the `embeddedView`'s super view(|ChildClippingView|) using a
 // |FlutterClippingMaskView|. Transforms are applied to `embeddedView`
 //
-// The `boundingRect` is the final bounding rect of the PlatformView
-// (EmbeddedViewParams::finalBoundingRect). If a clip mutator's rect contains the final bounding
-// rect of the PlatformView, the clip mutator is not applied for performance optimization.
-//
 // This method is only called when the `embeddedView` needs to be re-composited at the current
 // frame. See: `compositeView:withParams:` for details.
-- (void)applyMutators:(const flutter::MutatorsStack&)mutatorsStack
-         embeddedView:(UIView*)embeddedView
-         boundingRect:(const DlRect&)boundingRect;
+- (void)applyMutators:(NSArray<FlutterPlatformViewMutator*>*)mutators
+         embeddedView:(UIView*)embeddedView;
 
 // Appends the overlay views and platform view and sets their z index based on the composition
 // order.
@@ -215,11 +189,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)removeUnusedLayers:(const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers
       withCompositionOrder:(const std::vector<int64_t>&)compositionOrder;
 
-/// Computes and returns all views to be disposed on the platform thread, removes them from
-/// self.platformViews, self.viewsToRecomposite, and self.currentCompositionParams. Any views that
-/// still require compositing are not returned, but instead added to `viewsToDelayDispose` for
-/// disposal on the next call.
-- (NSArray<UIView*>*)computeViewsToDispose;
+/// Returns the views to be disposed (as requested via the `dispose` method channel call) and
+/// removes them from `self.platformViews`. Any views still in `compositionOrder` are not returned,
+/// but are instead kept in `viewsToDispose` for disposal on a later call.
+///
+/// Must run on the platform thread.
+- (NSArray<UIView*>*)computeViewsToDisposeWithCompositionOrder:
+    (const std::vector<int64_t>&)compositionOrder;
 
 /// Resets the state of the frame.
 - (void)resetFrameState;
@@ -240,10 +216,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   FlutterFMLTaskRunner* _platformTaskRunner;
   NSMutableDictionary<NSNumber*, FlutterPlatformViewInfo*>* _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
+  std::unordered_map<int64_t, flutter::EmbeddedViewParams> _previousCompositionParams;
   NSMutableSet<NSNumber*>* _viewsToDispose;
   std::vector<int64_t> _compositionOrder;
   std::vector<int64_t> _visitedPlatformViews;
-  std::unordered_set<int64_t> _viewsToRecomposite;
   NSMutableArray<NSNumber*>* _previousCompositionOrder;
 }
 
@@ -460,14 +436,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   self.slices.insert_or_assign(viewId, std::move(view));
 
   self.compositionOrder.push_back(viewId);
-
-  if (self.currentCompositionParams.count(viewId) == 1 &&
-      self.currentCompositionParams[viewId] == *params.get()) {
-    // Do nothing if the params didn't change.
-    return;
-  }
   self.currentCompositionParams[viewId] = flutter::EmbeddedViewParams(*params.get());
-  self.viewsToRecomposite.insert(viewId);
 }
 
 - (size_t)embeddedViewCount {
@@ -503,9 +472,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame];
 }
 
-- (void)applyMutators:(const flutter::MutatorsStack&)mutatorsStack
-         embeddedView:(UIView*)embeddedView
-         boundingRect:(const DlRect&)boundingRect {
+- (void)applyMutators:(NSArray<FlutterPlatformViewMutator*>*)mutators
+         embeddedView:(UIView*)embeddedView {
   if (self.flutterView == nil) {
     return;
   }
@@ -513,7 +481,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   ResetAnchor(embeddedView.layer);
   ChildClippingView* clipView = (ChildClippingView*)embeddedView.superview;
 
-  DlMatrix transformMatrix;
+  CATransform3D transformMatrix = CATransform3DIdentity;
   NSMutableArray* blurFilters = [[NSMutableArray alloc] init];
   NSMutableArray<PendingRRectClip*>* pendingClipRRects = [[NSMutableArray alloc] init];
 
@@ -524,61 +492,38 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     clipView.maskView = nil;
   }
   CGFloat screenScale = [UIScreen mainScreen].scale;
-  auto iter = mutatorsStack.Begin();
-  while (iter != mutatorsStack.End()) {
-    switch ((*iter)->GetType()) {
-      case flutter::MutatorType::kTransform: {
-        transformMatrix = transformMatrix * (*iter)->GetMatrix();
+  for (FlutterPlatformViewMutator* mutator in mutators) {
+    switch (mutator.type) {
+      case FlutterPlatformViewMutatorTypeTransform: {
+        transformMatrix = CATransform3DConcat(mutator.transform, transformMatrix);
         break;
       }
-      case flutter::MutatorType::kClipRect: {
-        if (flutter::DisplayListMatrixClipState::TransformedRectCoversBounds(
-                (*iter)->GetRect(), transformMatrix, boundingRect)) {
-          break;
-        }
+      case FlutterPlatformViewMutatorTypeClipRect: {
         [self clipViewSetMaskView:clipView];
-        [(FlutterClippingMaskView*)clipView.maskView clipRect:(*iter)->GetRect()
-                                                       matrix:transformMatrix];
+        [(FlutterClippingMaskView*)clipView.maskView clipRect:mutator.rect matrix:transformMatrix];
         break;
       }
-      case flutter::MutatorType::kClipRRect: {
-        if (flutter::DisplayListMatrixClipState::TransformedRRectCoversBounds(
-                (*iter)->GetRRect(), transformMatrix, boundingRect)) {
-          break;
-        }
+      case FlutterPlatformViewMutatorTypeClipRoundedRect:
+      case FlutterPlatformViewMutatorTypeClipRoundedSuperellipse: {
         [self clipViewSetMaskView:clipView];
-        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRRect()
+        [(FlutterClippingMaskView*)clipView.maskView clipRRect:mutator.rect
+                                                         radii:mutator.cornerRadii
                                                         matrix:transformMatrix];
         break;
       }
-      case flutter::MutatorType::kClipRSE: {
-        if (flutter::DisplayListMatrixClipState::TransformedRoundSuperellipseCoversBounds(
-                (*iter)->GetRSE(), transformMatrix, boundingRect)) {
-          break;
-        }
+      case FlutterPlatformViewMutatorTypeClipPath: {
         [self clipViewSetMaskView:clipView];
-        [(FlutterClippingMaskView*)clipView.maskView clipRRect:(*iter)->GetRSEApproximation()
-                                                        matrix:transformMatrix];
+        [(FlutterClippingMaskView*)clipView.maskView clipPath:mutator.path matrix:transformMatrix];
         break;
       }
-      case flutter::MutatorType::kClipPath: {
-        // TODO(cyanglaz): Find a way to pre-determine if path contains the PlatformView boudning
-        // rect. See `ClipRRectContainsPlatformViewBoundingRect`.
-        // https://github.com/flutter/flutter/issues/118650
-        [self clipViewSetMaskView:clipView];
-        [(FlutterClippingMaskView*)clipView.maskView clipPath:(*iter)->GetPath()
-                                                       matrix:transformMatrix];
+      case FlutterPlatformViewMutatorTypeOpacity:
+        embeddedView.alpha = mutator.opacity * embeddedView.alpha;
         break;
-      }
-      case flutter::MutatorType::kOpacity:
-        embeddedView.alpha = (*iter)->GetAlphaFloat() * embeddedView.alpha;
-        break;
-      case flutter::MutatorType::kBackdropFilter: {
-        // Only support DlBlurImageFilter for BackdropFilter.
-        if (!self.canApplyBlurBackdrop || !(*iter)->GetFilterMutation().GetFilter().asBlur()) {
+      case FlutterPlatformViewMutatorTypeBackdropFilter: {
+        if (!self.canApplyBlurBackdrop) {
           break;
         }
-        CGRect filterRect = GetCGRectFromDlRect((*iter)->GetFilterMutation().GetFilterRect());
+        CGRect filterRect = mutator.rect;
         // `filterRect` is in global coordinates. We need to convert to local space.
         filterRect = CGRectApplyAffineTransform(
             filterRect, CGAffineTransformMakeScale(1 / screenScale, 1 / screenScale));
@@ -594,7 +539,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         // sigma_x and sigma_y equal to each other. DlBlurImageFilter's Tile Mode
         // is not supported in Quartz's gaussianBlur CAFilter, so it is not used
         // to blur the PlatformView.
-        CGFloat blurRadius = (*iter)->GetFilterMutation().GetFilter().asBlur()->sigma_x();
+        CGFloat blurRadius = mutator.blurSigmaX;
         UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
             initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
         // The visual effect shouldn't swallow touches.
@@ -628,42 +573,29 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         }
         break;
       }
-      case flutter::MutatorType::kBackdropClipRect: {
+      case FlutterPlatformViewMutatorTypeBackdropClipRect: {
         // The frame already handles cropping into the rect so this can
         // no-op
         break;
       }
-      case flutter::MutatorType::kBackdropClipRRect: {
+      case FlutterPlatformViewMutatorTypeBackdropClipRoundedRect:
+      case FlutterPlatformViewMutatorTypeBackdropClipRoundedSuperellipse: {
         PendingRRectClip* clip = [[PendingRRectClip alloc] init];
-        DlRoundRect rrect = (*iter)->GetBackdropClipRRect().rrect;
-
-        impeller::RoundingRadii radii = rrect.GetRadii();
-        clip.topLeftRadius = radii.top_left.width;
-        clip.topRightRadius = radii.top_right.width;
-        clip.bottomLeftRadius = radii.bottom_left.width;
-        clip.bottomRightRadius = radii.bottom_right.width;
+        FlutterPlatformViewCornerRadii radii = mutator.cornerRadii;
+        clip.topLeftRadius = radii.topLeft.width;
+        clip.topRightRadius = radii.topRight.width;
+        clip.bottomLeftRadius = radii.bottomLeft.width;
+        clip.bottomRightRadius = radii.bottomRight.width;
+        clip.isRoundedSuperellipse =
+            mutator.type == FlutterPlatformViewMutatorTypeBackdropClipRoundedSuperellipse;
         [pendingClipRRects addObject:clip];
         break;
       }
-      case flutter::MutatorType::kBackdropClipRSuperellipse: {
-        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
-        flutter::DlRoundSuperellipse rse = (*iter)->GetBackdropClipRSuperellipse().rse;
-
-        impeller::RoundingRadii radii = rse.GetRadii();
-        clip.topLeftRadius = radii.top_left.width;
-        clip.topRightRadius = radii.top_right.width;
-        clip.bottomLeftRadius = radii.bottom_left.width;
-        clip.bottomRightRadius = radii.bottom_right.width;
-        clip.isRoundedSuperellipse = YES;
-        [pendingClipRRects addObject:clip];
-        break;
-      }
-      case flutter::MutatorType::kBackdropClipPath: {
+      case FlutterPlatformViewMutatorTypeBackdropClipPath: {
         // TODO(https://github.com/flutter/flutter/issues/179127)
         break;
       }
     }
-    ++iter;
   }
 
   if (self.canApplyBlurBackdrop) {
@@ -675,8 +607,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // However, flow is based on the physical resolution. For example, 1000 pixels in flow equals
   // 500 points in UIKit for devices that has screenScale of 2. We need to scale the transformMatrix
   // down to the logical resoltion before applying it to the layer of PlatformView.
-  flutter::DlScalar pointScale = 1.0 / screenScale;
-  transformMatrix = DlMatrix::MakeScale({pointScale, pointScale, 1}) * transformMatrix;
+  CGFloat pointScale = 1.0 / screenScale;
+  transformMatrix =
+      CATransform3DConcat(transformMatrix, CATransform3DMakeScale(pointScale, pointScale, 1));
 
   // Reverse the offset of the clipView.
   // The clipView's frame includes the final translate of the final transform matrix.
@@ -685,31 +618,38 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   //
   // Note that the transforms are not applied to the clipping paths because clipping paths happen on
   // the mask view, whose origin is always (0,0) to the _flutterView.
-  impeller::Vector3 origin = impeller::Vector3(clipView.frame.origin.x, clipView.frame.origin.y);
-  transformMatrix = DlMatrix::MakeTranslation(-origin) * transformMatrix;
+  CGPoint origin = clipView.frame.origin;
+  transformMatrix =
+      CATransform3DConcat(transformMatrix, CATransform3DMakeTranslation(-origin.x, -origin.y, 0));
 
-  embeddedView.layer.transform = GetCATransform3DFromDlMatrix(transformMatrix);
+  embeddedView.layer.transform = transformMatrix;
 }
 
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params {
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+  [self compositeLayer:flutter::GetPlatformViewLayerFromEmbeddedViewParams(viewId, params,
+                                                                           screenScale)];
+}
+
+- (void)compositeLayer:(FlutterPlatformViewLayer*)layer {
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   // TODO(https://github.com/flutter/flutter/issues/109700)
-  CGRect frame = CGRectMake(0, 0, params.sizePoints().width, params.sizePoints().height);
-  FlutterTouchInterceptingView* touchInterceptor = self.platformViews[@(viewId)].touchInterceptor;
+  CGRect frame = CGRectMake(0, 0, layer.size.width / screenScale, layer.size.height / screenScale);
+  FlutterTouchInterceptingView* touchInterceptor =
+      self.platformViews[@(layer.viewId)].touchInterceptor;
   touchInterceptor.layer.transform = CATransform3DIdentity;
   touchInterceptor.frame = frame;
   touchInterceptor.alpha = 1;
 
-  const flutter::MutatorsStack& mutatorStack = params.mutatorsStack();
-  UIView* clippingView = self.platformViews[@(viewId)].rootView;
+  UIView* clippingView = self.platformViews[@(layer.viewId)].rootView;
   // The frame of the clipping view should be the final bounding rect.
   // Because the translate matrix in the Mutator Stack also includes the offset,
-  // when we apply the transforms matrix in |applyMutators:embeddedView:boundingRect|, we need
+  // when we apply the transforms matrix in |applyMutators:embeddedView:|, we need
   // to remember to do a reverse translate.
-  const DlRect& rect = params.finalBoundingRect();
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  clippingView.frame = CGRectMake(rect.GetX() / screenScale, rect.GetY() / screenScale,
-                                  rect.GetWidth() / screenScale, rect.GetHeight() / screenScale);
-  [self applyMutators:mutatorStack embeddedView:touchInterceptor boundingRect:rect];
+  CGRect rect = layer.boundingRect;
+  clippingView.frame = CGRectMake(rect.origin.x / screenScale, rect.origin.y / screenScale,
+                                  rect.size.width / screenScale, rect.size.height / screenScale);
+  [self applyMutators:layer.mutators embeddedView:touchInterceptor];
 }
 
 - (flutter::DlCanvas*)compositeEmbeddedViewWithId:(int64_t)viewId {
@@ -718,7 +658,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 - (void)reset {
-  // Reset will only be called from the raster thread or a merged raster/platform thread.
+  // `PlatformViewIOS::OnPreEngineRestart` calls this on the platform thread during hot restart.
   // _platformViews must only be modified on the platform thread, and any operations that
   // read or modify platform views should occur there.
   std::vector<int64_t> compositionOrder = self.compositionOrder;
@@ -730,10 +670,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     [_previousCompositionOrder removeAllObjects];
   }];
 
+  // The state below is otherwise only modified on the raster thread.
   self.compositionOrder.clear();
   self.slices.clear();
   self.currentCompositionParams.clear();
-  self.viewsToRecomposite.clear();
+  self.previousCompositionParams.clear();
   self.layerPool->RecycleLayers();
   self.visitedPlatformViews.clear();
 }
@@ -760,10 +701,29 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     }
 
     self.hadPlatformViews = NO;
+
+    // No platform views are composited when there is no Flutter view, or when neither this frame
+    // nor the previous one had any. The next frame that has platform views must composite all of
+    // them.
+    self.previousCompositionParams.clear();
     background_frame->Submit();
     return;
   }
   self.hadPlatformViews = !self.compositionOrder.empty();
+
+  // Recomposite only the views whose parameters changed since the previous frame.
+  //
+  // Backdrop filter and clip mutators are appended to the parameters via the
+  // `push*ToVisitedPlatformViews:` methods after preroll. As a result, we can't compare in preroll;
+  // we need to do it here.
+  std::unordered_set<int64_t> viewsToRecomposite;
+  for (int64_t viewId : self.compositionOrder) {
+    auto previous = self.previousCompositionParams.find(viewId);
+    if (previous == self.previousCompositionParams.end() ||
+        previous->second != self.currentCompositionParams[viewId]) {
+      viewsToRecomposite.insert(viewId);
+    }
+  }
 
   LayersMap platformViewLayers;
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
@@ -842,10 +802,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
+  self.previousCompositionParams = self.currentCompositionParams;
   auto task = fml::MakeCopyable([self,                                                      //
                                  platformViewLayers = std::move(platformViewLayers),        //
                                  currentCompositionParams = self.currentCompositionParams,  //
-                                 viewsToRecomposite = self.viewsToRecomposite,              //
+                                 viewsToRecomposite = std::move(viewsToRecomposite),        //
                                  compositionOrder = self.compositionOrder,                  //
                                  unusedLayers = std::move(unusedLayers),                    //
                                  surfaceFrames = std::move(surfaceFrames)]() mutable {
@@ -921,7 +882,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 
   // Dispose unused Flutter Views.
-  for (UIView* view in [self computeViewsToDispose]) {
+  for (UIView* view in [self computeViewsToDisposeWithCompositionOrder:compositionOrder]) {
     [view removeFromSuperview];
   }
 
@@ -1017,13 +978,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   }
 }
 
-- (NSArray<UIView*>*)computeViewsToDispose {
+- (NSArray<UIView*>*)computeViewsToDisposeWithCompositionOrder:
+    (const std::vector<int64_t>&)compositionOrder {
   if (self.viewsToDispose.count == 0) {
     return @[];
   }
 
-  std::unordered_set<int64_t> viewsToComposite(self.compositionOrder.begin(),
-                                               self.compositionOrder.end());
+  std::unordered_set<int64_t> viewsToComposite(compositionOrder.begin(), compositionOrder.end());
   NSMutableArray<UIView*>* views = [NSMutableArray array];
   NSMutableSet<NSNumber*>* viewsToDelayDispose = [NSMutableSet set];
   for (NSNumber* viewId in self.viewsToDispose) {
@@ -1035,8 +996,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     if (rootView != nil) {
       [views addObject:rootView];
     }
-    self.currentCompositionParams.erase(viewId.longLongValue);
-    self.viewsToRecomposite.erase(viewId.longLongValue);
     [self.platformViews removeObjectForKey:viewId];
   }
   [self.viewsToDispose setSet:viewsToDelayDispose];
@@ -1046,6 +1005,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)resetFrameState {
   self.slices.clear();
   self.compositionOrder.clear();
+  self.currentCompositionParams.clear();
   self.visitedPlatformViews.clear();
 }
 
@@ -1103,16 +1063,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return _currentCompositionParams;
 }
 
+- (std::unordered_map<int64_t, flutter::EmbeddedViewParams>&)previousCompositionParams {
+  return _previousCompositionParams;
+}
+
 - (std::vector<int64_t>&)compositionOrder {
   return _compositionOrder;
 }
 
 - (std::vector<int64_t>&)visitedPlatformViews {
   return _visitedPlatformViews;
-}
-
-- (std::unordered_set<int64_t>&)viewsToRecomposite {
-  return _viewsToRecomposite;
 }
 
 - (NSArray<NSNumber*>*)previousCompositionOrder {

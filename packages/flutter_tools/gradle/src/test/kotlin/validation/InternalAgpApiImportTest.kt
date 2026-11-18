@@ -45,8 +45,7 @@ class InternalAgpApiImportTest {
         assertTrue(
             offendingLines.isEmpty(),
             "AGP internal APIs must not be used in production sources. Use the public " +
-                "com.android.build.api surface (see " +
-                "docs/platforms/android/Migrating-Flutter-Gradle-Plugin-to-AGP-public-API.md).\n" +
+                "com.android.build.api surface.\n" +
                 offendingLines.joinToString("\n")
         )
     }

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -281,6 +282,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry'},
         );
@@ -295,6 +297,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug'},
         );
@@ -316,6 +319,7 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
+            featureFlags: TestFeatureFlags(),
             processManager: FakeProcessManager.any(),
             defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-vanilla'},
           );
@@ -339,6 +343,7 @@ void main() {
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
+            featureFlags: TestFeatureFlags(),
             processManager: FakeProcessManager.any(),
             defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug vanilla'},
           );
@@ -360,6 +365,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-random'},
         );
@@ -382,6 +388,7 @@ void main() {
 
           await project.ensureReadyForPlatformSpecificTooling(
             plistParser: FakePlistParser(),
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             templateRenderer: const MustacheTemplateRenderer(),
             toolContext: FakeToolContext(
               cache: FakeCache(olderThanToolsStamp: true)
@@ -412,6 +419,7 @@ void main() {
 
           await project.ensureReadyForPlatformSpecificTooling(
             plistParser: FakePlistParser(),
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             templateRenderer: const MustacheTemplateRenderer(),
             toolContext: FakeToolContext(
               cache: FakeCache(olderThanToolsStamp: true)
