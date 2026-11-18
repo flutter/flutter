@@ -9,10 +9,12 @@ import 'dart:isolate';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:stream_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -94,6 +96,16 @@ final class _LogTestService extends ToolExtensionService {
         log('warning message', level: .warning);
         log('error message', level: .error);
         log('trace message', level: .trace);
+        return 'ok';
+      },
+      'emitAnsi': (Map<String, Object?> _) {
+        log('\u001B[32mGreen unclosed');
+        log('\u001B[1;33mBold yellow\u001B[m warning', level: .warning);
+        log('Plain trace', level: .trace);
+        return 'ok';
+      },
+      'emitExplicitTimestamp': (Map<String, Object?> _) {
+        log('explicit timestamp', timestamp: DateTime(2026, 11, 18, 12, 30));
         return 'ok';
       },
       'emitMalformed': (Map<String, Object?> _) {
@@ -818,6 +830,94 @@ void main() {
       expect(logger.errorText, contains('[log_ext] error message'));
       expect(logger.traceText, contains('[log_ext] trace message'));
     });
+
+    test('ToolExtensionService.log populates default UTC timestamp and normalizes explicit timestamps to UTC', () async {
+      final receivePort = ReceivePort();
+      addTearDown(receivePort.close);
+      final Isolate isolate = await Isolate.spawn(_logExtensionEntryPoint, receivePort.sendPort);
+      addTearDown(() => isolate.kill(priority: Isolate.immediate));
+
+      final hostPeer = json_rpc.Peer.withoutJson(
+        IsolateChannel<Object?>.connectReceive(receivePort),
+      );
+      addTearDown(hostPeer.close);
+      final notifications = <Map<String, Object?>>[];
+      hostPeer.registerMethod(ToolExtensionEntryPoint.logNotificationMethod, (
+        json_rpc.Parameters params,
+      ) {
+        if (params.value case final Map<String, Object?> payload) {
+          notifications.add(payload);
+        }
+      });
+      unawaited(hostPeer.listen());
+
+      final DateTime before = DateTime.now().toUtc();
+      expect(await hostPeer.sendRequest('log_test.emitAll'), 'ok');
+      expect(await hostPeer.sendRequest('log_test.emitExplicitTimestamp'), 'ok');
+      await pumpEventQueue();
+      final DateTime after = DateTime.now().toUtc();
+
+      expect(notifications, hasLength(5));
+      for (final Map<String, Object?> payload in notifications.take(4)) {
+        expect(payload[ExtensionLogMessage.timestampKey], allOf(isA<String>(), endsWith('Z')));
+        final parsed = ExtensionLogMessage.fromJson(payload);
+        expect(parsed.timestamp, isNotNull);
+        expect(parsed.timestamp!.isUtc, isTrue);
+        expect(parsed.timestamp!.isBefore(before), isFalse);
+        expect(parsed.timestamp!.isAfter(after), isFalse);
+      }
+
+      expect(
+        notifications.last[ExtensionLogMessage.timestampKey],
+        DateTime(2026, 11, 18, 12, 30).toUtc().toIso8601String(),
+      );
+
+      await hostPeer.sendRequest(ToolExtensionEntryPoint.shutdownMethod);
+    });
+
+    test(
+      'strips ANSI SGR escape sequences from extension.log when !logger.supportsColor',
+      () async {
+        final logger = BufferLogger.test();
+        expect(logger.supportsColor, isFalse);
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('log_test.emitAnsi'), 'ok');
+        await pumpEventQueue();
+
+        expect(logger.statusText, '[log_ext] Green unclosed\n');
+        expect(logger.warningText, '[log_ext] Bold yellow warning\n');
+        expect(logger.traceText, contains('[log_ext] Plain trace\n'));
+      },
+    );
+
+    test(
+      'appends trailing ANSI reset on color terminals when extension.log contains ANSI sequences',
+      () async {
+        final logger = BufferLogger.test(terminal: Terminal.test(supportsColor: true));
+        expect(logger.supportsColor, isTrue);
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          _logExtensionEntryPoint,
+          logger: logger,
+        );
+        addTearDown(connection.dispose);
+
+        expect(await connection.sendRequest('log_test.emitAnsi'), 'ok');
+        await pumpEventQueue();
+
+        expect(logger.statusText, '[log_ext] \u001B[32mGreen unclosed${AnsiTerminal.resetAll}\n');
+        expect(
+          logger.warningText,
+          '[log_ext] \u001B[1;33mBold yellow\u001B[m warning${AnsiTerminal.resetAll}\n',
+        );
+        expect(logger.traceText, contains('[log_ext] Plain trace\n'));
+        expect(logger.traceText, isNot(contains('[log_ext] Plain trace${AnsiTerminal.resetAll}')));
+      },
+    );
 
     test('logs warning on malformed extension.log notification', () async {
       final logger = BufferLogger.test();

@@ -55,10 +55,17 @@ abstract base class ToolExtensionService {
 
   /// Sends a structured log notification to the host tool over
   /// [ToolExtensionEntryPoint.logNotificationMethod].
+  ///
+  /// Defaults [timestamp] to the current UTC time when omitted.
+  @nonVirtual
   void log(String message, {ExtensionLogLevel level = .info, DateTime? timestamp}) {
     sendNotification(
       ToolExtensionEntryPoint.logNotificationMethod,
-      ExtensionLogMessage(level: level, message: message, timestamp: timestamp).toMap(),
+      ExtensionLogMessage(
+        level: level,
+        message: message,
+        timestamp: (timestamp ?? DateTime.now()).toUtc(),
+      ).toMap(),
     );
   }
 
