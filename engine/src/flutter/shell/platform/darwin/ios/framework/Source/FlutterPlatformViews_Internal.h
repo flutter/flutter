@@ -16,6 +16,7 @@
 #include "flutter/impeller/base/thread_safety.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewLayer.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
@@ -36,18 +37,21 @@
 
 // Adds a clip rect operation to the queue.
 //
-// The `clipSkRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRect:(const flutter::DlRect&)clipDlRect matrix:(const flutter::DlMatrix&)matrix;
+// The `clipRect` is transformed with the `matrix` before adding to the queue.
+- (void)clipRect:(CGRect)clipRect matrix:(CATransform3D)matrix;
 
 // Adds a clip rrect operation to the queue.
 //
-// The `clipSkRRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRRect:(const flutter::DlRoundRect&)clipDlRRect matrix:(const flutter::DlMatrix&)matrix;
+// The rounded rect described by `clipRect` and `radii` is transformed with the `matrix` before
+// adding to the queue.
+- (void)clipRRect:(CGRect)clipRect
+            radii:(FlutterPlatformViewCornerRadii)radii
+           matrix:(CATransform3D)matrix;
 
 // Adds a clip path operation to the queue.
 //
 // The `path` is transformed with the `matrix` before adding to the queue.
-- (void)clipPath:(const flutter::DlPath&)path matrix:(const flutter::DlMatrix&)matrix;
+- (void)clipPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
 @end
 

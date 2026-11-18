@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -60,6 +61,7 @@ void main() {
     Logger? logger,
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
+    Pub? pub,
   }) async {
     final Logger resolvedLogger = logger ?? BufferLogger.test();
     final ProcessManager resolvedProcessManager = processManager ?? const LocalProcessManager();
@@ -89,7 +91,7 @@ void main() {
         projectFactory: projectFactory,
       ),
     );
-    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final CommandRunner<void> runner = createTestCommandRunner(command, null, null, null, pub);
     await runner.run(<String>['aar', ...?arguments, target]);
     return command;
   }
@@ -179,6 +181,7 @@ void main() {
         await runBuildAar(
           projectPath,
           arguments: <String>['--target-platform=android-arm'],
+          pub: FakePub(),
           // If we use --no-pub, it bypasses validation that occurs only on a
           // build with --pub, which as a consequence means that we aren't
           // testing every code branch.
@@ -187,7 +190,6 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => _CapturingFakeAndroidBuilder(),
         Analytics: () => analytics,
-        Pub: FakePub.new,
       },
     );
 
@@ -642,6 +644,7 @@ void main() {
               operatingSystemUtils: os,
               platform: localPlatform,
             ),
+            templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
             templateRenderer: const MustacheTemplateRenderer(),
           );
 
@@ -710,6 +713,7 @@ void main() {
               operatingSystemUtils: os,
               platform: localPlatform,
             ),
+            templatePathProvider: TemplatePathProvider(flutterRoot: flutterRoot),
             templateRenderer: const MustacheTemplateRenderer(),
           );
 

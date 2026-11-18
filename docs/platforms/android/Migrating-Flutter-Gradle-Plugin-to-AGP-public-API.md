@@ -123,7 +123,7 @@ projects. That opt-out dies with AGP 10.
 | `getLegacyAndroidExtension(project).buildTypes` loops | `PluginHandler.kt` | wrapper new-DSL `buildTypes` container | P2 |
 | `internal.dsl.BuildType` live aliasing into plugin projects | `PluginHandler.kt` | `initWith`-based copy on new-DSL `BuildType`; app-specific props only when both sides are `ApplicationBuildType` | P3 |
 | `BaseExtension` / `getLegacyAndroidExtension` (remaining call sites) | `FlutterPluginUtils.kt` | wrapper accessors incl. `externalNativeBuild` | P4 |
-| eager `applicationVariants.configureEach` task creation; mergeAssets/processResources hooks | `FlutterPlugin.kt`, `FlutterPluginUtils.kt` | consolidated `onVariants` block; `CopyFlutterAssetsTask` + `variant.sources.assets.addGeneratedSourceDirectory` | P5 |
+| eager `applicationVariants.configureEach` task creation; mergeAssets/processResources hooks | `FlutterPlugin.kt`, `FlutterPluginUtils.kt` | consolidated `onVariants` block; `CopyFlutterAssetsTask` + `variant.artifacts.use(...).toTransform(SingleArtifact.ASSETS)` | P5 |
 | `variant.outputs` + `packageApplicationProvider` + `doLast` APK copy; `versionCodeOverride` | `FlutterPluginUtils.kt` | `CopyFlutterApksTask` (`SingleArtifact.APK` + `BuiltArtifactsLoader`); `VariantOutput.versionCode` set from a `finalizeDsl` snapshot (`DslVersionCodes`) | P6 |
 | `libraryVariants.all` × host `applicationVariants.all` cross-wiring | `FlutterPlugin.kt` (add-to-app) | library-side `onVariants` with `Component.debuggable`; no host-project lookup | P7 |
 | `android.libraryVariants`; internal `publishing.singleVariants`; module-to-plugin `assembleAar<V>.dependsOn` | `aar_init_script.gradle` | `com.android.library` plugin check; per-variant `singleVariant` that keeps the build file's declaration; the tool requests `assembleAar<V>` without a project path, so it runs in the module and in every plugin that has it (no `dependsOn`) | P8 |
@@ -236,11 +236,15 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    the plugin's `BuildConfig.DEBUG` and native (C++/JNI) code may silently compile
    in release mode instead of debug mode. Matching is preserved via `matchingFallbacks`,
    but C++ debugging will be broken for those custom build types.
-5. **Asset merge**: flutter assets become a merged source dir instead of a
-   post-merge overwrite; collisions resolve by AGP source-set priority.
+5. **Asset merge**: flutter assets are added by a transform of the merged assets
+   (`SingleArtifact.ASSETS`), which copies `flutter_assets/` over AGP's merge output, so
+   Flutter assets still win on a collision. An earlier version of the migration added them
+   as a generated assets source directory instead, but AGP filters those with
+   `androidResources.ignoreAssetsPattern`, whose default drops `.env` and other valid
+   Flutter assets ([#196444](https://github.com/flutter/flutter/issues/196444)).
 6. **Add-to-app**: the module registers its Flutter tasks in its own `onVariants` and
-   adds the staged assets and native libraries as generated source directories of each
-   library variant. The host consumes them like any Android library's, so the
+   adds the Flutter assets to the merged assets and the native libraries as a generated
+   jniLibs source directory of each library variant. The host consumes them like any Android library's, so the
    host-project lookup, the `libraryVariants` × host `applicationVariants` loop and the
    `:app:merge<V>Assets.dependsOn` edge are removed.
    - `flutter.hostAppProjectName` has no effect; setting it logs a warning that names no
@@ -253,7 +257,7 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
      debuggable host build type that falls back to the module's `release` gets release
      artifacts. Built as the only task, the deleted code ran the module's debug Flutter
      build for it, and the APK had no `flutter_assets` and no `libapp.so`.
-   - Module assets are a generated source directory (item 5), and `copyFlutterAssets<V>`
+   - Module assets use the same transform (item 5), and `copyFlutterAssets<V>`
      is a `CopyFlutterAssetsTask` (item 7).
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
