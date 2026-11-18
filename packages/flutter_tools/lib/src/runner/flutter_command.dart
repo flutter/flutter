@@ -1538,7 +1538,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
         targetPlatform,
-        runner?.featureFlags ?? featureFlags,
+        runner!.featureFlags,
       );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);

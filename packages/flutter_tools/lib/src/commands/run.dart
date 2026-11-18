@@ -114,6 +114,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
 
+  FeatureFlags get _featureFlags => runner!.featureFlags;
+
   bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
   bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
   bool get enableDartProfiling => getValue(DebuggingOptionDescriptors.enableDartProfiling);
@@ -158,10 +160,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? webBrowserDebugPort = featureFlags.isWebEnabled
+    final int? webBrowserDebugPort = _featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserDebugPort)
         : null;
-    final List<String> webBrowserFlags = featureFlags.isWebEnabled
+    final List<String> webBrowserFlags = _featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserFlags)
         : const <String>[];
 
@@ -173,22 +175,22 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         : null;
 
     final webConfig = WebDebugConfig(
-      enableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
+      enableExposeUrl: _featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
       useSseForDebugProxy:
-          featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
+          _featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
       useSseForDebugBackend:
-          featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
+          _featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
       useSseForInjectedClient:
-          featureFlags.isWebEnabled &&
+          _featureFlags.isWebEnabled &&
           getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
-      runHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
+      runHeadless: _featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
       browserDebugPort: webBrowserDebugPort,
       browserFlags: webBrowserFlags,
       enableExpressionEvaluation:
           !buildInfo.mode.isRelease &&
-          featureFlags.isWebEnabled &&
+          _featureFlags.isWebEnabled &&
           getValue(WebOptions.webEnableExpressionEvaluation),
-      launchUrl: !buildInfo.mode.isRelease && featureFlags.isWebEnabled
+      launchUrl: !buildInfo.mode.isRelease && _featureFlags.isWebEnabled
           ? getValue(WebOptions.webLaunchUrl)
           : null,
       crossOriginIsolation: webCrossOriginIsolation,
@@ -450,7 +452,7 @@ class RunCommand extends RunCommandBase {
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
 
-    if (featureFlags.isWebEnabled &&
+    if (_featureFlags.isWebEnabled &&
         devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
@@ -705,6 +707,7 @@ class RunCommand extends RunCommandBase {
         dartBuilder: _flutterHookRunner,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
         xcode: appleContext.xcode,
       );
@@ -720,6 +723,7 @@ class RunCommand extends RunCommandBase {
         assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         toolContext: toolContext,
         webDefines: extractWebDefines(),
@@ -739,6 +743,7 @@ class RunCommand extends RunCommandBase {
       assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
+      featureFlags: _featureFlags,
       toolContext: toolContext,
       xcode: appleContext.xcode,
     );
@@ -753,7 +758,7 @@ class RunCommand extends RunCommandBase {
       buildSystem: buildSystem,
       buildTargets: buildTargets,
       devtoolsLauncher: _devtoolsLauncher,
-      featureFlags: featureFlags,
+      featureFlags: _featureFlags,
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
       webRunnerFactory: _webRunnerFactory,

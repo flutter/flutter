@@ -2844,6 +2844,7 @@ void _testInMemory(
   final ProcessManager testProcessManager = processManager ?? FakeProcessManager.any();
   final cache = Cache(
     flutterRoot: flutterRoot,
+    isLocalEngineBuilder: () => false,
     logger: testBufferLogger,
     fileSystem: testFileSystem,
     osUtils: osUtils,
