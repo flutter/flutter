@@ -53,8 +53,6 @@ struct MockQueryPool {
   std::vector<uint64_t> timestamps IPLR_GUARDED_BY(mutex);
 };
 
-static std::atomic<uint64_t> g_next_mock_timestamp{1000000u};
-
 struct MockCommandPool {};
 
 struct MockDescriptorPool {};
@@ -157,6 +155,10 @@ class MockDevice final {
     return query_pool_result_counts_;
   }
 
+  uint64_t NextMockTimestamp() {
+    return next_mock_timestamp_.fetch_add(1000000u);
+  }
+
   MockQueue& GetQueue() { return queue_; }
 
  private:
@@ -181,6 +183,7 @@ class MockDevice final {
       IPLR_GUARDED_BY(commmand_pools_mutex_);
 
   MockQueue queue_;
+  std::atomic<uint64_t> next_mock_timestamp_{1000000u};
 };
 
 std::weak_ptr<MockDevice>* MockPhysicalDevice::CreateDevice() {
@@ -924,7 +927,8 @@ void vkCmdWriteTimestamp(VkCommandBuffer commandBuffer,
   MockQueryPool* mock_pool = reinterpret_cast<MockQueryPool*>(queryPool);
   Lock lock(mock_pool->mutex);
   if (query < mock_pool->timestamps.size()) {
-    mock_pool->timestamps[query] = g_next_mock_timestamp.fetch_add(1000000u);
+    mock_pool->timestamps[query] =
+        mock_command_buffer->device_.NextMockTimestamp();
   }
 }
 
