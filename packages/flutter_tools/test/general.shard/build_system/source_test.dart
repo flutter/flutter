@@ -37,6 +37,7 @@ void main() {
     cache = FlutterCache(
       flutterRoot: '',
       fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
       logger: logger,
       platform: platform,
       osUtils: osUtils,
@@ -59,6 +60,7 @@ void main() {
       fileSystem.currentDirectory,
       outputDir: outputs,
       artifacts: artifacts, // using real artifacts
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       // engineVersion being null simulates a local engine.
@@ -225,6 +227,7 @@ void main() {
     final windowsEnvironment = Environment.test(
       windowsFileSystem.currentDirectory,
       artifacts: Artifacts.test(fileSystem: windowsFileSystem),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: windowsFileSystem,
       logger: BufferLogger.test(),
@@ -255,6 +258,7 @@ void main() {
       final versionedEnvironment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: environment.logger,

@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -112,7 +111,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.version'}),
@@ -391,7 +390,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         expect(notifyingLogger.notifyVerbose, false);
 
@@ -421,7 +420,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         notifyingLogger.notifyVerbose = false;
 
@@ -449,7 +448,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.shutdown'}),
@@ -472,7 +471,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.restart'}));
@@ -495,7 +494,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
 
         daemonStreams.inputs.add(
@@ -523,7 +522,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.stop'}));
@@ -544,7 +543,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}),
@@ -566,7 +565,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -595,7 +594,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
 
         final discoverer = FakePollingDeviceDiscovery();
@@ -661,7 +660,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}),
@@ -683,7 +682,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -711,7 +710,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -743,7 +742,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -800,7 +799,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -884,7 +883,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -962,7 +961,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       final discoverer1 = FakePollingDeviceDiscovery();
       discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
@@ -995,7 +994,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
 
       daemonStreams.inputs.add(
@@ -1018,7 +1017,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       final params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
       daemonStreams.inputs.add(
@@ -1041,7 +1040,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
@@ -1066,7 +1065,7 @@ void main() {
         toolContext: const DelegatingToolContext(),
         xcode: null,
         notifyingLogger: notifyingLogger,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(),
       );
 
       // Respond to any requests from the daemon to expose a URL.
@@ -1175,7 +1174,7 @@ void main() {
             toolContext: const DelegatingToolContext(),
             xcode: null,
             notifyingLogger: notifyingLogger,
-            featureFlags: featureFlags,
+            featureFlags: TestFeatureFlags(),
           );
           daemonStreams.inputs.add(
             DaemonMessage(<String, Object?>{
@@ -1266,7 +1265,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -1303,7 +1302,7 @@ void main() {
           toolContext: const DelegatingToolContext(),
           xcode: null,
           notifyingLogger: notifyingLogger,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
         );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
