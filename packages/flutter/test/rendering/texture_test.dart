@@ -46,6 +46,11 @@ void main() {
 
   void tearDownScene(RenderView renderView) {
     renderView.child = null;
+    final PipelineOwner? owner = renderView.owner;
+    if (owner != null) {
+      binding.rootPipelineOwner.dropChild(owner);
+      owner.rootNode = null;
+    }
     binding.removeRenderView(renderView);
   }
 
@@ -154,6 +159,8 @@ void main() {
     expect(owner.needsPaint, isFalse);
 
     binding.removeRenderView(renderView);
+    binding.rootPipelineOwner.dropChild(owner);
+    owner.rootNode = null;
   });
 }
 
@@ -183,6 +190,8 @@ class FakeFlutterView extends Fake implements FlutterView {
   ViewConstraints get physicalConstraints => ViewConstraints.tight(physicalSize);
   @override
   ViewPadding padding;
+  @override
+  PlatformDispatcher get platformDispatcher => PlatformDispatcher.instance;
 
   List<Scene> renderedScenes = <Scene>[];
 
