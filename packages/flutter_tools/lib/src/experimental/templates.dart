@@ -208,12 +208,12 @@ base class ExtensionTemplateManager {
 
   /// Request platform template parameter generation over extension protocol RPC.
   ///
-  /// Delegates parameter generation for [platformName] to the active tool
-  /// extension that provides platform support for [platformName], passing the
+  /// Delegates parameter generation for [platform] to the active tool
+  /// extension that provides platform support for [platform], passing the
   /// host's [toolParameters]. Falls back to returning [toolParameters] unchanged
   /// if the extension fails, does not modify parameters, or is not available.
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
-    required String platformName,
+    required String platform,
     required Map<String, Object?> toolParameters,
   }) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
@@ -222,7 +222,7 @@ base class ExtensionTemplateManager {
 
     await (_loadFuture ??= _loadPlatformTemplates());
 
-    final ExtensionConnection? owner = _platformOwners[platformName];
+    final ExtensionConnection? owner = _platformOwners[platform];
     if (owner == null) {
       return toolParameters;
     }
@@ -231,7 +231,7 @@ base class ExtensionTemplateManager {
       final Object? result = await owner.sendRequest(
         TemplateService.generatePlatformTemplateParametersMethod,
         params: <String, Object?>{
-          TemplateService.platformNameParam: platformName,
+          TemplateService.platformParam: platform,
           TemplateService.toolParametersParam: toolParameters,
         },
       );

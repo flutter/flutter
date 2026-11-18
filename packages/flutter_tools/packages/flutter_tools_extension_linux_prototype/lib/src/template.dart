@@ -25,10 +25,10 @@ final class LinuxTemplateService extends TemplateService {
 
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
-    required String platformName,
+    required String platform,
     required Map<String, Object?> toolParameters,
   }) async {
-    if (platformName == customLinuxPlatformName) {
+    if (platform == customLinuxPlatformName) {
       return <String, Object?>{...toolParameters, 'customLinux': true};
     }
     return toolParameters;

@@ -24,7 +24,7 @@ void main() {
       final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
 
       final Map<String, Object?> result = await service.generatePlatformTemplateParameters(
-        platformName: LinuxTemplateService.customLinuxPlatformName,
+        platform: LinuxTemplateService.customLinuxPlatformName,
         toolParameters: inputParams,
       );
       expect(result, equals(<String, Object?>{...inputParams, 'customLinux': true}));
@@ -37,7 +37,7 @@ void main() {
         final inputParams = <String, Object?>{'projectName': 'my_app', 'org': 'com.example'};
 
         final Map<String, Object?> result = await service.generatePlatformTemplateParameters(
-          platformName: 'unknown_platform',
+          platform: 'unknown_platform',
           toolParameters: inputParams,
         );
         expect(result, equals(inputParams));

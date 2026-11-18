@@ -48,7 +48,7 @@ final class _ConflictingPluginLinuxTemplateService extends TemplateService {
 
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
-    required String platformName,
+    required String platform,
     required Map<String, Object?> toolParameters,
   }) async {
     return <String, Object?>{...toolParameters, 'fromConflictingPluginExtension': true};
@@ -82,7 +82,7 @@ final class _CombinedAppAndPluginLinuxTemplateService extends TemplateService {
 
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
-    required String platformName,
+    required String platform,
     required Map<String, Object?> toolParameters,
   }) async {
     return <String, Object?>{...toolParameters, 'combinedExtension': true};
@@ -108,7 +108,7 @@ final class _DomainErrorTemplateService extends TemplateService {
 
   @override
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
-    required String platformName,
+    required String platform,
     required Map<String, Object?> toolParameters,
   }) async {
     throw const ToolExtensionException('Template parameter generation failed.');
@@ -167,7 +167,7 @@ void main() {
         final defaultParams = <String, Object?>{'projectName': 'my_app'};
         final Map<String, Object?> generatedParams = await templateManager
             .generatePlatformTemplateParameters(
-              platformName: LinuxTemplateService.customLinuxPlatformName,
+              platform: LinuxTemplateService.customLinuxPlatformName,
               toolParameters: defaultParams,
             );
         expect(generatedParams, equals(defaultParams));
@@ -239,7 +239,7 @@ void main() {
         };
         final Map<String, Object?> result = await templateManager
             .generatePlatformTemplateParameters(
-              platformName: LinuxTemplateService.customLinuxPlatformName,
+              platform: LinuxTemplateService.customLinuxPlatformName,
               toolParameters: inputParams,
             );
 
@@ -247,10 +247,10 @@ void main() {
         expect(result['org'], 'com.example');
         expect(result['customLinux'], isTrue);
 
-        // Returns toolParameters unchanged when platformName is unknown.
+        // Returns toolParameters unchanged when platform is unknown.
         final Map<String, Object?> unknownResult = await templateManager
             .generatePlatformTemplateParameters(
-              platformName: 'unknown_platform',
+              platform: 'unknown_platform',
               toolParameters: inputParams,
             );
         expect(unknownResult, equals(inputParams));
@@ -340,7 +340,7 @@ void main() {
       );
 
       final Map<String, Object?> params = await templateManager.generatePlatformTemplateParameters(
-        platformName: LinuxTemplateService.customLinuxPlatformName,
+        platform: LinuxTemplateService.customLinuxPlatformName,
         toolParameters: const <String, Object?>{'projectName': 'my_app'},
       );
       expect(params['customLinux'], isTrue);
@@ -390,7 +390,7 @@ void main() {
 
         final Map<String, Object?> params = await templateManager
             .generatePlatformTemplateParameters(
-              platformName: LinuxTemplateService.customLinuxPlatformName,
+              platform: LinuxTemplateService.customLinuxPlatformName,
               toolParameters: const <String, Object?>{'projectName': 'my_plugin'},
             );
         expect(params['combinedExtension'], isTrue);
@@ -428,7 +428,7 @@ void main() {
           connection.sendRequest(
             TemplateService.generatePlatformTemplateParametersMethod,
             params: const <String, Object?>{
-              TemplateService.platformNameParam: 123,
+              TemplateService.platformParam: 123,
               TemplateService.toolParametersParam: <String, Object?>{},
             },
           ),
@@ -445,7 +445,7 @@ void main() {
           connection.sendRequest(
             TemplateService.generatePlatformTemplateParametersMethod,
             params: const <String, Object?>{
-              TemplateService.platformNameParam: LinuxTemplateService.customLinuxPlatformName,
+              TemplateService.platformParam: LinuxTemplateService.customLinuxPlatformName,
               TemplateService.toolParametersParam: 'invalid',
             },
           ),
@@ -525,7 +525,7 @@ void main() {
 
       await expectLater(
         templateManager.generatePlatformTemplateParameters(
-          platformName: _DomainErrorTemplateService.customPlatformName,
+          platform: _DomainErrorTemplateService.customPlatformName,
           toolParameters: const <String, Object?>{'projectName': 'my_app'},
         ),
         throwsA(

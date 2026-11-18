@@ -38,8 +38,8 @@ abstract base class TemplateService extends ToolExtensionService {
   static const String generatePlatformTemplateParametersMethod =
       '$serviceNamespace.$_generatePlatformTemplateParametersRpcMethod';
 
-  /// RPC parameter key for the target platform name.
-  static const String platformNameParam = 'platformName';
+  /// RPC parameter key for the target platform.
+  static const String platformParam = 'platform';
 
   /// RPC parameter key for the tool parameters map.
   static const String toolParametersParam = 'toolParameters';
@@ -100,7 +100,7 @@ abstract base class TemplateService extends ToolExtensionService {
   /// Defaults to returning [toolParameters] unchanged. Extensions can override
   /// this method to supply custom template variables to Mustache templates.
   Future<Map<String, Object?>> generatePlatformTemplateParameters({
-    required String platformName,
+    required String platform,
     required Map<String, Object?> toolParameters,
   }) async => toolParameters;
 
@@ -125,17 +125,14 @@ abstract base class TemplateService extends ToolExtensionService {
       pluginPlatformTemplates;
 
   Future<Object?> _generatePlatformTemplateParametersRpc(Map<String, Object?> params) async {
-    final String platformName;
+    final String platform;
     final Map<String, Object?> toolParameters;
     try {
-      platformName = params.requiredField<String>(platformNameParam);
+      platform = params.requiredField<String>(platformParam);
       toolParameters = params.requiredField<Map<String, Object?>>(toolParametersParam);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
-    return generatePlatformTemplateParameters(
-      platformName: platformName,
-      toolParameters: toolParameters,
-    );
+    return generatePlatformTemplateParameters(platform: platform, toolParameters: toolParameters);
   }
 }
