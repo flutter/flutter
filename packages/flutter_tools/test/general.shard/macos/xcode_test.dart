@@ -490,7 +490,7 @@ void main() {
               ),
             );
 
-            expect(await xcode.sdkLocation(EnvironmentType.physical), sdkroot);
+            expect(await xcode.sdkLocation(XcodeSdk.IPhoneOS), sdkroot);
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
@@ -504,7 +504,7 @@ void main() {
               ),
             );
 
-            expect(await xcode.macOSSdkLocation(), macosSdkroot);
+            expect(await xcode.sdkLocation(XcodeSdk.MacOSX), macosSdkroot);
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
@@ -518,7 +518,7 @@ void main() {
             );
 
             expect(
-              () async => xcode.sdkLocation(EnvironmentType.physical),
+              () async => xcode.sdkLocation(XcodeSdk.IPhoneOS),
               throwsToolExit(message: 'Could not find SDK location'),
             );
             expect(fakeProcessManager, hasNoRemainingExpectations);

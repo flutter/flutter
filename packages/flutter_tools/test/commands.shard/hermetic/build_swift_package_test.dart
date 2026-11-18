@@ -3451,12 +3451,9 @@ class FakeXcode extends Fake implements Xcode {
   Version get currentVersion => Version(15, 0, 0);
 
   @override
-  Future<String> sdkLocation(EnvironmentType environmentType) async {
-    return _iosSdkRoot;
+  Future<String> sdkLocation(XcodeSdk sdk) async {
+    return sdk == XcodeSdk.MacOSX ? _macosSdkRoot : _iosSdkRoot;
   }
-
-  @override
-  Future<String> macOSSdkLocation() async => _macosSdkRoot;
 
   @override
   List<String> xcrunCommand() => ['xcrun'];
