@@ -39,7 +39,11 @@ static void registry_global(void* data,
 
 static void registry_global_remove(void* data,
                                    struct wl_registry* registry,
-                                   uint32_t name) {}
+                                   uint32_t name) {
+  (void)data;
+  (void)registry;
+  (void)name;
+}
 
 static const struct wl_registry_listener kRegistryListener = {
     .global = registry_global,
@@ -53,6 +57,7 @@ static gboolean bind_globals(FlWaylandDisplay* self,
   struct wl_registry* registry = wl_display_get_registry(display);
   wl_registry_add_listener(registry, &kRegistryListener, self);
   wl_display_roundtrip(display);
+
   wl_registry_destroy(registry);
 
   return self->compositor != nullptr && self->subcompositor != nullptr;

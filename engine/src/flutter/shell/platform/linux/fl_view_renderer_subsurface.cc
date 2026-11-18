@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
+#include "flutter/shell/platform/linux/fl_presentation_tracker.h"
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_subsurface_egl.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
@@ -41,6 +42,10 @@ struct _FlViewRendererSubsurface {
   // Manages the EGL context and surface used to present frames to the
   // subsurface.
   FlSubsurfaceEGL* egl;
+
+  // Reports commit-to-repaint timing from the subsurface's Wayland frame
+  // callbacks. Null when no subsurface exists.
+  FlPresentationTracker* presentation;
 
   // Combines layers into a frame.
   FlCompositorOpenGL* compositor;
@@ -141,6 +146,10 @@ static void end_synchronized_resize(FlViewRendererSubsurface* self) {
 
   if (self->synchronized && self->subsurface != nullptr) {
     fl_subsurface_set_desync(self->subsurface);
+    if (self->presentation != nullptr) {
+      fl_presentation_tracker_reset(self->presentation);
+      fl_presentation_tracker_set_enabled(self->presentation, TRUE);
+    }
   }
   self->synchronized = FALSE;
 }
@@ -176,6 +185,9 @@ static void begin_synchronized_resize(FlViewRendererSubsurface* self) {
 
   fl_subsurface_set_sync(self->subsurface);
   self->synchronized = TRUE;
+  if (self->presentation != nullptr) {
+    fl_presentation_tracker_set_enabled(self->presentation, FALSE);
+  }
   self->frame_clock = GDK_FRAME_CLOCK(g_object_ref(frame_clock));
   // GTK commits the parent surface from its own handler for this signal, so
   // connect after it to desynchronize once that commit has been made. GTK
@@ -217,6 +229,15 @@ static void create_subsurface(FlViewRendererSubsurface* self,
       fl_wayland_display_create_subsurface(wayland_display, parent_surface);
   update_subsurface_position(self);
 
+  // Presentation feedback is only useful while the subsurface is
+  // desynchronized. A view sized to its content stays synchronized and the
+  // parent commit determines when its frame is shown.
+  self->presentation = fl_presentation_tracker_new(self->engine);
+  if (self->presentation != nullptr) {
+    fl_presentation_tracker_set_enabled(self->presentation,
+                                        !self->sized_to_content);
+  }
+
   // A new subsurface is synchronized with its parent, which holds back every
   // frame until the parent (GTK) surface is redrawn and committed. A view sized
   // to its content relies on that, as it resizes the window to fit each frame
@@ -234,6 +255,9 @@ static void create_subsurface(FlViewRendererSubsurface* self,
   self->egl = fl_subsurface_egl_new(
       fl_engine_get_opengl_manager(self->engine), self->subsurface,
       allocation.width, allocation.height, gtk_widget_get_scale_factor(widget));
+  if (self->egl != nullptr) {
+    fl_subsurface_egl_set_presentation_tracker(self->egl, self->presentation);
+  }
 }
 
 // GTK destroys the window's Wayland surface when it is hidden and makes a new
@@ -258,6 +282,10 @@ static void update_parent_surface(FlViewRendererSubsurface* self) {
   // shown again.
   end_synchronized_resize(self);
   g_mutex_lock(&self->frame_mutex);
+  if (self->presentation != nullptr) {
+    fl_presentation_tracker_reset(self->presentation);
+    g_clear_object(&self->presentation);
+  }
   g_clear_object(&self->egl);
   g_clear_object(&self->subsurface);
   self->parent_surface = parent_surface;
@@ -266,6 +294,10 @@ static void update_parent_surface(FlViewRendererSubsurface* self) {
     create_subsurface(self, parent_surface);
   }
   g_mutex_unlock(&self->frame_mutex);
+
+  // The new surface may be on a different output or have a different commit
+  // cadence. Relearn the phase from scratch.
+  fl_engine_reset_presentation_phase(self->engine);
 
   if (parent_surface == nullptr) {
     return;
@@ -346,11 +378,16 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
 
   // The EGL context and surface are released here; the EGL display is owned by
   // the engine and is left untouched by FlSubsurfaceEGL.
+  if (self->presentation != nullptr) {
+    fl_presentation_tracker_reset(self->presentation);
+    g_clear_object(&self->presentation);
+  }
   g_clear_object(&self->egl);
   g_clear_object(&self->subsurface);
   self->parent_surface = nullptr;
   self->parent_surface_id = 0;
   g_mutex_unlock(&self->frame_mutex);
+  fl_engine_reset_presentation_phase(self->engine);
 
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unrealize(widget);
 }
@@ -528,6 +565,10 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
   end_synchronized_resize(self);
+  if (self->presentation != nullptr) {
+    fl_presentation_tracker_reset(self->presentation);
+    g_clear_object(&self->presentation);
+  }
   g_clear_object(&self->engine);
   g_clear_object(&self->task_runner);
   g_mutex_clear(&self->frame_mutex);

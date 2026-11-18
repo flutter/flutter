@@ -7,6 +7,7 @@
 #include <epoxy/egl.h>
 #include <gmodule.h>
 
+#include <cmath>
 #include <cstring>
 
 #include "flutter/common/constants.h"
@@ -22,6 +23,7 @@
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
+#include "flutter/shell/platform/linux/fl_presentation_phase.h"
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/linux/fl_texture_gl_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
@@ -34,6 +36,16 @@ static constexpr size_t kPlatformTaskRunnerIdentifier = 1;
 // differentiate the actual device (mouse v.s. trackpad)
 static constexpr int32_t kMousePointerDeviceId = 0;
 static constexpr int32_t kPointerPanZoomDeviceId = 1;
+
+// Refresh rate assumed when the display rate is unknown.
+static constexpr double kDefaultRefreshRate = 60.0;
+
+// Bounds for the frame interval. The upper bound avoids division by zero and
+// the lower bound keeps very high refresh rate modes from creating a timer
+// storm. 1ms is 1000Hz, higher than any current display.
+static constexpr gint64 kDefaultFrameIntervalUs = 16667;
+static constexpr gint64 kMinFrameIntervalUs = 1000;
+static constexpr gint64 kMaxFrameIntervalUs = 100000;
 
 struct _FlEngine {
   GObject parent_instance;
@@ -103,6 +115,28 @@ struct _FlEngine {
   // engine threads and GTK.
   GMutex renderables_mutex;
 
+  // Display each view was last reported on. Used to select the refresh rate
+  // frames are produced at. Only accessed from the GTK thread.
+  GHashTable* display_ids_by_view_id;
+
+  // Frame pacing state. The mutex is needed because the engine can request a
+  // vsync from the UI thread while the GTK thread delivers the callback.
+  GMutex vsync_mutex;
+  gint64 frame_interval_us;
+  gint64 frame_grid_origin_us;
+  // How far later than the natural grid the next frame should start. Learned
+  // from Wayland presentation feedback; zero when feedback is unavailable.
+  gint64 presentation_phase_us;
+
+  // Adjusts @presentation_phase_us from feedback samples. Only used on the GTK
+  // thread; null after disposal.
+  FlPresentationPhase* presentation_phase;
+
+  // Source that delivers a vsync request once the frame is due to start. The
+  // phase is applied by delaying this delivery, which is what moves the commit.
+  // NULL when no delivery is pending. Only used on the GTK thread.
+  GSource* vsync_source;
+
   // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
@@ -171,6 +205,316 @@ static void parse_locale(const gchar* locale,
   }
 }
 
+// Converts a refresh rate in Hz to a frame interval, clamped to a sane range.
+static gint64 fl_engine_refresh_rate_to_interval(double refresh_rate) {
+  if (!(refresh_rate > 0.0) || !std::isfinite(refresh_rate)) {
+    refresh_rate = kDefaultRefreshRate;
+  }
+  const double interval_us = 1000000.0 / refresh_rate;
+  if (interval_us <= static_cast<double>(kMinFrameIntervalUs)) {
+    return kMinFrameIntervalUs;
+  }
+  if (interval_us >= static_cast<double>(kMaxFrameIntervalUs)) {
+    return kMaxFrameIntervalUs;
+  }
+  return static_cast<gint64>(llround(interval_us));
+}
+
+// Gets the time the next frame should start. If no frame has been scheduled
+// yet, start it immediately.
+//
+// The start is the natural grid boundary plus the presentation phase, which is
+// a delay. The grid itself is kept unshifted so a phase change only moves the
+// starts and cannot make the boundaries drift.
+static gint64 fl_engine_next_frame_start_locked(FlEngine* self, gint64 now) {
+  gint64 interval = self->frame_interval_us;
+  if (interval <= 0) {
+    interval = kDefaultFrameIntervalUs;
+  }
+  if (self->frame_grid_origin_us == 0) {
+    // Start the first frame immediately, then anchor the grid to it. The
+    // phase is not applied to this frame so startup is not delayed.
+    self->frame_grid_origin_us = now;
+    return now;
+  }
+
+  // The origin is the unshifted boundary used for the previous frame. Advance
+  // by exactly one interval so two frames can never be produced in one refresh
+  // period, even if the request for this frame arrived early.
+  gint64 boundary = self->frame_grid_origin_us + interval;
+  gint64 phase =
+      CLAMP(self->presentation_phase_us, static_cast<gint64>(0), interval - 1);
+  gint64 start = boundary + phase;
+
+  // If the start is already in the past the request is late (for example
+  // because rendering took longer than a refresh, or the phase was reduced
+  // after a failed probe). Skip whole periods until the start is in the future
+  // again. This keeps the learned phase instead of re-anchoring the grid to a
+  // late request; the cost is one skipped refresh when the phase shrinks by
+  // almost a whole period, which only happens when the compositor or surface
+  // changed.
+  if (start <= now) {
+    const gint64 missed = (now - start) / interval + 1;
+    boundary += missed * interval;
+    start += missed * interval;
+  }
+
+  self->frame_grid_origin_us = boundary;
+  return start;
+}
+
+// Releases a pending vsync request to the engine. Must be called on the GTK
+// thread and without the vsync mutex held.
+static void fl_engine_deliver_vsync(FlEngine* self,
+                                    intptr_t baton,
+                                    gint64 start_time_us,
+                                    gint64 target_time_us,
+                                    gint64 frame_interval_us) {
+  if (baton == 0 || self->engine == nullptr) {
+    return;
+  }
+
+  gint64 now = self->embedder_api.GetCurrentTime() / 1000;
+  if (start_time_us < now) {
+    // Preserve the interval when the requested start has already passed. The
+    // engine uses the target time as the frame deadline, so shrinking it
+    // would make frame timestamps non-monotonic under load.
+    gint64 late_by_us = now - start_time_us;
+    start_time_us = now;
+    target_time_us += late_by_us;
+  }
+  if (target_time_us <= start_time_us) {
+    target_time_us =
+        start_time_us +
+        (frame_interval_us > 0 ? frame_interval_us : kDefaultFrameIntervalUs);
+  }
+
+  uint64_t start_time_ns = static_cast<uint64_t>(start_time_us) * 1000;
+  uint64_t target_time_ns = static_cast<uint64_t>(target_time_us) * 1000;
+  if (self->embedder_api.OnVsync(self->engine, baton, start_time_ns,
+                                 target_time_ns) != kSuccess) {
+    g_warning("Failed to notify vsync to Flutter engine");
+  }
+}
+
+typedef struct {
+  GSource source;
+  FlEngine* engine;
+  intptr_t baton;
+  gint64 start_time_us;
+  gint64 interval_us;
+} FlScheduledVsync;
+
+static gboolean fl_engine_scheduled_vsync_cb(GSource* source,
+                                             GSourceFunc callback,
+                                             gpointer user_data) {
+  FlScheduledVsync* vsync = reinterpret_cast<FlScheduledVsync*>(source);
+  FlEngine* self = vsync->engine;
+
+  // Clear the pointer before delivering, so cancellation can never touch a
+  // source that has already run.
+  if (self->vsync_source == source) {
+    self->vsync_source = nullptr;
+  }
+
+  fl_engine_deliver_vsync(self, vsync->baton, vsync->start_time_us,
+                          vsync->start_time_us + vsync->interval_us,
+                          vsync->interval_us);
+  return G_SOURCE_REMOVE;
+}
+
+static GSourceFuncs fl_engine_scheduled_vsync_funcs = {
+    nullptr, nullptr, fl_engine_scheduled_vsync_cb, nullptr, nullptr, nullptr,
+};
+
+// Schedules a vsync delivery for @start_time_us. The source uses a microsecond
+// ready time rather than a millisecond timeout so the frame start is not
+// quantized by the main loop on a high refresh display.
+static void fl_engine_schedule_vsync(FlEngine* self,
+                                     intptr_t baton,
+                                     gint64 start_time_us,
+                                     gint64 interval_us) {
+  GSource* source =
+      g_source_new(&fl_engine_scheduled_vsync_funcs, sizeof(FlScheduledVsync));
+  FlScheduledVsync* vsync = reinterpret_cast<FlScheduledVsync*>(source);
+  // The engine owns the source and cancels it in dispose, so a plain
+  // pointer is enough; a reference would keep an idle engine alive.
+  vsync->engine = self;
+  vsync->baton = baton;
+  vsync->start_time_us = start_time_us;
+  vsync->interval_us = interval_us;
+
+  g_source_set_priority(source, G_PRIORITY_HIGH);
+  g_source_set_name(source, "FlEngineVsync");
+  g_source_set_ready_time(source, start_time_us);
+  self->vsync_source = source;
+  if (g_source_attach(source, nullptr) == 0) {
+    // The main context is gone. Release the frame now rather than losing the
+    // baton and leaving the engine waiting forever.
+    self->vsync_source = nullptr;
+    g_source_unref(source);
+    fl_engine_deliver_vsync(self, baton, start_time_us,
+                            start_time_us + interval_us, interval_us);
+    return;
+  }
+  // The main context keeps the source alive until it is dispatched or
+  // destroyed.
+  g_source_unref(source);
+}
+
+// Delivers a pending vsync immediately so its baton is not lost.
+static void fl_engine_flush_vsync(FlEngine* self) {
+  GSource* source = self->vsync_source;
+  if (source == nullptr) {
+    return;
+  }
+  FlScheduledVsync* vsync = reinterpret_cast<FlScheduledVsync*>(source);
+  intptr_t baton = vsync->baton;
+  gint64 start_time_us = vsync->start_time_us;
+  gint64 interval_us = vsync->interval_us;
+  self->vsync_source = nullptr;
+  g_source_destroy(source);
+  fl_engine_deliver_vsync(self, baton, start_time_us,
+                          start_time_us + interval_us, interval_us);
+}
+
+// Drops a pending vsync delivery without delivering it. Used while the engine
+// is shutting down, when there is no frame left to present.
+static void fl_engine_cancel_pending_vsync(FlEngine* self) {
+  GSource* source = self->vsync_source;
+  if (source == nullptr) {
+    return;
+  }
+  self->vsync_source = nullptr;
+  g_source_destroy(source);
+}
+
+// Deliver a frame directly if the scheduled start is already this close; the
+// main loop cannot dispatch a timer more precisely than this anyway.
+static constexpr gint64 kVsyncDeliverySlackUs = 100;
+
+// Called on the GTK thread to handle a vsync request from the engine.
+static void fl_engine_await_vsync_on_main(FlEngine* self, intptr_t baton) {
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  gint64 now = self->embedder_api.GetCurrentTime() / 1000;
+
+  g_mutex_lock(&self->vsync_mutex);
+  if (self->engine == nullptr) {
+    g_mutex_unlock(&self->vsync_mutex);
+    return;
+  }
+
+  gint64 start_time_us = fl_engine_next_frame_start_locked(self, now);
+  gint64 interval = self->frame_interval_us;
+  if (interval <= 0) {
+    interval = kDefaultFrameIntervalUs;
+  }
+  g_mutex_unlock(&self->vsync_mutex);
+
+  // The engine requests one frame at a time; a second request while a delivery
+  // is pending means the previous baton has to be released first.
+  fl_engine_flush_vsync(self);
+
+  if (start_time_us <= now + kVsyncDeliverySlackUs) {
+    // The frame is due now (the first frame, or a request that arrived late).
+    fl_engine_deliver_vsync(self, baton, start_time_us,
+                            start_time_us + interval, interval);
+    return;
+  }
+
+  // Delaying the delivery is what moves the commit; changing only the
+  // timestamps passed to OnVsync would not affect when the frame is rendered.
+  fl_engine_schedule_vsync(self, baton, start_time_us, interval);
+}
+
+typedef struct {
+  FlEngine* engine;
+  intptr_t baton;
+} FlVsyncRequest;
+
+static gboolean fl_engine_await_vsync_cb(gpointer user_data) {
+  FlVsyncRequest* request = static_cast<FlVsyncRequest*>(user_data);
+  fl_engine_await_vsync_on_main(request->engine, request->baton);
+  return G_SOURCE_REMOVE;
+}
+
+static void fl_engine_free_vsync_request(gpointer user_data) {
+  FlVsyncRequest* request = static_cast<FlVsyncRequest*>(user_data);
+  g_object_unref(request->engine);
+  g_free(request);
+}
+
+// Called by the engine when it wants to wait for a vsync. This may be called on
+// the UI thread, while FlutterEngineOnVsync must be called on the thread that
+// ran the engine (the GTK thread).
+static void fl_engine_vsync_cb(void* user_data, intptr_t baton) {
+  FlEngine* self = FL_ENGINE(user_data);
+
+  if (g_thread_self() == self->thread) {
+    fl_engine_await_vsync_on_main(self, baton);
+    return;
+  }
+
+  FlVsyncRequest* request = g_new0(FlVsyncRequest, 1);
+  request->engine = FL_ENGINE(g_object_ref(self));
+  request->baton = baton;
+  g_main_context_invoke_full(nullptr, G_PRIORITY_HIGH, fl_engine_await_vsync_cb,
+                             request, fl_engine_free_vsync_request);
+}
+
+// Updates the frame interval from a display refresh rate.
+static void fl_engine_set_refresh_rate(FlEngine* self, double refresh_rate) {
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  gint64 interval = fl_engine_refresh_rate_to_interval(refresh_rate);
+
+  if (self->presentation_phase != nullptr) {
+    self->presentation_phase->SetInterval(interval);
+  }
+
+  g_mutex_lock(&self->vsync_mutex);
+  if (self->frame_interval_us != interval) {
+    g_debug("FlEngine: frame interval %" G_GINT64_FORMAT " -> %" G_GINT64_FORMAT
+            "us",
+            self->frame_interval_us, interval);
+    self->frame_interval_us = interval;
+    self->frame_grid_origin_us = 0;
+    self->presentation_phase_us = 0;
+  }
+  g_mutex_unlock(&self->vsync_mutex);
+}
+
+// Updates the frame interval from the displays that views are currently on.
+static void fl_engine_update_frame_interval(FlEngine* self) {
+  if (self->engine == nullptr || self->display_monitor == nullptr ||
+      self->display_ids_by_view_id == nullptr) {
+    return;
+  }
+
+  double refresh_rate = 0.0;
+  GHashTableIter iter;
+  g_hash_table_iter_init(&iter, self->display_ids_by_view_id);
+  gpointer value;
+  while (g_hash_table_iter_next(&iter, nullptr, &value)) {
+    FlutterEngineDisplayId display_id = GPOINTER_TO_INT(value);
+    if (display_id != 0) {
+      refresh_rate = MAX(refresh_rate, fl_display_monitor_get_refresh_rate(
+                                           self->display_monitor, display_id));
+    }
+  }
+  if (refresh_rate <= 0.0) {
+    refresh_rate =
+        fl_display_monitor_get_primary_refresh_rate(self->display_monitor);
+  }
+
+  fl_engine_set_refresh_rate(self, refresh_rate);
+}
+
 /// Stores a weak reference to the renderable with the given ID.
 static void set_renderable(FlEngine* self,
                            int64_t view_id,
@@ -196,8 +540,22 @@ static FlRenderable* get_renderable(FlEngine* self, int64_t view_id) {
 
 /// Remove a renderable that no longer exists.
 static void remove_renderable(FlEngine* self, int64_t view_id) {
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->renderables_mutex);
-  g_hash_table_remove(self->renderables_by_view_id, GINT_TO_POINTER(view_id));
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  {
+    g_autoptr(GMutexLocker) locker =
+        g_mutex_locker_new(&self->renderables_mutex);
+    if (self->renderables_by_view_id != nullptr) {
+      g_hash_table_remove(self->renderables_by_view_id,
+                          GINT_TO_POINTER(view_id));
+    }
+  }
+  if (self->display_ids_by_view_id != nullptr) {
+    g_hash_table_remove(self->display_ids_by_view_id, GINT_TO_POINTER(view_id));
+  }
+  fl_engine_update_frame_interval(self);
 }
 
 static void view_added_cb(const FlutterAddViewResult* result) {
@@ -592,6 +950,10 @@ static void fl_engine_set_property(GObject* object,
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
+  // Drop a frame that was waiting for its start time; the engine is going away
+  // and there is nothing left to present it to.
+  fl_engine_cancel_pending_vsync(self);
+
   if (self->engine != nullptr) {
     if (self->embedder_api.Shutdown(self->engine) != kSuccess) {
       g_warning("Failed to shutdown Flutter engine");
@@ -628,6 +990,11 @@ static void fl_engine_dispose(GObject* object) {
     g_clear_pointer(&self->renderables_by_view_id, g_hash_table_unref);
   }
   g_mutex_clear(&self->renderables_mutex);
+
+  g_clear_pointer(&self->display_ids_by_view_id, g_hash_table_unref);
+  delete self->presentation_phase;
+  self->presentation_phase = nullptr;
+  g_mutex_clear(&self->vsync_mutex);
 
   if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
@@ -682,6 +1049,13 @@ static void fl_engine_init(FlEngine* self) {
         g_weak_ref_clear(ref);
         free(ref);
       });
+
+  self->display_ids_by_view_id =
+      g_hash_table_new(g_direct_hash, g_direct_equal);
+  g_mutex_init(&self->vsync_mutex);
+  self->frame_interval_us = kDefaultFrameIntervalUs;
+  self->presentation_phase = new FlPresentationPhase(kDefaultFrameIntervalUs);
+  self->vsync_source = nullptr;
 
   self->texture_registrar = fl_texture_registrar_new(self);
 }
@@ -865,6 +1239,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
+  args.vsync_callback = fl_engine_vsync_cb;
   args.assets_path = fl_dart_project_get_assets_path(self->project);
   args.icu_data_path = fl_dart_project_get_icu_data_path(self->project);
   args.command_line_argc = command_line_args->len;
@@ -948,12 +1323,18 @@ void fl_engine_notify_display_update(FlEngine* self,
                                      size_t displays_length) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
+  if (self->engine == nullptr) {
+    return;
+  }
+
   FlutterEngineResult result = self->embedder_api.NotifyDisplayUpdate(
       self->engine, kFlutterEngineDisplaysUpdateTypeStartup, displays,
       displays_length);
   if (result != kSuccess) {
     g_warning("Failed to notify display update to Flutter engine: %d", result);
   }
+
+  fl_engine_update_frame_interval(self);
 }
 
 void fl_engine_set_implicit_view(FlEngine* self, FlRenderable* renderable) {
@@ -1194,6 +1575,62 @@ void fl_engine_schedule_frame(FlEngine* self) {
   }
 }
 
+void fl_engine_add_presentation_sample(FlEngine* self, gint64 latency_us) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr || self->presentation_phase == nullptr) {
+    return;
+  }
+
+  // The engine has a single animator, while views can be on outputs with
+  // different refresh phases. Only use feedback when there is at most one view;
+  // multi-view windows keep the natural grid until per-view scheduling exists.
+  g_mutex_lock(&self->renderables_mutex);
+  const gboolean single_view =
+      self->renderables_by_view_id == nullptr ||
+      g_hash_table_size(self->renderables_by_view_id) <= 1;
+  g_mutex_unlock(&self->renderables_mutex);
+  if (!single_view) {
+    return;
+  }
+
+  if (!self->presentation_phase->AddSample(latency_us,
+                                           g_get_monotonic_time())) {
+    return;
+  }
+
+  const gint64 offset_us = self->presentation_phase->offset_us();
+  g_mutex_lock(&self->vsync_mutex);
+  const gint64 interval_us = self->frame_interval_us > 0
+                                 ? self->frame_interval_us
+                                 : kDefaultFrameIntervalUs;
+  // The phase is a delay of less than one refresh period.
+  self->presentation_phase_us =
+      CLAMP(offset_us, static_cast<gint64>(0), interval_us);
+  g_mutex_unlock(&self->vsync_mutex);
+}
+
+void fl_engine_reset_presentation_phase(FlEngine* self) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  g_debug("FlEngine: reset presentation phase");
+  if (self->presentation_phase != nullptr) {
+    self->presentation_phase->Reset();
+  }
+  g_mutex_lock(&self->vsync_mutex);
+  self->presentation_phase_us = 0;
+  g_mutex_unlock(&self->vsync_mutex);
+}
+
+gint64 fl_engine_get_presentation_phase(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), 0);
+
+  g_mutex_lock(&self->vsync_mutex);
+  gint64 phase_us = self->presentation_phase_us;
+  g_mutex_unlock(&self->vsync_mutex);
+  return phase_us;
+}
+
 void fl_engine_send_window_metrics_event(FlEngine* self,
                                          FlutterEngineDisplayId display_id,
                                          FlutterViewId view_id,
@@ -1204,9 +1641,19 @@ void fl_engine_send_window_metrics_event(FlEngine* self,
                                          double pixel_ratio) {
   g_return_if_fail(FL_IS_ENGINE(self));
 
-  if (self->engine == nullptr) {
+  if (self->engine == nullptr || self->display_ids_by_view_id == nullptr) {
     return;
   }
+
+  // A display ID of zero means the view has not been placed on a display yet
+  // (the very first metrics event). Don't replace a known display with the
+  // unknown value.
+  if (display_id != 0 || !g_hash_table_contains(self->display_ids_by_view_id,
+                                                GINT_TO_POINTER(view_id))) {
+    g_hash_table_insert(self->display_ids_by_view_id, GINT_TO_POINTER(view_id),
+                        GINT_TO_POINTER(display_id));
+  }
+  fl_engine_update_frame_interval(self);
 
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(FlutterWindowMetricsEvent);

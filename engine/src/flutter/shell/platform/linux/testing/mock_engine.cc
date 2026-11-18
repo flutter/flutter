@@ -9,6 +9,8 @@
 //
 // Over time existing tests should be migrated and this file should be removed.
 
+#include <glib.h>
+
 #include <cstring>
 #include <unordered_map>
 #include <utility>
@@ -36,12 +38,15 @@ FlutterEngineResult FlutterEngineCollectAOTData(FlutterEngineAOTData data) {
   return kSuccess;
 }
 
+static VsyncCallback mock_vsync_callback = nullptr;
+
 FlutterEngineResult FlutterEngineInitialize(size_t version,
                                             const FlutterRendererConfig* config,
                                             const FlutterProjectArgs* args,
                                             void* user_data,
                                             FLUTTER_API_SYMBOL(FlutterEngine) *
                                                 engine_out) {
+  mock_vsync_callback = args != nullptr ? args->vsync_callback : nullptr;
   *engine_out = new _FlutterEngine();
   return kSuccess;
 }
@@ -193,6 +198,19 @@ FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine,
+                                         intptr_t baton,
+                                         uint64_t frame_start_time_nanos,
+                                         uint64_t frame_target_time_nanos) {
+  return kSuccess;
+}
+
+uint64_t FlutterEngineGetCurrentTime() {
+  // Match the engine, which uses the monotonic clock in nanoseconds.
+  return g_get_monotonic_time() * 1000;
+}
+
 FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
                                                 engine,
                                             const FlutterRemoveViewInfo* info) {
@@ -200,6 +218,14 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
 }
 
 }  // namespace
+
+VsyncCallback fl_mock_engine_get_vsync_callback() {
+  return mock_vsync_callback;
+}
+
+void fl_mock_engine_reset_vsync_callback() {
+  mock_vsync_callback = nullptr;
+}
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
@@ -240,6 +266,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->UpdateAccessibilityFeatures =
       &FlutterEngineUpdateAccessibilityFeatures;
   table->NotifyDisplayUpdate = &FlutterEngineNotifyDisplayUpdate;
+  table->OnVsync = &FlutterEngineOnVsync;
+  table->GetCurrentTime = &FlutterEngineGetCurrentTime;
   table->AddView = &FlutterEngineAddView;
   table->RemoveView = &FlutterEngineRemoveView;
   return kSuccess;
