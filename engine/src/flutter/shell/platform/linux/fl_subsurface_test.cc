@@ -90,6 +90,18 @@ TEST_F(FlSubsurfaceTest, SetPosition) {
   fl_subsurface_set_position(subsurface, 3, 4);
 }
 
+// Unmapping destroys the subsurface but leaves the surface it is shown with.
+TEST_F(FlSubsurfaceTest, Unmap) {
+  g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
+  ASSERT_NE(subsurface, nullptr);
+
+  EXPECT_CALL(wayland, DestroyObject(::testing::StrEq("wl_subsurface")));
+  EXPECT_CALL(wayland, DestroyObject(::testing::StrEq("wl_surface"))).Times(0);
+
+  fl_subsurface_unmap(subsurface);
+  ::testing::Mock::VerifyAndClearExpectations(&wayland);
+}
+
 // The Wayland objects are released when the subsurface is destroyed.
 TEST_F(FlSubsurfaceTest, Destroy) {
   FlSubsurface* subsurface = CreateSubsurface();

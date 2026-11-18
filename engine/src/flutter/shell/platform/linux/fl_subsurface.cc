@@ -70,3 +70,8 @@ void fl_subsurface_set_desync(FlSubsurface* self) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
   wl_subsurface_set_desync(self->subsurface);
 }
+
+void fl_subsurface_unmap(FlSubsurface* self) {
+  g_return_if_fail(FL_IS_SUBSURFACE(self));
+  g_clear_pointer(&self->subsurface, wl_subsurface_destroy);
+}

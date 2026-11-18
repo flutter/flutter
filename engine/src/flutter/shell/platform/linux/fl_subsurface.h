@@ -76,6 +76,16 @@ void fl_subsurface_set_sync(FlSubsurface* subsurface);
  */
 void fl_subsurface_set_desync(FlSubsurface* subsurface);
 
+/**
+ * fl_subsurface_unmap:
+ * @subsurface: an #FlSubsurface.
+ *
+ * Removes the subsurface from its parent surface, so it is no longer shown.
+ * The Wayland surface backing it remains valid until @subsurface is destroyed.
+ * The position and synchronization can't be changed after this is called.
+ */
+void fl_subsurface_unmap(FlSubsurface* subsurface);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_SUBSURFACE_H_
