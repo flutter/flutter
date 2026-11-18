@@ -29,6 +29,7 @@ import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
 import '../experimental/extension_arg_parser.dart';
+import '../experimental/extension_build_manager.dart';
 import '../experimental/templates.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
@@ -53,6 +54,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     required this.appleContext,
     required this.templateRenderer,
     required super.toolContext,
+    this.extensionBuildManager,
     this.extensionTemplateManager,
     this.net,
     this.pub,
@@ -61,6 +63,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   final AndroidContext androidContext;
   final AppleContext appleContext;
+  final ExtensionBuildManager? extensionBuildManager;
   final ExtensionTemplateManager? extensionTemplateManager;
   final Net? net;
   final Pub? pub;
@@ -775,6 +778,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     }
 
     _generatePubspecLock(relativeDir, flutterRoot: flutterRoot);
+    ExtensionBuildManager.deletePluginsStamp(relativeDir);
 
     if (shouldCallPubGet) {
       projectFactory.invalidate(relativeDir);
@@ -805,6 +809,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           analytics: analytics,
           androidPlatform: includeAndroid,
           cocoaPods: appleContext.cocoaPods,
+          extensionBuildManager: extensionBuildManager,
           featureFlags: featureFlags,
           gradleUtils: androidContext.gradleUtils,
           iosPlatform: includeIos || includeDarwin,

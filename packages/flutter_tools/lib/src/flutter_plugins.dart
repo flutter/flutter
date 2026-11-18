@@ -28,6 +28,7 @@ import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'darwin/darwin.dart';
+import 'experimental/extension_build_manager.dart';
 import 'features.dart';
 import 'macos/cocoapods.dart';
 import 'macos/darwin_dependency_management.dart';
@@ -1590,6 +1591,7 @@ Future<void> injectPlugins(
   bool macOSPlatform = false,
   bool windowsPlatform = false,
   DarwinDependencyManagement? darwinDependencyManagement,
+  ExtensionBuildManager? extensionBuildManager,
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
@@ -1692,6 +1694,13 @@ Future<void> injectPlugins(
       );
     }
   }
+  await extensionBuildManager?.injectPlugins(
+    project,
+    packageConfig: packageConfig,
+    packageGraph: packageGraph,
+    pubspecCache: pubspecCache,
+    releaseMode: releaseMode,
+  );
 }
 
 /// Returns whether the specified Flutter [project] has any plugin dependencies.

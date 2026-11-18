@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'build_system/constants.dart';
 import 'build_system/source.dart';
 import 'json_utils.dart';
+import 'project.dart';
 
 export 'build_system/constants.dart';
 export 'build_system/source.dart';
@@ -171,6 +172,121 @@ class ExtensionPlugin {
 
   @override
   int get hashCode => Object.hash(name, path, const DeepCollectionEquality().hash(configuration));
+}
+
+/// Context passed to `BuildService.injectPlugins` when generating native
+/// plugin registrants and build inputs inside a platform runner directory.
+@immutable
+final class ExtensionPluginInjectionContext {
+  /// Creates a native plugin injection context for [pluginPlatformKey] and
+  /// [runnerDirectory].
+  const ExtensionPluginInjectionContext({
+    required this.pluginPlatformKey,
+    required this.plugins,
+    required this.project,
+    required this.releaseMode,
+    required this.runnerDirectory,
+  });
+
+  /// Deserializes an [ExtensionPluginInjectionContext] from a JSON-serializable map.
+  factory ExtensionPluginInjectionContext.fromJson(Map<String, Object?> json) {
+    final String pluginPlatformKey = json.requiredField<String>(pluginPlatformKeyKey);
+    if (!ExtensionBuildTarget.isValidPluginPlatformKey(pluginPlatformKey)) {
+      throw FormatException(
+        'Invalid "$pluginPlatformKeyKey" field: "$pluginPlatformKey". '
+        '${ExtensionBuildTarget._invalidPluginPlatformKeyMessage}',
+      );
+    }
+    final List<ExtensionPlugin> plugins = ExtensionPlugin.listFromJson(
+      json.requiredField<List<Object?>>(pluginsKey),
+    );
+    final project = ExtensionFlutterProject.fromJson(
+      json.requiredField<Map<String, Object?>>(projectKey),
+    );
+    final bool releaseMode = json.requiredField<bool>(releaseModeKey);
+    final Uri runnerDirectory = json.directoryUri(runnerDirectoryKey);
+    return ExtensionPluginInjectionContext(
+      pluginPlatformKey: pluginPlatformKey,
+      plugins: plugins,
+      project: project,
+      releaseMode: releaseMode,
+      runnerDirectory: runnerDirectory,
+    );
+  }
+
+  /// Map key for [pluginPlatformKey].
+  @visibleForTesting
+  static const pluginPlatformKeyKey = 'pluginPlatformKey';
+
+  /// Map key for [plugins].
+  @visibleForTesting
+  static const pluginsKey = 'plugins';
+
+  /// Map key for [project].
+  @visibleForTesting
+  static const projectKey = 'project';
+
+  /// Map key for [releaseMode].
+  @visibleForTesting
+  static const releaseModeKey = 'releaseMode';
+
+  /// Map key for [runnerDirectory].
+  @visibleForTesting
+  static const runnerDirectoryKey = 'runnerDirectory';
+
+  /// The `flutter.plugin.platforms.<key>` identifier being injected (for
+  /// example, `'custom_os'`).
+  final String pluginPlatformKey;
+
+  /// Resolved plugins declaring [pluginPlatformKey] in `pubspec.yaml`.
+  final List<ExtensionPlugin> plugins;
+
+  /// The Flutter project receiving generated native plugin tooling.
+  final ExtensionFlutterProject project;
+
+  /// Whether plugin tooling is being generated for a release build.
+  final bool releaseMode;
+
+  /// Absolute directory URI of the existing platform runner directory on disk
+  /// (for example, `file:///workspace/app/custom_os/`).
+  final Uri runnerDirectory;
+
+  /// Serializes this context to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    pluginPlatformKeyKey: pluginPlatformKey,
+    pluginsKey: <Map<String, Object?>>[
+      for (final ExtensionPlugin plugin in plugins) plugin.toMap(),
+    ],
+    projectKey: project.toMap(),
+    releaseModeKey: releaseMode,
+    runnerDirectoryKey: runnerDirectory.toString(),
+  };
+
+  @override
+  String toString() =>
+      'ExtensionPluginInjectionContext(pluginPlatformKey: $pluginPlatformKey, '
+      'plugins: $plugins, project: $project, releaseMode: $releaseMode, '
+      'runnerDirectory: $runnerDirectory)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionPluginInjectionContext &&
+            other.pluginPlatformKey == pluginPlatformKey &&
+            const ListEquality<ExtensionPlugin>().equals(other.plugins, plugins) &&
+            other.project == project &&
+            other.releaseMode == releaseMode &&
+            other.runnerDirectory == runnerDirectory);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    pluginPlatformKey,
+    Object.hashAll(plugins),
+    project,
+    releaseMode,
+    runnerDirectory,
+  );
 }
 
 /// Representation of a custom `flutter build` subcommand target provided by a tool extension.

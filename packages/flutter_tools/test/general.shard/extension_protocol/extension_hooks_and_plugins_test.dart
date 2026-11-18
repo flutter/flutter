@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
@@ -44,6 +45,8 @@ import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
 import 'package:flutter_tools_core/flutter_tools_core.dart' as core show Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:hooks/hooks.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
@@ -328,6 +331,71 @@ final class _PluginCapturingBuildService extends BuildService {
   List<AssembleTarget> get assembleTargets => <AssembleTarget>[
     _PluginCapturingAssembleTarget(_pluginsPort),
   ];
+
+  @override
+  Map<String, String> get pluginPlatformDirectories => const <String, String>{
+    'custom_os': 'custom_os',
+  };
+
+  @override
+  Future<void> injectPlugins(ExtensionPluginInjectionContext context) async {
+    _pluginsPort.send(context);
+  }
+}
+
+final class _ConfigurablePluginDirsBuildService extends BuildService {
+  _ConfigurablePluginDirsBuildService({
+    required this.pluginPlatformDirectories,
+    this.eventsPort,
+    this.failFirstInjection = false,
+  });
+
+  final SendPort? eventsPort;
+  final bool failFirstInjection;
+  var _failedOnce = false;
+
+  @override
+  final Map<String, String> pluginPlatformDirectories;
+
+  @override
+  Future<void> injectPlugins(ExtensionPluginInjectionContext context) async {
+    eventsPort?.send(context);
+    if (failFirstInjection && !_failedOnce) {
+      _failedOnce = true;
+      throw const ToolExtensionException('Missing custom platform SDK');
+    }
+  }
+}
+
+void _configurablePluginDirsEntryPoint(
+  SendPort sendPort,
+  String extensionName,
+  Map<String, String> directories,
+  SendPort? eventsPort,
+  bool failFirstInjection,
+) {
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+    _ConfigurablePluginDirsBuildService(
+      pluginPlatformDirectories: directories,
+      eventsPort: eventsPort,
+      failFirstInjection: failFirstInjection,
+    ),
+  ], extensionName: extensionName);
+}
+
+ExtensionEntryPoint _createConfigurablePluginDirsEntryPoint({
+  required String extensionName,
+  required Map<String, String> directories,
+  SendPort? eventsPort,
+  bool failFirstInjection = false,
+}) {
+  return (SendPort sendPort) => _configurablePluginDirsEntryPoint(
+    sendPort,
+    extensionName,
+    directories,
+    eventsPort,
+    failFirstInjection,
+  );
 }
 
 final class _PluginCapturingDeviceService extends DeviceService {
@@ -861,15 +929,8 @@ environment:
       },
     );
 
-    ({
-      ExtensionBuildManager buildManager,
-      List<ExtensionPlugin> expectedCustomPlugins,
-      ExtensionManager extensionManager,
-      FeatureFlags featureFlags,
-      StreamIterator<Object?> pluginsEvents,
-      Directory projectDir,
-    })
-    setUpCustomPluginProject() {
+    ({List<ExtensionPlugin> expectedCustomPlugins, Directory projectDir})
+    writeCustomPluginProjectFiles() {
       final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
       fileSystem.directory('/flutter').createSync(recursive: true);
       fileSystem.currentDirectory = projectDir;
@@ -917,6 +978,30 @@ environment:
   sdk: ^3.7.0-0
   flutter: ">=1.20.0"
 ''');
+      final expectedCustomPlugins = <ExtensionPlugin>[
+        ExtensionPlugin(
+          name: 'camera_custom',
+          path: fileSystem.directory('/camera_custom').uri,
+          configuration: const <String, Object?>{
+            'pluginClass': 'CameraCustomPlugin',
+            'archivePath': 'pkg/camera.pkg',
+          },
+        ),
+      ];
+      return (expectedCustomPlugins: expectedCustomPlugins, projectDir: projectDir);
+    }
+
+    ({
+      ExtensionBuildManager buildManager,
+      List<ExtensionPlugin> expectedCustomPlugins,
+      ExtensionManager extensionManager,
+      FeatureFlags featureFlags,
+      StreamIterator<Object?> pluginsEvents,
+      Directory projectDir,
+    })
+    setUpCustomPluginProject() {
+      final (:List<ExtensionPlugin> expectedCustomPlugins, :Directory projectDir) =
+          writeCustomPluginProjectFiles();
 
       final pluginsPort = ReceivePort();
       addTearDown(pluginsPort.close);
@@ -941,17 +1026,6 @@ environment:
           logger: logger,
         ),
       );
-
-      final expectedCustomPlugins = <ExtensionPlugin>[
-        ExtensionPlugin(
-          name: 'camera_custom',
-          path: fileSystem.directory('/camera_custom').uri,
-          configuration: const <String, Object?>{
-            'pluginClass': 'CameraCustomPlugin',
-            'archivePath': 'pkg/camera.pkg',
-          },
-        ),
-      ];
 
       return (
         buildManager: buildManager,
@@ -1367,6 +1441,491 @@ dev_dependencies:
       expect(pluginsEvents.current, equals(expectedCustomPlugins));
       expect(await pluginsEvents.moveNext(), isTrue);
       expect(pluginsEvents.current, equals(expectedCustomPlugins));
+    });
+
+    ({
+      ExtensionBuildManager buildManager,
+      List<ExtensionPluginInjectionContext> events,
+      ExtensionManager extensionManager,
+      FlutterProject project,
+      File stampFile,
+    })
+    setUpPluginInjectionHarness({
+      Map<String, String> directories = const <String, String>{'custom_os': 'custom_os'},
+      List<ExtensionEntryPoint>? entryPoints,
+      String extensionName = 'custom_os_tools',
+      bool failFirstInjection = false,
+      FeatureFlags? featureFlags,
+      Directory? projectDirectory,
+    }) {
+      final eventsPort = ReceivePort();
+      addTearDown(eventsPort.close);
+      final events = <ExtensionPluginInjectionContext>[];
+      eventsPort.listen((Object? event) => events.add(event! as ExtensionPluginInjectionContext));
+
+      final FeatureFlags resolvedFlags =
+          featureFlags ?? TestFeatureFlags(isToolExtensionsEnabled: true);
+      final extensionManager = ExtensionManager(
+        entryPoints:
+            entryPoints ??
+            <ExtensionEntryPoint>[
+              _createConfigurablePluginDirsEntryPoint(
+                extensionName: extensionName,
+                directories: directories,
+                eventsPort: eventsPort.sendPort,
+                failFirstInjection: failFirstInjection,
+              ),
+            ],
+        featureFlags: resolvedFlags,
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(extensionManager.dispose);
+      final projectFactory = FlutterProjectFactory(
+        config: FakeConfig(),
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: extensionManager,
+        featureFlags: resolvedFlags,
+        fileSystem: fileSystem,
+        logger: logger,
+        projectFactory: projectFactory,
+      );
+      final Directory targetDir = projectDirectory ?? fileSystem.directory('/project');
+      final FlutterProject project = projectFactory.fromDirectory(targetDir);
+      final File stampFile = project.dartTool
+          .childDirectory('flutter_build')
+          .childFile('extension_plugins.stamp');
+      return (
+        buildManager: buildManager,
+        events: events,
+        extensionManager: extensionManager,
+        project: project,
+        stampFile: stampFile,
+      );
+    }
+
+    testWithoutContext('BuildService.injectPlugins runs via regeneratePlatformSpecificTooling and injectPlugins when runnerDir exists, filters dev_dependencies in releaseMode, and skips warm runs via extension_plugins.stamp', () async {
+      final (:List<ExtensionPlugin> expectedCustomPlugins, :Directory projectDir) =
+          writeCustomPluginProjectFiles();
+
+      fileSystem.directory('/dev_inspector_custom').childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: dev_inspector_custom
+flutter:
+  plugin:
+    platforms:
+      custom_os:
+        ffiPlugin: true
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+''');
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+version: 1.0.0+1
+dependencies:
+  flutter:
+    sdk: flutter
+  camera_custom: 1.0.0
+  url_launcher_linux: 1.0.0
+dev_dependencies:
+  dev_inspector_custom: 1.0.0
+''');
+      writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'my_app',
+        devDependencies: <String>['dev_inspector_custom'],
+        packages: <String, String>{
+          'camera_custom': '/camera_custom',
+          'dev_inspector_custom': '/dev_inspector_custom',
+          'url_launcher_linux': '/url_launcher_linux',
+        },
+      );
+      final File pluginsDepsFile = projectDir.childFile('.flutter-plugins-dependencies')
+        ..writeAsStringSync('{"plugins":{}}');
+
+      // Use a relative directory view (matching CreateCommand) on a project
+      // with ONLY custom_os/ and zero built-in platform directories.
+      fileSystem.currentDirectory = fileSystem.directory('/');
+      projectDir.childDirectory('custom_os').createSync(recursive: true);
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPluginInjectionContext> events,
+        extensionManager: _,
+        project: FlutterProject relativeProject,
+        :File stampFile,
+      ) = setUpPluginInjectionHarness(
+        featureFlags: featureFlags,
+        projectDirectory: fileSystem.directory('project'),
+      );
+      final toolContext = FakeToolContext(
+        cache: FakeCache(fileSystem: fileSystem, flutterRoot: '/flutter'),
+        fs: fileSystem,
+        logger: logger,
+        signals: FakeSignals(),
+      );
+
+      // 1) Initial debug regeneration invokes BuildService.injectPlugins and writes stamp.
+      await relativeProject.regeneratePlatformSpecificTooling(
+        analytics: const NoOpAnalytics(),
+        cocoaPods: null,
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        gradleUtils: null,
+        plistParser: FakePlistParser(),
+        releaseMode: false,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
+      await pumpEventQueue();
+      expect(stampFile, exists);
+      expect(events, hasLength(1));
+      final ExtensionPluginInjectionContext firstContext = events.single;
+      expect(firstContext.pluginPlatformKey, 'custom_os');
+      expect(firstContext.releaseMode, isFalse);
+      expect(firstContext.runnerDirectory, Uri.parse('file:///project/custom_os/'));
+      expect(firstContext.project.appName, 'my_app');
+      expect(firstContext.project.directory, Uri.parse('file:///project/'));
+      expect(
+        firstContext.plugins,
+        equals(<ExtensionPlugin>[
+          ...expectedCustomPlugins,
+          ExtensionPlugin(
+            name: 'dev_inspector_custom',
+            path: fileSystem.directory('/dev_inspector_custom').uri,
+            configuration: const <String, Object?>{'ffiPlugin': true},
+          ),
+        ]),
+      );
+
+      // 2) Warm run on a fresh ExtensionBuildManager with unchanged inputs skips injectPlugins.
+      final (
+        buildManager: ExtensionBuildManager warmBuildManager,
+        events: List<ExtensionPluginInjectionContext> warmEvents,
+        extensionManager: _,
+        project: _,
+        stampFile: _,
+      ) = setUpPluginInjectionHarness(
+        featureFlags: featureFlags,
+        projectDirectory: fileSystem.directory('project'),
+      );
+
+      await injectPlugins(
+        relativeProject,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: null,
+        extensionBuildManager: warmBuildManager,
+        featureFlags: featureFlags,
+        releaseMode: false,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
+      await pumpEventQueue();
+      expect(warmEvents, isEmpty);
+
+      // 3) Switching releaseMode to true invalidates stamp and excludes dev_dependencies.
+      await injectPlugins(
+        relativeProject,
+        analytics: const NoOpAnalytics(),
+        cocoaPods: null,
+        extensionBuildManager: warmBuildManager,
+        featureFlags: featureFlags,
+        releaseMode: true,
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
+      await pumpEventQueue();
+      expect(warmEvents, hasLength(1));
+      final ExtensionPluginInjectionContext releaseContext = warmEvents.single;
+      expect(releaseContext.releaseMode, isTrue);
+      expect(releaseContext.plugins, equals(expectedCustomPlugins));
+
+      // 4) Updating package_config.json invalidates extension_plugins.stamp when
+      //    .dart_tool/flutter_tools/extensions is absent.
+      fileSystem.directory('/extra_pkg').createSync(recursive: true);
+      writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'my_app',
+        devDependencies: <String>['dev_inspector_custom'],
+        packages: <String, String>{
+          'camera_custom': '/camera_custom',
+          'dev_inspector_custom': '/dev_inspector_custom',
+          'extra_pkg': '/extra_pkg',
+          'url_launcher_linux': '/url_launcher_linux',
+        },
+      );
+      await warmBuildManager.injectPlugins(relativeProject, releaseMode: true);
+      await pumpEventQueue();
+      expect(warmEvents, hasLength(2));
+
+      // 5) Updating .flutter-plugins-dependencies invalidates extension_plugins.stamp.
+      pluginsDepsFile.writeAsStringSync('{"plugins":{"linux":[]}}');
+      await warmBuildManager.injectPlugins(relativeProject, releaseMode: true);
+      await pumpEventQueue();
+      expect(warmEvents, hasLength(3));
+
+      // 6) When .dart_tool/flutter_tools/extensions exists on disk, hashing tracks
+      //    *.dill.stamp contents (ignoring package_config.json and non-stamp files).
+      final Directory extensionsCacheDir = projectDir
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_tools')
+          .childDirectory('extensions');
+      final File dillStampFile =
+          extensionsCacheDir.childDirectory('custom_os_tools').childFile('extension.dill.stamp')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('{"buildToken":"token-1"}');
+      await warmBuildManager.injectPlugins(relativeProject, releaseMode: true);
+      await pumpEventQueue();
+      expect(warmEvents, hasLength(4));
+
+      extensionsCacheDir
+          .childDirectory('custom_os_tools')
+          .childFile('extension.dill.lock')
+          .writeAsStringSync('lock');
+      fileSystem.directory('/second_extra_pkg').createSync(recursive: true);
+      writePackageConfigFiles(
+        directory: projectDir,
+        mainLibName: 'my_app',
+        devDependencies: <String>['dev_inspector_custom'],
+        packages: <String, String>{
+          'camera_custom': '/camera_custom',
+          'dev_inspector_custom': '/dev_inspector_custom',
+          'extra_pkg': '/extra_pkg',
+          'second_extra_pkg': '/second_extra_pkg',
+          'url_launcher_linux': '/url_launcher_linux',
+        },
+      );
+      await warmBuildManager.injectPlugins(relativeProject, releaseMode: true);
+      await pumpEventQueue();
+      expect(warmEvents, hasLength(4));
+
+      dillStampFile.writeAsStringSync('{"buildToken":"token-2"}');
+      await warmBuildManager.injectPlugins(relativeProject, releaseMode: true);
+      await pumpEventQueue();
+      expect(warmEvents, hasLength(5));
+    });
+
+    testWithoutContext('ExtensionBuildManager.injectPlugins skips injection when runnerDir is absent and cleans up stamp unconditionally if runnerDir is removed', () async {
+      final (expectedCustomPlugins: _, :Directory projectDir) = writeCustomPluginProjectFiles();
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPluginInjectionContext> events,
+        extensionManager: _,
+        :FlutterProject project,
+        :File stampFile,
+      ) = setUpPluginInjectionHarness();
+
+      // Absent runnerDir -> skipped, no stamp written.
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, isEmpty);
+      expect(stampFile, isNot(exists));
+
+      // Present runnerDir -> injected, stamp written.
+      final Directory runnerDir = projectDir.childDirectory('custom_os')..createSync();
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, hasLength(1));
+      expect(stampFile, exists);
+
+      // Deleted runnerDir -> skipped, stale stamp deleted.
+      runnerDir.deleteSync(recursive: true);
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, hasLength(1));
+      expect(stampFile, isNot(exists));
+
+      // Stale stamp is also deleted unconditionally when zero extensions are active.
+      stampFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"releaseMode":false}');
+      final (
+        buildManager: ExtensionBuildManager emptyBuildManager,
+        events: _,
+        extensionManager: _,
+        project: _,
+        stampFile: _,
+      ) = setUpPluginInjectionHarness(
+        entryPoints: const <ExtensionEntryPoint>[],
+      );
+      await emptyBuildManager.injectPlugins(project, releaseMode: false);
+      expect(stampFile, isNot(exists));
+    });
+
+    testWithoutContext('getPluginPlatformDirectories enforces built-in precedence, relative runnerDir validation, and lexicographical collision order', () async {
+      final (
+        :ExtensionBuildManager buildManager,
+        events: _,
+        extensionManager: _,
+        project: _,
+        stampFile: _,
+      ) = setUpPluginInjectionHarness(
+        entryPoints: <ExtensionEntryPoint>[
+          _createConfigurablePluginDirsEntryPoint(
+            extensionName: 'zeta_ext',
+            directories: const <String, String>{
+              'linux': 'linux',
+              'custom_os': 'zeta_runner',
+              'bad-key': 'bad_dir',
+              'escape_os': '../outside',
+              'abs_os': '/etc/abs',
+              'self_os': '.',
+            },
+          ),
+          _createConfigurablePluginDirsEntryPoint(
+            extensionName: 'alpha_ext',
+            directories: const <String, String>{'custom_os': 'alpha_runner/'},
+          ),
+        ],
+      );
+
+      final Map<String, String> directories = await buildManager.getPluginPlatformDirectories();
+      expect(directories, equals(const <String, String>{'custom_os': 'alpha_runner'}));
+      expect(
+        logger.warningText,
+        allOf(
+          contains(
+            'Skipping plugin platform "linux" from extension "zeta_ext" because "linux" is a built-in platform.',
+          ),
+          contains('Skipping invalid plugin platform key "bad-key" from extension "zeta_ext".'),
+          contains(
+            'runner directory "../outside" must be a relative path within the project root.',
+          ),
+          contains('runner directory "/etc/abs" must be a relative path within the project root.'),
+          contains('runner directory "." must be a relative path within the project root.'),
+          contains(
+            'Skipping duplicate plugin platform "custom_os" from extension "zeta_ext" '
+            '(already registered by extension "alpha_ext").',
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('ExtensionBuildManager.injectPlugins invalidates stamp when a second extension runner directory is added', () async {
+      final (expectedCustomPlugins: _, :Directory projectDir) = writeCustomPluginProjectFiles();
+      fileSystem.file('/camera_custom/pubspec.yaml').writeAsStringSync('''
+name: camera_custom
+flutter:
+  plugin:
+    platforms:
+      custom_os:
+        pluginClass: CameraCustomPlugin
+      second_os:
+        pluginClass: CameraSecondPlugin
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=1.20.0"
+''');
+      projectDir.childDirectory('custom_os').createSync();
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPluginInjectionContext> events,
+        extensionManager: _,
+        :FlutterProject project,
+        :File stampFile,
+      ) = setUpPluginInjectionHarness(
+        directories: const <String, String>{'custom_os': 'custom_os', 'second_os': 'second_os'},
+      );
+
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(stampFile, exists);
+      expect(
+        events.map((ExtensionPluginInjectionContext e) => e.pluginPlatformKey),
+        equals(<String>['custom_os']),
+      );
+
+      // Adding a second runner directory next to an already-stamped one invalidates the stamp.
+      projectDir.childDirectory('second_os').createSync();
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(
+        events.sublist(1).map((ExtensionPluginInjectionContext e) => e.pluginPlatformKey),
+        containsAll(<String>['custom_os', 'second_os']),
+      );
+    });
+
+    testWithoutContext('ExtensionBuildManager.deletePluginsStamp forces re-injection when runnerDir is deleted and re-scaffolded', () async {
+      final (:List<ExtensionPlugin> expectedCustomPlugins, :Directory projectDir) =
+          writeCustomPluginProjectFiles();
+      final Directory runnerDir = projectDir.childDirectory('custom_os')..createSync();
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPluginInjectionContext> events,
+        extensionManager: _,
+        :FlutterProject project,
+        :File stampFile,
+      ) = setUpPluginInjectionHarness();
+
+      // 1) Initial injection stamps custom_os/.
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, hasLength(1));
+      expect(stampFile, exists);
+
+      // 2) Deleting and re-scaffolding custom_os/ without clearing the stamp skips injection,
+      //    whereas ExtensionBuildManager.deletePluginsStamp (invoked by CreateCommand) forces
+      //    re-injection into the newly scaffolded runner directory.
+      runnerDir.deleteSync(recursive: true);
+      runnerDir.createSync();
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, hasLength(1));
+
+      ExtensionBuildManager.deletePluginsStamp(projectDir);
+      expect(stampFile, isNot(exists));
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, hasLength(2));
+      expect(events.last.plugins, equals(expectedCustomPlugins));
+      expect(stampFile, exists);
+    });
+
+    testWithoutContext('BuildService.injectPlugins surfaces ToolExtensionException as ToolExit without committing stamp and rejects malformed RPC params with -32602', () async {
+      final (expectedCustomPlugins: _, :Directory projectDir) = writeCustomPluginProjectFiles();
+      projectDir.childDirectory('custom_os').createSync();
+      final (
+        :ExtensionBuildManager buildManager,
+        :List<ExtensionPluginInjectionContext> events,
+        :ExtensionManager extensionManager,
+        :FlutterProject project,
+        :File stampFile,
+      ) = setUpPluginInjectionHarness(
+        extensionName: 'failing_inject_ext',
+        failFirstInjection: true,
+      );
+
+      await expectLater(
+        buildManager.injectPlugins(project, releaseMode: false),
+        throwsToolExit(
+          message:
+              'Failed to inject "custom_os" plugins via extension "failing_inject_ext": '
+              'Missing custom platform SDK',
+        ),
+      );
+      expect(stampFile, isNot(exists));
+
+      // Retry succeeds because stamp was not written on failure.
+      await buildManager.injectPlugins(project, releaseMode: false);
+      await pumpEventQueue();
+      expect(events, hasLength(2));
+      expect(stampFile, exists);
+
+      // Malformed RPC params to build.injectPlugins fail with INVALID_PARAMS (-32602).
+      await expectLater(
+        extensionManager.connections.single.sendRequest(
+          'build.injectPlugins',
+          params: const <String, Object?>{'pluginPlatformKey': 'invalid-hyphen'},
+        ),
+        throwsA(
+          isA<json_rpc.RpcException>().having((json_rpc.RpcException e) => e.code, 'code', -32602),
+        ),
+      );
     });
   });
 

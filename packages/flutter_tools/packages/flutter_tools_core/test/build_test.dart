@@ -962,4 +962,166 @@ void main() {
       );
     });
   });
+
+  group('ExtensionPluginInjectionContext', () {
+    final sampleProject = ExtensionFlutterProject(
+      appName: 'my_app',
+      appVersion: '1.2.3+4',
+      buildDirectory: Uri.parse('file:///workspace/my_app/build/'),
+      dependencies: const <String>{'camera_custom'},
+      directory: Uri.parse('file:///workspace/my_app/'),
+    );
+    final samplePlugin = ExtensionPlugin(
+      name: 'camera_custom',
+      path: Uri.parse('file:///pub-cache/camera_custom/'),
+      configuration: const <String, Object?>{
+        'pluginClass': 'CameraCustomPlugin',
+        'permissions': <Object?>['camera'],
+      },
+    );
+
+    test('serializes, deserializes, and compares all fields across JSON round-trip', () {
+      final context = ExtensionPluginInjectionContext(
+        pluginPlatformKey: 'custom_os',
+        plugins: <ExtensionPlugin>[samplePlugin],
+        project: sampleProject,
+        releaseMode: true,
+        runnerDirectory: Uri.parse('file:///workspace/my_app/custom_os/'),
+      );
+
+      final Map<String, Object?> jsonMap = context.toMap();
+      expect(jsonMap[ExtensionPluginInjectionContext.pluginPlatformKeyKey], 'custom_os');
+      expect(jsonMap[ExtensionPluginInjectionContext.releaseModeKey], isTrue);
+      expect(
+        jsonMap[ExtensionPluginInjectionContext.runnerDirectoryKey],
+        'file:///workspace/my_app/custom_os/',
+      );
+
+      final roundTripped = jsonDecode(jsonEncode(jsonMap)) as Map<String, Object?>;
+      final parsed = ExtensionPluginInjectionContext.fromJson(roundTripped);
+      expect(parsed, equals(context));
+      expect(parsed.hashCode, equals(context.hashCode));
+      expect(parsed.toString(), contains('custom_os'));
+      expect(parsed.toString(), contains('file:///workspace/my_app/custom_os/'));
+
+      expect(
+        parsed,
+        isNot(
+          equals(
+            ExtensionPluginInjectionContext(
+              pluginPlatformKey: 'other_os',
+              plugins: <ExtensionPlugin>[samplePlugin],
+              project: sampleProject,
+              releaseMode: true,
+              runnerDirectory: Uri.parse('file:///workspace/my_app/custom_os/'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        parsed,
+        isNot(
+          equals(
+            ExtensionPluginInjectionContext(
+              pluginPlatformKey: 'custom_os',
+              plugins: const <ExtensionPlugin>[],
+              project: sampleProject,
+              releaseMode: true,
+              runnerDirectory: Uri.parse('file:///workspace/my_app/custom_os/'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        parsed,
+        isNot(
+          equals(
+            ExtensionPluginInjectionContext(
+              pluginPlatformKey: 'custom_os',
+              plugins: <ExtensionPlugin>[samplePlugin],
+              project: sampleProject,
+              releaseMode: false,
+              runnerDirectory: Uri.parse('file:///workspace/my_app/custom_os/'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        parsed,
+        isNot(
+          equals(
+            ExtensionPluginInjectionContext(
+              pluginPlatformKey: 'custom_os',
+              plugins: <ExtensionPlugin>[samplePlugin],
+              project: sampleProject,
+              releaseMode: true,
+              runnerDirectory: Uri.parse('file:///workspace/my_app/other_runner/'),
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('fromJson validates required fields and directory URI', () {
+      final validMap = <String, Object?>{
+        'pluginPlatformKey': 'custom_os',
+        'plugins': <Object?>[samplePlugin.toMap()],
+        'project': sampleProject.toMap(),
+        'releaseMode': false,
+        'runnerDirectory': 'file:///workspace/my_app/custom_os/',
+      };
+
+      for (final String requiredKey in validMap.keys) {
+        final missingField = Map<String, Object?>.of(validMap)..remove(requiredKey);
+        expect(
+          () => ExtensionPluginInjectionContext.fromJson(missingField),
+          throwsFormatException,
+          reason: 'Expected FormatException when "$requiredKey" is missing.',
+        );
+      }
+
+      expect(
+        () => ExtensionPluginInjectionContext.fromJson(<String, Object?>{
+          ...validMap,
+          'pluginPlatformKey': 'invalid-hyphen',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPluginInjectionContext.fromJson(<String, Object?>{
+          ...validMap,
+          'plugins': 'not-a-list',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPluginInjectionContext.fromJson(<String, Object?>{
+          ...validMap,
+          'project': 'not-a-map',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPluginInjectionContext.fromJson(<String, Object?>{
+          ...validMap,
+          'releaseMode': 'false',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPluginInjectionContext.fromJson(<String, Object?>{
+          ...validMap,
+          'runnerDirectory': 'file:///workspace/my_app/custom_os',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ExtensionPluginInjectionContext.fromJson(<String, Object?>{
+          ...validMap,
+          'runnerDirectory': 'custom_os/',
+        }),
+        throwsFormatException,
+      );
+    });
+  });
 }

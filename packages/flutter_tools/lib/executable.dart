@@ -256,6 +256,7 @@ List<FlutterCommand> generateCommands({
     CreateCommand(
       androidContext: toolDependencies.androidContext,
       appleContext: toolDependencies.appleContext,
+      extensionBuildManager: toolDependencies.extensionBuildManager,
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
       extensionTemplateManager: extensionTemplateManager,

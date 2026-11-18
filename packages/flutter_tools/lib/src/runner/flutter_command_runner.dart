@@ -30,6 +30,7 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../experimental/extension_build_manager.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
 import '../ios/plist_parser.dart';
@@ -81,6 +82,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     required this.plistParser,
     required this.templateRenderer,
     required this.toolContext,
+    this.extensionBuildManager,
     this._verboseHelp = false,
   }) : _argParser = _createInitialArgParser(toolContext.outputPreferences),
        super(
@@ -344,6 +346,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   final AndroidContext _androidContext;
   final ExtensionManager _extensionManager;
+
+  /// The [ExtensionBuildManager] instance, if available.
+  final ExtensionBuildManager? extensionBuildManager;
 
   /// The [Analytics] instance.
   final Analytics analytics;

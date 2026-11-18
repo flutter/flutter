@@ -47,6 +47,7 @@ import 'src/custom_devices/custom_devices_config.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
+import 'src/experimental/extension_build_manager.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
@@ -240,6 +241,7 @@ Future<int> run(
           :DeviceManager deviceManager,
           :Doctor doctor,
           :EmulatorManager emulatorManager,
+          :ExtensionBuildManager? extensionBuildManager,
           :ExtensionManager? extensionManager,
           :FeatureFlags featureFlags,
           :MacOSWorkflow macOSWorkflow,
@@ -347,6 +349,7 @@ Future<int> run(
               cocoaPods: appleContext.cocoaPods,
               deviceManager: deviceManager,
               doctor: doctor,
+              extensionBuildManager: extensionBuildManager,
               extensionManager: extensionManager!,
               featureFlags: featureFlags,
               plistParser: appleContext.plistParser,

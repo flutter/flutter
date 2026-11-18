@@ -33,6 +33,7 @@ import 'cmake_project.dart';
 import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
+import 'experimental/extension_build_manager.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
@@ -603,8 +604,8 @@ class FlutterProject {
   ExtensionFlutterProject toExtensionProject() {
     return ExtensionFlutterProject(
       appName: manifest.appName,
-      buildDirectory: buildDirectory.uri,
-      directory: directory.uri,
+      buildDirectory: buildDirectory.absolute.uri,
+      directory: directory.absolute.uri,
       appVersion: manifest.appVersion,
       dependencies: <String>{...manifest.dependencies},
       isEmpty: manifest.isEmpty,
@@ -698,6 +699,7 @@ class FlutterProject {
     required TemplateRenderer templateRenderer,
     required bool releaseMode,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    ExtensionBuildManager? extensionBuildManager,
     PubspecCache? pubspecCache,
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
@@ -707,6 +709,7 @@ class FlutterProject {
       analytics: analytics,
       androidPlatform: android.existsSync(),
       cocoaPods: cocoaPods,
+      extensionBuildManager: extensionBuildManager,
       featureFlags: featureFlags,
       gradleUtils: gradleUtils,
       iosPlatform: ios.existsSync(),
@@ -748,6 +751,7 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    ExtensionBuildManager? extensionBuildManager,
     PubspecCache? pubspecCache,
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
@@ -772,7 +776,17 @@ class FlutterProject {
         macOSPlatform ||
         windowsPlatform ||
         webPlatform;
-    if (isPlugin || !anyPlatformEnabled) {
+    if (isPlugin) {
+      return;
+    }
+    if (!anyPlatformEnabled) {
+      await extensionBuildManager?.injectPlugins(
+        this,
+        packageConfig: packageConfig,
+        packageGraph: packageGraph,
+        pubspecCache: pubspecCache,
+        releaseMode: releaseMode,
+      );
       return;
     }
     await refreshPluginsList(
@@ -821,6 +835,7 @@ class FlutterProject {
       analytics: analytics,
       androidPlatform: androidPlatform,
       cocoaPods: cocoaPods,
+      extensionBuildManager: extensionBuildManager,
       featureFlags: featureFlags,
       iosPlatform: iosPlatform,
       linuxPlatform: linuxPlatform,

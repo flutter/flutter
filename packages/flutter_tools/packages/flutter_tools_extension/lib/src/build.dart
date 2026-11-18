@@ -224,6 +224,8 @@ abstract base class BuildService extends ToolExtensionService {
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
+  static const _getPluginPlatformDirectoriesRpcMethod = 'getPluginPlatformDirectories';
+  static const _injectPluginsRpcMethod = 'injectPlugins';
   static const String _resolveNativeAssetsConfigRpcMethod = 'resolveNativeAssetsConfig';
   static const String _buildRpcMethod = 'build';
   static const String _assembleRpcMethod = 'assemble';
@@ -237,11 +239,24 @@ abstract base class BuildService extends ToolExtensionService {
   /// Returns the custom `flutter assemble` targets contributed by this extension.
   List<AssembleTarget> get assembleTargets => const <AssembleTarget>[];
 
+  /// Maps `flutter.plugin.platforms.<key>` identifiers to project-relative
+  /// runner directories (for example,
+  /// `const <String, String>{'custom_os': 'custom_os'}`) for pre-build native
+  /// plugin injection via [injectPlugins].
+  Map<String, String> get pluginPlatformDirectories => const <String, String>{};
+
+  /// Generates native plugin registrants, build-system inputs, or plugin
+  /// symlinks inside [ExtensionPluginInjectionContext.runnerDirectory] during
+  /// `flutter create`, `flutter pub get`, and pre-build tooling regeneration.
+  Future<void> injectPlugins(ExtensionPluginInjectionContext context) async {}
+
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
       _getBuildTargetsRpcMethod: _getBuildTargetsRpc,
       _getAssembleTargetsRpcMethod: _getAssembleTargetsRpc,
+      _getPluginPlatformDirectoriesRpcMethod: _getPluginPlatformDirectoriesRpc,
+      _injectPluginsRpcMethod: _injectPluginsRpc,
       _resolveNativeAssetsConfigRpcMethod: _resolveNativeAssetsConfigRpc,
       _buildRpcMethod: _buildRpc,
       _assembleRpcMethod: _assembleRpc,
@@ -250,6 +265,21 @@ abstract base class BuildService extends ToolExtensionService {
 
   @override
   Future<void> shutdown() async {}
+
+  Future<Map<String, String>> _getPluginPlatformDirectoriesRpc(Map<String, Object?> _) async {
+    return Map<String, String>.of(pluginPlatformDirectories);
+  }
+
+  Future<Object?> _injectPluginsRpc(Map<String, Object?> params) async {
+    final ExtensionPluginInjectionContext context;
+    try {
+      context = ExtensionPluginInjectionContext.fromJson(params);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    await injectPlugins(context);
+    return null;
+  }
 
   Future<List<Map<String, Object?>>> _getBuildTargetsRpc(Map<String, Object?> _) async {
     return buildTargets

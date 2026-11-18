@@ -4,13 +4,19 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:json_rpc_2/error_code.dart' as json_rpc_error;
+import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/config.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart'
@@ -28,8 +34,11 @@ import '../build_system/targets/extension.dart'
         nativeAssetsEnvironmentDefines,
         resolveExtensionBuildTargetArtifacts,
         resolveExtensionOutputDir;
+import '../convert.dart';
+import '../dart/package_map.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
+import '../package_graph.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'extension_discovery.dart';
@@ -53,9 +62,36 @@ base class ExtensionBuildManager {
 
   List<ExtensionBuildTarget>? _cachedBuildTargets;
   List<ExtensionAssembleTarget>? _cachedAssembleTargets;
+  Map<String, String>? _cachedPluginPlatformDirectories;
   final _buildTargetToConnection = <String, ExtensionConnection>{};
   final _assembleTargetToConnection = <String, ExtensionConnection>{};
+  final _pluginPlatformToConnection = <String, ExtensionConnection>{};
   final _buildTargetsByName = <String, ExtensionBuildTarget>{};
+
+  static const _kDillStampFileSuffix = '.dill.stamp';
+  static const _kExtensionPluginsStampFileName = 'extension_plugins.stamp';
+  static const _kExtensionsDirName = 'extensions';
+  static const _kFlutterBuildDirName = 'flutter_build';
+  static const _kFlutterToolsDirName = 'flutter_tools';
+  static const _kGetPluginPlatformDirectoriesMethod = 'build.getPluginPlatformDirectories';
+  static const _kInjectPluginsMethod = 'build.injectPlugins';
+  static const _kStampExtensionDillStampsKey = 'extensionDillStamps';
+  static const _kStampFlutterPluginsDependenciesHashKey = 'flutterPluginsDependenciesHash';
+  static const _kStampPackageConfigHashKey = 'packageConfigHash';
+  static const _kStampPlatformDirectoriesKey = 'platformDirectories';
+  static const _kStampReleaseModeKey = 'releaseMode';
+
+  /// Deletes `.dart_tool/flutter_build/extension_plugins.stamp` under
+  /// [projectDirectory] if present (for example, when `flutter create`
+  /// scaffolds or re-scaffolds platform runner directories).
+  static void deletePluginsStamp(Directory projectDirectory) {
+    ErrorHandlingFileSystem.deleteIfExists(_pluginsStampFile(projectDirectory));
+  }
+
+  static File _pluginsStampFile(Directory projectDirectory) => projectDirectory
+      .childDirectory('.dart_tool')
+      .childDirectory(_kFlutterBuildDirName)
+      .childFile(_kExtensionPluginsStampFileName);
 
   /// Retrieve the cached `flutter build` targets synchronously.
   List<ExtensionBuildTarget> get cachedTargets =>
@@ -680,11 +716,20 @@ base class ExtensionBuildManager {
     Uri? buildDir,
     String? pluginPlatformKey,
   }) async {
-    final List<ExtensionPlugin> resolvedPlugins = await _resolvePluginsForTarget(
-      projectRoot,
-      pluginPlatformKey,
-      buildMode: buildMode,
-    );
+    final List<ExtensionPlugin> resolvedPlugins;
+    if (pluginPlatformKey == null || pluginPlatformKey.isEmpty) {
+      resolvedPlugins = const <ExtensionPlugin>[];
+    } else {
+      final FlutterProject project = _projectFactory.fromDirectory(
+        _fileSystem.directory(projectRoot),
+      );
+      final Map<String, List<ExtensionPlugin>> resolved = await _resolvePluginsForPlatforms(
+        project,
+        <String>{pluginPlatformKey},
+        releaseMode: buildMode.isRelease,
+      );
+      resolvedPlugins = resolved[pluginPlatformKey] ?? const <ExtensionPlugin>[];
+    }
     return <String, Object?>{
       BuildService.buildDirParam: ?buildDir?.toString(),
       BuildService.buildModeParam: buildMode.cliName,
@@ -701,34 +746,303 @@ base class ExtensionBuildManager {
     };
   }
 
-  Future<List<ExtensionPlugin>> _resolvePluginsForTarget(
-    Uri projectRoot,
-    String? pluginPlatformKey, {
-    required BuildMode buildMode,
-  }) async {
-    if (pluginPlatformKey == null || pluginPlatformKey.isEmpty) {
-      return const <ExtensionPlugin>[];
+  /// Queries active tool extensions for `flutter.plugin.platforms.<key>` to
+  /// project-relative runner directory mappings (`build.getPluginPlatformDirectories`).
+  Future<Map<String, String>> getPluginPlatformDirectories() async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return const <String, String>{};
     }
-    final Directory projectDir = _fileSystem.directory(projectRoot);
-    final FlutterProject project = _projectFactory.fromDirectory(projectDir);
-    if (!project.pubspecFile.existsSync()) {
-      return const <ExtensionPlugin>[];
+    if (_cachedPluginPlatformDirectories case final Map<String, String> cached) {
+      return cached;
+    }
+
+    try {
+      await _extensionManager.ensureInitialized();
+    } on Object catch (e) {
+      _logger.printTrace('Failed to initialize extension manager: $e');
+      return const <String, String>{};
+    }
+
+    _pluginPlatformToConnection.clear();
+    final List<ExtensionConnection> connections = _extensionManager.connections
+        .where(
+          (ExtensionConnection connection) =>
+              connection.capabilities.services.contains(BuildService.serviceNamespace),
+        )
+        .sortedBy((ExtensionConnection c) => c.extensionName);
+
+    final List<(ExtensionConnection, Map<String, String>)> responses = await Future.wait(
+      connections.map((ExtensionConnection connection) async {
+        try {
+          final Object? result = await connection.sendRequest(_kGetPluginPlatformDirectoriesMethod);
+          if (result case final Map<String, Object?> rawMap) {
+            final parsed = <String, String>{};
+            for (final MapEntry(:String key, :Object? value) in rawMap.entries) {
+              if (value is! String) {
+                _logger.printWarning(
+                  'Invalid plugin platform directories response from extension '
+                  '"${connection.extensionName}": expected string runner directory for "$key", '
+                  'got ${value.runtimeType}.',
+                );
+                return (connection, const <String, String>{});
+              }
+              parsed[key] = value;
+            }
+            return (connection, parsed);
+          }
+          _logger.printWarning(
+            'Invalid plugin platform directories response from extension '
+            '"${connection.extensionName}": expected Map<String, String>.',
+          );
+          return (connection, const <String, String>{});
+        } on Object catch (e) {
+          switch (e) {
+            case final ToolExtensionException e:
+              _logger.printWarning('Extension "${connection.extensionName}": ${e.message}');
+            case final RpcException e when e.code == json_rpc_error.METHOD_NOT_FOUND:
+              _logger.printTrace(
+                'Extension "${connection.extensionName}" does not implement '
+                '"$_kGetPluginPlatformDirectoriesMethod".',
+              );
+            case _:
+              _logger.printWarning(
+                'Failed to query plugin platform directories from extension '
+                '"${connection.extensionName}": $e',
+              );
+          }
+          return (connection, const <String, String>{});
+        }
+      }),
+    );
+
+    final directories = <String, String>{};
+    for (final (ExtensionConnection connection, Map<String, String> entries) in responses) {
+      for (final MapEntry(key: String platformKey, value: String rawRunnerDir) in entries.entries) {
+        if (Plugin.builtInPlatformKeys.contains(platformKey)) {
+          _logger.printWarning(
+            'Skipping plugin platform "$platformKey" from extension "${connection.extensionName}" '
+            'because "$platformKey" is a built-in platform.',
+          );
+          continue;
+        }
+        if (!ExtensionBuildTarget.isValidPluginPlatformKey(platformKey)) {
+          _logger.printWarning(
+            'Skipping invalid plugin platform key "$platformKey" from extension '
+            '"${connection.extensionName}".',
+          );
+          continue;
+        }
+        final String? normalizedRunnerDir = _normalizeRelativeRunnerDir(rawRunnerDir);
+        if (normalizedRunnerDir == null) {
+          _logger.printWarning(
+            'Skipping plugin platform "$platformKey" from extension "${connection.extensionName}": '
+            'runner directory "$rawRunnerDir" must be a relative path within the project root.',
+          );
+          continue;
+        }
+        if (_pluginPlatformToConnection[platformKey] case final ExtensionConnection existing) {
+          _logger.printWarning(
+            'Skipping duplicate plugin platform "$platformKey" from extension '
+            '"${connection.extensionName}" (already registered by extension '
+            '"${existing.extensionName}").',
+          );
+          continue;
+        }
+        directories[platformKey] = normalizedRunnerDir;
+        _pluginPlatformToConnection[platformKey] = connection;
+      }
+    }
+
+    final result = Map<String, String>.unmodifiable(directories);
+    _cachedPluginPlatformDirectories = result;
+    return result;
+  }
+
+  /// Invokes `BuildService.injectPlugins` for each extension-declared platform
+  /// whose runner directory exists under [project] when stamp inputs have
+  /// changed relative to `.dart_tool/flutter_build/extension_plugins.stamp`.
+  Future<void> injectPlugins(
+    FlutterProject project, {
+    required bool releaseMode,
+    PackageConfig? packageConfig,
+    PackageGraph? packageGraph,
+    PubspecCache? pubspecCache,
+  }) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return;
+    }
+
+    final File stampFile = _pluginsStampFile(project.directory);
+    final Map<String, String> platformDirectories = await getPluginPlatformDirectories();
+    final existingPlatformDirectories = <String, String>{
+      for (final MapEntry(key: String platformKey, value: String runnerDir)
+          in platformDirectories.entries)
+        if (project.directory.childDirectory(runnerDir).existsSync()) platformKey: runnerDir,
+    };
+    if (existingPlatformDirectories.isEmpty) {
+      ErrorHandlingFileSystem.deleteIfExists(stampFile);
+      return;
+    }
+
+    // Hash `.dart_tool/flutter_tools/extensions/**/*.dill.stamp` when that
+    // directory exists on disk (RFC 510.0000 §4.6), falling back to
+    // `.dart_tool/package_config.json` before the `.dill` cache has been populated.
+    final String stamp = _encodeExtensionPluginsStamp(
+      project,
+      existingPlatformDirectories: existingPlatformDirectories,
+      releaseMode: releaseMode,
+    );
+    if (stampFile.existsSync() && stampFile.readAsStringSync() == stamp) {
+      return;
+    }
+
+    final Map<String, List<ExtensionPlugin>> pluginsByPlatform = await _resolvePluginsForPlatforms(
+      project,
+      existingPlatformDirectories.keys,
+      packageConfig: packageConfig,
+      packageGraph: packageGraph,
+      pubspecCache: pubspecCache,
+      releaseMode: releaseMode,
+    );
+    final ExtensionFlutterProject extensionProject = project.toExtensionProject();
+    for (final MapEntry(key: String platformKey, value: String runnerDir)
+        in existingPlatformDirectories.entries) {
+      final ExtensionConnection connection = _pluginPlatformToConnection[platformKey]!;
+      final context = ExtensionPluginInjectionContext(
+        pluginPlatformKey: platformKey,
+        plugins: pluginsByPlatform[platformKey] ?? const <ExtensionPlugin>[],
+        project: extensionProject,
+        releaseMode: releaseMode,
+        runnerDirectory: project.directory.childDirectory(runnerDir).absolute.uri,
+      );
+      try {
+        await connection.sendRequest(_kInjectPluginsMethod, params: context.toMap(), timeout: null);
+      } on Exception catch (e) {
+        final String detail = e is ToolExtensionException ? e.message : '$e';
+        throwToolExit(
+          'Failed to inject "$platformKey" plugins via extension '
+          '"${connection.extensionName}": $detail',
+        );
+      }
+    }
+
+    stampFile.parent.createSync(recursive: true);
+    stampFile.writeAsStringSync(stamp, flush: true);
+  }
+
+  Future<Map<String, List<ExtensionPlugin>>> _resolvePluginsForPlatforms(
+    FlutterProject project,
+    Iterable<String> platformKeys, {
+    required bool releaseMode,
+    PackageConfig? packageConfig,
+    PackageGraph? packageGraph,
+    PubspecCache? pubspecCache,
+  }) async {
+    final Set<String> keys = platformKeys.toSet();
+    if (keys.isEmpty || !project.pubspecFile.existsSync()) {
+      return <String, List<ExtensionPlugin>>{
+        for (final String key in keys) key: const <ExtensionPlugin>[],
+      };
     }
     final List<Plugin> foundPlugins = await findPlugins(
       project,
-      extraPlatformKeys: <String>{pluginPlatformKey},
+      extraPlatformKeys: keys,
       logger: _logger,
+      packageConfig: packageConfig,
+      packageGraph: packageGraph,
+      pubspecCache: pubspecCache,
       throwOnError: false,
     );
-    if (foundPlugins.isEmpty) {
-      return const <ExtensionPlugin>[];
+    return <String, List<ExtensionPlugin>>{
+      for (final String key in keys)
+        key: foundPlugins.isEmpty
+            ? const <ExtensionPlugin>[]
+            : resolveExtensionPluginsForPlatform(
+                foundPlugins,
+                key,
+                fileSystem: _fileSystem,
+                includeDevDependencies: !releaseMode,
+                logger: _logger,
+              ),
+    };
+  }
+
+  static String _encodeExtensionPluginsStamp(
+    FlutterProject project, {
+    required Map<String, String> existingPlatformDirectories,
+    required bool releaseMode,
+  }) {
+    final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
+    final Directory extensionsDir = packageConfigFile.parent
+        .childDirectory(_kFlutterToolsDirName)
+        .childDirectory(_kExtensionsDirName);
+    final Map<String, String>? extensionDillStamps = _hashExtensionDillStamps(extensionsDir);
+    return json.encode(<String, Object?>{
+      _kStampExtensionDillStampsKey: extensionDillStamps,
+      _kStampFlutterPluginsDependenciesHashKey: _hashFileIfExists(
+        project.flutterPluginsDependenciesFile,
+      ),
+      _kStampPackageConfigHashKey: extensionDillStamps == null
+          ? _hashFileIfExists(packageConfigFile)
+          : null,
+      _kStampPlatformDirectoriesKey: <String, String>{
+        for (final String key in existingPlatformDirectories.keys.sorted())
+          key: existingPlatformDirectories[key]!,
+      },
+      _kStampReleaseModeKey: releaseMode,
+    });
+  }
+
+  static Map<String, String>? _hashExtensionDillStamps(Directory extensionsDir) {
+    if (!extensionsDir.existsSync()) {
+      return null;
     }
-    return resolveExtensionPluginsForPlatform(
-      foundPlugins,
-      pluginPlatformKey,
-      fileSystem: _fileSystem,
-      includeDevDependencies: !buildMode.isRelease,
-      logger: _logger,
-    );
+    final FileSystem fileSystem = extensionsDir.fileSystem;
+    final List<File> stampFiles;
+    try {
+      stampFiles = <File>[
+        for (final FileSystemEntity entity in extensionsDir.listSync(
+          recursive: true,
+          followLinks: false,
+        ))
+          if (entity is File && entity.path.endsWith(_kDillStampFileSuffix)) entity,
+      ];
+    } on FileSystemException {
+      return null;
+    }
+    final unsorted = <String, String>{
+      for (final File stampFile in stampFiles)
+        if (_hashFileIfExists(stampFile) case final String hash)
+          fileSystem.path
+                  .split(fileSystem.path.relative(stampFile.path, from: extensionsDir.path))
+                  .join('/'):
+              hash,
+    };
+    return <String, String>{
+      for (final String path in unsorted.keys.sorted()) path: unsorted[path]!,
+    };
+  }
+
+  String? _normalizeRelativeRunnerDir(String raw) {
+    if (!_fileSystem.path.isRelative(raw)) {
+      return null;
+    }
+    final String normalized = _fileSystem.path.normalize(raw);
+    final String firstSegment = _fileSystem.path.split(normalized).first;
+    if (firstSegment == '.' || firstSegment == '..') {
+      return null;
+    }
+    return normalized;
+  }
+
+  static String? _hashFileIfExists(File file) {
+    if (!file.existsSync()) {
+      return null;
+    }
+    try {
+      return sha256.convert(file.readAsBytesSync()).toString();
+    } on FileSystemException {
+      return null;
+    }
   }
 }

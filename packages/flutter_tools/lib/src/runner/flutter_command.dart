@@ -1291,6 +1291,7 @@ abstract class FlutterCommand extends Command<void> {
       analytics: commandRunner.analytics,
       cocoaPods: commandRunner.cocoaPods,
       deprecationBehavior: deprecationBehavior,
+      extensionBuildManager: commandRunner.extensionBuildManager,
       featureFlags: commandRunner.featureFlags,
       gradleUtils: commandRunner.gradleUtils,
       plistParser: commandRunner.plistParser,
