@@ -10,18 +10,23 @@ import 'dart:async';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../android/android_workflow.dart';
+import '../android/gradle.dart';
 import '../android/gradle_utils.dart';
 import '../android/java.dart';
+import '../application_package.dart';
 import '../artifacts.dart';
+import '../asset.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -34,7 +39,9 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../dart/pub.dart';
 import '../device.dart';
+import '../devtools_launcher.dart';
 import '../doctor.dart';
 import '../emulator.dart';
 import '../experimental/extension_build_manager.dart';
@@ -42,12 +49,14 @@ import '../experimental/extension_clean_manager.dart';
 import '../experimental/extension_discovery.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
+import '../flutter_application_package.dart';
 import '../flutter_cache.dart';
 import '../flutter_device_manager.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
 import '../flutter_manifest.dart';
 import '../git.dart';
+import '../hook_runner.dart';
 import '../ios/ios_workflow.dart';
 import '../ios/iproxy.dart';
 import '../ios/plist_parser.dart';
@@ -58,14 +67,18 @@ import '../macos/cocoapods_validator.dart';
 import '../macos/macos_workflow.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
+import '../mdns_discovery.dart';
 import '../native_assets.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../reporting/crash_reporting.dart';
 import '../reporting/unified_analytics.dart';
+import '../resident_runner.dart';
 import '../runner/local_engine.dart';
+import '../template.dart';
 import '../version.dart';
+import '../web/web_runner.dart';
 import '../windows/windows_workflow.dart';
 import 'android_context.dart';
 import 'apple_context.dart';
@@ -90,30 +103,54 @@ import 'tool_context.dart';
 class ToolDependencies {
   ToolDependencies({
     required this.analytics,
+    required this.androidBuilder,
     required this.androidContext,
+    required this.androidWorkflow,
     required this.appleContext,
+    required this.applicationPackageFactory,
+    required this.assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required this.crashReporter,
     required this.deviceManager,
+    required this.devtoolsLauncher,
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
+    required this.macOSWorkflow,
+    required this.mdnsVmServiceDiscovery,
+    required this.pub,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
+    required this.windowsWorkflow,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
+    this.flutterHookRunner,
+    this.webRunnerFactory,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
   final Analytics analytics;
 
+  /// Builder for Android APK, AAR, and App Bundle artifacts.
+  final AndroidBuilder androidBuilder;
+
   /// Sub-context containing Android-specific platform services.
   final AndroidContext androidContext;
 
+  /// Evaluates host readiness and toolchain requirements for Android workflows.
+  final AndroidWorkflow androidWorkflow;
+
   /// Sub-context containing Apple platform services.
   final AppleContext appleContext;
+
+  /// Factory for creating target-platform [ApplicationPackage] instances.
+  final ApplicationPackageFactory applicationPackageFactory;
+
+  /// Factory for creating [AssetBundle] instances.
+  final AssetBundleFactory assetBundleFactory;
 
   /// High-performance compilation and build pipeline orchestrator.
   final BuildSystem buildSystem;
@@ -126,6 +163,9 @@ class ToolDependencies {
 
   /// Manager for discovering and filtering connected target devices.
   final DeviceManager deviceManager;
+
+  /// Launcher for the Dart DevTools debugger and analysis server.
+  final DevtoolsLauncher devtoolsLauncher;
 
   /// System health diagnostics and toolchain validator.
   final Doctor doctor;
@@ -145,11 +185,32 @@ class ToolDependencies {
   /// Feature flags that govern tool capabilities and rollouts.
   final FeatureFlags featureFlags;
 
+  /// Runner for Dart build and link hooks when supported by the embedder.
+  final FlutterHookRunner? flutterHookRunner;
+
+  /// Evaluates host readiness and toolchain requirements for macOS workflows.
+  final MacOSWorkflow macOSWorkflow;
+
+  /// mDNS discovery service for locating Dart VM Service instances on local networks.
+  final MDnsVmServiceDiscovery mdnsVmServiceDiscovery;
+
+  /// Interface for interacting with the `pub` package manager.
+  final Pub pub;
+
+  /// Resolves filesystem paths for Flutter project templates and template images.
+  final TemplatePathProvider templatePathProvider;
+
   /// Renderer for mustache project and platform templates.
   final TemplateRenderer templateRenderer;
 
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
+
+  /// Factory for creating web resident runners when supported by the embedder.
+  final WebRunnerFactory? webRunnerFactory;
+
+  /// Evaluates host readiness and toolchain requirements for Windows workflows.
+  final WindowsWorkflow windowsWorkflow;
 
   /// Bootstraps the dependency graph and constructs all three contexts.
   ///
@@ -162,12 +223,15 @@ class ToolDependencies {
   static Future<ToolDependencies> bootstrap({
     required TemplateRenderer templateRenderer,
     Analytics? analytics,
+    AndroidBuilder? androidBuilder,
     AndroidSdk? androidSdk,
     AndroidSdk? Function()? androidSdkBuilder,
     AndroidStudio? androidStudio,
     AndroidStudio? Function()? androidStudioBuilder,
     AndroidWorkflow? androidWorkflow,
+    ApplicationPackageFactory? applicationPackageFactory,
     Artifacts? artifacts,
+    AssetBundleFactory? assetBundleFactory,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -180,15 +244,20 @@ class ToolDependencies {
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
     DeviceManager? deviceManager,
+    DevtoolsLauncher? devtoolsLauncher,
     Doctor? doctor,
+    DoctorValidatorsProvider? doctorValidatorsProvider,
     EmulatorManager? emulatorManager,
     List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
     FeatureFlags? featureFlags,
+    FlutterHookRunner? flutterHookRunner,
+    String? flutterRoot,
     FlutterVersion? flutterVersion,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
     GradleUtils Function()? gradleUtilsBuilder,
+    HttpClientFactory? httpClientFactory,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSSimulatorUtils? Function()? iosSimulatorUtilsBuilder,
     IOSWorkflow? iosWorkflow,
@@ -198,6 +267,7 @@ class ToolDependencies {
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
     MacOSWorkflow? macOSWorkflow,
+    MDnsVmServiceDiscovery? mdnsVmServiceDiscovery,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     OutputPreferences? outputPreferences,
     PersistentToolState? persistentToolState,
@@ -205,14 +275,20 @@ class ToolDependencies {
     PlistParser? plistParser,
     PlistParser? Function()? plistParserBuilder,
     PreRunValidator? preRunValidator,
+    PreRunValidator Function({required Cache cache, required FileSystem fileSystem})?
+    preRunValidatorBuilder,
     ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
+    Pub? pub,
     ShutdownHooks? shutdownHooks,
+    Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
+    TemplatePathProvider? templatePathProvider,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
+    WebRunnerFactory? webRunnerFactory,
     WindowsWorkflow? windowsWorkflow,
     XCDevice? xcdevice,
     XCDevice? Function()? xcdeviceBuilder,
@@ -258,6 +334,10 @@ class ToolDependencies {
       'Cannot provide both plistParser and plistParserBuilder to ToolDependencies.bootstrap.',
     );
     assert(
+      preRunValidator == null || preRunValidatorBuilder == null,
+      'Cannot provide both preRunValidator and preRunValidatorBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
       xcdevice == null || xcdeviceBuilder == null,
       'Cannot provide both xcdevice and xcdeviceBuilder to ToolDependencies.bootstrap.',
     );
@@ -269,12 +349,17 @@ class ToolDependencies {
       xcodeProjectInterpreter == null || xcodeProjectInterpreterBuilder == null,
       'Cannot provide both xcodeProjectInterpreter and xcodeProjectInterpreterBuilder to ToolDependencies.bootstrap.',
     );
+    assert(
+      cache == null || flutterRoot == null,
+      'Cannot provide both cache and flutterRoot to ToolDependencies.bootstrap.',
+    );
 
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
     final UserMessages finalUserMessages = userMessages ?? UserMessages();
     final ShutdownHooks finalShutdownHooks = shutdownHooks ?? ShutdownHooks();
+    final Signals finalSignals = signals ?? LocalSignals.instance;
     final Stdio finalStdio = stdio ?? Stdio();
 
     // 2. Terminal and Preferences
@@ -284,6 +369,9 @@ class ToolDependencies {
           stdio: finalStdio,
           platform: finalPlatform,
           now: finalSystemClock.now(),
+          // So that we don't animate anything before calling applyFeatureFlags, default
+          // the animations to disabled in real apps.
+          defaultCliAnimationEnabled: false,
           shutdownHooks: finalShutdownHooks,
         );
 
@@ -313,11 +401,7 @@ class ToolDependencies {
     // 4. File System
     final finalFS = fs == null
         ? ErrorHandlingFileSystem(
-            delegate: LocalFileSystem(
-              LocalSignals.instance,
-              Signals.defaultExitSignals,
-              finalShutdownHooks,
-            ),
+            delegate: LocalFileSystem(finalSignals, Signals.defaultExitSignals, finalShutdownHooks),
             platform: finalPlatform,
           )
         : ErrorHandlingFileSystem(delegate: fs, platform: finalPlatform);
@@ -329,7 +413,7 @@ class ToolDependencies {
 
     final BotDetector finalBotDetector = botDetector ?? BotDetector(platform: finalPlatform);
 
-    final bool isBot = await finalBotDetector.isRunningOnBot;
+    final bool isBot = finalBotDetector.isRunningOnBot;
 
     final Config finalConfig =
         config ??
@@ -359,13 +443,17 @@ class ToolDependencies {
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
     // 7. Project Factory, Operating System Utilities, and Cache
-    final String flutterRoot =
+    final String finalFlutterRoot =
+        flutterRoot ??
         cache?.flutterRoot ??
         Cache.defaultFlutterRoot(
           platform: finalPlatform,
           fileSystem: finalFS,
           userMessages: finalUserMessages,
         );
+
+    final TemplatePathProvider finalTemplatePathProvider =
+        templatePathProvider ?? TemplatePathProvider(flutterRoot: finalFlutterRoot);
 
     // FeatureFlags depends on FlutterVersion, which depends on Cache, which
     // depends on FlutterProjectFactory. The project factory resolves feature
@@ -408,15 +496,20 @@ class ToolDependencies {
       processManager: finalProcessManager,
     );
 
+    late final Artifacts finalArtifacts;
+    late final Pub finalPub;
+
     final Cache finalCache =
         cache ??
         FlutterCache(
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
           fileSystem: finalFS,
+          isLocalEngineBuilder: () => finalArtifacts.localEngineInfo != null,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
           projectFactory: finalProjectFactory,
+          pub: () => finalPub,
           stdio: finalStdio,
         );
 
@@ -425,9 +518,10 @@ class ToolDependencies {
         flutterVersion ??
         FlutterVersion(
           cache: finalCache,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
           fs: finalFS,
           git: finalGit,
+          isOmitLegacyVersionFileEnabled: () => finalFeatureFlags.isOmitLegacyVersionFileEnabled,
           logger: finalLogger,
           platform: finalPlatform,
         );
@@ -443,7 +537,9 @@ class ToolDependencies {
           config: finalConfig,
         );
     finalAnalyticsInitialized = true;
-    LocalSignals.instance.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    if (finalSignals is LocalSignals) {
+      finalSignals.configureExit(analytics: finalAnalytics, logger: finalLogger);
+    }
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
     final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
@@ -489,7 +585,9 @@ class ToolDependencies {
         );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
+        preRunValidator ??
+        preRunValidatorBuilder?.call(cache: finalCache, fileSystem: finalFS) ??
+        const NoOpPreRunValidator();
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 
@@ -500,13 +598,13 @@ class ToolDependencies {
           logger: finalLogger,
           platform: finalPlatform,
           fileSystem: finalFS,
-          flutterRoot: flutterRoot,
+          flutterRoot: finalFlutterRoot,
         );
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // Artifacts will be updated later if a local engine is used.
-    final Artifacts finalArtifacts = switch (artifacts) {
+    finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
       final Artifacts providedArtifacts => DeferredArtifacts(providedArtifacts),
       null => DeferredArtifacts(
@@ -541,12 +639,40 @@ class ToolDependencies {
       processUtils: finalProcessUtils,
       projectFactory: finalProjectFactory,
       shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
+      signals: finalSignals,
       stdio: finalStdio,
       systemClock: finalSystemClock,
       terminal: finalTerminal,
       userMessages: finalUserMessages,
     );
+
+    final AssetBundleFactory finalAssetBundleFactory =
+        assetBundleFactory ??
+        AssetBundleFactory.defaultInstance(
+          logger: finalLogger,
+          fileSystem: finalFS,
+          flutterRoot: finalFlutterRoot,
+          platform: finalPlatform,
+        );
+
+    final DevtoolsLauncher finalDevtoolsLauncher =
+        devtoolsLauncher ??
+        DevtoolsServerLauncher(
+          processManager: finalProcessManager,
+          artifacts: finalArtifacts,
+          logger: finalLogger,
+          botDetector: finalBotDetector,
+        );
+
+    final MDnsVmServiceDiscovery finalMDnsVmServiceDiscovery =
+        mdnsVmServiceDiscovery ??
+        MDnsVmServiceDiscovery(
+          logger: finalLogger,
+          analytics: finalAnalytics,
+          platform: finalPlatform,
+        );
+
+    finalPub = pub ?? Pub(featureFlags: finalFeatureFlags, toolContext: finalToolContext);
 
     // 11. AppleContext Dependencies
     late final CocoaPods finalCocoaPods =
@@ -569,13 +695,16 @@ class ToolDependencies {
         XCDevice(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
+          mdnsVmServiceDiscovery: finalMDnsVmServiceDiscovery,
           plistParser: finalPlistParser,
+          templatePathProvider: finalTemplatePathProvider,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           xcode: finalXcode,
@@ -593,6 +722,8 @@ class ToolDependencies {
         IOSSimulatorUtils(
           analytics: finalAnalytics,
           cocoaPods: finalCocoaPods,
+          featureFlags: finalFeatureFlags,
+          mdnsVmServiceDiscovery: finalMDnsVmServiceDiscovery,
           plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
@@ -681,6 +812,7 @@ class ToolDependencies {
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
     );
+    finalShutdownHooks.addShutdownHook(extensionManager.dispose);
 
     final appleContext = AppleContext(
       cocoaPodsBuilder: () => finalCocoaPods,
@@ -692,6 +824,23 @@ class ToolDependencies {
       xcodeBuilder: () => finalXcode,
       xcodeProjectInterpreterBuilder: () => finalXcodeProjectInterpreter,
     );
+
+    final AndroidBuilder finalAndroidBuilder =
+        androidBuilder ??
+        AndroidGradleBuilder.fromContexts(
+          analytics: finalAnalytics,
+          androidContext: finalAndroidContext,
+          toolContext: finalToolContext,
+        );
+
+    final ApplicationPackageFactory finalApplicationPackageFactory =
+        applicationPackageFactory ??
+        FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          plistParserBuilder: () => appleContext.plistParser,
+          templatePathProvider: finalTemplatePathProvider,
+          toolContext: finalToolContext,
+        );
 
     final extensionBuildManager = ExtensionBuildManager(
       extensionManager: extensionManager,
@@ -709,15 +858,18 @@ class ToolDependencies {
         deviceManager ??
         FlutterDeviceManager(
           analytics: finalAnalytics,
+          androidBuilder: finalAndroidBuilder,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: finalAndroidWorkflow,
           appleContext: appleContext,
+          applicationPackageFactory: finalApplicationPackageFactory,
           buildSystem: finalBuildSystem,
           buildTargets: finalBuildTargets,
           extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           macOSWorkflow: finalMacOSWorkflow,
+          mdnsVmServiceDiscovery: finalMDnsVmServiceDiscovery,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
@@ -732,31 +884,48 @@ class ToolDependencies {
           clock: finalSystemClock,
           logger: finalLogger,
           validatorsProviderBuilder: ({ExtensionManager? extensionManager}) =>
+              doctorValidatorsProvider ??
               DoctorValidatorsProvider.create(
+                androidContext: finalAndroidContext,
+                androidWorkflow: finalAndroidWorkflow,
                 appleContext: appleContext,
                 deviceManager: finalDeviceManager,
                 extensionManager: extensionManager,
                 featureFlags: finalFeatureFlags,
+                httpClientFactory: httpClientFactory,
                 toolContext: finalToolContext,
+                windowsWorkflow: finalWindowsWorkflow,
               ),
         );
 
     return ToolDependencies(
       analytics: finalAnalytics,
+      androidBuilder: finalAndroidBuilder,
       androidContext: finalAndroidContext,
+      androidWorkflow: finalAndroidWorkflow,
       appleContext: appleContext,
+      applicationPackageFactory: finalApplicationPackageFactory,
+      assetBundleFactory: finalAssetBundleFactory,
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
+      devtoolsLauncher: finalDevtoolsLauncher,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
       extensionBuildManager: extensionBuildManager,
       extensionCleanManager: extensionCleanManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
+      flutterHookRunner: flutterHookRunner,
+      macOSWorkflow: finalMacOSWorkflow,
+      mdnsVmServiceDiscovery: finalMDnsVmServiceDiscovery,
+      pub: finalPub,
+      templatePathProvider: finalTemplatePathProvider,
       templateRenderer: templateRenderer,
       toolContext: finalToolContext,
+      webRunnerFactory: webRunnerFactory,
+      windowsWorkflow: finalWindowsWorkflow,
     );
   }
 }

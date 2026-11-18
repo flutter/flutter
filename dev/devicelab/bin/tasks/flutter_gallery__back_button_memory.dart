@@ -37,7 +37,7 @@ class BackButtonMemoryTest extends MemoryTest {
       // Push back button, wait for it to be seen by the Flutter app.
       prepareForNextMessage('AppLifecycleState.paused');
       await device!.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
-      await receivedNextMessage;
+      await receivedNextMessage?.timeout(MemoryTest.nextMessageTimeout);
 
       // Give Android time to settle (e.g. run GCs) after closing the app.
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -53,7 +53,7 @@ class BackButtonMemoryTest extends MemoryTest {
       if (output.contains('Error')) {
         fail('unable to launch activity');
       }
-      await receivedNextMessage;
+      await receivedNextMessage?.timeout(MemoryTest.nextMessageTimeout);
 
       // Wait for the Flutter app to settle (e.g. run GCs).
       await Future<void>.delayed(const Duration(milliseconds: 100));

@@ -49,6 +49,7 @@ class TestViewRasterizer extends ViewRasterizer {
   TestViewRasterizer(super.view);
 
   List<LayerTree> treesRendered = <LayerTree>[];
+  List<ui.Size> sizesRendered = <ui.Size>[];
 
   @override
   DisplayCanvasFactory<DisplayCanvas> get displayFactory => throw UnimplementedError();
@@ -59,8 +60,9 @@ class TestViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  Future<void> draw(LayerTree tree, FrameTimingRecorder? recorder) async {
+  Future<void> draw(LayerTree tree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
     treesRendered.add(tree);
+    sizesRendered.add(frameSize);
     return Future<void>.value();
   }
 
@@ -114,7 +116,7 @@ void testMain() {
         builder.addPicture(ui.Offset.zero, picture);
         final ui.Scene scene = builder.build();
         treesToRender.add((scene as LayerScene).layerTree);
-        renderFutures.add(renderer.renderScene(scene, testView));
+        renderFutures.add(renderer.renderScene(scene, testView, size: ui.Size(i * 10.0, i * 20.0)));
       }
       await Future.wait(renderFutures);
 
@@ -123,6 +125,10 @@ void testMain() {
       expect(treesRendered.length, 2);
       expect(treesRendered.first, treesToRender.first);
       expect(treesRendered.last, treesToRender.last);
+      expect(testRasterizer.viewRasterizers[testView]!.sizesRendered, const <ui.Size>[
+        ui.Size(10, 20),
+        ui.Size(190, 380),
+      ]);
     });
 
     test('can render multiple frames at once into multiple views', () async {
@@ -166,7 +172,7 @@ void testMain() {
           builder.addPicture(ui.Offset.zero, picture);
           final ui.Scene scene = builder.build();
           treesToRender[testView]!.add((scene as LayerScene).layerTree);
-          renderFutures.add(renderer.renderScene(scene, testView));
+          renderFutures.add(renderer.renderScene(scene, testView, size: testView.physicalSize));
         }
       }
       await Future.wait(renderFutures);
