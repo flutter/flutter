@@ -12,6 +12,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/version.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../plugins.dart';
@@ -42,19 +43,10 @@ const kDisableSwiftPMInstructions =
 ///   * https://developer.apple.com/documentation/packagedescription/package -
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
-  const SwiftPackageManager({
-    required this._fileSystem,
-    required this._templateRenderer,
-    required this._processUtils,
-    required this._config,
-    this._logger,
-  });
+  const SwiftPackageManager({required this._templateRenderer, required this._toolContext});
 
-  final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
-  final ProcessUtils _processUtils;
-  final Config _config;
-  final Logger? _logger;
+  final ToolContext _toolContext;
 
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
@@ -62,10 +54,11 @@ class SwiftPackageManager {
     XcodeBasedProject project, {
     bool flutterAsADependency = true,
   }) async {
+    final ToolContext(fs: FileSystem fileSystem, :Logger logger) = _toolContext;
     final String lockPath = project.ephemeralDirectory.childFile('.swift_pm.lock').path;
-    await _fileSystem.runLocked<void>(
+    await fileSystem.runLocked<void>(
       lockPath: lockPath,
-      logger: _logger,
+      logger: logger,
       traceMessage:
           'Waiting to be able to obtain lock of Swift Package Manager directory: $lockPath',
       warningMessage:
@@ -75,7 +68,7 @@ class SwiftPackageManager {
         try {
           symlinkDirectory.createSync(recursive: true);
         } on FileSystemException catch (e) {
-          if (!_fileSystem.isDirectorySync(symlinkDirectory.path)) {
+          if (!fileSystem.isDirectorySync(symlinkDirectory.path)) {
             throwToolExit(
               'Failed to create Swift Packages directory at "${symlinkDirectory.path}": $e',
             );
@@ -161,6 +154,7 @@ class SwiftPackageManager {
     required Directory symlinkDirectory,
     required String pathRelativeTo,
   }) {
+    final FileSystem fileSystem = _toolContext.fs;
     final packageDependencies = <SwiftPackagePackageDependency>[];
     final targetDependencies = <SwiftPackageTargetDependency>[];
     final expectedBasenames = <String>{};
@@ -171,12 +165,12 @@ class SwiftPackageManager {
     );
     for (final plugin in plugins) {
       final String? pluginSwiftPackageManifestPath = plugin.pluginSwiftPackageManifestPath(
-        _fileSystem,
+        fileSystem,
         platform.name,
       );
-      String? packagePath = plugin.pluginSwiftPackagePath(_fileSystem, platform.name);
+      String? packagePath = plugin.pluginSwiftPackagePath(fileSystem, platform.name);
       final File? manifest = packagePath != null
-          ? _fileSystem.file(pluginSwiftPackageManifestPath)
+          ? fileSystem.file(pluginSwiftPackageManifestPath)
           : null;
       if (plugin.platforms[platform.name] == null ||
           packagePath == null ||
@@ -185,7 +179,7 @@ class SwiftPackageManager {
         continue;
       }
 
-      final String basename = _fileSystem.directory(plugin.path).basename;
+      final String basename = fileSystem.directory(plugin.path).basename;
 
       final Link pluginSymlink;
       final String linkName;
@@ -211,7 +205,7 @@ class SwiftPackageManager {
       _createPluginSymlink(pluginSymlink: pluginSymlink, packagePath: packagePath);
       expectedBasenames.add(linkName);
 
-      final String packageRelativePath = _fileSystem.path.relative(
+      final String packageRelativePath = fileSystem.path.relative(
         pluginSymlink.path,
         from: pathRelativeTo,
       );
@@ -251,29 +245,27 @@ class SwiftPackageManager {
     required List<Plugin> plugins,
     required FlutterDarwinPlatform platform,
   }) {
-    final Set<Plugin> pluginsToCopy = {};
+    final FileSystem fileSystem = _toolContext.fs;
+    final pluginsToCopy = <Plugin>{};
     for (final plugin in plugins) {
-      if (!plugin.supportSwiftPackageManagerForPlatform(_fileSystem, platform.name)) {
+      if (!plugin.supportSwiftPackageManagerForPlatform(fileSystem, platform.name)) {
         continue;
       }
 
       // The basename cannot be used when it does not match the plugin's name
       // (see https://github.com/flutter/flutter/issues/186881).
-      final String basename = _fileSystem.directory(plugin.path).basename;
+      final String basename = fileSystem.directory(plugin.path).basename;
       if (basename != plugin.name && !basename.startsWith('${plugin.name}-')) {
         pluginsToCopy.add(plugin);
       }
 
       // Plugins that are depended on by other plugins cannot use the basename
       // since their dependency paths are relative using the name of the plugin.
-      final String? manifestPath = plugin.pluginSwiftPackageManifestPath(
-        _fileSystem,
-        platform.name,
-      );
+      final String? manifestPath = plugin.pluginSwiftPackageManifestPath(fileSystem, platform.name);
       if (manifestPath == null) {
         continue;
       }
-      final File manifest = _fileSystem.file(manifestPath);
+      final File manifest = fileSystem.file(manifestPath);
       final String manifestContent = manifest.readAsStringSync();
       final List<Plugin> pluginDependencies = _getPluginDependencies(manifestContent, plugins);
       if (pluginDependencies.isNotEmpty) {
@@ -291,14 +283,15 @@ class SwiftPackageManager {
   /// If creation fails due to sharing violations or locks (e.g., when Xcode is open),
   /// throws a descriptive [ToolExit] advising the user to close Xcode and run "flutter clean --include-xcode-workspace".
   void _createPluginSymlink({required Link pluginSymlink, required String packagePath}) {
-    final FileSystemEntityType type = _fileSystem.typeSync(pluginSymlink.path, followLinks: false);
+    final FileSystem fileSystem = _toolContext.fs;
+    final FileSystemEntityType type = fileSystem.typeSync(pluginSymlink.path, followLinks: false);
     var skipCreation = false;
     if (type == FileSystemEntityType.link) {
       try {
         if (pluginSymlink.targetSync() == packagePath) {
           skipCreation = true;
         }
-      } on FileSystemException catch (_) {
+      } on FileSystemException {
         // If targetSync fails (e.g. broken link), proceed to delete.
       }
     }
@@ -314,7 +307,7 @@ class SwiftPackageManager {
     } on FileSystemException catch (e) {
       if (e.osError?.errorCode == 17) {
         // OS Error: File exists, errno = 17
-        final FileSystemEntityType postCrashType = _fileSystem.typeSync(
+        final FileSystemEntityType postCrashType = fileSystem.typeSync(
           pluginSymlink.path,
           followLinks: false,
         );
@@ -324,7 +317,9 @@ class SwiftPackageManager {
               // Concurrently created by another parallel target build, and points to the correct target.
               return;
             }
-          } on FileSystemException catch (_) {}
+          } on FileSystemException {
+            // If targetSync fails, throw the original error below.
+          }
         }
       }
       throwToolExit(
@@ -378,10 +373,12 @@ class SwiftPackageManager {
     required FlutterDarwinPlatform platform,
     required File manifest,
   }) {
+    final ToolContext(:Config config, fs: FileSystem fileSystem, :ProcessUtils processUtils) =
+        _toolContext;
     final String manifestContent = manifest.readAsStringSync();
-    final Directory destination = _fileSystem.directory(
-      _fileSystem.path.join(
-        platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+    final Directory destination = fileSystem.directory(
+      fileSystem.path.join(
+        platform.buildDirectory(config: config, fileSystem: fileSystem),
         kSwiftPackageCacheDirectoryName,
         basename,
       ),
@@ -389,7 +386,7 @@ class SwiftPackageManager {
     destination.createSync(recursive: true);
     final String sourcePath = plugin.path.endsWith('/') ? plugin.path : '${plugin.path}/';
     final String destinationPath = destination.absolute.path;
-    final RunResult result = _processUtils.runSync([
+    final RunResult result = processUtils.runSync([
       'rsync',
       '-8', // Avoid mangling filenames with encodings that do not match the current locale.
       '-av', // Archive mode and verbose: preserve permissions, ownership, timestamps, etc.
@@ -405,14 +402,14 @@ class SwiftPackageManager {
     }
 
     final String? packagePath = plugin.pluginSwiftPackagePath(
-      _fileSystem,
+      fileSystem,
       platform.name,
       overridePath: destinationPath,
     );
     if (packagePath == null) {
       throwToolExit('Failed to find path to Package.swift for plugin ${plugin.name}');
     }
-    final File copiedManifest = _fileSystem.directory(packagePath).childFile('Package.swift');
+    final File copiedManifest = fileSystem.directory(packagePath).childFile('Package.swift');
     if (!copiedManifest.existsSync()) {
       throwToolExit(
         'Failed to find path to copied Package.swift at ${copiedManifest.path}:\n'
@@ -434,7 +431,7 @@ class SwiftPackageManager {
     return (
       SwiftPackagePackageDependency(
         name: kFlutterGeneratedFrameworkSwiftPackageTargetName,
-        path: _fileSystem.path.relative(
+        path: _toolContext.fs.path.relative(
           project.flutterFrameworkSwiftPackageDirectory.path,
           from: pathRelativeTo,
         ),
@@ -535,7 +532,7 @@ class SwiftPackageManager {
     }
     try {
       for (final FileSystemEntity entity in symlinkDirectory.listSync()) {
-        final String name = _fileSystem.path.basename(entity.path);
+        final String name = _toolContext.fs.path.basename(entity.path);
         if (name == 'FlutterFramework') {
           if (!keepFlutterFramework) {
             ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);

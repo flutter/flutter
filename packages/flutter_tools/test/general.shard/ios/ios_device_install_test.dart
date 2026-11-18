@@ -17,12 +17,14 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 const kDyLdLibEntry = <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'};
 
@@ -371,6 +373,7 @@ IOSDevice setUpIOSDevice({
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: FakeXcode(),
     sdkVersion: '13.3',
@@ -383,15 +386,23 @@ IOSDevice setUpIOSDevice({
     ),
     iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: FakeXcodeDebug(),
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: interfaceType ?? DeviceConnectionInterface.attached,
     isConnected: true,
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+      analytics: const NoOpAnalytics(),
+      logger: logger,
+      platform: platform,
+    ),
     templateRenderer: FakeTemplateRenderer(),
   );
 }

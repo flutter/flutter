@@ -12,10 +12,12 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
+import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -42,6 +44,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'debug'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -86,6 +89,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'debug'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       engineVersion: '2',
@@ -124,6 +128,7 @@ void main() {
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'profile'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -144,6 +149,7 @@ void main() {
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -165,6 +171,7 @@ void main() {
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -194,6 +201,70 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext(
+    'AndroidAot throws ToolExit on Linux arm64 hosts when gen_snapshot is missing',
+    () async {
+      processManager = FakeProcessManager.empty();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        outputDir: fileSystem.directory('out')..createSync(),
+        defines: <String, String>{kBuildMode: 'release'},
+        artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+      environment.buildDir.createSync(recursive: true);
+      environment.buildDir.childFile('app.dill').createSync();
+      environment.buildDir.childFile('native_assets.json').createSync();
+      const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+
+      await expectLater(
+        androidAot.build(environment),
+        throwsToolExit(message: 'not supported on Linux arm64 hosts'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testWithoutContext(
+    'AndroidAot runs gen_snapshot on Linux arm64 hosts when it is present',
+    () async {
+      processManager = FakeProcessManager.empty();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        outputDir: fileSystem.directory('out')..createSync(),
+        defines: <String, String>{kBuildMode: 'release'},
+        artifacts: _LinuxArm64GenSnapshotArtifacts(artifacts),
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        fileSystem: fileSystem,
+        logger: logger,
+      );
+      fileSystem.file(_LinuxArm64GenSnapshotArtifacts.genSnapshotPath).createSync(recursive: true);
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            _LinuxArm64GenSnapshotArtifacts.genSnapshotPath,
+            '--deterministic',
+            '--snapshot_kind=app-aot-elf',
+            '--elf=${environment.buildDir.childDirectory('arm64-v8a').childFile('app.so').path}',
+            environment.buildDir.childFile('app.dill').path,
+          ],
+        ),
+      );
+      environment.buildDir.createSync(recursive: true);
+      environment.buildDir.childFile('app.dill').createSync();
+      environment.buildDir.childFile('native_assets.json').createSync();
+      const androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+
+      await androidAot.build(environment);
+
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   testWithoutContext('AndroidAot provide code size information.', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
@@ -201,6 +272,7 @@ void main() {
       outputDir: fileSystem.directory('out')..createSync(),
       defines: <String, String>{kBuildMode: 'release', kCodeSizeDirectory: 'code_size_1'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -244,6 +316,7 @@ void main() {
       },
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -286,6 +359,7 @@ void main() {
         },
         processManager: processManager,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: logger,
       );
@@ -322,6 +396,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'release'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -349,6 +424,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'release'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -446,6 +522,7 @@ void main() {
       defines: <String, String>{kBuildMode: 'release'},
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
@@ -534,6 +611,7 @@ void main() {
         defines: <String, String>{kBuildMode: 'debug'},
         processManager: processManager,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: logger,
       );
@@ -600,4 +678,33 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+}
+
+/// Places the Android gen_snapshot in a `linux-arm64` host directory, as the
+/// cached artifacts do on Linux arm64 hosts.
+class _LinuxArm64GenSnapshotArtifacts extends Fake implements Artifacts {
+  _LinuxArm64GenSnapshotArtifacts(this._delegate);
+
+  static const genSnapshotPath =
+      '/cache/artifacts/engine/android-arm64-release/linux-arm64/gen_snapshot';
+
+  final Artifacts _delegate;
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    if (artifact == Artifact.genSnapshot) {
+      return genSnapshotPath;
+    }
+    return _delegate.getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+      environmentType: environmentType,
+    );
+  }
 }

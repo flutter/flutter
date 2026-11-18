@@ -4566,6 +4566,9 @@ Future<void> testMain() async {
 
       // Editing state is applied to the element.
       expect(passwordElement.value, 'Test');
+      // Without semantics, password manager extensions fill these elements,
+      // and some skip elements hidden from assistive technology.
+      expect(passwordElement.getAttribute('aria-hidden'), isNull);
       // When we only set the `value` without changing selection, the browser
       // automatically sets the selection to the end of the value.
       expect(passwordElement.selectionStart, 4);
@@ -4727,45 +4730,6 @@ Future<void> testMain() async {
 
       // The submit button should have class `submitBtn`.
       expect(inputElement.className, 'submitBtn');
-    });
-
-    test('non-focused fields are hidden from assistive technology only in semantics mode', () {
-      // With semantics on, each field has a real semantics node and the proxy is
-      // a duplicate that a screen reader should skip. With semantics off the
-      // proxy is the only representation of the field, and a password manager
-      // rejects an aria-hidden input outright, so it must not be hidden there.
-      final List<Map<String, Object?>> fields = createFieldValues(
-        <String>['email', 'username', 'password'],
-        <String>['field1', 'field2', 'field3'],
-      );
-      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
-      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
-      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
-        kImplicitViewId,
-        emailAutofillMap,
-        fields,
-      )!;
-      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
-
-      EngineSemantics.instance.semanticsEnabled = true;
-      addTearDown(() {
-        EngineSemantics.instance.semanticsEnabled = false;
-      });
-      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
-
-      final formChildNodes =
-          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-      expect(formChildNodes[0], emailFocusedElement);
-      expect(formChildNodes[0].getAttribute('aria-hidden'), isNull);
-      expect(formChildNodes[1].getAttribute('aria-hidden'), 'true');
-      expect(formChildNodes[2].getAttribute('aria-hidden'), 'true');
-
-      // The proxies are reused for the life of the form, so waking it again
-      // with semantics off clears the attribute and they are candidates again.
-      EngineSemantics.instance.semanticsEnabled = false;
-      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
-      expect(formChildNodes[1].getAttribute('aria-hidden'), isNull);
-      expect(formChildNodes[2].getAttribute('aria-hidden'), isNull);
     });
 
     test('Return null if no focused element', () {

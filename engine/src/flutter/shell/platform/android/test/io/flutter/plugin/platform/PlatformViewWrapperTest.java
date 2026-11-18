@@ -8,12 +8,14 @@ import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.spy;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -28,9 +30,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.util.List;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -39,6 +43,11 @@ import org.robolectric.annotation.Implements;
 @RunWith(AndroidJUnit4.class)
 public class PlatformViewWrapperTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
+
+  @After
+  public void tearDown() {
+    FlutterRenderer.debugDisableSurfaceClear = false;
+  }
 
   @Test
   public void invalidateChildInParent_callsInvalidate() {
@@ -97,6 +106,201 @@ public class PlatformViewWrapperTest {
     wrapper.draw(canvas);
 
     verify(canvas, times(1)).drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR);
+  }
+
+  @Test
+  public void draw_withValidSurface_postsFrameAfterCurrentTraversal() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas);
+
+    // The frame is recorded synchronously, but posted to the render target only after the
+    // current traversal.
+    verify(surface, times(1)).lockHardwareCanvas();
+    verify(surface, never()).unlockCanvasAndPost(any());
+    verify(renderTarget, never()).scheduleFrame();
+
+    shadowOf(Looper.getMainLooper()).idle();
+
+    final InOrder inOrder = inOrder(surface, renderTarget);
+    inOrder.verify(surface).unlockCanvasAndPost(canvas);
+    inOrder.verify(renderTarget).scheduleFrame();
+  }
+
+  @Test
+  public void draw_twiceInOneTraversal_postsPreviousFrameBeforeLockingAgain() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas);
+    wrapper.draw(canvas);
+
+    verify(surface, times(2)).lockHardwareCanvas();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas);
+
+    shadowOf(Looper.getMainLooper()).idle();
+
+    verify(surface, times(2)).unlockCanvasAndPost(canvas);
+    verify(renderTarget, times(2)).scheduleFrame();
+  }
+
+  @Test
+  public void resizeRenderTarget_postsPendingFrameBeforeResizing() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas);
+    wrapper.resizeRenderTarget(200, 300);
+
+    final InOrder inOrder = inOrder(surface, renderTarget);
+    inOrder.verify(surface).unlockCanvasAndPost(canvas);
+    inOrder.verify(renderTarget).scheduleFrame();
+    inOrder.verify(renderTarget).resize(200, 300);
+
+    shadowOf(Looper.getMainLooper()).idle();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas);
+    verify(renderTarget, times(1)).scheduleFrame();
+  }
+
+  @Test
+  public void release_postsPendingFrame() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas);
+    wrapper.release();
+
+    final InOrder inOrder = inOrder(surface, renderTarget);
+    inOrder.verify(surface).unlockCanvasAndPost(canvas);
+    inOrder.verify(renderTarget).release();
+    verify(renderTarget, never()).scheduleFrame();
+
+    // Nothing is posted again after release.
+    shadowOf(Looper.getMainLooper()).idle();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas);
+  }
+
+  @Test
+  public void postPendingFrame_whenUnlockThrows_doesNotScheduleFrame() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas);
+    doThrow(new IllegalStateException("Surface released"))
+        .when(surface)
+        .unlockCanvasAndPost(canvas);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas);
+    shadowOf(Looper.getMainLooper()).idle();
+
+    verify(surface, times(1)).unlockCanvasAndPost(canvas);
+    verify(renderTarget, never()).scheduleFrame();
+  }
+
+  @Test
+  public void onWindowVisibilityChanged_withPendingFrame_flushesPendingFrameAndResumesCleanly() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas1 = mock(Canvas.class);
+    final Canvas canvas2 = mock(Canvas.class);
+    final Surface surface = mock(Surface.class);
+    when(surface.isValid()).thenReturn(true);
+    final PlatformViewRenderTarget renderTarget = mock(PlatformViewRenderTarget.class);
+    when(renderTarget.getSurface()).thenReturn(surface);
+    when(surface.lockHardwareCanvas()).thenReturn(canvas1, canvas2);
+    final PlatformViewWrapper wrapper = new PlatformViewWrapper(ctx, renderTarget);
+
+    wrapper.draw(canvas1);
+    verify(surface, never()).unlockCanvasAndPost(any());
+
+    // Backgrounding with a pending frame immediately unlocks and posts so no surface stays locked.
+    wrapper.onWindowVisibilityChanged(View.GONE);
+    verify(surface, times(1)).unlockCanvasAndPost(canvas1);
+    verify(renderTarget, times(1)).scheduleFrame();
+
+    // Idling the main looper does not re-post the already-flushed frame.
+    shadowOf(Looper.getMainLooper()).idle();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas1);
+    verify(renderTarget, times(1)).scheduleFrame();
+
+    // Resuming and drawing a new frame before release unlocks cleanly without stale callbacks.
+    wrapper.onWindowVisibilityChanged(View.VISIBLE);
+    wrapper.draw(canvas2);
+    wrapper.release();
+
+    verify(surface, times(1)).unlockCanvasAndPost(canvas2);
+    verify(renderTarget, times(1)).release();
+    shadowOf(Looper.getMainLooper()).idle();
+    verify(surface, times(1)).unlockCanvasAndPost(canvas2);
+    verify(renderTarget, times(1)).scheduleFrame();
+  }
+
+  @Test
+  public void draw_twoWrappersInSingleTraversal_postsBothFramesAfterTraversal() {
+    FlutterRenderer.debugDisableSurfaceClear = true;
+    final Canvas canvas1 = mock(Canvas.class);
+    final Surface surface1 = mock(Surface.class);
+    when(surface1.isValid()).thenReturn(true);
+    when(surface1.lockHardwareCanvas()).thenReturn(canvas1);
+    final PlatformViewRenderTarget renderTarget1 = mock(PlatformViewRenderTarget.class);
+    when(renderTarget1.getSurface()).thenReturn(surface1);
+
+    final Canvas canvas2 = mock(Canvas.class);
+    final Surface surface2 = mock(Surface.class);
+    when(surface2.isValid()).thenReturn(true);
+    when(surface2.lockHardwareCanvas()).thenReturn(canvas2);
+    final PlatformViewRenderTarget renderTarget2 = mock(PlatformViewRenderTarget.class);
+    when(renderTarget2.getSurface()).thenReturn(surface2);
+
+    final PlatformViewWrapper wrapper1 = new PlatformViewWrapper(ctx, renderTarget1);
+    final PlatformViewWrapper wrapper2 = new PlatformViewWrapper(ctx, renderTarget2);
+
+    wrapper1.draw(canvas1);
+    wrapper2.draw(canvas2);
+
+    verify(surface1, never()).unlockCanvasAndPost(any());
+    verify(surface2, never()).unlockCanvasAndPost(any());
+
+    shadowOf(Looper.getMainLooper()).idle();
+
+    verify(surface1, times(1)).unlockCanvasAndPost(canvas1);
+    verify(renderTarget1, times(1)).scheduleFrame();
+    verify(surface2, times(1)).unlockCanvasAndPost(canvas2);
+    verify(renderTarget2, times(1)).scheduleFrame();
+
+    wrapper1.release();
+    wrapper2.release();
+    shadowOf(Looper.getMainLooper()).idle();
+    verify(surface1, times(1)).unlockCanvasAndPost(canvas1);
+    verify(surface2, times(1)).unlockCanvasAndPost(canvas2);
   }
 
   @Test

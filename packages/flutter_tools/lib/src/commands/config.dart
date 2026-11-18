@@ -25,11 +25,12 @@ import '../ios/plist_parser.dart';
 import '../reporting/unified_analytics.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../version.dart';
 
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required this._androidContext,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this.featureFlags,
     this._verboseHelp = false,
     this._extensionManager,
@@ -421,6 +422,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
+    if (_toolContext.flutterVersion.channel == kUserBranch) {
+      return 'Analytics reporting is currently disabled when running from a feature branch.';
+    }
     return 'Analytics reporting is currently ${analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 

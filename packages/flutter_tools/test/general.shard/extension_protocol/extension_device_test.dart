@@ -5,13 +5,15 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
@@ -53,14 +55,16 @@ final class _StreamingTestDeviceService extends DeviceService {
     return <TargetDevice>[
       if (maxPolls == null || _getDevicesCallCount <= maxPolls)
         const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
           id: _primaryDeviceId,
           name: 'Primary Extension Device',
-          category: Category.desktop,
         ),
       const TargetDevice(
+        buildTarget: 'custom-linux-build',
+        category: Category.desktop,
         id: _secondaryDeviceId,
         name: 'Secondary Extension Device',
-        category: Category.desktop,
       ),
     ];
   }
@@ -70,6 +74,19 @@ final class _StreamingTestDeviceService extends DeviceService {
     required String deviceId,
     required ExtensionFlutterProject project,
   }) async => true;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async => false;
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async => false;
 
   @override
   Future<void> startLogStream({required String deviceId}) async {
@@ -98,6 +115,63 @@ final class _StreamingTestDeviceService extends DeviceService {
       DeviceService.deviceIdParam: deviceId,
     });
   }
+}
+
+final class _FakeExtensionBuildManager extends ExtensionBuildManager {
+  _FakeExtensionBuildManager({
+    required super.extensionManager,
+    required super.featureFlags,
+    required super.logger,
+    List<ExtensionBuildTarget>? targets,
+  }) : _targets =
+           targets ??
+           <ExtensionBuildTarget>[
+             ExtensionBuildTarget(
+               description: 'Custom Linux Build',
+               name: 'custom-linux-build',
+               outputDir: '{OUTPUT_DIR}/linux',
+               targetPlatform: 'linux-x64',
+             ),
+           ];
+
+  final List<ExtensionBuildTarget> _targets;
+
+  @override
+  Future<List<ExtensionBuildTarget>> getBuildTargets() async => _targets;
+
+  @override
+  Future<ExtensionBuildResult> build({
+    required BuildMode buildMode,
+    required Uri flutterRoot,
+    required String mainPath,
+    required Uri outputDir,
+    required Uri projectRoot,
+    required Map<String, String> resolvedArtifacts,
+    required String targetName,
+  }) async => const ExtensionBuildResult(success: true);
+}
+
+ExtensionBuildManager _createBuildManager({
+  required Logger logger,
+  ExtensionManager? extensionManager,
+  List<ExtensionBuildTarget>? targets,
+}) {
+  final ExtensionManager manager =
+      extensionManager ??
+      ExtensionManager(
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+  if (extensionManager == null) {
+    addTearDown(manager.dispose);
+  }
+  return _FakeExtensionBuildManager(
+    extensionManager: manager,
+    featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+    logger: logger,
+    targets: targets,
+  );
 }
 
 void main() {
@@ -137,8 +211,10 @@ void main() {
       expect(targetDevices, hasLength(2));
 
       final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
+        fileSystem: MemoryFileSystem.test(),
         logger: logger,
         targetDevice: targetDevices.first,
       );
@@ -200,8 +276,10 @@ void main() {
         final client = ExtensionDeviceClient(conn, logger: logger);
         final List<TargetDevice> targetDevices = await client.getDevices();
         final device = ExtensionBackedDevice(
+          buildManager: _createBuildManager(logger: logger),
           connection: conn,
           deviceService: client,
+          fileSystem: MemoryFileSystem.test(),
           logger: logger,
           targetDevice: targetDevices.firstWhere((TargetDevice d) => d.id == _primaryDeviceId),
         );
@@ -436,8 +514,10 @@ void main() {
       final client = ExtensionDeviceClient(conn, logger: logger);
       final List<TargetDevice> targetDevices = await client.getDevices();
       final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
+        fileSystem: MemoryFileSystem.test(),
         logger: logger,
         targetDevice: targetDevices.first,
       );
@@ -490,7 +570,12 @@ void main() {
       );
       addTearDown(manager.dispose);
 
-      final discovery = ExtensionDevices(extensionManager: manager, logger: logger);
+      final discovery = ExtensionDevices(
+        extensionBuildManager: _createBuildManager(extensionManager: manager, logger: logger),
+        extensionManager: manager,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+      );
       addTearDown(discovery.dispose);
 
       final List<Device> firstPoll = await discovery.pollingGetDevices();
@@ -527,5 +612,164 @@ void main() {
       expect(stopEvent[DeviceService.deviceIdParam], equals(_primaryDeviceId));
       expect(await primaryFirst.getLogReader(), isA<NoOpDeviceLogReader>());
     });
+
+    testWithoutContext(
+      'ExtensionBackedDevice.startApp fails when no extension provides buildTarget',
+      () async {
+        final eventPort = ReceivePort();
+        addTearDown(eventPort.close);
+        final SendPort eventSendPort = eventPort.sendPort;
+
+        void entryPoint(SendPort sendPort) {
+          unawaited(
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _StreamingTestDeviceService(eventSendPort: eventSendPort),
+            ]),
+          );
+        }
+
+        final ExtensionConnection conn = await ExtensionConnection.spawn(
+          entryPoint,
+          logger: logger,
+        );
+        addTearDown(conn.dispose);
+
+        final client = ExtensionDeviceClient(conn, logger: logger);
+        final device = ExtensionBackedDevice(
+          buildManager: _createBuildManager(
+            logger: logger,
+            targets: const <ExtensionBuildTarget>[],
+          ),
+          connection: conn,
+          deviceService: client,
+          fileSystem: MemoryFileSystem.test(),
+          logger: logger,
+          targetDevice: const TargetDevice(
+            buildTarget: 'custom-linux-build',
+            category: Category.desktop,
+            id: 'test_device',
+            name: 'Test Device',
+          ),
+        );
+        addTearDown(device.dispose);
+
+        final LaunchResult result = await device.startApp(
+          null,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        expect(result.started, isFalse);
+        expect(
+          logger.errorText,
+          contains('No tool extension provides build target "custom-linux-build" for Test Device.'),
+        );
+      },
+    );
+
+    testWithoutContext('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
+      void domainErrorEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _DomainErrorDeviceService(),
+          ], extensionName: 'custom_device_ext'),
+        );
+      }
+
+      final ExtensionConnection conn = await ExtensionConnection.spawn(
+        domainErrorEntryPoint,
+        logger: logger,
+      );
+      addTearDown(conn.dispose);
+
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final bool launched = await client.launchApp(
+        debuggingOptions: const ExtensionDebuggingOptions(
+          buildMode: .debug,
+          debuggingEnabled: true,
+        ),
+        deviceId: _primaryDeviceId,
+        executableUri: Uri.file('/project/build/app'),
+      );
+      expect(launched, isFalse);
+      expect(
+        logger.errorText,
+        contains('Extension "custom_device_ext": Launch failed: device disconnected.'),
+      );
+
+      logger.clear();
+      final bool stopped = await client.stopApp(deviceId: _primaryDeviceId);
+      expect(stopped, isFalse);
+      expect(
+        logger.errorText,
+        contains('Extension "custom_device_ext": Stop failed: app not running.'),
+      );
+    });
+
+    testWithoutContext('ExtensionDevices.pollingGetDevices reports ToolExtensionException via getDiagnostics without warning on every poll', () async {
+      void domainErrorEntryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _DomainErrorDeviceService(),
+          ], extensionName: 'custom_device_ext'),
+        );
+      }
+
+      final manager = ExtensionManager(
+        entryPoints: <ExtensionEntryPoint>[domainErrorEntryPoint],
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+      );
+      addTearDown(manager.dispose);
+
+      final discovery = ExtensionDevices(
+        extensionBuildManager: _createBuildManager(extensionManager: manager, logger: logger),
+        extensionManager: manager,
+        fileSystem: MemoryFileSystem.test(),
+        logger: logger,
+      );
+      addTearDown(discovery.dispose);
+
+      expect(await discovery.pollingGetDevices(), isEmpty);
+      expect(logger.warningText, isEmpty);
+      expect(await discovery.getDiagnostics(), const <String>[
+        'Extension "custom_device_ext": Device discovery failed: daemon not running.',
+      ]);
+    });
   });
+}
+
+final class _DomainErrorDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async {
+    throw const ToolExtensionException('Device discovery failed: daemon not running.');
+  }
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
+
+  @override
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  }) async {
+    throw const ToolExtensionException('Launch failed: device disconnected.');
+  }
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<bool> stopApp({required String deviceId}) async {
+    throw const ToolExtensionException('Stop failed: app not running.');
+  }
+
+  @override
+  Future<void> startLogStream({required String deviceId}) async {}
+
+  @override
+  Future<void> stopLogStream({required String deviceId}) async {}
 }

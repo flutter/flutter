@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -47,6 +48,7 @@ FlutterProject _setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    config: FakeConfig(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }
@@ -109,6 +111,7 @@ void main() {
   testWithoutContext('CustomDevice defaults', () async {
     final device = CustomDevice(
       config: testConfig,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -160,6 +163,7 @@ void main() {
               fileSystem: fs,
               directory: dir,
               logger: BufferLogger.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             ),
           ),
         ).devices(),
@@ -189,6 +193,7 @@ void main() {
               fileSystem: fs,
               directory: dir,
               logger: BufferLogger.test(),
+              cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             ),
           ),
         ).devices(),
@@ -218,6 +223,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ),
       ).devices(),
@@ -253,6 +259,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ),
       );
@@ -290,6 +297,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ),
       );
@@ -318,6 +326,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ),
     );
@@ -349,6 +358,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: logger,
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ),
     );
@@ -366,6 +376,7 @@ void main() {
       final logger = BufferLogger.test();
       final device = CustomDevice(
         config: testConfig,
+        featureFlags: TestFeatureFlags(),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
@@ -398,6 +409,7 @@ void main() {
     expect(
       CustomDevice(
         config: testConfig,
+        featureFlags: TestFeatureFlags(),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
@@ -415,6 +427,7 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -488,6 +501,7 @@ void main() {
         name: 'testname',
         device: CustomDevice(
           config: testConfig,
+          featureFlags: TestFeatureFlags(),
           analytics: const NoOpAnalytics(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const NoOpBuildTargets(),
@@ -528,6 +542,7 @@ void main() {
       name: 'testname',
       device: CustomDevice(
         config: testConfigNonForwarding,
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),
@@ -594,6 +609,7 @@ void main() {
           fileSystem: fs,
           directory: configFileDir,
           logger: BufferLogger.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ),
     );
@@ -688,6 +704,7 @@ void main() {
     // finally start actually testing things
     final device = CustomDevice(
       config: config,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -725,6 +742,7 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig,
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -753,6 +771,7 @@ void main() {
 
     final device = CustomDevice(
       config: testConfig.copyWith(explicitScreenshotCommand: true),
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),
@@ -771,6 +790,7 @@ void main() {
   testWithoutContext('CustomDevice returns correct target platform', () async {
     final device = CustomDevice(
       config: testConfig.copyWith(platform: TargetPlatform.linux_x64),
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
       analytics: const NoOpAnalytics(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       buildTargets: const NoOpBuildTargets(),

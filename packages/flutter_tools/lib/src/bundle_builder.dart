@@ -6,6 +6,7 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'android/android_sdk.dart';
 import 'artifacts.dart';
 import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
@@ -24,8 +25,10 @@ import 'cache.dart';
 import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart' show FeatureFlags;
 import 'project.dart';
 import 'version.dart';
+import 'windows/visual_studio.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
@@ -33,12 +36,16 @@ class BundleBuilder {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._toolContext,
+    this._androidSdkBuilder,
   });
 
   final Analytics _analytics;
+  final AndroidSdk? Function()? _androidSdkBuilder;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   /// Builds the bundle for the given target platform.
@@ -61,12 +68,13 @@ class BundleBuilder {
       :Cache cache,
       :Config config,
       :FileSystem fs,
+      :FlutterProjectFactory projectFactory,
       :FlutterVersion flutterVersion,
       :Logger logger,
       platform: Platform hostPlatform,
       :ProcessManager processManager,
     ) = _toolContext;
-    project ??= FlutterProject.current();
+    project ??= projectFactory.fromDirectory(fs.currentDirectory);
     mainPath ??= defaultMainPath(fs);
     depfilePath ??= defaultDepfilePath(config: config, fileSystem: fs);
     assetDirPath ??= getAssetBuildDirectory(config, fs);
@@ -79,7 +87,7 @@ class BundleBuilder {
       outputDir: fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
       cacheDir: cache.getRoot(),
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: fs.directory(cache.flutterRoot),
       engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
@@ -93,7 +101,12 @@ class BundleBuilder {
       logger: logger,
       processManager: processManager,
       analytics: _analytics,
+      androidSdkBuilder: _androidSdkBuilder,
+      featureFlags: _featureFlags,
       platform: hostPlatform,
+      projectFactory: projectFactory,
+      visualStudio: VisualStudio(toolContext: _toolContext),
+      xcode: null,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
@@ -134,12 +147,35 @@ Future<AssetBundle?> buildAssets({
   required String manifestPath,
   required String packageConfigPath,
   required TargetPlatform targetPlatform,
+  required ToolContext toolContext,
   String? flavor,
 }) async {
+  final ToolContext(
+    :Cache cache,
+    :FileSystem fs,
+    :Logger logger,
+    :Platform platform,
+    :FlutterProjectFactory projectFactory,
+  ) = toolContext;
+  final FlutterProject flutterProject;
+  try {
+    flutterProject = projectFactory.fromDirectory(fs.file(manifestPath).parent);
+  } on Exception catch (e) {
+    logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+    logger.printError('$e');
+    return null;
+  }
+
   // Build the asset bundle.
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  final assetBundle = ManifestAssetBundle(
+    logger: logger,
+    fileSystem: fs,
+    platform: platform,
+    flutterRoot: cache.flutterRoot,
+  );
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
+    flutterProject: flutterProject,
     packageConfigPath: packageConfigPath,
     targetPlatform: targetPlatform,
     flavor: flavor,

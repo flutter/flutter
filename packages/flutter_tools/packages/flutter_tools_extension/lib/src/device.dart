@@ -8,14 +8,17 @@ import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
-/// Extension service interface for retrieving target devices and streaming
-/// device logs.
+/// Extension service interface for retrieving target devices, managing
+/// application execution, and streaming device logs.
 abstract base class DeviceService extends ToolExtensionService {
   /// Service namespace identifier for device services.
   static const String serviceNamespace = 'device';
 
   static const String _getDevicesRpcMethod = 'getDevices';
   static const String _isSupportedForProjectRpcMethod = 'isSupportedForProject';
+  static const String _launchAppRpcMethod = 'launchApp';
+  static const String _getVmServiceUriRpcMethod = 'getVmServiceUri';
+  static const String _stopAppRpcMethod = 'stopApp';
   static const String _startLogStreamRpcMethod = 'startLogStream';
   static const String _stopLogStreamRpcMethod = 'stopLogStream';
 
@@ -25,6 +28,15 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC method identifier to query whether a target device is supported for a project.
   static const String isSupportedForProjectMethod =
       '$serviceNamespace.$_isSupportedForProjectRpcMethod';
+
+  /// RPC method identifier to launch an application on a target device.
+  static const String launchAppMethod = '$serviceNamespace.$_launchAppRpcMethod';
+
+  /// RPC method identifier to retrieve the VM service URI for a running application.
+  static const String getVmServiceUriMethod = '$serviceNamespace.$_getVmServiceUriRpcMethod';
+
+  /// RPC method identifier to stop a running application on a target device.
+  static const String stopAppMethod = '$serviceNamespace.$_stopAppRpcMethod';
 
   /// RPC method identifier to start streaming log output for a target device.
   static const String startLogStreamMethod = '$serviceNamespace.$_startLogStreamRpcMethod';
@@ -42,6 +54,15 @@ abstract base class DeviceService extends ToolExtensionService {
   /// RPC parameter key for the serialized [ExtensionFlutterProject].
   static const String projectParam = 'project';
 
+  /// RPC parameter key for the executable URI to launch.
+  static const String executableUriParam = 'executableUri';
+
+  /// RPC parameter key for debugging options.
+  static const String debuggingOptionsParam = 'debuggingOptions';
+
+  /// RPC response key for the VM service URI.
+  static const String vmServiceUriKey = 'vmServiceUri';
+
   /// JSON key for the log line text in [logEntryNotificationMethod]
   /// notifications.
   static const String lineKey = 'line';
@@ -57,6 +78,32 @@ abstract base class DeviceService extends ToolExtensionService {
     required String deviceId,
     required ExtensionFlutterProject project,
   });
+
+  /// Launches the application at [executableUri] on the device with [deviceId]
+  /// using the given [debuggingOptions].
+  ///
+  /// [executableUri] is guaranteed to be an absolute `file:` URI pointing to
+  /// the built application binary or bundle. Returns `true` once the
+  /// application process has been started, or `false` if launching failed.
+  Future<bool> launchApp({
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+  });
+
+  /// Returns the VM Service URI for a running application on [deviceId].
+  ///
+  /// Called by the host tool after [launchApp] succeeds when
+  /// [ExtensionDebuggingOptions.debuggingEnabled] is `true`. Implementations
+  /// may await VM Service discovery from the running process before returning,
+  /// or return `null` if the process exits or VM Service discovery fails.
+  Future<Uri?> getVmServiceUri({required String deviceId});
+
+  /// Stops any running application on [deviceId].
+  ///
+  /// Returns `true` if a running application was stopped, or `false` if no
+  /// application was running on [deviceId] or stopping it failed.
+  Future<bool> stopApp({required String deviceId});
 
   /// Starts streaming log output for the device identified by [deviceId].
   ///
@@ -87,6 +134,9 @@ abstract base class DeviceService extends ToolExtensionService {
     return <String, ExtensionRpcHandler>{
       _getDevicesRpcMethod: _getDevicesRpc,
       _isSupportedForProjectRpcMethod: _isSupportedForProjectRpc,
+      _launchAppRpcMethod: _launchAppRpc,
+      _getVmServiceUriRpcMethod: _getVmServiceUriRpc,
+      _stopAppRpcMethod: _stopAppRpc,
       _startLogStreamRpcMethod: _startLogStreamRpc,
       _stopLogStreamRpcMethod: _stopLogStreamRpc,
     };
@@ -101,10 +151,9 @@ abstract base class DeviceService extends ToolExtensionService {
   }
 
   Future<bool> _isSupportedForProjectRpc(Map<String, Object?> params) async {
-    final String deviceId;
+    final String deviceId = _parseDeviceId(params);
     final ExtensionFlutterProject project;
     try {
-      deviceId = params.requiredField<String>(deviceIdParam);
       final Map<String, Object?> projectMap = params.requiredField<Map<String, Object?>>(
         projectParam,
       );
@@ -126,6 +175,56 @@ abstract base class DeviceService extends ToolExtensionService {
       throw RpcException.invalidParams('Parameter "$deviceIdParam" must not be empty.');
     }
     return deviceId;
+  }
+
+  Future<bool> _launchAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final String executableUriStr;
+    final Map<String, Object?> optionsMap;
+    try {
+      executableUriStr = params.requiredField<String>(executableUriParam);
+      optionsMap = params.requiredField<Map<String, Object?>>(debuggingOptionsParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    final Uri executableUri = _parseExecutableUri(executableUriStr);
+    final ExtensionDebuggingOptions debuggingOptions = _parseDebuggingOptions(optionsMap);
+    return launchApp(
+      debuggingOptions: debuggingOptions,
+      deviceId: deviceId,
+      executableUri: executableUri,
+    );
+  }
+
+  static Uri _parseExecutableUri(String executableUriStr) {
+    final Uri? uri = Uri.tryParse(executableUriStr);
+    if (uri == null || !uri.isValidFileUri) {
+      throw RpcException.invalidParams(
+        'Invalid "$executableUriParam" parameter for $launchAppMethod: must be an absolute "file:" URI.',
+      );
+    }
+    return uri;
+  }
+
+  static ExtensionDebuggingOptions _parseDebuggingOptions(Map<String, Object?> options) {
+    try {
+      return ExtensionDebuggingOptions.fromJson(options);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(
+        'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod: ${e.message}',
+      );
+    }
+  }
+
+  Future<Map<String, Object?>> _getVmServiceUriRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    final Uri? uri = await getVmServiceUri(deviceId: deviceId);
+    return <String, Object?>{vmServiceUriKey: uri?.toString()};
+  }
+
+  Future<bool> _stopAppRpc(Map<String, Object?> params) async {
+    final String deviceId = _parseDeviceId(params);
+    return stopApp(deviceId: deviceId);
   }
 
   Future<Object?> _startLogStreamRpc(Map<String, Object?> params) async {

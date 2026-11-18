@@ -156,23 +156,6 @@ $view input:autofill {
   domDocument.head?.append(style);
 }
 
-/// Hides a non-focused autofill proxy from assistive technology, but only when
-/// semantics is on.
-///
-/// With semantics on the field has a real semantics node, so the proxy is a
-/// duplicate and screen readers should skip it. With semantics off there is no
-/// other representation of the field, so hiding the proxy hides nothing useful
-/// and costs a great deal: password managers reject an `aria-hidden` input
-/// outright, and one that is never a candidate is one they never fill.
-void _hideFromAssistiveTechnology(DomHTMLElement element) {
-  if (EngineSemantics.instance.semanticsEnabled) {
-    element.setAttribute('aria-hidden', 'true');
-  } else {
-    // Elements are reused across connections, so clear a stale attribute.
-    element.removeAttribute('aria-hidden');
-  }
-}
-
 /// Sets attributes to hide autofill elements.
 ///
 /// These style attributes are constant throughout the life time of an input
@@ -554,13 +537,13 @@ class EngineAutofillForm {
       // The focused field stays interactive (its tabIndex is set in
       // _reuseDormantAutofillElementOrCreate); the others are kept discoverable
       // for password managers but out of the tab order. See
-      // [_hideFromAssistiveTechnology] for why they are only hidden from the
+      // [_hideSyntheticElementFromAssistiveTechnology] for why they are only hidden from the
       // accessibility tree in semantics mode.
       if (isFocused) {
         entry.value.removeAttribute('aria-hidden');
       } else {
         entry.value.tabIndex = -1;
-        _hideFromAssistiveTechnology(entry.value);
+        _hideSyntheticElementFromAssistiveTechnology(entry.value);
       }
     }
 
@@ -690,8 +673,32 @@ class EngineAutofillForm {
       shouldHideElement: !_isWebKit,
       shouldDisablePointerEvents: _isWebKit,
     );
+    _hideSyntheticElementFromAssistiveTechnology(synthetic);
     elements[id] = synthetic;
     formElement!.append(synthetic);
+  }
+
+  /// Hides a synthetic autofill element from screen readers and keyboard
+  /// navigation in semantics mode.
+  ///
+  /// Synthetic elements exist for the browser's autofill and form submission.
+  /// The semantics tree already exposes each field through its own element, so
+  /// a synthetic copy would show up as an extra, unlabeled control, and the
+  /// dormant form keeps it in the page for the rest of the session. Browser
+  /// autofill does not read ARIA, so credential save and autofill keep working
+  /// through these elements.
+  ///
+  /// Without semantics, password manager extensions fill these elements, and
+  /// some of them skip elements hidden from assistive technology, so they are
+  /// left untouched.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/195174
+  void _hideSyntheticElementFromAssistiveTechnology(DomHTMLElement element) {
+    if (!associateFocusedElementByAttribute) {
+      return;
+    }
+    element.setAttribute('aria-hidden', 'true');
+    element.tabIndex = -1;
   }
 
   /// Makes the form dormant.
@@ -832,9 +839,9 @@ class EngineAutofillForm {
         );
         // Keep the proxy discoverable to password managers (which scan the DOM)
         // but out of the tab order, so keyboard Tab does not land on this
-        // invisible field. See [_hideFromAssistiveTechnology].
+        // invisible field.
         htmlElement.tabIndex = -1;
-        _hideFromAssistiveTechnology(htmlElement);
+        _hideSyntheticElementFromAssistiveTechnology(htmlElement);
         // The proxy has to hit-test back to itself for a manager to consider it
         // fillable, which also makes it a target for real taps. Suppress their
         // default action: a manager focuses a field with .focus(), which fires no
@@ -855,7 +862,7 @@ class EngineAutofillForm {
     // The -1 tab index value makes this element not reachable by keyboard.
     //
     // aria-hidden is unconditional, unlike the fields' semantics-gated
-    // [_hideFromAssistiveTechnology]: the button is engine plumbing that only
+    // [_hideSyntheticElementFromAssistiveTechnology]: the button is engine plumbing that only
     // [saveForms] ever clicks, programmatically, and it is not a fill
     // candidate, so the manager objection to aria-hidden inputs does not apply.
     // Without it, a screen reader's form-controls listing announces a Submit
