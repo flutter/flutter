@@ -365,6 +365,10 @@ static void fl_accessible_node_get_extents(AtkComponent* component,
         FL_ACCESSIBLE_NODE_GET_PRIVATE(current);
     transform_rect(&left, &top, &right, &bottom, current_priv->transform);
 
+    if (coord_type == ATK_XY_PARENT) {
+      break;
+    }
+
     g_autoptr(AtkObject) parent =
         ATK_OBJECT(g_weak_ref_get(&current_priv->parent));
     if (parent == nullptr) {

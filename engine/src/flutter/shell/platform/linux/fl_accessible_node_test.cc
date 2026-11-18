@@ -458,16 +458,24 @@ TEST_F(FlAccessibleNodeTest, ParentRectOriginDoesNotOffsetChildExtents) {
 
   gint x = 0, y = 0, width = 0, height = 0;
   atk_component_get_extents(ATK_COMPONENT(parent), &x, &y, &width, &height,
-                            ATK_XY_PARENT);
+                            ATK_XY_WINDOW);
   EXPECT_EQ(x, 10);
   EXPECT_EQ(y, 150);
   EXPECT_EQ(width, 200);
   EXPECT_EQ(height, 200);
 
   atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
-                            ATK_XY_PARENT);
+                            ATK_XY_WINDOW);
   EXPECT_EQ(x, 0);
   EXPECT_EQ(y, 200);
+  EXPECT_EQ(width, 200);
+  EXPECT_EQ(height, 100);
+
+  // ATK_XY_PARENT returns coordinates relative to the immediate parent.
+  atk_component_get_extents(ATK_COMPONENT(child), &x, &y, &width, &height,
+                            ATK_XY_PARENT);
+  EXPECT_EQ(x, 0);
+  EXPECT_EQ(y, 100);
   EXPECT_EQ(width, 200);
   EXPECT_EQ(height, 100);
 }

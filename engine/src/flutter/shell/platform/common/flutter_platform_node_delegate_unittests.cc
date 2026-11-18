@@ -746,12 +746,25 @@ TEST(FlutterPlatformNodeDelegateTest,
   auto parent_node = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
   ui::AXOffscreenResult parent_result;
   gfx::Rect parent_bounds = parent_node->GetBoundsRect(
-      ui::AXCoordinateSystem::kScreenDIPs, ui::AXClippingBehavior::kUnclipped,
+      ui::AXCoordinateSystem::kScreenDIPs, ui::AXClippingBehavior::kClipped,
       &parent_result);
   EXPECT_EQ(parent_bounds.x(), 20);
   EXPECT_EQ(parent_bounds.y(), 30);
   EXPECT_EQ(parent_bounds.width(), 50);
   EXPECT_EQ(parent_bounds.height(), 40);
+  EXPECT_EQ(parent_result, ui::AXOffscreenResult::kOnscreen);
+
+  // Sized child under empty parent is not clipped to the parent's 0x0 bounds.
+  auto sized_child_node = bridge->GetFlutterPlatformNodeDelegateFromID(3).lock();
+  ui::AXOffscreenResult child_result;
+  gfx::Rect child_bounds = sized_child_node->GetBoundsRect(
+      ui::AXCoordinateSystem::kScreenDIPs, ui::AXClippingBehavior::kClipped,
+      &child_result);
+  EXPECT_EQ(child_bounds.x(), 20);
+  EXPECT_EQ(child_bounds.y(), 30);
+  EXPECT_EQ(child_bounds.width(), 50);
+  EXPECT_EQ(child_bounds.height(), 40);
+  EXPECT_EQ(child_result, ui::AXOffscreenResult::kOnscreen);
 
   // Empty leaf node directly queried falls back to nearest non-empty ancestor.
   auto empty_leaf_node = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
@@ -764,6 +777,82 @@ TEST(FlutterPlatformNodeDelegateTest,
   EXPECT_EQ(leaf_bounds.width(), 800);
   EXPECT_EQ(leaf_bounds.height(), 600);
   EXPECT_EQ(leaf_result, ui::AXOffscreenResult::kOffscreen);
+}
+
+TEST(FlutterPlatformNodeDelegateTest,
+     offscreenOnOneAxisPartiallyOverlappingOtherAxis) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+
+  FlutterSemanticsNode2 root;
+  root.id = 0;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.child_count = 1;
+  root.flags2 = &flags;
+  int32_t root_children[] = {1};
+  root.children_in_traversal_order = root_children;
+  root.custom_accessibility_actions_count = 0;
+  root.identifier = "";
+  root.rect = {0, 0, 800, 600};
+  root.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+
+  // Parent: (10, 100) to (110, 200).
+  FlutterSemanticsNode2 parent;
+  parent.id = 1;
+  parent.label = "parent";
+  parent.hint = "";
+  parent.value = "";
+  parent.increased_value = "";
+  parent.decreased_value = "";
+  parent.tooltip = "";
+  parent.child_count = 1;
+  parent.flags2 = &flags;
+  int32_t parent_children[] = {2};
+  parent.children_in_traversal_order = parent_children;
+  parent.custom_accessibility_actions_count = 0;
+  parent.identifier = "";
+  parent.rect = {10, 100, 110, 200};
+  parent.transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(parent);
+
+  // Child: (-10, 200) to (30, 250) in parent space.
+  // Overlaps X in [10, 30], completely offscreen below Y [200, 250].
+  // Clipped to (10, 199, 20, 1).
+  FlutterSemanticsNode2 child;
+  child.id = 2;
+  child.label = "child";
+  child.hint = "";
+  child.value = "";
+  child.increased_value = "";
+  child.decreased_value = "";
+  child.tooltip = "";
+  child.child_count = 0;
+  child.flags2 = &flags;
+  child.custom_accessibility_actions_count = 0;
+  child.identifier = "";
+  child.rect = {0, 0, 40, 50};
+  child.transform = {1, 0, -10, 0, 1, 200, 0, 0, 1};
+  bridge->AddFlutterSemanticsNodeUpdate(child);
+
+  bridge->CommitUpdates();
+
+  auto child_node = bridge->GetFlutterPlatformNodeDelegateFromID(2).lock();
+  ui::AXOffscreenResult result;
+  gfx::Rect bounds = child_node->GetBoundsRect(
+      ui::AXCoordinateSystem::kScreenDIPs, ui::AXClippingBehavior::kClipped,
+      &result);
+  EXPECT_EQ(bounds.x(), 10);
+  EXPECT_EQ(bounds.y(), 199);
+  EXPECT_EQ(bounds.width(), 20);
+  EXPECT_EQ(bounds.height(), 1);
+  EXPECT_EQ(result, ui::AXOffscreenResult::kOffscreen);
 }
 
 }  // namespace testing

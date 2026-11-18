@@ -696,7 +696,7 @@ void ClipToContainerBounds(gfx::RectF& bounds,
                            const gfx::RectF& container_bounds,
                            bool clip_bounds,
                            bool& offscreen) {
-  if (bounds.IsEmpty()) {
+  if (bounds.IsEmpty() || container_bounds.IsEmpty()) {
     return;
   }
   gfx::RectF intersection = bounds;
@@ -718,6 +718,11 @@ void ClipToContainerBounds(gfx::RectF& bounds,
   } else if (bounds.right() <= container_bounds.x()) {
     bounds.set_x(container_bounds.x());
     bounds.set_width(1);
+  } else {
+    float left = std::max(bounds.x(), container_bounds.x());
+    float right = std::min(bounds.right(), container_bounds.right());
+    bounds.set_x(left);
+    bounds.set_width(right - left);
   }
   if (bounds.y() >= container_bounds.bottom()) {
     bounds.set_y(std::max(container_bounds.y(), container_bounds.bottom() - 1));
@@ -725,6 +730,11 @@ void ClipToContainerBounds(gfx::RectF& bounds,
   } else if (bounds.bottom() <= container_bounds.y()) {
     bounds.set_y(container_bounds.y());
     bounds.set_height(1);
+  } else {
+    float top = std::max(bounds.y(), container_bounds.y());
+    float bottom = std::min(bounds.bottom(), container_bounds.bottom());
+    bounds.set_y(top);
+    bounds.set_height(bottom - top);
   }
 }
 
