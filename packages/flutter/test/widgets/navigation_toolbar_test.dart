@@ -50,7 +50,9 @@ void main() {
   for (final TextDirection textDirection in TextDirection.values) {
     for (final middleWidth in <double>[
       112.0, // Centering leaves the required 4-pixel trailing gap.
-      116.0, // Centering leaves only a 2-pixel trailing gap.
+      // Centering leaves a 2-pixel gap. The middle should move 2 pixels toward
+      // the leading widget to leave the required 4-pixel gap.
+      116.0,
       120.0, // The centered middle touches the trailing widget.
       124.0, // The centered middle overlaps the trailing widget by 2 pixels.
     ]) {
