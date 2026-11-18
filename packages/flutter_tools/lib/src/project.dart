@@ -695,6 +695,7 @@ class FlutterProject {
     required FeatureFlags featureFlags,
     required gradle.GradleUtils? gradleUtils,
     required PlistParser plistParser,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required bool releaseMode,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
@@ -715,6 +716,7 @@ class FlutterProject {
       linuxPlatform: featureFlags.isLinuxEnabled && linux.existsSync(),
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
       plistParser: plistParser,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
@@ -739,6 +741,7 @@ class FlutterProject {
     required FeatureFlags featureFlags,
     required gradle.GradleUtils? gradleUtils,
     required PlistParser plistParser,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required bool releaseMode,
     bool androidPlatform = false,
@@ -790,6 +793,7 @@ class FlutterProject {
       await android.ensureReadyForPlatformSpecificTooling(
         toolContext: toolContext,
         gradleUtils: gradleUtils,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         deprecationBehavior: deprecationBehavior,
       );
@@ -797,6 +801,7 @@ class FlutterProject {
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling(
         plistParser: plistParser,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
       );
@@ -1294,6 +1299,7 @@ See the link below for more information:
   Future<void> ensureReadyForPlatformSpecificTooling({
     required ToolContext toolContext,
     required gradle.GradleUtils? gradleUtils,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
@@ -1308,6 +1314,7 @@ See the link below for more information:
         fileSystem: fs,
         gradleUtils: gradleUtils,
         logger: logger,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
       );
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -1317,6 +1324,7 @@ See the link below for more information:
           ephemeralDirectory,
           fileSystem: fs,
           logger: logger,
+          templatePathProvider: templatePathProvider,
           templateRenderer: templateRenderer,
         );
         await _overwriteFromTemplate(
@@ -1324,6 +1332,7 @@ See the link below for more information:
           ephemeralDirectory,
           fileSystem: fs,
           logger: logger,
+          templatePathProvider: templatePathProvider,
           templateRenderer: templateRenderer,
         );
       }
@@ -1354,6 +1363,7 @@ See the link below for more information:
     required FileSystem fileSystem,
     required gradle.GradleUtils? gradleUtils,
     required Logger logger,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
   }) async {
     ErrorHandlingFileSystem.deleteIfExists(ephemeralDirectory, recursive: true);
@@ -1362,6 +1372,7 @@ See the link below for more information:
       ephemeralDirectory,
       fileSystem: fileSystem,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
     );
     await _overwriteFromTemplate(
@@ -1369,6 +1380,7 @@ See the link below for more information:
       ephemeralDirectory,
       fileSystem: fileSystem,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
     );
     gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
@@ -1379,6 +1391,7 @@ See the link below for more information:
     Directory target, {
     required FileSystem fileSystem,
     required Logger logger,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
   }) async {
     final Template template = await Template.fromName(
@@ -1386,6 +1399,7 @@ See the link below for more information:
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
     );
     final String androidIdentifier =

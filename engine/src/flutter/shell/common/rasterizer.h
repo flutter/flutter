@@ -7,6 +7,7 @@
 
 #include <future>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <unordered_map>
 
@@ -584,7 +585,8 @@ class Rasterizer final : public SnapshotDelegate,
 
   //----------------------------------------------------------------------------
   /// @brief      Disables the thread merger if the external view embedder
-  ///             supports dynamic thread merging.
+  ///             supports dynamic thread merging, or ensures a merger created
+  ///             later by `Rasterizer::Setup` starts disabled.
   ///
   /// @attention  This method is thread-safe. When the thread merger is
   ///             disabled, the raster task queue will continue to run in the
@@ -812,7 +814,12 @@ class Rasterizer final : public SnapshotDelegate,
   fml::closure next_frame_callback_;
   bool user_override_resource_cache_bytes_ = false;
   std::optional<size_t> max_cache_bytes_;
+  // Guards cross-thread access to `raster_thread_merger_` and
+  // `thread_merger_disabled_` (raster-thread reads of `raster_thread_merger_`
+  // are unlocked since `Setup` on the raster thread is the sole writer).
+  std::mutex raster_thread_merger_mutex_;
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
+  bool thread_merger_disabled_ = false;
   std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
   std::unique_ptr<SnapshotController> snapshot_controller_;
 
