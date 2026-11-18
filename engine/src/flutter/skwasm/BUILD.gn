@@ -37,6 +37,7 @@ template("skwasm_variant") {
       "text/text_style.cc",
       "text/text_types.h",
       "vertices.cc",
+      "wasm_worker_semaphore.cc",
       "wrappers.h",
     ]
 
@@ -44,6 +45,7 @@ template("skwasm_variant") {
 
     ldflags = [
       "-std=c++20",
+      "-Wl,--allow-multiple-definition",
       "-lGL",
       "-sUSE_WEBGL2=1",
       "-sMAX_WEBGL_VERSION=2",
