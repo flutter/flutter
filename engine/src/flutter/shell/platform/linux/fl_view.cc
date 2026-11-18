@@ -399,6 +399,8 @@ static void grab_notify_cb(FlView* self, gboolean was_grabbed) {
 }
 
 // Signal handler for GtkWidget::configure-event on the toplevel window.
+// Used for X11 window drags. Wayland does not expose window position, so drag
+// start there is handled via leave-notify with GDK_CROSSING_UNGRAB instead.
 static gboolean window_configure_event_cb(FlView* self,
                                           GdkEventConfigure* event) {
   if (!self->window_position_set) {
@@ -488,6 +490,12 @@ static gboolean enter_notify_event_cb(FlView* self,
 // Signal handler for GtkWidget::leave-notify-event
 static gboolean leave_notify_event_cb(FlView* self,
                                       GdkEventCrossing* crossing_event) {
+  // On Wayland, starting a window drag is observed as leave-notify with
+  // GDK_CROSSING_UNGRAB. X11 uses configure-event for that case instead.
+  if (crossing_event->mode == GDK_CROSSING_UNGRAB) {
+    fl_engine_dismiss_context_menu(self->engine);
+    return FALSE;
+  }
   if (crossing_event->mode != GDK_CROSSING_NORMAL) {
     return FALSE;
   }

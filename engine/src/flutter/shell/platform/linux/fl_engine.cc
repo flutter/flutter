@@ -1627,9 +1627,6 @@ void fl_engine_request_app_exit(FlEngine* self) {
 
 void fl_engine_dismiss_context_menu(FlEngine* self) {
   g_return_if_fail(FL_IS_ENGINE(self));
-  if (self->platform_handler == nullptr) {
-    return;
-  }
   fl_platform_handler_dismiss_context_menu(self->platform_handler);
 }
 
