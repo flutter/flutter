@@ -77,18 +77,15 @@ void main() {
         final Rect leading = tester.getRect(find.byKey(leadingKey));
         final Rect middle = tester.getRect(find.byKey(middleKey));
         final Rect trailing = tester.getRect(find.byKey(trailingKey));
-        final double leadingGap = switch (textDirection) {
-          .ltr => middle.left - leading.right,
-          .rtl => leading.left - middle.right,
-        };
-        final double trailingGap = switch (textDirection) {
-          .ltr => trailing.left - middle.right,
-          .rtl => middle.left - trailing.right,
-        };
 
         expect(middle.width, middleWidth);
-        expect(leadingGap, greaterThanOrEqualTo(middleSpacing));
-        expect(trailingGap, middleSpacing);
+        if (textDirection == TextDirection.ltr) {
+          expect(middle.left - leading.right, greaterThanOrEqualTo(middleSpacing));
+          expect(trailing.left - middle.right, middleSpacing);
+        } else {
+          expect(leading.left - middle.right, greaterThanOrEqualTo(middleSpacing));
+          expect(middle.left - trailing.right, middleSpacing);
+        }
       });
     }
   }
