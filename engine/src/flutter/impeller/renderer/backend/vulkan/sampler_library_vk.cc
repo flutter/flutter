@@ -40,8 +40,7 @@ raw_ptr<const Sampler> SamplerLibraryVK::GetSampler(
   if (!device_holder || !device_holder->GetDevice()) {
     return raw_ptr<const Sampler>(nullptr);
   }
-  auto sampler =
-      std::make_shared<SamplerVK>(device_holder->GetDevice(), desc_copy);
+  auto sampler = std::make_shared<SamplerVK>(device_holder_, desc_copy);
   Lock lock(samplers_mutex_);
   if (auto existing = FindSampler(p_key)) {
     return existing;
