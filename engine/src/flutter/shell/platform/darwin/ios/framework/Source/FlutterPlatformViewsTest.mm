@@ -1997,6 +1997,63 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertNotNil(childClippingView.maskView);
 }
 
+- (void)testOpacity {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  // Push two opacities, which multiply.
+  stack.PushOpacity(128);
+  stack.PushOpacity(128);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(10, 10), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  // Verify the view's alpha is the product of the opacities.
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+  CGFloat expectedAlpha = flutter::DlColor::toOpacity(128) * flutter::DlColor::toOpacity(128);
+  XCTAssertEqualWithAccuracy(touchInterceptor.alpha, expectedAlpha, 1e-3);
+
+  // compositeView:withParams: resets the interceptor's alpha to 1 before applying the opacities.
+  // Verify the opacities are not applied a second time when the view is recomposited.
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+  XCTAssertEqualWithAccuracy(touchInterceptor.alpha, expectedAlpha, 1e-3);
+}
+
 - (void)testClipRect {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);

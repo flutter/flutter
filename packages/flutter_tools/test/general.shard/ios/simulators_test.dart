@@ -69,6 +69,7 @@ void main() {
         final simulator = IOSSimulator(
           '123',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -111,6 +112,7 @@ void main() {
       final simulator = IOSSimulator(
         '123',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
         simControl: FakeSimControl(),
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -154,6 +156,7 @@ void main() {
         final simulator = IOSSimulator(
           '123',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -188,6 +191,7 @@ void main() {
         final simulator = IOSSimulator(
           '456',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
@@ -226,6 +230,7 @@ void main() {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
@@ -250,6 +255,7 @@ void main() {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -274,6 +280,7 @@ void main() {
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -308,6 +315,7 @@ void main() {
         final simulator = IOSSimulator(
           'x',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'Apple TV',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
@@ -340,6 +348,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'Apple Watch',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
@@ -373,6 +382,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPad 2',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -406,6 +416,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPad Retina',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -439,6 +450,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 5',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -472,6 +484,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 5s',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -505,6 +518,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone SE',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -538,6 +552,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 7 Plus',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -571,6 +586,7 @@ void main() {
           await IOSSimulator(
             'x',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone X',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -620,6 +636,7 @@ void main() {
       final deviceUnderTest = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -658,6 +675,7 @@ void main() {
         final device = IOSSimulator(
           'x',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone SE',
           simulatorCategory: 'iOS 9.3',
           simControl: simControl,
@@ -700,6 +718,7 @@ void main() {
         final device = IOSSimulator(
           'x',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
@@ -762,6 +781,7 @@ void main() {
         final device = IOSSimulator(
           'x',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
@@ -860,6 +880,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final device = IOSSimulator(
             '123456',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.0',
             simControl: simControl,
@@ -925,6 +946,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final device = IOSSimulator(
             '123456',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
@@ -1003,6 +1025,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final device = IOSSimulator(
             '123456',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
@@ -1108,6 +1131,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final device = IOSSimulator(
             '123456',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -1190,6 +1214,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final device = IOSSimulator(
             '123456',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -1277,6 +1302,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           final device = IOSSimulator(
             '123456',
             cpuArch: CpuArch.x64,
+            featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
@@ -1406,6 +1432,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       simulatorUtils = IOSSimulatorUtils(
         analytics: const NoOpAnalytics(),
         cocoaPods: FakeCocoaPods(),
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
           analytics: const NoOpAnalytics(),
           logger: logger,
@@ -1431,6 +1458,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
         analytics: const NoOpAnalytics(),
         cocoaPods: FakeCocoaPods(),
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
           analytics: const NoOpAnalytics(),
           logger: logger,
@@ -1582,6 +1610,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       final iosSimulatorA = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
@@ -1663,6 +1692,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       final iosSimulator = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
@@ -1875,6 +1905,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         final device = IOSSimulator(
           'x',
           cpuArch: CpuArch.x64,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
@@ -1922,6 +1953,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -1976,6 +2008,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -2067,6 +2100,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       final device = IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -2138,6 +2172,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       IOSSimulator buildDevice() => IOSSimulator(
         'x',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
@@ -2306,6 +2341,7 @@ flutter:
       final simulator = IOSSimulator(
         'test',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -2335,6 +2371,7 @@ flutter:
       final simulator = IOSSimulator(
         'test',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -2363,6 +2400,7 @@ flutter:
       final simulator = IOSSimulator(
         'test',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
@@ -2386,6 +2424,7 @@ flutter:
       final simulator = IOSSimulator(
         'test',
         cpuArch: CpuArch.x64,
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
