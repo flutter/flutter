@@ -58,6 +58,7 @@ class FakeVmServiceHost {
             'error': <String, Object?>{
               'code': fakeRequest.error!.code,
               'message': fakeRequest.error!.error,
+              'data': ?fakeRequest.error!.data,
             },
           }),
         );
@@ -99,9 +100,10 @@ abstract class VmServiceExpectation {
 }
 
 class FakeRPCError {
-  const FakeRPCError({required this.code, this.error = 'error'});
+  const FakeRPCError({required this.code, this.data, this.error = 'error'});
 
   final int code;
+  final Map<String, Object?>? data;
   final String error;
 }
 

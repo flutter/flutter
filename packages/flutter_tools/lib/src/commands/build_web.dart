@@ -206,6 +206,7 @@ class BuildWebCommand extends BuildSubCommand {
       analytics: analytics,
       buildSystem: buildSystem,
       buildTargets: const BuildTargetsImpl(),
+      featureFlags: featureFlags,
       toolContext: toolContext,
     );
     await webBuilder.buildWeb(
