@@ -930,12 +930,8 @@ void main() {
     testUsingContext(
       'should only request artifacts corresponding to connected devices',
       () async {
-        testDeviceManager.devices = <Device>[
-          FakeDevice(targetPlatform: TargetPlatform.android_arm),
-        ];
-
-        expect(
-          await RunCommand(
+        Future<Set<DevelopmentArtifact>> getRequiredArtifacts() {
+          final command = RunCommand(
             appleContext: FakeAppleContext(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             assetBundleFactory: _FakeAssetBundleFactory(),
@@ -943,7 +939,17 @@ void main() {
             devtoolsLauncher: FakeDevtoolsLauncher(),
             deviceManager: testDeviceManager,
             toolContext: const DelegatingToolContext(),
-          ).requiredArtifacts,
+          );
+          createTestCommandRunner(command);
+          return command.requiredArtifacts;
+        }
+
+        testDeviceManager.devices = <Device>[
+          FakeDevice(targetPlatform: TargetPlatform.android_arm),
+        ];
+
+        expect(
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.androidGenSnapshot,
@@ -953,15 +959,7 @@ void main() {
         testDeviceManager.devices = <Device>[FakeDevice()];
 
         expect(
-          await RunCommand(
-            appleContext: FakeAppleContext(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            assetBundleFactory: _FakeAssetBundleFactory(),
-            buildTargets: const BuildTargetsImpl(),
-            devtoolsLauncher: FakeDevtoolsLauncher(),
-            deviceManager: testDeviceManager,
-            toolContext: const DelegatingToolContext(),
-          ).requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -974,15 +972,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand(
-            appleContext: FakeAppleContext(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            assetBundleFactory: _FakeAssetBundleFactory(),
-            buildTargets: const BuildTargetsImpl(),
-            devtoolsLauncher: FakeDevtoolsLauncher(),
-            deviceManager: testDeviceManager,
-            toolContext: const DelegatingToolContext(),
-          ).requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -995,15 +985,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand(
-            appleContext: FakeAppleContext(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            assetBundleFactory: _FakeAssetBundleFactory(),
-            buildTargets: const BuildTargetsImpl(),
-            devtoolsLauncher: FakeDevtoolsLauncher(),
-            deviceManager: testDeviceManager,
-            toolContext: const DelegatingToolContext(),
-          ).requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.web,
@@ -2841,6 +2823,7 @@ class CapturingAppDomain extends AppDomain {
         assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
         xcode: null,
       );
 
@@ -2929,6 +2912,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,

@@ -209,6 +209,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     analytics: _analytics,
     buildSystem: _buildSystem,
     cocoaPods: _cocoaPods,
+    featureFlags: _featureFlags,
     flutterRoot: toolContext.cache.flutterRoot,
     project: project,
     templatePathProvider: _templatePathProvider,
@@ -1254,6 +1255,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       platform: hostPlatform,
       analytics: _utils.analytics,
       androidSdkBuilder: null,
+      featureFlags: _utils.featureFlags,
       projectFactory: projectFactory,
       visualStudio: null,
       xcode: _utils.xcode,
@@ -1588,6 +1590,7 @@ class CocoaPodPluginDependencies {
       _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
       cocoaPods: _utils.cocoaPods,
+      featureFlags: _utils.featureFlags,
       templateRenderer: _utils.templateRenderer,
       toolContext: _utils.toolContext,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
@@ -2176,6 +2179,7 @@ class BuildSwiftPackageUtils {
     required this.analytics,
     required this.buildSystem,
     required this.cocoaPods,
+    required this.featureFlags,
     required this.flutterRoot,
     required this.project,
     required this.templatePathProvider,
@@ -2187,6 +2191,7 @@ class BuildSwiftPackageUtils {
   final Analytics analytics;
   final BuildSystem buildSystem;
   final CocoaPods cocoaPods;
+  final FeatureFlags featureFlags;
   final String flutterRoot;
   final FlutterProject project;
   final TemplatePathProvider templatePathProvider;

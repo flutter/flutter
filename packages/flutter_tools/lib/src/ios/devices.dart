@@ -328,6 +328,7 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required this._analytics,
     required this._cocoaPods,
+    required this._featureFlags,
     required this._mdnsVmServiceDiscovery,
     required this._plistParser,
     required this._xcode,
@@ -353,6 +354,7 @@ class IOSDevice extends Device {
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
   final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
@@ -560,6 +562,7 @@ class IOSDevice extends Device {
         analytics: _analytics,
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
+        featureFlags: _featureFlags,
         plistParser: _plistParser,
         templateRenderer: _templateRenderer,
         toolContext: toolContext,
@@ -1150,7 +1153,7 @@ class IOSDevice extends Device {
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
     final Version? xcodeVersion = _xcode.currentVersion;
-    if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
+    if (xcodeVersion != null && xcodeVersion.major >= 26 && _featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
         usingCISystem: debuggingOptions.usingCISystem,

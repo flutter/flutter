@@ -23,7 +23,7 @@
         "arm64",
         "--runtime-mode",
         "release",
-        "--no-lto",
+        "--thin-lto",
         "--prebuilt-dart-sdk",
         "--rbe",
         "--xcode-symlinks",

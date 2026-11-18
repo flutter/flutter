@@ -1000,8 +1000,7 @@ void main() {}
     },
   );
 
-  // Uses testUsingContext because RunCommandBase.createDebuggingOptions reads ambient featureFlags.
-  testUsingContext(
+  testWithoutContext(
     'includes devices unsupported by the project when using prebuilt application binary',
     () async {
       final capturingDriverService = CapturingDriverService();

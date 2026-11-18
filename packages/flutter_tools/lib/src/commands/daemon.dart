@@ -131,7 +131,7 @@ class DaemonCommand extends FlutterCommand {
         buildTargets: _buildTargets,
         deviceManager: _deviceManager,
         devtoolsLauncher: _devtoolsLauncher,
-        featureFlags: featureFlags,
+        featureFlags: runner!.featureFlags,
         flutterHookRunner: _flutterHookRunner,
         java: _java,
         logger: StdoutLogger(
@@ -161,7 +161,7 @@ class DaemonCommand extends FlutterCommand {
       buildTargets: _buildTargets,
       deviceManager: _deviceManager,
       devtoolsLauncher: _devtoolsLauncher,
-      featureFlags: featureFlags,
+      featureFlags: runner!.featureFlags,
       flutterHookRunner: _flutterHookRunner,
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
@@ -334,6 +334,7 @@ class Daemon {
         assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
+        featureFlags: featureFlags,
         flutterHookRunner: flutterHookRunner,
         webRunnerFactory: webRunnerFactory,
         xcode: xcode,
@@ -866,6 +867,7 @@ class AppDomain extends Domain {
     required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required this._xcode,
     this._flutterHookRunner,
     this._webRunnerFactory,
@@ -881,6 +883,7 @@ class AppDomain extends Domain {
   final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
   final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
@@ -944,6 +947,7 @@ class AppDomain extends Domain {
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
         debuggingOptions: options,
+        featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         flutterProject: flutterProject,
         machine: machine,
@@ -965,6 +969,7 @@ class AppDomain extends Domain {
         dartBuilder: _flutterHookRunner,
         debuggingOptions: options,
         dillOutputPath: dillOutputPath,
+        featureFlags: _featureFlags,
         hostIsIde: true,
         machine: machine,
         projectRootPath: projectRootPath,
@@ -983,6 +988,7 @@ class AppDomain extends Domain {
         buildTargets: _buildTargets,
         dartBuilder: _flutterHookRunner,
         debuggingOptions: options,
+        featureFlags: _featureFlags,
         machine: machine,
         target: target,
         toolContext: toolContext,
