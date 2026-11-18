@@ -4238,6 +4238,83 @@ Future<void> testMain() async {
       dormantForms.clear();
     });
 
+    test('a refocus of an autofill field keeps the caret where it was', () {
+      // While WebKit dispatches focus, the selection is not inside the input yet
+      // and reads 0..0. On iOS Safari the engine refocuses the field after an
+      // AutoFill and on every field switch, so forwarding that selection moved
+      // the caret to the start.
+      const typed = 'abc';
+      const selectionWhileFocusing = 0;
+      const noComposing = -1;
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      final DomHTMLInputElement input = openFormFocusing('email', send).username;
+      send(
+        const MethodCall('TextInput.setEditingState', <String, dynamic>{
+          'text': typed,
+          'selectionBase': typed.length,
+          'selectionExtent': typed.length,
+          'composingBase': noComposing,
+          'composingExtent': noComposing,
+        }),
+      );
+      spy.messages.clear();
+
+      // What WebKit reports while it dispatches the focus event.
+      input.setSelectionRange(selectionWhileFocusing, selectionWhileFocusing);
+      textEditing!.strategy.handleFocus(createDomEvent('Event', 'focus'));
+
+      expect(
+        spy.messages.where(
+          (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingState',
+        ),
+        isEmpty,
+      );
+
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
+    test('a value filled in while the field was blurred arrives with the caret at its end', () {
+      const filled = 'me@example.com';
+      const selectionWhileFocusing = 0;
+      const noComposing = -1;
+      void send(MethodCall call) =>
+          textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});
+      final DomHTMLInputElement input = openFormFocusing('email', send).username;
+      final DefaultTextEditingStrategy strategy = textEditing!.strategy;
+      strategy.debugDocumentHasFocusOverride = true;
+      strategy.debugDocumentVisibilityStateOverride = 'visible';
+
+      // A manager's menu takes the focus, fills the field and hands the focus
+      // back; WebKit reports 0..0 while it dispatches that focus.
+      strategy.handleBlur(createDomEvent('Event', 'blur'));
+      input.value = filled;
+      input.setSelectionRange(selectionWhileFocusing, selectionWhileFocusing);
+      spy.messages.clear();
+      strategy.handleFocus(createDomEvent('Event', 'focus'));
+
+      final Iterable<PlatformMessage> updates = spy.messages.where(
+        (PlatformMessage m) => m.methodName == 'TextInputClient.updateEditingState',
+      );
+      expect(updates, hasLength(1));
+      expect(updates.single.methodArguments, <dynamic>[
+        clientId,
+        <String, dynamic>{
+          'text': filled,
+          'selectionBase': filled.length,
+          'selectionExtent': filled.length,
+          'composingBase': noComposing,
+          'composingExtent': noComposing,
+        },
+      ]);
+
+      strategy.debugDocumentHasFocusOverride = null;
+      strategy.debugDocumentVisibilityStateOverride = null;
+      send(const MethodCall('TextInput.clearClient'));
+      dormantForms.clear();
+    });
+
     test('only the fields that are not focused swallow taps, after the focus moved', () async {
       void send(MethodCall call) =>
           textEditing!.channel.handleTextInput(codec.encodeMethodCall(call), (ByteData? _) {});

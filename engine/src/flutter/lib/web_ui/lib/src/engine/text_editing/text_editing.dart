@@ -2564,9 +2564,31 @@ abstract class DefaultTextEditingStrategy
     // nothing here; their edits arrive through input events.
     if (isEnabled && hasAutofillGroup) {
       inputConfiguration.autofillGroup?.endFillWindow();
-      handleChange(event);
+      _forwardValueFilledWhileBlurred(event);
       inputConfiguration.autofillGroup?.scanForAutofilledValues();
     }
+  }
+
+  /// Forwards a value that a password manager put into the field while it was
+  /// blurred, with the caret at its end, where a fill leaves it.
+  ///
+  /// Only a changed value is forwarded. While WebKit dispatches `focus`, the
+  /// selection is not inside the input yet and `selectionStart` and
+  /// `selectionEnd` read 0, so forwarding the DOM state of an unchanged field
+  /// would move the caret to the start on every refocus, as after an iOS
+  /// AutoFill. The settled selection still arrives through `selectionchange`.
+  ///
+  /// The caret is also set in the input, so that the selection the browser
+  /// settles on, and reports through `selectionchange`, agrees with the one
+  /// forwarded here.
+  void _forwardValueFilledWhileBlurred(DomEvent event) {
+    final domState = EditingState.fromDomElement(activeDomElement);
+    if (domState.text == lastEditingState?.text) {
+      return;
+    }
+    final int end = domState.text.length;
+    domState.copyWith(baseOffset: end, extentOffset: end).applyToDomElement(activeDomElement);
+    handleChange(event);
   }
 
   void handleClipboardEvent(DomEvent event) {
