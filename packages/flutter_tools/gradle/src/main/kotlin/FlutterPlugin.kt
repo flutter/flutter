@@ -657,10 +657,10 @@ class FlutterPlugin : Plugin<Project> {
          *
          * With `force-version-code-ignoring-abi`, no ABI offset is added, and AGP applies
          * [baseVersionCode] if set. If the DSL sets none, each ABI output gets the main-manifest
-         * `versionCode` after the same validity check. Outputs without an ABI filter are
-         * unchanged, and an app `onVariants` block runs later and wins. See the "Flutter Gradle
-         * Plugin uses the Android Gradle Plugin Variant API" breaking-change page
-         * (https://github.com/flutter/website/pull/14053).
+         * `versionCode` after the same validity check. Outputs without an ABI filter are left
+         * unchanged. An `onVariants` block in the app's build script runs after this one, so a
+         * value it sets wins. See the "Flutter Gradle Plugin uses the Android Gradle Plugin
+         * Variant API" breaking-change page (https://github.com/flutter/website/pull/14053).
          *
          * TODO(reidbaker): Link to the docs.flutter.dev page once it is published.
          * https://github.com/flutter/flutter/issues/193713
