@@ -377,7 +377,7 @@ void Manager::EnableMultithreadProtection() {
   // TODO(mattkae): Remove this once ANGLE's EGL calls exclude GL calls again.
   // See: https://github.com/flutter/flutter/issues/196618
   Microsoft::WRL::ComPtr<ID3D11Device> device;
-  if (!GetDevice(&device)) {
+  if (!GetDevice(&device) || !device) {
     FML_LOG(WARNING) << "Unable to get ANGLE's D3D11 device to enable "
                         "multithread protection.";
     return;
