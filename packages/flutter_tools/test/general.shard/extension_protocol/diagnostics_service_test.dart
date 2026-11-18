@@ -151,7 +151,10 @@ void main() {
 
       final validator = ExtensionDoctorValidator(extension: extensions.first, logger: logger);
       final ValidationResult result = await validator.validate();
-      expect(validator.title, 'Linux Custom Extension Prototype');
+      expect(
+        validator.title,
+        'Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype)',
+      );
       expect(result.type, ValidationType.success);
       expect(result.messages, hasLength(3));
       expect(result.messages.first.message, 'Linux custom extension toolchain is operational');
@@ -180,7 +183,10 @@ void main() {
         expect(validators, hasLength(2));
 
         final ValidationResult result0 = await validators[0].validate();
-        expect(validators[0].title, 'Linux Custom Extension Prototype');
+        expect(
+          validators[0].title,
+          'Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype)',
+        );
         expect(result0.type, ValidationType.success);
         expect(result0.messages, hasLength(3));
 
@@ -234,7 +240,7 @@ void main() {
       final validator = ExtensionDoctorValidator(extension: extension, logger: logger);
       final ValidationResult result = await validator.validate();
 
-      expect(validator.title, 'Crashing Diagnostic Check');
+      expect(validator.title, 'Crashing Diagnostic Check (package:my_test_extension)');
       expect(result.type, ValidationType.crash);
       expect(result.leadingBox, '[☠]');
       expect(result.statusInfo, 'the doctor check crashed');
@@ -349,7 +355,7 @@ void main() {
       );
     });
 
-    testWithoutContext('DiagnosticsExtensionClient.runDiagnostics allows slow checks past 5 seconds without timing out', () {
+    testWithoutContext('DiagnosticsExtensionClient.runDiagnostics allows slow checks up to 60 seconds without timing out', () {
       final logger = BufferLogger.test();
       bool? diagnoseSucceeded;
       FakeAsync().run<void>((FakeAsync time) {
@@ -370,7 +376,7 @@ void main() {
             diagnoseSucceeded = result;
           }),
         );
-        time.elapse(const Duration(seconds: 6));
+        time.elapse(const Duration(seconds: 59));
         time.flushMicrotasks();
         expect(diagnoseSucceeded, isNull);
         expect(logger.warningText, isEmpty);
@@ -385,7 +391,10 @@ void main() {
 
       expect(diagnoseSucceeded, isTrue);
       expect(logger.warningText, isEmpty);
-      expect(logger.statusText, contains('[✓] Slow Diagnostic Check (Slow OK)'));
+      expect(
+        logger.statusText,
+        contains('[✓] Slow Diagnostic Check (package:my_test_extension) (Slow OK)'),
+      );
     });
 
     testWithoutContext('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension validator throws directly', () async {
@@ -410,7 +419,7 @@ void main() {
       expect(directLogger.statusText, isNot(contains('flutter/flutter/issues')));
     });
 
-    testWithoutContext('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension exceeds doctorDuration', () async {
+    testWithoutContext('DiagnosticsExtensionClient.runDiagnostics times out after 60 seconds with extension attribution', () async {
       final clientLogger = BufferLogger.test();
       void hangingEntryPoint(SendPort sendPort) {
         ToolExtensionEntryPoint.run(
@@ -442,11 +451,11 @@ void main() {
             diagnoseSucceeded = result;
           }),
         );
-        time.elapse(const Duration(seconds: 6));
+        time.elapse(const Duration(seconds: 59));
         time.flushMicrotasks();
         expect(diagnoseSucceeded, isNull);
 
-        time.elapse(const Duration(minutes: 5));
+        time.elapse(const Duration(seconds: 1));
         time.flushMicrotasks();
       });
 
@@ -454,7 +463,9 @@ void main() {
       expect(clientLogger.warningText, isEmpty);
       expect(
         clientLogger.statusText,
-        contains('Hanging Diagnostic Check exceeded maximum allowed duration of '),
+        contains(
+          '[☠] Hanging Diagnostic Check (package:my_test_extension) (the doctor check crashed)',
+        ),
       );
       expect(
         clientLogger.statusText,
@@ -463,7 +474,56 @@ void main() {
           'Please report this issue to the extension author.',
         ),
       );
+      expect(clientLogger.statusText, isNot(contains('exceeded maximum allowed duration of')));
       expect(clientLogger.statusText, isNot(contains('flutter/flutter/issues')));
+      expect(
+        clientLogger.traceText,
+        contains(
+          'Failed to run diagnostics for extension "my_test_extension": TimeoutException after 0:01:00.000000',
+        ),
+      );
+    });
+
+    testWithoutContext('Doctor.diagnose uses ExtensionDoctorValidator.createCrashResult when extension exceeds doctorDuration', () {
+      final timeoutLogger = BufferLogger.test();
+      bool? diagnoseSucceeded;
+      FakeAsync().run<void>((FakeAsync time) {
+        final timeoutDoctor = _TestExtensionDoctor(
+          logger: timeoutLogger,
+          validators: <DoctorValidator>[
+            ExtensionDoctorValidator(
+              extension: _HangingDiagnosticsExtension(),
+              logger: timeoutLogger,
+            ),
+          ],
+        );
+        unawaited(
+          timeoutDoctor.diagnose(verbose: false, sendEvent: false).then((bool result) {
+            diagnoseSucceeded = result;
+          }),
+        );
+        time.elapse(const Duration(seconds: 60));
+        time.flushMicrotasks();
+        expect(diagnoseSucceeded, isNull);
+
+        time.elapse(const Duration(minutes: 4));
+        time.flushMicrotasks();
+      });
+
+      expect(diagnoseSucceeded, isFalse);
+      expect(timeoutLogger.warningText, isEmpty);
+      expect(
+        timeoutLogger.statusText,
+        contains('Hanging Diagnostic Check exceeded maximum allowed duration of '),
+      );
+      expect(
+        timeoutLogger.statusText,
+        contains(
+          'Due to an error in tool extension "Hanging Diagnostic Check", the doctor check did not complete. '
+          'Please report this issue to the extension author.',
+        ),
+      );
+      expect(timeoutLogger.statusText, isNot(contains('flutter/flutter/issues')));
     });
 
     test(

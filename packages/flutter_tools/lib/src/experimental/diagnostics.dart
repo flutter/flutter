@@ -37,7 +37,11 @@ class ExtensionDoctorValidator extends DoctorValidator {
   final Logger _logger;
 
   @override
-  String get title => extension.title;
+  String get title => switch (extension) {
+    DiagnosticsExtensionClient(:final ExtensionConnection connection) =>
+      '${extension.title} (package:${connection.extensionName})',
+    _ => extension.title,
+  };
 
   @override
   ValidationResult createCrashResult(Object error, [StackTrace? stackTrace]) {
@@ -99,6 +103,8 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
     this._defaultTitle = 'Tool Extension Diagnostics',
   });
 
+  static const _runDiagnosticsTimeout = Duration(seconds: 60);
+
   /// The active extension isolate connection.
   final ExtensionConnection connection;
   final String _defaultTitle;
@@ -139,7 +145,7 @@ final class DiagnosticsExtensionClient extends DiagnosticsExtension {
     try {
       final Object? result = await connection.sendRequest(
         DiagnosticsExtension.runDiagnosticsMethod,
-        timeout: null,
+        timeout: _runDiagnosticsTimeout,
       );
       final List<ValidationResult> results = ValidationResult.listFromJson(result);
       _logger.printTrace(
