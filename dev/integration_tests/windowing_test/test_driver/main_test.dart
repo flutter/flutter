@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -257,7 +258,7 @@ void main() {
         expect(data['popupDestroyed'], true);
       },
       timeout: Timeout.none,
-      testOn: 'linux',
+      skip: Platform.isLinux ? false : 'Popups are only closed on focus loss on Linux.',
     );
 
     test(
@@ -272,7 +273,7 @@ void main() {
         expect(data['popupDestroyed'], false);
       },
       timeout: Timeout.none,
-      testOn: 'linux',
+      skip: Platform.isLinux ? false : 'Popups are only closed on focus loss on Linux.',
     );
 
     test('Satellite window is not destroyed until closed', () async {
