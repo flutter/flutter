@@ -32,6 +32,19 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.50 Changes
 
+### [3.50.1](https://github.com/flutter/flutter/releases/tag/3.50.1)
+- [flutter/196412](https://github.com/flutter/flutter/issues/196412) When building an Android app with plugins and custom or app-only `buildType` settings, Gradle configuration fails.
+- [flutter/196444](https://github.com/flutter/flutter/issues/196444) When building for Android with Flutter 3.50.0, assets whose names start with a dot (such as `.env`) or an underscore folder were silently left out of the APK or AAB which caused a runtime failure.
+- [flutter/193695](https://github.com/flutter/flutter/issues/193695) When rendering dynamic text on Web (`--wasm`) with cross-origin isolation enabled, the app may freeze or crash.
+- [dart-lang/webdev/2883](https://github.com/dart-lang/webdev/issues/2883) `flutter run -d chrome` fails to connect to the web debug service with a `TimeoutException` for large web apps.
+- [flutter/195885](https://github.com/flutter/flutter/issues/195885) When running Linux apps on drivers without `glBlitFramebuffer`, app content is shifted.
+- [flutter/196452](https://github.com/flutter/flutter/issues/196452) When running `flutter build web` without `--web-content-hash` after a `--web-content-hash` build on web, `build/web/index.html` was deleted from the build output directory.
+- [flutter/196119](https://github.com/flutter/flutter/issues/196119) When running `flutter screenshot --type=skia` against an application with Impeller enabled on platforms supporting Impeller, `flutter_tools` crashes with an unhandled `RPCError` (`-32000`).
+- [flutter/196118](https://github.com/flutter/flutter/issues/196118) When the target device or host temporary directory is inaccessible or full during debug launch (most commonly on Windows and iOS Simulator), `flutter run` and `flutter attach` crash with an unhandled `RPCError`.
+- [flutter/196121](https://github.com/flutter/flutter/issues/196121) When running `flutter test` with a project or build directory on an external volume on macOS, `flutter_tools` crashes with an unhandled `FileSystemException` (`OS Error: Cross-device link, errno = 18`) while cleaning up `native_assets.json`.
+- [flutter/196559](https://github.com/flutter/flutter/issues/196559) When building Android APKs with `--split-per-abi` and `versionCode` set only in `AndroidManifest.xml`, every split APK gets the same `versionCode`.
+- [flutter/195006](https://github.com/flutter/flutter/pull/195006) When building Android apps with Gradle's configuration cache enabled, Gradle can't store the cache entry, so it never reuses it.
+
 ### [3.50.0](https://github.com/flutter/flutter/releases/tag/3.50.0)
 
 Learn about what's new in this release in [the blog post](https://flutter.dev/blog/whats-new-in-flutter-3-50), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.50.0) for a detailed list of all the new changes.
