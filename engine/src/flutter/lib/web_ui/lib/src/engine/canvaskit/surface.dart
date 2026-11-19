@@ -488,18 +488,35 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     List<ui.Picture> pictures,
   ) async {
     await _initialized.future;
-    // Everything from here until all bitmaps have been requested must be
-    // synchronous so that no other operation can resize or draw into the
-    // canvas in between. `createImageBitmap` copies the canvas contents at the
-    // time it is called; only the resolution of the returned promise is
-    // asynchronous.
+    // Everything from here on must be synchronous so that no other operation
+    // can resize or draw into the canvas while pictures are rendered and
+    // transferred out of it.
     setSize(size);
-    final bitmapFutures = <Future<DomImageBitmap>>[];
-    for (final picture in pictures) {
-      _drawPicture(picture as CkPicture);
-      bitmapFutures.add(createImageBitmap(_canvas));
+    for (var attempt = 0; ; attempt++) {
+      final offscreenCanvas = canvas as DomOffscreenCanvas;
+      final bitmaps = <DomImageBitmap>[];
+      try {
+        for (final picture in pictures) {
+          _drawPicture(picture as CkPicture);
+          bitmaps.add(offscreenCanvas.transferToImageBitmap());
+        }
+        return bitmaps;
+      } catch (_) {
+        for (final bitmap in bitmaps) {
+          bitmap.close();
+        }
+        if (!_isDisposed && supportsWebGl && _webGlContextOf(offscreenCanvas).isContextLost()) {
+          if (attempt == 0) {
+            onContextLost();
+          } else {
+            _markWebGlFailed('WebGL context remained lost after recovery.');
+            _recreateSkSurface();
+          }
+          continue;
+        }
+        rethrow;
+      }
     }
-    return Future.wait(bitmapFutures);
   }
 
   @override
