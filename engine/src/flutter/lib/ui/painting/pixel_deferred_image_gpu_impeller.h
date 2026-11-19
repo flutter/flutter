@@ -56,6 +56,15 @@ class PixelDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
   // |DlImage|
   std::optional<std::string> get_error() const override;
 
+  // |DlImage|
+  //
+  // The texture is uploaded by a task posted to the raster task runner, so
+  // readbacks (such as `Image.toByteData`) must also run there to be ordered
+  // after the upload.
+  OwningContext owning_context() const override {
+    return OwningContext::kRaster;
+  }
+
  private:
   class ImageWrapper : public std::enable_shared_from_this<ImageWrapper> {
    public:
