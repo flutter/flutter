@@ -406,6 +406,7 @@ abstract class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
     Hyphens? hyphens,
+    String? hyphenCharacter,
   }) => engine.isWebParagraphEnabled
       ? engine.WebParagraphStyle(
           textAlign: textAlign,
@@ -421,6 +422,7 @@ abstract class ParagraphStyle {
           ellipsis: ellipsis,
           locale: locale,
           hyphens: hyphens,
+          hyphenCharacter: hyphenCharacter,
         )
       : engine.EngineParagraphStyle(
           textAlign: textAlign,
@@ -436,6 +438,7 @@ abstract class ParagraphStyle {
           ellipsis: ellipsis,
           locale: locale,
           hyphens: hyphens,
+          hyphenCharacter: hyphenCharacter,
         );
 }
 

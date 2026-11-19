@@ -88,6 +88,56 @@ class CherryPickHelper {
     ]);
   }
 
+  /// Whether the original PR's merge commit contains the `cp-trigger.yml`
+  /// workflow.
+  ///
+  /// Adding a `cp:` label runs `cp-trigger.yml` from the PR's merge commit, so
+  /// for PRs merged before that workflow existed, adding the label does nothing.
+  Future<bool> hasCpTrigger() async {
+    final String sha = switch (originalPrData) {
+      {'mergeCommit': {'oid': final String oid}} => oid,
+      _ => throw StateError('Could not find merge commit SHA in PR data'),
+    };
+    final ProcessResult result = await runCmd([
+      'gh',
+      'api',
+      'repos/flutter/flutter/contents/.github/workflows/cp-trigger.yml?ref=$sha',
+      '--silent',
+    ], allowFailure: true);
+    return result.exitCode == 0;
+  }
+
+  /// Runs the `easy-cp.yml` workflow directly via `workflow_dispatch`.
+  ///
+  /// This is the fallback for PRs merged before `cp-trigger.yml` existed.
+  /// Requires write access to flutter/flutter.
+  Future<void> dispatchWorkflow() async {
+    _info('Running easy-cp.yml for PR #$pr to $channel via workflow_dispatch...');
+    await runCmd([
+      'gh',
+      'workflow',
+      'run',
+      'easy-cp.yml',
+      '-R',
+      'flutter/flutter',
+      '-f',
+      'pr_number=$pr',
+      '-f',
+      'channel=$channel',
+    ]);
+  }
+
+  /// Starts the automated cherry-pick, by adding the `cp:` label or, for PRs
+  /// merged before `cp-trigger.yml` existed, by dispatching `easy-cp.yml`.
+  Future<void> triggerAutomatedCp() async {
+    if (await hasCpTrigger()) {
+      await addLabel();
+    } else {
+      _info('PR #$pr was merged before cp-trigger.yml existed; adding a label would do nothing.');
+      await dispatchWorkflow();
+    }
+  }
+
   /// Dynamically retrieves the release candidate branch name for the target channel.
   ///
   /// Reads the version file `bin/internal/release-candidate-branch.version` from
@@ -172,7 +222,9 @@ class CherryPickHelper {
   /// the original PR number or title in its title.
   Future<int?> pollForPr(String candidateBranch) async {
     _info('Polling for automated cherry-pick PR targeting $candidateBranch...');
-    const attempts = 8;
+    // The automated cherry-pick runs as two chained workflows (cp-trigger.yml,
+    // then easy-cp.yml), which usually takes 1-2 minutes.
+    const attempts = 12;
     for (var i = 0; i < attempts; i++) {
       await Future<void>.delayed(const Duration(seconds: 15));
       _info('Polling attempt ${i + 1}/$attempts...');
@@ -379,7 +431,7 @@ void main(List<String> arguments) async {
   final String candidateBranch = await helper.getCandidateBranch();
 
   if (action == 'start') {
-    await helper.addLabel();
+    await helper.triggerAutomatedCp();
     // Wait a bit before polling to let GitHub Actions trigger
     await Future<void>.delayed(const Duration(seconds: 5));
     final int? cpPr = await helper.pollForPr(candidateBranch);

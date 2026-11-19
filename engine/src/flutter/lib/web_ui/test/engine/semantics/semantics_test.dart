@@ -2095,6 +2095,105 @@ void _testContainer() {
     semantics().semanticsEnabled = false;
   });
 
+  // Regression test for: https://github.com/flutter/flutter/issues/194420
+  test(
+    'removes un-reparented nodes that follow a reparented sibling deep in a detached subtree',
+    () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      // 0 -> 1 -> 2 -> [3 -> 7, 4]
+      {
+        final builder = ui.SemanticsUpdateBuilder();
+        updateNode(
+          builder,
+          childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+        );
+        updateNode(
+          builder,
+          id: 1,
+          childrenInTraversalOrder: Int32List.fromList(<int>[2]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[2]),
+        );
+        updateNode(
+          builder,
+          id: 2,
+          childrenInTraversalOrder: Int32List.fromList(<int>[3, 4]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[3, 4]),
+        );
+        updateNode(
+          builder,
+          id: 3,
+          childrenInTraversalOrder: Int32List.fromList(<int>[7]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[7]),
+        );
+        updateNode(builder, id: 4);
+        updateNode(builder, id: 7);
+
+        owner().updateSemantics(builder.build());
+        expectSemanticsTree(owner(), '''
+<sem>
+    <sem>
+        <sem>
+            <sem style="z-index: 2">
+                <sem></sem>
+            </sem>
+            <sem style="z-index: 1"></sem>
+        </sem>
+    </sem>
+</sem>''');
+
+        expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 2, 3, 4, 7]));
+      }
+
+      // Replace the chain under the root with new nodes 5 -> 6 and move #3 (with
+      // its child #7) under #6. Nodes #1, #2 and #4 are gone.
+      //
+      // #1 is the detachment root. Two levels below it, #3 is reparented and
+      // must be skipped, but its *later* sibling #4 was not reparented and must
+      // still be removed. Before the fix, skipping #3 ended the walk of #2's
+      // children, so #4 stayed in the node map forever.
+      {
+        final builder = ui.SemanticsUpdateBuilder();
+        updateNode(
+          builder,
+          childrenInTraversalOrder: Int32List.fromList(<int>[5]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[5]),
+        );
+        updateNode(
+          builder,
+          id: 5,
+          childrenInTraversalOrder: Int32List.fromList(<int>[6]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[6]),
+        );
+        updateNode(
+          builder,
+          id: 6,
+          childrenInTraversalOrder: Int32List.fromList(<int>[3]),
+          childrenInHitTestOrder: Int32List.fromList(<int>[3]),
+        );
+
+        owner().updateSemantics(builder.build());
+        expectSemanticsTree(owner(), '''
+<sem>
+    <sem>
+        <sem>
+            <sem>
+                <sem></sem>
+            </sem>
+        </sem>
+    </sem>
+</sem>''');
+
+        expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 3, 5, 6, 7]));
+      }
+
+      semantics().semanticsEnabled = false;
+    },
+  );
+
   test('node updated with role change', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)

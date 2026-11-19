@@ -612,6 +612,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           cocoaPods: appleContext.cocoaPods,
+          featureFlags: runner!.featureFlags,
           templateRenderer: templateRenderer,
           toolContext: toolContext,
           forceCocoaPodsOnly: true,
@@ -828,6 +829,7 @@ end
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
     ) = toolContext;
     final AppleContext(:Xcode xcode) = appleContext;
 
@@ -865,6 +867,11 @@ end
           processManager: processManager,
           platform: platform,
           analytics: analytics,
+          androidSdkBuilder: null,
+          featureFlags: runner!.featureFlags,
+          projectFactory: projectFactory,
+          visualStudio: null,
+          xcode: xcode,
           engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
           generateDartPluginRegistry: true,
         );
