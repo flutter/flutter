@@ -62,6 +62,7 @@ use_repo(
     "dart_sdk_macos_x64",
     "emsdk",
     "emsdk_lto",
+    "engine_package_config",
     "esbuild",
     "expat",
     "flatbuffers",

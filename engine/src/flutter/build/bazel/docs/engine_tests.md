@@ -224,7 +224,11 @@ mirror its enums for `api_check`. The repository root has a `BUILD.bazel`
 for the three checkout-level files. One read escapes the tree: `bin/et`
 resolves its own location with `realpath`, which follows the runfiles
 symlink to the checkout, so `engine_tool`'s entry-point test runs the
-checkout's copy of the package on the checkout's prebuilt SDK.
+checkout's copy of the package on the checkout's prebuilt SDK. That test
+and the two of `et fetch` are the ones that need a gclient checkout: in one
+that was never synced (`docs/dependencies.md`) `.gclient` is absent
+(`//:gclient_config` is empty, so the target still builds) and `bin/et`
+asks for `gclient sync`.
 
 Eleven of the thirteen packages are here, under
 `//engine/src/flutter:dart_host_tests`. The two that are not run with

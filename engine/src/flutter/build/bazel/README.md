@@ -24,8 +24,10 @@ listed at the end.
 
 ## Prerequisites
 
-- An engine checkout synced with `gclient sync`. Bazel reads the synced
-  trees in place and never runs gclient.
+- A checkout. Where `gclient sync` has populated it, Bazel reads the synced
+  trees in place. Where it has not -- a plain `git clone` -- Bazel fetches
+  what `DEPS` pins, a tree at a time as the build needs it, with `git` and
+  the network (`docs/dependencies.md`). It never runs gclient.
 - `bazelisk` on `PATH`. It downloads the Bazel release `.bazelversion`
   names. On CI the gclient variable `download_bazelisk` syncs a copy to
   `engine/src/flutter/third_party/bazelisk`, which `tools/gn --bazel` uses;
@@ -33,7 +35,8 @@ listed at the end.
 - On Linux: `Xvfb` for the suites that open a window; `dbus` and
   `at-spi2-core` for the GTK shell's suite.
 - On a Mac: Xcode.
-- For the web targets: the gclient variable `download_emsdk`.
+- For the web targets: a synced checkout, with the gclient variable
+  `download_emsdk` (the Emscripten SDK is not among what Bazel fetches).
 - Disk and memory: see "How long it takes, and how much room".
 
 ## Quick start for an engine developer
@@ -151,6 +154,8 @@ sandbox contribute.
 ## Known gaps
 
 - No Windows, Fuchsia or riscv64 Linux build.
+- Without `gclient sync` there is no web engine build (the Emscripten SDK
+  is installed by a hook of `DEPS`), and a Mac has not been tried.
 - Tests run with the network blocked, so golden images are neither compared
   nor uploaded under Bazel.
 - The Dart SDK is a GN build wrapped as a single Bazel action, as are the
@@ -172,7 +177,7 @@ sandbox contribute.
 
 | Document | Subject |
 |---|---|
-| `docs/dependencies.md` | How dependencies reach Bazel; adding one |
+| `docs/dependencies.md` | How dependencies reach Bazel, with and without `gclient sync`; adding one |
 | `docs/toolchains.md` | The C/C++ toolchains: Linux, Android, macOS and iOS, Emscripten |
 | `docs/wrapped_gn_builds.md` | The Dart SDK as a wrapped GN build; the GPU test backends (converted on Linux, wrapped on a Mac) |
 | `docs/engine_tests.md` | The engine's C++, Dart and Java tests |

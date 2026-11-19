@@ -6,13 +6,10 @@
 # that tests of the engine's Dart tools read (testing/run_tests.py
 # --type dart-host, build_defs/dart/package_test.bzl) -- DEPS and the
 # .bazelignore generated from it (tools/bazel_tools' tests check the
-# generation), and .gclient, which `et fetch` locates to run gclient from
-# its directory (tools/engine_tool's tests). .gclient is the checkout's own,
-# written by `gclient config`, not a file of the repository.
+# generation), and .gclient (gclient_config, below).
 
 exports_files([
     ".bazelignore",
-    ".gclient",
     "DEPS",
     # The pub workspace's resolution, which `flutter create` reads to pin a new
     # project's dependencies (flutter_tools' tests run it).
@@ -27,6 +24,21 @@ exports_files([
     # every engine directory it downloads (from the facsimile's root).
     "LICENSE",
 ])
+
+# The checkout's .gclient, which `et fetch` locates to run gclient from its
+# directory (tools/engine_tool's tests). It is the checkout's own, written
+# by `gclient config`, not a file of the repository: a checkout that was
+# never synced has none, the group is then empty, and those of `et`'s tests
+# that need the gclient checkout fail there, as the tool does.
+filegroup(
+    name = "gclient_config",
+    # A glob of one name: the file, or nothing.
+    srcs = glob(
+        [".gclient"],  # buildifier: disable=constant-glob
+        allow_empty = True,
+    ),
+    visibility = ["//engine/src/flutter/tools/engine_tool:__pkg__"],
+)
 
 # The repository's Dart and framework tests that Bazel compiles and runs
 # (build_defs/dart/flutter_test.bzl, dart_test.bzl; the

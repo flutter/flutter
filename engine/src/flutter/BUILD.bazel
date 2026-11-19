@@ -7,6 +7,7 @@
 # Dependencies left out, having no Bazel counterpart yet: //flutter/build/dart/test:gen_dartcli_call, //flutter/build/dart/test:gen_executable_call, //flutter/lib/gpu:gpu_unittests.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@host_platform//:host.bzl", "ENGINE_PACKAGE_CONFIG")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/dist:everything.bzl", "everything_assemble", "everything_contents", "everything_files", "everything_trees")
 load("//build_defs/dist:local_engine.bzl", "local_engine")
@@ -283,10 +284,13 @@ cc_library(
 # The engine's Dart package configuration, which `gclient sync` writes (the
 # pub_get_offline hook) and GN's Dart compiles read (--packages). What the
 # frontend server resolves `package:` imports through; the fixtures compiled
-# so far import none, so nothing it points at is declared.
+# so far import none, so nothing it points at is declared. The checkout's
+# .dart_tool/package_config.json, or, in a checkout that was never synced,
+# the same resolution over fetched packages (@host_platform says which:
+# build_defs/repositories/engine_packages.bzl).
 filegroup(
     name = "package_config",
-    srcs = [".dart_tool/package_config.json"],
+    srcs = [ENGINE_PACKAGE_CONFIG],
     visibility = ["//visibility:public"],
 )
 

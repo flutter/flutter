@@ -48,6 +48,29 @@ final class GnError implements Exception {
   String toString() => '$location: $message';
 }
 
+/// A file the conversion looks for is not there, and its path lies in a tree
+/// the converter was told the checkout does not have (`--absent-tree`): a
+/// dependency of DEPS in a checkout that `gclient sync` never populated.
+///
+/// Not a [GnError], which a dependency resolver may take for "this file
+/// says nothing": without the tree the converter cannot know what the file
+/// would have said, and a conversion that went on would differ, silently,
+/// from a synced checkout's. The message names the tree in a form the
+/// fetch-time conversion reads (build_defs/repositories/repositories.bzl's
+/// _convert_gn, which fetches the tree and runs the converter again).
+final class AbsentTreeError implements Exception {
+  AbsentTreeError(this.tree, this.path);
+
+  /// The tree's GN directory (`//flutter/third_party/zlib`).
+  final String tree;
+
+  /// The GN path looked for.
+  final String path;
+
+  @override
+  String toString() => '[absent-tree: $tree] $path is not in the checkout, which has no $tree';
+}
+
 /// A node of the GN syntax tree.
 sealed class GnNode {
   GnNode(this.location);
@@ -211,13 +234,23 @@ Future<GnBlock> loadGnFile(String path, {required String gnBinary}) async {
 /// the directory at the same path under the primary root, and `.gni` files
 /// there are found when the primary tree lacks them.
 final class GnSourceTree {
-  GnSourceTree(String root, {required this.gnBinary})
-    : root = p.canonicalize(root),
-      secondarySource = _secondarySource(p.canonicalize(root));
+  GnSourceTree(
+    String root, {
+    required this.gnBinary,
+    Iterable<String> absentTrees = const <String>[],
+  }) : root = p.canonicalize(root),
+       secondarySource = _secondarySource(p.canonicalize(root)),
+       absentTrees = List<String>.unmodifiable(absentTrees);
 
   /// The directory holding `.gn`.
   final String root;
   final String gnBinary;
+
+  /// The GN directories of the trees this checkout is known not to have
+  /// (the dependencies of DEPS, in a checkout without `gclient sync`): a
+  /// path inside one that [resolve] does not find is an [AbsentTreeError],
+  /// where any other missing file is just missing.
+  final List<String> absentTrees;
 
   /// The secondary source root as a GN directory (`//flutter/build/secondary`),
   /// or null when `.gn` declares none.
@@ -248,12 +281,28 @@ final class GnSourceTree {
       throw ArgumentError.value(gnPath, 'gnPath', 'not a GN path');
     }
     final String primary = p.join(root, gnPath.substring(2));
-    final String? secondary = secondarySource;
-    if (secondary == null || File(primary).existsSync()) {
+    if (File(primary).existsSync()) {
       return primary;
     }
-    final String fallback = p.join(root, secondary.substring(2), gnPath.substring(2));
-    return File(fallback).existsSync() ? fallback : primary;
+    final String? secondary = secondarySource;
+    if (secondary != null) {
+      final String fallback = p.join(root, secondary.substring(2), gnPath.substring(2));
+      if (File(fallback).existsSync()) {
+        return fallback;
+      }
+    }
+    // Found nowhere: a file that does not exist (a caller may ask to find
+    // out), unless it would be in a tree the checkout lacks -- then nothing
+    // can be said about it. A path that exists as a directory is there.
+    if (absentTrees.isNotEmpty &&
+        FileSystemEntity.typeSync(primary) == FileSystemEntityType.notFound) {
+      for (final String tree in absentTrees) {
+        if (gnPath == tree || gnPath.startsWith('$tree/')) {
+          throw AbsentTreeError(tree, gnPath);
+        }
+      }
+    }
+    return primary;
   }
 
   /// The GN path of a file under the root; a file under the secondary

@@ -7612,6 +7612,78 @@ group("flutter_engine") {
       expect(output, isNot(contains('build_embedder_api =')));
     });
 
+    test('a tree the checkout lacks: a path in it that is not found stops the conversion', () {
+      // A checkout without `gclient sync` has no //third_party/zlib, and the
+      // fetch-time conversion says which trees it lacks (--absent-tree). A
+      // file looked for in one and not found is not "no such file", which a
+      // dependency resolver takes for a file that says nothing: the
+      // conversion would differ, silently, from a synced checkout's.
+      final Directory root = Directory.systemTemp.createTempSync('gn_to_bazel_absent');
+      addTearDown(() => root.deleteSync(recursive: true));
+      void write(String path, String content) {
+        File(p.join(root.path, path))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(content);
+      }
+
+      write('.gn', 'buildconfig = "//BUILDCONFIG.gn"\nsecondary_source = "//secondary/"\n');
+      write('third_party/deps/present/src/BUILD.gn', '');
+      write('secondary/third_party/standin/BUILD.gn', '');
+      final tree = GnSourceTree(
+        root.path,
+        gnBinary: gnBinary,
+        absentTrees: const <String>[
+          '//third_party/zlib',
+          '//third_party/deps',
+          '//third_party/standin',
+        ],
+      );
+      expect(
+        () => tree.resolve('//third_party/zlib/BUILD.gn'),
+        throwsA(
+          isA<AbsentTreeError>()
+              .having((AbsentTreeError e) => e.tree, 'tree', '//third_party/zlib')
+              .having((AbsentTreeError e) => e.path, 'path', '//third_party/zlib/BUILD.gn')
+              .having(
+                (AbsentTreeError e) => '$e',
+                'message',
+                startsWith('[absent-tree: //third_party/zlib] '),
+              ),
+        ),
+      );
+      // A tree nested in an absent one, itself present: its files are found,
+      expect(
+        tree.resolve('//third_party/deps/present/src/BUILD.gn'),
+        endsWith('present/src/BUILD.gn'),
+      );
+      // a directory of it is there (no file, and not missing),
+      expect(tree.resolve('//third_party/deps/present/src'), endsWith('present/src'));
+      // and a file missing beside it is the absent tree's.
+      expect(
+        () => tree.resolve('//third_party/deps/other/BUILD.gn'),
+        throwsA(isA<AbsentTreeError>()),
+      );
+      // The secondary source root stands in before a tree is missed.
+      expect(
+        tree.resolve('//third_party/standin/BUILD.gn'),
+        endsWith('secondary/third_party/standin/BUILD.gn'),
+      );
+      // A file missing anywhere else is just missing,
+      expect(tree.resolve('//flutter/none/BUILD.gn'), endsWith('flutter/none/BUILD.gn'));
+      // as every missing file is where no tree is named absent.
+      expect(
+        GnSourceTree(root.path, gnBinary: gnBinary).resolve('//third_party/zlib/BUILD.gn'),
+        endsWith('third_party/zlib/BUILD.gn'),
+      );
+
+      // The dependency resolver, which reads a dependency's file to learn
+      // what it hands its dependents and takes a missing file for a
+      // dependency that hands nothing, does not get to.
+      final resolver = DependencyResolver(tree: tree, assumptions: linuxHostAssumptions());
+      expect(() => resolver.targetOf('//third_party/zlib:zlib'), throwsA(isA<AbsentTreeError>()));
+      expect(resolver.targetOf('//flutter/none:none'), isNull);
+    });
+
     test('secondary source root: a BUILD.gn stands in for another directory', () {
       // wuffs: its BUILD.gn lives in //flutter/build/secondary.
       final GnSourceTree tree = sourceTree(<String, String>{
