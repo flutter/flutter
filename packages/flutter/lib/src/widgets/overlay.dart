@@ -1083,7 +1083,7 @@ mixin _RenderTheaterMixin on RenderBox {
 
   Iterable<RenderBox> _childrenInPaintOrder();
   Iterable<RenderBox> _childrenInHitTestOrder();
-  Iterable<RenderBox> _childrenInBaselineOrder() => _childrenInPaintOrder();
+  Iterable<RenderBox> get _onstageOverlayEntryChildren => _childrenInPaintOrder();
 
   @override
   void setupParentData(RenderBox child) {
@@ -1096,7 +1096,7 @@ mixin _RenderTheaterMixin on RenderBox {
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (final RenderBox child in _childrenInBaselineOrder()) {
+    for (final RenderBox child in _onstageOverlayEntryChildren) {
       assert(!child.debugNeedsLayout);
       final childParentData = child.parentData! as StackParentData;
       baselineOffset = baselineOffset.minOf(
@@ -1170,8 +1170,6 @@ mixin _RenderTheaterMixin on RenderBox {
   void paint(PaintingContext context, Offset offset) {
     for (final RenderBox child in _childrenInPaintOrder()) {
       final childParentData = child.parentData! as StackParentData;
-      // RenderObject._paintWithContext returns early for any child needing
-      // layout, including a pending _RenderDeferredLayoutBox.
       context.paintChild(child, childParentData.offset + offset);
     }
   }
@@ -1202,8 +1200,8 @@ class _TheaterParentData extends StackParentData {
       overlayEntry?._overlayEntryStateNotifier?.value!._hitTestOrderIterable.iterator;
 
   // A convenience method for traversing `paintOrderIterator` with a
-  // callback that preserves the deferred child's type.
-  void visitOverlayPortalChildrenOnOverlayEntry(ValueChanged<_RenderDeferredLayoutBox> visitor) =>
+  // [RenderObjectVisitor].
+  void visitOverlayPortalChildrenOnOverlayEntry(RenderObjectVisitor visitor) =>
       overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
 }
 
@@ -1236,7 +1234,7 @@ class _RenderTheater extends RenderBox
     RenderBox? child = firstChild;
     while (child != null) {
       final childParentData = child.parentData! as _TheaterParentData;
-      final Iterator<_RenderDeferredLayoutBox>? iterator = childParentData.paintOrderIterator;
+      final Iterator<RenderBox>? iterator = childParentData.paintOrderIterator;
       if (iterator != null) {
         while (iterator.moveNext()) {
           iterator.current.attach(owner);
@@ -1330,10 +1328,10 @@ class _RenderTheater extends RenderBox
     _outstandingDeferredChildUpdateCalls -= 1;
     assert(_outstandingDeferredChildUpdateCalls >= 0);
 
-    // Mark the layout surrogate dirty so its performLayout schedules `child`'s
-    // initial layout onto the dirty list. If the surrogate is not laid out this
-    // frame (for example, while kept alive offscreen or in an offstage entry),
-    // `child` remains pending until the surrogate is laid out.
+    // After adding `child` to the render tree, we want to make sure it will be
+    // laid out in the same frame. This is done by calling markNeedsLayout on the
+    // layout surrogate. This ensures `child` is added to the dirty list (see
+    // _RenderLayoutSurrogateProxyBox.performLayout).
     child._layoutSurrogate.markNeedsLayout();
   }
 
@@ -1410,7 +1408,7 @@ class _RenderTheater extends RenderBox
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (final RenderBox child in _childrenInBaselineOrder()) {
+    for (final RenderBox child in _onstageOverlayEntryChildren) {
       baselineOffset = baselineOffset.minOf(
         BaselineOffset(
           _RenderTheaterMixin.baselineForChild(
@@ -1437,23 +1435,25 @@ class _RenderTheater extends RenderBox
   // Like intrinsic dimensions, baselines only depend on ordinary entry children.
   // Portal children are laid out after the theater and its ancestors.
   @override
-  // The following uses sync* because baseline queries do not need to allocate a list.
-  Iterable<RenderBox> _childrenInBaselineOrder() sync* {
+  Iterable<RenderBox> get _onstageOverlayEntryChildren {
+    final children = <RenderBox>[];
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
-      yield child;
+      children.add(child);
       child = (child.parentData! as _TheaterParentData).nextSibling;
     }
+    return children;
   }
 
   @override
-  // The following uses sync* because painting does not need to allocate a child list.
+  // The following uses sync* because concurrent modifications should be allowed
+  // during layout.
   Iterable<RenderBox> _childrenInPaintOrder() sync* {
     RenderBox? child = _firstOnstageChild;
     while (child != null) {
       yield child;
       final childParentData = child.parentData! as _TheaterParentData;
-      final Iterator<_RenderDeferredLayoutBox>? innerIterator = childParentData.paintOrderIterator;
+      final Iterator<RenderBox>? innerIterator = childParentData.paintOrderIterator;
       if (innerIterator != null) {
         while (innerIterator.moveNext()) {
           yield innerIterator.current;
@@ -1470,15 +1470,10 @@ class _RenderTheater extends RenderBox
     int childLeft = childCount - skipCount;
     while (child != null) {
       final childParentData = child.parentData! as _TheaterParentData;
-      final Iterator<_RenderDeferredLayoutBox>? innerIterator =
-          childParentData.hitTestOrderIterator;
+      final Iterator<RenderBox>? innerIterator = childParentData.hitTestOrderIterator;
       if (innerIterator != null) {
         while (innerIterator.moveNext()) {
-          final _RenderDeferredLayoutBox deferredChild = innerIterator.current;
-          // Hit testing between frames can use stale geometry, but requires a size.
-          if (deferredChild.hasSize) {
-            yield deferredChild;
-          }
+          yield innerIterator.current;
         }
       }
       yield child;
@@ -1516,27 +1511,10 @@ class _RenderTheater extends RenderBox
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
     _nonPositionedChildConstraints = BoxConstraints.tight(size);
-    RenderBox? child = _firstOnstageChild;
-    while (child != null) {
+    for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
         layoutChild(child, _nonPositionedChildConstraints);
       }
-      final childParentData = child.parentData! as _TheaterParentData;
-      final Iterator<_RenderDeferredLayoutBox>? iterator = childParentData.paintOrderIterator;
-      if (iterator != null) {
-        while (iterator.moveNext()) {
-          final _RenderDeferredLayoutBox deferredChild = iterator.current;
-          // Do not establish deferred layout before the surrogate has geometry.
-          // Already-sized children must still receive updated theater constraints.
-          if (!deferredChild.hasSize &&
-              (!deferredChild._layoutSurrogate.hasSize ||
-                  deferredChild._layoutSurrogate.needsLayout)) {
-            continue;
-          }
-          layoutChild(deferredChild, _nonPositionedChildConstraints);
-        }
-      }
-      child = childParentData.nextSibling;
     }
   }
 
@@ -1624,15 +1602,7 @@ class _RenderTheater extends RenderBox
       visitor(child);
       final childParentData = child.parentData! as _TheaterParentData;
 
-      childParentData.visitOverlayPortalChildrenOnOverlayEntry((
-        _RenderDeferredLayoutBox overlayChild,
-      ) {
-        // Semantics collection requires up-to-date layout.
-        if (overlayChild.needsLayout) {
-          return;
-        }
-        visitor(overlayChild);
-      });
+      childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
   }
@@ -1872,11 +1842,6 @@ enum OverlayChildLocation {
 ///
 /// The overlay child does not contribute to the target [Overlay]'s intrinsic
 /// dimensions or baseline.
-///
-/// If [OverlayPortalController.show] is called while this widget is not being
-/// laid out (for example, while kept alive offscreen in a [ListView] or inside
-/// an offstage [OverlayEntry]), the overlay child's initial layout, painting,
-/// hit testing, and semantics are deferred until this widget is next laid out.
 ///
 /// When [OverlayPortalController.hide] is called, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the
@@ -2602,22 +2567,18 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 // `_layoutSurrogate` (which must be a descendant of this `RenderObject`'s
 // parent) through the parent `_RenderTheater` are known. To this end:
 //
-// 1. Once established as a relayout boundary, it normally schedules its own
-//    layout rather than dirtying its `_RenderTheater`. Adding it to the theater
-//    does not itself require the theater to relayout. Before its first layout,
-//    it can remain attached without being on the dirty list if
-//    its layout surrogate is not laid out (for example, while kept alive
-//    offscreen or in an offstage entry).
-//    The theater skips its initial layout until the surrogate has a size and has
-//    completed local layout; the surrogate can then schedule deferred layout.
+// 1. It's a relayout boundary, and calling `markNeedsLayout` on it or adding it
+//    to the `_RenderTheater` as a child never dirties its `_RenderTheater`.
+//    Instead, it is always added to the `PipelineOwner`'s dirty list when it
+//    needs layout (even for the initial layout when it is first added to the
+//    tree).
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
-//    not lay out its child when it's called from `layout`, preventing the parent
+//    not do anything when its called from `layout`, preventing the parent
 //    `_RenderTheater` from laying out this subtree prematurely (but this
 //    `RenderObject` may still be resized). Instead, `markNeedsLayout` will be
 //    called from within `layout` to schedule a layout update for this relayout
-//    boundary if it needs layout or its constraints have changed. The layout
-//    surrogate also uses this path to schedule the initial deferred layout.
+//    boundary when needed.
 //
 //  When invoked from `PipelineOwner.flushLayout`, this `RenderObject` behaves
 //  like an `Overlay` that has only one entry.
@@ -2721,7 +2682,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       //     laid out, as it has a greater depth value than its dependencies.
       //
       //  2. when the deferred child's child starts to do layout, the nodes
-      //     from the layout surrogate to the theater (exclusive) have finished
+      //     from the layout surrogate to the theater (exclusive) have finishd
       //     doing layout, so the deferred child's child can read their sizes
       //     and (usually) compute the paint transform of the regular child
       //     within the Overlay.
@@ -2802,23 +2763,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 // always kept in sync with both the surrogate and its parent theater.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderLayoutSurrogateProxyBox(this.overlayLocation);
-
-  // The theater must not initiate a deferred child's first layout while its
-  // surrogate has not been laid out (for example, kept alive offscreen or in an
-  // offstage entry).
-  bool get needsLayout {
-    assert(debugNeedsLayout == _needsLayout);
-    return _needsLayout;
-  }
-
-  bool _needsLayout = true;
-
-  @override
-  void markNeedsLayout() {
-    _needsLayout = true;
-    super.markNeedsLayout();
-  }
-
   // This variable is set as soon as the _DeferredLayout widget creates it, and
   // it is only set to null when the _DeferredLayout widget is being removed
   // from the tree.
@@ -2869,7 +2813,6 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
 
   @override
   void performLayout() {
-    _needsLayout = false;
     super.performLayout();
     final _RenderDeferredLayoutBox? deferredChild = _deferredLayoutChild;
     if (deferredChild == null) {
