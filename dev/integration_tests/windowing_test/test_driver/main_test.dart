@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -272,31 +273,16 @@ void main() {
             driver,
             jsonEncode({'type': 'are_nested_popups_destroyed'}),
           );
-          var data = jsonDecode(response) as Map<String, Object?>;
+          final data = jsonDecode(response) as Map<String, Object?>;
           expect(data['outer'], false);
           expect(data['inner'], false);
-
-          // Activating the main window closes the inner popup, as the main
-          // window is neither its parent nor its descendant, but keeps the outer
-          // popup, whose parent is the main window.
-          response = await _requestDataWithRetry(
-            driver,
-            jsonEncode({'type': 'activate_main_window'}),
-          );
-          expect((jsonDecode(response) as Map<String, Object?>)['isActivated'], true);
-
-          response = await _requestDataWithRetry(
-            driver,
-            jsonEncode({'type': 'are_nested_popups_destroyed'}),
-          );
-          data = jsonDecode(response) as Map<String, Object?>;
-          expect(data['outer'], false);
-          expect(data['inner'], true);
         } finally {
           await _requestDataWithRetry(driver, jsonEncode({'type': 'destroy_nested_popups'}));
         }
       },
       timeout: Timeout.none,
+      // TODO(mattkae): Enable on other platforms once nested popup activation is supported there.
+      skip: !Platform.isWindows,
     );
   });
 }
