@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
@@ -48,6 +47,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -73,11 +73,7 @@ void main() {
 
       testUsingContext(
         'build with assets $buildMode$testName',
-        overrides: <Type, Generator>{
-          ProcessManager: () => FakeProcessManager.empty(),
-          FeatureFlags: () =>
-              TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-        },
+        overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
         () async {
           writePackageConfigFiles(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri = environment.buildDir
@@ -115,7 +111,10 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
-            featureFlags: featureFlags,
+            featureFlags: TestFeatureFlags(
+              isNativeAssetsEnabled: true,
+              isDartDataAssetsEnabled: true,
+            ),
             logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),

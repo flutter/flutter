@@ -1729,8 +1729,8 @@
             "longest_path_cycles": [
               0.78125,
               0.78125,
-              0.625,
-              0.625,
+              0.4375,
+              0.5625,
               0.0,
               0.25,
               1.25
@@ -1746,16 +1746,16 @@
             ],
             "shortest_path_bound_pipelines": [
               "arith_total",
-              "arith_sfu"
+              "arith_fma"
             ],
             "shortest_path_cycles": [
-              0.625,
               0.59375,
-              0.421875,
-              0.625,
+              0.59375,
+              0.3125,
+              0.5625,
               0.0,
               0.25,
-              0.0
+              0.25
             ],
             "total_bound_pipelines": [
               "texture"
@@ -1763,8 +1763,8 @@
             "total_cycles": [
               0.78125,
               0.78125,
-              0.625,
-              0.625,
+              0.4375,
+              0.5625,
               0.0,
               0.25,
               1.25
@@ -4520,8 +4520,8 @@
             "longest_path_cycles": [
               0.53125,
               0.53125,
-              0.40625,
-              0.1875,
+              0.21875,
+              0.125,
               0.0,
               0.25,
               0.25
@@ -4542,11 +4542,11 @@
             "shortest_path_cycles": [
               0.53125,
               0.53125,
-              0.296875,
               0.1875,
+              0.125,
               0.0,
               0.25,
-              0.0
+              0.25
             ],
             "total_bound_pipelines": [
               "arith_total",
@@ -4555,8 +4555,8 @@
             "total_cycles": [
               0.53125,
               0.53125,
-              0.40625,
-              0.1875,
+              0.21875,
+              0.125,
               0.0,
               0.25,
               0.25
@@ -4565,7 +4565,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 6,
-          "work_registers_used": 21
+          "work_registers_used": 25
         }
       }
     }

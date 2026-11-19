@@ -14,7 +14,7 @@ name: Pull Request Labeler Trigger
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
