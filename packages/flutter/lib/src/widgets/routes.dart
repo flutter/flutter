@@ -601,9 +601,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
         // This route is destined to pop at this point. Reuse navigator's pop.
         navigator?.pop();
 
-        // The popping may have finished inline if already at the target destination.
+        // `pop()` already started the dismiss animation from the current value.
+        // Reversing from `upperBound` would snap the animation to 1.0 before
+        // playing backwards, so continue from wherever the gesture left it.
         if (_controller?.isAnimating ?? false) {
-          _controller!.reverse(from: _controller!.upperBound);
+          _controller!.reverse();
         }
       }
     }
