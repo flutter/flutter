@@ -463,8 +463,32 @@ class EngineAutofillForm {
       shouldHideElement: !_isWebKit,
       shouldDisablePointerEvents: _isWebKit,
     );
+    _hideSyntheticElementFromAssistiveTechnology(synthetic);
     elements[id] = synthetic;
     formElement!.append(synthetic);
+  }
+
+  /// Hides a synthetic autofill element from screen readers and keyboard
+  /// navigation in semantics mode.
+  ///
+  /// Synthetic elements exist for the browser's autofill and form submission.
+  /// The semantics tree already exposes each field through its own element, so
+  /// a synthetic copy would show up as an extra, unlabeled control, and the
+  /// dormant form keeps it in the page for the rest of the session. Browser
+  /// autofill does not read ARIA, so credential save and autofill keep working
+  /// through these elements.
+  ///
+  /// Without semantics, password manager extensions fill these elements, and
+  /// some of them skip elements hidden from assistive technology, so they are
+  /// left untouched.
+  ///
+  /// See: https://github.com/flutter/flutter/issues/195174
+  void _hideSyntheticElementFromAssistiveTechnology(DomHTMLElement element) {
+    if (!associateFocusedElementByAttribute) {
+      return;
+    }
+    element.setAttribute('aria-hidden', 'true');
+    element.tabIndex = -1;
   }
 
   /// Makes the form dormant.
@@ -529,6 +553,7 @@ class EngineAutofillForm {
           shouldHideElement: !_isWebKit,
           shouldDisablePointerEvents: _isWebKit,
         );
+        _hideSyntheticElementFromAssistiveTechnology(htmlElement);
       }
 
       elements[field.autofillInfo.uniqueIdentifier] = htmlElement;
@@ -1773,9 +1798,17 @@ abstract class DefaultTextEditingStrategy
 
   @override
   void setEditingState(EditingState? editingState) {
+    final String? previousText = lastEditingState?.text;
     lastEditingState = editingState;
     if (!isEnabled || !editingState!.isValid) {
       return;
+    }
+    // Writing different text into the element ends any composition in
+    // progress, and Chrome does so without a `compositionend` event. This
+    // happens when an input formatter rejects a dead key character. Forget the
+    // composition so its stale range is not reported back to the framework.
+    if (editingState.text != previousText) {
+      resetComposition();
     }
     lastEditingState!.applyToDomElement(domElement);
   }

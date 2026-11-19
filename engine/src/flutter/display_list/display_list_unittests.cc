@@ -477,7 +477,7 @@ TEST_F(DisplayListTest, BuildRestoresAttributes) {
   DisplayListBuilder builder(cull_rect);
   DlOpReceiver& receiver = ToReceiver(builder);
 
-  receiver.setAntiAlias(true);
+  receiver.setAntiAlias(!DlPaint::kDefaultAntiAlias);
   builder.Build();
   check_defaults(builder, cull_rect);
 
@@ -1886,7 +1886,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
   EXPECT_EQ(DlIRect::RoundOut(display_list->GetBounds()),
             DlIRect::MakeWH(100, 100));
   EXPECT_EQ(display_list->op_count(), 19u);
-  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 408u);
+  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 400u);
   EXPECT_EQ(display_list->total_depth(), 3u);
 }
 

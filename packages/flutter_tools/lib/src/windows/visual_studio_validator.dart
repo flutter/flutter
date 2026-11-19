@@ -4,12 +4,9 @@
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 
-import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor_validator.dart';
 import 'visual_studio.dart';
-
-VisualStudioValidator? get visualStudioValidator => context.get<VisualStudioValidator>();
 
 class VisualStudioValidator extends DoctorValidator {
   VisualStudioValidator({required this._visualStudio, required this._userMessages})

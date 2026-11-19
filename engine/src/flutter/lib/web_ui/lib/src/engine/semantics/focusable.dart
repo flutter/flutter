@@ -47,6 +47,9 @@ class Focusable extends SemanticBehavior {
   /// not take the focus. The return value can be used to decide whether to stop
   /// searching for a node that should take focus.
   bool focusAsRouteDefault() {
+    if (!semanticsObject.isFocusable) {
+      return false;
+    }
     _focusManager._lastEvent = AccessibilityFocusManagerEvent.requestedFocus;
     owner.element.focusWithoutScroll();
     return true;

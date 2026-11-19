@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -27,14 +28,11 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart' as test_context show testUsingContext;
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -60,7 +58,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -70,17 +67,18 @@ void main() {
 
     String sdkPath() => fileSystem.directory('android-sdk').absolute.path;
     String missingSdkPath() => fileSystem.directory('nonexistent-android-sdk').absolute.path;
-    String sdkManagerPath() => fileSystem.path.join(
+    String sdkManagerPath({Platform? platform}) => fileSystem.path.join(
       sdkPath(),
       'cmdline-tools',
       'latest',
       'bin',
-      globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager',
+      (platform ?? FakePlatform()).isWindows ? 'sdkmanager.bat' : 'sdkmanager',
     );
     String sdkLicensesPath() => fileSystem.path.join(sdkPath(), 'licenses');
     String ndkPath(String version) => fileSystem.path.join(sdkPath(), 'ndk', version);
+    String apkAnalyzerName() => apkAnalyzerBinaryName(FakePlatform());
     String apkAnalyzerPath() =>
-        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', apkAnalyzerBinaryName);
+        fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin', apkAnalyzerName());
 
     AndroidGradleBuilder createBuilder({
       ToolContext? toolContext,
@@ -89,23 +87,28 @@ void main() {
       Java? java,
       Logger? logger,
       ProcessManager? processManager,
-      FileSystem? fileSystem,
       Artifacts? artifacts,
       GradleUtils? gradleUtils,
       Platform? platform,
       AndroidStudio? androidStudio,
       AndroidSdk? androidSdk,
     }) {
-      return AndroidGradleBuilder.fromContexts(
-        toolContext:
-            toolContext ??
-            FakeToolContext(
-              logger: logger,
-              processManager: processManager,
-              fs: fileSystem ?? globals.fs,
-              artifacts: artifacts,
-              platform: platform,
+      final ToolContext resolvedToolContext =
+          toolContext ??
+          FakeToolContext(
+            logger: logger,
+            processManager: processManager,
+            fs: fileSystem,
+            artifacts: artifacts,
+            platform: platform,
+            cache: Cache.test(
+              flutterRoot: '/',
+              fileSystem: fileSystem,
+              processManager: processManager ?? FakeProcessManager.any(),
             ),
+          );
+      return AndroidGradleBuilder.fromContexts(
+        toolContext: resolvedToolContext,
         androidContext:
             androidContext ??
             FakeAndroidContext(
@@ -115,226 +118,221 @@ void main() {
               androidSdk:
                   androidSdk ??
                   AndroidSdk(
-                    (fileSystem ?? globals.fs).directory(missingSdkPath()),
+                    resolvedToolContext.fs.directory(missingSdkPath()),
                     java: FakeJava(),
+                    toolContext: resolvedToolContext,
                   ),
             ),
         analytics: analytics ?? fakeAnalytics,
       );
     }
 
-    void testUsingContext(
-      String description,
-      dynamic Function() body, {
-      Map<Type, Generator> overrides = const <Type, Generator>{},
-    }) {
-      test_context.testUsingContext(
-        description,
-        body,
-        overrides: <Type, Generator>{
-          AndroidSdk: () => AndroidSdk(fileSystem.directory(missingSdkPath()), java: FakeJava()),
-          ProcessManager: () => processManager,
-          ...overrides,
-        },
-      );
-    }
-
-    testUsingContext(
-      'build apk passes sdkmanager path, sdk root, and validated installed ndk versions to gradle',
-      () async {
-        final AndroidGradleBuilder builder = createBuilder(
-          java: FakeJava(),
-          logger: logger,
-          processManager: processManager,
-          fileSystem: fileSystem,
-          artifacts: Artifacts.test(),
-          analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(),
-          platform: FakePlatform(),
-          androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
-        );
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=lib/main.dart',
-              '-Pbase-application-name=android.app.Application',
-              '-Pdart-obfuscation=false',
-              '-Ptrack-widget-creation=false',
-              '-Ptree-shake-icons=false',
-              '-Pflutter.androidSdkRoot=${sdkPath()}',
-              '-Pflutter.installedNdkVersions=29.0.13846066',
-              '-Pflutter.sdkManagerPath=${sdkManagerPath()}',
-              'assembleDevRelease',
-            ],
-          ),
-        );
-
-        fileSystem.file('android/gradlew').createSync(recursive: true);
-        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
-        fileSystem.file('android/build.gradle').createSync(recursive: true);
-        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-        fileSystem
-            .directory('build')
-            .childDirectory('app')
-            .childDirectory('outputs')
-            .childDirectory('flutter-apk')
-            .childFile('app-dev-release.apk')
-            .createSync(recursive: true);
-
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
-        project.android.appManifestFile
-          ..createSync(recursive: true)
-          ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-        await builder.buildGradleApp(
-          project: project,
-          androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              'dev',
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-            ),
-          ),
-          target: 'lib/main.dart',
-          isBuildingBundle: false,
-          configOnly: false,
-          localGradleErrors: const <GradleHandledError>[],
-        );
-
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
+    for (final operatingSystem in <String>['linux', 'windows']) {
+      testWithoutContext(
+        'build apk passes sdkmanager path, sdk root, and validated installed ndk versions to gradle on $operatingSystem',
+        () async {
+          final platform = FakePlatform(operatingSystem: operatingSystem);
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
+          fileSystem.file(sdkManagerPath(platform: platform)).createSync(recursive: true);
           fileSystem
               .directory(ndkPath('29.0.13846066'))
               .childFile('source.properties')
               .createSync(recursive: true);
           fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
-    );
+          final sdk = AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(),
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: processManager,
+            ),
+          );
+          final AndroidGradleBuilder builder = createBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: platform,
+            androidStudio: FakeAndroidStudio(),
+            androidSdk: sdk,
+          );
+          processManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'gradlew',
+                '-q',
+                '-Ptarget-platform=android-arm,android-arm64,android-x64',
+                '-Ptarget=lib/main.dart',
+                '-Pbase-application-name=android.app.Application',
+                '-Pdart-obfuscation=false',
+                '-Ptrack-widget-creation=false',
+                '-Ptree-shake-icons=false',
+                '-Pflutter.androidSdkRoot=${sdkPath()}',
+                '-Pflutter.installedNdkVersions=29.0.13846066',
+                '-Pflutter.sdkManagerPath=${sdkManagerPath(platform: platform)}',
+                'assembleDevRelease',
+              ],
+            ),
+          );
 
-    testUsingContext(
-      'build apk keeps skip dependency checks on the main gradle invocation when ndk provisioning is unavailable',
-      () async {
-        final AndroidGradleBuilder builder = createBuilder(
-          java: FakeJava(),
+          fileSystem.file('android/gradlew').createSync(recursive: true);
+          fileSystem
+              .directory('android')
+              .childFile('gradle.properties')
+              .createSync(recursive: true);
+          fileSystem.file('android/build.gradle').createSync(recursive: true);
+          fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+          fileSystem
+              .directory('build')
+              .childDirectory('app')
+              .childDirectory('outputs')
+              .childDirectory('flutter-apk')
+              .childFile('app-dev-release.apk')
+              .createSync(recursive: true);
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+          project.android.appManifestFile
+            ..createSync(recursive: true)
+            ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+          await builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                'dev',
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+            ),
+            target: 'lib/main.dart',
+            isBuildingBundle: false,
+            configOnly: false,
+            localGradleErrors: const <GradleHandledError>[],
+          );
+
+          expect(processManager, hasNoRemainingExpectations);
+        },
+      );
+    }
+
+    testWithoutContext('build apk keeps skip dependency checks on the main gradle invocation when ndk provisioning is unavailable', () async {
+      fileSystem.directory(sdkPath()).createSync(recursive: true);
+      fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+      final sdk = AndroidSdk(
+        fileSystem.directory(sdkPath()),
+        java: FakeJava(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
-          artifacts: Artifacts.test(),
-          analytics: fakeAnalytics,
-          gradleUtils: FakeGradleUtils(),
-          platform: FakePlatform(),
-          androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
-        );
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              'gradlew',
-              '-q',
-              '-PskipDependencyChecks=true',
-              '-Ptarget-platform=android-arm,android-arm64,android-x64',
-              '-Ptarget=lib/main.dart',
-              '-Pbase-application-name=android.app.Application',
-              '-Pdart-obfuscation=false',
-              '-Ptrack-widget-creation=false',
-              '-Ptree-shake-icons=false',
-              '-Pflutter.androidSdkRoot=${sdkPath()}',
-              '-Pflutter.installedNdkVersions=',
-              'assembleDevRelease',
-            ],
+        ),
+      );
+      final AndroidGradleBuilder builder = createBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        analytics: fakeAnalytics,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
+        androidSdk: sdk,
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-q',
+            '-PskipDependencyChecks=true',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            '-Ptarget=lib/main.dart',
+            '-Pbase-application-name=android.app.Application',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=false',
+            '-Pflutter.androidSdkRoot=${sdkPath()}',
+            '-Pflutter.installedNdkVersions=',
+            'assembleDevRelease',
+          ],
+        ),
+      );
+
+      fileSystem.file('android/gradlew').createSync(recursive: true);
+      fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+      fileSystem.file('android/build.gradle').createSync(recursive: true);
+      fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      fileSystem
+          .directory('build')
+          .childDirectory('app')
+          .childDirectory('outputs')
+          .childDirectory('flutter-apk')
+          .childFile('app-dev-release.apk')
+          .createSync(recursive: true);
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+      await builder.buildGradleApp(
+        project: project,
+        androidBuildInfo: const AndroidBuildInfo(
+          BuildInfo(
+            BuildMode.release,
+            'dev',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
           ),
-        );
+        ),
+        target: 'lib/main.dart',
+        isBuildingBundle: false,
+        configOnly: false,
+        localGradleErrors: const <GradleHandledError>[],
+      );
 
-        fileSystem.file('android/gradlew').createSync(recursive: true);
-        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
-        fileSystem.file('android/build.gradle').createSync(recursive: true);
-        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-        fileSystem
-            .directory('build')
-            .childDirectory('app')
-            .childDirectory('outputs')
-            .childDirectory('flutter-apk')
-            .childFile('app-dev-release.apk')
-            .createSync(recursive: true);
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-        final FlutterProject project = FlutterProject.fromDirectoryTest(
-          fileSystem.currentDirectory,
-        );
-        project.android.appManifestFile
-          ..createSync(recursive: true)
-          ..writeAsStringSync(minimalV2EmbeddingManifest);
-
-        await builder.buildGradleApp(
-          project: project,
-          androidBuildInfo: const AndroidBuildInfo(
-            BuildInfo(
-              BuildMode.release,
-              'dev',
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-              androidSkipBuildDependencyValidation: true,
-            ),
-          ),
-          target: 'lib/main.dart',
-          isBuildingBundle: false,
-          configOnly: false,
-          localGradleErrors: const <GradleHandledError>[],
-        );
-
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
-    );
-
-    testUsingContext(
+    testWithoutContext(
       'build apk passes releaseManifestEngineShellArgs to gradle as a base64 encoded JSON string',
       () async {
         const engineShellArgs = <String>['--enable-impeller=true', '--trace-skia'];
         final String base64EngineShellArgs = base64Encode(utf8.encode(jsonEncode(engineShellArgs)));
 
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
+          androidSdk: sdk,
         );
         processManager.addCommand(
           FakeCommand(
@@ -395,34 +393,33 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{
-        Java: () => FakeJava(),
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'build apk passes an empty installed ndk version list when no valid ndks are installed',
       () async {
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+        fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
+          androidSdk: sdk,
         );
         processManager.addCommand(
           FakeCommand(
@@ -482,26 +479,13 @@ void main() {
 
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
     );
 
-    testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
+    testWithoutContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -559,10 +543,18 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -595,16 +587,15 @@ void main() {
         ),
         true,
       );
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'Verbose mode for APKs includes Gradle stacktrace and sets debug log level',
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: BufferLogger.test(verbose: true),
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
@@ -669,15 +660,13 @@ void main() {
         );
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
     );
 
-    testUsingContext('Can retry build on recognized exit code/stderr', () async {
+    testWithoutContext('Can retry build on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -746,9 +735,17 @@ void main() {
                 }
                 return false;
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                return GradleBuildStatus.retry;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    return GradleBuildStatus.retry;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -770,14 +767,13 @@ void main() {
           ),
         ),
       );
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('Gradle build retries with exponential backoff capped at kMaxRetryTime', () {
+    testWithoutContext('Gradle build retries with exponential backoff capped at kMaxRetryTime', () {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -837,9 +833,17 @@ void main() {
             localGradleErrors: <GradleHandledError>[
               GradleHandledError(
                 test: (String line) => line.contains('Some gradle message'),
-                handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                  return GradleBuildStatus.retry;
-                },
+                handler:
+                    ({
+                      required GradleUtils gradleUtils,
+                      required String line,
+                      required FlutterProject project,
+                      required ToolContext toolContext,
+                      required bool usesAndroidX,
+                      Java? java,
+                    }) async {
+                      return GradleBuildStatus.retry;
+                    },
                 eventLabel: 'random-event-label',
               ),
             ],
@@ -871,14 +875,13 @@ void main() {
         logger.statusText,
         contains('Retrying Gradle Build: #8, wait time: 10000ms'),
       ); // Correctly capped!
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
+    testWithoutContext('Converts recognized ProcessExceptions into tools exits', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -936,10 +939,18 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -959,14 +970,13 @@ void main() {
           ),
         ),
       );
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('rethrows unrecognized ProcessException', () async {
+    testWithoutContext('rethrows unrecognized ProcessException', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -1024,14 +1034,13 @@ void main() {
         );
       }, throwsProcessException());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('logs success event after a successful retry', () async {
+    testWithoutContext('logs success event after a successful retry', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -1110,9 +1119,17 @@ void main() {
             test: (String line) {
               return line.contains('Some gradle message');
             },
-            handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-              return GradleBuildStatus.retry;
-            },
+            handler:
+                ({
+                  required GradleUtils gradleUtils,
+                  required String line,
+                  required FlutterProject project,
+                  required ToolContext toolContext,
+                  required bool usesAndroidX,
+                  Java? java,
+                }) async {
+                  return GradleBuildStatus.retry;
+                },
             eventLabel: 'random-event-label',
           ),
         ],
@@ -1129,14 +1146,13 @@ void main() {
         ),
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('performs code size analysis and sends analytics', () async {
+    testWithoutContext('performs code size analysis and sends analytics', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -1223,7 +1239,7 @@ void main() {
       );
 
       expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'apk')));
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
     group('Appbundle debug symbol tests', () {
       List<String> commonCommandPortion() => <String>[
@@ -1405,20 +1421,35 @@ void main() {
         return aabFile;
       }
 
-      testUsingContext(
+      testWithoutContext(
         'build succeeds when debug symbols present for at least one architecture',
         () async {
+          final platform = FakePlatform(environment: <String, String>{'HOME': '/home'});
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
+              .childFile(apkAnalyzerName())
+              .createSync(recursive: true);
+          final sdk = AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(),
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: processManager,
+            ),
+          );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
-            fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
             gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            platform: platform,
             androidStudio: FakeAndroidStudio(),
-            androidSdk: globals.androidSdk,
+            androidSdk: sdk,
           );
           processManager.addCommand(
             FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleRelease')),
@@ -1458,34 +1489,37 @@ void main() {
             localGradleErrors: <GradleHandledError>[],
           );
         },
-        overrides: <Type, Generator>{
-          AndroidSdk: () {
-            fileSystem.directory(sdkPath()).createSync(recursive: true);
-            fileSystem
-                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
-                .createSync(recursive: true);
-            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-          },
-          AndroidStudio: () => FakeAndroidStudio(),
-          ProcessManager: () => processManager,
-        },
       );
 
-      testUsingContext(
+      testWithoutContext(
         'build succeeds when debug info and symbol tables present for at least one architecture',
         () async {
+          final platform = FakePlatform(environment: <String, String>{'HOME': '/home'});
+          fileSystem.directory(sdkPath()).createSync(recursive: true);
+          fileSystem
+              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
+              .childFile(apkAnalyzerName())
+              .createSync(recursive: true);
+          final sdk = AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(),
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: processManager,
+            ),
+          );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
-            fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
             gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            platform: platform,
             androidStudio: FakeAndroidStudio(),
-            androidSdk: globals.androidSdk,
+            androidSdk: sdk,
           );
           processManager.addCommand(
             FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleRelease')),
@@ -1525,97 +1559,95 @@ void main() {
             localGradleErrors: <GradleHandledError>[],
           );
         },
-        overrides: <Type, Generator>{
-          AndroidSdk: () {
-            fileSystem.directory(sdkPath()).createSync(recursive: true);
-            fileSystem
-                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
-                .createSync(recursive: true);
-            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-          },
-          AndroidStudio: () => FakeAndroidStudio(),
-          ProcessManager: () => processManager,
-        },
       );
 
-      testUsingContext(
-        'building a debug aab does not invoke apkanalyzer',
-        () async {
-          final AndroidGradleBuilder builder = createBuilder(
-            java: FakeJava(),
+      testWithoutContext('building a debug aab does not invoke apkanalyzer', () async {
+        final platform = FakePlatform(environment: <String, String>{'HOME': '/home'});
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem
+            .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
+            .childFile(apkAnalyzerName())
+            .createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
             logger: logger,
+            platform: platform,
             processManager: processManager,
-            fileSystem: fileSystem,
-            artifacts: Artifacts.test(),
-            analytics: fakeAnalytics,
-            gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-            androidStudio: FakeAndroidStudio(),
-            androidSdk: globals.androidSdk,
-          );
-          processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleDebug')),
-          );
+          ),
+        );
+        final AndroidGradleBuilder builder = createBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: platform,
+          androidStudio: FakeAndroidStudio(),
+          androidSdk: sdk,
+        );
+        processManager.addCommand(
+          FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleDebug')),
+        );
 
-          createSharedGradleFiles();
-          createAabFile(BuildMode.debug);
+        createSharedGradleFiles();
+        createAabFile(BuildMode.debug);
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(
-            fileSystem.currentDirectory,
-          );
-          project.android.appManifestFile
-            ..createSync(recursive: true)
-            ..writeAsStringSync(minimalV2EmbeddingManifest);
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-          await builder.buildGradleApp(
-            project: project,
-            androidBuildInfo: const AndroidBuildInfo(
-              BuildInfo(
-                BuildMode.debug,
-                null,
-                treeShakeIcons: false,
-                packageConfigPath: '.dart_tool/package_config.json',
-              ),
-              targetArchs: <CpuArch>[CpuArch.arm64, CpuArch.armv7, CpuArch.x64],
+        await builder.buildGradleApp(
+          project: project,
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.debug,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
             ),
-            target: 'lib/main.dart',
-            isBuildingBundle: true,
-            configOnly: false,
-            localGradleErrors: <GradleHandledError>[],
-          );
-        },
-        overrides: <Type, Generator>{
-          AndroidSdk: () {
-            fileSystem.directory(sdkPath()).createSync(recursive: true);
-            fileSystem
-                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
-                .createSync(recursive: true);
-            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-          },
-          AndroidStudio: () => FakeAndroidStudio(),
-        },
-      );
+            targetArchs: <CpuArch>[CpuArch.arm64, CpuArch.armv7, CpuArch.x64],
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: true,
+          configOnly: false,
+          localGradleErrors: <GradleHandledError>[],
+        );
+      });
 
-      testUsingContext(
+      testWithoutContext(
         'throws tool exit for missing debug symbols when building release app bundle',
         () async {
+          final platform = FakePlatform(environment: <String, String>{'HOME': '/home'});
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(apkAnalyzerBinaryName)
+              .childFile(apkAnalyzerName())
               .createSync(recursive: true);
-          final sdk = AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
+          final sdk = AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(),
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: processManager,
+            ),
+          );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
-            fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
             gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            platform: platform,
             androidStudio: FakeAndroidStudio(),
             androidSdk: sdk,
           );
@@ -1629,7 +1661,7 @@ void main() {
           processManager.addCommand(
             FakeCommand(
               command: <String>[
-                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                sdk.getCmdlineToolsPath(apkAnalyzerName())!,
                 'files',
                 'list',
                 aabFile.path,
@@ -1665,37 +1697,35 @@ void main() {
             throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
           );
         },
-        overrides: <Type, Generator>{
-          AndroidSdk: () {
-            fileSystem.directory(sdkPath()).createSync(recursive: true);
-            fileSystem
-                .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-                .childFile(apkAnalyzerBinaryName)
-                .createSync(recursive: true);
-            return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-          },
-          AndroidStudio: () => FakeAndroidStudio(),
-        },
       );
 
-      testUsingContext(
+      testWithoutContext(
         'build aab in release mode fails when apkanalyzer exit code is non zero',
         () async {
+          final platform = FakePlatform(environment: <String, String>{'HOME': '/home'});
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(apkAnalyzerBinaryName)
+              .childFile(apkAnalyzerName())
               .createSync(recursive: true);
-          final sdk = AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
+          final sdk = AndroidSdk(
+            fileSystem.directory(sdkPath()),
+            java: FakeJava(),
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: processManager,
+            ),
+          );
           final AndroidGradleBuilder builder = createBuilder(
             java: FakeJava(),
             logger: logger,
             processManager: processManager,
-            fileSystem: fileSystem,
             artifacts: Artifacts.test(),
             analytics: fakeAnalytics,
             gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            platform: platform,
             androidStudio: FakeAndroidStudio(),
             androidSdk: sdk,
           );
@@ -1709,7 +1739,7 @@ void main() {
           processManager.addCommand(
             FakeCommand(
               command: <String>[
-                sdk.getCmdlineToolsPath(apkAnalyzerBinaryName)!,
+                sdk.getCmdlineToolsPath(apkAnalyzerName())!,
                 'files',
                 'list',
                 aabFile.path,
@@ -1746,16 +1776,14 @@ void main() {
             throwsToolExit(message: failedToStripDebugSymbolsErrorMessage),
           );
         },
-        overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
       );
     });
 
-    testUsingContext('indicates that an APK has been built successfully', () async {
+    testWithoutContext('indicates that an APK has been built successfully', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -1819,9 +1847,9 @@ void main() {
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('Uses namespace attribute if manifest lacks a package attribute', () async {
+    testWithoutContext('Uses namespace attribute if manifest lacks a package attribute', () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       final AndroidSdk sdk = FakeAndroidSdk();
 
@@ -1870,30 +1898,32 @@ android {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        processUtils: ProcessUtils(processManager: processManager, logger: logger),
-        userMessages: UserMessages(),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
         ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
       );
 
       expect(androidApk?.id, 'com.example.foo');
     });
 
-    testUsingContext(
+    testWithoutContext(
       'can call custom gradle task getBuildOptions and parse the result',
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
@@ -1934,18 +1964,13 @@ BuildVariant: paidProfile
           true,
         );
       },
-      overrides: <Type, Generator>{
-        AndroidStudio: () => FakeAndroidStudio(),
-        Analytics: () => fakeAnalytics,
-      },
     );
 
-    testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
+    testWithoutContext('getBuildOptions returns empty list if gradle returns error', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -1965,9 +1990,9 @@ Gradle Crashed
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       );
       expect(actual, const <String>[]);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'can call custom gradle task outputFreeDebugAppLinkSettings and parse the result',
       () async {
         final String expectedOutputPath;
@@ -1979,7 +2004,6 @@ Gradle Crashed
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
@@ -2010,22 +2034,15 @@ Gradle Crashed
           true,
         );
       },
-      overrides: <Type, Generator>{
-        AndroidStudio: () => FakeAndroidStudio(),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Analytics: () => fakeAnalytics,
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       "doesn't indicate how to consume an AAR when printHowToConsumeAar is false",
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
@@ -2092,26 +2109,38 @@ Gradle Crashed
           true,
         );
       },
-      overrides: <Type, Generator>{
-        AndroidStudio: () => FakeAndroidStudio(),
-        Analytics: () => fakeAnalytics,
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'build aar passes sdkmanager path, sdk root, and validated installed ndk versions to gradle',
       () async {
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+        fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+        fileSystem
+            .directory(ndkPath('29.0.13846066'))
+            .childFile('source.properties')
+            .createSync(recursive: true);
+        fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
+          androidSdk: sdk,
         );
         processManager.addCommand(
           FakeCommand(
@@ -2165,27 +2194,10 @@ Gradle Crashed
 
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          fileSystem
-              .directory(ndkPath('29.0.13846066'))
-              .childFile('source.properties')
-              .createSync(recursive: true);
-          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(fileSystem.directory(sdkPath()), java: FakeJava());
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/162649.
-    testUsingContext('buildAar generates tooling for each sub-build for AARs', () async {
+    testWithoutContext('buildAar generates tooling for each sub-build for AARs', () async {
       addTearDown(() {
         printOnFailure(logger.statusText);
         printOnFailure(logger.errorText);
@@ -2194,7 +2206,6 @@ Gradle Crashed
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -2315,14 +2326,13 @@ Gradle Crashed
       );
     });
 
-    testUsingContext(
+    testWithoutContext(
       'Verbose mode for AARs includes Gradle stacktrace and sets debug log level',
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(),
           logger: BufferLogger.test(verbose: true),
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
@@ -2379,15 +2389,13 @@ Gradle Crashed
         );
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
     );
 
-    testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
+    testWithoutContext('gradle exit code and stderr is forwarded to tool exit', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -2449,14 +2457,13 @@ Gradle Crashed
         ),
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
+    testWithoutContext('build apk uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm',
           localEngineHost: 'out/host_release',
@@ -2536,14 +2543,13 @@ Gradle Crashed
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
+    testWithoutContext('build apk uses selected local engine with arm64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm64',
           localEngineHost: 'out/host_release',
@@ -2627,14 +2633,13 @@ Gradle Crashed
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('build apk uses selected local engine with x64 ABI', () async {
+    testWithoutContext('build apk uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_x64',
           localEngineHost: 'out/host_release',
@@ -2715,14 +2720,13 @@ Gradle Crashed
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('honors --no-android-gradle-daemon setting', () async {
+    testWithoutContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -2765,7 +2769,7 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              androidGradleDaemon: false,
+              androidGradleConfig: AndroidGradleConfig(gradleDaemon: false),
               packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
@@ -2776,14 +2780,13 @@ Gradle Crashed
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('honors --android-project-cache-dir setting', () async {
+    testWithoutContext('honors --android-project-cache-dir setting', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.test(),
         analytics: fakeAnalytics,
         gradleUtils: FakeGradleUtils(),
@@ -2826,7 +2829,7 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              androidGradleProjectCacheDir: '/made/up/dir',
+              androidGradleConfig: AndroidGradleConfig(projectCacheDir: '/made/up/dir'),
               packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
@@ -2837,14 +2840,13 @@ Gradle Crashed
         );
       }, throwsToolExit());
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
+    testWithoutContext('build aar uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm',
           localEngineHost: 'out/host_release',
@@ -2938,14 +2940,13 @@ Gradle Crashed
         exists,
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('build aar uses selected local engine with x64 ABI', () async {
+    testWithoutContext('build aar uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_arm64',
           localEngineHost: 'out/host_release',
@@ -3042,14 +3043,13 @@ Gradle Crashed
         exists,
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext('build aar uses selected local engine on x64 ABI', () async {
+    testWithoutContext('build aar uses selected local engine on x64 ABI', () async {
       final AndroidGradleBuilder builder = createBuilder(
         java: FakeJava(),
         logger: logger,
         processManager: processManager,
-        fileSystem: fileSystem,
         artifacts: Artifacts.testLocalEngine(
           localEngine: 'out/android_x64',
           localEngineHost: 'out/host_release',
@@ -3142,22 +3142,38 @@ Gradle Crashed
         exists,
       );
       expect(processManager, hasNoRemainingExpectations);
-    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'build apk throws ToolExit when Java and Gradle versions are incompatible',
       () async {
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+        fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+        fileSystem
+            .directory(ndkPath('29.0.13846066'))
+            .childFile('source.properties')
+            .createSync(recursive: true);
+        fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
+          androidSdk: sdk,
         );
 
         // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
@@ -3228,42 +3244,38 @@ Gradle Crashed
         );
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          fileSystem
-              .directory(ndkPath('29.0.13846066'))
-              .childFile('source.properties')
-              .createSync(recursive: true);
-          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-          );
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'build apk succeeds when Java and Gradle versions are incompatible but Gradle build succeeds',
       () async {
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+        fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+        fileSystem
+            .directory(ndkPath('29.0.13846066'))
+            .childFile('source.properties')
+            .createSync(recursive: true);
+        fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
+          androidSdk: sdk,
         );
 
         // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
@@ -3331,42 +3343,38 @@ Gradle Crashed
 
         expect(processManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          fileSystem
-              .directory(ndkPath('29.0.13846066'))
-              .childFile('source.properties')
-              .createSync(recursive: true);
-          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-          );
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
-      },
     );
 
-    testUsingContext(
-      'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
+    testWithoutContext(
+      'skips Java and Gradle compatibility check when skipBuildDependencyValidation is true',
       () async {
+        fileSystem.directory(sdkPath()).createSync(recursive: true);
+        fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
+        fileSystem.file(sdkManagerPath()).createSync(recursive: true);
+        fileSystem
+            .directory(ndkPath('29.0.13846066'))
+            .childFile('source.properties')
+            .createSync(recursive: true);
+        fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+        final sdk = AndroidSdk(
+          fileSystem.directory(sdkPath()),
+          java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            processManager: processManager,
+          ),
+        );
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
           logger: logger,
           processManager: processManager,
-          fileSystem: fileSystem,
           artifacts: Artifacts.test(),
           analytics: fakeAnalytics,
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-          androidSdk: globals.androidSdk,
+          androidSdk: sdk,
         );
 
         // Setup incompatible gradle version (e.g. 8.0 for Java 21) in gradle-wrapper.properties
@@ -3426,7 +3434,7 @@ Gradle Crashed
               'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              androidSkipBuildDependencyValidation: true, // Skip validation
+              androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
             ),
           ),
           target: 'lib/main.dart',
@@ -3436,26 +3444,6 @@ Gradle Crashed
         );
 
         expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        AndroidSdk: () {
-          fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
-          fileSystem
-              .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
-              .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
-              .createSync(recursive: true);
-          fileSystem
-              .directory(ndkPath('29.0.13846066'))
-              .childFile('source.properties')
-              .createSync(recursive: true);
-          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
-          return AndroidSdk(
-            fileSystem.directory(sdkPath()),
-            java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
-          );
-        },
-        AndroidStudio: () => FakeAndroidStudio(),
       },
     );
   });

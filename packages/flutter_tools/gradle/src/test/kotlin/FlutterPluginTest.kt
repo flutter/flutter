@@ -1,13 +1,17 @@
 package com.flutter.gradle
 
+import com.android.build.api.artifact.InAndOutDirectoryOperationRequest
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.artifact.TaskBasedOperation
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.BuiltArtifactsLoader
+import com.android.build.api.variant.LibraryVariant
 import com.android.build.api.variant.SourceDirectories
 import com.android.build.api.variant.Sources
 import com.android.build.api.variant.Variant
@@ -18,7 +22,11 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidSourceDirectorySet
 import com.flutter.gradle.tasks.CopyFlutterApksTask
 import com.flutter.gradle.tasks.CopyFlutterAssetsTask
+import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
+import com.flutter.gradle.tasks.ManifestVersionCodeTask
+import com.flutter.gradle.tasks.ManifestVersionCodeTaskHelper
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.testing.mockAbiFilters
 import com.flutter.gradle.testing.mockProductFlavors
@@ -27,18 +35,24 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.assertThrows
@@ -50,6 +64,8 @@ import java.util.Base64
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -80,6 +96,65 @@ class FlutterPluginTest {
         assertContains(registeredPrintTasks, "kgpVersion")
         assertContains(registeredPrintTasks, "printBuildVariants")
         assertContains(registeredPrintTasks, "printNdkVersion")
+    }
+
+    @Test
+    fun `FlutterPlugin apply checks dependency versions before configuring project`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val mockApplicationExtension = setupMockApplicationExtension(project)
+        val mockComponentsExtension = setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(FlutterPluginUtils::class)
+        mockkStatic(DependencyVersionChecker::class)
+        every { DependencyVersionChecker.checkDependencyVersions(project) } just Runs
+
+        FlutterPlugin().apply(project)
+
+        verifyOrder {
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(project)
+            DependencyVersionChecker.checkDependencyVersions(project)
+            project.tasks.register("javaVersion", PrintTask::class.java, any())
+            mockComponentsExtension.onVariants(any(), any<(Variant) -> Unit>())
+            mockApplicationExtension.defaultConfig
+            mockApplicationExtension.buildTypes
+        }
+    }
+
+    @Test
+    fun `FlutterPlugin apply rethrows DependencyValidationException and logs other exceptions`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        setupMockApplicationExtension(project)
+        setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        mockkStatic(DependencyVersionChecker::class)
+
+        val validationException = DependencyValidationException("Unsupported AGP version")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws validationException
+
+        val thrown =
+            assertThrows<DependencyValidationException> {
+                FlutterPlugin().apply(project)
+            }
+        assertEquals(validationException, thrown)
+
+        val unexpectedException = IllegalStateException("Unexpected failure")
+        every { DependencyVersionChecker.checkDependencyVersions(project) } throws unexpectedException
+
+        FlutterPlugin().apply(project)
+
+        verify {
+            project.logger.error(
+                "Warning: Flutter was unable to detect project Gradle, Java, " +
+                    "AGP, and KGP versions. Skipping dependency version checking. Error was: " +
+                    unexpectedException
+            )
+        }
     }
 
     @Test
@@ -133,7 +208,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants registers compile and asset tasks and adds generated asset source directory`(
+    fun `onVariants registers compile and asset tasks and transforms the merged assets`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -148,8 +223,9 @@ class FlutterPluginTest {
         } returns mockCopyAssetsTaskProvider
 
         val onVariant = applyPluginCapturingVariantCallback(env)
-        val mockAssetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
-        onVariant(mockApplicationVariant(assetsSource = mockAssetsSource))
+        val variant = mockApplicationVariant()
+        val assetsTransform = stubAssetsTransform(variant, mockCopyAssetsTaskProvider)
+        onVariant(variant)
 
         verify {
             project.tasks.register("compileFlutterBuildDebug", FlutterTask::class.java, any())
@@ -157,30 +233,9 @@ class FlutterPluginTest {
         verify {
             project.tasks.register("copyFlutterAssetsDebug", CopyFlutterAssetsTask::class.java, any())
         }
-        verify {
-            mockAssetsSource.addGeneratedSourceDirectory(
-                mockCopyAssetsTaskProvider,
-                CopyFlutterAssetsTask::destinationDir
-            )
-        }
-    }
-
-    @Test
-    fun `onVariants throws GradleException when variant sources assets is null`(
-        @TempDir tempDir: Path
-    ) {
-        val env = setupTestProjectEnvironment(tempDir)
-
-        val onVariant = applyPluginCapturingVariantCallback(env)
-
-        val exception =
-            assertThrows<GradleException> {
-                onVariant(mockApplicationVariant(assetsSource = null))
-            }
-        assertContains(
-            exception.message!!,
-            "Flutter could not register its generated assets for variant 'debug'"
-        )
+        // A transform of the merged assets, not an assets source directory, because AGP filters
+        // assets source directories with ignoreAssetsPattern, which drops assets such as `.env`.
+        verify { assetsTransform.toTransform(SingleArtifact.ASSETS) }
     }
 
     @Test
@@ -209,6 +264,119 @@ class FlutterPluginTest {
         verify(exactly = 0) {
             taskContainer.register("copyFlutterApksAndroidTest", CopyFlutterApksTask::class.java, any())
         }
+        verify(exactly = 0) {
+            taskContainer.register("copyJniLibsflutterBuildAndroidTest", CopyFlutterJniLibsTask::class.java, any())
+        }
+    }
+
+    @Test
+    fun `onVariants wires the jniLibs copy to the output of the variant's compile task`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val compileTaskProvider = project.stubTaskRegistration<FlutterTask>("compileFlutterBuildDebug")
+        val compileOutputSlot = slot<Transformer<File, FlutterTask>>()
+        val compileOutput = mockk<Provider<File>>()
+        every { compileTaskProvider.map(capture(compileOutputSlot)) } returns compileOutput
+        val compileOutputDir = mockk<Provider<Directory>>()
+        every { project.layout.dir(compileOutput) } returns compileOutputDir
+        val configureJniLibsTask = project.captureTaskConfiguration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
+
+        applyPluginCapturingVariantCallback(env)(mockApplicationVariant())
+        val jniLibsTask = configureJniLibsTask()
+
+        verify { jniLibsTask.intermediateDir.set(compileOutputDir) }
+        val compileTask = mockk<FlutterTask>()
+        val outputDirectory = File("build/intermediates/flutter/debug")
+        every { compileTask.outputDirectory } returns outputDirectory
+        assertEquals(outputDirectory, compileOutputSlot.captured.transform(compileTask))
+        // The provider carries the task dependency, so the compile task is not looked up by name.
+        val taskContainer = project.tasks
+        verify(exactly = 0) { taskContainer.findByName(any()) }
+        verify(exactly = 0) { taskContainer.matching(any<Spec<Task>>()) }
+    }
+
+    @Test
+    fun `onVariants configures a module variant for any command line task, without APK wiring`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        // A host task, whose name matches none of the module's variant names.
+        project.setCommandLineTasks(":app:assembleDemoStaging")
+        val copyAssetsTaskProvider = project.stubTaskRegistration<CopyFlutterAssetsTask>("copyFlutterAssetsDebug")
+        val copyJniLibsTaskProvider = project.stubTaskRegistration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
+        val jniLibsSource = mockk<SourceDirectories.Layered>(relaxed = true)
+        val variant = mockLibraryVariant(jniLibsSource = jniLibsSource)
+        val assetsTransform = stubAssetsTransform(variant, copyAssetsTaskProvider)
+
+        applyPluginToModuleCapturingVariantCallback(env)(variant)
+
+        val taskContainer = project.tasks
+        verify { taskContainer.register("compileFlutterBuildDebug", FlutterTask::class.java, any()) }
+        verify { assetsTransform.toTransform(SingleArtifact.ASSETS) }
+        verify { jniLibsSource.addGeneratedSourceDirectory(copyJniLibsTaskProvider, CopyFlutterJniLibsTask::destinationDir) }
+        verify(exactly = 0) { taskContainer.register(any(), CopyFlutterApksTask::class.java, any()) }
+        verify(exactly = 0) { taskContainer.configureEach(any<Action<in Task>>()) }
+    }
+
+    @Test
+    fun `onVariants compiles each module variant in the build mode of its build type`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val configureCompileTasks =
+            listOf("Debug", "Profile", "Release").associateWith { variantName ->
+                env.project.captureTaskConfiguration<FlutterTask>("compileFlutterBuild$variantName")
+            }
+
+        val onVariant = applyPluginToModuleCapturingVariantCallback(env)
+        onVariant(mockLibraryVariant(name = "debug", buildType = "debug", debuggable = true, minSdkApiLevel = 24))
+        // The plugin creates `profile` with initWith(debug), so it is debuggable too.
+        onVariant(mockLibraryVariant(name = "profile", buildType = "profile", debuggable = true))
+        onVariant(mockLibraryVariant(name = "release", buildType = "release", debuggable = false))
+
+        val buildModes =
+            configureCompileTasks.mapValues { (_, configureCompileTask) ->
+                val task = configureCompileTask()
+                val buildModeSlot = slot<String>()
+                verify { task.buildMode = capture(buildModeSlot) }
+                buildModeSlot.captured
+            }
+        assertEquals(mapOf("Debug" to "debug", "Profile" to "profile", "Release" to "release"), buildModes)
+    }
+
+    @Test
+    fun `apply warns that flutter hostAppProjectName has no effect in a module and does not look up the host`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        every { project.providers.gradleProperty(FlutterPlugin.PROP_HOST_APP_PROJECT_NAME).isPresent } returns true
+
+        applyPluginToModuleCapturingVariantCallback(env)
+
+        val logger = project.logger
+        verify {
+            logger.warn(match<String> { it.contains("'flutter.hostAppProjectName' has no effect") })
+        }
+        val rootProject = project.rootProject
+        verify(exactly = 0) { rootProject.findProject(any()) }
+    }
+
+    @Test
+    fun `apply does not warn about flutter hostAppProjectName when it is not set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        every { project.providers.gradleProperty(FlutterPlugin.PROP_HOST_APP_PROJECT_NAME).isPresent } returns false
+
+        applyPluginToModuleCapturingVariantCallback(env)
+
+        val logger = project.logger
+        verify(exactly = 0) { logger.warn(match<String> { it.contains("hostAppProjectName") }) }
     }
 
     @Test
@@ -258,28 +426,130 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants warns and leaves versionCodes unchanged when the DSL declares no versionCode`(
+    fun `onVariants offsets a versionCode that a later finalizeDsl callback sets`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
         every { env.project.findProperty("split-per-abi") } returns "true"
         val arm64 = mockVariantOutput(abi = "arm64-v8a")
-
         val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        // Like a finalizeDsl block in the app's build script, which AGP runs after Flutter's
+        // callbacks and before any onVariants callback.
+        val appExtension = env.project.extensions.getByType(ApplicationExtension::class.java)
+        every { appExtension.defaultConfig.versionCode } returns 55
+
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
-        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
-        val logger = env.project.logger
-        verify {
-            logger.error(
-                match<String> {
-                    it.contains("variant 'debug'") &&
-                        it.contains("declares no versionCode") &&
-                        it.contains("versionCode = flutter.versionCode")
-                }
-            )
+        verify { arm64.versionCode.set(2055) }
+    }
+
+    @Test
+    fun `onVariants fails instead of overflowing a split APK versionCode`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm32 = mockVariantOutput(abi = "armeabi-v7a")
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = 2147482000)
+
+        val error =
+            assertThrows<GradleException> {
+                onVariant(mockApplicationVariant(outputs = listOf(arm32.output, arm64.output)))
+            }
+
+        // 1000 + 2147482000 still fits in an Int; 2000 + 2147482000 does not.
+        verify { arm32.versionCode.set(2147483000) }
+        assertContains(error.message!!, "arm64-v8a split APK of variant 'debug'")
+        assertContains(error.message!!, "2000 + 2147482000 is larger than 2147483647")
+        assertContains(error.message!!, "force-version-code-ignoring-abi=true")
+    }
+
+    @Test
+    fun `splitApkVersionCode allows versionCodes up to Int MAX_VALUE`() {
+        assertEquals(Int.MAX_VALUE, FlutterPlugin.splitApkVersionCode("release", "x86_64", 4, Int.MAX_VALUE - 4000))
+        assertThrows<GradleException> {
+            FlutterPlugin.splitApkVersionCode("release", "x86_64", 4, Int.MAX_VALUE - 3999)
         }
-        verify(exactly = 0) { logger.warn(any<String>()) }
+    }
+
+    @Test
+    fun `onVariants reads the main manifest versionCode in a task when the DSL declares none`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val project = stubManifestVersionCodeTaskRegistration(env, tempDir)
+        val debugManifest = tempDir.resolve("debug.xml").toFile()
+        val mainManifest = tempDir.resolve("main.xml").toFile()
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        // AGP's ManifestFiles.all lists the main manifest last.
+        every { variant.sources.manifests.all } returns
+            project.provider { listOf(debugManifest, mainManifest).map { project.layout.projectDirectory.file(it.path) } }
+
+        onVariant(variant)
+        // Written after configuration, so the value must be read when the task runs.
+        debugManifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="9"/>"""
+        )
+        mainManifest.writeText(
+            """<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="7"/>"""
+        )
+
+        verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+        assertTrue(versionCodeProvider.isCaptured)
+        val task = project.tasks.getByName("resolveManifestVersionCodeDebug") as ManifestVersionCodeTask
+        val versionCodeFile = task.versionCodeFile.get().asFile
+        // Gradle creates the parent of an @OutputFile before it runs the task.
+        versionCodeFile.parentFile.mkdirs()
+        task.writeVersionCode()
+        // Gradle refuses to query the offset provider outside a build, because it maps a task
+        // output. flutter_build_apk_split_per_abi_test checks the offset values.
+        assertEquals("7", versionCodeFile.readText())
+        mainManifest.writeText("""<manifest xmlns:android="http://schemas.android.com/apk/res/android"/>""")
+        val error = assertThrows<GradleException> { task.writeVersionCode() }
+        assertContains(error.message!!, "variant 'debug'")
+        assertContains(error.message!!, "$mainManifest does not set android:versionCode")
+        assertContains(error.message!!, "versionCode = flutter.versionCode")
+    }
+
+    @Test
+    fun `onVariants reads the manifest versionCode after tasks that generate manifests`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val project = stubManifestVersionCodeTaskRegistration(env, tempDir)
+        // Like AGP's ManifestFiles.all after addGeneratedManifestFile: the reversed list of the
+        // main manifest and then the generated one, which a task produces.
+        val generateManifest =
+            project.tasks.register("generateEngineFlagsManifestDebug", GenerateEngineFlagsManifestTask::class.java) {
+                manifestOutputFile.set(project.layout.buildDirectory.file("generated/AndroidManifest.xml"))
+            }
+        val manifestFiles = project.objects.listProperty(RegularFile::class.java)
+        manifestFiles.add(project.layout.projectDirectory.file("src/main/AndroidManifest.xml"))
+        manifestFiles.add(generateManifest.flatMap { it.manifestOutputFile })
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        every { variant.sources.manifests.all } returns manifestFiles.map { it.reversed() }
+
+        onVariant(variant)
+
+        // Building the task graph must not query the generated manifest before its task ran.
+        val processManifest =
+            project.tasks.register("processDebugMainManifest") {
+                inputs.property("versionCode", versionCodeProvider.captured)
+            }
+        val resolveVersionCode = project.tasks.getByName("resolveManifestVersionCodeDebug")
+        assertEquals(setOf(resolveVersionCode), processManifest.get().taskDependencies.getDependencies(null))
+        assertEquals(setOf(generateManifest.get()), resolveVersionCode.taskDependencies.getDependencies(null))
     }
 
     @Test
@@ -296,7 +566,7 @@ class FlutterPluginTest {
     }
 
     @Test
-    fun `onVariants leaves versionCodes unchanged when force-version-code-ignoring-abi is set`(
+    fun `onVariants leaves DSL versionCodes unchanged when force-version-code-ignoring-abi is set`(
         @TempDir tempDir: Path
     ) {
         val env = setupTestProjectEnvironment(tempDir)
@@ -308,6 +578,32 @@ class FlutterPluginTest {
         onVariant(mockApplicationVariant(outputs = listOf(arm64.output)))
 
         verify(exactly = 0) { arm64.versionCode.set(any<Int>()) }
+        verify(exactly = 0) { arm64.versionCode.set(any<Provider<Int>>()) }
+    }
+
+    @Test
+    fun `onVariants uses the checked main manifest versionCode without an offset when force-version-code-ignoring-abi is set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        every { env.project.findProperty("split-per-abi") } returns "true"
+        every { env.project.findProperty("force-version-code-ignoring-abi") } returns "true"
+        val arm64 = mockVariantOutput(abi = "arm64-v8a")
+        val versionCodeProvider = slot<Provider<Int>>()
+        every { arm64.versionCode.set(capture(versionCodeProvider)) } just Runs
+        val onVariant = applyPluginCapturingVariantCallback(env, defaultConfigVersionCode = null)
+        val variant = mockApplicationVariant(outputs = listOf(arm64.output))
+        // Stands in for the ManifestVersionCodeTask output, which fails the build when the main
+        // manifest sets no positive versionCode.
+        mockkObject(ManifestVersionCodeTaskHelper)
+        every { ManifestVersionCodeTaskHelper.registerTask(env.project, variant) } returns
+            ProjectBuilder.builder().build().provider { 7 }
+
+        onVariant(variant)
+
+        verify(exactly = 1) { ManifestVersionCodeTaskHelper.registerTask(env.project, variant) }
+        // 7, not 2007: with the flag, every split APK gets the manifest versionCode.
+        assertEquals(7, versionCodeProvider.captured.get())
     }
 
     @Test
@@ -488,6 +784,42 @@ class FlutterPluginTest {
         return onVariantSlot.captured
     }
 
+    /** [applyPluginCapturingVariantCallback] for an add-to-app module (Android library plugin). */
+    private fun applyPluginToModuleCapturingVariantCallback(env: TestProjectEnvironment): (Variant) -> Unit {
+        val project = env.project
+        every { project.plugins.hasPlugin("com.android.application") } returns false
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+
+        val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
+        every { project.extensions.findByName("android") } returns mockLibraryExtension
+        every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
+        val mockDebugBuildType =
+            mockk<LibraryBuildType>(relaxed = true) {
+                every { name } returns "debug"
+            }
+        val mockReleaseBuildType =
+            mockk<LibraryBuildType>(relaxed = true) {
+                every { name } returns "release"
+            }
+        val container = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
+        every { container.getByName("debug") } returns mockDebugBuildType
+        every { container.getByName("release") } returns mockReleaseBuildType
+        every { container.all(any<Action<in LibraryBuildType>>()) } answers {
+            val action = firstArg<Action<in LibraryBuildType>>()
+            action.execute(mockDebugBuildType)
+            action.execute(mockReleaseBuildType)
+        }
+        every { mockLibraryExtension.buildTypes } returns container
+
+        val mockComponentsExtension = setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        val onVariantSlot = slot<(Variant) -> Unit>()
+        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
+
+        FlutterPlugin().apply(project)
+        return onVariantSlot.captured
+    }
+
     /**
      * An [ApplicationVariant] that answers everything the plugin reads while configuring a
      * variant. Pass the values a test is about; the rest are stubbed so the plugin can run.
@@ -499,20 +831,37 @@ class FlutterPluginTest {
         flavorName: String? = null,
         productFlavors: List<Pair<String, String>> = emptyList(),
         minSdkApiLevel: Int = 21,
-        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
         outputs: List<VariantOutput> = emptyList()
     ): ApplicationVariant {
         val mockVariant = mockk<ApplicationVariant>(relaxed = true)
-        val mockSources = mockk<Sources>(relaxed = true)
         every { mockVariant.name } returns name
         every { mockVariant.buildType } returns buildType
         every { mockVariant.debuggable } returns debuggable
         every { mockVariant.flavorName } returns flavorName
         every { mockVariant.productFlavors } returns productFlavors
         every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
-        every { mockVariant.sources } returns mockSources
-        every { mockSources.assets } returns assetsSource
         every { mockVariant.outputs } returns outputs
+        return mockVariant
+    }
+
+    /** [mockApplicationVariant] for an add-to-app module. */
+    private fun mockLibraryVariant(
+        name: String = "debug",
+        buildType: String = "debug",
+        debuggable: Boolean = true,
+        minSdkApiLevel: Int = 21,
+        jniLibsSource: SourceDirectories.Layered? = mockk(relaxed = true)
+    ): LibraryVariant {
+        val mockVariant = mockk<LibraryVariant>(relaxed = true)
+        val mockSources = mockk<Sources>(relaxed = true)
+        every { mockVariant.name } returns name
+        every { mockVariant.buildType } returns buildType
+        every { mockVariant.debuggable } returns debuggable
+        every { mockVariant.flavorName } returns null
+        every { mockVariant.productFlavors } returns emptyList()
+        every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
+        every { mockVariant.sources } returns mockSources
+        every { mockSources.jniLibs } returns jniLibsSource
         return mockVariant
     }
 
@@ -521,6 +870,47 @@ class FlutterPluginTest {
         val output: VariantOutput,
         val versionCode: Property<Int>
     )
+
+    /**
+     * Stubs [variant]'s artifacts so that [taskProvider] can only be wired as a transform from
+     * `mergedAssetsDir` to `destinationDir`, and returns the request to verify `toTransform` on.
+     */
+    private fun stubAssetsTransform(
+        variant: Variant,
+        taskProvider: TaskProvider<CopyFlutterAssetsTask>
+    ): InAndOutDirectoryOperationRequest<CopyFlutterAssetsTask> {
+        val operation = mockk<TaskBasedOperation<CopyFlutterAssetsTask>>()
+        val request = mockk<InAndOutDirectoryOperationRequest<CopyFlutterAssetsTask>>(relaxed = true)
+        every { variant.artifacts.use(taskProvider) } returns operation
+        every {
+            operation.wiredWithDirectories(
+                CopyFlutterAssetsTask::mergedAssetsDir,
+                CopyFlutterAssetsTask::destinationDir
+            )
+        } returns request
+        return request
+    }
+
+    /** Stubs registering task [name] to return a relaxed provider, which is returned. */
+    private inline fun <reified T : Task> Project.stubTaskRegistration(name: String): TaskProvider<T> {
+        val provider = mockk<TaskProvider<T>>(relaxed = true)
+        every { tasks.register(name, T::class.java, any()) } returns provider
+        return provider
+    }
+
+    /**
+     * Captures the configuration action registered for task [name]. The returned function runs
+     * that action on a relaxed mock task and returns the task, for verifying what it set.
+     */
+    private inline fun <reified T : Task> Project.captureTaskConfiguration(name: String): () -> T {
+        val action = slot<Action<T>>()
+        every { tasks.register(name, T::class.java, capture(action)) } returns mockk(relaxed = true)
+        return { mockk<T>(relaxed = true).also { action.captured.execute(it) } }
+    }
+
+    private fun Project.setCommandLineTasks(vararg taskNames: String) {
+        every { gradle.startParameter.taskNames } returns taskNames.toList()
+    }
 
     /**
      * A [VariantOutput] with an ABI filter for [abi] (none if null). Only `set` is stubbed on its
@@ -533,6 +923,27 @@ class FlutterPluginTest {
         every { output.filters } returns mockAbiFilters(abi)
         every { output.versionCode } returns versionCodeProperty
         return MockVariantOutput(output, versionCodeProperty)
+    }
+
+    /**
+     * Makes [env]'s project register the `resolveManifestVersionCodeDebug` task in a real project
+     * in [tempDir], which is returned, so the task's properties and dependencies are real. Call it
+     * after [applyPluginCapturingVariantCallback], which stubs the build directory too.
+     */
+    private fun stubManifestVersionCodeTaskRegistration(
+        env: TestProjectEnvironment,
+        tempDir: Path
+    ): Project {
+        val project = ProjectBuilder.builder().withProjectDir(tempDir.toFile()).build()
+        every {
+            env.project.layout.buildDirectory
+                .file(any<String>())
+        } answers
+            { project.layout.buildDirectory.file(firstArg<String>()) }
+        every {
+            env.project.tasks.register("resolveManifestVersionCodeDebug", ManifestVersionCodeTask::class.java, any())
+        } answers { project.tasks.register(firstArg(), ManifestVersionCodeTask::class.java, thirdArg()) }
+        return project
     }
 
     private data class TestProjectEnvironment(
@@ -568,6 +979,7 @@ class FlutterPluginTest {
         every { project.rootProject } returns project
         every { project.state.failure as Throwable? } returns null
         every { project.configurations.named("api") } returns mockk()
+        every { project.gradle.gradleVersion } returns DependencyVersionChecker.warnGradleVersion.toString()
 
         val flutterExtension = FlutterExtension()
         every { project.extensions.create("flutter", any<Class<*>>()) } returns flutterExtension
@@ -639,6 +1051,9 @@ class FlutterPluginTest {
     private fun setupMockComponentsExtension(project: Project): AndroidComponentsExtension<Any, VariantBuilder, Variant> {
         val mockAndroidComponentsExtension =
             mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>(relaxed = true)
+        every {
+            mockAndroidComponentsExtension.pluginVersion
+        } returns DependencyVersionChecker.warnAGPVersion
         every {
             project.extensions.getByType(AndroidComponentsExtension::class.java)
         } returns (mockAndroidComponentsExtension as AndroidComponentsExtension<*, *, *>)

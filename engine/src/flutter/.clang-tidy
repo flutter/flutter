@@ -7,6 +7,7 @@ Checks: >-
   bugprone-unchecked-optional-access,
   clang-analyzer-*,
   clang-diagnostic-*,
+  cppcoreguidelines-pro-type-member-init,
   darwin-*,
   google-*,
   modernize-use-default-member-init,
@@ -30,6 +31,8 @@ Checks: >-
   performance-unnecessary-value-param
 
 CheckOptions:
+  - key: cppcoreguidelines-pro-type-member-init.UseAssignment
+    value: true
   - key: modernize-use-default-member-init.UseAssignment
     value: true
   - key: readability-identifier-naming.EnumConstantCase

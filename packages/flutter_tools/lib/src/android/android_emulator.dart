@@ -20,17 +20,18 @@ import 'android_workflow.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
   AndroidEmulators({
-    this._androidSdk,
     required this._androidWorkflow,
     required this._fileSystem,
     required Logger logger,
     required ProcessManager processManager,
+    this._androidSdkBuilder,
   }) : _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final AndroidWorkflow _androidWorkflow;
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
   final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessManager _processManager;

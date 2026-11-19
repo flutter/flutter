@@ -19,7 +19,7 @@ import 'framework.dart';
 import 'platform_view.dart';
 
 /// Displays an `<img>` element with `src` set to [src].
-class ImgElementPlatformView extends StatelessWidget {
+class ImgElementPlatformView extends StatefulWidget {
   /// Creates a platform view backed with an `<img>` element.
   ImgElementPlatformView(this.src, {super.key}) {
     if (!_registered) {
@@ -34,11 +34,9 @@ class ImgElementPlatformView extends StatelessWidget {
     assert(!_registered);
     _registered = true;
     ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId, {Object? params}) {
-      final paramsMap = params! as Map<Object?, Object?>;
       // Create a new <img> element. The browser is able to display the image
       // without fetching it over the network again.
       final img = web.document.createElement('img') as web.HTMLImageElement;
-      img.src = paramsMap['src']! as String;
       // Set `width` and `height`, otherwise the engine will issue a warning.
       img.style
         ..width = '100%'
@@ -52,13 +50,56 @@ class ImgElementPlatformView extends StatelessWidget {
   final String? src;
 
   @override
+  State<ImgElementPlatformView> createState() => _ImgElementPlatformViewState();
+}
+
+class _ImgElementPlatformViewState extends State<ImgElementPlatformView> {
+  web.HTMLImageElement? _imgElement;
+
+  void _onPlatformViewCreated(int viewId) {
+    final img = ui_web.platformViewRegistry.getViewById(viewId) as web.HTMLImageElement;
+    // Platform view creation is asynchronous. If this State was already
+    // disposed (or widget.src became null) before the creation callback fired,
+    // clear the <img> element's src immediately.
+    if (!mounted || widget.src == null) {
+      img.src = '';
+      return;
+    }
+    _imgElement?.src = '';
+    _imgElement = img;
+    img.src = widget.src!;
+  }
+
+  @override
+  void didUpdateWidget(ImgElementPlatformView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.src != oldWidget.src) {
+      if (widget.src == null) {
+        _imgElement?.src = '';
+        _imgElement = null;
+      } else {
+        _imgElement?.src = widget.src!;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // Clear the src attribute when the platform view is disposed so the browser
+    // can eagerly reclaim the decoded image buffer.
+    _imgElement?.src = '';
+    _imgElement = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (src == null) {
+    if (widget.src == null) {
       return const SizedBox.expand();
     }
     return HtmlElementView(
-      viewType: _viewType,
-      creationParams: <String, String?>{'src': src},
+      viewType: ImgElementPlatformView._viewType,
+      onPlatformViewCreated: _onPlatformViewCreated,
       hitTestBehavior: PlatformViewHitTestBehavior.transparent,
     );
   }

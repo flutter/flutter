@@ -1366,6 +1366,81 @@ public class TextInputPluginTest {
     verify(textInputChannel, times(1)).setTextInputMethodHandler(isNull());
   }
 
+  @Test
+  public void isTextEditor_reflectsInputTarget() {
+    View testView = new View(ctx);
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    ArgumentCaptor<TextInputChannel.TextInputMethodHandler> handlerCaptor =
+        ArgumentCaptor.forClass(TextInputChannel.TextInputMethodHandler.class);
+    verify(textInputChannel).setTextInputMethodHandler(handlerCaptor.capture());
+    TextInputChannel.TextInputMethodHandler handler = handlerCaptor.getValue();
+    TextInputChannel.Configuration textConfiguration =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+    TextInputChannel.Configuration noneConfiguration =
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.NONE, false, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+    // Nothing is attached yet.
+    assertFalse(textInputPlugin.isTextEditor());
+
+    // A framework client that accepts text.
+    handler.setClient(0, textConfiguration);
+    assertTrue(textInputPlugin.isTextEditor());
+
+    // TextInputType.none never shows the keyboard, so the view is not a text editor.
+    handler.setClient(1, noneConfiguration);
+    assertFalse(textInputPlugin.isTextEditor());
+
+    // Detaching the client drops the flag again.
+    handler.setClient(2, textConfiguration);
+    assertTrue(textInputPlugin.isTextEditor());
+    handler.clearClient();
+    assertFalse(textInputPlugin.isTextEditor());
+
+    // A virtual display platform view proxies its input connection through the Flutter view.
+    handler.setPlatformViewClient(3, /* usesVirtualDisplay= */ true);
+    assertTrue(textInputPlugin.isTextEditor());
+
+    // A hybrid composition platform view owns its own input connection.
+    handler.setPlatformViewClient(4, /* usesVirtualDisplay= */ false);
+    assertFalse(textInputPlugin.isTextEditor());
+  }
+
   @SuppressWarnings("deprecation")
   // DartExecutor.send is deprecated.
   private void verifyInputConnection(TextInputChannel.TextInputType textInputType)
@@ -2695,25 +2770,26 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
 
-            // Progress the animation and ensure that the navigation bar insets have been subtracted
-            // from the IME insets
+            // Progress the animation and ensure that the IME insets smoothly interpolate
+            // to the settled target IME insets.
+            when(animation.getInterpolatedFraction()).thenReturn(0.25f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
-            assertEquals(0, viewportMetricsCaptor.getValue().viewInsetBottom);
+            assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
+            when(animation.getInterpolatedFraction()).thenReturn(0.50f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
-            assertEquals(10, viewportMetricsCaptor.getValue().viewInsetBottom);
+            assertEquals(50, viewportMetricsCaptor.getValue().viewInsetBottom);
 
             // End the animation and ensure that the bottom insets match the lastWindowInsets that
-            // we set
-            // during onPrepare
+            // we set during onPrepare.
             imeSyncCallback.getAnimationCallback().onEnd(animation);
 
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
@@ -2792,6 +2868,7 @@ public class TextInputPluginTest {
 
             // Progress the animation and ensure that the navigation bar insets have not been
             // subtracted from the IME insets
+            when(animation.getInterpolatedFraction()).thenReturn(0.25f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2799,6 +2876,7 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
+            when(animation.getInterpolatedFraction()).thenReturn(0.50f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2889,6 +2967,7 @@ public class TextInputPluginTest {
 
             // Progress the animation and ensure that the navigation bar insets have not been
             // subtracted from the IME insets
+            when(animation.getInterpolatedFraction()).thenReturn(0.25f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 25));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);
@@ -2896,6 +2975,7 @@ public class TextInputPluginTest {
             verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
             assertEquals(25, viewportMetricsCaptor.getValue().viewInsetBottom);
 
+            when(animation.getInterpolatedFraction()).thenReturn(0.50f);
             builder.setInsets(WindowInsets.Type.ime(), Insets.of(0, 0, 0, 50));
             builder.setInsets(WindowInsets.Type.navigationBars(), Insets.of(0, 0, 0, 40));
             imeSyncCallback.getAnimationCallback().onProgress(builder.build(), animationList);

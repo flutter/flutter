@@ -10,28 +10,33 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/flutter_application_package.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -62,10 +67,44 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
+    testUsingContext('preserves expected hidden and visible options across verboseHelp modes', () {
+      final defaultCommand = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
+      expect(defaultCommand.argParser.options['track-widget-creation']?.hide, isFalse);
+      expect(defaultCommand.argParser.options['native-null-assertions']?.hide, isTrue);
+      expect(defaultCommand.argParser.options['adb-log-filtering']?.hide, isTrue);
+
+      final verboseCommand = RunCommand(
+        verboseHelp: true,
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
+      expect(verboseCommand.argParser.options['track-widget-creation']?.hide, isFalse);
+      expect(verboseCommand.argParser.options['native-null-assertions']?.hide, isFalse);
+      expect(verboseCommand.argParser.options['adb-log-filtering']?.hide, isFalse);
+    }, overrides: <Type, Generator>{FeatureFlags: () => FakeFeatureFlags()});
+
     testUsingContext(
       'fails when target not found',
       () async {
-        final command = RunCommand();
+        final command = RunCommand(
+          appleContext: FakeAppleContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          toolContext: const DelegatingToolContext(),
+        );
         expect(
           () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
           throwsA(
@@ -99,14 +138,20 @@ void main() {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
 
-        final command = RunCommand();
+        final command = RunCommand(
+          appleContext: FakeAppleContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          toolContext: const DelegatingToolContext(),
+        );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(),
         );
-        final bufferLogger = globals.logger as BufferLogger;
         expect(
-          bufferLogger.statusText,
+          logger.statusText,
           containsIgnoringWhitespace('Changing current working directory to:'),
         );
       },
@@ -123,7 +168,14 @@ void main() {
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
         fileSystem.file('lib/main.dart').createSync(recursive: true);
 
-        final command = RunCommand();
+        final command = RunCommand(
+          appleContext: FakeAppleContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          toolContext: const DelegatingToolContext(),
+        );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(message: 'No pubspec.yaml file found'),
@@ -137,13 +189,23 @@ void main() {
     );
 
     testUsingContext('accepts --[no-]deprecated-js-interop', () {
-      expectAcceptsDeprecatedJsInteropFlag(RunCommand());
+      expectAcceptsDeprecatedJsInteropFlag(
+        RunCommand(
+          appleContext: FakeAppleContext(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildTargets: const BuildTargetsImpl(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          toolContext: const DelegatingToolContext(),
+        ),
+      );
     });
 
     group('run app', () {
       late MemoryFileSystem fs;
       late Artifacts artifacts;
       late FakeAnsiTerminal fakeTerminal;
+      late FakeStdio fakeStdio;
       late analytics.FakeAnalytics fakeAnalytics;
 
       setUpAll(() {
@@ -152,6 +214,7 @@ void main() {
 
       setUp(() {
         fakeTerminal = FakeAnsiTerminal();
+        fakeStdio = FakeStdio();
         artifacts = Artifacts.test();
         fs = MemoryFileSystem.test();
 
@@ -301,7 +364,14 @@ void main() {
       testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+          );
           testDeviceManager.devices = <Device>[];
 
           await expectLater(
@@ -325,7 +395,14 @@ void main() {
       testUsingContext(
         'exits and lists available devices when specified device not found',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+          );
           final device = FakeDevice(isLocalEmulator: true);
           testDeviceManager
             ..devices = <Device>[device]
@@ -404,7 +481,14 @@ void main() {
       testUsingContext(
         'shows unsupported devices when no supported devices are found',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+          );
           final mockDevice = FakeDevice(
             targetPlatform: TargetPlatform.android_arm,
             isLocalEmulator: true,
@@ -431,7 +515,7 @@ void main() {
           expect(
             testLogger.statusText,
             containsIgnoringWhitespace(
-              globals.userMessages.flutterMissPlatformProjects(
+              UserMessages().flutterMissPlatformProjects(
                 Device.devicesPlatformTypes(<Device>[mockDevice]),
               ),
             ),
@@ -485,7 +569,14 @@ void main() {
       testUsingContext(
         'forwards --uninstall-only to DebuggingOptions',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+          );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -517,7 +608,14 @@ void main() {
       testUsingContext(
         'passes device target platform to analytics',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+          );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -538,7 +636,7 @@ void main() {
             contains(
               analytics.Event.commandUsageValues(
                 workflow: 'run',
-                commandHasTerminal: globals.stdio.hasTerminal,
+                commandHasTerminal: fakeStdio.hasTerminal,
                 runIsEmulator: false,
                 runTargetName: 'ios',
                 runTargetOsVersion: 'iOS 13',
@@ -559,7 +657,7 @@ void main() {
           FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Stdio: () => FakeStdio(),
+          Stdio: () => fakeStdio,
           analytics.Analytics: () => fakeAnalytics,
         },
       );
@@ -575,7 +673,14 @@ void main() {
               .childDirectory('ios')
               .childFile('AppDelegate.swift')
               .createSync(recursive: true);
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+          );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -591,7 +696,7 @@ void main() {
             contains(
               analytics.Event.commandUsageValues(
                 workflow: 'run',
-                commandHasTerminal: globals.stdio.hasTerminal,
+                commandHasTerminal: fakeStdio.hasTerminal,
                 runIsEmulator: false,
                 runTargetName: 'ios',
                 runTargetOsVersion: 'iOS 13',
@@ -612,7 +717,7 @@ void main() {
           FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
-          Stdio: () => FakeStdio(),
+          Stdio: () => fakeStdio,
           analytics.Analytics: () => fakeAnalytics,
         },
       );
@@ -621,7 +726,10 @@ void main() {
         testUsingContext(
           'can pass --device-user',
           () async {
-            final command = DaemonCapturingRunCommand();
+            final command = DaemonCapturingRunCommand(
+              toolContext: const DelegatingToolContext(),
+              appleContext: FakeAppleContext(),
+            );
             final device = FakeDevice(platformType: PlatformType.android);
             testDeviceManager.devices = <Device>[device];
 
@@ -660,7 +768,15 @@ void main() {
           testUsingContext(
             'can pass --web-define',
             () async {
-              final command = RunCommand();
+              final command = RunCommand(
+                appleContext: FakeAppleContext(),
+                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+                assetBundleFactory: _FakeAssetBundleFactory(),
+                buildTargets: const BuildTargetsImpl(),
+                devtoolsLauncher: FakeDevtoolsLauncher(),
+                toolContext: const DelegatingToolContext(),
+                webRunnerFactory: fakeWebRunnerFactory,
+              );
               final device = FakeDevice(
                 platformType: PlatformType.web,
                 targetPlatform: TargetPlatform.web_javascript,
@@ -689,7 +805,6 @@ void main() {
               ProcessManager: () => FakeProcessManager.any(),
               Stdio: () => FakeStdio(),
               Logger: () => MachineOutputLogger(parent: logger),
-              WebRunnerFactory: () => fakeWebRunnerFactory,
             },
           );
         });
@@ -697,7 +812,10 @@ void main() {
         testUsingContext(
           'can disable devtools with --no-devtools',
           () async {
-            final command = DaemonCapturingRunCommand();
+            final command = DaemonCapturingRunCommand(
+              toolContext: const DelegatingToolContext(),
+              appleContext: FakeAppleContext(),
+            );
             final device = FakeDevice();
             testDeviceManager.devices = <Device>[device];
 
@@ -733,6 +851,8 @@ void main() {
       testUsingContext(
         "doesn't fail if --fatal-warnings specified and no warnings occur",
         () async {
+          command = TestRunCommandWithFakeResidentRunner()
+            ..fakeResidentRunner = FakeResidentRunner();
           try {
             await createTestCommandRunner(command)
                 .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']);
@@ -749,6 +869,8 @@ void main() {
       testUsingContext(
         "doesn't fail if --fatal-warnings not specified",
         () async {
+          command = TestRunCommandWithFakeResidentRunner()
+            ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
           try {
             await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
@@ -765,6 +887,8 @@ void main() {
       testUsingContext(
         'fails if --fatal-warnings specified and warnings emitted',
         () async {
+          command = TestRunCommandWithFakeResidentRunner()
+            ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
           await expectLater(
             createTestCommandRunner(command)
@@ -784,6 +908,8 @@ void main() {
       testUsingContext(
         'fails if --fatal-warnings specified and errors emitted',
         () async {
+          command = TestRunCommandWithFakeResidentRunner()
+            ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printError('Error: Danger Will Robinson!');
           await expectLater(
             createTestCommandRunner(command)
@@ -804,12 +930,26 @@ void main() {
     testUsingContext(
       'should only request artifacts corresponding to connected devices',
       () async {
+        Future<Set<DevelopmentArtifact>> getRequiredArtifacts() {
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            deviceManager: testDeviceManager,
+            toolContext: const DelegatingToolContext(),
+          );
+          createTestCommandRunner(command);
+          return command.requiredArtifacts;
+        }
+
         testDeviceManager.devices = <Device>[
           FakeDevice(targetPlatform: TargetPlatform.android_arm),
         ];
 
         expect(
-          await RunCommand().requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.androidGenSnapshot,
@@ -819,7 +959,7 @@ void main() {
         testDeviceManager.devices = <Device>[FakeDevice()];
 
         expect(
-          await RunCommand().requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -832,7 +972,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand().requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -845,7 +985,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand().requiredArtifacts,
+          await getRequiredArtifacts(),
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.web,
@@ -1212,15 +1352,24 @@ void main() {
       testUsingContext(
         'can accept simple, valid values',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
-            'foo': 'bar',
-          });
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers,
+            <String, String>{'foo': 'bar'},
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1228,14 +1377,21 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'throws a ToolExit when no value is provided',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1249,7 +1405,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1260,7 +1415,15 @@ void main() {
           fileSystem.file('pubspec.yaml').createSync();
           fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
 
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1279,7 +1442,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1287,7 +1449,15 @@ void main() {
         'throws a ToolExit when using --wasm on a non-web platform',
         () async {
           testDeviceManager.devices = <Device>[FakeDevice(platformType: PlatformType.android)];
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await expectLater(
             () =>
                 createTestCommandRunner(command)
@@ -1301,14 +1471,21 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'throws a ToolExit when using the skwasm renderer without --wasm',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1325,14 +1502,21 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'accepts headers with commas in them',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1342,10 +1526,11 @@ void main() {
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
-            'hurray': 'flutter,flutter=hurray',
-          });
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers,
+            <String, String>{'hurray': 'flutter,flutter=hurray'},
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1353,7 +1538,6 @@ void main() {
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -1390,13 +1574,21 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.port, 8080);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.port, 8080);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1404,7 +1596,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1416,13 +1607,21 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.host, 'clihost');
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.host, 'clihost');
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1430,7 +1629,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1447,7 +1645,15 @@ server:
     - name: X-Shared-Header
       value: from-config
 ''');
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1457,9 +1663,9 @@ server:
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
           final Map<String, String> headers =
-              fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers;
+              fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers;
           // CLI headers override file config headers with same name
           expect(headers['X-Shared-Header'], 'from-cli');
           // CLI-only headers are included
@@ -1473,7 +1679,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1485,13 +1690,21 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.host, 'confighost');
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.port, 9000);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.host, 'confighost');
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.port, 9000);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1499,7 +1712,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1514,7 +1726,15 @@ server:
     cert-path: /config/cert.pem
     cert-key-path: /config/key.pem
 ''');
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1524,14 +1744,14 @@ server:
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
         },
@@ -1541,7 +1761,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1556,21 +1775,29 @@ server:
     cert-path: /config/cert.pem
     cert-key-path: /config/key.pem
 ''');
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           // CLI cert path overrides file config
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           // File config key path is used as fallback
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/config/key.pem',
           );
         },
@@ -1580,7 +1807,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
@@ -1588,7 +1814,15 @@ server:
         'CLI TLS args work without web_dev_config.yaml file',
         () async {
           // No web_dev_config.yaml file exists
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1598,14 +1832,14 @@ server:
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
         },
@@ -1615,7 +1849,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -1647,13 +1880,24 @@ server:
       testUsingContext(
         'passes base-href to WebDevServerConfig',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, '/preview/');
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.baseHref,
+            '/preview/',
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1661,14 +1905,21 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'throws ToolExit when base-href does not start with /',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await expectLater(
             () =>
                 createTestCommandRunner(command)
@@ -1682,14 +1933,21 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'throws ToolExit when base-href does not end with /',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await expectLater(
             () =>
                 createTestCommandRunner(command)
@@ -1703,19 +1961,26 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
 
       testUsingContext(
         'base-href defaults to null when not provided',
         () async {
-          final command = RunCommand();
+          final command = RunCommand(
+            appleContext: FakeAppleContext(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildTargets: const BuildTargetsImpl(),
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: const DelegatingToolContext(),
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, isNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.baseHref, isNull);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1723,7 +1988,6 @@ server:
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
           FeatureFlags: () => FakeFeatureFlags(),
-          WebRunnerFactory: () => fakeWebRunnerFactory,
         },
       );
     });
@@ -1879,7 +2143,14 @@ server:
   testUsingContext(
     'Configures web connection options to use web sockets by default',
     () async {
-      final command = RunCommand();
+      final command = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
         throwsToolExit(),
@@ -1887,9 +2158,9 @@ server:
 
       final DebuggingOptions options = await command.createDebuggingOptions();
 
-      expect(options.webUseSseForDebugBackend, false);
-      expect(options.webUseSseForDebugProxy, false);
-      expect(options.webUseSseForInjectedClient, false);
+      expect(options.webConfig.useSseForDebugBackend, false);
+      expect(options.webConfig.useSseForDebugProxy, false);
+      expect(options.webConfig.useSseForInjectedClient, false);
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -1901,7 +2172,14 @@ server:
   testUsingContext(
     'flags propagate to debugging options',
     () async {
-      final command = RunCommand();
+      final command = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>[
           'run',
@@ -1961,7 +2239,14 @@ server:
   testUsingContext(
     'usingCISystem can also be set by environment LUCI_CI',
     () async {
-      final command = RunCommand();
+      final command = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run']),
         throwsToolExit(),
@@ -1982,7 +2267,14 @@ server:
   testUsingContext(
     'wasm mode selects skwasm renderer by default',
     () async {
-      final command = RunCommand();
+      final command = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '-d chrome', '--wasm']),
         throwsToolExit(),
@@ -1990,8 +2282,8 @@ server:
 
       final DebuggingOptions options = await command.createDebuggingOptions();
 
-      expect(options.webUseWasm, true);
-      expect(options.webRenderer, WebRendererMode.skwasm);
+      expect(options.webConfig.useWasm, true);
+      expect(options.webConfig.renderer, WebRendererMode.skwasm);
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -2003,7 +2295,14 @@ server:
   testUsingContext(
     'fails when "--web-launch-url" is not supported',
     () async {
-      final command = RunCommand();
+      final command = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: const DelegatingToolContext(),
+      );
       await expectLater(
         () =>
             createTestCommandRunner(command)
@@ -2018,10 +2317,10 @@ server:
       );
 
       final DebuggingOptions options = await command.createDebuggingOptions();
-      expect(options.webLaunchUrl, 'http://flutter.dev');
+      expect(options.webConfig.launchUrl, 'http://flutter.dev');
 
       final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-      expect(pattern.hasMatch(options.webLaunchUrl!), true);
+      expect(pattern.hasMatch(options.webConfig.launchUrl!), true);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
@@ -2196,10 +2495,27 @@ server:
       initializeFlutterRoot: false,
     );
   });
+
+  testWithoutContext('RunCommand registers --flavor, --track-widget-creation, and AndroidGradleOptionsBundle without AndroidBuildOptionsBundle flags', () {
+    final command = RunCommand(
+      appleContext: FakeAppleContext(),
+      assetBundleFactory: _FakeAssetBundleFactory(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
+      toolContext: FakeToolContext(),
+    );
+
+    expect(command.argParser.options, contains('flavor'));
+    expect(command.argParser.options, contains('track-widget-creation'));
+    expect(command.argParser.options, contains('android-gradle-daemon'));
+    expect(command.argParser.options, isNot(contains('shrink')));
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required super.logger});
+  TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override
@@ -2366,7 +2682,18 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 }
 
 class TestRunCommandForUsageValues extends RunCommand {
-  TestRunCommandForUsageValues({List<Device>? devices}) {
+  TestRunCommandForUsageValues({
+    AppleContext? appleContext,
+    List<Device>? devices,
+    ToolContext? toolContext,
+  }) : super(
+         appleContext: appleContext ?? FakeAppleContext(),
+         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+         assetBundleFactory: _FakeAssetBundleFactory(),
+         buildTargets: const BuildTargetsImpl(),
+         devtoolsLauncher: FakeDevtoolsLauncher(),
+         toolContext: toolContext ?? const DelegatingToolContext(),
+       ) {
     this.devices = devices;
   }
 
@@ -2388,6 +2715,16 @@ class TestRunCommandForUsageValues extends RunCommand {
 }
 
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
+  TestRunCommandWithFakeResidentRunner({AppleContext? appleContext, ToolContext? toolContext})
+    : super(
+        appleContext: appleContext ?? FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
+      );
+
   late FakeResidentRunner fakeResidentRunner;
 
   @override
@@ -2408,6 +2745,16 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
 }
 
 class TestRunCommandThatOnlyValidates extends RunCommand {
+  TestRunCommandThatOnlyValidates({AppleContext? appleContext, ToolContext? toolContext})
+    : super(
+        appleContext: appleContext ?? FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
+      );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
@@ -2441,6 +2788,16 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
+  DaemonCapturingRunCommand({AppleContext? appleContext, ToolContext? toolContext})
+    : super(
+        appleContext: appleContext ?? FakeAppleContext(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        buildTargets: const BuildTargetsImpl(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
+      );
+
   late Daemon daemon;
   late CapturingAppDomain appDomain;
 
@@ -2457,9 +2814,16 @@ class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon)
     : super(
         analytics: const analytics.NoOpAnalytics(),
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: const DelegatingToolContext(),
+        ),
+        assetBundleFactory: _FakeAssetBundleFactory(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
-        toolContext: const DelegatingToolContext(),
+        featureFlags: TestFeatureFlags(),
         xcode: null,
       );
 
@@ -2543,12 +2907,16 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   ResidentRunner createWebRunner(
     FlutterDevice device, {
     required analytics.Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
     required FlutterProject flutterProject,
     required bool stayResident,
     required ToolContext toolContext,
+    FlutterHookRunner? flutterHookRunner,
     bool machine = false,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     String? target,
@@ -2559,4 +2927,14 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     lastWebDefines = webDefines;
     return FakeResidentRunner();
   }
+}
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
+    fileSystem: MemoryFileSystem.test(),
+    flutterRoot: '',
+    logger: BufferLogger.test(),
+    platform: FakePlatform(),
+  ).createBundle();
 }

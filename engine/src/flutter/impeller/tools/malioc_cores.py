@@ -61,10 +61,14 @@ def malioc_core_info(malioc, core):
   apis = info_json['apis']
 
   opengles_max_version = 0
+  supports_framebuffer_fetch = False
   if 'opengles' in apis:
     opengles = apis['opengles']
     if opengles['max_version'] is not None:
       opengles_max_version = opengles['max_version']
+    extensions = opengles.get('extensions')
+    if extensions is not None:
+      supports_framebuffer_fetch = ('GL_EXT_shader_framebuffer_fetch' in extensions)
   vulkan_max_version = 0
   if 'vulkan' in apis:
     vulkan = apis['vulkan']
@@ -74,6 +78,7 @@ def malioc_core_info(malioc, core):
   info = {
       'core': core,
       'opengles_max_version': opengles_max_version,
+      'supports_framebuffer_fetch': supports_framebuffer_fetch,
       'vulkan_max_version': vulkan_max_version,
   }
   return info

@@ -628,6 +628,12 @@ enum EngineSemanticsRole {
 
   /// A graphic object that can be incremented or decremented as a slider.
   slider,
+
+  /// A widget that allows the user to select one or more items from a list of choices.
+  listBox,
+
+  /// A selectable item in a [listBox].
+  option,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -1031,13 +1037,15 @@ abstract class SemanticRole {
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
 
-  /// Whether any ancestor of [semanticsObject] has the [EngineSemanticsRole.menu]
-  /// or [EngineSemanticsRole.menuBar] role.
-  bool get hasMenuAncestor {
+  /// Whether any ancestor of [semanticsObject] has the [EngineSemanticsRole.menu],
+  /// [EngineSemanticsRole.menuBar], or [EngineSemanticsRole.listBox] role.
+  bool get hasMenuOrListBoxAncestor {
     SemanticsObject? current = semanticsObject.parent;
     while (current != null) {
       final EngineSemanticsRole? kind = current.semanticRole?.kind;
-      if (kind == EngineSemanticsRole.menu || kind == EngineSemanticsRole.menuBar) {
+      if (kind == EngineSemanticsRole.menu ||
+          kind == EngineSemanticsRole.menuBar ||
+          kind == EngineSemanticsRole.listBox) {
         return true;
       }
       current = current.parent;
@@ -1112,12 +1120,13 @@ final class GenericRole extends SemanticRole {
       // likely that this node is simply there for positioning its children and
       // has no other role for the screen reader to be aware of. Normally the
       // element does not need a `role` attribute at all, except when nested
-      // inside a menu/menubar (such as the outer ListView semantics node in
-      // DropdownButton), where omitting `role="none"` causes the browser to
-      // expose the element as an extra generic child of `role="menu"`.
+      // inside a menu, menubar, or listbox (such as the outer ListView
+      // semantics node in DropdownButton or an Autocomplete options list),
+      // where omitting `role="none"` causes the browser to expose the element
+      // as an extra generic child of the container.
       super.update();
       semanticsObject.owner.addOneTimePostUpdateCallback(() {
-        if (!semanticsObject.hasLabel && !semanticsObject.isTappable && hasMenuAncestor) {
+        if (!semanticsObject.hasLabel && !semanticsObject.isTappable && hasMenuOrListBoxAncestor) {
           setAriaRole('none');
         } else {
           removeAttribute('role');
@@ -2298,6 +2307,10 @@ class SemanticsObject {
         return EngineSemanticsRole.list;
       case ui.SemanticsRole.listItem:
         return EngineSemanticsRole.listItem;
+      case ui.SemanticsRole.listBox:
+        return EngineSemanticsRole.listBox;
+      case ui.SemanticsRole.option:
+        return EngineSemanticsRole.option;
       case ui.SemanticsRole.complementary:
         return EngineSemanticsRole.complementary;
       case ui.SemanticsRole.contentInfo:
@@ -2371,6 +2384,8 @@ class SemanticsObject {
       EngineSemanticsRole.link => SemanticLink(this),
       EngineSemanticsRole.list => SemanticList(this),
       EngineSemanticsRole.listItem => SemanticListItem(this),
+      EngineSemanticsRole.listBox => SemanticListBox(this),
+      EngineSemanticsRole.option => SemanticOption(this),
       EngineSemanticsRole.heading => SemanticHeading(this),
       EngineSemanticsRole.header => SemanticHeader(this),
       EngineSemanticsRole.tab => SemanticTab(this),
@@ -2730,6 +2745,12 @@ class SemanticsObject {
 
   /// Recursively visits the tree rooted at `this` node in depth-first fashion
   /// in traversal order but can skip a subtree.
+  ///
+  /// Calls [searchSubtree] for `this` node, then for all of its descendants.
+  /// If [searchSubtree] returns false for a node, that node's descendants are
+  /// skipped, but the traversal continues with the node's siblings. This is
+  /// different from [_visitDepthFirstInTraversalOrder], which stops the entire
+  /// traversal as soon as the callback returns false.
   void _visitDepthFirstInTraversalOrderCanSkipSubtree(
     bool Function(SemanticsObject) searchSubtree,
   ) {
@@ -2755,7 +2776,11 @@ class SemanticsObject {
         'SemanticsNode created at the time this method was called.',
       );
 
-      child!._visitDepthFirstInTraversalOrder(searchSubtree);
+      // Recurse with the subtree-skipping variant. Recursing with
+      // _visitDepthFirstInTraversalOrder would turn a "skip this subtree" into
+      // "stop visiting this node's remaining siblings" for every node that is
+      // two or more levels below `this`.
+      child!._visitDepthFirstInTraversalOrderCanSkipSubtree(searchSubtree);
     }
 
     return;
@@ -2944,7 +2969,7 @@ class EngineSemantics {
         return;
       } else {
         // Running a real app. Auto-enable engine semantics.
-        semanticsHelper.dispose(); // placeholder no longer needed
+        semanticsHelper.retirePlaceholders(); // placeholder no longer needed
         semanticsEnabled = true;
       }
     }

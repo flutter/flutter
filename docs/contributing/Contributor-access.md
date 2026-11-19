@@ -1,75 +1,76 @@
-For people who make the occasional contribution to Flutter (filing an issue, submitting the occasional PR, chatting on Discord), the default set of permissions is fine. However, if you are a frequent contributor, whether helping us in triage, or often fixing bugs, or regularly improving our documentation, or regularly helping others in our #help channel, or participating in high-level design discussions and prioritization, you may find your life is more pleasant with commit access (also known as "contributor access", "being a member of the flutter-hackers group", "being a member of the Flutter team").
+For people who make the occasional contribution to Flutter (filing an issue, submitting the occasional PR, chatting on Discord), the default set of permissions is fine. However, if you are a regular contributor, whether helping in triage, fixing bugs, reviewing pull requests, improving documentation, or participating in design discussions, you can earn triage and commit permissions through the **[Flutter Contributor Ladder](https://github.com/flutter/contributors)** (see [`docs/LADDER.md`](https://github.com/flutter/contributors/blob/main/docs/LADDER.md)).
 
-We grant commit access (which includes full rights to the issue database, such as being able to edit labels, and grants access to our internal chat channels) to people who have gained our trust and demonstrated a commitment to Flutter.
+Active ladder members are listed in [`ROSTER.md`](https://github.com/flutter/contributors/blob/main/ROSTER.md) in [`flutter/contributors`](https://github.com/flutter/contributors), and belong to the `@flutter/flutter-hackers` parent team on GitHub through one of its role-based child teams:
 
-Specifically, if you meet one of the following criteria and you have a sponsor (someone who already has contributor access and agrees that you should be granted access), then please ask your sponsor to propose, on the #server-support [Chat](Chat.md) channel, that you be made a member of the team, and then reply to that message explaining which criteria below you are claiming to meet. The possible criteria are:
+* **Reviewer (`@flutter/reviewers` — GitHub Triage role):** Community contributors with ≥ 10 qualifying contributions over the preceding 12 months (merged PRs, valid issues filed, reviews on merged PRs, or qualitative contributions such as issue triage, reproduction verification, [RFC](https://github.com/flutter/rfc) reviews, and mentoring). Reviewers conduct first-pass code reviews on community PRs, provide one of the two required approvals on Contributor/Reviewer PRs, and triage and label issues.
+* **Committer (`@flutter/committers` — GitHub Write role):** Experienced contributors with ≥ 30 qualifying contributions over the preceding 12 months, including ≥ 10 merged PRs. Committers provide binding review approvals, mentor Contributors and Reviewers, and have repository write/merge permissions.
+* **Maintainer (`@flutter/maintainers`, `@flutter/googlers`, `@flutter/partners` — GitHub Write + Moderation):** Flutter team engineers at Google and verified partner team engineers who steward subsystems, hold GitHub organization moderation privileges, and lead architectural and policy decisions.
+* **Dasher Emeritus ([`EMERITUS.md`](https://github.com/flutter/contributors/blob/main/EMERITUS.md) — Alumni):** Former ladder members who have stepped back from active contribution (< 10 contributions over 12 months after a 30-day grace period).
 
-* You have a long history of participating productively, e.g. in our [Chat](Chat.md) channels, helping with [Triage](../triage/README.md), helping other contributors track down problems, finding meaningful issues in submitted PRs, helping people in our #help channel, etc, all while demonstrating exemplary behavior that closely aligns with our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md).
-* You have recently submitted several PRs that have landed successfully (received an LGTM, PR was merged, no regressions reported, PR was not reverted), without needing extensive tutoring in the process.
-* You are employed by a company with a history of contributing to Flutter, for the purpose of yourself regularly contributing to Flutter.
-* You represent a development team that creates applications, plugins, or packages using Flutter and have a close relationship with our developer relations team, including having a customer label, and have a great need to regularly update labels on issues (see [Issue hygiene, Customers](./issue_hygiene/README.md#customers)). (This is rare.)
+Being on the contributor ladder means you are added to the appropriate `@flutter/flutter-hackers` child team on GitHub (`@flutter/reviewers`, `@flutter/committers`, or `@flutter/maintainers`), granted the "team" role on Discord, and invited to the announcement-only `flutter-contributors` Google Group (via the registration form pinned in `#hidden-chat` on Discord). This privilege comes with an expectation of responsibility: ladder members care about Flutter and help move the project forward along our [roadmap](../roadmap/Roadmap.md), collaborate constructively with the team, contribute and review high-quality code, and follow through on bugs and tests.
 
-Being granted access means that you will be added to the "flutter-hackers" group on GitHub and the "team" role on Discord. This privilege is granted with some expectation of responsibility: contributors are people who care about Flutter and want to help Flutter along our [roadmap](../roadmap/Roadmap.md). A contributor is not just someone who can make changes or comment on issues, but someone who has demonstrated their ability to collaborate with the team, get the most knowledgeable people to review code, contribute high-quality code, follow through to fix bugs (in code or tests), and provide meaningful insights on issues.
-
-We grant access optimistically based on a reasonably small volume of evidence of good faith. Correspondingly, we will remove access quickly if we find our trust has been violated. Contributors with commit access must still follow all our processes and policies, and must follow our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md) rigorously. (Please read it, it's stricter than most.)
+Ladder members must follow all project processes and policies, and must adhere to our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md) and [style guide](Style-guide-for-Flutter-repo.md). Access will be revoked if trust or the code of conduct is violated.
 
 
 ### Responsibilities
 
 #### Code of conduct
 
-If you have commit access or "team" access on the Discord server, you are responsible for enforcing our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md).
+If you are on the contributor ladder or hold "team" access on the Discord server, you are expected to uphold and help enforce our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md).
 
 Our code of conduct is much, much stricter than most. We do not wait until someone has been actively rude or insulting. Being disrespectful in any way is grounds for action. For example, passive-aggressive whining and general unconstructive negativity are all violations of the code of conduct. If someone is in a bad mood, we would rather they avoided contributing to Flutter on that day.
 
 When you see something that might be described as unwelcoming or is in some other way a violation of our code of conduct, promptly contact the offender and ask them to read the code of conduct and consider how they might more effectively espouse its philosophy. Most people react very positively to this.
 
-If they react negatively, or if they continue to make the environment unpleasant, they should be removed from the environment. On Discord, this would be kicking them from the channel. Repeat offenders should be banned. On GitHub, they can be blocked from our organization (you can ask @github-admin on Discord to do this). Please let the #server-support [Chat](Chat.md) channel know when you do anything like this, so that we can keep an eye on how common it is.
+If they react negatively, or if they continue to make the environment unpleasant, they should be removed from the environment. On Discord, this would be kicking them from the channel. Repeat offenders should be banned. On GitHub, organization moderation permissions (blocking accounts, locking conversations, hiding comments) are held by Maintainers (you can also contact `conduct@flutter.dev` or ping @github-admin on Discord). Please let the #server-support [Chat](Chat.md) channel know when you do anything like this, so that we can keep an eye on how common it is.
 
 #### Maintaining documentation
 
-Part of being a contributor is making sure our documentation is up to date, including our internal (team-facing) documentation such as this wiki. If you spot something wrong, please fix it! As a contributor, you have access to the wiki.
+Part of being a contributor is making sure our documentation is up to date, including our internal (team-facing) documentation such as `docs/`. If you spot something wrong, please fix it!
 
 ### Privileges
 
-Being in the GitHub "flutter-hackers" group gives you the following:
+Depending on your tier in `@flutter/flutter-hackers` (see [`docs/LADDER.md`](https://github.com/flutter/contributors/blob/main/docs/LADDER.md) and [`docs/CODE_REVIEW_WORKFLOW.md`](https://github.com/flutter/contributors/blob/main/docs/CODE_REVIEW_WORKFLOW.md)), GitHub organization membership gives you:
 
-* The ability to merge your own PRs once they are reviewed (see [Tree Hygiene](Tree-hygiene.md)).
+* **Reviewers (`@flutter/reviewers` — Triage role):**
+  * The ability to add labels, milestones, and assignees, and close duplicate or resolved issues on GitHub (see [Issue Hygiene](./issue_hygiene/README.md)).
+  * First-pass code review approval on Contributor and Reviewer PRs (counting as one of the two required `@flutter/flutter-hackers` approvals, alongside a binding approval from a Committer or Maintainer).
+  * Faster pre-submit CI test execution on PRs.
 
-* The ability to add labels, milestones, etc, on issues on GitHub (see [Issue Hygiene](./issue_hygiene/README.md)).
-
-* PRs will run their tests slightly faster.
-
-* Exemption from the 2 concurrent open pull request limit on public Flutter repositories.
+* **Committers (`@flutter/committers`) and Maintainers (`@flutter/maintainers`) — Write role:**
+  * All Reviewer privileges above.
+  * Authoritative/binding code review approvals on pull requests.
+  * The ability to merge pull requests (requiring 1 approval from a Reviewer or higher on your own PRs) and apply the `autosubmit` label (see [Tree Hygiene](Tree-hygiene.md)).
+  * Exemption from the 2 concurrent open pull request limit on public Flutter repositories.
 
 Being in the Discord "team" group gives you the following:
 
+* Access to `#hidden-chat` (which includes the pinned sign-up form for the `flutter-contributors` Google Group, delivering announcements and calendar invites for the Flutter Contributor Roundtable and the Dash Forum).
 * The ability to talk without rate-limiting on the #hackers-* channels.
-
 * The ability to kick people.
-
 * The ability to manage the server emoji.
 
 
 ## Process
 
-The actual process (as followed by Flutter repo admins) is as follows:
+Invitations and promotions on the contributor ladder are managed through **[Quarterly Reviews](https://github.com/flutter/contributors/blob/main/docs/QUARTERLY_REVIEW.md)** in [`flutter/contributors`](https://github.com/flutter/contributors):
 
-1. Verify that they qualify under all the terms described above. Make sure they have a sponsor who isn't you.
-1. Verify the identity of the person making the request. Ask them to confirm, on Discord, that they have read the style guide, issue or tree hygiene wiki page, code of conduct, and other documents relevant to them.
-1. Add them to our private spreadsheet (go/flutter-organization-members).
-1. Click the "Add a member" button on [the flutter-hackers team page](https://github.com/orgs/flutter/teams/flutter-hackers/members) on GitHub.
-1. Type their name in the text field, select them, then click the "Invite" button.
-1. Add them to the "team" group on Discord. Be sure to verify that you are promoting the right person; multiple people can have the same nickname on Discord!
+1. Every quarter, automated activity tracking across active `flutter` repositories evaluates rolling 12-month contributions and opens a public Community Contributor Ladder Audit issue in [`flutter/contributors`](https://github.com/flutter/contributors/issues) for a 30-day review period.
+2. Contributors who meet the criteria for **Reviewer** (≥ 10 contributions) or **Committer** (≥ 30 contributions, including ≥ 10 merged PRs) and are in good Code of Conduct standing are invited on the quarterly audit issue.
+3. Invited contributors reply on the tracking issue to accept their invitation (confirming agreement with our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md) and [style guide](Style-guide-for-Flutter-repo.md)) and share their Discord username.
+4. At the conclusion of the 30-day review period, [`ROSTER.md`](https://github.com/flutter/contributors/blob/main/ROSTER.md) is updated and organization admins provision the corresponding GitHub team (`@flutter/reviewers` or `@flutter/committers` under `@flutter/flutter-hackers`) and Discord "team" role.
+5. For exceptional off-cycle needs between quarterly reviews, an active organization member can sponsor an out-of-band nomination issue in [`flutter/contributors`](https://github.com/flutter/contributors/issues/new/choose).
 
-*For new Googlers joining the team*: You need to ask someone in the team to add you to get added. It's not an automatic process after you join the flutter Google group.
+*For new Googlers and Partner engineers*: Googlers are provisioned via `@flutter/googlers` (managed through internal tooling) and added to `@flutter/maintainers` by an admin. Partner engineers are managed through `@flutter/partners` child teams and verified quarterly (see [`docs/GOVERNANCE.md`](https://github.com/flutter/contributors/blob/main/docs/GOVERNANCE.md)).
 
 
-## Inactivity
+## Inactivity and Dasher Emeritus
 
-We occasionally check for account with commit access that have not been used for a while. It takes very little to count as "active" (e.g. commenting on an issue, even adding an emoji reaction to an issue). If your account has been inactive for over a year we will try to reach out (e.g. by e-mail or on Discord) before removing access.
+During each [quarterly review](https://github.com/flutter/contributors/blob/main/docs/QUARTERLY_REVIEW.md), ladder members with fewer than 10 recorded GitHub contributions over the preceding 12 months are placed in a **30-day grace period** on the public quarterly audit issue. Members who have been active through qualitative contributions not captured by automated PR/issue/review counts (such as issue triage, verifying reproductions, reviewing [RFCs](https://github.com/flutter/rfc) or design docs, or mentoring) can reply on the audit issue during the 30-day window to retain their active role.
 
-If your account access was removed but you wish to return to contributing to Flutter, you are most welcome to do so; just reach out on the Discord (see [Chat](Chat.md)) and ask someone to renominate you according to the process described above.
+After the 30-day grace period, inactive members transition to **Dasher Emeritus** and are honored in [`EMERITUS.md`](https://github.com/flutter/contributors/blob/main/EMERITUS.md). To maintain repository security, Dasher Emeriti exit the `flutter` GitHub organization, while retaining their Discord "team" role (including `#hidden-chat`) and membership in the `flutter-contributors` Google Group so they can stay connected with the team.
+
+If you are a Dasher Emeritus and return to active contributing, you will be automatically identified for reinstatement during the next quarterly review once you reach 10 contributions, or you can ask an active organization member in `#hidden-chat` on Discord to sponsor an off-cycle [Dasher Emeritus Reinstatement request](https://github.com/flutter/contributors/issues/new?template=2_emeritus_reinstatement.yml) in [`flutter/contributors`](https://github.com/flutter/contributors).
 
 
 # Access rights to Flutter dashboard

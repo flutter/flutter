@@ -409,6 +409,17 @@ abstract mixin class WidgetsBindingObserver {
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged].
   void didChangeAccessibilityFeatures() {}
+
+  /// Called when the [PlatformDispatcher.alwaysUse24HourFormat] setting changes.
+  ///
+  /// This method exposes notifications from
+  /// [dart:ui.PlatformDispatcher.onAlwaysUse24HourFormatChanged].
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.alwaysUse24HourFormatOf], which provides a similar service with
+  ///    less boilerplate.
+  void didChangeAlwaysUse24HourFormat() {}
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -486,7 +497,7 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = createDefaultWindowingOwner();
+    _windowingOwner = createWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -986,6 +997,27 @@ mixin WidgetsBinding
             library: 'widgets library',
             context: ErrorDescription(
               'while dispatching notifications for WidgetsBindingObserver.didChangePlatformBrightness',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void handleAlwaysUse24HourFormatChanged() {
+    super.handleAlwaysUse24HourFormatChanged();
+    for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      try {
+        observer.didChangeAlwaysUse24HourFormat();
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription(
+              'while dispatching notifications for WidgetsBindingObserver.didChangeAlwaysUse24HourFormat',
             ),
           ),
         );
@@ -1764,6 +1796,23 @@ mixin WidgetsBinding
   Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
+
+  /// Creates the [WindowingOwner] to install in [windowingOwner].
+  ///
+  /// By default, this creates the owner for the current platform, or an
+  /// unsupported owner when windowing is disabled. Test bindings override this
+  /// to avoid initializing native windowing before installing their test owner.
+  ///
+  /// [initInstances] calls this, so an override runs before this binding — and
+  /// before every binding mixed in after it — has finished initializing. Only
+  /// state that a constructor established, or that a binding earlier in the
+  /// mixin application initialized, can be read from here: [platformDispatcher]
+  /// can be, and anything assigned after the call below cannot.
+  ///
+  /// {@macro flutter.widgets.binding.window.experimental}
+  @internal
+  @protected
+  WindowingOwner createWindowingOwner() => createDefaultWindowingOwner();
 
   /// The [WindowingOwner] is responsible for creating and managing [BaseWindowController]s.
   ///
