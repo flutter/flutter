@@ -178,13 +178,13 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       overlay_canvas->RestoreToCount(restore_count);
     }
   }
-  bool overlay_layer_has_content_this_frame_;
+  bool overlay_layer_has_content_this_frame;
   if (overlay_frame != nullptr) {
     overlay_frame->set_submit_info({.frame_boundary = false});
     overlay_frame->Submit();
-    overlay_layer_has_content_this_frame_ = true;
+    overlay_layer_has_content_this_frame = true;
   } else {
-    overlay_layer_has_content_this_frame_ = false;
+    overlay_layer_has_content_this_frame = false;
   }
 
   frame->Submit();
@@ -199,8 +199,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
        overlay_layer_state = overlay_layer_state_,
-       overlay_layer_has_content_this_frame_]() mutable -> void {
-        if (overlay_layer_has_content_this_frame_) {
+       overlay_layer_has_content_this_frame]() mutable -> void {
+        if (overlay_layer_has_content_this_frame) {
           ShowOverlayLayerIfNeeded(jni_facade.get(), overlay_layer_state.get());
         } else {
           HideOverlayLayerIfNeeded(jni_facade.get(), overlay_layer_state.get());
