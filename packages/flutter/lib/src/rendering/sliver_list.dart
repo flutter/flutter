@@ -181,7 +181,11 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // the earliestUsefulChild, we will correct it once the scroll offset
         // reaches zero again.
         earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
-        assert(earliestUsefulChild != null);
+        if (earliestUsefulChild == null) {
+          // The builder has no child before firstChild.
+          earliestUsefulChild = firstChild;
+          break;
+        }
         final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild!);
         final childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;

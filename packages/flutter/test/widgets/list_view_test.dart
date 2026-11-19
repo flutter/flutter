@@ -1287,4 +1287,40 @@ void main() {
       expect(find.text('Item 1'), findsOneWidget);
     },
   );
+
+  testWidgets('ListView.builder handles a null child before the first built child', (
+    WidgetTester tester,
+  ) async {
+    final items = List<String?>.generate(200, (int i) => i > 180 ? null : 'Item $i');
+    late StateSetter setState;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (BuildContext context, int index) {
+                final String? item = items[index];
+                return item == null ? null : SizedBox(height: 100.0, child: Text(item));
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.fling(find.byType(ListView), const Offset(0.0, -5000.0), 5000.0);
+    await tester.pumpAndSettle();
+
+    setState(() => items.replaceRange(10, 30, <String?>[null]));
+    await tester.pump();
+
+    await tester.fling(find.byType(ListView), const Offset(0.0, 5000.0), 5000.0);
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Text), findsWidgets);
+  });
 }
