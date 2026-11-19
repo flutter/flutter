@@ -164,6 +164,9 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
                                                    const DlRect& rect) {
   std::shared_ptr<OverlayLayer> layer = surface_pool_->GetLayer(
       context, android_context_, jni_facade_, surface_factory_);
+  if (!layer || !layer->surface) {
+    return nullptr;
+  }
 
   std::unique_ptr<SurfaceFrame> frame =
       layer->surface->AcquireFrame(frame_size_);

@@ -1351,6 +1351,100 @@ TEST(RasterizerTest, TeardownNoSurface) {
   rasterizer->Teardown();
 }
 
+#if !SLIMPELLER
+TEST(RasterizerTest,
+     DrawMakesRenderContextCurrentBeforeSkiaPerformDeferredCleanup) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, ShouldDiscardLayerTree).WillByDefault(Return(false));
+
+  auto context = GrDirectContext::MakeMock(nullptr);
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  auto* raw_surface = surface.get();
+  EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface, GetContext()).WillRepeatedly(Return(context.get()));
+
+  // Pipeline depth sufficient for two single-frame Draw() runs.
+  constexpr uint32_t kTestPipelineDepth = 4;
+  // Arbitrary test frame dimensions in physical pixels.
+  constexpr int kTestFrameWidth = 800;
+  constexpr int kTestFrameHeight = 600;
+
+  bool frame_submitted = false;
+  bool context_made_current_after_submit = false;
+  int make_current_calls = 0;
+
+  ON_CALL(*surface, AcquireFrame(DlISize())).WillByDefault([&] {
+    SurfaceFrame::FramebufferInfo framebuffer_info;
+    framebuffer_info.supports_readback = true;
+    return std::make_unique<SurfaceFrame>(
+        /*surface=*/nullptr, framebuffer_info,
+        /*encode_callback=*/
+        [](const SurfaceFrame&, DlCanvas*) { return true; },
+        /*submit_callback=*/
+        [&](const SurfaceFrame&) {
+          frame_submitted = true;
+          return true;
+        },
+        /*frame_size=*/DlISize(kTestFrameWidth, kTestFrameHeight));
+  });
+
+  // 1st call: Rasterizer::Setup; 2nd call: post-submit deferred Skia cleanup;
+  // 3rd call: simulates failed context switch on second Draw() without crash.
+  EXPECT_CALL(*raw_surface, MakeRenderContextCurrent())
+      .WillOnce([] { return std::make_unique<GLContextDefaultResult>(true); })
+      .WillOnce([&] {
+        ++make_current_calls;
+        context_made_current_after_submit = frame_submitted;
+        return std::make_unique<GLContextDefaultResult>(true);
+      })
+      .WillOnce([&] {
+        ++make_current_calls;
+        return std::make_unique<GLContextDefaultResult>(false);
+      });
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto rasterizer = std::make_unique<Rasterizer>(delegate);
+    rasterizer->Setup(std::move(surface));
+
+    auto pipeline = std::make_shared<FramePipeline>(kTestPipelineDepth);
+    for (int i = 0; i < 2; ++i) {
+      frame_submitted = false;
+      auto layer_tree = std::make_unique<LayerTree>(
+          /*root_layer=*/nullptr, /*frame_size=*/DlISize());
+      auto item = std::make_unique<FrameItem>(
+          SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
+                              kDevicePixelRatio),
+          CreateFinishedBuildRecorder());
+      EXPECT_TRUE(pipeline->Produce().Complete(std::move(item)).success);
+      EXPECT_EQ(rasterizer->Draw(pipeline), DrawStatus::kDone);
+    }
+
+    rasterizer->Teardown();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  EXPECT_TRUE(context_made_current_after_submit);
+  EXPECT_EQ(make_current_calls, 2);
+}
+#endif  // !SLIMPELLER
+
 TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
   GTEST_SKIP() << "eglPresentationTime is disabled due to "
                   "https://github.com/flutter/flutter/issues/112503";

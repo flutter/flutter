@@ -27,6 +27,7 @@ AndroidExternalViewEmbedderWrapper::AndroidExternalViewEmbedderWrapper(
       surface_factory_(std::move(surface_factory)) {}
 
 void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
+  std::lock_guard<std::mutex> lock(init_mutex_);
   if (non_hcpp_view_embedder_ || hcpp_view_embedder_) {
     return;
   }
@@ -158,11 +159,20 @@ bool AndroidExternalViewEmbedderWrapper::SupportsDynamicThreadMerging() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::Teardown() {
-  EnsureInitialized();
-  if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->Teardown();
-  } else {
-    non_hcpp_view_embedder_->Teardown();
+  ExternalViewEmbedder* target = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(init_mutex_);
+    if (hcpp_view_embedder_) {
+      target = hcpp_view_embedder_.get();
+    } else if (non_hcpp_view_embedder_) {
+      target = non_hcpp_view_embedder_.get();
+    }
+  }
+  // Invoke Teardown() outside init_mutex_ because Teardown() synchronously
+  // waits on PlatformTaskRunner while main may concurrently query wrapper
+  // methods that acquire init_mutex_.
+  if (target != nullptr) {
+    target->Teardown();
   }
 }
 

@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
+#include <mutex>
+
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -83,6 +85,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   const bool meets_hcpp_criteria_;
   const AndroidContext& android_context_;
   const TaskRunners& task_runners_;
+  std::mutex init_mutex_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;

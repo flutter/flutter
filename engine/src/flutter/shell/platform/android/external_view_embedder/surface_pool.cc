@@ -6,6 +6,8 @@
 
 #include <utility>
 
+#include "flutter/fml/logging.h"
+
 namespace flutter {
 
 OverlayLayer::OverlayLayer(int id,
@@ -53,22 +55,40 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
   if (available_layer_index_ >= layers_.size()) {
     std::unique_ptr<AndroidSurface> android_surface =
         surface_factory->CreateSurface();
-
-    FML_CHECK(android_surface && android_surface->IsValid())
-        << "Could not create an OpenGL, Vulkan or Software surface to set up "
-           "rendering.";
+    if (!android_surface || !android_surface->IsValid()) {
+      FML_LOG(ERROR)
+          << "Could not create an OpenGL, Vulkan or Software surface to set up "
+             "overlay rendering.";
+      return nullptr;
+    }
 
     std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> java_metadata =
         use_new_surface_methods_
             ? jni_facade->createOverlaySurface2()
             : jni_facade->FlutterViewCreateOverlaySurface();
+    if (!java_metadata || !java_metadata->window) {
+      FML_LOG(ERROR)
+          << "Could not create Java overlay surface or native window.";
+      return nullptr;
+    }
 
-    FML_CHECK(java_metadata->window);
-    android_surface->SetNativeWindow(java_metadata->window, jni_facade);
+    // Initialize any dynamic Impeller backend surface before binding the
+    // ANativeWindow so SetNativeWindow validates swapchain/EGL creation
+    // directly rather than stashing the window for later.
     android_surface->SetupImpellerSurface();
+    if (!android_surface->SetNativeWindow(java_metadata->window, jni_facade)) {
+      FML_LOG(ERROR) << "Could not bind native window for overlay layer "
+                     << java_metadata->id << ".";
+      return nullptr;
+    }
 
     std::unique_ptr<Surface> surface =
         android_surface->CreateGPUSurface(gr_context);
+    if (!surface) {
+      FML_LOG(ERROR) << "Could not create GPU surface for overlay layer "
+                     << java_metadata->id << ".";
+      return nullptr;
+    }
 
     std::shared_ptr<OverlayLayer> layer =
         std::make_shared<OverlayLayer>(java_metadata->id,           //
@@ -83,11 +103,17 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
   // Since the surfaces are recycled, it's possible that the GrContext is
   // different.
   if (gr_context_key != layer->gr_context_key) {
-    layer->gr_context_key = gr_context_key;
     // The overlay already exists, but the GrContext was changed so we need to
     // recreate the rendering surface with the new GrContext.
     std::unique_ptr<Surface> surface =
         layer->android_surface->CreateGPUSurface(gr_context);
+    if (!surface) {
+      layers_.erase(layers_.begin() + available_layer_index_);
+      FML_LOG(ERROR) << "Could not recreate GPU surface for overlay layer "
+                     << layer->id << ".";
+      return nullptr;
+    }
+    layer->gr_context_key = gr_context_key;
     layer->surface = std::move(surface);
   }
   available_layer_index_++;

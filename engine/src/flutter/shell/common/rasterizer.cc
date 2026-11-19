@@ -747,7 +747,13 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
 
 #if !SLIMPELLER
   if (surface_->GetContext()) {
-    surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
+    // Re-bind the root surface's GL context before Skia deferred cleanup in
+    // case an overlay ~GPUSurfaceGLSkia cleared the current EGLContext inside
+    // SubmitFlutterView.
+    auto context_switch = surface_->MakeRenderContextCurrent();
+    if (context_switch && context_switch->GetResult()) {
+      surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
+    }
   }
 #endif  //  !SLIMPELLER
 

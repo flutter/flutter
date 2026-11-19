@@ -31,14 +31,14 @@ void AndroidSurfaceDynamicImpeller::TeardownOnScreenContext() {
 std::unique_ptr<Surface> AndroidSurfaceDynamicImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
   if (vulkan_surface_) {
-    if (window_) {
-      vulkan_surface_->SetNativeWindow(window_, jni_facade_);
+    if (window_ && !vulkan_surface_->SetNativeWindow(window_, jni_facade_)) {
+      return nullptr;
     }
     return vulkan_surface_->CreateGPUSurface(gr_context);
   }
   if (gl_surface_) {
-    if (window_) {
-      gl_surface_->SetNativeWindow(window_, jni_facade_);
+    if (window_ && !gl_surface_->SetNativeWindow(window_, jni_facade_)) {
+      return nullptr;
     }
     return gl_surface_->CreateGPUSurface(gr_context);
   }
