@@ -51,8 +51,7 @@ const kKnownHardware = <String, HardwareType>{
   'samsungexynos7570': HardwareType.physical,
 };
 
-/// How long to wait for `adb shell getprop` before treating the device as
-/// unresponsive.
+/// Timeout for `adb shell getprop`.
 const _kGetpropTimeout = Duration(seconds: 30);
 
 /// A physical Android device or emulator.
@@ -109,24 +108,17 @@ class AndroidDevice extends Device {
 
     try {
       final Process process = await _processManager.start(propCommand);
-      // Decode as latin1 so that we don't try and interpret the
-      // `adb shell getprop` result as UTF8.
-      final List<Object>? result =
-          await Future.wait<Object>(<Future<Object>>[
-                process.exitCode,
-                latin1.decodeStream(process.stdout),
-                latin1.decodeStream(process.stderr),
-              ])
-              .then<List<Object>?>((List<Object> result) => result)
-              .timeout(
-                _kGetpropTimeout,
-                onTimeout: () {
-                  // A frozen device never answers; don't leak the adb process.
-                  process.kill();
-                  return null;
-                },
-              );
-      if (result == null) {
+      final List<Object> result;
+      try {
+        // Decode as latin1; getprop output is not guaranteed to be valid UTF-8.
+        result = await Future.wait<Object>(<Future<Object>>[
+          process.exitCode,
+          latin1.decodeStream(process.stdout),
+          latin1.decodeStream(process.stderr),
+        ]).timeout(_kGetpropTimeout);
+      } on TimeoutException {
+        // Kill adb so it does not leak.
+        process.kill();
         _logger.printError(
           'Timed out retrieving device properties for $name; the device may be unresponsive.',
         );
