@@ -14,7 +14,7 @@ updates:
       all-github-actions:
         patterns: [ "*" ]
     reviewers:
-      - "jmagman"
+      - "eyebrowsoffire"
       - "jtmcdole"
     labels:
       - "team-infra"
