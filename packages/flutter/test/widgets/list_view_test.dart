@@ -996,6 +996,71 @@ void main() {
     expect(find.text('Item 5'), findsNothing);
   });
 
+  testWidgets('itemExtentBuilder memoizes terminal index when itemCount is null', (
+    WidgetTester tester,
+  ) async {
+    final calledIndices = <int>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            calledIndices.add(index);
+            if (index >= 5) {
+              return null;
+            }
+            return 50.0;
+          },
+          itemBuilder: (BuildContext context, int index) {
+            if (index >= 5) {
+              return null;
+            }
+            return SizedBox(height: 50.0, child: Text('Item $index'));
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+
+    // Each evaluated index, including the terminal index 5, must be called at most once during layout.
+    expect(calledIndices.toSet().length, calledIndices.length);
+    expect(calledIndices.contains(5), isTrue);
+  });
+
+  testWidgets(
+    'ListView.builder with shrinkWrap and itemExtentBuilder inside SingleChildScrollView',
+    (WidgetTester tester) async {
+      final heights = <double>[40.0, 50.0, 60.0, 70.0, 80.0];
+      final calledIndices = <int>[];
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SingleChildScrollView(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: heights.length,
+              itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+                calledIndices.add(index);
+                return heights[index];
+              },
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(height: heights[index], child: Text('Item $index'));
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Item 4'), findsOneWidget);
+      expect(find.text('Item 5'), findsNothing);
+      expect(calledIndices, <int>[0, 1, 2, 3, 4]);
+    },
+  );
+
   // Regression test for https://github.com/flutter/flutter/pull/131393
   testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
     final controller = ScrollController();
@@ -1174,4 +1239,52 @@ void main() {
       throwsAssertionError,
     );
   });
+
+  testWidgets('ListView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: ListView(children: const <Widget>[Placeholder()])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ListView)), Size.zero);
+  });
+
+  testWidgets(
+    'ListView.separated itemExtentBuilder works with different extents for items and separators',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView.separated(
+            controller: controller,
+            itemCount: 10,
+            itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+              return index.isEven ? 100.0 : 10.0; // 100 for items, 10 for separators
+            },
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(height: 100.0, child: Text('Item $index'));
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return SizedBox(height: 10.0, child: Text('Separator $index'));
+            },
+          ),
+        ),
+      );
+
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Separator 0'), findsOneWidget);
+      expect(find.text('Item 5'), findsOneWidget);
+      expect(find.text('Item 6'), findsNothing);
+
+      controller.jumpTo(200.0);
+      await tester.pump();
+      expect(find.text('Item 0'), findsNothing);
+      expect(find.text('Item 1'), findsOneWidget);
+    },
+  );
 }

@@ -65,9 +65,6 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isWindowingEnabled => isEnabled(windowingFeature);
 
   @override
-  bool get isAccessibilityEvaluationsEnabled => isEnabled(accessibilityEvaluationsFeature);
-
-  @override
   bool get isLLDBDebuggingEnabled => isEnabled(lldbDebugging);
 
   @override
@@ -75,15 +72,23 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
 
   @override
   bool get isRiscv64SupportEnabled => isEnabled(riscv64);
+
+  @override
+  bool get isMacOSArm64OnlyEnabled => isEnabled(macOSArm64Only);
+
+  @override
+  bool get isHcppEnabled => isEnabled(hcpp);
+
+  @override
+  bool get isToolExtensionsEnabled => isEnabled(toolExtensionsFeature);
 }
 
 interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlagsIsEnabled {
   FlutterFeatureFlags({
-    required FlutterVersion flutterVersion,
-    required FlutterFeaturesConfig featuresConfig,
+    required this._flutterVersion,
+    required this._featuresConfig,
     required this.platform,
-  }) : _flutterVersion = flutterVersion,
-       _featuresConfig = featuresConfig;
+  });
 
   final FlutterVersion _flutterVersion;
   final FlutterFeaturesConfig _featuresConfig;

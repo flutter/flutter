@@ -644,7 +644,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     if (scale == 1.0) {
       return matrix.clone();
     }
-    assert(scale != 0.0);
 
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.
@@ -849,7 +848,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _animation = Tween<Offset>(
           begin: translation,
           end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
-        ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
+        ).chain(CurveTween(curve: Curves.decelerate)).animate(_controller);
         _controller.duration = Duration(milliseconds: (tFinal * 1000).round());
         _animation!.addListener(_handleInertiaAnimation);
         _controller.forward();
@@ -872,7 +871,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _scaleAnimation = Tween<double>(
           begin: scale,
           end: frictionSimulation.x(tFinal),
-        ).animate(CurvedAnimation(parent: _scaleController, curve: Curves.decelerate));
+        ).chain(CurveTween(curve: Curves.decelerate)).animate(_scaleController);
         _scaleController.duration = Duration(milliseconds: (tFinal * 1000).round());
         _scaleAnimation!.addListener(_handleScaleAnimation);
         _scaleController.forward();

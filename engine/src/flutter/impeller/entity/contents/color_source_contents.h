@@ -68,7 +68,7 @@ class ColorSourceContents : public Contents {
   void SetEffectTransform(Matrix matrix);
 
   //----------------------------------------------------------------------------
-  /// @brief   Set the inverted effect transform for this color source.
+  /// @brief   Get the inverted effect transform for this color source.
   ///
   ///          When the effect transform is set via `SetEffectTransform`, the
   ///          value is inverted upon storage. The reason for this is that most

@@ -20,6 +20,12 @@ struct SamplerDescriptor final {
   SamplerAddressMode height_address_mode = SamplerAddressMode::kClampToEdge;
   SamplerAddressMode depth_address_mode = SamplerAddressMode::kClampToEdge;
 
+  /// The maximum anisotropy clamp used when sampling. A value of 1 disables
+  /// anisotropic filtering. Values greater than 1 are clamped to the device
+  /// limit reported by `Capabilities::GetMaxSamplerAnisotropy`. Anisotropic
+  /// filtering only applies when all filters are linear.
+  uint8_t max_anisotropy = 1;
+
   std::string_view label = "NN Clamp Sampler";
 
   SamplerDescriptor();
@@ -39,7 +45,8 @@ struct SamplerDescriptor final {
            static_cast<uint64_t>(d.mip_filter) << 16 |
            static_cast<uint64_t>(d.width_address_mode) << 24 |
            static_cast<uint64_t>(d.height_address_mode) << 32 |
-           static_cast<uint64_t>(d.depth_address_mode) << 40;
+           static_cast<uint64_t>(d.depth_address_mode) << 40 |
+           static_cast<uint64_t>(d.max_anisotropy) << 48;
   }
 };
 

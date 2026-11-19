@@ -5,6 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'host_agent.dart';
@@ -40,6 +42,98 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
   return minVersion;
 }
 
+/// An installed, available iOS simulator runtime from `simctl list runtimes`.
+@visibleForTesting
+final class SimulatorRuntime {
+  const SimulatorRuntime({
+    required this.identifier,
+    required this.build,
+    required this.version,
+    required this.supportedDeviceTypeIds,
+  });
+
+  final String identifier;
+  final String build;
+  final String version;
+  final Set<String> supportedDeviceTypeIds;
+
+  @override
+  String toString() => 'iOS $version ($build)';
+}
+
+List<SimulatorRuntime> _parseAvailableIOSRuntimes(String simctlListRuntimesJson) {
+  if (json.decode(simctlListRuntimesJson) case {'runtimes': final List<Object?> runtimes}) {
+    return <SimulatorRuntime>[
+      for (final Object? runtime in runtimes)
+        if (runtime case {
+          'platform': 'iOS',
+          'isAvailable': true,
+          'identifier': final String identifier,
+          'buildversion': final String build,
+          'version': final String version,
+          'supportedDeviceTypes': final List<Object?> deviceTypes,
+        })
+          SimulatorRuntime(
+            identifier: identifier,
+            build: build,
+            version: version,
+            supportedDeviceTypeIds: <String>{
+              for (final Object? deviceType in deviceTypes)
+                if (deviceType case {'identifier': final String id}) id,
+            },
+          ),
+    ];
+  }
+  return const <SimulatorRuntime>[];
+}
+
+/// Picks the runtime for a [deviceTypeId] simulator from `simctl list runtimes`
+/// and `simctl runtime match list` JSON output.
+///
+/// Prefers the selected Xcode's runtime if it supports [deviceTypeId],
+/// otherwise the last compatible runtime. Throws if none is compatible.
+@visibleForTesting
+SimulatorRuntime selectIOSSimulatorRuntime({
+  required String simctlListRuntimesJson,
+  required String simctlRuntimeMatchListJson,
+  required String deviceTypeId,
+}) {
+  // mac_toolchain may set userOverriddenBuild in CI. Otherwise use the build
+  // simctl matched to the selected Xcode's iOS SDK, which older simctl versions
+  // (Xcode < 27) call "preferredBuild" and newer versions (Xcode >= 27) call
+  // "chosenRuntimeBuild".
+  final decodeResult = json.decode(simctlRuntimeMatchListJson) as Map<String, Object?>;
+  final String? iosKey = decodeResult.keys
+      .where((String key) => key.contains('iphoneos'))
+      .firstOrNull;
+  final String? runtimeBuildForSelectedXcode = switch (decodeResult[iosKey]) {
+    {'userOverriddenBuild': final String build} => build,
+    {'chosenRuntimeBuild': final String build} => build,
+    {'preferredBuild': final String build} => build,
+    _ => null,
+  };
+
+  // Some runtimes (e.g. iOS 27.1) only support a few device types.
+  final List<SimulatorRuntime> compatibleRuntimes = _parseAvailableIOSRuntimes(
+    simctlListRuntimesJson,
+  ).where((SimulatorRuntime r) => r.supportedDeviceTypeIds.contains(deviceTypeId)).toList();
+  if (compatibleRuntimes.isEmpty) {
+    throw 'No iOS simulator runtime supports $deviceTypeId. Available runtimes:\n$simctlListRuntimesJson';
+  }
+  final SimulatorRuntime runtime =
+      compatibleRuntimes.firstWhereOrNull(
+        (SimulatorRuntime r) => r.build == runtimeBuildForSelectedXcode,
+      ) ??
+      compatibleRuntimes.last;
+  if (runtimeBuildForSelectedXcode != null && runtime.build != runtimeBuildForSelectedXcode) {
+    print(
+      'Runtime $runtimeBuildForSelectedXcode for the selected Xcode does not '
+      'support $deviceTypeId. Falling back to $runtime.',
+    );
+  }
+  return runtime;
+}
+
 /// Creates and boots a new simulator, passes the new simulator's identifier to
 /// `testFunction`.
 ///
@@ -53,6 +147,7 @@ Future<void> testWithNewIOSSimulator(
     'simctl',
     'list',
     'runtimes',
+    '--json',
   ], workingDirectory: flutterDirectory.path);
 
   final String runtimesForSelectedXcode = await eval('xcrun', <String>[
@@ -63,55 +158,18 @@ Future<void> testWithNewIOSSimulator(
     '--json',
   ], workingDirectory: flutterDirectory.path);
 
-  // First check for userOverriddenBuild, which may be set in CI by mac_toolchain.
-  // Next, get the preferred runtime build for the selected Xcode version. Preferred
-  // means the runtime was either bundled with Xcode, exactly matched your SDK
-  // version, or it's indicated a better match for your SDK.
-  final decodeResult = json.decode(runtimesForSelectedXcode) as Map<String, Object?>;
-  final String? iosKey = decodeResult.keys
-      .where((String key) => key.contains('iphoneos'))
-      .firstOrNull;
-  final String? runtimeBuildForSelectedXcode = switch (decodeResult[iosKey]) {
-    {'userOverriddenBuild': final String build} => build,
-    {'preferredBuild': final String build} => build,
-    _ => null,
-  };
-
-  String? iOSSimRuntime;
-
-  final iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
-
-  // [availableRuntimes] may include runtime versions greater than the selected
-  // Xcode's greatest supported version. Use [runtimeBuildForSelectedXcode] when
-  // possible to pick which runtime to use.
-  // For example, iOS 17 (released with Xcode 15) may be available even if the
-  // selected Xcode version is 14.
-  for (final String runtime in LineSplitter.split(availableRuntimes)) {
-    if (runtimeBuildForSelectedXcode != null && !runtime.contains(runtimeBuildForSelectedXcode)) {
-      continue;
-    }
-    // These seem to be in order, so allow matching multiple lines so it grabs
-    // the last (hopefully latest) one.
-    final RegExpMatch? iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
-    if (iOSRuntimeMatch != null) {
-      iOSSimRuntime = iOSRuntimeMatch.group(1)!.trim();
-      continue;
-    }
-  }
-  if (iOSSimRuntime == null) {
-    if (runtimeBuildForSelectedXcode != null) {
-      throw 'iOS simulator runtime $runtimeBuildForSelectedXcode not found. Available runtimes:\n$availableRuntimes';
-    } else {
-      throw 'No iOS simulator runtime found. Available runtimes:\n$availableRuntimes';
-    }
-  }
+  final SimulatorRuntime runtime = selectIOSSimulatorRuntime(
+    simctlListRuntimesJson: availableRuntimes,
+    simctlRuntimeMatchListJson: runtimesForSelectedXcode,
+    deviceTypeId: deviceTypeId,
+  );
 
   final String deviceId = await eval('xcrun', <String>[
     'simctl',
     'create',
     deviceName,
     deviceTypeId,
-    iOSSimRuntime,
+    runtime.identifier,
   ], workingDirectory: flutterDirectory.path);
   await eval('xcrun', <String>[
     'simctl',

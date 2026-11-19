@@ -49,16 +49,16 @@ shift # past argument
 test_packages=
 case $test_name in
   embedder)
-    test_packages=("flutter-embedder-test-0.far" "parent-view.far" "child-view.far")
+    test_packages=("flutter-embedder-test-0.far")
     ;;
   text-input)
-    test_packages=("text-input-test-0.far" "text-input-view.far")
+    test_packages=("text-input-test-0.far")
     ;;
   touch-input)
-    test_packages=("touch-input-test-0.far" "touch-input-view.far" "embedding-flutter-view.far")
+    test_packages=("touch-input-test-0.far")
     ;;
   mouse-input)
-    test_packages=("mouse-input-test-0.far" "mouse-input-view.far")
+    test_packages=("mouse-input-test-0.far")
     ;;
   *)
     engine-error "Unknown test name $test_name. You may need to add it to $0"

@@ -45,7 +45,7 @@ data:
 """ % (target_arch, target_arch)
   for symbol_dir in symbol_dirs:
     symbol_dir_name = os.path.basename(os.path.normpath(symbol_dir))
-    data = '\n  - dir: %s' % (symbol_dir_name)
+    data = '\n  - dir: "%s"' % (symbol_dir_name)
     pkg_def = pkg_def + data
   return pkg_def
 

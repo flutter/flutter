@@ -16,6 +16,12 @@ NS_ASSUME_NONNULL_BEGIN
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* _Nullable bundle = nil,
                                               NSProcessInfo* _Nullable processInfoOrNil = nil);
 
+/// Returns the value of the FLTEnableWideGamut key from the given bundle,
+/// falling back to the main bundle if not found in the first. If both bundles
+/// are the same object, the value is read once.
+NSNumber* _Nullable FLTEnableWideGamutFromBundle(NSBundle* _Nullable bundle,
+                                                 NSBundle* _Nullable mainBundle);
+
 @interface FlutterDartProject ()
 
 @property(nonatomic, readonly) BOOL isWideGamutEnabled;

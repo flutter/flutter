@@ -10,8 +10,8 @@ import androidx.annotation.NonNull;
 import java.util.*;
 
 /**
- * DEPRECATED. Please see {@link FlutterEngineFlags} for the list of arguments to use or update if
- * you are adding a new flag.
+ * DEPRECATED. Please see {@link io.flutter.embedding.engine.flags.FlutterEngineFlags} for the list
+ * of arguments to use or update if you are adding a new flag.
  *
  * <p>Arguments that can be delivered to the Flutter shell when it is created.
  *
@@ -21,8 +21,9 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  */
-// TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
-// is no longer supported. See https://github.com/flutter/flutter/issues/180686.
+// TODO(camsim99): Delete this class after a stable release has passed since the
+// FlutterActivityAndFragmentDelegate.Host.getFlutterShellArgs deprecation:
+// https://github.com/flutter/flutter/issues/193256.
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Deprecated
 public class FlutterShellArgs {
@@ -57,6 +58,12 @@ public class FlutterShellArgs {
   public static final String ARG_KEY_TOGGLE_IMPELLER = "enable-impeller";
   public static final String ARG_ENABLE_IMPELLER = "--enable-impeller=true";
   public static final String ARG_DISABLE_IMPELLER = "--enable-impeller=false";
+  /** Intent extra key that opts the engine into the Flutter GPU API. */
+  public static final String ARG_KEY_ENABLE_FLUTTER_GPU = "enable-flutter-gpu";
+
+  /** Engine shell argument emitted when {@link #ARG_KEY_ENABLE_FLUTTER_GPU} is set. */
+  public static final String ARG_ENABLE_FLUTTER_GPU = "--enable-flutter-gpu";
+
   public static final String ARG_KEY_ENABLE_VULKAN_VALIDATION = "enable-vulkan-validation";
   public static final String ARG_ENABLE_VULKAN_VALIDATION = "--enable-vulkan-validation";
   public static final String ARG_KEY_ENABLE_HCPP_AND_SURFACE_CONTROL =
@@ -142,6 +149,9 @@ public class FlutterShellArgs {
       } else {
         args.add(ARG_DISABLE_IMPELLER);
       }
+    }
+    if (intent.getBooleanExtra(ARG_KEY_ENABLE_FLUTTER_GPU, false)) {
+      args.add(ARG_ENABLE_FLUTTER_GPU);
     }
     if (intent.getBooleanExtra(ARG_KEY_ENABLE_VULKAN_VALIDATION, false)) {
       args.add(ARG_ENABLE_VULKAN_VALIDATION);

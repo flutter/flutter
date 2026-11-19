@@ -20,6 +20,10 @@ class MockDelegate : public PlatformView::Delegate {
               OnPlatformViewCreated,
               (std::unique_ptr<Surface>),
               (override));
+  MOCK_METHOD(void,
+              OnPlatformViewCreatedDeferred,
+              (PlatformView::SurfaceFactory),
+              (override));
   MOCK_METHOD(void, OnPlatformViewDestroyed, (), (override));
   MOCK_METHOD(void, OnPlatformViewScheduleFrame, (), (override));
   MOCK_METHOD(void,
@@ -102,6 +106,10 @@ class MockDelegate : public PlatformView::Delegate {
               (override));
   MOCK_METHOD(const Settings&,
               OnPlatformViewGetSettings,
+              (),
+              (const, override));
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
               (),
               (const, override));
 };

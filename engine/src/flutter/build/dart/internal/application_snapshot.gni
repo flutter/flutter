@@ -49,7 +49,8 @@ template("application_snapshot") {
     # As we move towards a single pub workspace for the engine, this will be
     # the correct package config to use, as we will no longer have a per-package
     # .dart_tool/package_config.json.
-    package_config = rebase_path("//flutter/.dart_tool/package_config.json")
+    package_config =
+        rebase_path("//flutter/.dart_tool/package_config.json", root_build_dir)
   }
 
   extra_deps = []
@@ -66,15 +67,11 @@ template("application_snapshot") {
   }
 
   depfile = output + ".d"
-  abs_depfile = rebase_path(depfile)
-  abs_output = rebase_path(output)
-  rel_output = rebase_path(output, root_build_dir)
   snapshot_vm_args = [
     "--deterministic",
     "--packages=$package_config",
-    "--snapshot=$abs_output",
-    "--snapshot-depfile=$abs_depfile",
-    "--depfile-output-filename=$rel_output",
+    "--snapshot=" + rebase_path(output, root_build_dir),
+    "--snapshot-depfile=" + rebase_path(depfile, root_build_dir),
   ]
   if (defined(invoker.vm_args)) {
     snapshot_vm_args += invoker.vm_args
@@ -124,7 +121,7 @@ template("application_snapshot") {
 
       args = [ dart ]
       args += snapshot_vm_args
-      args += [ rebase_path(main_dart) ]
+      args += [ rebase_path(main_dart, root_build_dir) ]
       args += training_args
     }
   } else {

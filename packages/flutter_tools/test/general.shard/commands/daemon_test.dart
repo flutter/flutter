@@ -3,13 +3,22 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart'
+    show FakeDevtoolsLauncher, FakePlistParser, FakeToolContext, TestFeatureFlags;
+import '../../src/test_build_system.dart';
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {
@@ -21,8 +30,22 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(),
+      ),
+      assetBundleFactory: _FakeAssetBundleFactory(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
+      toolContext: FakeToolContext(),
+      xcode: null,
       port: 123,
       logger: logger,
+      featureFlags: TestFeatureFlags(),
       bind: (Object? address, int port) async {
         bindCalledTimes++;
         bindAddresses.add(address);
@@ -45,8 +68,22 @@ void main() {
     final bindPorts = <int>[];
 
     final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(),
+      ),
+      assetBundleFactory: _FakeAssetBundleFactory(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
+      toolContext: FakeToolContext(),
+      xcode: null,
       port: 123,
       logger: logger,
+      featureFlags: TestFeatureFlags(),
       bind: (Object? address, int port) async {
         bindCalledTimes++;
         bindAddresses.add(address);
@@ -62,10 +99,50 @@ void main() {
     expect(bindAddresses, <Object?>[InternetAddress.loopbackIPv4, InternetAddress.loopbackIPv6]);
     expect(bindPorts, <int>[123, 123]);
   });
+
+  testWithoutContext('waits for server socket stream to close', () async {
+    final socket = FakeServerSocket(closeImmediately: false);
+    final logger = BufferLogger.test();
+
+    final server = DaemonServer(
+      analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => null,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(),
+      ),
+      assetBundleFactory: _FakeAssetBundleFactory(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
+      devtoolsLauncher: FakeDevtoolsLauncher(),
+      toolContext: FakeToolContext(),
+      xcode: null,
+      port: 123,
+      logger: logger,
+      featureFlags: TestFeatureFlags(),
+      bind: (Object? address, int port) async => socket,
+    );
+
+    var completed = false;
+    final Future<void> runFuture = server.run().whenComplete(() {
+      completed = true;
+    });
+    await pumpEventQueue();
+    expect(completed, isFalse);
+
+    await socket.controller.close();
+    await runFuture;
+    expect(completed, isTrue);
+  });
 }
 
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
+
 class FakeServerSocket extends Fake implements ServerSocket {
-  FakeServerSocket();
+  FakeServerSocket({this.closeImmediately = true});
+
+  final bool closeImmediately;
 
   @override
   int get port => 1;
@@ -80,10 +157,12 @@ class FakeServerSocket extends Fake implements ServerSocket {
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    // Close the controller immediately for testing purpose.
-    scheduleMicrotask(() {
-      controller.close();
-    });
+    if (closeImmediately) {
+      // Close the controller immediately for testing purpose.
+      scheduleMicrotask(() {
+        controller.close();
+      });
+    }
     return controller.stream.listen(
       onData,
       onError: onError,

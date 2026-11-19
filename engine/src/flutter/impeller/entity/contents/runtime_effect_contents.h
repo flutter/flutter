@@ -66,6 +66,10 @@ class RuntimeEffectContents final : public ColorSourceContents {
 
   const Geometry* geometry_ = nullptr;
   std::shared_ptr<RuntimeStage> runtime_stage_;
+  // Scoped registry name for `runtime_stage_`'s fragment function. Stable
+  // across the lifetime of a single `runtime_stage_` value, so we compute
+  // it once in `SetRuntimeStage` rather than per `Render`.
+  std::string scoped_fragment_name_;
   std::shared_ptr<std::vector<uint8_t>> uniform_data_;
   std::vector<TextureInput> texture_inputs_;
 };

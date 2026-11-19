@@ -10,12 +10,13 @@ import 'package:xml/xml.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/user_messages.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
@@ -38,11 +39,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   static AndroidApk? fromApk(
     File apk, {
     required AndroidSdk androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required Logger logger,
-    required ProcessUtils processUtils,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(:Logger logger, :ProcessManager processManager, :ProcessUtils processUtils) =
+        toolContext;
     final String? aaptPath = androidSdk.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
       logger.printError(_aaptNotFound);
@@ -66,7 +66,14 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       return null;
     }
 
-    final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+    final ApkManifestData? data;
+    try {
+      data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+      // ignore: avoid_catches_without_on_clauses
+    } catch (error, stackTrace) {
+      logger.printError('Failed to parse manifest from APK: $error', stackTrace: stackTrace);
+      return null;
+    }
 
     if (data == null) {
       logger.printError('Unable to read manifest info from ${apk.path}.');
@@ -100,13 +107,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
     required AndroidSdk? androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required ProcessUtils processUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
+    required ToolContext toolContext,
     BuildInfo? buildInfo,
   }) async {
+    final ToolContext(:Config config, fs: FileSystem fileSystem, :Logger logger) = toolContext;
     final File apkFile;
     final String filename;
     if (buildInfo == null) {
@@ -128,20 +132,28 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
-        return AndroidApk.fromApk(
+        final AndroidApk? builtApk = AndroidApk.fromApk(
           apkFile,
           androidSdk: androidSdk!,
-          processManager: processManager,
-          logger: logger,
-          userMessages: userMessages,
-          processUtils: processUtils,
+          toolContext: toolContext,
+        );
+        if (builtApk != null) {
+          return builtApk;
+        }
+        logger.printWarning(
+          'Failed to extract manifest from APK: falling back to source AndroidManifest.xml',
         );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
+      apkFile = fileSystem.file(
+        fileSystem.path.join(
+          getAndroidBuildDirectory(config: config, fileSystem: fileSystem),
+          filename,
+        ),
+      );
     }
 
     final File manifest = androidProject.appManifestFile;
@@ -189,12 +201,16 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
-    for (final XmlElement activity in document.findAllElements('activity')) {
+    final Iterable<XmlElement> activities = document
+        .findAllElements('activity')
+        .followedBy(document.findAllElements('activity-alias'));
+    for (final activity in activities) {
       final String? enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
       }
 
+      var foundLauncher = false;
       for (final XmlElement element in activity.findElements('intent-filter')) {
         String? actionName = '';
         String? categoryName = '';
@@ -214,9 +230,15 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
             actionName.isNotEmpty &&
             categoryName.isNotEmpty) {
           final String? activityName = activity.getAttribute('android:name');
-          launchActivity = '$packageId/$activityName';
-          break;
+          if (packageId != null && activityName != null && activityName.isNotEmpty) {
+            launchActivity = '$packageId/$activityName';
+            foundLauncher = true;
+            break;
+          }
         }
+      }
+      if (foundLauncher) {
+        break;
       }
     }
 

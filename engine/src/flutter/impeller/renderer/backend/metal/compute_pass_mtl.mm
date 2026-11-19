@@ -11,7 +11,6 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "fml/status.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -23,6 +22,7 @@
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/command.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -32,8 +32,10 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   if (!buffer_) {
     return;
   }
+  // A serial encoder runs each dispatch after the previous one finishes and
+  // makes its writes visible, so dependent dispatches need no manual barrier.
   encoder_ = [buffer_ computeCommandEncoderWithDispatchType:
-                          MTLDispatchType::MTLDispatchTypeConcurrent];
+                          MTLDispatchType::MTLDispatchTypeSerial];
   if (!encoder_) {
     return;
   }
@@ -41,7 +43,12 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   is_valid_ = true;
 }
 
-ComputePassMTL::~ComputePassMTL() = default;
+ComputePassMTL::~ComputePassMTL() {
+  if (!did_finish_encoding_) {
+    [encoder_ endEncoding];
+    did_finish_encoding_ = true;
+  }
+}
 
 bool ComputePassMTL::IsValid() const {
   return is_valid_;
@@ -57,8 +64,10 @@ void ComputePassMTL::OnSetLabel(const std::string& label) {
 }
 
 void ComputePassMTL::SetCommandLabel(std::string_view label) {
+#ifdef IMPELLER_DEBUG
   has_label_ = true;
-  [encoder_ pushDebugGroup:@(label.data())];
+  [encoder_ pushDebugGroup:@(std::string(label).c_str())];
+#endif  // IMPELLER_DEBUG
 }
 
 // |ComputePass|
@@ -66,6 +75,7 @@ void ComputePassMTL::SetPipeline(
     const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
   pass_bindings_cache_.SetComputePipelineState(
       ComputePipelineMTL::Cast(*pipeline).GetMTLComputePipelineState());
+  workgroup_size_ = pipeline->GetDescriptor().GetWorkgroupSize();
 }
 
 // |ComputePass|
@@ -122,50 +132,46 @@ bool ComputePassMTL::BindResource(ShaderStage stage,
   return true;
 }
 
-fml::Status ComputePassMTL::Compute(const ISize& grid_size) {
-  if (grid_size.IsEmpty()) {
-    return fml::Status(fml::StatusCode::kUnknown,
-                       "Invalid grid size for compute command.");
-  }
-
-  // Threadgroup sizes must be uniform.
-  auto width = grid_size.width;
-  auto height = grid_size.height;
-
-  auto max_total_threads_per_threadgroup = static_cast<int64_t>(
-      pass_bindings_cache_.GetPipeline().maxTotalThreadsPerThreadgroup);
-
-  // Special case for linear processing.
-  if (height == 1) {
-    int64_t thread_groups = std::max(
-        static_cast<int64_t>(
-            std::ceil(width * 1.0 / max_total_threads_per_threadgroup * 1.0)),
-        1LL);
-    [encoder_
-         dispatchThreadgroups:MTLSizeMake(thread_groups, 1, 1)
-        threadsPerThreadgroup:MTLSizeMake(max_total_threads_per_threadgroup, 1,
-                                          1)];
-  } else {
-    while (width * height > max_total_threads_per_threadgroup) {
-      width = std::max(1LL, width / 2);
-      height = std::max(1LL, height / 2);
-    }
-
-    auto size = MTLSizeMake(width, height, 1);
-    [encoder_ dispatchThreadgroups:size threadsPerThreadgroup:size];
-  }
-
+void ComputePassMTL::PopCommandLabel() {
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
     [encoder_ popDebugGroup];
   }
   has_label_ = false;
 #endif  // IMPELLER_DEBUG
-  return fml::Status();
+}
+
+absl::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
+  // The label set by `SetCommandLabel` applies to this dispatch only.
+  fml::ScopedCleanupClosure pop_label([this]() { PopCommandLabel(); });
+
+  // A dispatch with no workgroups does nothing, like a draw with no vertices.
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u) {
+    return absl::OkStatus();
+  }
+
+  if (!pass_bindings_cache_.GetPipeline()) {
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "No compute pipeline is bound.");
+  }
+
+  // Unlike Vulkan and GLES, Metal does not bake the threadgroup size into the
+  // shader; it is supplied here at dispatch. Pipeline creation checked the
+  // shader's declared size against the device and pipeline limits.
+  const MTLSize threads_per_threadgroup =
+      MTLSizeMake(workgroup_size_[0], workgroup_size_[1], workgroup_size_[2]);
+
+  [encoder_
+       dispatchThreadgroups:MTLSizeMake(workgroup_count[0], workgroup_count[1],
+                                        workgroup_count[2])
+      threadsPerThreadgroup:threads_per_threadgroup];
+  return absl::OkStatus();
 }
 
 bool ComputePassMTL::EncodeCommands() const {
   [encoder_ endEncoding];
+  did_finish_encoding_ = true;
   return true;
 }
 

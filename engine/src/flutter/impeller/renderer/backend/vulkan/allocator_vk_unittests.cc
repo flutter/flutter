@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/base/allocation_size.h"
@@ -91,6 +93,41 @@ TEST(AllocatorVKTest, ImageResourceKeepsVulkanDeviceAlive) {
   }
 
   ASSERT_TRUE(weak_allocator.lock());
+}
+
+TEST(AllocatorVKTest, RetriesUncompressedOnCompressionExhausted) {
+  // Advertise fixed-rate compression support, then force the first (compressed)
+  // vkCreateImage to fail with VK_ERROR_COMPRESSION_EXHAUSTED_EXT, as the
+  // PowerVR driver does when its fixed-rate-compression resources are depleted.
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetDeviceExtensions(
+              {"VK_KHR_swapchain", "VK_EXT_image_compression_control"})
+          .SetCompressionExhaustedCreateImageFailures(1)
+          .Build();
+  ASSERT_TRUE(context);
+  auto allocator = context->GetResourceAllocator();
+  ASSERT_TRUE(allocator);
+
+  // A lossy (fixed-rate-compressed) render target. The first compressed
+  // allocation fails with COMPRESSION_EXHAUSTED; the allocator must retry
+  // without compression and still produce a valid texture instead of returning
+  // null (a null render target previously crashed the raster thread).
+  auto texture = allocator->CreateTexture(TextureDescriptor{
+      .storage_mode = StorageMode::kDevicePrivate,
+      .format = PixelFormat::kR8G8B8A8UNormInt,
+      .size = {64, 64},
+      .usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead,
+      .compression_type = CompressionType::kLossy,
+  });
+
+  ASSERT_TRUE(texture);
+  EXPECT_TRUE(texture->IsValid());
+
+  // vkCreateImage was called twice: the compressed attempt (which failed with
+  // COMPRESSION_EXHAUSTED) and the uncompressed retry (which succeeded).
+  auto const called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_EQ(std::count(called->begin(), called->end(), "vkCreateImage"), 2);
 }
 
 #ifdef IMPELLER_DEBUG

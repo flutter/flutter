@@ -11,9 +11,18 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import 'xcresult_test_data.dart';
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXCResultCommand({
@@ -29,7 +38,7 @@ void main() {
     final List<String> command;
     if (useNewCommand) {
       command = <String>[
-        ...xcode.xcrunCommand(),
+        'xcrun',
         'xcresulttool',
         'get',
         'build-results',
@@ -40,7 +49,7 @@ void main() {
       ];
     } else {
       command = <String>[
-        ...xcode.xcrunCommand(),
+        'xcrun',
         'xcresulttool',
         'get',
         '--path',
@@ -59,13 +68,6 @@ void main() {
     );
   }
 
-  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-  const kx64CheckCommand = FakeCommand(
-    command: <String>['sysctl', 'hw.optional.arm64'],
-    exitCode: 1,
-  );
-
   XCResultGenerator setupGenerator({
     required String resultJson,
     int exitCode = 0,
@@ -75,18 +77,17 @@ void main() {
     // the logic for pre-Xcode 16 platforms.
     Version? xcodeVersion = const Version.withText(15, 0, 0, '15.0'),
   }) {
-    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-      kWhichSysctlCommand,
-      kx64CheckCommand,
-    ]);
+    final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
     final xcode = Xcode.test(
-      processManager: fakeProcessManager,
+      toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
       xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
         version: xcodeVersion,
       ),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       setUpFakeXCResultCommand(
         stdout: resultJson,
         tempResultPath: _tempResultPath,
@@ -319,22 +320,19 @@ void main() {
     expect(result.parsingErrorMessage, isNull);
   });
 
-  testWithoutContext(
-    'error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.',
-    () async {
-      const fakeStderr = 'Fake: fail to parse result json.';
-      final XCResultGenerator generator = setupGenerator(
-        resultJson: '',
-        exitCode: 1,
-        stderr: fakeStderr,
-      );
+  testWithoutContext('error: `xcresulttool get` process fail should return an `XCResult` with stderr as `parsingErrorMessage`.', () async {
+    const fakeStderr = 'Fake: fail to parse result json.';
+    final XCResultGenerator generator = setupGenerator(
+      resultJson: '',
+      exitCode: 1,
+      stderr: fakeStderr,
+    );
 
-      final XCResult result = await generator.generate();
-      expect(result.issues.length, 0);
-      expect(result.parseSuccess, false);
-      expect(result.parsingErrorMessage, fakeStderr);
-    },
-  );
+    final XCResult result = await generator.generate();
+    expect(result.issues.length, 0);
+    expect(result.parseSuccess, false);
+    expect(result.parsingErrorMessage, fakeStderr);
+  });
 
   testWithoutContext('error: `xcresulttool get` no stdout', () async {
     final XCResultGenerator generator = setupGenerator(resultJson: '');

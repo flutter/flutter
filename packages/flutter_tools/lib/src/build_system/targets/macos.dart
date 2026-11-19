@@ -12,7 +12,6 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -210,10 +209,10 @@ class DebugMacOSFramework extends Target {
       environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'),
     );
 
-    final Iterable<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
+    final Iterable<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
 
-    final Iterable<String> darwinArchArguments = darwinArchs.expand(
-      (DarwinArch arch) => <String>['-arch', arch.name],
+    final Iterable<String> darwinArchArguments = cpuArchs.expand(
+      (CpuArch arch) => <String>['-arch', arch.darwinArchName],
     );
 
     outputFile.createSync(recursive: true);
@@ -221,7 +220,7 @@ class DebugMacOSFramework extends Target {
       ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
-    final RunResult result = await globals.xcode!.clang(<String>[
+    final RunResult result = await environment.xcode!.clang(<String>[
       '-x',
       'c',
       debugApp.path,
@@ -286,8 +285,8 @@ class CompileMacOSFramework extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
-    final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    final List<CpuArch> cpuArchs = getCpuArchsFromEnv(environment.defines);
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
@@ -295,20 +294,20 @@ class CompileMacOSFramework extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: environment.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
 
     final pending = <Future<int>>[];
-    for (final darwinArch in darwinArchs) {
+    for (final cpuArch in cpuArchs) {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('snapshot.${darwinArch.name}.json');
+            .childFile('snapshot.${cpuArch.darwinArchName}.json');
         final File precompilerTraceFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('trace.${darwinArch.name}.json');
+            .childFile('trace.${cpuArch.darwinArchName}.json');
         extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -320,9 +319,9 @@ class CompileMacOSFramework extends Target {
         snapshotter.build(
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
-          outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
+          outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
           platform: TargetPlatform.darwin,
-          darwinArch: darwinArch,
+          cpuArch: cpuArch,
           splitDebugInfo: splitDebugInfo,
           dartObfuscation: dartObfuscation,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
@@ -339,7 +338,7 @@ class CompileMacOSFramework extends Target {
     // Combine the app lib into a fat framework.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework/App',
       inputDir: buildOutputPath,
     );
@@ -347,7 +346,7 @@ class CompileMacOSFramework extends Target {
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
       inputDir: buildOutputPath,
       // Don't fail if the dSYM wasn't created (i.e. during a debug build).
@@ -443,7 +442,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
         .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = environment.projectFactory.fromDirectory(
+      environment.projectDir,
+    );
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);

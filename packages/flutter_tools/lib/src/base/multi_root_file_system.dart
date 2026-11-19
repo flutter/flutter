@@ -35,10 +35,9 @@ import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 class MultiRootFileSystem extends ForwardingFileSystem {
   MultiRootFileSystem({
     required FileSystem delegate,
-    required String scheme,
+    required this._scheme,
     required List<String> roots,
   }) : assert(roots.isNotEmpty),
-       _scheme = scheme,
        _roots = roots.map((String root) => delegate.path.normalize(root)).toList(),
        super(delegate);
 

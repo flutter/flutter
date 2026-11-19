@@ -76,7 +76,7 @@ void main() {
         isA<StateError>().having(
           (StateError e) => e.message,
           'message',
-          'No device connected: error',
+          'No device connected: stderr: error, stdout: ',
         ),
       ),
     );

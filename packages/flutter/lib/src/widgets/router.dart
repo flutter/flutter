@@ -1384,8 +1384,12 @@ abstract class RouterDelegate<T> extends Listenable {
   /// the operating system is requesting that the current route be popped.
   ///
   /// The method should return a boolean [Future] to indicate whether this
-  /// delegate handles the request. Returning false will cause the entire app
-  /// to be popped.
+  /// delegate handles the request. Returning true indicates that the request
+  /// has been handled and prevents it from bubbling up. Returning false means
+  /// this delegate did not handle the request, so the request may continue to a
+  /// parent [BackButtonDispatcher] in a nested [Router] setup. If the request
+  /// reaches the root [WidgetsBinding] and remains unhandled, the platform is
+  /// requested to pop the application by calling [SystemNavigator.pop].
   ///
   /// Consider using a [SynchronousFuture] if the result can be computed
   /// synchronously, so that the [Router] does not need to wait for the next

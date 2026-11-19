@@ -171,6 +171,7 @@ void printSomething() {
       "import 'dart:_web_test_fonts';",
       "import 'dart:_web_locale_keymap' as locale_keymap;",
       "import 'dart:_wasm';",
+      "import 'dart:_js_interop_wasm';",
     ]);
 
     // Other libraries (should not have extra imports).
@@ -182,6 +183,7 @@ void printSomething() {
     const source = '''
 import 'package:some_package/some_package.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    // ignore: deprecated_web_configuration, https://github.com/dart-lang/sdk/issues/61464
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
     if (dart.library.js_interop) 'package:ui/src/engine/skwasm/skwasm_stub.dart';

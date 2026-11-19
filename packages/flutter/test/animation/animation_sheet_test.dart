@@ -7,7 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -152,8 +152,8 @@ class _PaintDecuplePixels extends CustomPainter {
       begin: const Rect.fromLTWH(1, 1, 1, 1),
       end: const Rect.fromLTWH(11, 1, 1, 1),
     ).transform(value)!;
-    canvas.drawRect(rect, Paint()..color = Colors.yellow);
-    final black = Paint()..color = Colors.black;
+    canvas.drawRect(rect, Paint()..color = const Color(0xFFFFEB3B));
+    final black = Paint()..color = const Color(0xFF000000);
     canvas
       // Top border
       ..drawRect(const Rect.fromLTRB(0, 0, 12, 1), black)

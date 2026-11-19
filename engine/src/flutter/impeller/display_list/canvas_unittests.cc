@@ -4,12 +4,8 @@
 
 #include <unordered_map>
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_image_filter.h"
-#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
-#include "impeller/core/formats.h"
-#include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_image_impeller.h"
@@ -70,7 +66,7 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 }
 
 TEST_P(AiksTest, TransformMultipliesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_MATRIX_NEAR(canvas->GetCurrentTransform(), Matrix());
@@ -111,7 +107,7 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 }
 
 TEST_P(AiksTest, CanvasCanPushPopCTM) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   ASSERT_EQ(canvas->GetSaveCount(), 1u);
@@ -129,7 +125,7 @@ TEST_P(AiksTest, CanvasCanPushPopCTM) {
 }
 
 TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context);
 
   Matrix identity;
@@ -140,7 +136,7 @@ TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
 }
 
 TEST_P(AiksTest, BackdropCountDownNormal) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -175,7 +171,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -215,7 +211,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -248,11 +244,85 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
   EXPECT_FALSE(canvas->RequiresReadback());
 }
 
+TEST_P(AiksTest, BackdropGroupIdUsesCoverageUnionForSnapshot) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 1000, 1000),
+                                 /*requires_readback=*/true);
+  std::unordered_map<int64_t, BackdropData> data;
+  data[1] = BackdropData{
+      .backdrop_count = 2,
+      .all_filters_equal = true,
+      .coverage_union = Rect::MakeLTRB(100, 100, 200, 200),
+  };
+  canvas->SetBackdropData(data, 2);
+
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+
+  canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 1000, 1000),
+                   {.color = Color::Azure()});
+  canvas->SaveLayer({}, std::nullopt, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/1, /*can_distribute_opacity=*/false,
+                    /*backdrop_id=*/1);
+  canvas->Restore();
+
+  canvas->SaveLayer({}, std::nullopt, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/1, /*can_distribute_opacity=*/false,
+                    /*backdrop_id=*/1);
+  canvas->Restore();
+
+  const auto& backdrop_map = canvas->GetBackdropData();
+  auto it = backdrop_map.find(1);
+  ASSERT_TRUE(it != backdrop_map.end());
+  EXPECT_TRUE(it->second.shared_filter_snapshot.has_value());
+  if (it->second.shared_filter_snapshot.has_value()) {
+    ISize snapshot_size = it->second.shared_filter_snapshot->texture->GetSize();
+    EXPECT_LE(snapshot_size.width, 250u);
+    EXPECT_LE(snapshot_size.height, 250u);
+  }
+}
+
+TEST_P(AiksTest, BackdropGroupSharedSnapshotReservesContentDepth) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 1000, 1000),
+                                 /*requires_readback=*/true);
+  std::unordered_map<int64_t, BackdropData> data;
+  data[1] = BackdropData{
+      .backdrop_count = 2,
+      .all_filters_equal = true,
+      .coverage_union = Rect::MakeLTRB(100, 100, 300, 200),
+  };
+  canvas->SetBackdropData(data, 2);
+
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+
+  canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 1000, 1000),
+                   {.color = Color::Azure()});
+  for (int i = 0; i < 2; i++) {
+    canvas->SaveLayer({}, std::nullopt, blur.get(),
+                      ContentBoundsPromise::kContainsContents,
+                      /*total_content_depth=*/1,
+                      /*can_distribute_opacity=*/false,
+                      /*backdrop_id=*/1);
+    canvas->DrawRect(flutter::DlRect::MakeXYWH(100 + i * 100, 100, 100, 100),
+                     {.color = Color::Red()});
+    canvas->Restore();
+  }
+
+  const auto& backdrop_map = canvas->GetBackdropData();
+  auto it = backdrop_map.find(1);
+  ASSERT_TRUE(it != backdrop_map.end());
+  EXPECT_TRUE(it->second.shared_filter_snapshot.has_value());
+}
+
 // We only know the total number of backdrop filters, not the number of backdrop
 // filters in the root pass. If we reach a count of 0 while in a nested
 // saveLayer, we should not restore to the onscreen.
 TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
@@ -285,7 +355,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -341,7 +411,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
       runtime_effect, {}, uniform_data);
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
 
     std::vector<flutter::DlPoint> vertex_coordinates = {
@@ -377,7 +447,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
 }
 
 TEST_P(AiksTest, SupportsBlitToOnscreen) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
@@ -410,7 +480,7 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
   }
 
   RenderCallback callback = [&](RenderTarget& render_target) {
-    ContentContext context(GetContext(), nullptr);
+    ContentContext& context = GetContentContext();
     Canvas canvas(context, render_target, true, false);
     // Somehow there's a scaling factor between PlaygroundPoint and Canvas.
     Matrix ctm = Matrix::MakeScale(Vector2(1, 1) * 0.5);
@@ -420,12 +490,12 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
     static Scalar radius = 200;
 
     // Define the ImGui
-    ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Shadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 100);
       ImGui::SliderFloat("Radius", &radius, 0, 1000);
+      ImGui::End();
     }
-    ImGui::End();
 
     static PlaygroundPoint right_reference_var(
         ctm * (right_center + default_size / 2), 30, Color::White());
@@ -459,11 +529,12 @@ TEST_P(AiksTest, RoundSuperellipseShadowComparison) {
 }
 
 TEST_P(AiksTest, ImageTextureCacheBehavesCorrectly) {
-  ContentContext context(GetContext(), nullptr);
+  ContentContext& context = GetContentContext();
 
   TextureDescriptor desc;
   desc.size = {100, 100};
   desc.format = context.GetDeviceCapabilities().GetDefaultColorFormat();
+  desc.usage = TextureUsage::kRenderTarget;
   auto texture =
       context.GetContext()->GetResourceAllocator()->CreateTexture(desc);
 

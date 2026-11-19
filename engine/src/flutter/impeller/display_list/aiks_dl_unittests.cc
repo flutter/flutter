@@ -123,7 +123,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
 
   DlPaint paint;
-  paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
+  paint.setColorFilter(DlColorFilter::MakeSrgbToLinearGamma());
   builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);
@@ -592,6 +592,10 @@ TEST_P(AiksTest, SetContentsWithRegion) {
 
 // Regression test for https://github.com/flutter/flutter/issues/134678.
 TEST_P(AiksTest, ReleasesTextureOnTeardown) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with its own unique context.
+  EnsureContextIsUnique();
+
   auto context = MakeContext();
   std::weak_ptr<Texture> weak_texture;
 
@@ -629,8 +633,8 @@ TEST_P(AiksTest, ReleasesTextureOnTeardown) {
 TEST_P(AiksTest, MatrixImageFilterMagnify) {
   Scalar scale = 2.0;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Scale", &scale, 1, 2);
       ImGui::End();
     }
@@ -774,6 +778,44 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
     auto backdrop_filter =
         DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
     builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
+    builder.Restore();
+  }
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, MatrixBackdropFilterWithTranslation) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+  builder.SaveLayer(std::nullopt, nullptr);
+  {
+    DlPaint paint;
+    paint.setColor(DlColor::kGreen());
+    paint.setBlendMode(DlBlendMode::kPlus);
+
+    DlPaint rect_paint;
+    rect_paint.setColor(DlColor::kRed());
+    rect_paint.setStrokeWidth(4);
+    rect_paint.setDrawStyle(DlDrawStyle::kStroke);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 300, 300), rect_paint);
+    builder.DrawCircle(DlPoint(200, 200), 100, paint);
+
+    builder.Save();
+    builder.Translate(300, 300);
+    builder.ClipRect(DlRect::MakeLTRB(0, 0, 200, 200));
+
+    DlMatrix matrix = DlMatrix::MakeTranslation({(200 + 100 * k1OverSqrt2),
+                                                 (200 + 100 * k1OverSqrt2)}) *
+                      DlMatrix::MakeScale({0.5, 0.5, 1}) *
+                      DlMatrix::MakeTranslation({-200, -200});
+    auto backdrop_filter =
+        DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
+    builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
+    builder.Restore();
     builder.Restore();
   }
   builder.Restore();
@@ -1066,9 +1108,11 @@ TEST_P(AiksTest, ToImageFromImage) {
     blit_pass->EncodeCommands();
 
     auto latch = std::make_shared<fml::CountDownLatch>(1u);
-    GetContext()->GetCommandQueue()->Submit(
-        {cmd_buffer},
-        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    GetContext()
+        ->GetCommandQueue()
+        ->Submit({cmd_buffer},
+                 [latch](CommandBuffer::Status status) { latch->CountDown(); })
+        .IgnoreError();
     latch->Wait();
   }
 
@@ -1086,9 +1130,11 @@ TEST_P(AiksTest, ToImageFromImage) {
     blit_pass->EncodeCommands();
 
     auto latch = std::make_shared<fml::CountDownLatch>(1u);
-    GetContext()->GetCommandQueue()->Submit(
-        {cmd_buffer},
-        [latch](CommandBuffer::Status status) { latch->CountDown(); });
+    GetContext()
+        ->GetCommandQueue()
+        ->Submit({cmd_buffer},
+                 [latch](CommandBuffer::Status status) { latch->CountDown(); })
+        .IgnoreError();
     latch->Wait();
   }
 
@@ -1138,6 +1184,22 @@ TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
                            /*reset_host_buffer=*/true, /*generate_mips=*/true);
 
   EXPECT_FALSE(texture->NeedsMipmapGeneration());
+}
+
+TEST_P(AiksTest, DisplayListToTextureResetsHostBufferOnce) {
+  DisplayListBuilder builder;
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 10, 10), DlPaint(DlColor::kRed()));
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  HostBuffer& data_host_buffer =
+      aiks_context.GetContentContext().GetTransientsDataBuffer();
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 0u);
+
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{10, 10}, aiks_context,
+                           /*reset_host_buffer=*/true);
+  ASSERT_NE(texture, nullptr);
+  EXPECT_EQ(data_host_buffer.GetStateForTest().current_frame, 1u);
 }
 
 }  // namespace testing

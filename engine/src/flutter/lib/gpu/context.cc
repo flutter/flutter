@@ -9,6 +9,9 @@
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -19,6 +22,17 @@ bool SupportsNormalOffscreenMSAA(const impeller::Context& context) {
   auto& capabilities = context.GetCapabilities();
   return capabilities->SupportsOffscreenMSAA() &&
          !capabilities->SupportsImplicitResolvingMSAA();
+}
+
+bool SupportsCompute(const impeller::Context& context) {
+  switch (context.GetBackendType()) {
+    case impeller::Context::BackendType::kMetal:
+    case impeller::Context::BackendType::kVulkan:
+      return true;
+    case impeller::Context::BackendType::kOpenGLES:
+      return false;
+  }
+  return false;
 }
 
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Context);
@@ -132,7 +146,135 @@ extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
   return wrapper->GetContext().GetCapabilities()->GetMinimumUniformAlignment();
 }
 
+extern int InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->GetMinimumStorageBufferAlignment();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsCompute(
+    flutter::gpu::Context* wrapper) {
+  return flutter::gpu::SupportsCompute(wrapper->GetContext());
+}
+
+// The compute limits are zero wherever Flutter GPU does not support compute,
+// whatever the backend reports.
+
+extern uint32_t
+InternalFlutterGpu_Context_GetMaximumComputeWorkgroupInvocations(
+    flutter::gpu::Context* wrapper) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context)) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_invocations;
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context) || dimension < 0 ||
+      dimension > 2) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_size[dimension];
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context) || dimension < 0 ||
+      dimension > 2) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_count[dimension];
+}
+
+extern int64_t InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize(
+    flutter::gpu::Context* wrapper) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context)) {
+    return 0;
+  }
+  return static_cast<int64_t>(
+      context.GetCapabilities()->GetComputeLimits().max_shared_memory_size);
+}
+
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper) {
   return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->SupportsFramebufferRenderMipmap();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext()
+      .GetCapabilities()
+      ->SupportsManuallyMippedTextures();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsTextureArrays(
+    flutter::gpu::Context* wrapper) {
+  // TODO(bdero): Shader bundles do not carry an OpenGL ES 3.0 shader variant
+  // yet, so user shaders cannot sample 2D array textures on the GLES backend
+  // even when the context itself supports them. Once the bundle format gains
+  // an ES 3.0 variant, gate on the context capability alone.
+  if (wrapper->GetContext().GetBackendType() ==
+      impeller::Context::BackendType::kOpenGLES) {
+    return false;
+  }
+  return wrapper->GetContext().GetCapabilities()->SupportsTextureArrays();
+}
+
+extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
+    flutter::gpu::Context* wrapper) {
+  return wrapper->GetContext().GetCapabilities()->GetMaxSamplerAnisotropy();
+}
+
+extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
+    flutter::gpu::Context* wrapper,
+    int family) {
+  return wrapper->GetContext().GetCapabilities()->SupportsTextureCompression(
+      flutter::gpu::ToImpellerCompressedTextureFamily(family));
+}
+
+extern bool InternalFlutterGpu_Context_SupportsTextureFormat(
+    flutter::gpu::Context* wrapper,
+    int format,
+    bool render_target,
+    bool shader_read,
+    bool shader_write) {
+  const impeller::PixelFormat impeller_format =
+      flutter::gpu::ToImpellerPixelFormat(format);
+  if (impeller_format == impeller::PixelFormat::kUnknown) {
+    return false;
+  }
+  // Compressed formats are sample-only: shader_read must be true, and
+  // render-target or shader-write usage is never available.
+  if (impeller::IsCompressed(impeller_format)) {
+    if (render_target || shader_write || !shader_read) {
+      return false;
+    }
+    return wrapper->GetContext().GetCapabilities()->SupportsTextureCompression(
+        impeller::CompressedTextureFamilyForFormat(impeller_format));
+  }
+  // For uncompressed formats, today's Impeller capability surface does not
+  // expose a per-format usage query, so this returns true. As that surface
+  // grows it should be wired in here.
+  return true;
 }

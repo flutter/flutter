@@ -42,7 +42,7 @@ void IOSExternalViewEmbedder::BeginFrame(
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PrepareFlutterView(DlISize frame_size, double device_pixel_ratio) {
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ beginFrameWithSize:frame_size];
+  [platform_views_controller_ beginFrameWithSize:frame_size devicePixelRatio:device_pixel_ratio];
 }
 
 // |ExternalViewEmbedder|
@@ -52,16 +52,6 @@ void IOSExternalViewEmbedder::PrerollCompositeEmbeddedView(
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PrerollCompositeEmbeddedView");
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ prerollCompositeEmbeddedView:view_id withParams:std::move(params)];
-}
-
-// |ExternalViewEmbedder|
-PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
-  FML_CHECK(platform_views_controller_);
-  PostPrerollResult result =
-      [platform_views_controller_ postPrerollActionWithThreadMerger:raster_thread_merger];
-  return result;
 }
 
 // |ExternalViewEmbedder|
@@ -85,15 +75,6 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ submitFrame:std::move(frame) withIosContext:ios_context_];
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
-}
-
-// |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
-  [platform_views_controller_ endFrameWithResubmit:should_resubmit_frame
-                                      threadMerger:raster_thread_merger];
 }
 
 // |ExternalViewEmbedder|

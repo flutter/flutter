@@ -21,10 +21,8 @@ namespace impeller {
 
 CommandBufferVK::CommandBufferVK(
     std::weak_ptr<const Context> context,
-    std::weak_ptr<const DeviceHolderVK> device_holder,
     std::shared_ptr<TrackedObjectsVK> tracked_objects)
     : CommandBuffer(std::move(context)),
-      device_holder_(std::move(device_holder)),
       tracked_objects_(std::move(tracked_objects)) {}
 
 CommandBufferVK::~CommandBufferVK() = default;
@@ -43,8 +41,7 @@ bool CommandBufferVK::IsValid() const {
   return true;
 }
 
-bool CommandBufferVK::OnSubmitCommands(bool block_on_schedule,
-                                       CompletionCallback callback) {
+bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
   FML_UNREACHABLE()
 }
 
@@ -159,12 +156,12 @@ bool CommandBufferVK::Track(const std::shared_ptr<const Texture>& texture) {
   return Track(TextureVK::Cast(*texture).GetTextureSource());
 }
 
-fml::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
+absl::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
     PipelineKey pipeline_key,
     const ContextVK& context) {
   if (!IsValid()) {
-    return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");
+    return absl::Status(absl::StatusCode::kUnknown, "command encoder invalid");
   }
 
   return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(

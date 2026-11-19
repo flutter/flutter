@@ -17,12 +17,21 @@ DeviceBufferGLES::DeviceBufferGLES(DeviceBufferDescriptor desc,
                                    std::unique_ptr<Allocation> backing_store)
     : DeviceBuffer(desc),
       reactor_(std::move(reactor)),
-      backing_store_(std::move(backing_store)) {}
+      backing_store_(std::move(backing_store)) {
+  if (reactor_) {
+    const auto& capabilities = reactor_->GetProcTable().GetCapabilities();
+    separate_uniform_buffer_ =
+        capabilities && capabilities->NeedsSeparateUniformBuffers();
+  }
+}
 
 // |DeviceBuffer|
 DeviceBufferGLES::~DeviceBufferGLES() {
   if (handle_.has_value() && !handle_->IsDead()) {
     reactor_->CollectHandle(*handle_);
+  }
+  if (uniform_handle_.has_value() && !uniform_handle_->IsDead()) {
+    reactor_->CollectHandle(*uniform_handle_);
   }
 }
 
@@ -62,15 +71,41 @@ std::optional<GLuint> DeviceBufferGLES::GetHandle() const {
   }
 }
 
+std::optional<GLuint> DeviceBufferGLES::GetUniformHandle() const {
+  if (!separate_uniform_buffer_) {
+    return GetHandle();
+  }
+  if (uniform_handle_.has_value()) {
+    return reactor_->GetGLHandle(*uniform_handle_);
+  } else {
+    return std::nullopt;
+  }
+}
+
+bool DeviceBufferGLES::UsesUniformBuffer(BindingType type) const {
+  return separate_uniform_buffer_ && type == BindingType::kUniformBuffer;
+}
+
+static void MergeRange(std::optional<Range>& dirty_range, Range range) {
+  if (dirty_range.has_value()) {
+    dirty_range = dirty_range->Merge(range);
+  } else {
+    dirty_range = range;
+  }
+}
+
 void DeviceBufferGLES::Flush(std::optional<Range> range) const {
+  Lock lock(dirty_range_mutex_);
   if (!range.has_value()) {
     dirty_range_ = Range{
         0, static_cast<size_t>(backing_store_->GetLength().GetByteSize())};
+    if (separate_uniform_buffer_) {
+      uniform_dirty_range_ = dirty_range_;
+    }
   } else {
-    if (dirty_range_.has_value()) {
-      dirty_range_ = dirty_range_->Merge(range.value());
-    } else {
-      dirty_range_ = range.value();
+    MergeRange(dirty_range_, range.value());
+    if (separate_uniform_buffer_) {
+      MergeRange(uniform_dirty_range_, range.value());
     }
   }
 }
@@ -92,16 +127,21 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
     return false;
   }
 
-  if (!handle_.has_value()) {
-    handle_ = reactor_->CreateUntrackedHandle(HandleType::kBuffer);
+  const bool uses_uniform_buffer = UsesUniformBuffer(type);
+  std::optional<HandleGLES>& handle =
+      uses_uniform_buffer ? uniform_handle_ : handle_;
+  bool& initialized = uses_uniform_buffer ? uniform_initialized_ : initialized_;
+
+  if (!handle.has_value()) {
+    handle = reactor_->CreateUntrackedHandle(HandleType::kBuffer);
 #ifdef IMPELLER_DEBUG
-    if (handle_.has_value() && label_.has_value()) {
-      reactor_->SetDebugLabel(*handle_, *label_);
+    if (handle.has_value() && label_.has_value()) {
+      reactor_->SetDebugLabel(*handle, *label_);
     }
 #endif
   }
 
-  auto buffer = reactor_->GetGLHandle(*handle_);
+  auto buffer = reactor_->GetGLHandle(*handle);
   if (!buffer.has_value()) {
     return false;
   }
@@ -110,17 +150,24 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
   const auto& gl = reactor_->GetProcTable();
 
   gl.BindBuffer(target_type, buffer.value());
-  if (!initialized_) {
+  if (!initialized) {
     gl.BufferData(target_type, backing_store_->GetLength().GetByteSize(),
                   nullptr, GL_DYNAMIC_DRAW);
-    initialized_ = true;
+    initialized = true;
   }
 
-  if (dirty_range_.has_value()) {
-    auto range = dirty_range_.value();
-    gl.BufferSubData(target_type, range.offset, range.length,
-                     backing_store_->GetBuffer() + range.offset);
-    dirty_range_ = std::nullopt;
+  // Take and clear the dirty range BEFORE uploading. A Flush() from another
+  // thread during the upload then merges into a fresh dirty range that the
+  // next bind uploads, instead of being silently discarded by a clear that
+  // runs after the upload.
+  std::optional<Range> dirty;
+  {
+    Lock lock(dirty_range_mutex_);
+    std::swap(uses_uniform_buffer ? uniform_dirty_range_ : dirty_range_, dirty);
+  }
+  if (dirty.has_value()) {
+    gl.BufferSubData(target_type, dirty->offset, dirty->length,
+                     backing_store_->GetBuffer() + dirty->offset);
   }
 
   return true;
@@ -132,6 +179,9 @@ bool DeviceBufferGLES::SetLabel(std::string_view label) {
   label_ = label;
   if (handle_.has_value()) {
     reactor_->SetDebugLabel(*handle_, label);
+  }
+  if (uniform_handle_.has_value()) {
+    reactor_->SetDebugLabel(*uniform_handle_, label);
   }
 #endif  // IMPELLER_DEBUG
   return true;

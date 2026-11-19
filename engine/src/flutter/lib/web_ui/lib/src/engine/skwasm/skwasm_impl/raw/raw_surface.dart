@@ -5,6 +5,9 @@
 @DefaultAsset('skwasm')
 library skwasm_impl;
 
+// TODO(simolus3): Remove these analyzer ignores, https://dartbug.com/63166.
+// ignore: unnecessary_import, import_internal_library
+import 'dart:_js_interop_wasm';
 import 'dart:_wasm';
 import 'dart:ffi';
 import 'dart:js_interop';
@@ -58,14 +61,17 @@ external void surfaceDestroy(SurfaceHandle surface);
 )
 external void surfaceSetResourceCacheLimitBytes(SurfaceHandle surface, int bytes);
 
-@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int)>(
+@Native<Int32 Function(SurfaceHandle, Pointer<PictureHandle>, Int, Int, Int, Bool)>(
   symbol: 'surface_renderPictures',
   isLeaf: true,
 )
 external CallbackId surfaceRenderPictures(
   SurfaceHandle surface,
-  Pointer<PictureHandle> picture,
+  Pointer<PictureHandle> pictures,
   int count,
+  int width,
+  int height,
+  bool captureImageBitmaps,
 );
 
 @Native<Int32 Function(SurfaceHandle, ImageHandle, Int)>(

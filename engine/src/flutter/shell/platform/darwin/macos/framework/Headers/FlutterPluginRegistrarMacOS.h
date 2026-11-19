@@ -28,6 +28,13 @@ FLUTTER_DARWIN_EXPORT
 @protocol FlutterPluginRegistrar <NSObject>
 
 /**
+ * The unique identifier for the `FlutterEngine` associated with this registrar.
+ *
+ * This corresponds to `PlatformDispatcher.instance.engineId` in Dart.
+ */
+@property(nonatomic, readonly) int64_t engineIdentifier;
+
+/**
  * The binary messenger used for creating channels to communicate with the Flutter engine.
  */
 @property(nonnull, readonly) id<FlutterBinaryMessenger> messenger;
@@ -100,6 +107,16 @@ FLUTTER_DARWIN_EXPORT
  * @param value The value to be published.
  */
 - (void)publish:(nonnull NSObject*)value;
+
+/**
+ * Returns a value published by the specified plugin.
+ *
+ * @param pluginKey The unique key identifying the plugin.
+ * @return An object published by the plugin, if any. Will be `NSNull` if
+ *   nothing has been published. Will be `nil` if the plugin has not been
+ *   registered.
+ */
+- (nullable NSObject*)valuePublishedByPlugin:(nonnull NSString*)pluginKey;
 
 /**
  * Returns the file name for the given asset.

@@ -27,7 +27,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -38,7 +37,6 @@
                 "--no-lto",
                 "--windows-cpu",
                 "arm64",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_debug_arm64",
@@ -74,7 +72,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -85,7 +82,6 @@
                 "--no-lto",
                 "--windows-cpu",
                 "arm64",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_profile_arm64",
@@ -117,7 +113,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "generators": {},
@@ -129,7 +124,6 @@
                 "--no-lto",
                 "--windows-cpu",
                 "arm64",
-                "--no-goma",
                 "--rbe"
             ],
             "name": "ci\\host_release_arm64",

@@ -191,12 +191,10 @@ bool AtlasContents::Render(const ContentContext& renderer,
 
     VS::FrameInfo frame_info;
     frame_info.mvp = entity.GetShaderTransform(pass);
-    frame_info.texture_sampler_y_coord_scale =
-        geometry_->GetAtlas()->GetYCoordScale();
 
     VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.alpha = alpha_;
     FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
@@ -217,15 +215,13 @@ bool AtlasContents::Render(const ContentContext& renderer,
         geometry_->ShouldInvertBlendMode()
             ? (InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc))
             : blend_mode;
-    pass.SetPipeline(renderer.GetPorterDuffPipeline(
-        inverted_blend_mode, OptionsFromPassAndEntity(pass, entity)));
+    pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(
+        OptionsFromPassAndEntity(pass, entity)));
 
     FS::FragInfo frag_info;
     VS::FrameInfo frame_info;
 
     FS::BindTextureSamplerDst(pass, geometry_->GetAtlas(), dst_sampler);
-    frame_info.texture_sampler_y_coord_scale =
-        geometry_->GetAtlas()->GetYCoordScale();
 
     frag_info.input_alpha_output_alpha_tmx_tmy =
         Vector4(1.0, alpha_, static_cast<int>(Entity::TileMode::kDecal),
@@ -239,6 +235,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     } else {
       frag_info.use_strict_source_rect = 0.0;
     }
+    SetPorterDuffCoefficients(inverted_blend_mode, frag_info);
 
     FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
 
@@ -263,10 +260,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;
-  FS::FragInfo frag_info;
+  FS::FragInfo frag_info{};
 
-  frame_info.texture_sampler_y_coord_scale =
-      geometry_->GetAtlas()->GetYCoordScale();
   frame_info.mvp = entity.GetShaderTransform(pass);
 
   frag_info.alpha = alpha_;
@@ -338,8 +333,6 @@ bool ColorFilterAtlasContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
 
   FS::BindInputTexture(pass, geometry_->GetAtlas(), dst_sampler);
-  frame_info.texture_sampler_y_coord_scale =
-      geometry_->GetAtlas()->GetYCoordScale();
 
   frag_info.input_alpha = 1;
   frag_info.output_alpha = alpha_;

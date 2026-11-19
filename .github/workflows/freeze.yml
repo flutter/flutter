@@ -2,51 +2,98 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Unprivileged half of the code freeze check.
+#
+# This workflow runs on `pull_request` with a read-only token and no access to
+# secrets. It fails the check when frozen paths are modified and uploads a
+# `freeze-metadata` artifact so that the privileged `freeze-comment.yml`
+# workflow can leave an explanatory comment on the pull request.
+
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+  pull_request:
+    # Label events are intentionally not included. For first-time contributors,
+    # every run needs maintainer approval, and a pending run for a label change
+    # (e.g. `autosubmit`) blocks the pull request from entering the merge
+    # queue. After applying the `override code freeze` label, re-run this check.
+    types: [opened, reopened, synchronize, ready_for_review]
     branches:
       - master
   merge_group:
     branches:
       - master
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   check_freeze:
     name: Check Code Freeze
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Check for changes in frozen folders
         if: github.event_name != 'merge_group'
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: filter
         with:
           token: ${{ github.token }}
           filters: |
             frozen:
+              - 'packages/flutter/examples/api/lib/material/**'
+              - 'packages/flutter/examples/api/lib/cupertino/**'
+              - 'packages/flutter/examples/api/test/material/**'
+              - 'packages/flutter/examples/api/test/cupertino/**'
               - 'packages/flutter/lib/src/material/**'
               - 'packages/flutter/lib/src/cupertino/**'
               - 'packages/flutter/test/material/**'
               - 'packages/flutter/test/cupertino/**'
-              - 'examples/api/lib/material/**'
-              - 'examples/api/lib/cupertino/**'
-              - 'examples/api/test/material/**'
-              - 'examples/api/test/cupertino/**'
               - 'packages/flutter/lib/fix_data/fix_cupertino.yaml'
               - 'packages/flutter/lib/fix_data/fix_material/**'
               - 'packages/flutter/test_fixes/material/**'
               - 'packages/flutter/test_fixes/cupertino/**'
 
+      - name: Check for override label
+        id: override
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        # Read the labels from the API rather than the event payload, since a
+        # re-run reuses the original payload and would miss a newly added label.
+        run: |
+          if gh api "repos/$REPO/pulls/$PR_NUMBER" --jq '.labels[].name' | grep -Fxq 'override code freeze'; then
+            echo "overridden=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Record frozen changes
+        id: record
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && steps.override.outputs.overridden != 'true'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p freeze-metadata
+          jq -n --arg pr "$PR_NUMBER" '{pr_number: $pr}' > freeze-metadata/metadata.json
+
+      - name: Upload freeze metadata
+        if: steps.record.conclusion == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: freeze-metadata
+          path: freeze-metadata/
+          retention-days: 1
+          if-no-files-found: error
+
       - name: Fail on frozen changes
-        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+        if: steps.record.conclusion == 'success'
         run: |
           echo "Error: Code changes detected during the current code freeze."
-          echo "If this is a critical fix that must land, please file an issue for team-design."
-          echo "Info: https://github.com/flutter/flutter/issues/184093"
+          echo "Changes to Material and Cupertino should be made in material_ui and/or cupertino_ui in the flutter/packages repository."
+          echo "Info: https://github.com/flutter/flutter/issues/188444"
           exit 1

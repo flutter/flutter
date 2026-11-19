@@ -4,11 +4,12 @@
 
 #include "impeller/core/formats.h"
 
-#include <format>
 #include <sstream>
 
 #include "impeller/base/validation.h"
 #include "impeller/core/texture.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 
 namespace impeller {
 
@@ -26,6 +27,20 @@ constexpr bool StoreActionNeedsResolveTexture(StoreAction action) {
 bool Attachment::IsValid() const {
   if (!texture || !texture->IsValid()) {
     VALIDATION_LOG << "Attachment has no texture.";
+    return false;
+  }
+
+  const TextureDescriptor& desc = texture->GetTextureDescriptor();
+  if (mip_level >= desc.mip_count) {
+    VALIDATION_LOG << "Attachment mip_level " << mip_level
+                   << " is out of range; the texture has " << desc.mip_count
+                   << " mip levels.";
+    return false;
+  }
+  const uint32_t slice_count = desc.type == TextureType::kTextureCube ? 6u : 1u;
+  if (slice >= slice_count) {
+    VALIDATION_LOG << "Attachment slice " << slice
+                   << " is out of range for the texture type.";
     return false;
   }
 
@@ -128,17 +143,13 @@ std::string ColorAttachmentToString(const ColorAttachment& color) {
 }
 
 std::string DepthAttachmentToString(const DepthAttachment& depth) {
-  std::stringstream stream;
-  stream << AttachmentToString(depth) << ",";
-  stream << std::format("ClearDepth={:.2f}", depth.clear_depth);
-  return stream.str();
+  return absl::StrFormat("%s,ClearDepth=%.2f", AttachmentToString(depth),
+                         depth.clear_depth);
 }
 
 std::string StencilAttachmentToString(const StencilAttachment& stencil) {
-  std::stringstream stream;
-  stream << AttachmentToString(stencil) << ",";
-  stream << std::format("ClearStencil={}", stencil.clear_stencil);
-  return stream.str();
+  return absl::StrCat(AttachmentToString(stencil),
+                      ",ClearStencil=", stencil.clear_stencil);
 }
 
 }  // namespace impeller

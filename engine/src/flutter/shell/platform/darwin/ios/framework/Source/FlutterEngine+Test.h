@@ -6,23 +6,22 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_TEST_H_
 
 #import "flutter/shell/common/shell.h"
+#include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 @class FlutterBinaryMessengerRelay;
-
-namespace flutter {
-class ThreadHost;
-}
+@class FlutterShell;
 
 // Category to add test-only visibility.
 @interface FlutterEngine (Test) <FlutterBinaryMessenger>
 
+@property(nonatomic, readonly) FlutterShell* backend;
 @property(readonly, nonatomic) FlutterEngineProcTable& embedderAPI;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
+@property(readonly, nonatomic) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
 @property(nonatomic, strong) FlutterRestorationPlugin* restorationPlugin;
 
@@ -30,14 +29,15 @@ class ThreadHost;
 - (flutter::PlatformViewIOS*)platformView;
 
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger;
-- (flutter::IOSRenderingAPI)platformViewsRenderingAPI;
 - (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
                            libraryURI:(/*nullable*/ NSString*)libraryURI
                          initialRoute:(/*nullable*/ NSString*)initialRoute
-                       entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs;
+                       entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs
+    NS_SWIFT_UI_ACTOR;
 - (const flutter::ThreadHost&)threadHost;
 - (void)updateDisplays;
+- (void)sendDisplayWithScreenNativeSize:(CGSize)screenNativeSize scale:(CGFloat)scale;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
                performAction:(FlutterTextInputAction)action
                   withClient:(int)client;

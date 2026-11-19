@@ -49,7 +49,7 @@ class VulkanApplication {
   bool initialization_logs_enabled_ = true;
   bool valid_;
   bool enable_validation_layers_;
-  uint8_t padding_;
+  uint8_t padding_ = 0;
   uint32_t api_version_;
   VulkanProcTable& vk_;
   VulkanHandle<VkInstance> instance_;

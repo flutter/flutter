@@ -1,5 +1,5 @@
 # See Dependabot documentation for all configuration options:
-# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 
 version: 2
 updates:
@@ -7,12 +7,15 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    allow:
+      - dependency-name: "actions/*"
+      - dependency-name: "google-github-actions/*"
     groups:
       all-github-actions:
         patterns: [ "*" ]
     reviewers:
-      - "christopherfujino"
       - "jmagman"
+      - "jtmcdole"
     labels:
       - "team-infra"
       - "autosubmit"

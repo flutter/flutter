@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "integration_test",
     platforms: [
-        .iOS("13.0"),
+        .iOS("15.0"),
     ],
     products: [
         .library(name: "integration-test", targets: ["integration_test"]),

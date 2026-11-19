@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <baseline version="1.0">
-    <file name="dev/a11y_assessments/android/app/src/main/kotlin/com/example/a11y_assessments/MainActivity.kt">
-        <error line="1" column="9" source="standard:package-name" />
-    </file>
     <file name="dev/benchmarks/platform_channels_benchmarks/android/app/src/main/kotlin/com/example/platform_channels_benchmarks/MainActivity.kt">
         <error line="5" column="9" source="standard:package-name" />
     </file>
@@ -10,6 +7,12 @@
         <error line="1" column="9" source="standard:package-name" />
     </file>
     <file name="dev/integration_tests/android_embedding_v2_smoke_test/android/app/src/main/kotlin/com/example/android_embedding_v2_smoke_test/MainActivity.kt">
+        <error line="1" column="9" source="standard:package-name" />
+    </file>
+    <file name="dev/integration_tests/android_hardware_smoke_test/android/app/src/androidTest/java/com/example/android_hardware_smoke_test/FlutterActivityTest.kt">
+        <error line="5" column="9" source="standard:package-name" />
+    </file>
+    <file name="dev/integration_tests/android_hardware_smoke_test/android/app/src/main/kotlin/com/example/android_hardware_smoke_test/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
     <file name="dev/integration_tests/deferred_components_test/android/app/src/main/kotlin/io/flutter/integration/deferred_components_test/MainActivity.kt">
@@ -27,7 +30,7 @@
     <file name="dev/tracing_tests/android/app/src/main/kotlin/com/example/tracing_tests/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
-    <file name="examples/api/android/app/src/main/kotlin/dev/flutter/flutter_api_samples/MainActivity.kt">
+    <file name="packages/flutter/examples/api/android/app/src/main/kotlin/dev/flutter/flutter_api_samples/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
 </baseline>

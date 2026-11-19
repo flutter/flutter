@@ -198,8 +198,8 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
 TEST_P(AiksTest, ColorFilterBlend) {
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("has color filter", &has_color_filter);
       ImGui::End();
     }
@@ -250,8 +250,8 @@ TEST_P(AiksTest, ColorFilterBlend) {
 TEST_P(AiksTest, ColorFilterAdvancedBlend) {
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("has color filter", &has_color_filter);
       ImGui::End();
     }
@@ -311,9 +311,6 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
     GTEST_SKIP()
         << "This backend doesn't yet support setting device capabilities.";
   }
-  if (!WillRenderSomething()) {
-    GTEST_SKIP() << "This test requires playgrounds.";
-  }
 
   std::shared_ptr<const Capabilities> old_capabilities =
       GetContext()->GetCapabilities();
@@ -343,8 +340,8 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
 
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("has color filter", &has_color_filter);
       ImGui::End();
     }
@@ -398,6 +395,12 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
   auto texture = CreateTextureForFixture("airplane.jpg",
@@ -430,6 +433,12 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
   auto texture = CreateTextureForFixture("airplane.jpg",
@@ -497,13 +506,14 @@ TEST_P(AiksTest, ClearBlend) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
+static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
+                                        Vector2 content_scale,
                                         BlendMode blend_mode,
                                         const sk_sp<DlImageImpeller>& src_image,
                                         const sk_sp<DlImageImpeller>& dst_image,
                                         Scalar src_alpha) {
-  if (AiksTest::ImGuiBegin("Controls", nullptr,
-                           ImGuiWindowFlags_AlwaysAutoResize)) {
+  if (test->IsPlaygroundEnabled()) {
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
     ImGui::End();
   }
@@ -658,7 +668,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
     auto dst_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png")); \
     auto callback = [&]() -> sk_sp<DisplayList> {                             \
-      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,       \
+      return BlendModeTest(this, GetContentScale(), BlendMode::k##blend_mode, \
                            src_image, dst_image, /*src_alpha=*/1.0);          \
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
@@ -672,7 +682,7 @@ IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
     auto dst_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png")); \
     auto callback = [&]() -> sk_sp<DisplayList> {                             \
-      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,       \
+      return BlendModeTest(this, GetContentScale(), BlendMode::k##blend_mode, \
                            src_image, dst_image, /*src_alpha=*/0.5);          \
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
@@ -687,8 +697,8 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
     static Color foreground = Color::Color::OrangeRed().WithAlpha(0.5);
     static int current_blend_index = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::ColorEdit4("Background", reinterpret_cast<float*>(&background));
       ImGui::ColorEdit4("Foreground", reinterpret_cast<float*>(&foreground));
       ImGui::ListBox("Blend mode", &current_blend_index,
@@ -728,6 +738,53 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
+
+// Draws an image through a DlBlendColorFilter with the given Porter-Duff mode.
+// `Canvas::AttemptColorFilterOptimization` turns the draw into an AtlasContents
+// draw with the `PorterDuffBlend` pipeline, which takes the mode, without
+// inverting it, as uniforms (see `SetPorterDuffCoefficients`). Each test
+// exercises the shader with one mode's coefficients on every backend.
+static void DrawImageWithPorterDuffBlendColorFilter(AiksTest* test,
+                                                    DlBlendMode mode) {
+  auto image = DlImageImpeller::Make(
+      test->CreateTextureForFixture("blend_mode_dst.png"));
+  ASSERT_TRUE(image);
+
+  DisplayListBuilder builder;
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
+  builder.DrawColor(DlColor::kDarkGrey(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColorFilter(
+      DlColorFilter::MakeBlend(DlColor::kOrange().withAlphaF(0.6f), mode));
+  builder.DrawImageRect(image, DlRect::MakeXYWH(100, 100, 400, 400),
+                        DlImageSampling::kLinear, &paint);
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+
+// One test per Porter-Duff mode, kClear through kModulate. kDst is left out
+// because DlBlendColorFilter::Make folds it to no filter at all.
+#define PORTER_DUFF_BLEND_COLOR_FILTER_TEST(mode)                        \
+  TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilter##mode) {      \
+    DrawImageWithPorterDuffBlendColorFilter(this, DlBlendMode::k##mode); \
+  }
+
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Clear)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Src)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcOver)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstOver)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcIn)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstIn)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcOut)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstOut)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcATop)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstATop)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Xor)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Plus)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Modulate)
+
+#undef PORTER_DUFF_BLEND_COLOR_FILTER_TEST
 
 TEST_P(AiksTest, ForegroundAdvancedBlendAppliesTransformCorrectly) {
   auto texture = CreateTextureForFixture("airplane.jpg",
@@ -823,8 +880,8 @@ TEST_P(AiksTest, ColorWheel) {
     static DlColor color1 = DlColor::kGreen();
     static DlColor color2 = DlColor::kBlue();
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("Cache the wheel", &cache_the_wheel);
       ImGui::ListBox("Blending mode", &current_blend_index,
                      blend_modes.blend_mode_names.data(),

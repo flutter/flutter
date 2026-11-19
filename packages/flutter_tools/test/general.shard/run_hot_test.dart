@@ -3,13 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -17,6 +24,8 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
+import '../src/test_build_system.dart';
 import 'hot_shared.dart';
 
 void main() {
@@ -48,8 +57,25 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
+          buildTargets: const BuildTargetsImpl(),
+          featureFlags: TestFeatureFlags(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
@@ -69,8 +95,25 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
+          buildTargets: const BuildTargetsImpl(),
+          featureFlags: TestFeatureFlags(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
@@ -90,8 +133,25 @@ void main() {
       () async {
         final runner = HotRunner(
           <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
+          buildTargets: const BuildTargetsImpl(),
+          featureFlags: TestFeatureFlags(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 
@@ -123,8 +183,25 @@ void main() {
       () async {
         final runner = HotRunner(
           flutterDevices,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fileSystem,
+            flutterRoot: getFlutterRoot(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
+          buildTargets: const BuildTargetsImpl(),
+          featureFlags: TestFeatureFlags(),
           target: 'main.dart',
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
           analytics: _FakeAnalytics(),
         );
 

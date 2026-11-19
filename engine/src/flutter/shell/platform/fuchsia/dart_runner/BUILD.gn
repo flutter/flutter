@@ -13,6 +13,7 @@ import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 
 template("runner_sources") {
   assert(defined(invoker.product), "runner_sources must define product")
+
   source_set(target_name) {
     forward_variables_from(invoker, [ "defines" ])
     sources = [
@@ -139,7 +140,6 @@ runner("dart_aot_runner_bin") {
   extra_deps = [
     "$dart_src/runtime:libdart_aotruntime",
     "$dart_src/runtime/platform:libdart_platform_aotruntime",
-    "embedder:dart_aot_snapshot_cc",
   ]
 }
 
@@ -153,7 +153,6 @@ runner("dart_aot_product_runner_bin") {
   extra_deps = [
     "$dart_src/runtime:libdart_aotruntime",
     "$dart_src/runtime/platform:libdart_platform_aotruntime",
-    "embedder:dart_aot_product_snapshot_cc",
   ]
 }
 
@@ -163,6 +162,7 @@ template("aot_runner_package") {
   if (invoker.product) {
     product_suffix = "_product"
   }
+
   fuchsia_archive(target_name) {
     deps = [
       ":dart_aot${product_suffix}_runner_bin",

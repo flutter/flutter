@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 
+#include <array>
 #include <cstddef>
 
 #include "impeller/base/backend_cast.h"
@@ -77,8 +78,46 @@ class CapabilitiesGLES final
 
   bool IsANGLE() const;
 
+  /// Whether uploads must reset a stale shared-context texture binding.
+  bool NeedsTextureUploadRebind() const;
+
+  /// Whether uniform data must be stored in GL buffers that are never also
+  /// bound as vertex or index buffers.
+  bool NeedsSeparateUniformBuffers() const;
+
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
+
+  /// @brief The value of `GL_MAX_SHADER_COMPILER_THREADS_KHR` as returned by
+  ///        `glGetIntegerv` if GL_KHR_parallel_shader_compile (or its desktop
+  ///        GL equivalent, GL_ARB_parallel_shader_compile) is supported,
+  ///        otherwise 0.
+  ///
+  ///        A value of 0 means the driver will not compile shaders in
+  ///        parallel. A value of -1 means the implementation-dependent
+  ///        maximum; the limit is a GLuint whose initial value is 0xFFFFFFFF,
+  ///        which reads back as -1 through `glGetIntegerv`.
+  int32_t GetMaxShaderCompilerThreads() const;
+
+  // |Capabilities|
+  /// Always false. Rendering into a non-zero mip level is not yet implemented
+  /// on the GLES backend; see SupportsFramebufferRenderMipmap in the .cc file.
+  bool SupportsFramebufferRenderMipmap() const override;
+
+  /// @brief Whether GL_TEXTURE_MAX_LEVEL can be set to bound a texture's
+  /// sampled
+  ///        mip range. Core on desktop GL and ES 3.0+; on ES 2.0 it requires
+  ///        the GL_APPLE_texture_max_level extension. Without it a partial mip
+  ///        chain cannot be made mipmap complete and samples as black.
+  bool SupportsTextureMaxLevel() const;
+
+  /// @brief Whether 2D array textures (`GL_TEXTURE_2D_ARRAY`, `sampler2DArray`)
+  ///        are available. Core on desktop GL 3.0+ and OpenGL ES 3.0+, and also
+  ///        available below them through GL_EXT_texture_array (desktop GL 2.x)
+  ///        or GL_NV_texture_array (OpenGL ES 2.0). When absent, callers must
+  ///        fall back to a texture atlas.
+  // |Capabilities|
+  bool SupportsTextureArrays() const override;
 
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
@@ -120,7 +159,14 @@ class CapabilitiesGLES final
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
+
+  // |Capabilities|
+  bool SupportsTextureCompression(
+      CompressedTextureFamily family) const override;
 
   // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
@@ -138,10 +184,16 @@ class CapabilitiesGLES final
   ISize GetMaximumRenderPassAttachmentSize() const override;
 
   // |Capabilities|
+  uint32_t GetMaxSamplerAnisotropy() const override;
+
+  // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
 
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
+
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override;
 
  private:
   bool supports_texture_to_texture_blits_ = false;
@@ -150,8 +202,18 @@ class CapabilitiesGLES final
   bool supports_offscreen_msaa_ = false;
   bool supports_implicit_msaa_ = false;
   bool supports_32bit_primitive_indices_ = false;
+  bool supports_texture_max_level_ = false;
+  bool supports_texture_array_ = false;
+  bool needs_texture_upload_rebind_ = false;
+  bool needs_separate_uniform_buffers_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
+  bool supports_texture_compression_bc_ = false;
+  bool supports_texture_compression_etc2_ = false;
+  bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
+  uint32_t max_sampler_anisotropy_ = 1;
+  int32_t max_shader_compiler_threads_ = 0;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 

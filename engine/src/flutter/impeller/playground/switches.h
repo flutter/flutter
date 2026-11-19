@@ -21,6 +21,13 @@ struct PlaygroundSwitches {
   std::optional<std::chrono::milliseconds> timeout;
   bool enable_vulkan_validation = false;
   //----------------------------------------------------------------------------
+  /// Enable the synchronization validation feature of the Vulkan validation
+  /// layers. This implies `enable_vulkan_validation`. Synchronization
+  /// validation adds significant CPU overhead so it is only intended to be
+  /// enabled for a select set of tests.
+  ///
+  bool enable_vulkan_sync_validation = false;
+  //----------------------------------------------------------------------------
   /// Seek a SwiftShader library in known locations and use it when running
   /// Vulkan. It is a fatal error to provide this option and not have the test
   /// find a SwiftShader implementation.
@@ -33,6 +40,13 @@ struct PlaygroundSwitches {
   ///
   bool use_angle = false;
 
+  /// Whether the Playground instance can share contexts among multiple
+  /// instantiations. This value is initialized by the Playground before
+  /// it instantiates the |PlaygroundImpl| object. Implementations are free
+  /// to share or not share contexts if this switch is true, but must create
+  /// a new context for each Impl object created if the value is false.
+  bool can_share_context = true;
+
   bool enable_wide_gamut = false;
 
   Flags flags;
@@ -40,6 +54,8 @@ struct PlaygroundSwitches {
   PlaygroundSwitches();
 
   explicit PlaygroundSwitches(const fml::CommandLine& args);
+
+  bool operator==(const PlaygroundSwitches&) const = default;
 };
 
 }  // namespace impeller

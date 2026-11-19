@@ -308,11 +308,10 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// The [padding] argument must have non-negative insets.
   RenderSliverPadding({
     required EdgeInsetsGeometry padding,
-    TextDirection? textDirection,
+    this._textDirection,
     RenderSliver? child,
   }) : assert(padding.isNonNegative),
-       _padding = padding,
-       _textDirection = textDirection {
+       _padding = padding {
     this.child = child;
   }
 
@@ -340,7 +339,7 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
   set padding(EdgeInsetsGeometry value) {
-    assert(padding.isNonNegative);
+    assert(value.isNonNegative);
     if (_padding == value) {
       return;
     }

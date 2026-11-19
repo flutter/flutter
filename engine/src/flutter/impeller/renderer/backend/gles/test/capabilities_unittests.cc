@@ -72,5 +72,118 @@ TEST(CapabilitiesGLES, SupportsMSAA) {
   EXPECT_FALSE(capabilities->SupportsOffscreenMSAA());
 }
 
+TEST(CapabilitiesGLES, MaxSamplerAnisotropyUnsupportedByDefault) {
+  auto mock_gles = MockGLES::Init();
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxSamplerAnisotropy(), 1u);
+}
+
+TEST(CapabilitiesGLES, MaxSamplerAnisotropyWithExtension) {
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                       //
+      "GL_EXT_texture_filter_anisotropic",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions);
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  // The extension guarantees a maximum anisotropy of at least 2.
+  EXPECT_GE(capabilities->GetMaxSamplerAnisotropy(), 2u);
+}
+
+TEST(CapabilitiesGLES, SupportsTextureArrayOnES3) {
+  // 2D array textures are core on OpenGL ES 3.0, no extension needed.
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
+}
+
+TEST(CapabilitiesGLES, DoesNotSupportTextureArrayOnES2WithoutExtension) {
+  auto const extensions = std::vector<const char*>{"GL_KHR_debug"};
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_FALSE(capabilities->SupportsTextureArrays());
+}
+
+TEST(CapabilitiesGLES, SupportsTextureArrayViaNVExtensionOnES2) {
+  // OpenGL ES 2.0 has no core array textures, but GL_NV_texture_array exposes
+  // them through *NV-suffixed 3D texture entry points.
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",         //
+      "GL_NV_texture_array",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
+}
+
+TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
+  // GL_EXT_texture_array exposes the core-named 3D texture entry points below
+  // GL 3.0 (desktop GL 2.x).
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",          //
+      "GL_EXT_texture_array",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArrays());
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsIsZeroWithoutExtension) {
+  auto mock_gles = MockGLES::Init();
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 0);
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsWithKHRExtension) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*mock_gles_impl,
+          GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(3));
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                    //
+      "GL_KHR_parallel_shader_compile",  //
+  };
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), extensions);
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  const auto& capabilities = gl.GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 3);
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsWithARBExtension) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*mock_gles_impl,
+          GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(3));
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                    //
+      "GL_ARB_parallel_shader_compile",  //
+  };
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), extensions);
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  const auto& capabilities = gl.GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), 3);
+}
+
+TEST(CapabilitiesGLES, MaxShaderCompilerThreadsReportsImplementationMaximum) {
+  // The initial value of the limit, 0xFFFFFFFF, reads back as -1.
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  ON_CALL(*mock_gles_impl,
+          GetIntegerv(GL_MAX_SHADER_COMPILER_THREADS_KHR, ::testing::_))
+      .WillByDefault(::testing::SetArgPointee<1>(-1));
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",                    //
+      "GL_KHR_parallel_shader_compile",  //
+  };
+  auto mock_gles = MockGLES::Init(std::move(mock_gles_impl), extensions);
+  // The mock's own proc table is created before the impl is attached, so
+  // create a new one that queries the impl.
+  ProcTableGLES gl(kMockResolverGLES);
+  const auto& capabilities = gl.GetCapabilities();
+  EXPECT_EQ(capabilities->GetMaxShaderCompilerThreads(), -1);
+}
+
 }  // namespace testing
 }  // namespace impeller

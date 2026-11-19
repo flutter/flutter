@@ -20,6 +20,42 @@ List<ui.PointerData> _allPointerData(List<ui.PointerDataPacket> packets) {
   return packets.expand((ui.PointerDataPacket packet) => packet.data).toList();
 }
 
+/// Whether this browser exposes the `Touch` and `TouchEvent` constructors that
+/// [_createTouchEvent] needs.
+///
+/// Desktop Safari and Firefox only define them on devices with a touchscreen,
+/// so the touch tests below cannot build their input there.
+bool get _canConstructTouchEvents =>
+    domWindow.hasProperty('Touch'.toJS).toDart && domWindow.hasProperty('TouchEvent'.toJS).toDart;
+
+/// Builds a `touchend` or `touchcancel` reporting that the touches in [lifted]
+/// left the surface, while those in [remaining] are still on it.
+///
+/// A touch identifier is the same value as its pointer event's `pointerId`, so
+/// both lists hold device ids. The touch points carry no meaningful coordinates,
+/// because the engine only reads their identifiers.
+DomTouchEvent _createTouchEvent(
+  String type,
+  List<int> lifted, {
+  List<int> remaining = const <int>[],
+}) {
+  JSAny touch(int device) => DomTouch(
+    JSObject()
+      ..setProperty('identifier'.toJS, device.toJS)
+      ..setProperty('target'.toJS, rootElement as JSAny)
+      ..setProperty('clientX'.toJS, 0.toJS)
+      ..setProperty('clientY'.toJS, 0.toJS),
+  );
+  return DomTouchEvent(
+    type,
+    JSObject()
+      ..setProperty('bubbles'.toJS, true.toJS)
+      ..setProperty('cancelable'.toJS, true.toJS)
+      ..setProperty('touches'.toJS, <JSAny>[for (final int d in remaining) touch(d)].toJS)
+      ..setProperty('changedTouches'.toJS, <JSAny>[for (final int d in lifted) touch(d)].toJS),
+  );
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -1323,6 +1359,64 @@ void testMain() {
     ui_web.browser.debugOperatingSystemOverride = null;
   });
 
+  test('does reverse flip of scroll axis when "shift" key is pressed (macOS)', () {
+    final _ButtonedEventMixin context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
+
+    // Without Shift: axes are not flipped.
+    rootElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 200, deltaY: 100),
+    );
+
+    // With Shift pressed: macOS flips the axis, so we flip it back to normalize.
+    rootElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 210, deltaY: 110, shiftKey: true),
+    );
+
+    // After Shift is released: axes are not flipped again.
+    rootElement.dispatchEvent(
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 220, deltaY: 120),
+    );
+
+    expect(packets, hasLength(3));
+
+    // An add will be synthesized.
+    expect(packets[0].data, hasLength(2));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+    expect(packets[0].data[0].synthesized, isTrue);
+    // No Shift: scroll axes are not flipped.
+    expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
+    expect(packets[0].data[1].signalKind, equals(ui.PointerSignalKind.scroll));
+    expect(packets[0].data[1].scrollDeltaX, equals(200.0));
+    expect(packets[0].data[1].scrollDeltaY, equals(100.0));
+
+    // Shift held: deltaX and deltaY are swapped.
+    expect(packets[1].data, hasLength(1));
+    expect(packets[1].data[0].change, equals(ui.PointerChange.hover));
+    expect(packets[1].data[0].signalKind, equals(ui.PointerSignalKind.scroll));
+    expect(packets[1].data[0].scrollDeltaX, equals(110.0));
+    // Actually "scrollDeltaY" is the important thing to test:
+    // - User scrolls on the y axis while pressing "Shift".
+    // - MacOS converts / flips it to "deltaX", when pressing "Shift".
+    // - The Web engine reverts this flip to "scrollDeltaY".
+    // - Flutter framework flips it again (for all platforms) depending on the modifier key (default: "Shift") to "deltaX" again.
+    expect(packets[1].data[0].scrollDeltaY, equals(210.0));
+
+    // Shift released: axes are not flipped.
+    expect(packets[2].data, hasLength(1));
+    expect(packets[2].data[0].change, equals(ui.PointerChange.hover));
+    expect(packets[2].data[0].signalKind, equals(ui.PointerSignalKind.scroll));
+    expect(packets[2].data[0].scrollDeltaX, equals(220.0));
+    expect(packets[2].data[0].scrollDeltaY, equals(120.0));
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+  });
+
   test('does calculate delta and pointer identifier correctly', () {
     final _ButtonedEventMixin context = _PointerEventContext();
     final packets = <ui.PointerDataPacket>[];
@@ -2539,6 +2633,311 @@ void testMain() {
     packets.clear();
   });
 
+  // WebKit stops dispatching pointer events for a touch once it promotes that
+  // touch to a native gesture, such as dragging the caret in a text field. It
+  // sends neither `pointerup` nor `pointercancel`, which used to leave the
+  // pointer down forever and wedge any gesture recognizer tracking it.
+  // Regression test for https://github.com/flutter/flutter/issues/188781
+  test('cancels a touch the browser abandons without pointerup', () {
+    final context = _PointerEventContext();
+    // This workaround is gated to iOS WebKit.
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    // The finger lifts, but the browser only reports `touchend`. No `pointerup`
+    // and no `pointercancel` ever arrive.
+    //
+    // `touches` is not empty here: it can run ahead of the event stream, and
+    // already lists touch 3, whose `pointerdown` has not been dispatched yet.
+    // Touch 2 is absent from it though, which is what marks it as abandoned.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2], remaining: <int>[3]));
+
+    // A cancelled touch is also removed, so exactly two events are emitted.
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(2));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
+    expect(packets[0].data[0].device, equals(2));
+    expect(packets[0].data[0].buttons, equals(0));
+    // The cancel is reported at the pointer's last known location.
+    expect(packets[0].data[0].physicalX, equals(100 * dpi));
+    expect(packets[0].data[0].physicalY, equals(101 * dpi));
+    expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
+    expect(packets[0].data[1].device, equals(2));
+  }, skip: !_canConstructTouchEvents);
+
+  test('does not cancel a touch that was released normally', () {
+    final context = _PointerEventContext();
+    // This workaround is gated to iOS WebKit.
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    context
+        .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 100, clientY: 101)])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    // `pointerup` precedes `touchend` in a healthy sequence, so by now the
+    // pointer is already released and the trailing `touchend` must be a no-op.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
+
+    expect(packets, isEmpty);
+  }, skip: !_canConstructTouchEvents);
+
+  // WebKit sometimes drops the `touchend` for an abandoned touch entirely, so
+  // no event ever announces it. It is still caught because `touches` stops
+  // listing it, so reconciling against a later touch finds it missing.
+  test('cancels an abandoned touch whose touchend never arrives', () {
+    final context = _PointerEventContext();
+    // This workaround is gated to iOS WebKit.
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    // Pointer 2 is abandoned: no pointerup, and no touchend naming it either.
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+
+    // A later, unrelated touch completes normally.
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 3, clientX: 200, clientY: 201),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    context
+        .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 3, clientX: 200, clientY: 201)])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    // This is pointer 3's touchend, and `touches` is now empty. Pointer 2 is
+    // absent from it, so it is stale and must be cancelled.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[3]));
+
+    expect(packets, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
+    expect(packets[0].data[0].device, equals(2));
+  }, skip: !_canConstructTouchEvents);
+
+  // The abandoned touch is neither named by this event nor the last finger on
+  // the surface, so it is only detectable by being absent from `touches`.
+  test('cancels an abandoned touch while other fingers are still down', () {
+    final context = _PointerEventContext();
+    // This workaround is gated to iOS WebKit.
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    // Touch 2 is abandoned: no pointerup, and no touchend naming it either.
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+
+    // Two more fingers go down, and one of them lifts normally.
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 3, clientX: 200, clientY: 201),
+          _TouchDetails(pointer: 4, clientX: 300, clientY: 301),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    context
+        .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 3, clientX: 200, clientY: 201)])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    // Pointer 4 is still on the surface, so this is not the last finger up.
+    // Pointer 2 must still be cancelled, and pointer 4 must be left alone.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[3], remaining: <int>[4]));
+
+    // A cancelled touch is also removed, so two events are emitted, both for
+    // pointer 2. Nothing at all is emitted for pointer 4.
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(2));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
+    expect(packets[0].data[0].device, equals(2));
+    expect(packets[0].data[1].change, equals(ui.PointerChange.remove));
+    expect(packets[0].data[1].device, equals(2));
+    expect(
+      packets[0].data.every((ui.PointerData data) => data.device != 4),
+      isTrue,
+      reason: 'pointer 4 is still down and must not be cancelled',
+    );
+  }, skip: !_canConstructTouchEvents);
+
+  // An aborted touch is normally cleaned up by the `pointercancel` that
+  // accompanies `touchcancel`. This covers the case where the browser drops that
+  // `pointercancel`, which is the same class of defect as the missing
+  // `pointerup` this whole safety net exists for.
+  test('cancels an abandoned touch on touchcancel', () {
+    final context = _PointerEventContext();
+    // This workaround is gated to iOS WebKit.
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    // The touch is aborted, and no `pointercancel` arrives to release it.
+    rootElement.dispatchEvent(_createTouchEvent('touchcancel', <int>[2]));
+
+    expect(packets, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
+    expect(packets[0].data[0].device, equals(2));
+  }, skip: !_canConstructTouchEvents);
+
+  // The reconciliation is gated to iOS WebKit, because it relies on WebKit
+  // behavior other engines do not guarantee (notably that `Touch.identifier`
+  // equals `pointerId`). Off iOS it must never cancel a live pointer.
+  test('does not cancel abandoned touches on non-iOS browsers', () {
+    // Deliberately does NOT emulate iOS.
+    final context = _PointerEventContext();
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    // The same abandonment that would be cancelled on iOS.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
+
+    expect(packets, isEmpty);
+  }, skip: !_canConstructTouchEvents);
+
+  // A semantics-enabled text field is itself a tappable element, so the touch
+  // WebKit abandons is usually the very one being debounced: its `down` is still
+  // queued when the repair runs. Sending the cancel straight through would hand
+  // the framework a cancel for a pointer it has not seen go down, and the `down`
+  // would arrive afterwards with nothing left to close it out. That is the same
+  // stuck state this workaround exists to repair, so the queue has to be flushed
+  // ahead of the cancel.
+  test('flushes the debounce queue before delivering the cancel', () {
+    debugEmulateIosSafari = true;
+    EngineSemantics.instance.semanticsEnabled = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+      EngineSemantics.instance.semanticsEnabled = false;
+    });
+
+    final context = _PointerEventContext();
+    final events = <(ui.PointerChange, int)>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData datum in packet.data) {
+        events.add((datum.change, datum.device));
+      }
+    };
+
+    // The touch lands on a tappable element, so it starts click debouncing and
+    // its `down` sits in the queue instead of going to the framework.
+    final DomElement tappable = createDomElement('flutter-tappable')
+      ..setAttribute('flt-tappable', '');
+    rootElement.append(tappable);
+    addTearDown(() {
+      tappable.remove();
+    });
+    tappable.dispatchEvent(
+      context.multiTouchDown(const <_TouchDetails>[
+        _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+      ]).single,
+    );
+    expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
+    expect(events, isEmpty, reason: 'the debounced down must still be queued');
+
+    // WebKit abandons that same touch: no pointerup or pointercancel arrives,
+    // and the finger is gone from the surface by the time touchend fires.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
+
+    expect(events, <(ui.PointerChange, int)>[
+      (ui.PointerChange.add, 2),
+      (ui.PointerChange.down, 2),
+      (ui.PointerChange.cancel, 2),
+      (ui.PointerChange.remove, 2),
+    ], reason: 'the queued down must be flushed ahead of the cancel that closes it out');
+  }, skip: !_canConstructTouchEvents);
+
+  // The abandoned pointer's `down` must already have reached the framework
+  // before its synthesized `cancel`, otherwise the framework sees cancel first.
+  test('sends the abandoned pointer down before its cancel', () {
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+
+    final context = _PointerEventContext();
+    final events = <(ui.PointerChange, int)>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      for (final ui.PointerData d in packet.data) {
+        events.add((d.change, d.device));
+      }
+    };
+
+    // Not cleared: we want the whole ordered stream, down then cancel.
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 100, clientY: 101),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2]));
+
+    final int downIndex = events.indexOf((ui.PointerChange.down, 2));
+    final int cancelIndex = events.indexOf((ui.PointerChange.cancel, 2));
+    expect(downIndex, greaterThanOrEqualTo(0));
+    expect(cancelIndex, greaterThanOrEqualTo(0));
+    expect(downIndex, lessThan(cancelIndex));
+  }, skip: !_canConstructTouchEvents);
+
   test('does not synthesize pointer up if from different device', () {
     final context = _PointerEventContext();
     final packets = <ui.PointerDataPacket>[];
@@ -2634,6 +3033,327 @@ void testMain() {
     expect(packets.single.data[0].change, equals(ui.PointerChange.up));
   });
 
+  // POINTER CAPTURE
+  //
+  // A drag that starts on Flutter content must keep receiving `pointermove`
+  // when the pointer crosses an `<iframe>` platform view, which is a separate
+  // document. Capturing the pointer to the view root on presses on Flutter
+  // content achieves that.
+  // See: https://github.com/flutter/flutter/issues/141307
+
+  /// Replaces `setPointerCapture` on the view root with a stub that records
+  /// the pointer ids it is called with, and returns that record.
+  List<int> stubSetPointerCapture() {
+    final captured = <int>[];
+    final root = rootElement as JSObject;
+    root['setPointerCapture'] = (JSNumber pointerId) {
+      captured.add(pointerId.toDartInt);
+    }.toJS;
+    addTearDown(() {
+      root.delete('setPointerCapture'.toJS);
+    });
+    return captured;
+  }
+
+  /// Returns a list that collects the packets sent to the framework.
+  List<ui.PointerDataPacket> recordPackets() {
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = packets.add;
+    return packets;
+  }
+
+  /// The changes reported in [packets], in order.
+  List<ui.PointerChange> pointerChanges(List<ui.PointerDataPacket> packets) =>
+      _allPointerData(packets).map((ui.PointerData d) => d.change).toList();
+
+  /// The devices reported in [packets].
+  Set<int> pointerDevices(List<ui.PointerDataPacket> packets) =>
+      _allPointerData(packets).map((ui.PointerData d) => d.device).toSet();
+
+  /// Builds a composed, cancelable pointer event of [type], such as the
+  /// `lostpointercapture` the browser fires when [pointerId] stops being
+  /// captured.
+  DomEvent pointerEvent(
+    String type, {
+    required int pointerId,
+    String pointerType = 'mouse',
+    required int buttons,
+    double clientX = 10,
+    double clientY = 10,
+  }) {
+    return createDomPointerEvent(type, <String, Object?>{
+      'bubbles': true,
+      'cancelable': true,
+      'composed': true,
+      'pointerId': pointerId,
+      'pointerType': pointerType,
+      'button': 0,
+      'buttons': buttons,
+      'clientX': clientX,
+      'clientY': clientY,
+    });
+  }
+
+  /// Presses and releases the primary mouse button on [target] with
+  /// [pointerId], and returns the number of `down` changes reported for it.
+  int pressAndRelease(_PointerEventContext context, DomElement target, int pointerId) {
+    final List<ui.PointerDataPacket> packets = recordPackets();
+    target.dispatchEvent(pointerEvent('pointerdown', pointerId: pointerId, buttons: 1));
+    rootElement.dispatchEvent(
+      context.mouseUp(pointerId: pointerId, button: 0, buttons: 0, clientX: 10, clientY: 10),
+    );
+    return pointerChanges(packets).where((ui.PointerChange c) => c == ui.PointerChange.down).length;
+  }
+
+  test('captures the pointer to the view root on presses on Flutter content only', () {
+    final context = _PointerEventContext();
+    final List<int> captured = stubSetPointerCapture();
+
+    final DomElement sceneProxy = createDomHTMLDivElement();
+    view.dom.sceneHost.append(sceneProxy);
+    addTearDown(() => sceneProxy.remove());
+
+    final DomElement slot = createPlatformViewSlot(1);
+    view.dom.sceneHost.append(slot);
+    addTearDown(() => slot.remove());
+
+    final DomElement platformViewWrapper = createDomElement('flt-platform-view')
+      ..setAttribute('slot', getPlatformViewSlotName(1));
+    final DomElement platformViewContent = createDomHTMLDivElement();
+    platformViewWrapper.append(platformViewContent);
+    view.dom.platformViewsHost.append(platformViewWrapper);
+    addTearDown(() => platformViewWrapper.remove());
+
+    // Presses on the view root, the glass pane, and elements inside the glass
+    // pane's shadow root (which the browser retargets to `platformViewsHost`)
+    // hit Flutter content.
+    expect(pressAndRelease(context, rootElement, 1), 1);
+    expect(captured, <int>[1]);
+    expect(pressAndRelease(context, view.dom.platformViewsHost, 2), 1);
+    expect(captured, <int>[1, 2]);
+    expect(pressAndRelease(context, sceneProxy, 3), 1);
+    expect(captured, <int>[1, 2, 3]);
+
+    // Platform view content lives in the light DOM of the glass pane (slotted
+    // into the shadow root). A press on the platform view wrapper or its inner
+    // DOM element is not retargeted to `platformViewsHost`—its `event.target`
+    // is the platform view element itself—so it is not captured.
+    expect(pressAndRelease(context, platformViewWrapper, 4), 1);
+    expect(pressAndRelease(context, platformViewContent, 5), 1);
+    expect(captured, <int>[1, 2, 3]);
+  });
+
+  test('does not capture presses on the text editing and semantics hosts', () {
+    final context = _PointerEventContext();
+    final List<int> captured = stubSetPointerCapture();
+
+    final DomElement textInput = createDomHTMLInputElement();
+    view.dom.textEditingHost.append(textInput);
+    addTearDown(() => textInput.remove());
+
+    final DomElement semanticsNode = createDomElement('flt-semantics');
+    view.dom.semanticsHost.append(semanticsNode);
+    addTearDown(() => semanticsNode.remove());
+
+    // Capturing would retarget the pointer events of the text field to the view
+    // root and break caret placement and selection in it.
+    expect(pressAndRelease(context, view.dom.textEditingHost, 1), 1);
+    expect(pressAndRelease(context, textInput, 2), 1);
+    // Accessibility trade-off: presses on semantics nodes are not captured, so
+    // a drag starting on one can still stall over an `<iframe>`. Capturing
+    // them would retarget the resulting `click` to the view root, and the
+    // semantics node would never see the click that activates it.
+    expect(pressAndRelease(context, view.dom.semanticsHost, 3), 1);
+    expect(pressAndRelease(context, semanticsNode, 4), 1);
+
+    expect(captured, isEmpty);
+  });
+
+  test('presses on Flutter content still work when pointer capture throws', () {
+    final context = _PointerEventContext();
+    // A synthetic touch has no active browser pointer, so the real
+    // `setPointerCapture` throws a `NotFoundError` for it. (The mouse pointer
+    // is always active, so it can't be used to exercise this.)
+    expect(() => rootElement.setPointerCapture(2), throwsA(anything));
+
+    final List<ui.PointerDataPacket> packets = recordPackets();
+
+    final DomEvent down = pointerEvent(
+      'pointerdown',
+      pointerId: 2,
+      pointerType: 'touch',
+      buttons: 1,
+    );
+    rootElement.dispatchEvent(down);
+    // The rest of the press handling still runs after the failed capture.
+    expect(down.defaultPrevented, isTrue);
+    context
+        .multiTouchMove(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 20, clientY: 10)])
+        .forEach(rootElement.dispatchEvent);
+    context
+        .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 20, clientY: 10)])
+        .forEach(rootElement.dispatchEvent);
+
+    expect(pointerChanges(packets), <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+      ui.PointerChange.move,
+      ui.PointerChange.up,
+      ui.PointerChange.remove,
+    ]);
+    expect(pointerDevices(packets), <int>{2});
+    final List<ui.PointerData> data = _allPointerData(packets);
+    expect(data[1].physicalX, equals(10 * dpi));
+    expect(data[2].physicalX, equals(20 * dpi));
+    expect(data[3].physicalX, equals(20 * dpi));
+  });
+
+  test('dispatches cancel when pointer capture is lost while buttons are down', () {
+    final context = _PointerEventContext();
+    final List<ui.PointerDataPacket> packets = recordPackets();
+
+    rootElement.dispatchEvent(context.primaryDown(clientX: 10, clientY: 10));
+    rootElement.dispatchEvent(context.primaryMove(clientX: 20, clientY: 10));
+    packets.clear();
+
+    // The browser takes the capture away while the button is still pressed,
+    // e.g. because the page called `releasePointerCapture`. No `pointerup`
+    // follows, so the press is cancelled.
+    rootElement.dispatchEvent(
+      pointerEvent('lostpointercapture', pointerId: 1, buttons: 1, clientX: 0, clientY: 0),
+    );
+
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.cancel));
+    expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.mouse));
+    expect(packets[0].data[0].buttons, equals(0));
+    // The cancel is reported at the pointer's last known position, not at
+    // the position carried by the `lostpointercapture` event.
+    expect(packets[0].data[0].physicalX, equals(20 * dpi));
+    expect(packets[0].data[0].physicalY, equals(10 * dpi));
+    packets.clear();
+
+    // The pressed buttons were reset, so a later move with the button still
+    // reported as pressed is a hover, not a drag of the cancelled press.
+    rootElement.dispatchEvent(context.primaryMove(clientX: 40, clientY: 10));
+    expect(packets, hasLength(1));
+    expect(packets[0].data, hasLength(1));
+    expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
+    expect(packets[0].data[0].buttons, equals(0));
+    packets.clear();
+
+    // The release of the cancelled press is ignored.
+    rootElement.dispatchEvent(context.primaryUp(clientX: 40, clientY: 10));
+    expect(packets, isEmpty);
+  });
+
+  test('ignores lostpointercapture if pointerup already completed', () {
+    final context = _PointerEventContext();
+    final List<ui.PointerDataPacket> packets = recordPackets();
+
+    rootElement.dispatchEvent(context.primaryDown(clientX: 10, clientY: 10));
+    rootElement.dispatchEvent(context.primaryUp(clientX: 10, clientY: 10));
+    expect(pointerChanges(packets), <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+      ui.PointerChange.up,
+    ]);
+    packets.clear();
+
+    // The browser releases the capture right after `pointerup`.
+    rootElement.dispatchEvent(pointerEvent('lostpointercapture', pointerId: 1, buttons: 0));
+    // Nor is there a press to cancel for a pointer the engine has never seen.
+    rootElement.dispatchEvent(
+      pointerEvent('lostpointercapture', pointerId: 9, pointerType: 'pen', buttons: 1),
+    );
+
+    expect(packets, isEmpty);
+  });
+
+  test('cancels a press of several buttons only once when pointer capture is lost', () {
+    final context = _PointerEventContext();
+    final List<ui.PointerDataPacket> packets = recordPackets();
+
+    // A second button pressed while another is held comes as a `pointermove`.
+    rootElement.dispatchEvent(context.mouseDown(button: 0, buttons: 1, clientX: 10, clientY: 10));
+    rootElement.dispatchEvent(context.mouseMove(button: 2, buttons: 3, clientX: 10, clientY: 10));
+    expect(_allPointerData(packets).last.buttons, equals(3));
+    packets.clear();
+
+    rootElement.dispatchEvent(pointerEvent('lostpointercapture', pointerId: 1, buttons: 3));
+    expect(pointerChanges(packets), <ui.PointerChange>[ui.PointerChange.cancel]);
+    expect(_allPointerData(packets).single.buttons, equals(0));
+    packets.clear();
+
+    // A repeated loss of capture and the release of the buttons are ignored.
+    rootElement.dispatchEvent(pointerEvent('lostpointercapture', pointerId: 1, buttons: 3));
+    rootElement.dispatchEvent(context.mouseUp(button: 2, buttons: 1, clientX: 10, clientY: 10));
+    rootElement.dispatchEvent(context.mouseUp(button: 0, buttons: 0, clientX: 10, clientY: 10));
+    expect(packets, isEmpty);
+  });
+
+  test('cancels and forgets only the touch whose pointer capture is lost', () {
+    final context = _PointerEventContext();
+    // Lets the iOS safety net for abandoned touches run on `touchend`.
+    debugEmulateIosSafari = true;
+    addTearDown(() {
+      debugEmulateIosSafari = false;
+    });
+    final List<ui.PointerDataPacket> packets = recordPackets();
+
+    context
+        .multiTouchDown(const <_TouchDetails>[
+          _TouchDetails(pointer: 2, clientX: 10, clientY: 10),
+          _TouchDetails(pointer: 3, clientX: 50, clientY: 50),
+        ])
+        .forEach(rootElement.dispatchEvent);
+    packets.clear();
+
+    rootElement.dispatchEvent(
+      pointerEvent('lostpointercapture', pointerId: 2, pointerType: 'touch', buttons: 1),
+    );
+    expect(pointerChanges(packets), <ui.PointerChange>[
+      ui.PointerChange.cancel,
+      ui.PointerChange.remove,
+    ]);
+    expect(pointerDevices(packets), <int>{2});
+    packets.clear();
+
+    // Touch 3 is still down until WebKit abandons it. Touch 2 is forgotten, so
+    // it is neither cancelled again nor released.
+    rootElement.dispatchEvent(_createTouchEvent('touchend', <int>[2, 3]));
+    expect(pointerChanges(packets), <ui.PointerChange>[
+      ui.PointerChange.cancel,
+      ui.PointerChange.remove,
+    ]);
+    expect(pointerDevices(packets), <int>{3});
+    packets.clear();
+    context
+        .multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 2, clientX: 10, clientY: 10)])
+        .forEach(rootElement.dispatchEvent);
+    expect(packets, isEmpty);
+  }, skip: !_canConstructTouchEvents);
+
+  test('does not cancel a press when platform view content loses pointer capture', () {
+    final context = _PointerEventContext();
+    final DomElement platformViewContent = createDomHTMLDivElement();
+    view.dom.platformViewsHost.append(platformViewContent);
+    addTearDown(() => platformViewContent.remove());
+    final List<ui.PointerDataPacket> packets = recordPackets();
+
+    platformViewContent.dispatchEvent(context.primaryDown(clientX: 10, clientY: 10));
+    packets.clear();
+
+    // The platform view moves the capture of its own pointer between its own
+    // elements. That says nothing about the press, which is still held.
+    platformViewContent.dispatchEvent(pointerEvent('lostpointercapture', pointerId: 1, buttons: 1));
+    expect(packets, isEmpty);
+
+    rootElement.dispatchEvent(context.primaryUp(clientX: 10, clientY: 10));
+    expect(pointerChanges(packets), <ui.PointerChange>[ui.PointerChange.up]);
+  });
+
   test('throws if browser does not support pointer events', () {
     expect(
       () => PointerBinding(view, detector: MockPointerSupportDetector(false)),
@@ -2712,6 +3432,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   Future<void> nextEventLoop() {
     return Future.delayed(Duration.zero);
   }
+
+  // Mouse clicks are forwarded to the framework as pointer events rather than
+  // as `SemanticsAction.tap`, so tests that exercise the semantics action use
+  // touch, like an assistive technology would.
+  DomEvent touchDown() =>
+      context.multiTouchDown(const <_TouchDetails>[_TouchDetails(pointer: 1)])[0];
+  DomEvent touchUp() => context.multiTouchUp(const <_TouchDetails>[_TouchDetails(pointer: 1)])[0];
 
   void testWithSemantics(
     String description,
@@ -2826,7 +3553,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
 
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     // ClickDebouncer does not start debouncing right away.
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
@@ -2856,13 +3583,13 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     view.dom.semanticsHost.appendChild(testElement);
 
     // A `pointerdown` kicks off the debouncing process.
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
     expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(1));
 
     // A `pointerup` in the same event loop should not throw.
-    expect(() => testElement.dispatchEvent(context.primaryUp()), returnsNormally);
+    expect(() => testElement.dispatchEvent(touchUp()), returnsNormally);
     expect(PointerBinding.clickDebouncer.isDebouncing, isTrue);
     expect(PointerBinding.clickDebouncer.debugState, isNotNull);
     expect(PointerBinding.clickDebouncer.debugState!.queue, hasLength(2));
@@ -3001,7 +3728,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     final DomElement testElement = createDomElement('flt-semantics');
     testElement.setAttribute('flt-tappable', '');
     view.dom.semanticsHost.appendChild(testElement);
-    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(touchDown());
     expect(PointerBinding.clickDebouncer.isDebouncing, true);
 
     await nextEventLoop();
@@ -3011,6 +3738,69 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     });
 
     PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    expect(pointerPackets, isEmpty);
+    expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/188859
+  //
+  // A `SemanticsAction.tap` carries no position and no device kind, so the
+  // framework has to synthesize the tap at the center of the semantics node.
+  // Mouse clicks come with pointer events that describe the interaction
+  // precisely, so those are flushed to the framework instead.
+  testWithSemantics('Flushes pointer events instead of tap action for mouse clicks', () async {
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+
+    await nextEventLoop();
+    testElement.dispatchEvent(context.primaryUp());
+    expect(
+      reason: 'Events are withheld from the framework while debouncing',
+      pointerPackets,
+      isEmpty,
+    );
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+    expect(pointerPackets, <ui.PointerChange>[
+      ui.PointerChange.add,
+      ui.PointerChange.down,
+      ui.PointerChange.up,
+    ]);
+    expect(semanticsActions, isEmpty);
+  });
+
+  // Chrome turns screen reader activation into mouse pointer events and a click
+  // at the center of the element, all dispatched in a single task. Those must
+  // keep producing `SemanticsAction.tap`, otherwise nodes that only handle the
+  // semantics action, such as `Semantics(onTap: ...)`, stop responding.
+  testWithSemantics('Forwards tap action for mouse clicks within a single task', () async {
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
+
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
+    testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryUp());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
     expect(pointerPackets, isEmpty);
     expect(semanticsActions, <CapturedSemanticsEvent>[(type: ui.SemanticsAction.tap, nodeId: 42)]);
   });
@@ -3042,51 +3832,47 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
     expect(semanticsActions, isEmpty);
   });
 
-  testWithSemantics(
-    'Dedupes click if pointer down/up flushed recently',
-    () async {
-      expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-      expect(PointerBinding.clickDebouncer.isDebouncing, false);
+  testWithSemantics('Dedupes click if pointer down/up flushed recently', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
-      final DomElement testElement = createDomElement('flt-semantics');
-      testElement.setAttribute('flt-tappable', '');
-      view.dom.semanticsHost.appendChild(testElement);
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
 
-      testElement.dispatchEvent(context.primaryDown());
+    testElement.dispatchEvent(context.primaryDown());
 
-      // Simulate the user holding the pointer down for some time before releasing,
-      // such that the pointerup event happens close to timer expiration. This
-      // will create the situation that the click event arrives just after the
-      // pointerup is flushed. Forwarding the click to the framework would look
-      // like a double-click, so the click event is deduped.
-      await Future<void>.delayed(const Duration(milliseconds: 190));
+    // Simulate the user holding the pointer down for some time before releasing,
+    // such that the pointerup event happens close to timer expiration. This
+    // will create the situation that the click event arrives just after the
+    // pointerup is flushed. Forwarding the click to the framework would look
+    // like a double-click, so the click event is deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 190));
 
-      testElement.dispatchEvent(context.primaryUp());
-      expect(PointerBinding.clickDebouncer.isDebouncing, true);
-      expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
+    testElement.dispatchEvent(context.primaryUp());
+    expect(PointerBinding.clickDebouncer.isDebouncing, true);
+    expect(reason: 'Timer has not expired yet', pointerPackets, isEmpty);
 
-      // Wait for the timer to expire to make sure pointer events are flushed.
-      await Future<void>.delayed(const Duration(milliseconds: 20));
+    // Wait for the timer to expire to make sure pointer events are flushed.
+    await Future<void>.delayed(const Duration(milliseconds: 20));
 
-      expect(
-        reason:
-            'Queued up events should be flushed to the framework because the '
-            'time expired before the click event arrived.',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
-      );
+    expect(
+      reason:
+          'Queued up events should be flushed to the framework because the '
+          'time expired before the click event arrived.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down, ui.PointerChange.up],
+    );
 
-      final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-        'clientX': testElement.getBoundingClientRect().x,
-        'clientY': testElement.getBoundingClientRect().y,
-      });
-      PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
-      expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-    },
-    skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows,
-  );
+    expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   // Regression test for https://github.com/flutter/flutter/issues/147050
   //
@@ -3098,53 +3884,49 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
   // followed by a "click". Since we sent the "pointerdown" and "pointerup" to
   // the framework already, the framework registered a tap. Forwarding the
   // "click" would lead to a double-tap. This was the bug.
-  testWithSemantics(
-    'Dedupes click if pointer up happened recently without debouncing',
-    () async {
-      expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
-      expect(PointerBinding.clickDebouncer.isDebouncing, false);
+  testWithSemantics('Dedupes click if pointer up happened recently without debouncing', () async {
+    expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);
+    expect(PointerBinding.clickDebouncer.isDebouncing, false);
 
-      final DomElement testElement = createDomElement('flt-semantics');
-      testElement.setAttribute('flt-tappable', '');
-      view.dom.semanticsHost.appendChild(testElement);
+    final DomElement testElement = createDomElement('flt-semantics');
+    testElement.setAttribute('flt-tappable', '');
+    view.dom.semanticsHost.appendChild(testElement);
 
-      // Begin a long-press with a "pointerdown".
-      testElement.dispatchEvent(context.primaryDown());
+    // Begin a long-press with a "pointerdown".
+    testElement.dispatchEvent(context.primaryDown());
 
-      // Expire the timer causing the debouncer to reset itself.
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-      expect(
-        reason: '"pointerdown" should be flushed when the timer expires.',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
-      );
-      pointerPackets.clear();
+    // Expire the timer causing the debouncer to reset itself.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    expect(
+      reason: '"pointerdown" should be flushed when the timer expires.',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.add, ui.PointerChange.down],
+    );
+    pointerPackets.clear();
 
-      // Send a "pointerup" while the debouncer is not debouncing anything.
-      testElement.dispatchEvent(context.primaryUp());
+    // Send a "pointerup" while the debouncer is not debouncing anything.
+    testElement.dispatchEvent(context.primaryUp());
 
-      // A standalone "pointerup" should not start debouncing anything.
-      expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
-      expect(
-        reason: 'The "pointerup" should be forwarded to the framework immediately',
-        pointerPackets,
-        <ui.PointerChange>[ui.PointerChange.up],
-      );
+    // A standalone "pointerup" should not start debouncing anything.
+    expect(PointerBinding.clickDebouncer.isDebouncing, isFalse);
+    expect(
+      reason: 'The "pointerup" should be forwarded to the framework immediately',
+      pointerPackets,
+      <ui.PointerChange>[ui.PointerChange.up],
+    );
 
-      // Use a delay that's short enough for the click to be deduped.
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+    // Use a delay that's short enough for the click to be deduped.
+    await Future<void>.delayed(const Duration(milliseconds: 10));
 
-      final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
-        'clientX': testElement.getBoundingClientRect().x,
-        'clientY': testElement.getBoundingClientRect().y,
-      });
-      PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
+    final DomEvent click = createDomMouseEvent('click', <Object?, Object?>{
+      'clientX': testElement.getBoundingClientRect().x,
+      'clientY': testElement.getBoundingClientRect().y,
+    });
+    PointerBinding.clickDebouncer.onClick(click, view.viewId, 42, true);
 
-      expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-    },
-    skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows,
-  );
+    expect(reason: 'Because the DOM click event was deduped.', semanticsActions, isEmpty);
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   testWithSemantics(
     'Forwards click if enough time passed after the last flushed pointerup',
@@ -3290,6 +4072,35 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     return mouseUp(button: 0, clientX: clientX, clientY: clientY);
   }
 
+  /// Creates a synthetic DOM `WheelEvent` for testing. It inherits from DOM
+  /// `MouseEvent` and `Event` classes.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
+  ///
+  /// [buttons] is a bitmask of pressed mouse buttons (0 = none, 1 = primary,
+  /// 2 = secondary). See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
+  ///
+  /// [clientX] and [clientY] are the pointer position in CSS pixels relative
+  /// to the viewport. See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/clientX
+  ///
+  /// [deltaX] and [deltaY] are the horizontal and vertical scroll distances in
+  /// pixels (positive = right/down). See MDN: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaX
+  ///
+  /// [wheelDeltaX] and [wheelDeltaY] are the legacy equivalents of [deltaX]
+  /// and [deltaY] with opposite sign, only available in Chromium-based browsers
+  /// (absent in Firefox).
+  ///
+  /// [timeStamp] overrides the browser-assigned event time in milliseconds.
+  /// It must be set via a property descriptor because it cannot be passed
+  /// through the constructor. See MDN: https://developer.mozilla.org/en-US/docs/Web/API/Event/timeStamp
+  ///
+  /// [ctrlKey] signals a pinch-to-zoom gesture. The browser sets this even when
+  /// "Ctrl" is not physically held. Flutter uses it to emit
+  /// [ui.PointerSignalKind.scale] instead of [ui.PointerSignalKind.scroll],
+  /// unless the physical "Ctrl" key is also down.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/ctrlKey
+  ///
+  /// [shiftKey] emulates a left or right "Shift" key press.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey
   DomEvent wheel({
     required int? buttons,
     required double? clientX,
@@ -3300,6 +4111,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     double? wheelDeltaY,
     int? timeStamp,
     bool ctrlKey = false,
+    bool shiftKey = false,
   }) {
     final DomEvent event = createDomWheelEvent('wheel', <String, Object>{
       'buttons': ?buttons,
@@ -3310,6 +4122,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
       'wheelDeltaX': ?wheelDeltaX,
       'wheelDeltaY': ?wheelDeltaY,
       'ctrlKey': ctrlKey,
+      'shiftKey': shiftKey,
       'cancelable': true,
       'bubbles': true,
       'composed': true,

@@ -173,22 +173,21 @@ TEST_F(FuchsiaShellTest, LocaltimesVaryOnTimezoneChanges) {
   // there.
   fml::AutoResetWaitableEvent latch;
   std::string dart_isolate_time_str;
-  AddNativeCallback("NotifyLocalTime", CREATE_NATIVE_ENTRY([&](auto args) {
-                      dart_isolate_time_str =
-                          tonic::DartConverter<std::string>::FromDart(
-                              Dart_GetNativeArgument(args, 0));
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NotifyLocalTime", CREATE_FFI_LAMBDA([&](Dart_Handle string_handle) {
+        dart_isolate_time_str =
+            tonic::DartConverter<std::string>::FromDart(string_handle);
+        latch.Signal();
+      }));
 
   // As long as this is set, the isolate will keep rerunning its only task.
   bool continue_fixture = true;
   fml::AutoResetWaitableEvent fixture_latch;
-  AddNativeCallback("WaitFixture", CREATE_NATIVE_ENTRY([&](auto args) {
-                      // Wait for the test fixture to advance.
-                      fixture_latch.Wait();
-                      tonic::DartConverter<bool>::SetReturnValue(
-                          args, continue_fixture);
-                    }));
+  AddFfiNativeCallback("WaitFixture", CREATE_FFI_LAMBDA([&]() {
+                         // Wait for the test fixture to advance.
+                         fixture_latch.Wait();
+                         return continue_fixture;
+                       }));
 
   auto settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);

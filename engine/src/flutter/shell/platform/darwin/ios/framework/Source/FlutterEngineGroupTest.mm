@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include "flutter/fml/synchronization/sync_switch.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 
@@ -30,10 +31,42 @@ FLUTTER_ASSERT_ARC
   FlutterEngine* spawner = [group makeEngineWithEntrypoint:nil libraryURI:nil];
   spawner.isGpuDisabled = YES;
   FlutterEngine* spawnee = [group makeEngineWithEntrypoint:nil libraryURI:nil];
+
+  // Verify engines exist.
   XCTAssertNotNil(spawner);
   XCTAssertNotNil(spawnee);
+
+  // Verify engine properties match.
   XCTAssertEqual(&spawner.threadHost, &spawnee.threadHost);
   XCTAssertEqual(spawner.isGpuDisabled, spawnee.isGpuDisabled);
+
+  // Verify the shell came up with GPU disabled.
+  BOOL gpuDisabled = NO;
+  [spawnee shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }));
+  XCTAssertTrue(gpuDisabled);
+}
+
+// Verifies that the Dart VM, isolate group snapshot, and task runners are shared between engines.
+- (void)testSpawnSharesDartVMAndTaskRunners {
+  FlutterEngineGroup* group = [[FlutterEngineGroup alloc] initWithName:@"foo" project:nil];
+  FlutterEngine* spawner = [group makeEngineWithEntrypoint:nil libraryURI:nil];
+  FlutterEngine* spawnee = [group makeEngineWithEntrypoint:nil libraryURI:nil];
+  XCTAssertNotNil(spawner);
+  XCTAssertNotNil(spawnee);
+
+  // A single Dart VM backs every engine in the group.
+  XCTAssertEqual([spawner shell].GetDartVM(), [spawnee shell].GetDartVM());
+
+  // The engine-managed threads are shared; only the Dart isolate differs.
+  const flutter::TaskRunners& spawnerRunners = [spawner shell].GetTaskRunners();
+  const flutter::TaskRunners& spawneeRunners = [spawnee shell].GetTaskRunners();
+  XCTAssertEqual(spawnerRunners.GetRasterTaskRunner(), spawneeRunners.GetRasterTaskRunner());
+  XCTAssertEqual(spawnerRunners.GetIOTaskRunner(), spawneeRunners.GetIOTaskRunner());
+  XCTAssertEqual(spawnerRunners.GetPlatformTaskRunner(), spawneeRunners.GetPlatformTaskRunner());
+
+  // Platform and UI are merged on iOS, so this holds for the spawned engine too.
+  XCTAssertEqual(spawneeRunners.GetUITaskRunner(), spawneeRunners.GetPlatformTaskRunner());
 }
 
 - (void)testDeleteLastEngine {

@@ -272,7 +272,13 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   ///       child: Text('list item $index'),
   ///     );
   ///   },
-  ///   separatorBuilder: (BuildContext context, int index) => const Divider(),
+  ///   separatorBuilder: (BuildContext context, int index) {
+  ///     return const SizedBox(
+  ///       height: 1.0,
+  ///       width: double.infinity,
+  ///       child: ColoredBox(color: Color(0xFF000000)),
+  ///     );
+  ///   },
   /// )
   /// ```
   /// {@end-tool}
@@ -665,6 +671,9 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
   ///
   /// Should return null if asked to build an item extent with a greater index than
   /// exists.
+  ///
+  /// The extents returned by this builder are cached during each layout pass
+  /// for performance.
   final ItemExtentBuilder itemExtentBuilder;
 
   @override
@@ -935,8 +944,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
   /// [RenderSliverFixedExtentList]) to avoid inflating unnecessary children.
   SliverMultiBoxAdaptorElement(
     SliverMultiBoxAdaptorWidget super.widget, {
-    bool replaceMovedChildren = false,
-  }) : _replaceMovedChildren = replaceMovedChildren;
+    this._replaceMovedChildren = false,
+  });
 
   final bool _replaceMovedChildren;
 
@@ -1180,8 +1189,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       var lo = 0;
       var hi = 1;
       final adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
-      const int max = kIsWeb
-          ? 9007199254740992 // max safe integer on JS (from 0 to this number x != x+1)
+      // TODO(kevmoo): Use double.maxSafeInteger + 1 when the minimum Dart SDK is 3.15, https://github.com/flutter/flutter/issues/195202.
+      const int max = kIsWeb && !kIsWasm
+          ? 9007199254740992 // max safe integer on JS + 1 (2^53)
           : ((1 << 63) - 1);
       while (_build(hi - 1, adaptorWidget) != null) {
         lo = hi - 1;
@@ -1406,23 +1416,13 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.IgnorePointer.semantics}
 ///
-/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-///
 /// See also:
 ///
 ///  * [IgnorePointer], the equivalent widget for boxes.
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
-  const SliverIgnorePointer({
-    super.key,
-    this.ignoring = true,
-    @Deprecated(
-      'Create a custom sliver ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    Widget? sliver,
-  }) : super(child: sliver);
+  const SliverIgnorePointer({super.key, this.ignoring = true, Widget? sliver})
+    : super(child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
@@ -1432,35 +1432,20 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.IgnorePointer.semantics}
   final bool ignoring;
 
-  /// Whether the semantics of this sliver is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  @Deprecated(
-    'Create a custom sliver ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderSliverIgnorePointer createRenderObject(BuildContext context) {
-    return RenderSliverIgnorePointer(ignoring: ignoring, ignoringSemantics: ignoringSemantics);
+    return RenderSliverIgnorePointer(ignoring: ignoring);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.ignoring = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -1716,7 +1701,8 @@ class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
 /// After all slivers with null or zero flex (e.g. [SliverConstrainedCrossAxis])
 /// are laid out (which should determine their own [SliverGeometry.crossAxisExtent]),
 /// the remaining space is laid out among the slivers with nonzero flex
-/// proportionally to their flex value.
+/// proportionally to their flex value. If the constrained slivers consume all
+/// available cross-axis extent, flexible children will receive zero extent.
 class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerParentData> {
   /// Creates an object that assigns a [flex] value to the child sliver.
   ///
@@ -1768,10 +1754,14 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
 ///    [SliverGeometry.crossAxisExtent]. For example, the [SliverConstrainedCrossAxis]
 ///    widget uses either [SliverConstrainedCrossAxis.maxExtent] or
 ///    [SliverConstraints.crossAxisExtent], deciding between whichever is smaller.
+///    If the remaining cross axis space is zero, constrained children receive a
+///    cross axis constraint of 0.0.
 /// 2. Divide up the remaining cross axis space among the children with non-zero flex
 ///    factors according to their flex factor. For example, a child with a flex
 ///    factor of 2.0 will receive twice the amount of cross axis space as a child
-///    with a flex factor 1.0.
+///    with a flex factor 1.0. If the constrained slivers consume all of the
+///    available cross axis space, flexible children receive a cross axis
+///    constraint of 0.0.
 /// 3. Layout each of the remaining children with the cross axis constraint
 ///    allocated in the previous step.
 /// 4. Set the geometry to that of whichever child has the longest

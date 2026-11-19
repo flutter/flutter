@@ -95,9 +95,14 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
 
-  external BidiNamespace get Bidi;
-
-  external CodeUnitsNamespace get CodeUnits;
+  @JS('Bidi')
+  external BidiNamespace? get _Bidi;
+  BidiNamespace get Bidi {
+    if (_Bidi == null) {
+      throw StateError('The downloaded CanvasKit version does not support WebParagraph');
+    }
+    return _Bidi!;
+  }
 
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -156,8 +161,8 @@ extension type CanvasKit(JSObject _) implements JSObject {
   /// parameters specified in [SkImageInfo] passed [SkImage.readPixels] must
   /// match [info].
   @JS('MakeImage')
-  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, double bytesPerRow);
-  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, double bytesPerRow) =>
+  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, int bytesPerRow);
+  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, int bytesPerRow) =>
       _MakeImage(info, pixels.toJS, bytesPerRow);
 
   @JS('MakeLazyImageFromTextureSource')
@@ -289,15 +294,6 @@ extension type SkAffinityEnum(JSObject _) implements JSObject {
 
 extension type SkAffinity(JSObject _) implements JSObject {
   external double get value;
-}
-
-final List<SkAffinity> _skAffinitys = <SkAffinity>[
-  canvasKit.Affinity.Upstream,
-  canvasKit.Affinity.Downstream,
-];
-
-SkAffinity toSkAffinity(ui.TextAffinity affinity) {
-  return _skAffinitys[affinity.index];
 }
 
 extension type SkTextDirectionEnum(JSObject _) implements JSObject {
@@ -1047,7 +1043,7 @@ extension type SkColorFilter(JSObject _) implements JSObject {
 }
 
 extension type SkImageFilterNamespace(JSObject _) implements JSObject {
-  external SkImageFilter MakeBlur(
+  external SkImageFilter? MakeBlur(
     double sigmaX,
     double sigmaY,
     SkTileMode tileMode,
@@ -1066,20 +1062,20 @@ extension type SkImageFilterNamespace(JSObject _) implements JSObject {
     void input, // we don't use this yet
   ) => _MakeMatrixTransform(matrix.toJS, filterOptions, input);
 
-  external SkImageFilter MakeColorFilter(
+  external SkImageFilter? MakeColorFilter(
     SkColorFilter colorFilter,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeCompose(SkImageFilter outer, SkImageFilter inner);
+  external SkImageFilter? MakeCompose(SkImageFilter? outer, SkImageFilter? inner);
 
-  external SkImageFilter MakeDilate(
+  external SkImageFilter? MakeDilate(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
   );
 
-  external SkImageFilter MakeErode(
+  external SkImageFilter? MakeErode(
     double radiusX,
     double radiusY,
     void input, // we don't use this yet
@@ -1092,8 +1088,8 @@ extension type SkImageFilter(JSObject _) implements JSObject {
   external bool isDeleted();
 
   @JS('getOutputBounds')
-  external JSInt32Array _getOutputBounds(JSFloat32Array bounds);
-  Int32List getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS).toDart;
+  external JSInt32Array? _getOutputBounds(JSFloat32Array bounds);
+  Int32List? getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS)?.toDart;
 }
 
 extension type SkPathNamespace(JSObject _) implements JSObject {
@@ -1510,16 +1506,6 @@ Float32List toSkRRect(ui.RRect rrect) {
   return skRRect;
 }
 
-// TODO(hterkelsen): Use a shared malloc'ed array for performance.
-Float32List toOuterSkRect(ui.RRect rrect) {
-  final skRect = Float32List(4);
-  skRect[0] = rrect.left;
-  skRect[1] = rrect.top;
-  skRect[2] = rrect.right;
-  skRect[3] = rrect.bottom;
-  return skRect;
-}
-
 /// Encodes a list of offsets to CanvasKit-compatible point array.
 ///
 /// Uses `CanvasKit.Malloc` to allocate storage for the points in the WASM
@@ -1544,16 +1530,6 @@ Float32List toFlatSkPoints(List<ui.Offset> points) {
   for (var i = 0; i < len; i++) {
     result[2 * i] = points[i].dx;
     result[2 * i + 1] = points[i].dy;
-  }
-  return result;
-}
-
-/// Converts a list of [ui.Color] into a flat list of ints.
-Uint32List toFlatColors(List<ui.Color> colors) {
-  final int len = colors.length;
-  final result = Uint32List(len);
-  for (var i = 0; i < len; i++) {
-    result[i] = colors[i].value;
   }
   return result;
 }
@@ -1632,6 +1608,7 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     JSUint32Array? colors,
+    CkFilterOptions sampling,
   );
   void drawAtlas(
     SkImage image,
@@ -1640,7 +1617,8 @@ extension type SkCanvas(JSObject _) implements JSObject {
     SkPaint paint,
     SkBlendMode blendMode,
     Uint32List? colors,
-  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS);
+    CkFilterOptions sampling,
+  ) => _drawAtlas(image, rects.toJS, rstTransforms.toJS, paint, blendMode, colors?.toJS, sampling);
 
   external void drawCircle(double x, double y, double radius, SkPaint paint);
   external void drawColorInt(double color, SkBlendMode blendMode);
@@ -1849,16 +1827,6 @@ extension type BidiNamespace(JSObject _) implements JSObject {
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
 }
 
-extension type CodeUnitInfo(JSObject _) implements JSObject {
-  external int get flags;
-}
-
-extension type CodeUnitsNamespace(JSObject _) implements JSObject {
-  @JS('compute')
-  external JSArray<JSAny?> _compute(String text);
-  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
-}
-
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   external SkParagraphBuilder MakeFromFontCollection(
     SkParagraphStyle paragraphStyle,
@@ -1951,6 +1919,8 @@ extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
   external set strutStyle(SkStrutStyleProperties? strutStyle);
   external set replaceTabCharacters(bool? bool);
   external set applyRoundingHack(bool applyRoundingHack);
+  external set renderSoftHyphens(bool renderSoftHyphens);
+  external set softHyphenString(String? softHyphenString);
 }
 
 extension type SkTextStyle(JSObject _) implements JSObject {}
@@ -2127,7 +2097,9 @@ extension type SkFontVariation._(JSObject _) implements JSObject {
 
 extension type SkTypeface(JSObject _) implements JSObject {
   /// Returns the family name of the typeface.
-  external String? getFamilyName();
+  external String getFamilyName();
+
+  external void delete();
 }
 
 @JS('window.flutterCanvasKit.Font')
@@ -2409,14 +2381,12 @@ extension type SkPartialImageInfo._(JSObject _) implements JSObject {
 
 @JS('window.flutterCanvasKit.RuntimeEffect')
 extension type SkRuntimeEffect(JSObject _) implements JSObject {
-  @JS('makeShader')
-  external SkShader? _makeShader(JSAny uniforms);
-  SkShader? makeShader(SkFloat32List uniforms) => _makeShader(uniforms.toJSAnyShallow);
+  external SkShader? makeShader(JSFloat32Array uniforms);
 
   @JS('makeShaderWithChildren')
-  external SkShader? _makeShaderWithChildren(JSAny uniforms, JSAny children);
-  SkShader? makeShaderWithChildren(SkFloat32List uniforms, List<Object?> children) =>
-      _makeShaderWithChildren(uniforms.toJSAnyShallow, children.toJSAnyShallow);
+  external SkShader? _makeShaderWithChildren(JSFloat32Array uniforms, JSAny children);
+  SkShader? makeShaderWithChildren(JSFloat32Array uniforms, List<Object?> children) =>
+      _makeShaderWithChildren(uniforms, children.toJSAnyShallow);
 }
 
 @JS('window.flutterCanvasKit.RuntimeEffect.Make')
@@ -2425,27 +2395,30 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
-const String _kWebParagraphCanvasKitJsFileName = 'experimental_webparagraph/canvaskit.js';
+const String _kWebParagraphCanvasKitJsFileName = 'webparagraph/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  return switch (variant) {
-    CanvasKitVariant.auto => <String>[
-      if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
-      _kFullCanvasKitJsFileName,
-    ],
-    CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
-    CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
-    CanvasKitVariant.experimentalWebParagraph => <String>[_kWebParagraphCanvasKitJsFileName],
-  };
+  if (isWebParagraphEnabled) {
+    return <String>[_kWebParagraphCanvasKitJsFileName];
+  }
+  return [
+    ...switch (variant) {
+      CanvasKitVariant.auto => <String>[
+        if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
+        _kFullCanvasKitJsFileName,
+      ],
+      CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
+      CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
+    },
+  ];
 }
 
 Iterable<String> get _canvasKitJsUrls {
-  return getCanvasKitJsFileNames(
-    configuration.canvasKitVariant,
-  ).map((String filename) => '$_canvasKitBaseUrl$filename');
+  return getCanvasKitJsFileNames(configuration.canvasKitVariant)
+      .map((String filename) => '$_canvasKitBaseUrl$filename');
 }
 
 @visibleForTesting
@@ -2454,7 +2427,7 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) => canvasKitBas
 /// Download and initialize the CanvasKit module.
 ///
 /// Downloads the CanvasKit JavaScript, then calls `CanvasKitInit` to download
-/// and intialize the CanvasKit wasm.
+/// and initialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
   final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
 

@@ -40,6 +40,11 @@ void GPUTracerGLES::RecordRasterThread() {
   raster_thread_ = std::this_thread::get_id();
 }
 
+void GPUTracerGLES::Reset() {
+  pending_traces_.clear();
+  active_frame_ = std::nullopt;
+}
+
 void GPUTracerGLES::ProcessQueries(const ProcTableGLES& gl) {
   // For reasons unknown to me, querying the state of more than
   // one query object per frame causes crashes on a Pixel 6 pro.

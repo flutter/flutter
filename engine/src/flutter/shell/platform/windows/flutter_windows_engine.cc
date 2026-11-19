@@ -194,11 +194,35 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 
   // Check for impeller support.
   auto& switches = project_->GetSwitches();
-  enable_impeller_ = std::find(switches.begin(), switches.end(),
-                               "--enable-impeller=true") != switches.end();
+  bool enable_impeller = true;
+  if (project_->impeller_switch() == FlutterImpellerSwitch::Enabled) {
+    enable_impeller = true;
+  } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
+    enable_impeller = false;
+  }
+  for (const auto& env_switch : switches) {
+    if (env_switch == "--enable-impeller" ||
+        env_switch == "--enable-impeller=true") {
+      enable_impeller = true;
+    } else if (env_switch == "--enable-impeller=false") {
+      enable_impeller = false;
+    }
+  }
+  enable_impeller_ = enable_impeller;
 
+  const std::optional<egl::D3DFeatureLevel> max_d3d_feature_level =
+      project_->max_d3d_feature_level();
+  if (max_d3d_feature_level.has_value()) {
+    FML_LOG(WARNING) << "Capping ANGLE's D3D11 feature level to "
+                     << max_d3d_feature_level->major << "_"
+                     << max_d3d_feature_level->minor << ".";
+  }
+
+  // Only Impeller knows how to render into a top-left origin default
+  // framebuffer. The Skia path still expects OpenGL's bottom-left origin.
   egl_manager_ = egl::Manager::Create(
-      static_cast<egl::GpuPreference>(project_->gpu_preference()));
+      static_cast<egl::GpuPreference>(project_->gpu_preference()),
+      /*allow_inverted_surface=*/enable_impeller_, max_d3d_feature_level);
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);
@@ -290,6 +314,46 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::string executable_name = GetExecutableName();
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
+  if (enable_impeller_) {
+    if (std::find(switches.begin(), switches.end(),
+                  "--impeller-use-sdfs=true") == switches.end() &&
+        std::find(switches.begin(), switches.end(),
+                  "--impeller-use-sdfs=false") == switches.end()) {
+      switches.push_back("--impeller-use-sdfs=true");
+    }
+    if (std::find(switches.begin(), switches.end(), "--enable-impeller") ==
+            switches.end() &&
+        std::find(switches.begin(), switches.end(), "--enable-impeller=true") ==
+            switches.end()) {
+      // Impeller was enabled programmatically, so forward the switch to the
+      // engine.
+      switches.push_back("--enable-impeller");
+    }
+    if (egl_manager_ && egl_manager_->surface_origin_is_top_left()) {
+      // ANGLE gave us a window surface with an inverted Y axis, so the default
+      // framebuffer is top-down. Tell Impeller so that it stores backing store
+      // contents in the same orientation and the presenting blit stays a
+      // straight copy.
+      switches.push_back("--impeller-top-left-default-framebuffer-origin");
+    }
+  } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
+    if (std::find(switches.begin(), switches.end(),
+                  "--enable-impeller=false") == switches.end()) {
+      // Impeller was disabled programmatically, so forward the switch to the
+      // engine.
+      switches.push_back("--enable-impeller=false");
+    }
+  }
+  if (project_->enable_flutter_gpu()) {
+    if (std::find(switches.begin(), switches.end(), "--enable-flutter-gpu") ==
+            switches.end() &&
+        std::find(switches.begin(), switches.end(),
+                  "--enable-flutter-gpu=true") == switches.end()) {
+      // Flutter GPU was enabled programmatically, so forward the switch to
+      // the engine.
+      switches.push_back("--enable-flutter-gpu");
+    }
+  }
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
@@ -527,7 +591,12 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
     std::unique_ptr<WindowBindingHandler> window,
     bool is_sized_to_content,
     const BoxConstraints& box_constraints,
+    bool allow_implicit_view,
     FlutterWindowsViewSizingDelegate* sizing_delegate) {
+  if (!allow_implicit_view && next_view_id_ == kImplicitViewId) {
+    ++next_view_id_;
+  }
+
   auto view_id = next_view_id_;
   auto view = std::make_unique<FlutterWindowsView>(
       view_id, this, std::move(window), is_sized_to_content, box_constraints,
@@ -1009,6 +1078,7 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
 void FlutterWindowsEngine::OnPreEngineRestart() {
   // Reset the keyboard's state on hot restart.
   InitializeKeyboard();
+  window_manager_->OnPreEngineRestart();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {

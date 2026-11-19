@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+
+#include <cmath>
+
 #include "flow/view_slicer.h"
 #include "flutter/common/constants.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -10,6 +13,26 @@
 #include "fml/make_copyable.h"
 
 namespace flutter {
+
+namespace {
+
+// Converts a size in logical pixels to the whole number of physical pixels the
+// platform view should be laid out at.
+//
+// Android view geometry is integral, so this conversion is lossy no matter
+// what, but it must *round* rather than truncate. `size_points * dpr` is
+// computed in double precision from a float `size_points`, so a platform view
+// that exactly covers the screen lands a hair under the physical size (e.g.
+// 1079.99996 for a 1080px wide screen at a device pixel ratio of 2.625).
+// Truncating that drops a pixel off the right and bottom edges, and the Flutter
+// content behind the platform view shows through as a thin line.
+//
+// See https://github.com/flutter/flutter/issues/189834.
+int32_t ToPhysicalPixels(DlScalar size_points, double device_pixel_ratio) {
+  return static_cast<int32_t>(std::round(size_points * device_pixel_ratio));
+}
+
+}  // namespace
 
 AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     const AndroidContext& android_context,
@@ -21,7 +44,7 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
       jni_facade_(std::move(jni_facade)),
       surface_factory_(std::move(surface_factory)),
       surface_pool_(
-          std::make_unique<SurfacePool>(/*use_new_surface_methods=*/false)),
+          std::make_shared<SurfacePool>(/*use_new_surface_methods=*/false)),
       task_runners_(task_runners) {}
 
 // |ExternalViewEmbedder|
@@ -100,7 +123,9 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
   }
 
   for (int64_t view_id : composition_order_) {
-    DlRect view_rect = GetViewRect(view_id);
+    // Round, rather than truncate, the bounds onto the pixel grid. See
+    // `ToPhysicalPixels` for why.
+    const DlIRect view_rect = DlIRect::Round(GetViewRect(view_id));
     const EmbeddedViewParams& params = view_params_.at(view_id);
     // Display the platform view. If it's already displayed, then it's
     // just positioned and sized.
@@ -110,8 +135,8 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
         view_rect.GetY(),       //
         view_rect.GetWidth(),   //
         view_rect.GetHeight(),  //
-        params.sizePoints().width * device_pixel_ratio_,
-        params.sizePoints().height * device_pixel_ratio_,
+        ToPhysicalPixels(params.sizePoints().width, device_pixel_ratio_),
+        ToPhysicalPixels(params.sizePoints().height, device_pixel_ratio_),
         params.mutatorsStack()  //
     );
     std::unordered_map<int64_t, DlRect>::const_iterator overlay =
@@ -125,7 +150,7 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
                               slices_.at(view_id).get(),  //
                               overlay->second             //
         );
-    if (should_submit_current_frame) {
+    if (frame && should_submit_current_frame) {
       frame->Submit();
     }
   }
@@ -142,6 +167,9 @@ AndroidExternalViewEmbedder::CreateSurfaceIfNeeded(GrDirectContext* context,
 
   std::unique_ptr<SurfaceFrame> frame =
       layer->surface->AcquireFrame(frame_size_);
+  if (!frame) {
+    return nullptr;
+  }
   // Display the overlay surface. If it's already displayed, then it's
   // just positioned and sized.
   jni_facade_->FlutterViewDisplayOverlaySurface(layer->id,        //
@@ -220,10 +248,14 @@ void AndroidExternalViewEmbedder::PrepareFlutterView(
     double device_pixel_ratio) {
   Reset();
 
-  // The surface size changed. Therefore, destroy existing surfaces as
-  // the existing surfaces in the pool can't be recycled.
+  // Overlay layers are allocated for the current frame size, so the layers in
+  // the pool can't be recycled after the size changes. Release them without
+  // waiting for the platform thread: this runs on the raster thread, which is
+  // only merged into the platform thread while platform views are in the
+  // scene, and the platform thread may be waiting for the raster thread, for
+  // example in `PlatformViewAndroid::NotifyChanged` during `surfaceChanged`.
   if (frame_size_ != frame_size) {
-    DestroySurfaces();
+    ReleaseOverlayLayers();
 
     // This should not block to prevent deadlocks with
     // setViewportMetrics.
@@ -267,7 +299,7 @@ void AndroidExternalViewEmbedder::Teardown() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::DestroySurfaces() {
-  if (!surface_pool_->HasLayers()) {
+  if (!surface_pool_->HasLayers() && !surface_pool_->HasPendingDestroy()) {
     return;
   }
   fml::AutoResetWaitableEvent latch;
@@ -277,6 +309,30 @@ void AndroidExternalViewEmbedder::DestroySurfaces() {
                                       latch.Signal();
                                     });
   latch.Wait();
+}
+
+void AndroidExternalViewEmbedder::ReleaseOverlayLayers() {
+  std::vector<std::shared_ptr<OverlayLayer>> layers =
+      surface_pool_->TakeLayers();
+  if (layers.empty()) {
+    return;
+  }
+  // Release the rendering surfaces on the thread that renders into them.
+  layers.clear();
+
+  // Destroy the stale Java overlay surfaces on the platform thread without
+  // waiting. If an earlier-queued raster task runs on the platform thread after
+  // a dynamic thread merge ahead of this task, |SurfacePool::GetLayer| flushes
+  // the pending destroy before allocating a new overlay surface, turning this
+  // posted call into a no-op.
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      [jni_facade = jni_facade_,
+       pool = std::weak_ptr<SurfacePool>(surface_pool_)]() {
+        if (std::shared_ptr<SurfacePool> locked_pool = pool.lock()) {
+          locked_pool->DestroyPendingLayers(jni_facade);
+        }
+      });
 }
 
 }  // namespace flutter

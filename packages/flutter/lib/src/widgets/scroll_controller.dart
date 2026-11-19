@@ -72,12 +72,12 @@ typedef ScrollControllerCallback = void Function(ScrollPosition position);
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ScrollController({
-    double initialScrollOffset = 0.0,
+    this._initialScrollOffset = 0.0,
     this.keepScrollOffset = true,
     this.debugLabel,
     this.onAttach,
     this.onDetach,
-  }) : _initialScrollOffset = initialScrollOffset {
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
@@ -195,6 +195,14 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The animation is indifferent to changes to the viewport or content
   /// dimensions.
+  ///
+  /// For scrollables that lazily construct their contents, such as
+  /// [ListView.builder], a value based on [ScrollPosition.maxScrollExtent] can
+  /// be an estimate. It may not reach newly added content outside the current
+  /// cache extent because the animation target is computed from the current
+  /// [ScrollMetrics.maxScrollExtent] estimate. The target is not updated as
+  /// more children are laid out during the animation. To reveal a built child,
+  /// use [Scrollable.ensureVisible] with the child's [BuildContext].
   ///
   /// Once the animation has completed, the scroll position will attempt to
   /// begin a ballistic activity in case its value is not stable (for example,

@@ -35,6 +35,10 @@ static MockGtk* mock = nullptr;
 MockGtk::MockGtk() {
   thread = g_thread_self();
   mock = this;
+  ON_CALL(*this, gdk_window_get_width(::testing::_))
+      .WillByDefault(::testing::Return(100));
+  ON_CALL(*this, gdk_window_get_height(::testing::_))
+      .WillByDefault(::testing::Return(100));
 }
 
 MockGtk::~MockGtk() {
@@ -74,12 +78,18 @@ void gdk_display_beep(GdkDisplay* display) {
 
 int gdk_window_get_width(GdkWindow* window) {
   check_thread();
-  return 100;
+  if (mock == nullptr) {
+    return 100;
+  }
+  return mock->gdk_window_get_width(window);
 }
 
 int gdk_window_get_height(GdkWindow* window) {
   check_thread();
-  return 100;
+  if (mock == nullptr) {
+    return 100;
+  }
+  return mock->gdk_window_get_height(window);
 }
 
 gint gdk_window_get_scale_factor(GdkWindow* window) {
@@ -298,7 +308,10 @@ GtkWidget* gtk_widget_get_toplevel(GtkWidget* widget) {
 
 GdkWindow* gtk_widget_get_window(GtkWidget* widget) {
   check_thread();
-  return nullptr;
+  if (mock == nullptr) {
+    return nullptr;
+  }
+  return mock->gtk_widget_get_window(widget);
 }
 
 void gtk_im_context_set_client_window(GtkIMContext* context,

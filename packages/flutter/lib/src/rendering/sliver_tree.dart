@@ -111,10 +111,9 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
   RenderTreeSliver({
     required super.childManager,
     required super.itemExtentBuilder,
-    required Map<UniqueKey, TreeSliverNodesAnimation> activeAnimations,
-    required double indentation,
-  }) : _activeAnimations = activeAnimations,
-       _indentation = indentation;
+    required this._activeAnimations,
+    required this._indentation,
+  });
 
   // TODO(Piinks): There are some opportunities to cache even further as far as
   // extents and layout offsets when using itemExtentBuilder from the super
@@ -228,7 +227,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         break;
       }
 
-      itemExtent = itemExtentBuilder(index, layoutDimensions);
+      itemExtent = itemExtentOf(index);
       if (itemExtent == null) {
         break;
       }
@@ -260,7 +259,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
     // We animate only a portion of children that would be visible/in the cache
     // extent, unless all children would fit on the screen.
     while (currentIndex <= lastIndex && currentPosition < targetPosition) {
-      final double itemExtent = itemExtentBuilder(currentIndex, layoutDimensions)!;
+      final double itemExtent = itemExtentOf(currentIndex)!;
       totalAnimatingOffset += itemExtent;
       currentPosition += itemExtent;
       currentIndex++;
@@ -294,7 +293,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
         break;
       }
 
-      itemExtent = itemExtentBuilder(currentIndex, layoutDimensions);
+      itemExtent = itemExtentOf(currentIndex);
       if (itemExtent == null) {
         break;
       }
@@ -371,13 +370,16 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
       // leadingIndex), and the trailing edge of the trailing index. We cannot
       // rely on the leading edge of the leading index, because it is currently
       // moving.
+      //
+      // parentIndex is always a real animating node (the unclipped first
+      // segment is already painted), so its extent is added even when it is
+      // index 0. Otherwise the clip starts at the parent's leading edge and its
+      // children paint over it.
       final int parentIndex = math.max(segment.leadingIndex - 1, 0);
       final double leadingOffset =
-          indexToLayoutOffset(0.0, parentIndex) +
-          (parentIndex == 0 ? 0.0 : itemExtentBuilder(parentIndex, layoutDimensions)!);
+          indexToLayoutOffset(0.0, parentIndex) + itemExtentOf(parentIndex)!;
       final double trailingOffset =
-          indexToLayoutOffset(0.0, segment.trailingIndex) +
-          itemExtentBuilder(segment.trailingIndex, layoutDimensions)!;
+          indexToLayoutOffset(0.0, segment.trailingIndex) + itemExtentOf(segment.trailingIndex)!;
       final rect = Rect.fromPoints(
         Offset(0.0, leadingOffset),
         Offset(constraints.crossAxisExtent, trailingOffset),

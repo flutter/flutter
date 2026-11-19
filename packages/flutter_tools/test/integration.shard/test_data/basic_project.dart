@@ -5,9 +5,12 @@
 import 'project.dart';
 
 class BasicProject extends Project {
+  BasicProject({super.name});
+
   @override
-  final pubspec = '''
-  name: test
+  String get pubspec =>
+      '''
+  name: $name
   environment:
     sdk: ^3.7.0-0
 

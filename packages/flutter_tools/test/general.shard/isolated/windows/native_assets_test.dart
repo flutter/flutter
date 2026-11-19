@@ -7,20 +7,26 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart'
     show cCompilerConfigWindows;
+import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -41,6 +47,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -86,7 +93,11 @@ void main() {
           ];
           final buildRunner = FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
-            buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+            buildResult: buildMode == BuildMode.debug
+                ? FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets)
+                : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                    codeAssetsForLinking: <String, List<CodeAsset>>{'package:bar': codeAssets},
+                  ),
             linkResult: buildMode == BuildMode.debug
                 ? null
                 : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
@@ -100,6 +111,11 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            featureFlags: TestFeatureFlags(
+              isNativeAssetsEnabled: true,
+              isDartDataAssetsEnabled: true,
+            ),
+            logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
@@ -117,13 +133,17 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
+            processManager: processManager,
             nativeAssetsFileUri: nativeAssetsFileUri,
-            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/windows/'),
+            targetUri: projectUri.resolve(
+              '${getBuildDirectory(Config.test(), fileSystem)}/native_assets/windows/',
+            ),
           );
           final expectedOS = flutterTester ? OS.current.toString() : 'windows';
           final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
           expect(
-            (globals.logger as BufferLogger).traceText,
+            logger.traceText,
             stringContainsInOrder(<String>[
               'Running build hooks for ${expectedOS}_$expectedArch.',
               'Running build hooks for ${expectedOS}_$expectedArch done.',
@@ -158,27 +178,25 @@ void main() {
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            RegExp(r'(.*)vswhere.exe'),
-            '-format',
-            'json',
-            '-products',
-            '*',
-            '-utf8',
-            '-latest',
-            '-version',
-            '16',
-            '-requires',
-            'Microsoft.VisualStudio.Workload.NativeDesktop',
-            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-            'Microsoft.VisualStudio.Component.VC.CMake.Project',
-          ],
-          stdout: r'''
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
+    final vswhereProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <Pattern>[
+          RegExp(r'(.*)vswhere.exe'),
+          '-format',
+          'json',
+          '-products',
+          '*',
+          '-utf8',
+          '-latest',
+          '-version',
+          '16',
+          '-requires',
+          'Microsoft.VisualStudio.Workload.NativeDesktop',
+          'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+          'Microsoft.VisualStudio.Component.VC.CMake.Project',
+        ],
+        stdout: r'''
 [
   {
     "instanceId": "491ec752",
@@ -230,26 +248,133 @@ void main() {
   }
 ]
 ''', // Newline at the end of the string.
+      ),
+    ]);
+
+    final Directory msvcBinDir = fileSystem.directory(
+      r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64',
+    );
+    await msvcBinDir.create(recursive: true);
+
+    final visualStudio = VisualStudio(
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.windows_x64),
+        platform: FakePlatform(
+          operatingSystem: 'windows',
+          environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
         ),
-      ]),
-      FileSystem: () => fileSystem,
-    },
-    () async {
-      if (!const LocalPlatform().isWindows) {
-        return;
-      }
+        processManager: vswhereProcessManager,
+      ),
+    );
+    expect(visualStudio.clPath, msvcBinDir.childFile('cl.exe').path);
+    expect(visualStudio.libPath, msvcBinDir.childFile('lib.exe').path);
+    expect(visualStudio.linkPath, msvcBinDir.childFile('link.exe').path);
+    expect(visualStudio.vcvarsPath, isNotNull);
+    expect(vswhereProcessManager.hasRemainingExpectations, isFalse);
 
-      final Directory msvcBinDir = fileSystem.directory(
-        r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64',
+    if (!const LocalPlatform().isWindows) {
+      return;
+    }
+
+    final CCompilerConfig result = (await cCompilerConfigWindows(
+      throwIfNotFound: true,
+      visualStudio: visualStudio,
+    ))!;
+    expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
+    expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
+    expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
+    expect(result.windows.developerCommandPrompt?.script, isNotNull);
+    expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
+  });
+
+  group('cCompilerConfigWindows', () {
+    final Platform windowsPlatform = FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
+    );
+
+    testWithoutContext(
+      'returns null when Visual Studio is not found and throwIfNotFound is false',
+      () async {
+        final CCompilerConfig? result = await cCompilerConfigWindows(
+          throwIfNotFound: false,
+          visualStudio: VisualStudio(
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: windowsPlatform,
+              processManager: FakeProcessManager.any(),
+            ),
+          ),
+        );
+        expect(result, isNull);
+      },
+    );
+
+    testWithoutContext(
+      'throws ToolExit when Visual Studio is not found and throwIfNotFound is true',
+      () async {
+        await expectLater(
+          cCompilerConfigWindows(
+            throwIfNotFound: true,
+            visualStudio: VisualStudio(
+              toolContext: FakeToolContext(
+                fs: fileSystem,
+                logger: logger,
+                os: FakeOperatingSystemUtils(),
+                platform: windowsPlatform,
+                processManager: FakeProcessManager.any(),
+              ),
+            ),
+          ),
+          throwsA(isA<ToolExit>()),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'WindowsAssetTarget.setCCompilerConfig throws StateError when visualStudio is null',
+      () async {
+        final target = WindowsAssetTarget(
+          architecture: Architecture.x64,
+          supportedAssetTypes: const <SupportedAssetTypes>[SupportedAssetTypes.codeAssets],
+          visualStudio: null,
+        );
+        await expectLater(
+          target.setCCompilerConfig(
+            processUtils: ProcessUtils(processManager: FakeProcessManager.empty(), logger: logger),
+          ),
+          throwsA(
+            isA<StateError>().having(
+              (StateError error) => error.message,
+              'message',
+              contains('VisualStudio'),
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext('runFlutterSpecificBuildHooks succeeds for data-only hooks on Windows when visualStudio is null', () async {
+      final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
+        androidSdkProvider: null,
+        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+        targetPlatform: TargetPlatform.windows_x64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        featureFlags: TestFeatureFlags(isDartDataAssetsEnabled: true),
+        logger: logger,
+        buildRunner: FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['bar'],
+        ),
+        buildCodeAssets: null,
+        buildDataAssets: true,
+        visualStudio: null,
       );
-      await msvcBinDir.create(recursive: true);
-
-      final CCompilerConfig result = (await cCompilerConfigWindows())!;
-      expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
-      expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
-      expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
-      expect(result.windows.developerCommandPrompt?.script, isNotNull);
-      expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
-    },
-  );
+      expect(buildResult.codeAssets, isEmpty);
+    });
+  });
 }

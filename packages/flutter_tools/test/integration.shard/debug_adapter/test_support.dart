@@ -5,13 +5,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dds/dap.dart';
+import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test/test.dart';
 
+import '../../src/common.dart';
+import '../test_utils.dart';
 import 'test_client.dart';
 import 'test_server.dart';
 
@@ -29,11 +28,7 @@ final useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true';
 /// This is useful for debugging locally or on the bots and will include both
 /// DAP traffic (between the test DAP client and the DAP server) and the VM
 /// Service traffic (wrapped in a custom 'dart.log' event).
-final bool verboseLogging =
-    Platform.environment['DAP_TEST_VERBOSE'] == 'true' ||
-    // Enable verbose logging on CI bots.
-    // TODO(bkonyi): remove this once https://github.com/flutter/flutter/issues/172636 is resolved.
-    Platform.environment.containsKey('SWARMING_TASK_ID');
+final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
 const endOfErrorOutputMarker =
     '════════════════════════════════════════════════════════════════════════════════';
@@ -103,10 +98,11 @@ class SimpleFlutterRunner {
   Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
 
   static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
-    final String flutterToolPath = globals.fs.path.join(
-      Cache.flutterRoot!,
+    final String flutterRoot = getFlutterRoot();
+    final String flutterToolPath = fileSystem.path.join(
+      flutterRoot,
       'bin',
-      globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+      platform.isWindows ? 'flutter.bat' : 'flutter',
     );
 
     final args = <String>['run', '--machine', '-d', 'flutter-tester'];
@@ -134,12 +130,13 @@ class DapTestSession {
   }
 
   static Future<DapTestSession> setUp({List<String>? additionalArgs}) async {
-    final DapTestServer server = await _startServer(additionalArgs: additionalArgs);
+    // ignore: avoid_print
+    final Logger? logger = verboseLogging ? print : null;
+    final DapTestServer server = await _startServer(logger: logger, additionalArgs: additionalArgs);
     final DapTestClient client = await DapTestClient.connect(
       server,
       captureVmServiceTraffic: verboseLogging,
-      // ignore: avoid_print
-      logger: verboseLogging ? print : null,
+      logger: logger,
     );
     return DapTestSession._(server, client);
   }

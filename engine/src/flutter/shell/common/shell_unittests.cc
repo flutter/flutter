@@ -30,6 +30,7 @@
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
@@ -47,6 +48,8 @@
 #include "fml/mapping.h"
 #include "gmock/gmock.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/renderer/pipeline_library.h"
+#include "impeller/renderer/testing/mocks.h"
 #include "lib/ui/semantics/semantics_node.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
@@ -57,7 +60,7 @@
 #include "flutter/vulkan/vulkan_application.h"  // nogncheck
 #endif
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter {
@@ -100,6 +103,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD(void,
               OnPlatformViewCreated,
               (std::unique_ptr<Surface> surface),
+              (override));
+
+  MOCK_METHOD(void,
+              OnPlatformViewCreatedDeferred,
+              (PlatformView::SurfaceFactory surface_factory),
               (override));
 
   MOCK_METHOD(void, OnPlatformViewDestroyed, (), (override));
@@ -183,6 +191,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   MOCK_METHOD(const Settings&,
               OnPlatformViewGetSettings,
+              (),
+              (const, override));
+
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
               (),
               (const, override));
 
@@ -587,9 +600,9 @@ TEST_F(ShellTest, FixturesAreFunctional) {
   configuration.SetEntrypoint("fixturesAreFunctionalMain");
 
   fml::AutoResetWaitableEvent main_latch;
-  AddNativeCallback(
+  AddFfiNativeCallback(
       "SayHiFromFixturesAreFunctionalMain",
-      CREATE_NATIVE_ENTRY([&main_latch](auto args) { main_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&main_latch]() { main_latch.Signal(); }));
 
   RunEngine(shell.get(), std::move(configuration));
   main_latch.Wait();
@@ -677,9 +690,8 @@ TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
   configuration.SetEntrypoint("testCanLaunchSecondaryIsolate");
 
   fml::CountDownLatch latch(2);
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
-                      latch.CountDown();
-                    }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   RunEngine(shell.get(), std::move(configuration));
 
@@ -703,8 +715,8 @@ TEST_F(ShellTest, LastEntrypoint) {
 
   fml::AutoResetWaitableEvent main_latch;
   std::string last_entry_point;
-  AddNativeCallback(
-      "SayHiFromFixturesAreFunctionalMain", CREATE_NATIVE_ENTRY([&](auto args) {
+  AddFfiNativeCallback(
+      "SayHiFromFixturesAreFunctionalMain", CREATE_FFI_LAMBDA([&]() {
         last_entry_point = shell->GetEngine()->GetLastEntrypoint();
         main_latch.Signal();
       }));
@@ -732,8 +744,8 @@ TEST_F(ShellTest, LastEntrypointArgs) {
 
   fml::AutoResetWaitableEvent main_latch;
   std::vector<std::string> last_entry_point_args;
-  AddNativeCallback(
-      "SayHiFromFixturesAreFunctionalMain", CREATE_NATIVE_ENTRY([&](auto args) {
+  AddFfiNativeCallback(
+      "SayHiFromFixturesAreFunctionalMain", CREATE_FFI_LAMBDA([&]() {
         last_entry_point_args = shell->GetEngine()->GetLastEntrypointArgs();
         main_latch.Signal();
       }));
@@ -824,7 +836,13 @@ TEST_F(ShellTest, NeedsReportTimingsIsSetWithCallback) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("dummyReportTimingsMain");
 
+  fml::AutoResetWaitableEvent startupLatch;
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { startupLatch.Signal(); }));
+
   RunEngine(shell.get(), std::move(configuration));
+  startupLatch.Wait();
+
   PumpOneFrame(shell.get());
   ASSERT_TRUE(GetNeedsReportTimings(shell.get()));
   DestroyShell(std::move(shell));
@@ -874,16 +892,14 @@ TEST_F(ShellTest, ReportTimingsIsCalled) {
   configuration.SetEntrypoint("reportTimingsMain");
   fml::AutoResetWaitableEvent reportLatch;
   std::vector<int64_t> timestamps;
-  auto nativeTimingCallback = [&reportLatch,
-                               &timestamps](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
+  auto nativeTimingCallback = [&reportLatch, &timestamps](Dart_Handle timings) {
     ASSERT_EQ(timestamps.size(), 0ul);
-    timestamps = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
-        args, 0, exception);
+    timestamps = tonic::DartConverter<std::vector<int64_t>>::FromDart(timings);
     reportLatch.Signal();
   };
-  AddNativeCallback("NativeReportTimingsCallback",
-                    CREATE_NATIVE_ENTRY(nativeTimingCallback));
+  AddFfiNativeCallback("NativeReportTimingsCallback",
+                       CREATE_FFI_LAMBDA(nativeTimingCallback));
+
   RunEngine(shell.get(), std::move(configuration));
 
   // Pump many frames so we can trigger the report quickly instead of waiting
@@ -946,16 +962,21 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onBeginFrameMain");
 
-  int64_t frame_target_time;
-  auto nativeOnBeginFrame = [&frame_target_time](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
-    frame_target_time =
-        tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
+  int64_t frame_target_time = 0;
+
+  auto nativeOnBeginFrame = [&frame_target_time](int64_t microseconds) {
+    frame_target_time = microseconds;
   };
-  AddNativeCallback("NativeOnBeginFrame",
-                    CREATE_NATIVE_ENTRY(nativeOnBeginFrame));
+  AddFfiNativeCallback("NativeOnBeginFrame",
+                       CREATE_FFI_LAMBDA(nativeOnBeginFrame));
+
+  fml::AutoResetWaitableEvent startupLatch;
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { startupLatch.Signal(); }));
 
   RunEngine(shell.get(), std::move(configuration));
+  startupLatch.Wait();
+
   PumpOneFrame(shell.get());
 
   // Check that timing is properly set. This implies that
@@ -1191,12 +1212,13 @@ TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
 
   PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
 
-  auto result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-  // Wait for the rasterizer to process the frame. WaitForFirstFrame only waits
-  // for the Animator, but end_frame_callback is called by the Rasterizer.
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  first_frame_event.Wait();
+  // Wait for the rasterizer to process the frame. AddFirstFrameCallback only
+  // waits for the Animator, but end_frame_callback is called by the Rasterizer.
   PostSync(shell->GetTaskRunners().GetRasterTaskRunner(), [] {});
-  ASSERT_TRUE(result.ok()) << "Result: " << static_cast<int>(result.code())
-                           << ": " << result.message();
 
   ASSERT_TRUE(raster_thread_merger->IsEnabled());
 
@@ -1642,16 +1664,13 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   configuration.SetEntrypoint("reportTimingsMain");
   fml::AutoResetWaitableEvent reportLatch;
   std::vector<int64_t> timestamps;
-  auto nativeTimingCallback = [&reportLatch,
-                               &timestamps](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
+  auto nativeTimingCallback = [&reportLatch, &timestamps](Dart_Handle timings) {
     ASSERT_EQ(timestamps.size(), 0ul);
-    timestamps = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
-        args, 0, exception);
+    timestamps = tonic::DartConverter<std::vector<int64_t>>::FromDart(timings);
     reportLatch.Signal();
   };
-  AddNativeCallback("NativeReportTimingsCallback",
-                    CREATE_NATIVE_ENTRY(nativeTimingCallback));
+  AddFfiNativeCallback("NativeReportTimingsCallback",
+                       CREATE_FFI_LAMBDA(nativeTimingCallback));
   ASSERT_TRUE(configuration.IsValid());
   RunEngine(shell.get(), std::move(configuration));
 
@@ -1667,7 +1686,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
-TEST_F(ShellTest, WaitForFirstFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackFiresAfterFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1679,13 +1698,15 @@ TEST_F(ShellTest, WaitForFirstFrame) {
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-  ASSERT_TRUE(result.ok());
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  first_frame_event.Wait();
 
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfZeroSizeFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1697,15 +1718,16 @@ TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get(), ViewContent::DummyView({1.0, 0.0, 0.0, 22, 0}));
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-  EXPECT_FALSE(result.ok());
-  EXPECT_EQ(result.message(), "timeout");
-  EXPECT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  bool timeout = first_frame_event.WaitWithTimeout(fml::TimeDelta::Zero());
+  EXPECT_TRUE(timeout);
 
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameTimeout) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfNoFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1716,14 +1738,16 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   configuration.SetEntrypoint("emptyMain");
 
   RunEngine(shell.get(), std::move(configuration));
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-  ASSERT_FALSE(result.ok());
-  ASSERT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  bool timeout = first_frame_event.WaitWithTimeout(fml::TimeDelta::Zero());
+  EXPECT_TRUE(timeout);
 
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameMultiple) {
+TEST_F(ShellTest, AddFirstFrameCallbackMultiple) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1735,19 +1759,23 @@ TEST_F(ShellTest, WaitForFirstFrameMultiple) {
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-  ASSERT_TRUE(result.ok());
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  first_frame_event.Wait();
   for (int i = 0; i < 100; ++i) {
-    result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-    ASSERT_TRUE(result.ok());
+    shell->AddFirstFrameCallback(
+        [&first_frame_event] { first_frame_event.Signal(); });
+    bool timeout = first_frame_event.WaitWithTimeout(fml::TimeDelta::Zero());
+    ASSERT_FALSE(timeout);
   }
 
   DestroyShell(std::move(shell));
 }
 
-/// Makes sure that WaitForFirstFrame works if we rendered a frame with the
+/// Makes sure that AddFirstFrameCallback fires if we rendered a frame with the
 /// single-thread setup.
-TEST_F(ShellTest, WaitForFirstFrameInlined) {
+TEST_F(ShellTest, AddFirstFrameCallbackInlined) {
   Settings settings = CreateSettingsForFixture();
   auto task_runner = CreateNewThread();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
@@ -1764,14 +1792,29 @@ TEST_F(ShellTest, WaitForFirstFrameInlined) {
   PumpOneFrame(shell.get());
   fml::AutoResetWaitableEvent event;
   task_runner->PostTask([&shell, &event] {
-    fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-    ASSERT_FALSE(result.ok());
-    ASSERT_EQ(result.code(), fml::StatusCode::kFailedPrecondition);
-    event.Signal();
+    shell->AddFirstFrameCallback([&event] { event.Signal(); });
   });
   ASSERT_FALSE(event.WaitWithTimeout(fml::TimeDelta::Max()));
 
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, AddFirstFrameCallbackSkippedIfNoFrame) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  // Check that a first frame callback is never invoked if the shell is
+  // destroyed before any frames are rendered.
+  RunEngine(shell.get(), std::move(configuration));
+  shell->AddFirstFrameCallback([] { ASSERT_TRUE(false); });
+
+  DestroyShell(std::move(shell));
 }
 
 static size_t GetRasterizerResourceCacheBytesSync(const Shell& shell) {
@@ -2024,9 +2067,8 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
             static_cast<size_t>(3840000U));
 
   fml::AutoResetWaitableEvent latch;
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
@@ -2054,16 +2096,12 @@ TEST_F(ShellTest, CanCreateImagefromDecompressedBytes) {
   configuration.SetEntrypoint("canCreateImageFromDecompressedData");
 
   fml::AutoResetWaitableEvent latch;
-  AddNativeCallback("NotifyWidthHeight",
-                    CREATE_NATIVE_ENTRY([&latch](auto args) {
-                      auto width = tonic::DartConverter<int>::FromDart(
-                          Dart_GetNativeArgument(args, 0));
-                      auto height = tonic::DartConverter<int>::FromDart(
-                          Dart_GetNativeArgument(args, 1));
-                      ASSERT_EQ(width, 10);
-                      ASSERT_EQ(height, 10);
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback("NotifyWidthHeight",
+                       CREATE_FFI_LAMBDA([&latch](int width, int height) {
+                         ASSERT_EQ(width, 10);
+                         ASSERT_EQ(height, 10);
+                         latch.Signal();
+                       }));
 
   RunEngine(shell.get(), std::move(configuration));
 
@@ -2159,14 +2197,13 @@ TEST_F(ShellTest, IsolateCanAccessPersistentIsolateData) {
   );
 
   fml::AutoResetWaitableEvent message_latch;
-  AddNativeCallback("NotifyMessage",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      const auto message_from_dart =
-                          tonic::DartConverter<std::string>::FromDart(
-                              Dart_GetNativeArgument(args, 0));
-                      ASSERT_EQ(message, message_from_dart);
-                      message_latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NotifyMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        const auto message_from_dart =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        ASSERT_EQ(message, message_from_dart);
+        message_latch.Signal();
+      }));
 
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
@@ -2187,14 +2224,12 @@ TEST_F(ShellTest, CanScheduleFrameFromPlatform) {
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners = GetTaskRunnersForFixture();
   fml::AutoResetWaitableEvent latch;
-  AddNativeCallback(
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
   fml::AutoResetWaitableEvent check_latch;
-  AddNativeCallback("NativeOnBeginFrame",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      check_latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NativeOnBeginFrame",
+      CREATE_FFI_LAMBDA([&](int64_t microseconds) { check_latch.Signal(); }));
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
   ASSERT_TRUE(shell->IsSetup());
 
@@ -2209,60 +2244,6 @@ TEST_F(ShellTest, CanScheduleFrameFromPlatform) {
       shell->GetTaskRunners().GetPlatformTaskRunner(),
       [&shell]() { shell->GetPlatformView()->ScheduleFrame(); });
   check_latch.Wait();
-  DestroyShell(std::move(shell), task_runners);
-}
-
-TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
-  bool is_on_begin_frame_called = false;
-  bool is_secondary_callback_called = false;
-  bool test_started = false;
-  Settings settings = CreateSettingsForFixture();
-  TaskRunners task_runners = GetTaskRunnersForFixture();
-  fml::AutoResetWaitableEvent latch;
-  AddNativeCallback(
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
-  fml::CountDownLatch count_down_latch(2);
-  AddNativeCallback("NativeOnBeginFrame",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      if (!test_started) {
-                        return;
-                      }
-                      EXPECT_FALSE(is_on_begin_frame_called);
-                      EXPECT_FALSE(is_secondary_callback_called);
-                      is_on_begin_frame_called = true;
-                      count_down_latch.CountDown();
-                    }));
-  std::unique_ptr<Shell> shell = CreateShell({
-      .settings = settings,
-      .task_runners = task_runners,
-  });
-  ASSERT_TRUE(shell->IsSetup());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("onBeginFrameWithNotifyNativeMain");
-  RunEngine(shell.get(), std::move(configuration));
-
-  // Wait for the application to attach the listener.
-  latch.Wait();
-
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(), [&]() {
-        shell->GetEngine()->ScheduleSecondaryVsyncCallback(0, [&]() {
-          if (!test_started) {
-            return;
-          }
-          EXPECT_TRUE(is_on_begin_frame_called);
-          EXPECT_FALSE(is_secondary_callback_called);
-          is_secondary_callback_called = true;
-          count_down_latch.CountDown();
-        });
-        shell->GetEngine()->ScheduleFrame();
-        test_started = true;
-      });
-  count_down_latch.Wait();
-  EXPECT_TRUE(is_on_begin_frame_called);
-  EXPECT_TRUE(is_secondary_callback_called);
   DestroyShell(std::move(shell), task_runners);
 }
 
@@ -2350,12 +2331,12 @@ TEST_F(ShellTest, LocaltimesMatch) {
 
   // See fixtures/shell_test.dart, the callback NotifyLocalTime is declared
   // there.
-  AddNativeCallback("NotifyLocalTime", CREATE_NATIVE_ENTRY([&](auto args) {
-                      dart_isolate_time_str =
-                          tonic::DartConverter<std::string>::FromDart(
-                              Dart_GetNativeArgument(args, 0));
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NotifyLocalTime", CREATE_FFI_LAMBDA([&](Dart_Handle string_handle) {
+        dart_isolate_time_str =
+            tonic::DartConverter<std::string>::FromDart(string_handle);
+        latch.Signal();
+      }));
 
   auto settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -2425,15 +2406,12 @@ class SinglePixelImageGenerator : public ImageGenerator {
 
 TEST_F(ShellTest, CanRegisterImageDecoders) {
   fml::AutoResetWaitableEvent latch;
-  AddNativeCallback("NotifyWidthHeight", CREATE_NATIVE_ENTRY([&](auto args) {
-                      auto width = tonic::DartConverter<int>::FromDart(
-                          Dart_GetNativeArgument(args, 0));
-                      auto height = tonic::DartConverter<int>::FromDart(
-                          Dart_GetNativeArgument(args, 1));
-                      ASSERT_EQ(width, 1);
-                      ASSERT_EQ(height, 1);
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback("NotifyWidthHeight",
+                       CREATE_FFI_LAMBDA([&](int width, int height) {
+                         ASSERT_EQ(width, 1);
+                         ASSERT_EQ(height, 1);
+                         latch.Signal();
+                       }));
 
   auto settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -2569,6 +2547,55 @@ TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
       });
   latch->Wait();
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
+#if !SHELL_ENABLE_METAL
+  // This test uses the Metal backend.
+  GTEST_SKIP();
+#else
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .rendering_backend =
+              ShellTestPlatformView::BackendType::kMetalBackend,
+      }),
+  });
+
+  ASSERT_TRUE(ValidateShell(shell.get()));
+  PlatformViewNotifyCreated(shell.get());
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  auto latch = std::make_shared<fml::AutoResetWaitableEvent>();
+
+  PumpOneFrame(shell.get());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
+        SnapshotDelegate* delegate = shell->GetRasterizer().get();
+        sk_sp<DisplayList> display_list = MakeSizedDisplayList(50, 50);
+        std::shared_ptr<impeller::Texture> texture =
+            delegate->MakeImpellerSnapshotSync(
+                [display_list](impeller::AiksContext*) { return display_list; },
+                DlISize(50, 50), SnapshotPixelFormat::kDontCare);
+        EXPECT_NE(texture, nullptr);
+        if (texture != nullptr) {
+          EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
+        }
+
+        latch->Signal();
+      });
+  latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+#endif  // !SHELL_ENABLE_METAL
 }
 
 TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
@@ -2838,22 +2865,14 @@ TEST_F(ShellTest, IgnoresInvalidMetrics) {
   double last_device_pixel_ratio;
   double last_width;
   double last_height;
-  auto native_report_device_pixel_ratio = [&](Dart_NativeArguments args) {
-    auto dpr_handle = Dart_GetNativeArgument(args, 0);
-    ASSERT_TRUE(Dart_IsDouble(dpr_handle));
-    Dart_DoubleValue(dpr_handle, &last_device_pixel_ratio);
+  auto native_report_device_pixel_ratio = [&](double device_pixel_ratio,
+                                              double width, double height) {
+    last_device_pixel_ratio = device_pixel_ratio;
+    last_width = width;
+    last_height = height;
     ASSERT_FALSE(last_device_pixel_ratio == 0.0);
-
-    auto width_handle = Dart_GetNativeArgument(args, 1);
-    ASSERT_TRUE(Dart_IsDouble(width_handle));
-    Dart_DoubleValue(width_handle, &last_width);
     ASSERT_FALSE(last_width == 0.0);
-
-    auto height_handle = Dart_GetNativeArgument(args, 2);
-    ASSERT_TRUE(Dart_IsDouble(height_handle));
-    Dart_DoubleValue(height_handle, &last_height);
     ASSERT_FALSE(last_height == 0.0);
-
     latch.Signal();
   };
 
@@ -2862,8 +2881,8 @@ TEST_F(ShellTest, IgnoresInvalidMetrics) {
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
 
-  AddNativeCallback("ReportMetrics",
-                    CREATE_NATIVE_ENTRY(native_report_device_pixel_ratio));
+  AddFfiNativeCallback("ReportMetrics",
+                       CREATE_FFI_LAMBDA(native_report_device_pixel_ratio));
 
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
@@ -2914,11 +2933,10 @@ TEST_F(ShellTest, IgnoresMetricsUpdateToInvalidView) {
   fml::AutoResetWaitableEvent latch;
   double last_device_pixel_ratio;
   // This callback will be called whenever any view's metrics change.
-  auto native_report_device_pixel_ratio = [&](Dart_NativeArguments args) {
+  auto native_report_device_pixel_ratio = [&](double device_pixel_ratio,
+                                              double width, double height) {
     // The correct call will have a DPR of 3.
-    auto dpr_handle = Dart_GetNativeArgument(args, 0);
-    ASSERT_TRUE(Dart_IsDouble(dpr_handle));
-    Dart_DoubleValue(dpr_handle, &last_device_pixel_ratio);
+    last_device_pixel_ratio = device_pixel_ratio;
     ASSERT_TRUE(last_device_pixel_ratio > 2.5);
 
     latch.Signal();
@@ -2929,8 +2947,8 @@ TEST_F(ShellTest, IgnoresMetricsUpdateToInvalidView) {
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
                            task_runner);
 
-  AddNativeCallback("ReportMetrics",
-                    CREATE_NATIVE_ENTRY(native_report_device_pixel_ratio));
+  AddFfiNativeCallback("ReportMetrics",
+                       CREATE_FFI_LAMBDA(native_report_device_pixel_ratio));
 
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
@@ -2970,32 +2988,29 @@ TEST_F(ShellTest, OnServiceProtocolSetAssetBundlePathWorks) {
   // Callback used to signal whether the resource was loaded successfully.
   bool can_access_resource = false;
   auto native_can_access_resource = [&can_access_resource,
-                                     &latch](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
-    can_access_resource =
-        tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+                                     &latch](bool success) {
+    can_access_resource = success;
     latch.Signal();
   };
-  AddNativeCallback("NotifyCanAccessResource",
-                    CREATE_NATIVE_ENTRY(native_can_access_resource));
+  AddFfiNativeCallback("NotifyCanAccessResource",
+                       CREATE_FFI_LAMBDA(native_can_access_resource));
 
   // Callback used to delay the asset load until after the service
   // protocol method has finished.
-  auto native_notify_set_asset_bundle_path =
-      [&shell](Dart_NativeArguments args) {
-        // Update the asset directory to a bonus path.
-        ServiceProtocol::Handler::ServiceProtocolMap params;
-        params["assetDirectory"] = "assetDirectory";
-        rapidjson::Document document;
-        OnServiceProtocol(shell.get(), ServiceProtocolEnum::kSetAssetBundlePath,
-                          shell->GetTaskRunners().GetUITaskRunner(), params,
-                          &document);
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        document.Accept(writer);
-      };
-  AddNativeCallback("NotifySetAssetBundlePath",
-                    CREATE_NATIVE_ENTRY(native_notify_set_asset_bundle_path));
+  auto native_notify_set_asset_bundle_path = [&shell]() {
+    // Update the asset directory to a bonus path.
+    ServiceProtocol::Handler::ServiceProtocolMap params;
+    params["assetDirectory"] = "assetDirectory";
+    rapidjson::Document document;
+    OnServiceProtocol(shell.get(), ServiceProtocolEnum::kSetAssetBundlePath,
+                      shell->GetTaskRunners().GetUITaskRunner(), params,
+                      &document);
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    document.Accept(writer);
+  };
+  AddFfiNativeCallback("NotifySetAssetBundlePath",
+                       CREATE_FFI_LAMBDA(native_notify_set_asset_bundle_path));
 
   RunEngine(shell.get(), std::move(configuration));
 
@@ -3176,19 +3191,18 @@ TEST_F(ShellTest, Spawn) {
   fml::AutoResetWaitableEvent main_latch;
   std::string last_entry_point;
   // Fulfill native function for the first Shell's entrypoint.
-  AddNativeCallback(
-      "SayHiFromFixturesAreFunctionalMain", CREATE_NATIVE_ENTRY([&](auto args) {
+  AddFfiNativeCallback(
+      "SayHiFromFixturesAreFunctionalMain", CREATE_FFI_LAMBDA([&]() {
         last_entry_point = shell->GetEngine()->GetLastEntrypoint();
         main_latch.Signal();
       }));
   // Fulfill native function for the second Shell's entrypoint.
   fml::CountDownLatch second_latch(2);
-  AddNativeCallback(
+  AddFfiNativeCallback(
       // The Dart native function names aren't very consistent but this is
       // just the native function name of the second vm entrypoint in the
       // fixture.
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY([&](auto args) { second_latch.CountDown(); }));
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { second_latch.CountDown(); }));
 
   RunEngine(shell.get(), std::move(configuration));
   main_latch.Wait();
@@ -3282,25 +3296,21 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
   fml::AutoResetWaitableEvent main_latch;
   std::string last_entry_point;
   // Fulfill native function for the first Shell's entrypoint.
-  AddNativeCallback("NotifyNativeWhenEngineRun",
-                    CREATE_NATIVE_ENTRY(([&](Dart_NativeArguments args) {
-                      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
-                          Dart_GetNativeArgument(args, 0)));
-                      last_entry_point =
-                          shell->GetEngine()->GetLastEntrypoint();
-                      main_latch.Signal();
-                    })));
+  AddFfiNativeCallback(
+      "NotifyNativeWhenEngineRun", CREATE_FFI_LAMBDA(([&](bool success) {
+        ASSERT_TRUE(success);
+        last_entry_point = shell->GetEngine()->GetLastEntrypoint();
+        main_latch.Signal();
+      })));
 
   fml::AutoResetWaitableEvent second_latch;
   // Fulfill native function for the second Shell's entrypoint.
-  AddNativeCallback("NotifyNativeWhenEngineSpawn",
-                    CREATE_NATIVE_ENTRY(([&](Dart_NativeArguments args) {
-                      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
-                          Dart_GetNativeArgument(args, 0)));
-                      last_entry_point =
-                          shell->GetEngine()->GetLastEntrypoint();
-                      second_latch.Signal();
-                    })));
+  AddFfiNativeCallback(
+      "NotifyNativeWhenEngineSpawn", CREATE_FFI_LAMBDA(([&](bool success) {
+        ASSERT_TRUE(success);
+        last_entry_point = shell->GetEngine()->GetLastEntrypoint();
+        second_latch.Signal();
+      })));
 
   RunEngine(shell.get(), std::move(configuration));
   main_latch.Wait();
@@ -3828,6 +3838,43 @@ TEST_F(ShellTest, PrefetchDefaultFontManager) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, ReloadSystemFonts) {
+  auto settings = CreateSettingsForFixture();
+  settings.prefetched_default_font_manager = true;
+  auto shell = CreateShell(settings);
+
+  auto get_font_manager_count = [&] {
+    fml::AutoResetWaitableEvent latch;
+    size_t font_manager_count = 0;
+    fml::TaskRunner::RunNowOrPostTask(
+        shell->GetTaskRunners().GetUITaskRunner(),
+        [this, &shell, &latch, &font_manager_count]() {
+          font_manager_count =
+              GetFontCollection(shell.get())->GetFontManagersCount();
+          latch.Signal();
+        });
+    latch.Wait();
+    return font_manager_count;
+  };
+
+  const size_t initial_font_manager_count = get_font_manager_count();
+  EXPECT_GT(initial_font_manager_count, 0u);
+
+  fml::AutoResetWaitableEvent reload_latch;
+  bool reload_result = false;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &reload_result, &reload_latch]() {
+        reload_result = shell->ReloadSystemFonts();
+        reload_latch.Signal();
+      });
+  reload_latch.Wait();
+  EXPECT_TRUE(reload_result);
+  EXPECT_EQ(get_font_manager_count(), initial_font_manager_count + 1);
+
+  DestroyShell(std::move(shell));
+}
+
 TEST_F(ShellTest, OnPlatformViewCreatedWhenUIThreadIsBusy) {
   // This test will deadlock if the threading logic in
   // Shell::OnCreatePlatformView is wrong.
@@ -3852,10 +3899,10 @@ TEST_F(ShellTest, UIWorkAfterOnPlatformViewDestroyed) {
 
   fml::AutoResetWaitableEvent latch;
   fml::AutoResetWaitableEvent notify_native_latch;
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-                      notify_native_latch.Signal();
-                      latch.Wait();
-                    }));
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&]() {
+                         notify_native_latch.Signal();
+                         latch.Wait();
+                       }));
 
   RunEngine(shell.get(), std::move(configuration));
   // Wait to make sure we get called back from Dart and thus have latched
@@ -3944,21 +3991,19 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
 
   fml::CountDownLatch latch(2);
 
-  AddNativeCallback(
-      "NotifyErrorA", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        auto string_handle = Dart_GetNativeArgument(args, 0);
-        const char* c_str;
-        Dart_StringToCString(string_handle, &c_str);
-        EXPECT_STREQ(c_str, "Exception: I should be coming from A");
+  AddFfiNativeCallback(
+      "NotifyErrorA", CREATE_FFI_LAMBDA([&](Dart_Handle string_handle) {
+        const auto message =
+            tonic::DartConverter<std::string>::FromDart(string_handle);
+        EXPECT_EQ(message, "Exception: I should be coming from A");
         latch.CountDown();
       }));
 
-  AddNativeCallback(
-      "NotifyErrorB", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        auto string_handle = Dart_GetNativeArgument(args, 0);
-        const char* c_str;
-        Dart_StringToCString(string_handle, &c_str);
-        EXPECT_STREQ(c_str, "Exception: I should be coming from B");
+  AddFfiNativeCallback(
+      "NotifyErrorB", CREATE_FFI_LAMBDA([&](Dart_Handle string_handle) {
+        const auto message =
+            tonic::DartConverter<std::string>::FromDart(string_handle);
+        EXPECT_EQ(message, "Exception: I should be coming from B");
         latch.CountDown();
       }));
 
@@ -4004,8 +4049,8 @@ TEST_F(ShellTest, ImmutableBufferLoadsAssetOnBackgroundThread) {
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
 
   fml::CountDownLatch latch(1);
-  AddNativeCallback("NotifyNative",
-                    CREATE_NATIVE_ENTRY([&](auto args) { latch.CountDown(); }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { latch.CountDown(); }));
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -4042,18 +4087,17 @@ TEST_F(ShellTest, PictureToImageSync) {
       }),
   });
 
-  AddNativeCallback("NativeOnBeforeToImageSync",
-                    CREATE_NATIVE_ENTRY([&](auto args) {
-                      // nop
-                    }));
+  AddFfiNativeCallback("NativeOnBeforeToImageSync", CREATE_FFI_LAMBDA([&]() {
+                         // nop
+                       }));
 
   fml::CountDownLatch latch(2);
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-                      // Teardown and set up rasterizer again.
-                      PlatformViewNotifyDestroyed(shell.get());
-                      PlatformViewNotifyCreated(shell.get());
-                      latch.CountDown();
-                    }));
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&]() {
+                         // Teardown and set up rasterizer again.
+                         PlatformViewNotifyDestroyed(shell.get());
+                         PlatformViewNotifyCreated(shell.get());
+                         latch.CountDown();
+                       }));
 
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
@@ -4085,18 +4129,17 @@ TEST_F(ShellTest, PictureToImageSyncImpellerNoSurface) {
       }),
   });
 
-  AddNativeCallback("NativeOnBeforeToImageSync",
-                    CREATE_NATIVE_ENTRY([&](auto args) {
-                      // nop
-                    }));
+  AddFfiNativeCallback("NativeOnBeforeToImageSync", CREATE_FFI_LAMBDA([&]() {
+                         // nop
+                       }));
 
   fml::CountDownLatch latch(2);
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-                      // Teardown and set up rasterizer again.
-                      PlatformViewNotifyDestroyed(shell.get());
-                      PlatformViewNotifyCreated(shell.get());
-                      latch.CountDown();
-                    }));
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&]() {
+                         // Teardown and set up rasterizer again.
+                         PlatformViewNotifyDestroyed(shell.get());
+                         PlatformViewNotifyCreated(shell.get());
+                         latch.CountDown();
+                       }));
 
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
@@ -4137,21 +4180,21 @@ TEST_F(ShellTest, PictureToImageSyncWithTrampledContext) {
       }),
   });
 
-  AddNativeCallback(
-      "NativeOnBeforeToImageSync", CREATE_NATIVE_ENTRY([&](auto args) {
-        // Trample the GL context. If the rasterizer fails
-        // to make the right one current again, test will
-        // fail.
-        ::eglMakeCurrent(::eglGetCurrentDisplay(), NULL, NULL, NULL);
-      }));
+  AddFfiNativeCallback("NativeOnBeforeToImageSync", CREATE_FFI_LAMBDA([&]() {
+                         // Trample the GL context. If the rasterizer fails
+                         // to make the right one current again, test will
+                         // fail.
+                         ::eglMakeCurrent(::eglGetCurrentDisplay(), NULL, NULL,
+                                          NULL);
+                       }));
 
   fml::CountDownLatch latch(2);
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-                      // Teardown and set up rasterizer again.
-                      PlatformViewNotifyDestroyed(shell.get());
-                      PlatformViewNotifyCreated(shell.get());
-                      latch.CountDown();
-                    }));
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&]() {
+                         // Teardown and set up rasterizer again.
+                         PlatformViewNotifyDestroyed(shell.get());
+                         PlatformViewNotifyCreated(shell.get());
+                         latch.CountDown();
+                       }));
 
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
@@ -4174,12 +4217,10 @@ TEST_F(ShellTest, PluginUtilitiesCallbackHandleErrorHandling) {
 
   fml::AutoResetWaitableEvent latch;
   bool test_passed;
-  AddNativeCallback("NotifyNativeBool", CREATE_NATIVE_ENTRY([&](auto args) {
-                      Dart_Handle exception = nullptr;
-                      test_passed = tonic::DartConverter<bool>::FromArguments(
-                          args, 0, exception);
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback("NotifyNativeBool", CREATE_FFI_LAMBDA([&](bool value) {
+                         test_passed = value;
+                         latch.Signal();
+                       }));
 
   ASSERT_NE(shell, nullptr);
   ASSERT_TRUE(shell->IsSetup());
@@ -4261,11 +4302,8 @@ TEST_F(ShellTest, NotifyIdleNotCalledInLatencyMode) {
   // succeed. After the first `NotifyNativeBool` we expect to be in latency
   // mode, where we expect idle notifications to fail.
   fml::CountDownLatch latch(2);
-  AddNativeCallback(
-      "NotifyNativeBool", CREATE_NATIVE_ENTRY([&](auto args) {
-        Dart_Handle exception = nullptr;
-        bool is_in_latency_mode =
-            tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+  AddFfiNativeCallback(
+      "NotifyNativeBool", CREATE_FFI_LAMBDA([&](bool is_in_latency_mode) {
         auto runtime_controller = const_cast<RuntimeController*>(
             shell->GetEngine()->GetRuntimeController());
         bool success =
@@ -4376,12 +4414,11 @@ TEST_F(ShellTest, SemanticsActionsFlushMessageLoop) {
 
   RunEngine(shell.get(), std::move(configuration));
   fml::CountDownLatch latch(1);
-  AddNativeCallback(
+  AddFfiNativeCallback(
       // The Dart native function names aren't very consistent but this is
       // just the native function name of the second vm entrypoint in the
       // fixture.
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY([&](auto args) { latch.CountDown(); }));
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { latch.CountDown(); }));
 
   task_runners.GetPlatformTaskRunner()->PostTask([&] {
     SendSemanticsAction(shell.get(), 456, 0, SemanticsAction::kTap,
@@ -4410,12 +4447,11 @@ TEST_F(ShellTest, PointerPacketFlushMessageLoop) {
 
   RunEngine(shell.get(), std::move(configuration));
   fml::CountDownLatch latch(1);
-  AddNativeCallback(
+  AddFfiNativeCallback(
       // The Dart native function names aren't very consistent but this is
       // just the native function name of the second vm entrypoint in the
       // fixture.
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY([&](auto args) { latch.CountDown(); }));
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { latch.CountDown(); }));
 
   DispatchFakePointerData(shell.get(), 23);
   latch.Wait();
@@ -4424,8 +4460,8 @@ TEST_F(ShellTest, PointerPacketFlushMessageLoop) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-// Verifies a pointer event will flush the dart event loop.
-TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
+// Verifies a pointer event will flush the dart microtask queue.
+TEST_F(ShellTest, PointerPacketsFlushMicrotasks) {
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
                          ThreadHost::Type::kPlatform);
@@ -4437,24 +4473,74 @@ TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
             task_runners.GetUITaskRunner());
   auto shell = CreateShell(settings, task_runners);
   auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testDispatchEventsMicrotask");
+  // The onPointerDataPacket callback is set synchronously during
+  // RunEngine so the packet can be dispatched right away.
+  RunEngine(shell.get(), std::move(configuration));
+
+  bool did_invoke_callback = false;
+  AddFfiNativeCallback(
+      // The Dart native function names aren't very consistent but this is
+      // just the native function name of the second vm entrypoint in the
+      // fixture.
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
+
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&] {
+    // This dispatches the packet and flushes microtask so the callback must
+    // be invoked immediately.
+    DispatchFakePointerData(shell.get(), 23);
+    EXPECT_TRUE(did_invoke_callback);
+    latch.Signal();
+  });
+  latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, PointerPacketsAreDispatchedSynchronouslyWhenOnUIThread) {
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  EXPECT_EQ(task_runners.GetPlatformTaskRunner(),
+            task_runners.GetUITaskRunner());
+  auto shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [](Shell& shell) {
+            return std::make_unique<::testing::NiceMock<TestPlatformView>>(
+                shell, shell.GetTaskRunners());
+          },
+  });
+  auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("testDispatchEvents");
 
   RunEngine(shell.get(), std::move(configuration));
   fml::CountDownLatch latch(1);
   bool did_invoke_callback = false;
-  AddNativeCallback(
-      // The Dart native function names aren't very consistent but this is
-      // just the native function name of the second vm entrypoint in the
-      // fixture.
-      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-        did_invoke_callback = true;
-        latch.CountDown();
-      }));
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
 
-  DispatchFakePointerData(shell.get(), 23);
-  EXPECT_FALSE(did_invoke_callback);
+  bool callback_was_invoked_before_dispatch_returned = false;
+  task_runners.GetPlatformTaskRunner()->PostTask([&] {
+    auto packet = std::make_unique<PointerDataPacket>(1);
+    packet->SetPointerData(0, PointerData{
+                                  .change = PointerData::Change::kHover,
+                                  .physical_x = 23,
+                              });
+    shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
+    callback_was_invoked_before_dispatch_returned = did_invoke_callback;
+    latch.CountDown();
+  });
+
   latch.Wait();
-  EXPECT_TRUE(did_invoke_callback);
+  EXPECT_TRUE(callback_was_invoked_before_dispatch_returned);
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -4479,21 +4565,6 @@ TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
 #endif  // OS_FUCHSIA
 }
 
-// Parse the arguments of NativeReportViewIdsCallback and
-// store them in hasImplicitView and viewIds.
-static void ParseViewIdsCallback(const Dart_NativeArguments& args,
-                                 bool* hasImplicitView,
-                                 std::vector<int64_t>* viewIds) {
-  Dart_Handle exception = nullptr;
-  viewIds->clear();
-  *hasImplicitView =
-      tonic::DartConverter<bool>::FromArguments(args, 0, exception);
-  ASSERT_EQ(exception, nullptr);
-  *viewIds = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
-      args, 1, exception);
-  ASSERT_EQ(exception, nullptr);
-}
-
 TEST_F(ShellTest, ShellStartsWithImplicitView) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
@@ -4506,13 +4577,15 @@ TEST_F(ShellTest, ShellStartsWithImplicitView) {
   bool hasImplicitView;
   std::vector<int64_t> viewIds;
   fml::AutoResetWaitableEvent reportLatch;
-  auto nativeViewIdsCallback = [&reportLatch, &hasImplicitView,
-                                &viewIds](Dart_NativeArguments args) {
-    ParseViewIdsCallback(args, &hasImplicitView, &viewIds);
+  auto nativeViewIdsCallback = [&reportLatch, &hasImplicitView, &viewIds](
+                                   bool has_implicit_view,
+                                   Dart_Handle view_ids) {
+    hasImplicitView = has_implicit_view;
+    viewIds = tonic::DartConverter<std::vector<int64_t>>::FromDart(view_ids);
     reportLatch.Signal();
   };
-  AddNativeCallback("NativeReportViewIdsCallback",
-                    CREATE_NATIVE_ENTRY(nativeViewIdsCallback));
+  AddFfiNativeCallback("NativeReportViewIdsCallback",
+                       CREATE_FFI_LAMBDA(nativeViewIdsCallback));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4546,13 +4619,15 @@ TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
   bool hasImplicitView;
   std::vector<int64_t> viewIds;
   fml::AutoResetWaitableEvent reportLatch;
-  auto nativeViewIdsCallback = [&reportLatch, &hasImplicitView,
-                                &viewIds](Dart_NativeArguments args) {
-    ParseViewIdsCallback(args, &hasImplicitView, &viewIds);
+  auto nativeViewIdsCallback = [&reportLatch, &hasImplicitView, &viewIds](
+                                   bool has_implicit_view,
+                                   Dart_Handle view_ids) {
+    hasImplicitView = has_implicit_view;
+    viewIds = tonic::DartConverter<std::vector<int64_t>>::FromDart(view_ids);
     reportLatch.Signal();
   };
-  AddNativeCallback("NativeReportViewIdsCallback",
-                    CREATE_NATIVE_ENTRY(nativeViewIdsCallback));
+  AddFfiNativeCallback("NativeReportViewIdsCallback",
+                       CREATE_FFI_LAMBDA(nativeViewIdsCallback));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4613,11 +4688,13 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
   bool has_implicit_view;
   std::vector<int64_t> view_ids;
   fml::AutoResetWaitableEvent report_latch;
-  AddNativeCallback("NativeReportViewIdsCallback",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      ParseViewIdsCallback(args, &has_implicit_view, &view_ids);
-                      report_latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NativeReportViewIdsCallback",
+      CREATE_FFI_LAMBDA([&](bool has_implicit, Dart_Handle ids) {
+        has_implicit_view = has_implicit;
+        view_ids = tonic::DartConverter<std::vector<int64_t>>::FromDart(ids);
+        report_latch.Signal();
+      }));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4680,11 +4757,13 @@ TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
   bool has_implicit_view;
   std::vector<int64_t> view_ids;
   fml::AutoResetWaitableEvent report_latch;
-  AddNativeCallback("NativeReportViewIdsCallback",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      ParseViewIdsCallback(args, &has_implicit_view, &view_ids);
-                      report_latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NativeReportViewIdsCallback",
+      CREATE_FFI_LAMBDA([&](bool has_implicit, Dart_Handle ids) {
+        has_implicit_view = has_implicit;
+        view_ids = tonic::DartConverter<std::vector<int64_t>>::FromDart(ids);
+        report_latch.Signal();
+      }));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4714,14 +4793,11 @@ TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
 
 // Parse the arguments of NativeReportViewWidthsCallback and
 // store them in viewWidths.
-static void ParseViewWidthsCallback(const Dart_NativeArguments& args,
+static void ParseViewWidthsCallback(Dart_Handle view_width_packet,
                                     std::map<int64_t, int64_t>* viewWidths) {
-  Dart_Handle exception = nullptr;
   viewWidths->clear();
   std::vector<int64_t> viewWidthPacket =
-      tonic::DartConverter<std::vector<int64_t>>::FromArguments(args, 0,
-                                                                exception);
-  ASSERT_EQ(exception, nullptr);
+      tonic::DartConverter<std::vector<int64_t>>::FromDart(view_width_packet);
   ASSERT_EQ(viewWidthPacket.size() % 2, 0ul);
   for (size_t packetIndex = 0; packetIndex < viewWidthPacket.size();
        packetIndex += 2) {
@@ -4760,15 +4836,15 @@ TEST_F(ShellTest, ShellFlushesPlatformStatesByMain) {
   bool first_report = true;
   std::map<int64_t, int64_t> viewWidths;
   fml::AutoResetWaitableEvent reportLatch;
-  auto nativeViewWidthsCallback = [&reportLatch, &viewWidths,
-                                   &first_report](Dart_NativeArguments args) {
+  auto nativeViewWidthsCallback = [&reportLatch, &viewWidths, &first_report](
+                                      Dart_Handle view_width_packet) {
     EXPECT_TRUE(first_report);
     first_report = false;
-    ParseViewWidthsCallback(args, &viewWidths);
+    ParseViewWidthsCallback(view_width_packet, &viewWidths);
     reportLatch.Signal();
   };
-  AddNativeCallback("NativeReportViewWidthsCallback",
-                    CREATE_NATIVE_ENTRY(nativeViewWidthsCallback));
+  AddFfiNativeCallback("NativeReportViewWidthsCallback",
+                       CREATE_FFI_LAMBDA(nativeViewWidthsCallback));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4814,13 +4890,14 @@ TEST_F(ShellTest, CanRemoveViewBeforeLaunchingIsolate) {
   bool first_report = true;
   std::map<int64_t, int64_t> view_widths;
   fml::AutoResetWaitableEvent report_latch;
-  AddNativeCallback("NativeReportViewWidthsCallback",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      EXPECT_TRUE(first_report);
-                      first_report = false;
-                      ParseViewWidthsCallback(args, &view_widths);
-                      report_latch.Signal();
-                    }));
+  AddFfiNativeCallback("NativeReportViewWidthsCallback",
+                       CREATE_FFI_LAMBDA([&](Dart_Handle view_width_packet) {
+                         EXPECT_TRUE(first_report);
+                         first_report = false;
+                         ParseViewWidthsCallback(view_width_packet,
+                                                 &view_widths);
+                         report_latch.Signal();
+                       }));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4868,13 +4945,14 @@ TEST_F(ShellTest, IgnoresBadAddViewsBeforeLaunchingIsolate) {
   bool first_report = true;
   std::map<int64_t, int64_t> view_widths;
   fml::AutoResetWaitableEvent report_latch;
-  AddNativeCallback("NativeReportViewWidthsCallback",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      EXPECT_TRUE(first_report);
-                      first_report = false;
-                      ParseViewWidthsCallback(args, &view_widths);
-                      report_latch.Signal();
-                    }));
+  AddFfiNativeCallback("NativeReportViewWidthsCallback",
+                       CREATE_FFI_LAMBDA([&](Dart_Handle view_width_packet) {
+                         EXPECT_TRUE(first_report);
+                         first_report = false;
+                         ParseViewWidthsCallback(view_width_packet,
+                                                 &view_widths);
+                         report_latch.Signal();
+                       }));
 
   PlatformViewNotifyCreated(shell.get());
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -4919,18 +4997,16 @@ TEST_F(ShellTest, SendViewFocusEvent) {
   fml::AutoResetWaitableEvent latch;
   std::string last_event;
 
-  AddNativeCallback(
-      "NotifyNative",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
 
-  AddNativeCallback("NotifyMessage",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      const auto message_from_dart =
-                          tonic::DartConverter<std::string>::FromDart(
-                              Dart_GetNativeArgument(args, 0));
-                      last_event = message_from_dart;
-                      latch.Signal();
-                    }));
+  AddFfiNativeCallback(
+      "NotifyMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message) {
+        const auto message_from_dart =
+            tonic::DartConverter<std::string>::FromDart(message);
+        last_event = message_from_dart;
+        latch.Signal();
+      }));
   fml::AutoResetWaitableEvent check_latch;
 
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
@@ -4969,9 +5045,8 @@ TEST_F(ShellTest, ProvidesEngineId) {
 
   std::optional<int> reported_handle = std::nullopt;
 
-  AddNativeCallback(
-      "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        Dart_Handle arg = Dart_GetNativeArgument(args, 0);
+  AddFfiNativeCallback(
+      "ReportEngineId", CREATE_FFI_LAMBDA([&](Dart_Handle arg) {
         if (Dart_IsNull(arg)) {
           reported_handle = std::nullopt;
         } else {
@@ -5010,9 +5085,8 @@ TEST_F(ShellTest, ProvidesNullEngineId) {
 
   std::optional<int> reported_handle = std::nullopt;
 
-  AddNativeCallback(
-      "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        Dart_Handle arg = Dart_GetNativeArgument(args, 0);
+  AddFfiNativeCallback(
+      "ReportEngineId", CREATE_FFI_LAMBDA([&](Dart_Handle arg) {
         if (Dart_IsNull(arg)) {
           reported_handle = std::nullopt;
         } else {
@@ -5055,8 +5129,8 @@ TEST_F(ShellTest, MergeUIAndPlatformThreadsAfterLaunch) {
       task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
 
   fml::AutoResetWaitableEvent latch;
-  AddNativeCallback(
-      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+  AddFfiNativeCallback(
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
         ASSERT_TRUE(
             task_runners.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
         latch.Signal();
@@ -5182,6 +5256,800 @@ TEST_F(ShellTest, ShoulDiscardLayerTreeIfFrameIsSizedIncorrectly) {
   ASSERT_TRUE(ShellTest::ShouldDiscardLayerTree(shell.get(), kImplicitViewId,
                                                 *min_height));
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, MakePipelineUsageJsonReportsEachPipeline) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG && \
+    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE
+  GTEST_SKIP() << "Pipeline usage logging is only in debug and profile builds.";
+#else
+  ::impeller::testing::MockPipelineLibrary library;
+
+  impeller::PipelineDescriptor eager_solid;
+  eager_solid.SetLabel("SolidFill Pipeline");
+  library.LogPipelineCreation(eager_solid);
+  library.LogPipelineUsage(eager_solid);
+  library.LogPipelineUsage(eager_solid);
+
+  impeller::PipelineDescriptor eager_unused;
+  eager_unused.SetLabel("Clip Pipeline");
+  library.LogPipelineCreation(eager_unused);
+
+  impeller::PipelineDescriptor lazy_blend;
+  lazy_blend.SetLabel("PorterDuffBlend Pipeline V#1");
+  lazy_blend.SetSpecializationConstants({1, 0, 1});
+  library.LogPipelineUsage(lazy_blend);
+
+  // Distinct pipelines that share a label are still reported separately.
+  impeller::PipelineDescriptor runtime_a;
+  runtime_a.SetLabel("Runtime Stage");
+  runtime_a.SetSampleCount(impeller::SampleCount::kCount1);
+  library.LogPipelineUsage(runtime_a);
+  library.LogPipelineUsage(runtime_a);
+
+  impeller::PipelineDescriptor runtime_b;
+  runtime_b.SetLabel("Runtime Stage");
+  runtime_b.SetSampleCount(impeller::SampleCount::kCount4);
+  library.LogPipelineUsage(runtime_b);
+
+  rapidjson::Document document;
+  rapidjson::Value pipelines =
+      ShellTest::MakePipelineUsageJson(library, document.GetAllocator());
+
+  ASSERT_TRUE(pipelines.IsArray());
+  // The entries are in no particular order, so compare them as JSON strings.
+  std::vector<std::string> entries;
+  for (const auto& pipeline : pipelines.GetArray()) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    pipeline.Accept(writer);
+    entries.emplace_back(buffer.GetString());
+  }
+  EXPECT_THAT(
+      entries,
+      ::testing::UnorderedElementsAre(
+          R"({"label":"SolidFill Pipeline","constants":[],"count":2,"eagerly_created":true})",
+          R"({"label":"Clip Pipeline","constants":[],"count":0,"eagerly_created":true})",
+          R"({"label":"PorterDuffBlend Pipeline V#1","constants":[1.0,0.0,1.0],"count":1,"eagerly_created":false})",
+          R"({"label":"Runtime Stage","constants":[],"count":2,"eagerly_created":false})",
+          R"({"label":"Runtime Stage","constants":[],"count":1,"eagerly_created":false})"));
+#endif
+}
+
+namespace {
+
+// Wraps a real `fml::TaskRunner` (preserving its `TaskQueueId` for
+// `RasterThreadMerger`) and fires a one-shot callback when a task is posted
+// from `source_runner` (e.g., inside `Shell::OnPlatformViewDestroyed` after
+// `DisableThreadMergerIfNeeded()` and after its teardown task is enqueued).
+class ObservingTaskRunner final : public fml::TaskRunner {
+ public:
+  static fml::RefPtr<ObservingTaskRunner> Create(
+      fml::RefPtr<fml::TaskRunner> delegate) {
+    return fml::AdoptRef(new ObservingTaskRunner(std::move(delegate)));
+  }
+
+  void SetOnPostFromSourceRunner(
+      const fml::RefPtr<fml::TaskRunner>& source_runner,
+      const fml::closure& callback) {
+    std::scoped_lock lock(mutex_);
+    source_runner_ = source_runner;
+    on_post_ = callback;
+  }
+
+  // |fml::TaskRunner|
+  void PostTask(const fml::closure& task) override {
+    delegate_->PostTask(task);
+    NotifyIfFromSourceRunner();
+  }
+
+  // |fml::TaskRunner|
+  void PostTaskForTime(const fml::closure& task,
+                       fml::TimePoint target_time) override {
+    delegate_->PostTaskForTime(task, target_time);
+    NotifyIfFromSourceRunner();
+  }
+
+  // |fml::TaskRunner|
+  void PostDelayedTask(const fml::closure& task,
+                       fml::TimeDelta delay) override {
+    delegate_->PostDelayedTask(task, delay);
+    NotifyIfFromSourceRunner();
+  }
+
+  // |fml::TaskRunner|
+  bool RunsTasksOnCurrentThread() override {
+    return delegate_->RunsTasksOnCurrentThread();
+  }
+
+  // |fml::TaskRunner|
+  fml::TaskQueueId GetTaskQueueId() override {
+    return delegate_->GetTaskQueueId();
+  }
+
+ private:
+  explicit ObservingTaskRunner(fml::RefPtr<fml::TaskRunner> delegate)
+      : fml::TaskRunner(nullptr), delegate_(std::move(delegate)) {}
+
+  void NotifyIfFromSourceRunner() {
+    fml::closure callback;
+    {
+      std::scoped_lock lock(mutex_);
+      if (on_post_ && source_runner_ &&
+          source_runner_->RunsTasksOnCurrentThread()) {
+        callback = std::move(on_post_);
+      }
+    }
+    if (callback) {
+      callback();
+    }
+  }
+
+  fml::RefPtr<fml::TaskRunner> delegate_;
+  std::mutex mutex_;
+  fml::RefPtr<fml::TaskRunner> source_runner_;
+  fml::closure on_post_;
+};
+
+class ImmediateVsyncWaiter final : public VsyncWaiter {
+ public:
+  ImmediateVsyncWaiter(const TaskRunners& task_runners,
+                       fml::closure on_await_vsync)
+      : VsyncWaiter(task_runners), on_await_vsync_(std::move(on_await_vsync)) {}
+
+ protected:
+  // |VsyncWaiter|
+  void AwaitVSync() override {
+    if (on_await_vsync_) {
+      on_await_vsync_();
+    }
+    const auto now = fml::TimePoint::Now();
+    FireCallback(now, now + fml::TimeDelta::FromSecondsF(1.0 / 60.0));
+  }
+
+ private:
+  fml::closure on_await_vsync_;
+};
+
+class DeferredTestPlatformView : public PlatformView {
+ public:
+  DeferredTestPlatformView(
+      PlatformView::Delegate& delegate,
+      const TaskRunners& task_runners,
+      std::shared_ptr<ExternalViewEmbedder> external_view_embedder = nullptr,
+      fml::closure setup_impeller_callback = nullptr,
+      fml::closure create_resource_context_callback = nullptr,
+      CreateVsyncWaiter create_vsync_waiter_callback = nullptr)
+      : PlatformView(delegate, task_runners),
+        external_view_embedder_(std::move(external_view_embedder)),
+        setup_impeller_callback_(std::move(setup_impeller_callback)),
+        create_resource_context_callback_(
+            std::move(create_resource_context_callback)),
+        create_vsync_waiter_callback_(std::move(create_vsync_waiter_callback)) {
+  }
+
+  void TriggerNotifyCreatedDeferred(SurfaceFactory surface_factory) {
+    NotifyCreatedDeferred(std::move(surface_factory));
+  }
+
+  // |PlatformView|
+  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override {
+    if (create_vsync_waiter_callback_) {
+      return create_vsync_waiter_callback_();
+    }
+    return PlatformView::CreateVSyncWaiter();
+  }
+
+  // |PlatformView|
+  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override {
+    return external_view_embedder_;
+  }
+
+  // |PlatformView|
+  void SetupImpellerContext() override {
+    if (setup_impeller_callback_) {
+      setup_impeller_callback_();
+    }
+  }
+
+  // |PlatformView|
+  sk_sp<GrDirectContext> CreateResourceContext() const override {
+    if (create_resource_context_callback_) {
+      create_resource_context_callback_();
+    }
+    return nullptr;
+  }
+
+ private:
+  std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
+  fml::closure setup_impeller_callback_;
+  fml::closure create_resource_context_callback_;
+  CreateVsyncWaiter create_vsync_waiter_callback_;
+};
+
+// Simulates AndroidExternalViewEmbedderWrapper on an HCPP-eligible device:
+// SupportsDynamicThreadMerging() requires SetupImpellerContext() to have
+// completed on the raster thread and must never run on the platform thread.
+class BackendDependentExternalViewEmbedder : public ExternalViewEmbedder {
+ public:
+  using EndFrameCallback =
+      std::function<void(bool, const fml::RefPtr<fml::RasterThreadMerger>&)>;
+
+  BackendDependentExternalViewEmbedder(const TaskRunners& task_runners,
+                                       const std::atomic<bool>& backend_ready,
+                                       bool support_thread_merging,
+                                       EndFrameCallback end_frame_callback)
+      : task_runners_(task_runners),
+        backend_ready_(backend_ready),
+        support_thread_merging_(support_thread_merging),
+        end_frame_callback_(std::move(end_frame_callback)) {}
+
+  size_t GetSupportsMergingCalls() const {
+    return supports_merging_calls_.load();
+  }
+
+  // |ExternalViewEmbedder|
+  DlCanvas* GetRootCanvas() override { return nullptr; }
+  void CancelFrame() override {}
+  void BeginFrame(GrDirectContext* context,
+                  const fml::RefPtr<fml::RasterThreadMerger>&
+                      raster_thread_merger) override {}
+  void PrerollCompositeEmbeddedView(
+      int64_t platform_view_id,
+      std::unique_ptr<EmbeddedViewParams> params) override {}
+  DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) override {
+    return nullptr;
+  }
+  void PrepareFlutterView(DlISize frame_size,
+                          double device_pixel_ratio) override {}
+  void EndFrame(bool should_resubmit_frame,
+                const fml::RefPtr<fml::RasterThreadMerger>&
+                    raster_thread_merger) override {
+    if (end_frame_callback_) {
+      end_frame_callback_(should_resubmit_frame, raster_thread_merger);
+    }
+  }
+  bool SupportsDynamicThreadMerging() override {
+    supports_merging_calls_.fetch_add(1);
+    EXPECT_FALSE(
+        task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    EXPECT_TRUE(
+        task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+    EXPECT_TRUE(backend_ready_.load());
+    return support_thread_merging_;
+  }
+
+ private:
+  TaskRunners task_runners_;
+  const std::atomic<bool>& backend_ready_;
+  bool support_thread_merging_ = false;
+  EndFrameCallback end_frame_callback_;
+  std::atomic<size_t> supports_merging_calls_{0};
+};
+
+std::unique_ptr<::testing::NiceMock<MockSurface>> MakeValidMockSurface() {
+  auto surface = std::make_unique<::testing::NiceMock<MockSurface>>();
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+  ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([]() {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  ON_CALL(*surface, ClearRenderContext()).WillByDefault(Return(true));
+  ON_CALL(*surface, AcquireFrame(::testing::_))
+      .WillByDefault([](const DlISize& size) {
+        SurfaceFrame::FramebufferInfo framebuffer_info;
+        framebuffer_info.supports_readback = true;
+        return std::make_unique<SurfaceFrame>(
+            nullptr, framebuffer_info,
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, size,
+            /*context_result=*/nullptr, /*display_list_fallback=*/true);
+      });
+  return surface;
+}
+
+// Probes whether `Rasterizer::Setup` has populated `surface_` without invoking
+// `Surface::AcquireFrame` (requires viewport metrics on view 0 that exclude
+// `DlISize(1, 1)` so `ShouldDiscardLayerTree` discards the task once `surface_`
+// is present, returning `kDone`, whereas a null `surface_` returns
+// `kNotSetUp`).
+DrawStatus ProbeRasterizerSetupStatus(Rasterizer& rasterizer) {
+  auto pipeline = std::make_shared<FramePipeline>(1);
+  auto recorder = std::make_unique<FrameTimingsRecorder>();
+  const fml::TimePoint now = fml::TimePoint::Now();
+  recorder->RecordVsync(now, now + fml::TimeDelta::FromSeconds(3600));
+  recorder->RecordBuildStart(now);
+  recorder->RecordBuildEnd(now);
+  std::vector<std::unique_ptr<LayerTreeTask>> tasks;
+  tasks.push_back(std::make_unique<LayerTreeTask>(
+      /*view_id=*/0,
+      std::make_unique<LayerTree>(/*root_layer=*/nullptr, DlISize(1, 1)),
+      /*device_pixel_ratio=*/1.0f));
+  auto continuation = pipeline->Produce();
+  PipelineProduceResult produce_result = continuation.Complete(
+      std::make_unique<FrameItem>(std::move(tasks), std::move(recorder)));
+  EXPECT_TRUE(produce_result.success);
+  return rasterizer.Draw(pipeline);
+}
+
+}  // namespace
+
+TEST_F(
+    ShellTest,
+    OnPlatformViewCreatedDeferredDoesNotBlockAndOrdersResourceContextAfterRaster) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners base_runners = GetTaskRunnersForFixture();
+  auto observing_ui =
+      ObservingTaskRunner::Create(base_runners.GetUITaskRunner());
+  TaskRunners task_runners("test", base_runners.GetPlatformTaskRunner(),
+                           base_runners.GetRasterTaskRunner(), observing_ui,
+                           base_runners.GetIOTaskRunner());
+
+  fml::AutoResetWaitableEvent setup_impeller_entered;
+  fml::AutoResetWaitableEvent unblock_setup_impeller;
+  std::atomic<bool> impeller_setup_done{false};
+  std::atomic<bool> resource_context_saw_impeller_ready{false};
+  std::atomic<size_t> resource_context_calls{0};
+  std::atomic<size_t> vsync_count{0};
+
+  DeferredTestPlatformView* platform_view_ptr = nullptr;
+  ShellTest::Config config{
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [&](Shell& shell) {
+            auto view = std::make_unique<DeferredTestPlatformView>(
+                shell, task_runners, /*external_view_embedder=*/nullptr,
+                /*setup_impeller_callback=*/
+                [&]() {
+                  setup_impeller_entered.Signal();
+                  unblock_setup_impeller.Wait();
+                  impeller_setup_done.store(true);
+                },
+                /*create_resource_context_callback=*/
+                [&]() {
+                  EXPECT_TRUE(task_runners.GetIOTaskRunner()
+                                  ->RunsTasksOnCurrentThread());
+                  resource_context_saw_impeller_ready.store(
+                      impeller_setup_done.load());
+                  resource_context_calls.fetch_add(1);
+                },
+                /*create_vsync_waiter_callback=*/
+                [&]() {
+                  return std::make_unique<ImmediateVsyncWaiter>(
+                      task_runners,
+                      [&vsync_count]() { vsync_count.fetch_add(1); });
+                });
+            platform_view_ptr = view.get();
+            return view;
+          },
+  };
+  std::unique_ptr<Shell> shell = CreateShell(config);
+  ASSERT_NE(shell, nullptr);
+  ASSERT_NE(platform_view_ptr, nullptr);
+  setup_impeller_entered.Wait();
+  EXPECT_FALSE(impeller_setup_done.load());
+  EXPECT_EQ(resource_context_calls.load(), 0u);
+
+  // Configure non-empty viewport metrics before launching the isolate and drain
+  // the pre-isolate vsync so subsequent frames come solely from
+  // `OnPlatformViewCreatedDeferred`.
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    platform_view_ptr->SetViewportMetrics(
+        0, ViewportMetrics{1.0, 100, 100, 22, 0});
+  });
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+
+  fml::AutoResetWaitableEvent isolate_ready;
+  AddFfiNativeCallback("NotifyNative", CREATE_FFI_LAMBDA([&isolate_ready]() {
+                         isolate_ready.Signal();
+                       }));
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("onDrawFrameRenderAllViews");
+  RunEngine(shell.get(), std::move(configuration));
+  ASSERT_FALSE(isolate_ready.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+
+  // Phase 1: Queue deferred creations returning nullptr and an invalid Surface
+  // (`!IsValid()`) while `SetupImpellerContext` is still blocked on the raster
+  // thread. Neither may block the platform thread,
+  // `OnPlatformViewScheduleFrame` is issued immediately, and on failure neither
+  // `Rasterizer::Setup` nor IO `CreateResourceContext` runs (the scheduled
+  // frame's draw harmlessly returns `DrawStatus::kNotSetUp`).
+  const size_t vsyncs_before_failed_creates = vsync_count.load();
+  std::atomic<bool> platform_posted_to_ui{false};
+  observing_ui->SetOnPostFromSourceRunner(
+      task_runners.GetPlatformTaskRunner(),
+      [&platform_posted_to_ui]() { platform_posted_to_ui.store(true); });
+
+  std::atomic<bool> invalid_factory_ran{false};
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    platform_view_ptr->TriggerNotifyCreatedDeferred([]() { return nullptr; });
+    platform_view_ptr->TriggerNotifyCreatedDeferred(
+        [&invalid_factory_ran]() -> std::unique_ptr<Surface> {
+          invalid_factory_ran.store(true);
+          auto invalid_surface =
+              std::make_unique<::testing::NiceMock<MockSurface>>();
+          ON_CALL(*invalid_surface, IsValid()).WillByDefault(Return(false));
+          EXPECT_CALL(*invalid_surface, MakeRenderContextCurrent()).Times(0);
+          return invalid_surface;
+        });
+  });
+
+  EXPECT_TRUE(platform_posted_to_ui.load());
+  EXPECT_FALSE(invalid_factory_ran.load());
+  EXPECT_EQ(resource_context_calls.load(), 0u);
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+  EXPECT_GT(vsync_count.load(), vsyncs_before_failed_creates);
+
+  unblock_setup_impeller.Signal();
+  DrawStatus status_after_failed_factories = DrawStatus::kDone;
+  PostSync(task_runners.GetRasterTaskRunner(), [&]() {
+    status_after_failed_factories =
+        ProbeRasterizerSetupStatus(*shell->GetRasterizer());
+  });
+  PostSync(task_runners.GetIOTaskRunner(), [] {});
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+
+  EXPECT_TRUE(invalid_factory_ran.load());
+  EXPECT_EQ(status_after_failed_factories, DrawStatus::kNotSetUp);
+  // Called once during ShellSetupIOSubsystem (after GetImpellerContext), never
+  // by the nullptr or invalid surface factories.
+  EXPECT_EQ(resource_context_calls.load(), 1u);
+  EXPECT_TRUE(resource_context_saw_impeller_ready.load());
+
+  // Phase 2: Queue a valid deferred creation whose `surface_factory` blocks on
+  // the raster thread. Verify the UI frame request is issued and builds without
+  // waiting for `surface_factory` to unblock, and that the resulting draw
+  // executes on the raster FIFO strictly after `Rasterizer::Setup()`.
+  platform_posted_to_ui.store(false);
+  resource_context_saw_impeller_ready.store(false);
+  const size_t vsyncs_before_valid_create = vsync_count.load();
+  observing_ui->SetOnPostFromSourceRunner(
+      task_runners.GetPlatformTaskRunner(),
+      [&platform_posted_to_ui]() { platform_posted_to_ui.store(true); });
+
+  fml::AutoResetWaitableEvent valid_factory_entered;
+  fml::AutoResetWaitableEvent unblock_valid_factory;
+  fml::AutoResetWaitableEvent draw_done;
+  std::atomic<bool> setup_ran{false};
+  std::atomic<bool> draw_ran_after_setup{false};
+  std::atomic<bool> draw_signalled{false};
+
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    platform_view_ptr->TriggerNotifyCreatedDeferred(
+        [&]() -> std::unique_ptr<Surface> {
+          EXPECT_TRUE(impeller_setup_done.load());
+          valid_factory_entered.Signal();
+          unblock_valid_factory.Wait();
+          auto surface = MakeValidMockSurface();
+          EXPECT_CALL(*surface, MakeRenderContextCurrent())
+              .WillRepeatedly([&setup_ran]() {
+                setup_ran.store(true);
+                return std::make_unique<GLContextDefaultResult>(true);
+              });
+          EXPECT_CALL(*surface, AcquireFrame(::testing::_))
+              .WillRepeatedly([&](const DlISize& size) {
+                EXPECT_TRUE(setup_ran.load());
+                draw_ran_after_setup.store(setup_ran.load());
+                if (!draw_signalled.exchange(true)) {
+                  draw_done.Signal();
+                }
+                SurfaceFrame::FramebufferInfo framebuffer_info;
+                framebuffer_info.supports_readback = true;
+                return std::make_unique<SurfaceFrame>(
+                    nullptr, framebuffer_info,
+                    [](const SurfaceFrame&, DlCanvas*) { return true; },
+                    [](const SurfaceFrame&) { return true; }, size,
+                    /*context_result=*/nullptr, /*display_list_fallback=*/true);
+              });
+          return surface;
+        });
+  });
+
+  ASSERT_FALSE(
+      valid_factory_entered.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  EXPECT_TRUE(platform_posted_to_ui.load());
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+  EXPECT_GT(vsync_count.load(), vsyncs_before_valid_create);
+  EXPECT_FALSE(setup_ran.load());
+  EXPECT_FALSE(draw_ran_after_setup.load());
+
+  unblock_valid_factory.Signal();
+  ASSERT_FALSE(draw_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  PostSync(task_runners.GetRasterTaskRunner(), [] {});
+  PostSync(task_runners.GetIOTaskRunner(), [] {});
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+
+  EXPECT_TRUE(setup_ran.load());
+  EXPECT_TRUE(draw_ran_after_setup.load());
+  EXPECT_EQ(resource_context_calls.load(), 2u);
+  EXPECT_TRUE(resource_context_saw_impeller_ready.load());
+
+  ShellTest::PlatformViewNotifyDestroyed(shell.get());
+  EXPECT_TRUE(RasterizerIsTornDown(shell.get()));
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(
+    ShellTest,
+    OnPlatformViewCreatedDeferredWithDestroyBeforeSetupOrdersTeardownAndKeepsMergerDisabled) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
+                  "https://github.com/flutter/flutter/issues/59816 ";
+#else
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners base_runners = GetTaskRunnersForFixture();
+  auto observing_raster =
+      ObservingTaskRunner::Create(base_runners.GetRasterTaskRunner());
+  TaskRunners task_runners("test", base_runners.GetPlatformTaskRunner(),
+                           observing_raster, base_runners.GetUITaskRunner(),
+                           base_runners.GetIOTaskRunner());
+
+  std::atomic<bool> backend_ready{false};
+  fml::AutoResetWaitableEvent setup_impeller_entered;
+  fml::AutoResetWaitableEvent unblock_setup_impeller;
+  std::vector<std::string> events;
+  std::atomic<bool> enabled_during_inflight_destroy{true};
+  std::atomic<bool> merged_during_inflight_destroy{true};
+
+  auto embedder = std::make_shared<BackendDependentExternalViewEmbedder>(
+      task_runners, backend_ready, /*support_thread_merging=*/true,
+      [&](bool should_resubmit_frame,
+          const fml::RefPtr<fml::RasterThreadMerger>& merger) {
+        ASSERT_NE(merger.get(), nullptr);
+        enabled_during_inflight_destroy.store(merger->IsEnabled());
+        merger->MergeWithLease(10);
+        merged_during_inflight_destroy.store(merger->IsMerged());
+        events.emplace_back("end_frame");
+      });
+
+  DeferredTestPlatformView* platform_view_ptr = nullptr;
+  ShellTest::Config config{
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [&](Shell& shell) {
+            auto view = std::make_unique<DeferredTestPlatformView>(
+                shell, task_runners, embedder, [&]() {
+                  setup_impeller_entered.Signal();
+                  unblock_setup_impeller.Wait();
+                  backend_ready.store(true);
+                });
+            platform_view_ptr = view.get();
+            return view;
+          },
+  };
+  std::unique_ptr<Shell> shell = CreateShell(config);
+  ASSERT_NE(shell, nullptr);
+  ASSERT_NE(platform_view_ptr, nullptr);
+  setup_impeller_entered.Wait();
+  EXPECT_EQ(embedder->GetSupportsMergingCalls(), 0u);
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::AutoResetWaitableEvent factory_entered;
+  fml::AutoResetWaitableEvent unblock_factory;
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    platform_view_ptr->TriggerNotifyCreatedDeferred(
+        [&]() -> std::unique_ptr<Surface> {
+          EXPECT_EQ(shell->GetRasterizer()->GetRasterThreadMerger().get(),
+                    nullptr);
+          events.emplace_back("factory");
+          factory_entered.Signal();
+          unblock_factory.Wait();
+          auto surface = MakeValidMockSurface();
+          EXPECT_CALL(*surface, MakeRenderContextCurrent())
+              .WillRepeatedly([&events]() {
+                events.emplace_back("make_current");
+                return std::make_unique<GLContextDefaultResult>(true);
+              });
+          EXPECT_CALL(*surface, ClearRenderContext()).WillOnce([&events]() {
+            events.emplace_back("teardown_clear");
+            return true;
+          });
+          return surface;
+        });
+  });
+  // SupportsDynamicThreadMerging() must still not have been queried on the
+  // platform thread during Shell::Create or NotifyCreatedDeferred.
+  EXPECT_EQ(embedder->GetSupportsMergingCalls(), 0u);
+
+  unblock_setup_impeller.Signal();
+  factory_entered.Wait();
+
+  // Queue a frame draw behind the paused deferred-creation task on the raster
+  // FIFO queue, then invoke `NotifyDestroyed()` on the platform thread.
+  // `ObservingTaskRunner` unblocks `surface_factory` deterministically right
+  // after `OnPlatformViewDestroyed` disables the merger and enqueues teardown.
+  PumpOneFrame(shell.get());
+  PostSync(task_runners.GetUITaskRunner(), [] {});
+
+  observing_raster->SetOnPostFromSourceRunner(
+      task_runners.GetPlatformTaskRunner(),
+      [&unblock_factory]() { unblock_factory.Signal(); });
+
+  fml::AutoResetWaitableEvent destroy_done;
+  task_runners.GetPlatformTaskRunner()->PostTask([&shell, &destroy_done]() {
+    shell->GetPlatformView()->NotifyDestroyed();
+    destroy_done.Signal();
+  });
+  ASSERT_FALSE(destroy_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+
+  EXPECT_GE(embedder->GetSupportsMergingCalls(), 1u);
+  ASSERT_GE(events.size(), 4u);
+  EXPECT_EQ(events.front(), "factory");
+  EXPECT_EQ(events.back(), "teardown_clear");
+  EXPECT_NE(std::find(events.begin(), events.end(), "end_frame"), events.end());
+  EXPECT_FALSE(enabled_during_inflight_destroy.load());
+  EXPECT_FALSE(merged_during_inflight_destroy.load());
+  EXPECT_TRUE(RasterizerIsTornDown(shell.get()));
+
+  PostSync(task_runners.GetRasterTaskRunner(), [&]() {
+    auto merger = shell->GetRasterizer()->GetRasterThreadMerger();
+    ASSERT_NE(merger.get(), nullptr);
+    EXPECT_TRUE(merger->IsEnabled());
+  });
+
+  DestroyShell(std::move(shell), task_runners);
+#endif  // OS_FUCHSIA
+}
+
+TEST_F(ShellTest, DestroyShellWithPendingDeferredPlatformViewCreation) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners base_runners = GetTaskRunnersForFixture();
+  auto observing_ui =
+      ObservingTaskRunner::Create(base_runners.GetUITaskRunner());
+  TaskRunners task_runners("test", base_runners.GetPlatformTaskRunner(),
+                           base_runners.GetRasterTaskRunner(), observing_ui,
+                           base_runners.GetIOTaskRunner());
+
+  DeferredTestPlatformView* platform_view_ptr = nullptr;
+  ShellTest::Config config{
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [&platform_view_ptr, &task_runners](Shell& shell) {
+            auto view =
+                std::make_unique<DeferredTestPlatformView>(shell, task_runners);
+            platform_view_ptr = view.get();
+            return view;
+          },
+  };
+  std::unique_ptr<Shell> shell = CreateShell(config);
+  ASSERT_NE(shell, nullptr);
+
+  fml::AutoResetWaitableEvent raster_entered;
+  fml::AutoResetWaitableEvent unblock_raster;
+  task_runners.GetRasterTaskRunner()->PostTask(
+      [&raster_entered, &unblock_raster]() {
+        raster_entered.Signal();
+        unblock_raster.Wait();
+      });
+  raster_entered.Wait();
+
+  std::atomic<bool> factory_ran{false};
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    platform_view_ptr->TriggerNotifyCreatedDeferred(
+        [&factory_ran]() -> std::unique_ptr<Surface> {
+          factory_ran.store(true);
+          return MakeValidMockSurface();
+        });
+  });
+  EXPECT_FALSE(factory_ran.load());
+
+  // `Shell::~Shell()` posts `engine_.reset()` from the platform thread onto the
+  // UI task runner (`ui_latch`) before draining the raster task runner
+  // (`gpu_latch`). Unblocking raster on that platform -> UI post guarantees
+  // `DestroyShell` is already inside `Shell::~Shell()`.
+  std::atomic<bool> signalled{false};
+  observing_ui->SetOnPostFromSourceRunner(task_runners.GetPlatformTaskRunner(),
+                                          [&signalled, &unblock_raster]() {
+                                            signalled.store(true);
+                                            unblock_raster.Signal();
+                                          });
+
+  DestroyShell(std::move(shell), task_runners);
+
+  EXPECT_TRUE(signalled.load());
+  EXPECT_TRUE(factory_ran.load());
+}
+
+TEST_F(ShellTest, SpawnedShellSharesThreadMergerWhenParentSetupIsDeferred) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
+                  "https://github.com/flutter/flutter/issues/59816 ";
+#else
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+
+  auto make_embedder = []() {
+    return std::make_shared<ShellTestExternalViewEmbedder>(
+        [](bool, const fml::RefPtr<fml::RasterThreadMerger>&) {},
+        PostPrerollResult::kSuccess, /*support_thread_merging=*/true);
+  };
+
+  DeferredTestPlatformView* parent_view_ptr = nullptr;
+  ShellTest::Config config{
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [&parent_view_ptr, &task_runners, &make_embedder](Shell& shell) {
+            auto view = std::make_unique<DeferredTestPlatformView>(
+                shell, task_runners, make_embedder());
+            parent_view_ptr = view.get();
+            return view;
+          },
+  };
+  std::unique_ptr<Shell> parent_shell = CreateShell(config);
+  ASSERT_NE(parent_shell, nullptr);
+
+  auto parent_config = RunConfiguration::InferFromSettings(settings);
+  parent_config.SetEntrypoint("emptyMain");
+  RunEngine(parent_shell.get(), std::move(parent_config));
+
+  fml::AutoResetWaitableEvent parent_factory_entered;
+  fml::AutoResetWaitableEvent unblock_parent_factory;
+
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    parent_view_ptr->TriggerNotifyCreatedDeferred(
+        [&parent_factory_entered, &unblock_parent_factory]() {
+          parent_factory_entered.Signal();
+          unblock_parent_factory.Wait();
+          return MakeValidMockSurface();
+        });
+  });
+  parent_factory_entered.Wait();
+
+  std::unique_ptr<Shell> child_shell;
+  DeferredTestPlatformView* child_view_ptr = nullptr;
+  fml::AutoResetWaitableEvent child_setup_done;
+
+  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
+    auto child_config = RunConfiguration::InferFromSettings(settings);
+    child_config.SetEntrypoint("emptyMain");
+    child_shell = parent_shell->Spawn(
+        std::move(child_config), "",
+        [&child_view_ptr, &task_runners, &make_embedder,
+         &unblock_parent_factory](Shell& shell) {
+          unblock_parent_factory.Signal();
+          auto view = std::make_unique<DeferredTestPlatformView>(
+              shell, task_runners, make_embedder());
+          child_view_ptr = view.get();
+          return view;
+        },
+        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
+    ASSERT_NE(child_shell, nullptr);
+    ASSERT_NE(child_view_ptr, nullptr);
+
+    child_view_ptr->TriggerNotifyCreatedDeferred([&child_setup_done]() {
+      auto surface = MakeValidMockSurface();
+      child_setup_done.Signal();
+      return surface;
+    });
+  });
+
+  ASSERT_FALSE(
+      child_setup_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+
+  PostSync(task_runners.GetRasterTaskRunner(), [&]() {
+    auto parent_merger = parent_shell->GetRasterizer()->GetRasterThreadMerger();
+    auto child_merger = child_shell->GetRasterizer()->GetRasterThreadMerger();
+    ASSERT_NE(parent_merger.get(), nullptr);
+    ASSERT_NE(child_merger.get(), nullptr);
+    EXPECT_EQ(parent_merger->GetSharedRasterThreadMerger().get(),
+              child_merger->GetSharedRasterThreadMerger().get());
+  });
+
+  ShellTest::PlatformViewNotifyDestroyed(child_shell.get());
+  ShellTest::PlatformViewNotifyDestroyed(parent_shell.get());
+  DestroyShell(std::move(child_shell), task_runners);
+  DestroyShell(std::move(parent_shell), task_runners);
+#endif  // OS_FUCHSIA
 }
 
 }  // namespace testing

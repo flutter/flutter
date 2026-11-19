@@ -7,6 +7,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {

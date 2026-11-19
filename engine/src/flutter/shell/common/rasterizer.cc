@@ -98,8 +98,17 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
         delegate_.GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId();
     const auto gpu_id =
         delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
-    raster_thread_merger_ = fml::RasterThreadMerger::CreateOrShareThreadMerger(
-        delegate_.GetParentRasterThreadMerger(), platform_id, gpu_id);
+    fml::RefPtr<fml::RasterThreadMerger> parent_merger =
+        delegate_.GetParentRasterThreadMerger();
+    {
+      std::scoped_lock lock(raster_thread_merger_mutex_);
+      raster_thread_merger_ =
+          fml::RasterThreadMerger::CreateOrShareThreadMerger(
+              parent_merger, platform_id, gpu_id);
+      if (thread_merger_disabled_) {
+        raster_thread_merger_->Disable();
+      }
+    }
   }
   if (raster_thread_merger_) {
     raster_thread_merger_->SetMergeUnmergeCallback([this]() {
@@ -129,6 +138,8 @@ void Rasterizer::Teardown() {
       }
 #endif  //  !SLIMPELLER
     }
+    context_switch.reset();
+    surface_->ClearRenderContext();
     surface_.reset();
   }
 
@@ -157,28 +168,46 @@ std::optional<DrawSurfaceStatus> Rasterizer::GetLastDrawStatus(
 }
 
 void Rasterizer::EnableThreadMergerIfNeeded() {
+  std::scoped_lock lock(raster_thread_merger_mutex_);
+  thread_merger_disabled_ = false;
   if (raster_thread_merger_) {
     raster_thread_merger_->Enable();
   }
 }
 
 void Rasterizer::DisableThreadMergerIfNeeded() {
+  std::scoped_lock lock(raster_thread_merger_mutex_);
+  thread_merger_disabled_ = true;
   if (raster_thread_merger_) {
     raster_thread_merger_->Disable();
   }
 }
 
 void Rasterizer::NotifyLowMemoryWarning() const {
-#if !SLIMPELLER
+  ClearRenderTargetCache();
+}
+
+void Rasterizer::ClearRenderTargetCache() const {
   if (!surface_) {
     FML_DLOG(INFO)
-        << "Rasterizer::NotifyLowMemoryWarning called with no surface.";
+        << "Rasterizer::ClearRenderTargetCache called with no surface.";
     return;
   }
+#if IMPELLER_SUPPORTS_RENDERING
+  if (auto aiks_context = surface_->GetAiksContext()) {
+    auto context_switch = surface_->MakeRenderContextCurrent();
+    if (context_switch->GetResult()) {
+      aiks_context->ClearRenderTargetCache();
+      aiks_context->ClearCachedTextures();
+    }
+    return;
+  }
+#endif  // IMPELLER_SUPPORTS_RENDERING
+#if !SLIMPELLER
   auto context = surface_->GetContext();
   if (!context) {
     FML_DLOG(INFO)
-        << "Rasterizer::NotifyLowMemoryWarning called with no GrContext.";
+        << "Rasterizer::ClearRenderTargetCache called with no GrContext.";
     return;
   }
   auto context_switch = surface_->MakeRenderContextCurrent();
@@ -186,7 +215,7 @@ void Rasterizer::NotifyLowMemoryWarning() const {
     return;
   }
   context->performDeferredCleanup(std::chrono::milliseconds(0));
-#endif  //  !SLIMPELLER
+#endif  // !SLIMPELLER
 }
 
 void Rasterizer::CollectView(int64_t view_id) {
@@ -452,20 +481,20 @@ sk_sp<SkImage> Rasterizer::MakeSkiaSnapshotSync(
 }
 
 void Rasterizer::MakeImpellerSnapshot(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     std::function<void(std::shared_ptr<impeller::Texture>)> callback,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshot(
-      display_list, picture_size, std::move(callback), pixel_format);
+      std::move(provider), picture_size, std::move(callback), pixel_format);
 }
 
 std::shared_ptr<impeller::Texture> Rasterizer::MakeImpellerSnapshotSync(
-    sk_sp<DisplayList> display_list,
+    SnapshotDisplayListProvider provider,
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
   return snapshot_controller_->MakeImpellerSnapshotSync(
-      std::move(display_list), picture_size, pixel_format);
+      std::move(provider), picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
@@ -936,6 +965,23 @@ Rasterizer::ScreenshotFormat ToScreenshotFormat(impeller::PixelFormat format) {
     case impeller::PixelFormat::kB10G10R10XR:
     case impeller::PixelFormat::kB10G10R10A10XR:
     case impeller::PixelFormat::kR32Float:
+    case impeller::PixelFormat::kBC1RGBAUNormInt:
+    case impeller::PixelFormat::kBC1RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kBC3RGBAUNormInt:
+    case impeller::PixelFormat::kBC3RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kBC5RGUNormInt:
+    case impeller::PixelFormat::kBC7RGBAUNormInt:
+    case impeller::PixelFormat::kBC7RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kETC2RGB8UNormInt:
+    case impeller::PixelFormat::kETC2RGB8UNormIntSRGB:
+    case impeller::PixelFormat::kETC2RGBA8UNormInt:
+    case impeller::PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case impeller::PixelFormat::kASTC4x4LDR:
+    case impeller::PixelFormat::kASTC4x4LDRSRGB:
+    case impeller::PixelFormat::kASTC8x8LDR:
+    case impeller::PixelFormat::kASTC8x8LDRSRGB:
+    case impeller::PixelFormat::kASTC4x4HDR:
+    case impeller::PixelFormat::kASTC8x8HDR:
       FML_DCHECK(false);
       return Rasterizer::ScreenshotFormat::kUnknown;
     case impeller::PixelFormat::kR8G8B8A8UNormInt:
@@ -1133,6 +1179,7 @@ void Rasterizer::SetSnapshotSurfaceProducer(
 }
 
 fml::RefPtr<fml::RasterThreadMerger> Rasterizer::GetRasterThreadMerger() {
+  std::scoped_lock lock(raster_thread_merger_mutex_);
   return raster_thread_merger_;
 }
 

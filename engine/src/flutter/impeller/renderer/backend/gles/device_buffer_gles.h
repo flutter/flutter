@@ -10,6 +10,7 @@
 
 #include "impeller/base/allocation.h"
 #include "impeller/base/backend_cast.h"
+#include "impeller/base/thread.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 
@@ -43,14 +44,31 @@ class DeviceBufferGLES final
 
   std::optional<GLuint> GetHandle() const;
 
+  /// Returns the GL buffer used when binding as a uniform buffer.
+  std::optional<GLuint> GetUniformHandle() const;
+
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   std::optional<std::string> label_;
   // Mutable for lazy evaluation.
   mutable std::optional<HandleGLES> handle_;
+  // Separate buffer used for uniform data on drivers that require it. See
+  // |CapabilitiesGLES::NeedsSeparateUniformBuffers|.
+  bool separate_uniform_buffer_ = false;
+  mutable std::optional<HandleGLES> uniform_handle_;
   mutable std::unique_ptr<Allocation> backing_store_;
-  mutable std::optional<Range> dirty_range_ = std::nullopt;
+  // Guards dirty_range_. Flush() merges ranges from writer threads (e.g. the
+  // UI thread for flutter_gpu host-visible buffers) while
+  // BindAndUploadDataIfNecessary() consumes the range on a reactor thread.
+  mutable Mutex dirty_range_mutex_;
+  mutable std::optional<Range> dirty_range_
+      IPLR_GUARDED_BY(dirty_range_mutex_) = std::nullopt;
+  mutable std::optional<Range> uniform_dirty_range_
+      IPLR_GUARDED_BY(dirty_range_mutex_) = std::nullopt;
   mutable bool initialized_ = false;
+  mutable bool uniform_initialized_ = false;
+
+  bool UsesUniformBuffer(BindingType type) const;
 
   // |DeviceBuffer|
   uint8_t* OnGetContents() const override;

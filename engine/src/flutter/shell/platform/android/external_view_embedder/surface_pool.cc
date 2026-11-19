@@ -28,9 +28,25 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<AndroidSurfaceFactory>& surface_factory) {
   std::lock_guard lock(mutex_);
-  // Destroy current layers in the pool if the frame size has changed.
+  if (pending_java_destroy_) {
+    // Flush any Java overlay surfaces orphaned by an earlier |TakeLayers| call
+    // before allocating a new overlay surface. During a dynamic thread merge,
+    // an earlier-queued raster task can run on the platform thread ahead of the
+    // cleanup task posted by |ReleaseOverlayLayers|.
+    DestroyJavaLayersLocked(jni_facade);
+  }
   if (requested_frame_size_ != current_frame_size_) {
-    DestroyLayersLocked(jni_facade);
+    if (use_new_surface_methods_) {
+      // The overlay surface is persistent, so resize it in place. Nothing else
+      // resizes the swapchain: |Surface::AcquireFrame| ignores the size it is
+      // handed.
+      for (const std::shared_ptr<OverlayLayer>& layer : layers_) {
+        layer->android_surface->OnScreenSurfaceResize(requested_frame_size_);
+      }
+    } else {
+      // Destroy current layers in the pool if the frame size has changed.
+      DestroyLayersLocked(jni_facade);
+    }
   }
   intptr_t gr_context_key = reinterpret_cast<intptr_t>(gr_context);
   // Allocate a new surface if there isn't one available.
@@ -95,18 +111,49 @@ void SurfacePool::DestroyLayers(
   DestroyLayersLocked(jni_facade);
 }
 
-void SurfacePool::DestroyLayersLocked(
+void SurfacePool::DestroyPendingLayers(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
-  if (layers_.empty()) {
+  std::lock_guard lock(mutex_);
+  if (!pending_java_destroy_) {
     return;
   }
+  DestroyJavaLayersLocked(jni_facade);
+}
+
+std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::TakeLayers() {
+  std::lock_guard lock(mutex_);
+  std::vector<std::shared_ptr<OverlayLayer>> layers;
+  layers.swap(layers_);
+  available_layer_index_ = 0;
+  if (!layers.empty()) {
+    pending_java_destroy_ = true;
+  }
+  return layers;
+}
+
+bool SurfacePool::HasPendingDestroy() {
+  std::lock_guard lock(mutex_);
+  return pending_java_destroy_;
+}
+
+void SurfacePool::DestroyLayersLocked(
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+  if (layers_.empty() && !pending_java_destroy_) {
+    return;
+  }
+  DestroyJavaLayersLocked(jni_facade);
+  layers_.clear();
+  available_layer_index_ = 0;
+}
+
+void SurfacePool::DestroyJavaLayersLocked(
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+  pending_java_destroy_ = false;
   if (use_new_surface_methods_) {
     jni_facade->destroyOverlaySurface2();
   } else {
     jni_facade->FlutterViewDestroyOverlaySurfaces();
   }
-  layers_.clear();
-  available_layer_index_ = 0;
 }
 
 std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::GetUnusedLayers() {

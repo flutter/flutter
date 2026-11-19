@@ -4,9 +4,23 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createEndToEndDriverTest());
+  await task(() async {
+    String? simulatorDeviceId;
+    var result = TaskResult.success(null);
+    try {
+      await testWithNewIOSSimulator('integration_ui_ios_driver', (String deviceId) async {
+        simulatorDeviceId = deviceId;
+        result = await createEndToEndDriverTest(deviceIdOverride: deviceId).call();
+      });
+    } finally {
+      await removeIOSSimulator(simulatorDeviceId);
+    }
+    return result;
+  });
 }

@@ -4,12 +4,15 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'multi_view_testing.dart';
 
 void main() {
+  const kYellow = Color(0xFFFFEB3B);
+  const kYellowAccent = Color(0xFFFFFF00);
+
   testWidgets('Detects tap targets in all views', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpViews(
@@ -66,19 +69,19 @@ void main() {
         Container(
           width: 200.0,
           height: 200.0,
-          color: Colors.yellow,
+          color: kYellow,
           child: const Text(
             'this is a test',
-            style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+            style: TextStyle(fontSize: 14.0, color: kYellowAccent),
           ),
         ),
         Container(
           width: 200.0,
           height: 200.0,
-          color: Colors.yellow,
+          color: kYellow,
           child: const Text(
             'this is a test',
-            style: TextStyle(fontSize: 25.0, color: Colors.yellowAccent),
+            style: TextStyle(fontSize: 25.0, color: kYellowAccent),
           ),
         ),
       ],

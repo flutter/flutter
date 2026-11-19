@@ -32,7 +32,6 @@ void main() {
       return;
     }
     testWithoutContext('should log a message to stderr when lock is not acquired', () async {
-      final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final logger = BufferLogger(
         terminal: Terminal.test(),
@@ -41,17 +40,17 @@ void main() {
       logger.fatalWarnings = true;
       Process? process;
       try {
-        Cache.flutterRoot = tempDir.absolute.path;
         final cache = Cache.test(
+          rootOverride: tempDir,
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
         );
         final File cacheFile = fileSystem.file(
-          fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'lockfile'),
+          fileSystem.path.join(tempDir.path, 'bin', 'cache', 'lockfile'),
         )..createSync(recursive: true);
         final File script = fileSystem.file(
-          fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'test_lock.dart'),
+          fileSystem.path.join(tempDir.path, 'bin', 'cache', 'test_lock.dart'),
         );
         script.writeAsStringSync(r'''
 import 'dart:async';
@@ -103,7 +102,6 @@ Future<void> main(List<String> args) async {
         // Just to keep from leaving the process hanging around.
         process?.kill(io.ProcessSignal.sighup);
         tryToDelete(tempDir);
-        Cache.flutterRoot = oldRoot;
       }
       expect(logger.statusText, isEmpty);
       expect(logger.errorText, isEmpty);
@@ -117,7 +115,6 @@ Future<void> main(List<String> args) async {
       expect(logger.hadWarningOutput, isFalse);
     });
     testWithoutContext('should log a warning message for unknown version ', () async {
-      final String? oldRoot = Cache.flutterRoot;
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final logger = BufferLogger(
         terminal: Terminal.test(),
@@ -125,8 +122,8 @@ Future<void> main(List<String> args) async {
       );
       logger.fatalWarnings = true;
       try {
-        Cache.flutterRoot = tempDir.absolute.path;
         final cache = Cache.test(
+          rootOverride: tempDir,
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
@@ -141,7 +138,6 @@ Future<void> main(List<String> args) async {
         );
       } finally {
         tryToDelete(tempDir);
-        Cache.flutterRoot = oldRoot;
       }
       expect(logger.statusText, isEmpty);
       expect(
@@ -182,6 +178,17 @@ Future<void> main(List<String> args) async {
         .replaceAll('x86_64', 'x64');
     expect(dartTargetArch, equals(unameArch));
   });
+
+  testWithoutContext('verify the dart binary arch matches the host arch', () async {
+    final HostPlatform dartArch = _identifyMacBinaryArch(_dartBinary.path);
+    final os = OperatingSystemUtils(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      platform: platform,
+      logger: BufferLogger.test(),
+    );
+    expect(dartArch, os.hostPlatform);
+  }, skip: !platform.isMacOS); // [intended] Calls macOS-specific commands
 }
 
 class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
@@ -221,3 +228,34 @@ class FakeVersionlessArtifact extends CachedArtifact {
     OperatingSystemUtils operatingSystemUtils,
   ) async {}
 }
+
+// Call `file` on the path and parse the output.
+HostPlatform _identifyMacBinaryArch(String path) {
+  // Expect STDOUT like:
+  //   bin/cache/dart-sdk/bin/dart: Mach-O 64-bit executable x86_64
+  final pattern = RegExp(r'Mach-O 64-bit executable (\w+)');
+  final ProcessResult result = processManager.runSync(<String>['file', path]);
+  expect(result, ProcessResultMatcher(stdoutPattern: '$path: Mach-O 64-bit executable'));
+  final RegExpMatch? match = pattern.firstMatch(result.stdout as String);
+  if (match == null) {
+    fail('Unrecognized STDOUT from `file`: "${result.stdout}"');
+  }
+  switch (match.group(1)) {
+    case 'x86_64':
+      return HostPlatform.darwin_x64;
+    case 'arm64':
+      return HostPlatform.darwin_arm64;
+    default:
+      fail('Unexpected architecture ${match.group(1)}');
+  }
+}
+
+final String _flutterRootPath = getFlutterRoot();
+final Directory _flutterRoot = fileSystem.directory(_flutterRootPath);
+final File _dartBinary = _flutterRoot
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childDirectory('dart-sdk')
+    .childDirectory('bin')
+    .childFile('dart')
+    .absolute;

@@ -105,7 +105,11 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
   is_valid_ = control && control->IsValid();
 }
 
-AHBSwapchainImplVK::~AHBSwapchainImplVK() = default;
+AHBSwapchainImplVK::~AHBSwapchainImplVK() {
+  // Ensure that the Vulkan device is idle before destroying objects that the
+  // device may have been using.
+  WaitIdle();
+}
 
 const ISize& AHBSwapchainImplVK::GetSize() const {
   return desc_.size;
@@ -118,6 +122,17 @@ bool AHBSwapchainImplVK::IsValid() const {
 const android::HardwareBufferDescriptor& AHBSwapchainImplVK::GetDescriptor()
     const {
   return desc_;
+}
+
+void AHBSwapchainImplVK::WaitIdle() const {
+  if (transients_) {
+    if (auto context = transients_->GetContext().lock()) {
+      auto result = ContextVK::Cast(*context).GetDevice().waitIdle();
+      if (result != vk::Result::eSuccess) {
+        FML_LOG(INFO) << "Device waitIdle failed: " << vk::to_string(result);
+      }
+    }
+  }
 }
 
 std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
@@ -212,14 +227,15 @@ bool AHBSwapchainImplVK::Present(
                       "control.";
     return false;
   }
-  return transaction.Apply(
-      [texture, weak = weak_from_this()](ASurfaceTransactionStats* stats) {
-        auto thiz = weak.lock();
-        if (!thiz) {
-          return;
-        }
-        thiz->OnTextureUpdatedOnSurfaceControl(texture, stats);
-      });
+  const uint64_t present_id = next_present_id_++;
+  return transaction.Apply([texture, present_id, weak = weak_from_this()](
+                               ASurfaceTransactionStats* stats) {
+    auto thiz = weak.lock();
+    if (!thiz) {
+      return;
+    }
+    thiz->OnTextureUpdatedOnSurfaceControl(texture, stats, present_id);
+  });
 }
 
 void AHBSwapchainImplVK::AddFinalCommandBuffer(
@@ -345,7 +361,8 @@ bool AHBSwapchainImplVK::ImportRenderReady(
 
 void AHBSwapchainImplVK::OnTextureUpdatedOnSurfaceControl(
     std::shared_ptr<AHBTextureSourceVK> texture,
-    ASurfaceTransactionStats* stats) {
+    ASurfaceTransactionStats* stats,
+    uint64_t present_id) {
   auto control = surface_control_.lock();
   if (!control) {
     return;
@@ -359,10 +376,24 @@ void AHBSwapchainImplVK::OnTextureUpdatedOnSurfaceControl(
   // The transaction completion indicates that the surface control now
   // references the hardware buffer. We can recycle the previous set buffer
   // safely.
+  //
+  // When two transactions on the same SurfaceControl are merged before a
+  // single Choreographer draw (for example via
+  // ViewRootImpl.applyTransactionOnDraw), the later transaction's buffer
+  // overwrites the earlier one, but Android's SurfaceComposerClient retains
+  // both transaction completion callbacks in an unordered set and may invoke
+  // the newer callback before the older, superseded callback. Track the
+  // monotonic present ID so a superseded callback recycles its own dropped
+  // texture directly instead of displacing the currently displayed texture.
   Lock lock(currently_displayed_texture_mutex_);
-  auto old_texture = currently_displayed_texture_;
-  currently_displayed_texture_ = std::move(texture);
-  pool_->Push(std::move(old_texture), std::move(render_ready_fence));
+  if (present_id > last_completed_present_id_) {
+    last_completed_present_id_ = present_id;
+    auto old_texture = currently_displayed_texture_;
+    currently_displayed_texture_ = std::move(texture);
+    pool_->Push(std::move(old_texture), std::move(render_ready_fence));
+  } else {
+    pool_->Push(std::move(texture), std::move(render_ready_fence));
+  }
 }
 
 }  // namespace impeller

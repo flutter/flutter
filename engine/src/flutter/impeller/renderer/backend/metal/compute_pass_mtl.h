@@ -7,6 +7,9 @@
 
 #include <Metal/Metal.h>
 
+#include <array>
+#include <cstdint>
+
 #include "impeller/renderer/backend/metal/compute_pass_bindings_cache_mtl.h"
 #include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/pipeline_descriptor.h"
@@ -25,17 +28,25 @@ class ComputePassMTL final : public ComputePass {
   id<MTLComputeCommandEncoder> encoder_ = nil;
   ComputePassBindingsCacheMTL pass_bindings_cache_ =
       ComputePassBindingsCacheMTL();
+  // The workgroup size of the currently bound pipeline.
+  std::array<uint32_t, 3> workgroup_size_ = {0u, 0u, 0u};
   bool is_valid_ = false;
   bool has_label_ = false;
+  // Whether the encoder ended. Metal aborts if an encoder is released without
+  // ending, so the destructor ends one that `EncodeCommands` never did.
+  mutable bool did_finish_encoding_ = false;
 
   ComputePassMTL(std::shared_ptr<const Context> context,
                  id<MTLCommandBuffer> buffer);
+
+  // Pops the debug group pushed by `SetCommandLabel`, if any.
+  void PopCommandLabel();
 
   // |ComputePass|
   bool IsValid() const override;
 
   // |ComputePass|
-  fml::Status Compute(const ISize& grid_size) override;
+  absl::Status Compute(std::array<uint32_t, 3> workgroup_count) override;
 
   // |ComputePass|
   void SetCommandLabel(std::string_view label) override;

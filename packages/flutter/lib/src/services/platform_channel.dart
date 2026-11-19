@@ -201,12 +201,11 @@ BinaryMessenger _findBinaryMessenger() {
 /// See: <https://flutter.dev/to/platform-channels/>
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and
-  /// [binaryMessenger].
+  /// [_binaryMessenger].
   ///
   /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
-  /// [binaryMessenger] is null.
-  const BasicMessageChannel(this.name, this.codec, {BinaryMessenger? binaryMessenger})
-    : _binaryMessenger = binaryMessenger;
+  /// [_binaryMessenger] is null.
+  const BasicMessageChannel(this.name, this.codec, {this._binaryMessenger});
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -419,7 +418,7 @@ class MethodChannel {
   ///     // Errors occurring on the platform side cause invokeMethod to throw
   ///     // PlatformExceptions.
   ///     try {
-  ///       return _channel.invokeMethod('play', <String, dynamic>{
+  ///       return await _channel.invokeMethod('play', <String, dynamic>{
   ///         'song': song.id,
   ///         'volume': volume,
   ///       });

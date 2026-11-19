@@ -64,4 +64,26 @@ class VersionFetcherTest {
         val result = VersionFetcher.getKGPVersion(project)
         assertEquals(kgpVersion, result!!)
     }
+
+    @Test
+    fun `getKGPVersion returns null when the Kotlin Gradle plugin is absent`() {
+        // Expected under AGP's built-in Kotlin support, where no standalone KGP is applied.
+        val project = mockk<Project>()
+        every { project.hasProperty(eq("kotlin_version")) } returns false
+        every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns null
+        val result = VersionFetcher.getKGPVersion(project)
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getKGPVersion returns null when pluginVersion is unknown and reflection is unknown`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(eq("kotlin_version")) } returns false
+        every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns
+            mockk<KotlinAndroidPluginWrapper> {
+                every { pluginVersion } returns "unknown"
+            }
+        val result = VersionFetcher.getKGPVersion(project)
+        assertEquals(null, result)
+    }
 }

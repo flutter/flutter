@@ -231,6 +231,16 @@ void main() {
       expect(bufferLogger.statusText, 'Please choose something: \n');
     });
 
+    testWithoutContext('line input prompt', () async {
+      final stdio = FakeStdio()
+        .._stdin = Stream<List<int>>.fromIterable(<List<int>>[
+          <int>[49, 49, 10], // 11\n
+        ]);
+      terminalUnderTest = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+
+      expect(await terminalUnderTest.readLine(), '11');
+    });
+
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
       final ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());

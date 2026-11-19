@@ -79,6 +79,31 @@ void main() {
     }, retry: 1);
   });
 
+  group('testWidgets disposes semanticsHandle when test fails', () {
+    var retried = false;
+    testWidgets('failing attempt with semantics enabled', (WidgetTester tester) async {
+      addTearDown(() => retried = true);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(label: 'hello', child: const SizedBox(width: 10, height: 10)),
+        ),
+      );
+      if (!retried) {
+        debugPrint('DISREGARD NEXT FAILURE, IT IS EXPECTED');
+      }
+      expect(retried, isTrue);
+    }, retry: 1);
+
+    testWidgets(
+      'subsequent test with semanticsEnabled: false has semantics disabled',
+      semanticsEnabled: false,
+      (WidgetTester tester) async {
+        expect(SemanticsBinding.instance.semanticsEnabled, isFalse);
+      },
+    );
+  });
+
   group('respects the group skip flag', () {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);
@@ -257,6 +282,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.hasRunningAnimations, isFalse);
   });
+
+  testWidgets(
+    'hasRunningAnimations is false when the transient callback does not schedule new frames',
+    (WidgetTester tester) async {
+      assert(!tester.hasRunningAnimations);
+      tester.binding.scheduleFrameCallback((_) {}, scheduleNewFrame: false);
+      expect(tester.hasRunningAnimations, false);
+    },
+  );
 
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
     final controller = AnimationController(
@@ -442,7 +476,7 @@ void main() {
         void onCallback() {
           if (--pendingCallbacks == 0) {
             testZone.run(() {
-              callbacksDone.complete(null);
+              callbacksDone.complete();
             });
           }
         }
@@ -569,34 +603,26 @@ void main() {
   group('testWidgets variants work', () {
     var numberOfVariationsRun = 0;
 
-    testWidgets(
-      'variant tests run all values provided',
-      (WidgetTester tester) async {
-        if (debugDefaultTargetPlatformOverride == null) {
-          expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
-        } else {
-          numberOfVariationsRun += 1;
-        }
-      },
-      variant: TargetPlatformVariant(TargetPlatform.values.toSet()),
-    );
+    testWidgets('variant tests run all values provided', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+      } else {
+        numberOfVariationsRun += 1;
+      }
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
-    testWidgets(
-      'variant tests have descriptions with details',
-      (WidgetTester tester) async {
-        if (debugDefaultTargetPlatformOverride == null) {
-          expect(tester.testDescription, equals('variant tests have descriptions with details'));
-        } else {
-          expect(
-            tester.testDescription,
-            equals(
-              'variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)',
-            ),
-          );
-        }
-      },
-      variant: TargetPlatformVariant(TargetPlatform.values.toSet()),
-    );
+    testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(tester.testDescription, equals('variant tests have descriptions with details'));
+      } else {
+        expect(
+          tester.testDescription,
+          equals(
+            'variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)',
+          ),
+        );
+      }
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
 
   group('TargetPlatformVariant', () {
@@ -611,14 +637,10 @@ void main() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
-    testWidgets(
-      'TargetPlatformVariant.only tests given value',
-      (WidgetTester tester) async {
-        expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
-        expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+    testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
+      expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
+      expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     group('all', () {
       testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
@@ -684,13 +706,14 @@ void main() {
         expect(timer.isActive, true);
       }, () {});
 
+      binding.postTest();
+
       expect(flutterErrorDetails.exception, isA<AssertionError>());
       expect(
         (flutterErrorDetails.exception as AssertionError).message,
         'A Timer is still pending even after the widget tree was disposed.',
       );
-      expect(binding.inTest, true);
-      binding.postTest();
+      expect(binding.inTest, false);
     });
   });
 

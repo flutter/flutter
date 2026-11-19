@@ -167,8 +167,8 @@ public class PlatformPlugin {
       @Nullable PlatformPluginDelegate delegate) {
     this.activity = activity;
     this.platformChannel = platformChannel;
-    this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
     this.platformPluginDelegate = delegate;
+    this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
 
     mEnabledOverlays = DEFAULT_SYSTEM_UI;
   }
@@ -456,6 +456,10 @@ public class PlatformPlugin {
    * io.flutter.embedding.android.FlutterFragmentActivity}.
    */
   private void enableEdgeToEdge() {
+    // Clear previously applied system UI visibility flags to ensure that
+    // WindowInsetsControllerCompat can correctly configure the window.
+    activity.getWindow().getDecorView().setSystemUiVisibility(0);
+
     WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
   }
 

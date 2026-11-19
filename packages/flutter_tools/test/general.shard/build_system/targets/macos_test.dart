@@ -5,14 +5,17 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -33,6 +36,8 @@ void main() {
   late FakeCommand copyFrameworkCommand;
   late FakeCommand releaseCopyFrameworkCommand;
   late FakeCommand copyFrameworkDsymCommand;
+  late FakeCommand chmodDebugFrameworkCommand;
+  late FakeCommand chmodReleaseFrameworkCommand;
   late FakeCommand lipoInfoNonFatCommand;
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
@@ -57,11 +62,28 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
       analytics: fakeAnalytics,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'strawberry'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: processManager,
+        ),
+      ),
     );
 
     binary = environment.outputDir
@@ -83,6 +105,15 @@ void main() {
       ],
     );
 
+    chmodDebugFrameworkCommand = FakeCommand(
+      command: <String>[
+        'chmod',
+        '-R',
+        'u+w',
+        environment.outputDir.childDirectory('Artifact.flutterMacOSFramework.debug').path,
+      ],
+    );
+
     releaseCopyFrameworkCommand = FakeCommand(
       command: <String>[
         'rsync',
@@ -93,6 +124,15 @@ void main() {
         '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
         'Artifact.flutterMacOSFramework.release',
         environment.outputDir.path,
+      ],
+    );
+
+    chmodReleaseFrameworkCommand = FakeCommand(
+      command: <String>[
+        'chmod',
+        '-R',
+        'u+w',
+        environment.outputDir.childDirectory('Artifact.flutterMacOSFramework.release').path,
       ],
     );
 
@@ -154,6 +194,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -203,6 +244,7 @@ void main() {
             nestedEntitlements.writeAsStringSync('somefile.bin');
           },
         ),
+        chmodDebugFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -225,6 +267,7 @@ void main() {
     'thinning fails when framework missing',
     () async {
       processManager.addCommand(copyFrameworkCommand);
+      processManager.addCommand(chmodDebugFrameworkCommand);
       await expectLater(
         const DebugUnpackMacOS().build(environment),
         throwsA(
@@ -249,11 +292,9 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
         lipoInfoFatCommand,
-        FakeCommand(
-          command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64'],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
 
       await expectLater(
@@ -263,7 +304,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain architectures "arm64 x86_64".\n\nlipo -info:\nArchitectures in the fat file:',
+              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\nlipo -info:\nArchitectures in the fat file:',
             ),
           ),
         ),
@@ -279,6 +320,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoNonFatCommand,
       lipoVerifyX86_64Command,
     ]);
@@ -295,6 +337,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoFatCommand,
       lipoVerifyX86_64Command,
       lipoExtractX86_64Command,
@@ -311,6 +354,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -332,6 +376,7 @@ void main() {
       frameworkDsym.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
         copyFrameworkDsymCommand,
@@ -367,6 +412,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoFatCommand,
         lipoVerifyX86_64Command,
         lipoExtractX86_64Command,
@@ -551,8 +597,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -820,7 +864,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
-            '--macho-min-os-version=10.15',
+            '--macho-min-os-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -833,7 +877,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
-            '--macho-min-os-version=10.15',
+            '--macho-min-os-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -930,7 +974,6 @@ void main() {
         expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
       },
       overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       },
     );
@@ -954,7 +997,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     String? projectFilename,
   }) async {

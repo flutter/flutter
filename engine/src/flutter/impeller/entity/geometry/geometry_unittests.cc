@@ -117,6 +117,21 @@ TEST(EntityGeometryTest, UberSDFGeometryPaddingIsAdjustedByInverseMaxBasis) {
                                       .TransformAndClipBounds(matrix));
     }
   }
+
+  // Under skew, padding should account for non-orthogonal axis scaling and
+  // determinant.
+  {
+    auto matrix = Matrix::MakeSkew(0.75f, 0.5f);
+    auto coverage = geometry.GetCoverage(matrix);
+    EXPECT_TRUE(coverage.has_value());
+    if (coverage.has_value()) {
+      Vector2 pixel_size = matrix.GetTransformedPixelSize();
+      EXPECT_EQ(coverage.value(),
+                Rect::MakeLTRB(-pixel_size.x, -pixel_size.y,
+                               100.0f + pixel_size.x, 100.0f + pixel_size.y)
+                    .TransformAndClipBounds(matrix));
+    }
+  }
 }
 
 TEST(EntityGeometryTest, FillPathGeometryCoversArea) {
@@ -810,7 +825,7 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
       Point(30, 25),
       Point(30, 15),
 
-      // The points for the second segment (120, 20) -> (130, 20)
+      // The points for the second segment (30, 20) -> (30, 30)
       Point(25, 20),
       Point(35, 20),
       Point(25, 30),
@@ -844,11 +859,58 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
       Point(30, 25),
       Point(30, 15),
 
-      // The points for the second segment (120, 20) -> (130, 20)
+      // The points for the second segment (30, 20) -> (30, 10)
       Point(35, 20),
       Point(25, 20),
       Point(35, 10),
       Point(25, 10),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsInDifferentContoursAreNotJoined) {
+  flutter::DlPathBuilder path_builder;
+  // First contour with a single line.
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  // Starts a new contour with a MoveTo command. The start of the new contour is
+  // specified to be the same as the end of the previous contour.
+  path_builder.MoveTo({30, 20});
+  // Add a line in the second contour.
+  path_builder.LineTo({30, 30});
+  flutter::DlPath path = path_builder.TakePath();
+
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path,
+      {
+          .width = 10.0f,
+          .cap = Cap::kButt,
+          .join = Join::kBevel,
+          .miter_limit = 4.0f,
+      },
+      1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // The glue points that allow us to "pick up the pen" between segments.
+      // This prevents segments in different contours from being unintentionally
+      // joined with a bevel.
+      Point(30, 20),
+      Point(30, 20),
+      Point(30, 20),
+      Point(30, 20),
+
+      // The points for the second segment (30, 20) -> (30, 30)
+      Point(25, 20),
+      Point(35, 20),
+      Point(25, 30),
+      Point(35, 30),
   };
 
   EXPECT_EQ(points, expected);

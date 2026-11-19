@@ -151,6 +151,7 @@ abstract class BundleWindowsAssets extends Target {
       dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
+      flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
         'NativeAssetsManifest.json': DevFSFileContent(
           environment.buildDir.childFile('native_assets.json'),
@@ -169,8 +170,8 @@ class WindowsAotBundle extends Target {
   /// Create a [WindowsAotBundle] wrapper for [aotTarget].
   const WindowsAotBundle(this.aotTarget);
 
-  /// The [AotElfBase] subclass that produces the app.so.
-  final AotElfBase aotTarget;
+  /// The [AotSnapshotBase] subclass that produces the Windows AOT library.
+  final AotSnapshotBase aotTarget;
 
   @override
   String get name => 'windows_aot_bundle';
@@ -199,7 +200,7 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   const ReleaseBundleWindowsAssets(super.targetPlatform);
 
   @override
-  String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'release_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -207,7 +208,7 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    WindowsAotBundle(AotElfRelease(targetPlatform)),
+    WindowsAotBundle(AotSnapshotRelease(targetPlatform)),
   ];
 }
 
@@ -215,7 +216,7 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   const ProfileBundleWindowsAssets(super.targetPlatform);
 
   @override
-  String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'profile_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -223,7 +224,7 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    WindowsAotBundle(AotElfProfile(targetPlatform)),
+    WindowsAotBundle(AotSnapshotProfile(targetPlatform)),
   ];
 }
 
@@ -231,7 +232,7 @@ class DebugBundleWindowsAssets extends BundleWindowsAssets {
   const DebugBundleWindowsAssets(super.targetPlatform);
 
   @override
-  String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];

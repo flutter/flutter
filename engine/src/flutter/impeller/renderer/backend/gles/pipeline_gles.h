@@ -16,7 +16,7 @@ namespace impeller {
 class PipelineLibraryGLES;
 
 namespace testing {
-class RenderPassGLESViewportTest;
+class RenderPassGLESCommandTest;
 }  // namespace testing
 
 class PipelineGLES final
@@ -39,13 +39,18 @@ class PipelineGLES final
   [[nodiscard]] bool BuildVertexDescriptor(const ProcTableGLES& gl,
                                            GLuint program);
 
+  // GL location of the `_impeller_y_flip` uniform (flutter/flutter#186554),
+  // cached at link time. -1 if the shader doesn't declare it.
+  GLint GetYFlipUniformLocation() const { return y_flip_uniform_location_; }
+
  private:
   friend PipelineLibraryGLES;
-  friend class testing::RenderPassGLESViewportTest;
+  friend class testing::RenderPassGLESCommandTest;
 
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<UniqueHandleGLES> handle_;
   std::unique_ptr<BufferBindingsGLES> buffer_bindings_;
+  GLint y_flip_uniform_location_ = -1;
   bool is_valid_ = false;
 
   // |Pipeline|

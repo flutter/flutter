@@ -10,10 +10,16 @@
 namespace impeller {
 namespace testing {
 
+namespace {
+auto default_submit_callback = [](vk::Fence) { return absl::OkStatus(); };
+}  // namespace
+
 TEST(FenceWaiterVKTest, IgnoresNullFence) {
   auto const context = MockVulkanContextBuilder().Build();
   auto const waiter = context->GetFenceWaiter();
-  EXPECT_FALSE(waiter->AddFence(vk::UniqueFence(), []() {}));
+  const auto add_status =
+      waiter->AddFence(vk::UniqueFence(), default_submit_callback, []() {});
+  EXPECT_EQ(add_status.code(), absl::StatusCode::kInvalidArgument);
 }
 
 TEST(FenceWaiterVKTest, IgnoresNullCallback) {
@@ -22,7 +28,24 @@ TEST(FenceWaiterVKTest, IgnoresNullCallback) {
   auto const waiter = context->GetFenceWaiter();
 
   auto fence = device.createFenceUnique({}).value;
-  EXPECT_FALSE(waiter->AddFence(std::move(fence), nullptr));
+  const auto add_status =
+      waiter->AddFence(std::move(fence), default_submit_callback, nullptr);
+  EXPECT_EQ(add_status.code(), absl::StatusCode::kInvalidArgument);
+}
+
+TEST(FenceWaiterVKTest, ReturnsSubmitError) {
+  auto const context = MockVulkanContextBuilder().Build();
+  auto const device = context->GetDevice();
+  auto const waiter = context->GetFenceWaiter();
+
+  auto submit_callback = [&](vk::Fence) {
+    return absl::Status(absl::StatusCode::kCancelled, "Submit failed");
+  };
+
+  auto fence = device.createFenceUnique({}).value;
+  const auto add_status =
+      waiter->AddFence(std::move(fence), submit_callback, []() {});
+  EXPECT_EQ(add_status.code(), absl::StatusCode::kCancelled);
 }
 
 TEST(FenceWaiterVKTest, ExecutesFenceCallback) {
@@ -30,9 +53,19 @@ TEST(FenceWaiterVKTest, ExecutesFenceCallback) {
   auto const device = context->GetDevice();
   auto const waiter = context->GetFenceWaiter();
 
+  bool submit_called = false;
+  auto submit_callback = [&](vk::Fence) {
+    submit_called = true;
+    return absl::OkStatus();
+  };
+
   auto signal = fml::ManualResetWaitableEvent();
   auto fence = device.createFenceUnique({}).value;
-  waiter->AddFence(std::move(fence), [&signal]() { signal.Signal(); });
+  EXPECT_TRUE(waiter
+                  ->AddFence(std::move(fence), submit_callback,
+                             [&signal]() { signal.Signal(); })
+                  .ok());
+  EXPECT_TRUE(submit_called);
 
   signal.Wait();
 }
@@ -44,11 +77,17 @@ TEST(FenceWaiterVKTest, ExecutesFenceCallbackX2) {
 
   auto signal = fml::ManualResetWaitableEvent();
   auto fence = device.createFenceUnique({}).value;
-  waiter->AddFence(std::move(fence), [&signal]() { signal.Signal(); });
+  EXPECT_TRUE(waiter
+                  ->AddFence(std::move(fence), default_submit_callback,
+                             [&signal]() { signal.Signal(); })
+                  .ok());
 
   auto signal2 = fml::ManualResetWaitableEvent();
   auto fence2 = device.createFenceUnique({}).value;
-  waiter->AddFence(std::move(fence2), [&signal2]() { signal2.Signal(); });
+  EXPECT_TRUE(waiter
+                  ->AddFence(std::move(fence2), default_submit_callback,
+                             [&signal2]() { signal2.Signal(); })
+                  .ok());
 
   signal.Wait();
   signal2.Wait();
@@ -63,7 +102,10 @@ TEST(FenceWaiterVKTest, ExecutesNewFenceThenOldFence) {
   auto fence = device.createFenceUnique({}).value;
   MockFence::SetStatus(fence, vk::Result::eNotReady);
   auto raw_fence = MockFence::GetRawPointer(fence);
-  waiter->AddFence(std::move(fence), [&signal]() { signal.Signal(); });
+  EXPECT_TRUE(waiter
+                  ->AddFence(std::move(fence), default_submit_callback,
+                             [&signal]() { signal.Signal(); })
+                  .ok());
 
   // The easiest way to verify that the callback was _not_ called is to wait
   // for a timeout, but that could introduce flakiness. Instead, we'll add a
@@ -72,7 +114,10 @@ TEST(FenceWaiterVKTest, ExecutesNewFenceThenOldFence) {
     auto signal2 = fml::ManualResetWaitableEvent();
     auto fence2 = device.createFenceUnique({}).value;
     MockFence::SetStatus(fence2, vk::Result::eSuccess);
-    waiter->AddFence(std::move(fence2), [&signal2]() { signal2.Signal(); });
+    EXPECT_TRUE(waiter
+                    ->AddFence(std::move(fence2), default_submit_callback,
+                               [&signal2]() { signal2.Signal(); })
+                    .ok());
     signal2.Wait();
   }
 
@@ -93,7 +138,10 @@ TEST(FenceWaiterVKTest, AddFenceDoesNothingIfTerminating) {
     waiter->Terminate();
 
     auto fence = device.createFenceUnique({}).value;
-    waiter->AddFence(std::move(fence), [&signal]() { signal.Signal(); });
+    absl::Status status =
+        waiter->AddFence(std::move(fence), default_submit_callback,
+                         [&signal]() { signal.Signal(); });
+    EXPECT_EQ(status.code(), absl::StatusCode::kCancelled);
   }
 
   // Ensure the fence did _not_ signal.
@@ -114,7 +162,10 @@ TEST(FenceWaiterVKTest, InProgressFencesStillWaitIfTerminated) {
   // Even if the fence is eSuccess, it's not guaranteed to be called in time.
   MockFence::SetStatus(fence, vk::Result::eNotReady);
   raw_fence = MockFence::GetRawPointer(fence);
-  waiter->AddFence(std::move(fence), [&signal]() { signal.Signal(); });
+  EXPECT_TRUE(waiter
+                  ->AddFence(std::move(fence), default_submit_callback,
+                             [&signal]() { signal.Signal(); })
+                  .ok());
 
   // Signal the fence after a delay.
   std::thread thread([&]() {

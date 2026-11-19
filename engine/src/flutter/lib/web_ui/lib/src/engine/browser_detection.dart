@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'dom.dart';
+import 'safe_browser_api.dart';
 
 /// A flag to check if the current browser is running on a laptop/desktop device.
 bool get isDesktop => ui_web.browser.isDesktop;
@@ -36,11 +37,14 @@ bool get isWasm => ui_web.browser.isWasm;
 // Whether the detected `operatingSystem` is `OperatingSystem.iOs`.
 bool get _isIOS => ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs;
 
+/// Returns true if the browser is on macOS, false otherwise.
+bool get isMacOS => ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+
 /// Whether the browser is running on macOS or iOS.
 ///
 /// - See [operatingSystem].
 /// - See [OperatingSystem].
-bool get isMacOrIOS => _isIOS || ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs;
+bool get isMacOrIOS => _isIOS || isMacOS;
 
 /// Detect iOS 15.
 bool get isIOS15 => debugIsIOS15 ?? _isIOS && ui_web.browser.userAgent.contains('OS 15_');
@@ -137,7 +141,11 @@ bool get _workAroundBug91333 => _isIOS;
 
 /// Whether the current browser supports the Chromium variant of CanvasKit.
 bool get browserSupportsCanvaskitChromium =>
-    domIntl.v8BreakIterator != null && domIntl.Segmenter != null;
+    domIntl.v8BreakIterator != null && domIntl.Segmenter != null && browserSupportsImageDecoder;
+
+/// Whether the current browser supports the WebParagraph implementation.
+bool get browserSupportsWebParagraph =>
+    browserSupportsCanvaskitChromium && browserSupportsTextCluster;
 
 /// Whether the current browser is Safari 17.4 or newer.
 ///

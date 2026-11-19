@@ -5,12 +5,14 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_PASS_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_PASS_H_
 
+#include <array>
+#include <cstdint>
 #include <string>
 
-#include "fml/status.h"
 #include "impeller/core/resource_binder.h"
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -30,13 +32,37 @@ class ComputePass : public ResourceBinder {
 
   virtual void SetCommandLabel(std::string_view label) = 0;
 
+  /// @brief Sets the pipeline for later dispatches in the pass. The pipeline
+  ///        must not be null.
   virtual void SetPipeline(
       const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) = 0;
 
-  virtual fml::Status Compute(const ISize& grid_size) = 0;
+  //----------------------------------------------------------------------------
+  /// @brief      Dispatch a grid of compute workgroups.
+  ///
+  ///             The components of `workgroup_count` are workgroup
+  ///             (threadgroup) counts, not invocation counts. The number of
+  ///             invocations per workgroup (the local size) is declared by the
+  ///             shader. The total invocations along an axis is therefore the
+  ///             workgroup count times the shader's local size.
+  ///
+  ///             The pipeline and resource bindings persist across dispatches
+  ///             in the pass. A later dispatch reuses them until they are
+  ///             replaced.
+  ///
+  ///             Writes by earlier dispatches in the pass and by earlier passes
+  ///             are visible to this dispatch, and its writes are visible to
+  ///             later dispatches, passes and host reads, without a manual
+  ///             barrier.
+  ///
+  /// @return     OK without dispatching anything if any dimension is zero. A
+  ///             cancelled status if no pipeline is bound.
+  ///
+  virtual absl::Status Compute(std::array<uint32_t, 3> workgroup_count) = 0;
 
   /// @brief Ensures all previously encoded compute command's buffer writes are
-  ///        visible to any subsequent compute commands.
+  ///        visible to any subsequent compute commands. Dispatches are already
+  ///        synchronized automatically, so this is only a manual override.
   ///
   ///        On Vulkan, it does not matter if the compute command is in a
   ///        different command buffer, only that it is executed later in queue
@@ -44,7 +70,8 @@ class ComputePass : public ResourceBinder {
   virtual void AddBufferMemoryBarrier() = 0;
 
   /// @brief Ensures all previously encoded compute command's texture writes are
-  ///        visible to any subsequent compute commands.
+  ///        visible to any subsequent compute commands. Dispatches are already
+  ///        synchronized automatically, so this is only a manual override.
   ///
   ///        On Vulkan, it does not matter if the compute command is in a
   ///        different command buffer, only that it is executed later in queue

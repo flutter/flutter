@@ -2,23 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
@@ -111,194 +118,159 @@ void main() {
     });
 
     group('projectInfo', () {
-      testUsingContext(
-        'is null if XcodeProjectInterpreter is null',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.projectInfo(), isNull);
-        },
-        overrides: <Type, Generator>{XcodeProjectInterpreter: () => null},
-      );
+      testWithoutContext('is null if XcodeProjectInterpreter is null', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.projectInfo(), isNull);
+      });
 
-      testUsingContext(
-        'is null if XcodeProjectInterpreter is not installed',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.projectInfo(), isNull);
-        },
-        overrides: <Type, Generator>{
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(isInstalled: false),
-        },
-      );
+      testWithoutContext('is null if XcodeProjectInterpreter is not installed', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
+        );
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.projectInfo(), isNull);
+      });
 
-      testUsingContext(
-        'is null if xcodeproj does not exist',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          expect(await project.projectInfo(), isNull);
-        },
-        overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
-      );
+      testWithoutContext('is null if xcodeproj does not exist', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        );
+        expect(await project.projectInfo(), isNull);
+      });
 
-      testUsingContext(
-        'returns XcodeProjectInfo',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.projectInfo(), isNotNull);
-        },
-        overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
-      );
+      testUsingContext('returns XcodeProjectInfo', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        );
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.projectInfo(), isNotNull);
+      });
     });
 
-    testUsingContext(
-      'schemeForBuildInfo succeeds',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        project.xcodeProject.createSync(recursive: true);
-        const BuildInfo buildInfo = BuildInfo.debug;
-        expect(await project.schemeForBuildInfo(buildInfo), 'Runner');
-      },
-      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
-    );
+    testUsingContext('schemeForBuildInfo succeeds', () async {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      );
+      project.xcodeProject.createSync(recursive: true);
+      const BuildInfo buildInfo = BuildInfo.debug;
+      expect(await project.schemeForBuildInfo(buildInfo), 'Runner');
+    });
 
-    testUsingContext(
-      'schemeForBuildInfo returns null if unable to find project',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        const BuildInfo buildInfo = BuildInfo.debug;
-        expect(await project.schemeForBuildInfo(buildInfo), isNull);
-      },
-      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
-    );
+    testWithoutContext('schemeForBuildInfo returns null if unable to find project', () async {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      );
+      const BuildInfo buildInfo = BuildInfo.debug;
+      expect(await project.schemeForBuildInfo(buildInfo), isNull);
+    });
 
-    testUsingContext(
-      'schemeForBuildInfo succeeds with flavor',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        project.xcodeProject.createSync(recursive: true);
-        const buildInfo = BuildInfo(
-          BuildMode.debug,
-          'my_flavor',
-          treeShakeIcons: true,
-          packageConfigPath: '',
-        );
-        expect(await project.schemeForBuildInfo(buildInfo), 'my_flavor');
-      },
-      overrides: <Type, Generator>{
-        XcodeProjectInterpreter: () =>
-            FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
-      },
-    );
+    testUsingContext('schemeForBuildInfo succeeds with flavor', () async {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
+      );
+      project.xcodeProject.createSync(recursive: true);
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        'my_flavor',
+        treeShakeIcons: true,
+        packageConfigPath: '',
+      );
+      expect(await project.schemeForBuildInfo(buildInfo), 'my_flavor');
+    });
 
-    testUsingContext(
-      'schemeForBuildInfo throws error if flavor is not found',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        project.xcodeProject.createSync(recursive: true);
-        const buildInfo = BuildInfo(
-          BuildMode.debug,
-          'invalid_flavor',
-          treeShakeIcons: true,
-          packageConfigPath: '',
-        );
-        await expectLater(project.schemeForBuildInfo(buildInfo), throwsToolExit());
-      },
-      overrides: <Type, Generator>{
-        XcodeProjectInterpreter: () =>
-            FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
-      },
-    );
+    testUsingContext('schemeForBuildInfo throws error if flavor is not found', () async {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(
+        FakeFlutterProject(fileSystem: fs),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(schemes: ['Runner', 'my_flavor']),
+      );
+      project.xcodeProject.createSync(recursive: true);
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        'invalid_flavor',
+        treeShakeIcons: true,
+        packageConfigPath: '',
+      );
+      await expectLater(project.schemeForBuildInfo(buildInfo), throwsToolExit());
+    });
 
     group('usesSwiftPackageManager', () {
-      testUsingContext(
-        'is true when iOS project exists',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isTrue);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
+      testWithoutContext('is true when iOS project exists', () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.ios.usesSwiftPackageManager, isTrue);
+      });
 
-      testUsingContext(
-        "is false when iOS project doesn't exist",
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
+      testWithoutContext("is false when iOS project doesn't exist", () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.ios.usesSwiftPackageManager, isFalse);
+      });
 
-      testUsingContext(
-        'is false when Xcode is less than 15',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
-        },
-      );
+      testWithoutContext('is false when Swift Package Manager feature is not enabled', () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.ios.usesSwiftPackageManager, isFalse);
+      });
 
-      testUsingContext(
-        'is false when Swift Package Manager feature is not enabled',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
-
-      testUsingContext(
-        'is false when project is a module',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
+      testWithoutContext('is false when project is a module', () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.ios.usesSwiftPackageManager, isFalse);
+      });
     });
 
     group('parseFlavorFromConfiguration', () {
@@ -310,6 +282,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry'},
         );
@@ -324,6 +297,7 @@ void main() {
           fileSystem: fs,
           logger: BufferLogger.test(),
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
           processManager: FakeProcessManager.any(),
           defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug'},
         );
@@ -334,21 +308,23 @@ void main() {
         'from CONFIGURATION when has flavor following a hyphen that matches a scheme',
         () async {
           final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+          final project = IosProject.fromFlutter(
+            FakeFlutterProject(fileSystem: fs),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+              schemes: <String>['Runner', 'vanilla'],
+            ),
+          );
           final env = Environment.test(
             fs.currentDirectory,
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
+            featureFlags: TestFeatureFlags(),
             processManager: FakeProcessManager.any(),
             defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-vanilla'},
           );
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
-        },
-        overrides: <Type, Generator>{
-          XcodeProjectInterpreter: () =>
-              FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
         },
       );
 
@@ -356,96 +332,112 @@ void main() {
         'from CONFIGURATION when has flavor following a space that matches a scheme',
         () async {
           final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+          final project = IosProject.fromFlutter(
+            FakeFlutterProject(fileSystem: fs),
+            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+              schemes: <String>['Runner', 'vanilla'],
+            ),
+          );
           final env = Environment.test(
             fs.currentDirectory,
             fileSystem: fs,
             logger: BufferLogger.test(),
             artifacts: Artifacts.test(),
+            featureFlags: TestFeatureFlags(),
             processManager: FakeProcessManager.any(),
             defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug vanilla'},
           );
           project.xcodeProject.createSync(recursive: true);
           expect(await project.parseFlavorFromConfiguration(env), 'vanilla');
         },
-        overrides: <Type, Generator>{
-          XcodeProjectInterpreter: () =>
-              FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
-        },
       );
 
-      testUsingContext(
-        'from FLAVOR when CONFIGURATION does not match a scheme',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          final env = Environment.test(
-            fs.currentDirectory,
-            fileSystem: fs,
-            logger: BufferLogger.test(),
-            artifacts: Artifacts.test(),
-            processManager: FakeProcessManager.any(),
-            defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-random'},
-          );
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.parseFlavorFromConfiguration(env), 'strawberry');
-        },
-        overrides: <Type, Generator>{
-          XcodeProjectInterpreter: () =>
-              FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'vanilla']),
-        },
-      );
+      testUsingContext('from FLAVOR when CONFIGURATION does not match a scheme', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+            schemes: <String>['Runner', 'vanilla'],
+          ),
+        );
+        final env = Environment.test(
+          fs.currentDirectory,
+          fileSystem: fs,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(),
+          processManager: FakeProcessManager.any(),
+          defines: <String, String>{kFlavor: 'strawberry', kXcodeConfiguration: 'Debug-random'},
+        );
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.parseFlavorFromConfiguration(env), 'strawberry');
+      });
     });
 
     group('ensureReadyForPlatformSpecificTooling', () {
       group('lldb files are generated', () {
-        testUsingContext(
-          'when they are missing',
-          () async {
-            final fs = MemoryFileSystem.test();
-            final Directory projectDirectory = fs.directory('path');
-            projectDirectory.childDirectory('ios').createSync(recursive: true);
-            final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
-            final project = IosProject.fromFlutter(flutterProject);
-            expect(project.lldbInitFile, isNot(exists));
-            expect(project.lldbHelperPythonFile, isNot(exists));
+        testWithoutContext('when they are missing', () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest();
+          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+          final project = IosProject.fromFlutter(flutterProject);
+          expect(project.lldbInitFile, isNot(exists));
+          expect(project.lldbHelperPythonFile, isNot(exists));
 
-            await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            plistParser: FakePlistParser(),
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: FakeToolContext(
+              cache: FakeCache(olderThanToolsStamp: true)
+                ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
+              config: Config.test(),
+              fs: fs,
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.empty(),
+              terminal: FakeTerminal(),
+            ),
+          );
 
-            expect(project.lldbInitFile, exists);
-            expect(project.lldbHelperPythonFile, exists);
-          },
-          overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
-        );
+          expect(project.lldbInitFile, exists);
+          expect(project.lldbHelperPythonFile, exists);
+        });
 
-        testUsingContext(
-          'when they are older than tool',
-          () async {
-            final fs = MemoryFileSystem.test();
-            final Directory projectDirectory = fs.directory('path');
-            projectDirectory.childDirectory('ios').createSync(recursive: true);
-            final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
-            final project = IosProject.fromFlutter(flutterProject);
-            project.lldbInitFile.createSync(recursive: true);
-            project.lldbInitFile.writeAsStringSync('old');
-            project.lldbHelperPythonFile.createSync(recursive: true);
-            project.lldbHelperPythonFile.writeAsStringSync('old');
+        testWithoutContext('when they are older than tool', () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest();
+          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+          final project = IosProject.fromFlutter(flutterProject);
+          project.lldbInitFile.createSync(recursive: true);
+          project.lldbInitFile.writeAsStringSync('old');
+          project.lldbHelperPythonFile.createSync(recursive: true);
+          project.lldbHelperPythonFile.writeAsStringSync('old');
 
-            await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            plistParser: FakePlistParser(),
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            templateRenderer: const MustacheTemplateRenderer(),
+            toolContext: FakeToolContext(
+              cache: FakeCache(olderThanToolsStamp: true)
+                ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
+              config: Config.test(),
+              fs: fs,
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.empty(),
+              terminal: FakeTerminal(),
+            ),
+          );
 
-            expect(
-              project.lldbInitFile.readAsStringSync(),
-              contains('Generated file, do not edit.'),
-            );
-            expect(
-              project.lldbHelperPythonFile.readAsStringSync(),
-              contains('Generated file, do not edit.'),
-            );
-          },
-          overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
-        );
+          expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));
+          expect(
+            project.lldbHelperPythonFile.readAsStringSync(),
+            contains('Generated file, do not edit.'),
+          );
+        });
       });
     });
   });
@@ -503,85 +495,309 @@ void main() {
     });
 
     group('usesSwiftPackageManager', () {
-      testUsingContext(
-        'is true when macOS project exists',
+      testWithoutContext('is true when macOS project exists', () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('macos').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.macos.usesSwiftPackageManager, isTrue);
+      });
+
+      testWithoutContext("is false when macOS project doesn't exist", () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.ios.usesSwiftPackageManager, isFalse);
+        expect(project.macos.usesSwiftPackageManager, isFalse);
+      });
+
+      testWithoutContext('is false when Swift Package Manager feature is not enabled', () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('macos').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest();
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.macos.usesSwiftPackageManager, isFalse);
+      });
+
+      testWithoutContext('is false when project is a module', () async {
+        final fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('macos').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
+        final project = FlutterProject(
+          projectDirectory,
+          manifest,
+          manifest,
+          featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+          xcode: FakeXcode(),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+        );
+        expect(project.macos.usesSwiftPackageManager, isFalse);
+      });
+    });
+
+    group('prefetchSwiftPackages', () {
+      testWithoutContext('returns early if usesSwiftPackageManager is false', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        final fakeProcessManager = FakeProcessManager.empty();
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProjectWithCustomFlags.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          usesSwiftPackageManager: false,
+        );
+        await iosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: <String>[],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext(
+        'returns early if flutterPluginSwiftPackageInProjectSettings is false',
         () async {
           final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isTrue);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+          final testLogger = BufferLogger.test();
+          final fakeProcessManager = FakeProcessManager.empty();
+          final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+          final iosProject = FakeIosProjectWithCustomFlags.fromFlutter(
+            FakeFlutterProject(fileSystem: fs),
+            flutterPluginSwiftPackageInProjectSettings: false,
+          );
+          await iosProject.prefetchSwiftPackages(
+            xcodebuildProjectCommandArguments: <String>[],
+            processUtils: processUtils,
+            logger: testLogger,
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
         },
       );
 
-      testUsingContext(
-        "is false when macOS project doesn't exist",
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
+      testWithoutContext('starts the process and resolves packages successfully', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+            stdout: '''
+Resolve Package Graph
 
-      testUsingContext(
-        'is false when Xcode is less than 15',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
-        },
-      );
+Fetching from https://github.com/apple/swift-algorithms.git (cached)
 
-      testUsingContext(
-        'is false when Swift Package Manager feature is not enabled',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
+Fetching from https://github.com/apple/swift-numerics.git (cached)
 
-      testUsingContext(
-        'is false when project is a module',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
+Creating working copy of package ‘swift-numerics’
+
+Creating working copy of package ‘swift-algorithms’
+
+Checking out 1.2.2 of package ‘swift-algorithms’
+
+Checking out 1.1.1 of package ‘swift-numerics’
+
+
+Resolved source packages:
+  swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1
+  swift-algorithms: https://github.com/apple/swift-algorithms.git @ 1.2.2
+''',
+          ),
+        ]);
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        await iosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+          ],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(
+          testLogger.statusText,
+          contains('''
+Xcode is fetching Swift Package Manager dependencies. This may take several minutes...
+  Fetching from https://github.com/apple/swift-algorithms.git (cached)...
+  Fetching from https://github.com/apple/swift-numerics.git (cached)...'''),
+        );
+      });
+
+      testWithoutContext('skips running if already completed or in progress', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+          ),
+        ]);
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        await iosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+          ],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+
+        // Second call should skip starting a new process
+        await iosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+          ],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('throws exception when resolving fails', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+            exitCode: 1,
+            stderr: 'error: some error',
+          ),
+        ]);
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        await expectLater(
+          iosProject.prefetchSwiftPackages(
+            xcodebuildProjectCommandArguments: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+            ],
+            processUtils: processUtils,
+            logger: testLogger,
+          ),
+          throwsToolExit(),
+        );
+      });
+
+      testWithoutContext('prefetchSwiftPackages can run for both platforms', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory iosBuildDirectory = fs.directory('$projectPath/build/ios');
+        final Directory macosBuildDirectory = fs.directory('$projectPath/build/macos');
+
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${iosBuildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${macosBuildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+          ),
+        ]);
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        await iosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: [
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${iosBuildDirectory.path}/SourcePackages',
+          ],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+
+        final macosProject = FakeMacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        await macosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: [
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${macosBuildDirectory.path}/SourcePackages',
+          ],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
     });
   });
 }
@@ -593,6 +809,9 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   late final Directory directory = fileSystem.directory('app_name');
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
 
   @override
   bool isModule = false;
@@ -618,7 +837,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -628,6 +847,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   FakeFlutterManifest({this.isModule = false});
+
+  @override
+  Logger get logger => BufferLogger.test();
 
   @override
   bool isModule;
@@ -645,6 +867,9 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   String get appName => '';
 
   @override
+  List<String> get workspace => <String>[];
+
+  @override
   PluginPlatformConfig? get ios => null;
 
   @override
@@ -653,6 +878,9 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
 class FakeCache extends Fake implements Cache {
   FakeCache({this.olderThanToolsStamp = false});
+
+  @override
+  String get flutterRoot => '';
 
   bool olderThanToolsStamp;
   Map<String, bool> filesOlderThanToolsStamp = <String, bool>{};
@@ -664,4 +892,38 @@ class FakeCache extends Fake implements Cache {
     }
     return olderThanToolsStamp;
   }
+}
+
+class FakeIosProject extends IosProject {
+  FakeIosProject.fromFlutter(super.parent) : super.fromFlutter();
+
+  @override
+  bool usesSwiftPackageManager = true;
+
+  @override
+  bool flutterPluginSwiftPackageInProjectSettings = true;
+}
+
+class FakeMacOSProject extends MacOSProject {
+  FakeMacOSProject.fromFlutter(super.parent) : super.fromFlutter();
+
+  @override
+  bool usesSwiftPackageManager = true;
+
+  @override
+  bool flutterPluginSwiftPackageInProjectSettings = true;
+}
+
+class FakeIosProjectWithCustomFlags extends IosProject {
+  FakeIosProjectWithCustomFlags.fromFlutter(
+    super.parent, {
+    this.usesSwiftPackageManager = true,
+    this.flutterPluginSwiftPackageInProjectSettings = true,
+  }) : super.fromFlutter();
+
+  @override
+  final bool usesSwiftPackageManager;
+
+  @override
+  final bool flutterPluginSwiftPackageInProjectSettings;
 }

@@ -18,6 +18,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
  */
 @interface FlutterInactiveTextInput : UIView <UITextInput>
 @property(nonatomic, copy) NSString* text;
+@property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
 @end
 
 @implementation FlutterInactiveTextInput
@@ -211,7 +212,12 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 - (void)setSemanticsNode:(const flutter::SemanticsNode*)node {
   [super setSemanticsNode:node];
   _inactive_text_input.text = @(node->value.data());
-  FlutterTextInputView* textInput = (FlutterTextInputView*)[self bridge]->textInputView();
+  _inactive_text_input.secureTextEntry = [self node].flags.isObscured;
+  flutter::AccessibilityBridgeIos* bridge = self.bridge;
+  if (!bridge) {
+    return;
+  }
+  FlutterTextInputView* textInput = (FlutterTextInputView*)bridge->textInputView();
   if ([self node].flags.isFocused == flutter::SemanticsTristate::kTrue) {
     textInput.backingTextInputAccessibilityObject = self;
     // The text input view must have a non-trivial size for the accessibility
@@ -233,8 +239,9 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
  * we use an FlutterInactiveTextInput.
  */
 - (UIView<UITextInput>*)textInputSurrogate {
-  if ([self node].flags.isFocused == flutter::SemanticsTristate::kTrue) {
-    return [self bridge]->textInputView();
+  flutter::AccessibilityBridgeIos* bridge = self.bridge;
+  if (bridge && [self node].flags.isFocused == flutter::SemanticsTristate::kTrue) {
+    return bridge->textInputView();
   } else {
     return _inactive_text_input;
   }
@@ -245,7 +252,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (void)accessibilityElementDidBecomeFocused {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return;
   }
   [[self textInputSurrogate] accessibilityElementDidBecomeFocused];
@@ -253,7 +260,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (void)accessibilityElementDidLoseFocus {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return;
   }
   [[self textInputSurrogate] accessibilityElementDidLoseFocus];
@@ -261,21 +268,21 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (BOOL)accessibilityElementIsFocused {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return false;
   }
   return [self node].flags.isFocused == flutter::SemanticsTristate::kTrue;
 }
 
 - (BOOL)accessibilityActivate {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return false;
   }
   return [[self textInputSurrogate] accessibilityActivate];
 }
 
 - (NSString*)accessibilityLabel {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return nil;
   }
 
@@ -287,7 +294,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (NSString*)accessibilityHint {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return nil;
   }
   NSString* hint = [super accessibilityHint];
@@ -298,7 +305,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (NSString*)accessibilityValue {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return nil;
   }
   NSString* value = [super accessibilityValue];
@@ -309,7 +316,7 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 - (UIAccessibilityTraits)accessibilityTraits {
-  if (![self isAccessibilityBridgeAlive]) {
+  if (!self.bridge) {
     return 0;
   }
   UIAccessibilityTraits results =
@@ -321,6 +328,10 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
 }
 
 #pragma mark - UITextInput overrides
+
+- (BOOL)isSecureTextEntry {
+  return [[self textInputSurrogate] isSecureTextEntry];
+}
 
 - (NSString*)textInRange:(UITextRange*)range {
   return [[self textInputSurrogate] textInRange:range];

@@ -65,16 +65,9 @@ bool UberSDFGeometry::IsAxisAlignedRect() const {
 }
 
 Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
-  // Get the scaling factor of the transform in the X and Y directions.
-  Vector2 transform_scaling = transform.GetBasisScaleXY();
-
-  // Get the device pixel size in local space units. This is the inverse of the
-  // transform scaling. E.g. if the transform performs a scale of 4 in the X
-  // direction and 0.5 in the Y direction, then 1 device pixel is size
-  // {0.25, 2.0} in local space units.
-  Size device_pixel_size = {
-      transform_scaling.x != 0 ? 1.0f / transform_scaling.x : 0,
-      transform_scaling.y != 0 ? 1.0f / transform_scaling.y : 0};
+  // Get the device pixel size in local space units.
+  Vector2 pixel_size = transform.GetTransformedPixelSize();
+  Size device_pixel_size(pixel_size.x, pixel_size.y);
 
   // The stroke padding is half the stroke width, if the shape is stroked.
   Size stroke_padding;

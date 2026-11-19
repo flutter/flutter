@@ -5,18 +5,27 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart' show HostPlatform;
+import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/project_migrator.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
-import '../globals.dart' as globals;
+import '../features.dart' show FeatureFlags;
 import '../ios/migrations/metal_api_validation_migration.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
@@ -25,14 +34,18 @@ import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
+import '../reporting/crash_reporting.dart';
 import 'application_package.dart';
 import 'cocoapod_utils.dart';
+import 'cocoapods.dart';
+import 'darwin_dependency_management.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 import 'migrations/secure_restorable_state_migration.dart';
 import 'swift_package_manager.dart';
+import 'xcode.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -48,6 +61,13 @@ import 'swift_package_manager.dart';
 /// Function: createItemModels(for:itemModelSource:)
 /// Thread:   <_NSMainThread: 0x6000027c0280>{number = 1, name = main}
 /// Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+///
+/// xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open log store at /path/to/app/build/macos/Logs/Build
+/// xcodebuild[87399:14149529] [MT] IDELogStore: Failed to open Build log store: Error Domain=NSCocoaErrorDomain Code=4 "The file "LogStoreManifest.plist" doesn't exist." UserInfo={...}. User info: {
+///     NSFilePath = "/path/to/app/build/macos/Logs/Build/LogStoreManifest.plist";
+///     NSURL = "file:///path/to/app/build/macos/Logs/Build/LogStoreManifest.plist";
+///     NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"";
+/// }.
 
 /// ```
 final _filteredOutput = RegExp(
@@ -55,6 +75,10 @@ final _filteredOutput = RegExp(
   r'Requested but did not find extension point with identifier|'
   r'note\:|'
   r'\[MT\] DVTAssertions: Warning in /System/Volumes/Data/SWE/|'
+  r'.*\[MT\] IDELogStore: Failed to open|'
+  r'.*LogStoreManifest\.plist|'
+  r'.*NSUnderlyingError = "Error Domain=NSPOSIXErrorDomain Code=2|'
+  r'^\s*\}\.\s*$|'
   r'Details\:  createItemModels|'
   r'Function\: createItemModels|'
   r'Thread\:   <_NSMainThread\:|'
@@ -65,16 +89,21 @@ final _filteredOutput = RegExp(
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
-  required FlutterProject flutterProject,
+  required Analytics analytics,
+  required AppleContext appleContext,
   required BuildInfo buildInfo,
-  String? targetOverride,
+  required FeatureFlags featureFlags,
+  required FlutterProject flutterProject,
+  required TemplateRenderer templateRenderer,
+  required ToolContext toolContext,
   required bool verboseLogging,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
+  String? targetOverride,
   bool usingCISystem = false,
 }) async {
-  final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
-  if (xcodeWorkspace == null) {
+  final Directory xcodeProject = flutterProject.macos.xcodeProject;
+  if (!xcodeProject.existsSync()) {
     throwToolExit(
       'No macOS desktop project configured. '
       'See https://flutter.dev/to/add-desktop-support '
@@ -82,58 +111,100 @@ Future<void> buildMacOS({
     );
   }
 
+  final AppleContext(
+    :CocoaPods cocoaPods,
+    :PlistParser plistParser,
+    :Xcode xcode,
+    :XcodeProjectInterpreter xcodeProjectInterpreter,
+  ) = appleContext;
+  final ToolContext(
+    :BotDetector botDetector,
+    :Config config,
+    :FileSystem fs,
+    :FileSystemUtils fileSystemUtils,
+    :Logger logger,
+    :OperatingSystemUtils os,
+    :Platform platform,
+    :ProcessUtils processUtils,
+    :AnsiTerminal terminal,
+    :UserMessages userMessages,
+  ) = toolContext;
+  if (!xcodeProjectInterpreter.isInstalled) {
+    throwToolExit(userMessages.xcodeMissing);
+  }
+
+  // The .xcworkspace may not exist (e.g. a project using Swift Package Manager
+  // without CocoaPods). When absent, xcodebuild builds the .xcodeproj directly.
+  final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
+
+  const FlutterDarwinPlatform darwinPlatform = .macos;
   final migrators = <ProjectMigrator>[
-    RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-      flutterProject.macos,
-      globals.logger,
-      globals.analytics,
-    ),
-    MacOSDeploymentTargetMigration(flutterProject.macos, globals.logger),
-    XcodeProjectObjectVersionMigration(flutterProject.macos, globals.logger),
-    XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
-    XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
-    FlutterApplicationMigration(flutterProject.macos, globals.logger),
-    NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
-    SecureRestorableStateMigration(flutterProject.macos, globals.logger),
+    RemoveMacOSFrameworkLinkAndEmbeddingMigration(flutterProject.macos, logger, analytics),
+    MacOSDeploymentTargetMigration(flutterProject.macos, logger),
+    XcodeProjectObjectVersionMigration(flutterProject.macos, logger),
+    XcodeScriptBuildPhaseMigration(flutterProject.macos, logger),
+    XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, logger),
+    FlutterApplicationMigration(flutterProject.macos, logger, plistParser: plistParser),
+    NSApplicationMainDeprecationMigration(flutterProject.macos, logger),
+    SecureRestorableStateMigration(flutterProject.macos, logger),
     SwiftPackageManagerIntegrationMigration(
       flutterProject.macos,
-      FlutterDarwinPlatform.macos,
+      darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-      logger: globals.logger,
-      fileSystem: globals.fs,
-      plistParser: globals.plistParser,
-      config: globals.config,
+      analytics: analytics,
+      crashReportSenderFactory: botDetector.isRunningOnBot
+          ? null
+          : () => CrashReportSender(
+              platform: platform,
+              logger: logger,
+              operatingSystemUtils: os,
+              analytics: analytics,
+            ),
+      plistParser: plistParser,
+      toolContext: toolContext,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
-    SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
-    MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),
+    SwiftPackageManagerGitignoreMigration(flutterProject, logger),
+    MetalAPIValidationMigrator.macos(flutterProject.macos, logger),
   ];
 
   final migration = ProjectMigration(migrators);
   await migration.run();
 
-  final String buildDirectoryPath = getMacOSBuildDirectory();
+  await DarwinDependencyManagement.validatePluginSupport(
+    platform: darwinPlatform,
+    xcodeProject: flutterProject.macos,
+    plugins: await flutterProject.macos.getPlugins(),
+    fileSystem: fs,
+    logger: logger,
+    cocoapods: cocoaPods,
+    analytics: analytics,
+    featureFlags: featureFlags,
+  );
+
+  final String buildDirectoryPath = getMacOSBuildDirectory(config: config, fileSystem: fs);
   final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
 
-  final Directory xcodeProject = flutterProject.macos.xcodeProject;
-
   // If the standard project exists, specify it to getInfo to handle the case where there are
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
-    xcodeProject.parent.path,
+  final XcodeProjectInfo? projectInfo = await xcodeProjectInterpreter.getInfo(
+    flutterProject.macos,
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
-  final String? scheme = projectInfo?.schemeFor(buildInfo);
-  if (scheme == null) {
-    projectInfo!.reportFlavorNotFoundAndExit();
+  if (projectInfo == null) {
+    throwToolExit('Unable to get Xcode project information.');
   }
-  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
+  final String? scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    projectInfo.reportFlavorNotFoundAndExit();
+  }
+  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
@@ -150,6 +221,7 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
@@ -158,14 +230,22 @@ Future<void> buildMacOS({
     final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
-        platform: FlutterDarwinPlatform.macos,
+        platform: darwinPlatform,
         project: flutterProject.macos,
         deploymentTarget: macOSDeploymentTarget,
       );
     }
   }
 
-  await processPodsIfNeeded(flutterProject.macos, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    flutterProject.macos,
+    buildDirectoryPath,
+    buildInfo.mode,
+    cocoaPods: cocoaPods,
+    featureFlags: featureFlags,
+    templateRenderer: templateRenderer,
+    toolContext: toolContext,
+  );
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
     flutterProject.macos.inputFileList.createSync(recursive: true);
@@ -179,7 +259,7 @@ Future<void> buildMacOS({
 
   // Run the Xcode build.
   final sw = Stopwatch()..start();
-  final Status status = globals.logger.startProgress('Building macOS application...');
+  final Status status = logger.startProgress('Building macOS application...');
   int result;
 
   File? disabledSandboxEntitlementFile;
@@ -187,46 +267,83 @@ Future<void> buildMacOS({
     disabledSandboxEntitlementFile = _createDisabledSandboxEntitlementFile(
       flutterProject.macos,
       configuration,
+      fileSystem: fs,
+      logger: logger,
     );
     if (disabledSandboxEntitlementFile != null) {
-      globals.logger.printStatus('Detected macOS app running in CI, turning off sandboxing.');
+      logger.printStatus('Detected macOS app running in CI, turning off sandboxing.');
     }
   }
 
-  final String arch = switch (globals.os.hostPlatform) {
+  final String hostArch = switch (os.hostPlatform) {
     HostPlatform.darwin_arm64 => 'arm64',
     HostPlatform.darwin_x64 => 'x86_64',
     _ => throw UnimplementedError('Unsupported platform'),
   };
 
-  // Determine the build destination
+  // Determine the build destination specifier for xcodebuild.
+  // This does not prevent some versions of xcodebuild from building a fat binary
+  // even if set to 'platform=macOS,arch=arm64';
   final String destination;
+  // The archtectures to specify in xcode project's build setting.
+  final String? archs;
   if (buildInfo.isDebug) {
     // Debug builds default to current host architecture
-    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$arch';
+    destination = 'platform=${XcodeSdk.MacOSX.displayName},arch=$hostArch';
+    archs = null;
   } else {
-    // Release builds default to universal binary
+    // Release builds default to universal binary unless isMacOSArm64OnlyEnabled is set.
     destination = XcodeSdk.MacOSX.genericPlatform;
+    archs = featureFlags.isMacOSArm64OnlyEnabled ? 'arm64' : null;
   }
 
   // Get EXCLUDED_ARCHS from Xcode project build settings
   // This allows developers to exclude specific architectures (e.g., x86_64)
   // when dependencies don't support them
-  final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
+  final String? excludedArchs = switch (buildSettings['EXCLUDED_ARCHS']?.trim()) {
+    null || '' => null,
+    final String excludedArches => excludedArches,
+  };
 
+  final bool binaryContainsX86Slice =
+      archs == null && (excludedArchs == null || !excludedArchs.contains('x86_64'));
+  final bool allowsArm64Only = switch (xcodeProjectInterpreter.version?.major) {
+    null || < 27 => false,
+    _ => true,
+  };
+  if (buildInfo.isRelease && binaryContainsX86Slice && allowsArm64Only) {
+    logger.printWarning(
+      'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
+      'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
+      'This will become the default behavior in a future Flutter release.',
+    );
+  }
+
+  var hasMacOSMinDeploymentTargetIssue = false;
+  String? macOSMinDeploymentTarget;
   try {
-    final List<String> xcodebuildCommandArgs = await globals.xcode!
+    if (archs != null && excludedArchs != null && excludedArchs.contains(archs)) {
+      throwToolExit(
+        'No Valid Target Arch: '
+        'You have enabled the macOSArm64Only feature flag but '
+        "arm64 is present in your macOS app's xcode project EXCLUDED_ARCHS settings. "
+        'Consider removing arm64 from EXCLUDED_ARCHS.',
+      );
+    }
+    final List<String> xcodebuildCommandArgs = await xcode
         .fetchDependenciesAndGenerateXcodebuildArgs(
-          flutterProject.macos.hostAppRoot.path,
-          globals.fs.directory(buildDirectoryPath),
-          skipPackageUpdatesAndValidation: false,
+          flutterProject.macos,
+          fs.directory(buildDirectoryPath),
+          skipPackageValidation: false,
         );
-    result = await globals.processUtils.stream(
+    result = await processUtils.stream(
       <String>[
         '/usr/bin/env',
         ...xcodebuildCommandArgs,
-        '-workspace',
-        xcodeWorkspace.path,
+        if (xcodeWorkspace != null) ...<String>['-workspace', xcodeWorkspace.path] else ...<String>[
+          '-project',
+          xcodeProject.path,
+        ],
         '-configuration',
         configuration,
         '-scheme',
@@ -235,50 +352,86 @@ Future<void> buildMacOS({
         flutterBuildDir.absolute.path,
         '-destination',
         destination,
-        'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-        'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+        'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+        'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verboseLogging) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         'COMPILER_INDEX_STORE_ENABLE=NO',
         if (disabledSandboxEntitlementFile != null)
           'CODE_SIGN_ENTITLEMENTS=${disabledSandboxEntitlementFile.path}',
         // Pass EXCLUDED_ARCHS from Xcode project to xcodebuild command
         // This fixes Swift Package Manager not respecting EXCLUDED_ARCHS from the project
-        if (excludedArches != null && excludedArches.trim().isNotEmpty)
-          'EXCLUDED_ARCHS=$excludedArches',
-        ...environmentVariablesAsXcodeBuildSettings(globals.platform),
+        if (excludedArchs != null) 'EXCLUDED_ARCHS=$excludedArchs',
+        ...environmentVariablesAsXcodeBuildSettings(platform),
+        if (archs != null) 'ARCHS=$archs',
       ],
       trace: true,
       stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-      mapFunction: verboseLogging
-          ? null
-          : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+      mapFunction: (String line) {
+        if (line.contains("deployment target 'MACOSX_DEPLOYMENT_TARGET' is set to") &&
+            line.contains('but the range of supported deployment target versions is')) {
+          hasMacOSMinDeploymentTargetIssue = true;
+          final pattern = RegExp(r'range of supported deployment target versions is ([0-9.]+) to');
+          final RegExpMatch? match = pattern.firstMatch(line);
+          if (match != null) {
+            macOSMinDeploymentTarget = match.group(1);
+          }
+        }
+        if (verboseLogging) {
+          return line;
+        }
+        return _filteredOutput.hasMatch(line) ? line : null;
+      },
     );
   } finally {
     status.cancel();
   }
 
   if (result != 0) {
+    if (hasMacOSMinDeploymentTargetIssue) {
+      logger.printError(
+        _macOSDeploymentTargetTooLowMessage(macOSMinDeploymentTarget),
+        emphasis: true,
+      );
+    }
     throwToolExit('Build process failed');
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
     flutterProject.macos,
+    plistParser: plistParser,
+    toolContext: toolContext,
   ).applicationBundle(buildInfo);
   if (applicationBundle != null) {
-    final Directory outputDirectory = globals.fs.directory(applicationBundle);
+    final Directory outputDirectory = fs.directory(applicationBundle);
     // This output directory is the .app folder itself.
-    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+    final int? directorySize = os.getDirectorySize(outputDirectory);
     final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
         ? '' // Don't display the size when building a debug variant.
         : ' (${getSizeAsPlatformMB(directorySize)})';
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+    logger.printStatus(
+      '${terminal.successMark} '
+      'Built ${fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
+
+    final File builtInfoPlist = fs.file(
+      fs.path.join(outputDirectory.path, 'Contents', 'Info.plist'),
+    );
+    final String plistPath = builtInfoPlist.existsSync()
+        ? builtInfoPlist.path
+        : flutterProject.macos.defaultHostInfoPlist.path;
+    final bool? impellerEnabled = plistParser.getValueFromFile<bool>(
+      plistPath,
+      PlistParser.kFLTEnableImpellerKey,
+    );
+
+    final buildLabel = impellerEnabled == false
+        ? 'plist-impeller-disabled'
+        : 'plist-impeller-enabled';
+    analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
   }
-  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
+  await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer, toolContext: toolContext);
   final Duration elapsedDuration = sw.elapsed;
-  globals.analytics.send(
+  analytics.send(
     Event.timing(
       workflow: 'build',
       variableName: 'xcode-macos',
@@ -292,16 +445,26 @@ Future<void> buildMacOS({
 /// Size analysis will be run for release builds where the --analyze-size
 /// option has been specified. By default, size analysis JSON output is written
 /// to ~/.flutter-devtools/macos-code-size-analysis_NN.json.
-Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnalyzer) async {
+Future<void> _writeCodeSizeAnalysis(
+  BuildInfo buildInfo,
+  SizeAnalyzer? sizeAnalyzer, {
+  required ToolContext toolContext,
+}) async {
   // Bail out if the size analysis option was not specified.
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
-  final File? aotSnapshot = DarwinArch.values
-      .map<File?>((DarwinArch arch) {
-        return globals.fs
+  final ToolContext(
+    :Config config,
+    fs: FileSystem fileSystem,
+    :FileSystemUtils fileSystemUtils,
+    :Logger logger,
+  ) = toolContext;
+  final File? aotSnapshot = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]
+      .map<File?>((CpuArch arch) {
+        return fileSystem
             .directory(buildInfo.codeSizeDirectory)
-            .childFile('snapshot.${arch.name}.json');
+            .childFile('snapshot.${arch.darwinArchName}.json');
         // Pick the first if there are multiple for simplicity
       })
       .firstWhere((File? file) => file!.existsSync(), orElse: () => null);
@@ -310,11 +473,11 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
       'No code size snapshot file (snapshot.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}',
     );
   }
-  final File? precompilerTrace = DarwinArch.values
-      .map<File?>((DarwinArch arch) {
-        return globals.fs
+  final File? precompilerTrace = const <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]
+      .map<File?>((CpuArch arch) {
+        return fileSystem
             .directory(buildInfo.codeSizeDirectory)
-            .childFile('trace.${arch.name}.json');
+            .childFile('trace.${arch.darwinArchName}.json');
       })
       .firstWhere((File? file) => file!.existsSync(), orElse: () => null);
   if (precompilerTrace == null) {
@@ -325,13 +488,18 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
 
   // This analysis is only supported for release builds.
   // Attempt to guess the correct .app by picking the first one.
-  final Directory candidateDirectory = globals.fs.directory(
-    globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+  final Directory candidateDirectory = fileSystem.directory(
+    fileSystem.path.join(
+      getMacOSBuildDirectory(config: config, fileSystem: fileSystem),
+      'Build',
+      'Products',
+      'Release',
+    ),
   );
   final Directory appDirectory = candidateDirectory.listSync().whereType<Directory>().firstWhere((
     Directory directory,
   ) {
-    return globals.fs.path.extension(directory.path) == '.app';
+    return fileSystem.path.extension(directory.path) == '.app';
   });
   final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
     aotSnapshot: aotSnapshot,
@@ -340,17 +508,15 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
     type: 'macos',
     excludePath: 'Versions', // Avoid double counting caused by symlinks
   );
-  final File outputFile = globals.fsUtils.getUniqueFile(
-    globals.fs.directory(globals.fsUtils.homeDirPath).childDirectory('.flutter-devtools'),
+  final File outputFile = fileSystemUtils.getUniqueFile(
+    fileSystem.directory(fileSystemUtils.homeDirPath).childDirectory('.flutter-devtools'),
     'macos-code-size-analysis',
     'json',
   )..writeAsStringSync(jsonEncode(output));
   // This message is used as a sentinel in analyze_apk_size_test.dart
-  globals.printStatus(
-    'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
-  );
+  logger.printStatus('A summary of your macOS bundle analysis can be found at: ${outputFile.path}');
 
-  globals.printStatus(
+  logger.printStatus(
     '\nTo analyze your app size in Dart DevTools, run the following command:\n'
     'dart devtools --appSizeBase=${outputFile.path}',
   );
@@ -363,7 +529,12 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
 /// access to the app. To workaround this in CI, we create and use a entitlements
 /// file with sandboxing disabled. See
 /// https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox.
-File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configuration) {
+File? _createDisabledSandboxEntitlementFile(
+  MacOSProject macos,
+  String configuration, {
+  required FileSystem fileSystem,
+  required Logger logger,
+}) {
   String entitlementDefaultFileName;
   if (configuration == 'Release') {
     entitlementDefaultFileName = 'Release';
@@ -379,12 +550,12 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
       .childFile('$entitlementDefaultFileName.entitlements');
 
   if (!entitlementFile.existsSync()) {
-    globals.logger.printTrace('Unable to find entitlements file at ${entitlementFile.path}');
+    logger.printTrace('Unable to find entitlements file at ${entitlementFile.path}');
     return null;
   }
 
   final String entitlementFileContents = entitlementFile.readAsStringSync();
-  final File disabledSandboxEntitlementFile = globals.fs.systemTempDirectory
+  final File disabledSandboxEntitlementFile = fileSystem.systemTempDirectory
       .createTempSync('flutter_disable_sandbox_entitlement.')
       .childFile('${entitlementDefaultFileName}WithDisabledSandboxing.entitlements');
   disabledSandboxEntitlementFile.createSync(recursive: true);
@@ -397,4 +568,19 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
     ),
   );
   return disabledSandboxEntitlementFile;
+}
+
+String _macOSDeploymentTargetTooLowMessage(String? minVersion) {
+  final String versionText = minVersion ?? 'the minimum supported version';
+  return '''
+════════════════════════════════════════════════════════════════════════════════
+The macOS deployment target is too low. Xcode requires at least $versionText.
+
+To upgrade your macOS deployment target, follow these steps:
+  1. Open the project in Xcode:
+     open macos/Runner.xcworkspace
+  2. Select the "Runner" project in the project navigator.
+  3. Select the "Runner" TARGET, and in the "General" tab:
+     Update "Minimum Deployments" to at least $versionText.
+════════════════════════════════════════════════════════════════════════════════''';
 }

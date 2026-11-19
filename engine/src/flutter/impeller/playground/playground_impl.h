@@ -33,7 +33,7 @@ class PlaygroundImpl {
 
   Vector2 GetContentScale() const;
 
-  virtual fml::Status SetCapabilities(
+  virtual absl::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities) = 0;
 
   virtual Playground::GLProcAddressResolver CreateGLProcAddressResolver() const;
@@ -45,10 +45,12 @@ class PlaygroundImpl {
   [[nodiscard]]
   virtual RuntimeStageBackend GetRuntimeStageBackend() const = 0;
 
+  static void OnTearDownTestEnvironment();
+
  protected:
   const PlaygroundSwitches switches_;
 
-  explicit PlaygroundImpl(PlaygroundSwitches switches);
+  explicit PlaygroundImpl(const PlaygroundSwitches& switches);
 
  private:
   PlaygroundImpl(const PlaygroundImpl&) = delete;

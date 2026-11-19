@@ -41,12 +41,16 @@ internal object VersionFetcher {
     }
 
     /**
-     * Returns the version of the Kotlin Gradle plugin.
+     * Returns the version of the Kotlin Gradle plugin, or null if it cannot be determined.
+     *
+     * Null is an expected result when the Kotlin Gradle plugin has not been applied to the
+     * project — most notably under AGP's built-in Kotlin support (`android.builtInKotlin`),
+     * where there is no standalone KGP. Callers must treat null as "unknown/not applied",
+     * not as an error.
      */
     internal fun getKGPVersion(project: Project): Version? {
-        // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
-        //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
-        //                 those.
+        // KGP's version in org.jetbrains.kotlin.gradle.plugin.DefaultKotlinBasePlugin is not
+        // available when this method is called.
         val kotlinVersionProperty = "kotlin_version"
         val firstKotlinVersionFieldName = "pluginVersion"
         val secondKotlinVersionFieldName = "kotlinPluginVersion"
@@ -60,7 +64,7 @@ internal object VersionFetcher {
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)
         // Partial implementation of getKotlinPluginVersion from the comment above.
         var versionString: String? = kotlinPlugin?.pluginVersion
-        if (!versionString.isNullOrEmpty()) {
+        if (!versionString.isNullOrEmpty() && versionString != "unknown") {
             return Version.fromString(versionString)
         }
         // Fall back to reflection.
@@ -69,7 +73,7 @@ internal object VersionFetcher {
                 it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
             }
         versionString = versionField?.call(kotlinPlugin) as String?
-        return if (versionString == null) {
+        return if (versionString == null || versionString == "unknown") {
             null
         } else {
             Version.fromString(versionString)

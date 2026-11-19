@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CAPABILITIES_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_CAPABILITIES_VK_H_
 
+#include <array>
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -151,6 +152,14 @@ enum class OptionalDeviceExtensionVK : uint32_t {
   ///
   kEXTImageCompressionControl,
 
+  //----------------------------------------------------------------------------
+  /// For sampling ASTC HDR block-compressed textures. Promoted to core in
+  /// Vulkan 1.3, but gated here on the extension for broader device coverage.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_texture_compression_astc_hdr.html
+  ///
+  kEXTTextureCompressionAstcHdr,
+
   kLast,
 };
 
@@ -211,7 +220,8 @@ class CapabilitiesVK final : public Capabilities,
       vk::StructureChain<vk::PhysicalDeviceFeatures2,
                          vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR,
                          vk::PhysicalDevice16BitStorageFeatures,
-                         vk::PhysicalDeviceImageCompressionControlFeaturesEXT>;
+                         vk::PhysicalDeviceImageCompressionControlFeaturesEXT,
+                         vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>;
 
   std::optional<PhysicalDeviceFeatures> GetEnabledDeviceFeatures(
       const vk::PhysicalDevice& physical_device) const;
@@ -264,7 +274,20 @@ class CapabilitiesVK final : public Capabilities,
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override;
+
+  // |Capabilities|
+  bool SupportsTextureArrays() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
+
+  // |Capabilities|
+  bool SupportsTextureCompression(
+      CompressedTextureFamily family) const override;
+
+  // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override;
 
   // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
@@ -282,6 +305,9 @@ class CapabilitiesVK final : public Capabilities,
   ISize GetMaximumRenderPassAttachmentSize() const override;
 
   // |Capabilities|
+  uint32_t GetMaxSamplerAnisotropy() const override;
+
+  // |Capabilities|
   size_t GetMinimumUniformAlignment() const override;
 
   // |Capabilities|
@@ -289,6 +315,9 @@ class CapabilitiesVK final : public Capabilities,
 
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
+
+  // |Capabilities|
+  ComputeLimits GetComputeLimits() const override;
 
   //----------------------------------------------------------------------------
   /// @return     If fixed-rate compression for non-onscreen surfaces is
@@ -337,10 +366,15 @@ class CapabilitiesVK final : public Capabilities,
   bool supports_device_transient_textures_ = false;
   bool supports_texture_fixed_rate_compression_ = false;
   ISize max_render_pass_attachment_size_ = ISize{0, 0};
+  uint32_t max_sampler_anisotropy_ = 1;
   bool has_triangle_fans_ = true;
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;
   bool supports_external_fence_and_semaphore_ = false;
+  bool supports_texture_compression_bc_ = false;
+  bool supports_texture_compression_etc2_ = false;
+  bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
   bool is_valid_ = false;
 
   // The embedder.h API is responsible for providing the instance and device

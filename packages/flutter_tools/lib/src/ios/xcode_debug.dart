@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -28,17 +29,17 @@ import 'xcode_build_settings.dart';
 /// Scripting to debug Flutter applications.
 class XcodeDebug {
   XcodeDebug({
+    required this._fileSystem,
     required Logger logger,
     required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
+    required this._templatePathProvider,
+    required this._xcode,
   }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final TemplatePathProvider _templatePathProvider;
   final Xcode _xcode;
   final FileSystem _fileSystem;
 
@@ -378,6 +379,7 @@ class XcodeDebug {
       fileSystem: _fileSystem,
       templateManifest: null,
       logger: _logger,
+      templatePathProvider: _templatePathProvider,
       templateRenderer: templateRenderer,
     );
 
@@ -443,12 +445,14 @@ and ensure "Debug executable" is checked in the "Info" tab.
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
+    required ToolContext toolContext,
   }) async {
     await updateGeneratedXcodeProperties(
       project: project,
       buildInfo: buildInfo,
       targetOverride: mainPath,
       configurationBuildDir: configurationBuildDir,
+      toolContext: toolContext,
     );
   }
 }

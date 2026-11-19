@@ -139,7 +139,6 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   frame_info.mvp = entity.GetShaderTransform(pass);
-  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
 
 #ifdef IMPELLER_DEBUG
   if (label_.empty()) {
@@ -185,15 +184,7 @@ bool TextureContents::Render(const ContentContext& renderer,
         Rect::MakeSize(texture_->GetSize()).Project(source_rect_.Expand(-0.5));
 
     FSStrict::FragInfo frag_info;
-    if (texture_->GetYCoordScale() < 0.0) {
-      FML_DCHECK(texture_->GetYCoordScale() == -1.0f);
-      frag_info.source_rect = Vector4(strict_texture_coords.GetLeft(),
-                                      1.0f - strict_texture_coords.GetBottom(),
-                                      strict_texture_coords.GetRight(),
-                                      1.0f - strict_texture_coords.GetTop());
-    } else {
-      frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
-    }
+    frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
     frag_info.alpha = GetOpacity();
     FSStrict::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FSStrict::BindTextureSampler(
@@ -202,7 +193,7 @@ bool TextureContents::Render(const ContentContext& renderer,
             sampler_descriptor_));
 #if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   } else if (is_external_texture) {
-    FSExternal::FragInfo frag_info;
+    FSExternal::FragInfo frag_info{};
     frag_info.x_tile_mode =
         static_cast<Scalar>(sampler_descriptor_.width_address_mode);
     frag_info.y_tile_mode =
@@ -225,7 +216,7 @@ bool TextureContents::Render(const ContentContext& renderer,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
 #endif  //  IMPELLER_ENABLE_OPENGLES
   } else {
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.alpha = GetOpacity();
     FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(

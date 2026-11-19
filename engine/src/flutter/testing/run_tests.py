@@ -205,6 +205,40 @@ def vulkan_validation_env(build_dir: str) -> typing.Dict[str, str]:
   return extra_env
 
 
+# A small, hand picked set of Vulkan `impeller_unittests` that are run with the
+# synchronization validation feature of the Vulkan validation layers enabled.
+# Synchronization validation is too expensive to run against the entire suite,
+# so these are selected to cover the broadest set of synchronization scenarios
+# (blits, readbacks, mipmap generation, MSAA resolves, depth/stencil
+# attachments, subpasses, compute, offscreen layers, backdrop filters, advanced
+# blends, and glyph atlas uploads).
+#
+# See https://github.com/flutter/flutter/issues/195502.
+VULKAN_SYNC_VALIDATION_TESTS = [
+    # Blits, readbacks and mipmap generation.
+    'Play/BlitPassTest.CanBlitSmallRegionToUninitializedTexture/Vulkan',
+    'Play/BlitPassTest.CanResizeTextures/Vulkan',
+    'Play/RendererTest.CanBlitTextureToBuffer/Vulkan',
+    'Play/RendererTest.CanGenerateMipmaps/Vulkan',
+    'Play/TypographerTest.GlyphAtlasTextureWillGrowTilMaxTextureSize/Vulkan',
+    # Render passes, offscreen targets, MSAA, depth/stencil and subpasses.
+    'Play/RendererTest.CanRenderToTexture/Vulkan',
+    'Play/RendererTest.CachesRenderPassAndFramebufferMixed/Vulkan',
+    'Play/RendererTest.CanSepiaToneWithSubpasses/Vulkan',
+    'Play/EntityPassTargetTest.SwapWithMSAAImplicitResolve/Vulkan',
+    # Compute.
+    'Compute/ComputeTest.MultiStageInputAndOutput/Vulkan',
+    # End-to-end rendering through Aiks/DisplayList.
+    'Play/AiksTest.CanRenderImage/Vulkan',
+    'Play/AiksTest.CanRenderClips/Vulkan',
+    'Play/AiksTest.CanRenderTextFrame/Vulkan',
+    'Play/AiksTest.CanRenderBackdropBlur/Vulkan',
+    'Play/AiksTest.CanRenderAdvancedBlendColorFilterWithSaveLayer/Vulkan',
+    'Play/AiksTest.CanRenderNestedBackdropBlur/Vulkan',
+    'Play/AiksTest.GaussianBlurBackdropTinyMipMap/Vulkan',
+]
+
+
 def metal_validation_env() -> typing.Dict[str, str]:
   extra_env = {
       # pylint: disable=line-too-long
@@ -569,11 +603,10 @@ def run_cc_tests(
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
     mac_impeller_unittests_flags = repeat_flags + [
-        '--gtest_filter=-*OpenGLES',  # These are covered in the golden tests.
-        '--',
-        '--enable_vulkan_validation',
+        # OpenGLES is covered by the golden tests. Vulkan is SwiftShader here
+        # and already runs on Linux.
+        '--gtest_filter=-*OpenGLES:*OpenGLESSDF:*Vulkan*',
     ]
-    # Impeller tests are only supported on macOS for now.
     run_engine_executable(
         build_dir,
         'impeller_unittests',
@@ -623,6 +656,35 @@ def run_cc_tests(
         coverage=coverage,
         extra_env=extra_env,
     )
+
+
+def run_impeller_vulkan_sync_validation_tests(
+    build_dir: str, build_name: str, executable_filter: typing.Optional[typing.List[str]],
+    coverage: bool
+) -> None:
+  """
+  Runs `VULKAN_SYNC_VALIDATION_TESTS` with Vulkan synchronization validation.
+  """
+  flags = [
+      '--gtest_filter=' + ':'.join(VULKAN_SYNC_VALIDATION_TESTS),
+      '--',
+      '--enable_vulkan_sync_validation',
+  ]
+  try:
+    if is_linux():
+      xvfb.start_virtual_x(build_name, build_dir)
+    run_engine_executable(
+        build_dir,
+        'impeller_unittests',
+        executable_filter,
+        flags,
+        coverage=coverage,
+        gtest=True,
+        extra_env=vulkan_validation_env(build_dir),
+    )
+  finally:
+    if is_linux():
+      xvfb.stop_virtual_x(build_name)
 
 
 def run_engine_benchmarks(
@@ -844,7 +906,9 @@ def run_android_tests(
 
 
 def run_objc_tests(
-    ios_variant: str = 'ios_debug_sim_unopt', test_filter: typing.Optional[str] = None
+    ios_variant: str = 'ios_debug_sim_unopt',
+    test_filter: typing.Optional[str] = None,
+    ios_runtime: typing.Optional[str] = None,
 ) -> None:
   """Runs Objective-C XCTest unit tests for the iOS embedding"""
   assert_expected_xcode_version()
@@ -858,12 +922,15 @@ def run_objc_tests(
   delete_simulator(new_simulator_name)
 
   create_simulator = [
-      'xcrun '
-      'simctl '
-      'create '
-      f'{new_simulator_name} com.apple.CoreSimulator.SimDeviceType.iPhone-11'
+      'xcrun',
+      'simctl',
+      'create',
+      new_simulator_name,
+      'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
   ]
-  run_cmd(create_simulator, shell=True)
+  if ios_runtime is not None:
+    create_simulator.append(ios_runtime)
+  simulator_id = subprocess.check_output(create_simulator, text=True).strip()
 
   try:
     ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
@@ -880,7 +947,7 @@ def run_objc_tests(
           '-sdk iphonesimulator '
           '-scheme IosUnitTests '
           '-resultBundlePath ' + result_bundle_path + ' '
-          '-destination name=' + new_simulator_name + ' '
+          f'-destination id={simulator_id} '
           'test '
           'FLUTTER_ENGINE=' + ios_variant
       ]
@@ -1071,7 +1138,6 @@ def build_dart_host_test_list() -> typing.List[str]:
       os.path.join('flutter', 'tools', 'api_check'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
-      os.path.join('flutter', 'tools', 'const_finder'),
       os.path.join('flutter', 'tools', 'engine_tool'),
       os.path.join('flutter', 'tools', 'githooks'),
       os.path.join('flutter', 'tools', 'header_guard_check'),
@@ -1313,6 +1379,14 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       help='The engine build variant to run objective-c tests for'
   )
   parser.add_argument(
+      '--ios-runtime',
+      dest='ios_runtime',
+      action='store',
+      default=None,
+      help='The iOS simulator runtime to run tests on '
+      '(example: "com.apple.CoreSimulator.SimRuntime.iOS-26-5")'
+  )
+  parser.add_argument(
       '--verbose-dart-snapshot',
       dest='verbose_dart_snapshot',
       action='store_true',
@@ -1440,6 +1514,9 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     finally:
       xvfb.stop_virtual_x(build_name)
 
+  if 'impeller-vulkan-sync-validation' in types:
+    run_impeller_vulkan_sync_validation_tests(build_dir, args.variant, engine_filter, args.coverage)
+
   if 'dart' in types:
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None
     tasks = list(gather_dart_smoke_test(build_dir, dart_filter))
@@ -1478,7 +1555,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   if 'objc' in types:
     assert is_mac(), 'iOS embedding tests can only be run on macOS.'
-    run_objc_tests(args.ios_variant, args.objc_filter)
+    run_objc_tests(args.ios_variant, args.objc_filter, args.ios_runtime)
 
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not is_windows():

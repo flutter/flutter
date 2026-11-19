@@ -2599,7 +2599,8 @@ IFACEMETHODIMP AXPlatformNodeWin::QueryService(REFGUID guidService,
                                                void** object) {
   COM_OBJECT_VALIDATE_1_ARG(object);
 
-  if (guidService == IID_IAccessible || (guidService == IID_IAccessibleEx && delegate_->IsIAccessibleExEnabled())) {
+  if (guidService == IID_IAccessible || (guidService == IID_IAccessibleEx &&
+                                         delegate_->IsIAccessibleExEnabled())) {
     return QueryInterface(riid, object);
   }
 
@@ -5313,6 +5314,8 @@ std::optional<PROPERTYID> AXPlatformNodeWin::MojoEventToUIAProperty(
         return UIA_ToggleToggleStatePropertyId;
       }
       return std::nullopt;
+    case ax::mojom::Event::kStateChanged:
+      return UIA_IsEnabledPropertyId;
     default:
       return std::nullopt;
   }

@@ -367,5 +367,21 @@ TEST(PlatformViewShell,
   delegate->UpdateSemantics(update, actions);
 }
 
+TEST(PlatformViewShell, UpdateSemanticsEmptyDoesNotCrash) {
+  auto jni_mock = std::make_shared<JNIMock>();
+  auto delegate = std::make_unique<PlatformViewAndroidDelegate>(jni_mock);
+
+  EXPECT_CALL(*jni_mock, FlutterViewUpdateCustomAccessibilityActions(
+                             ::testing::_, ::testing::_))
+      .Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewUpdateSemantics(::testing::_, ::testing::_,
+                                                    ::testing::_))
+      .Times(0);
+
+  flutter::SemanticsNodeUpdates update;
+  flutter::CustomAccessibilityActionUpdates actions;
+  delegate->UpdateSemantics(update, actions);
+}
+
 }  // namespace testing
 }  // namespace flutter

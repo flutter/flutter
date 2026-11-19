@@ -70,6 +70,14 @@ class StubFlutterWindowsApi {
   virtual void EngineSetNextFrameCallback(VoidCallback callback,
                                           void* user_data) {}
 
+  // Called for FlutterDesktopEngineIsPlatformThread.
+  virtual bool EngineIsPlatformThread() { return false; }
+
+  // Called for FlutterDesktopEnginePostPlatformThreadTask.
+  virtual void EnginePostPlatformThreadTask(VoidCallback callback,
+                                            VoidCallback on_cancel,
+                                            void* user_data) {}
+
   // Called for FlutterDesktopEngineReloadSystemFonts.
   virtual void EngineReloadSystemFonts() {}
 
@@ -115,6 +123,14 @@ class StubFlutterWindowsApi {
   virtual bool PluginRegistrarGetGraphicsAdapter(IDXGIAdapter** adapter_out) {
     return false;
   }
+
+  // Called for FlutterDesktopPluginRegistrarIsPlatformThread.
+  virtual bool PluginRegistrarIsPlatformThread() { return false; }
+
+  // Called for FlutterDesktopPluginRegistrarPostPlatformThreadTask.
+  virtual void PluginRegistrarPostPlatformThreadTask(VoidCallback callback,
+                                                     VoidCallback on_cancel,
+                                                     void* user_data) {}
 
   // Called for FlutterDesktopEngineProcessExternalWindowMessage.
   virtual bool EngineProcessExternalWindowMessage(

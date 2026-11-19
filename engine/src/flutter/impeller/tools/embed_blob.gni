@@ -12,6 +12,7 @@ template("embed_blob") {
   assert(defined(invoker.deps), "The target dependencies must be specified")
 
   gen_blob_target_name = "gen_blob_$target_name"
+
   action(gen_blob_target_name) {
     inputs = [ invoker.blob ]
     outputs = [
@@ -22,11 +23,11 @@ template("embed_blob") {
       "--symbol-name",
       invoker.symbol_name,
       "--output-header",
-      rebase_path(invoker.hdr),
+      rebase_path(invoker.hdr, root_build_dir),
       "--output-source",
-      rebase_path(invoker.cc),
+      rebase_path(invoker.cc, root_build_dir),
       "--source",
-      rebase_path(invoker.blob),
+      rebase_path(invoker.blob, root_build_dir),
     ]
     script = "//flutter/impeller/tools/xxd.py"
     deps = invoker.deps
@@ -34,6 +35,7 @@ template("embed_blob") {
   }
 
   embed_config = "embed_$target_name"
+
   config(embed_config) {
     include_dirs = [ get_path_info(
             get_label_info("//flutter/impeller:impeller", "target_gen_dir"),

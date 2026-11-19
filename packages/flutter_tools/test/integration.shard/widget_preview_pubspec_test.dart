@@ -14,10 +14,13 @@ import 'widget_preview_test_helpers.dart';
 
 void main() {
   late Directory tempDir;
-  final project = BasicProject();
+  late BasicProject project;
+  var projectCounter = 0;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('widget_preview_pubspec_test.');
+    projectCounter++;
+    project = BasicProject(name: 'test_pubspec_$projectCounter');
     await project.setUpIn(tempDir);
   });
 

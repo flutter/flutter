@@ -4,8 +4,7 @@
 
 #include "impeller/renderer/render_target.h"
 
-#include <format>
-#include <sstream>
+#include <string>
 
 #include "impeller/base/validation.h"
 #include "impeller/core/allocator.h"
@@ -13,8 +12,21 @@
 #include "impeller/core/texture.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
+
+// The dimensions of `texture` at `mip_level`, clamped to a minimum of 1x1.
+// Rendering into a mip level uses that level's size, not the base size.
+static ISize SizeForMipLevel(const std::shared_ptr<Texture>& texture,
+                             uint32_t mip_level) {
+  ISize size = texture->GetSize();
+  // Any real texture reaches 1x1 well before this; clamping the shift also
+  // avoids undefined behavior for absurd mip levels.
+  uint32_t shift = std::min(mip_level, 31u);
+  return ISize{std::max<int64_t>(1, size.width >> shift),
+               std::max<int64_t>(1, size.height >> shift)};
+}
 
 RenderTarget::RenderTarget() = default;
 
@@ -34,10 +46,12 @@ bool RenderTarget::IsValid() const {
     std::optional<ISize> size;
     bool sizes_are_same = true;
     auto iterator = [&](const Attachment& attachment) -> bool {
+      ISize attachment_size =
+          SizeForMipLevel(attachment.texture, attachment.mip_level);
       if (!size.has_value()) {
-        size = attachment.texture->GetSize();
+        size = attachment_size;
       }
-      if (size != attachment.texture->GetSize()) {
+      if (size != attachment_size) {
         sizes_are_same = false;
         return false;
       }
@@ -155,7 +169,8 @@ bool RenderTarget::HasColorAttachment(size_t index) const {
 std::optional<ISize> RenderTarget::GetColorAttachmentSize(size_t index) const {
   if (index == 0u) {
     if (color0_.has_value()) {
-      return color0_.value().texture->GetSize();
+      return SizeForMipLevel(color0_.value().texture,
+                             color0_.value().mip_level);
     }
     return std::nullopt;
   }
@@ -165,7 +180,7 @@ std::optional<ISize> RenderTarget::GetColorAttachmentSize(size_t index) const {
     return std::nullopt;
   }
 
-  return found->second.texture->GetSize();
+  return SizeForMipLevel(found->second.texture, found->second.mip_level);
 }
 
 ISize RenderTarget::GetRenderTargetSize() const {
@@ -276,27 +291,25 @@ size_t RenderTarget::GetTotalAttachmentCount() const {
 }
 
 std::string RenderTarget::ToString() const {
-  std::stringstream stream;
+  std::string result;
 
   if (color0_.has_value()) {
-    stream << std::format("Color[{}]=({})", 0,
-                          ColorAttachmentToString(color0_.value()));
+    absl::StrAppend(&result, "Color[0]=(",
+                    ColorAttachmentToString(color0_.value()), ")");
   }
   for (const auto& [index, color] : colors_) {
-    stream << std::format("Color[{}]=({})", index,
-                          ColorAttachmentToString(color));
+    absl::StrAppend(&result, "Color[", index, "]=(",
+                    ColorAttachmentToString(color), ")");
   }
   if (depth_) {
-    stream << ",";
-    stream << std::format("Depth=({})",
-                          DepthAttachmentToString(depth_.value()));
+    absl::StrAppend(&result, ",Depth=(",
+                    DepthAttachmentToString(depth_.value()), ")");
   }
   if (stencil_) {
-    stream << ",";
-    stream << std::format("Stencil=({})",
-                          StencilAttachmentToString(stencil_.value()));
+    absl::StrAppend(&result, ",Stencil=(",
+                    StencilAttachmentToString(stencil_.value()), ")");
   }
-  return stream.str();
+  return result;
 }
 
 RenderTargetConfig RenderTarget::ToConfig() const {

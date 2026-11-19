@@ -10,12 +10,10 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
@@ -26,12 +24,15 @@ void main() {
   Logger? logger;
   DtdLauncher? dtdLauncher;
   DevtoolsServerLauncher? devtoolsLauncher;
-  final project = BasicProject();
+  late BasicProject project;
+  var projectCounter = 0;
   const ProcessManager processManager = LocalProcessManager();
 
   setUp(() async {
     logger = BufferLogger.test();
     tempDir = createResolvedTempDirectorySync('widget_preview_smoke_test.');
+    projectCounter++;
+    project = BasicProject(name: 'test_smoke_$projectCounter');
     await project.setUpIn(tempDir);
   });
 
@@ -56,59 +57,48 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'runs flutter pub get in widget_preview_scaffold if '
-      "widget_preview_scaffold/.dart_tool doesn't exist",
-      () async {
-        // Regression test for https://github.com/flutter/flutter/issues/178660
-        // Generate the widget preview scaffold, but don't bother launching it.
-        processManager.runSync(<String>[
-          flutterBin,
-          'widget-preview',
-          'start',
-          '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
-        ], workingDirectory: tempDir.path);
+    testWithoutContext('runs flutter pub get in widget_preview_scaffold if '
+        "widget_preview_scaffold/.dart_tool doesn't exist", () async {
+      // Regression test for https://github.com/flutter/flutter/issues/178660
+      // Generate the widget preview scaffold, but don't bother launching it.
+      processManager.runSync(<String>[
+        flutterBin,
+        'widget-preview',
+        'start',
+        '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
+      ], workingDirectory: tempDir.path);
 
-        // Ensure widget_preview_scaffold/.dart_tool/package_config.json exists.
-        final Directory widgetPreviewScaffoldDartTool = tempDir
-            .childDirectory('.dart_tool')
-            .childDirectory('widget_preview_scaffold')
-            .childDirectory('.dart_tool');
-        expect(widgetPreviewScaffoldDartTool, exists);
-        expect(widgetPreviewScaffoldDartTool.childFile('package_config.json'), exists);
+      // Ensure .widget_preview/.dart_tool/package_config.json exists.
+      final Directory widgetPreviewScaffoldDartTool = tempDir
+          .childDirectory('.widget_preview')
+          .childDirectory('.dart_tool');
+      expect(widgetPreviewScaffoldDartTool, exists);
+      expect(widgetPreviewScaffoldDartTool.childFile('package_config.json'), exists);
 
-        // Delete widget_preview_scaffold/.dart_tool/. This simulates an interrupted
-        // flutter widget-preview start where 'flutter pub get' wasn't run after
-        // the widget_preview_scaffold project was created.
-        widgetPreviewScaffoldDartTool.deleteSync(recursive: true);
+      // Delete .widget_preview/.dart_tool/. This simulates an interrupted
+      // flutter widget-preview start where 'flutter pub get' wasn't run after
+      // the widget_preview_scaffold project was created.
+      widgetPreviewScaffoldDartTool.deleteSync(recursive: true);
 
-        // Ensure we don't crash due to the package_config.json lookup pointing to
-        // the parent project's package_config.json due to
-        // widget_preview_scaffold/.dart_tool/package_config.json not existing.
-        await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
-      },
-      // Project is always regenerated.
-      skip: true, // See https://github.com/flutter/flutter/issues/179036.
-    );
+      // Ensure we don't crash due to the package_config.json lookup pointing to
+      // the parent project's package_config.json due to
+      // .widget_preview/.dart_tool/package_config.json not existing.
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
+    });
 
-    testWithoutContext(
-      'does not recreate project on subsequent runs',
-      () async {
-        // The first run of 'flutter widget-preview start' should generate a new preview scaffold
-        await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
+    testWithoutContext('does not recreate project on subsequent runs', () async {
+      // The first run of 'flutter widget-preview start' should generate a new preview scaffold
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
 
-        // We shouldn't regenerate the scaffold after the initial run.
-        await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
-      },
-      // Project is always regenerated.
-      skip: true, // See https://github.com/flutter/flutter/issues/179036.
-    );
+      // We shouldn't regenerate the scaffold after the initial run.
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
+    });
 
-    testUsingContext('can connect to an existing DTD instance', () async {
+    testWithoutContext('can connect to an existing DTD instance', () async {
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       // Start a DTD instance.
@@ -138,12 +128,12 @@ void main() {
       await completer.future;
     });
 
-    testUsingContext('can connect to an existing DevTools instance', () async {
+    testWithoutContext('can connect to an existing DevTools instance', () async {
       devtoolsLauncher = DevtoolsServerLauncher(
         processManager: processManager,
         logger: logger!,
         botDetector: const FakeBotDetector(true),
-        artifacts: globals.artifacts!,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
       );
 
       // Start a DevTools instance.
@@ -159,12 +149,12 @@ void main() {
       );
     });
 
-    testUsingContext("doesn't crash on flutter clean", () async {
+    testWithoutContext("doesn't crash on flutter clean", () async {
       // Regression test for https://github.com/flutter/flutter/issues/175058.
       dtdLauncher = DtdLauncher(
         logger: logger!,
-        artifacts: globals.artifacts!,
-        processManager: globals.processManager,
+        artifacts: createWidgetPreviewTestArtifacts(logger: logger),
+        processManager: processManager,
       );
 
       // Start a DTD instance.

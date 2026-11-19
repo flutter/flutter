@@ -19,7 +19,6 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
-#include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/variable_refresh_rate_display.h"
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
@@ -30,6 +29,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterShell_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextureRegistryRelay.h"
@@ -38,47 +39,10 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
-#include "flutter/shell/profiling/sampling_profiler.h"
 
 FLUTTER_ASSERT_ARC
-
-/// Inheriting ThreadConfigurer and use iOS platform thread API to configure the thread priorities
-/// Using iOS platform thread API to configure thread priority
-static void IOSPlatformThreadConfigSetter(const fml::Thread::ThreadConfig& config) {
-  // set thread name
-  fml::Thread::SetCurrentThreadName(config);
-
-  // set thread priority
-  switch (config.priority) {
-    case fml::Thread::ThreadPriority::kBackground: {
-      pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
-      [[NSThread currentThread] setThreadPriority:0];
-      break;
-    }
-    case fml::Thread::ThreadPriority::kNormal: {
-      pthread_set_qos_class_self_np(QOS_CLASS_DEFAULT, 0);
-      [[NSThread currentThread] setThreadPriority:0.5];
-      break;
-    }
-    case fml::Thread::ThreadPriority::kRaster:
-    case fml::Thread::ThreadPriority::kDisplay: {
-      pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
-      [[NSThread currentThread] setThreadPriority:1.0];
-      sched_param param;
-      int policy;
-      pthread_t thread = pthread_self();
-      if (!pthread_getschedparam(thread, &policy, &param)) {
-        param.sched_priority = 50;
-        pthread_setschedparam(thread, policy, &param);
-      }
-      break;
-    }
-  }
-}
 
 #pragma mark - Public exported constants
 
@@ -88,7 +52,6 @@ NSString* const FlutterDefaultInitialRoute = nil;
 #pragma mark - Internal constants
 
 NSString* const kFlutterKeyDataChannel = @"flutter/keydata";
-static constexpr int kNumProfilerSamplesPerSec = 5;
 NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.application_registrar";
 
 @interface FlutterEngineBaseRegistrar : NSObject <FlutterBaseRegistrar>
@@ -115,6 +78,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 #pragma mark - Properties
 
+@property(nonatomic, readonly) FlutterShell* backend;
 @property(nonatomic, readonly) FlutterDartProject* dartProject;
 @property(nonatomic, readonly, copy) NSString* labelPrefix;
 @property(nonatomic, readonly, assign) BOOL allowHeadlessExecution;
@@ -131,6 +95,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
 @property(nonatomic, readwrite, copy) NSString* isolateId;
 @property(nonatomic, copy) NSString* initialRoute;
+
+// Whether the engine has been destroyed. A destroyed engine cannot be run again.
+@property(nonatomic, assign, getter=isDestroyed) BOOL destroyed;
 @property(nonatomic, strong) id<NSObject> flutterViewControllerWillDeallocObserver;
 @property(nonatomic, strong) FlutterDartVMServicePublisher* publisher;
 @property(nonatomic, strong) FlutterConnectionCollection* connections;
@@ -193,19 +160,22 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 @end
 
 @implementation FlutterEngine {
-  std::shared_ptr<flutter::ThreadHost> _threadHost;
+  // Keep _backend an explicit ivar declared before _shell. ~Shell posts tasks to the raster and IO
+  // threads owned by _backend, so _shell must be destroyed first. Explicit ivars are destroyed in
+  // reverse declaration order and @synthesized ivars without an explicit ivar are destroyed first.
+  FlutterShell* _backend;
   std::unique_ptr<flutter::Shell> _shell;
-
-  flutter::IOSRenderingAPI _renderingApi;
-  std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
 
-  FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
-  FlutterFMLTaskRunner* _uiTaskRunnerWrapper;
-  FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
+  // The display information last sent to the framework by `updateDisplays`.
+  BOOL _hasSentDisplays;
+  CGSize _lastSentScreenNativeSize;
+  CGFloat _lastSentScreenScale;
 }
+
+@synthesize backend = _backend;
 
 - (int64_t)engineIdentifier {
   return reinterpret_cast<int64_t>((__bridge void*)self);
@@ -240,14 +210,19 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
 
+  // Reading the UIApplication lifecycle state and registering for UIKit notifications below both
+  // require the main thread, as does running the engine.
+  FML_DCHECK(NSThread.isMainThread) << "FlutterEngine must be created on the main thread.";
+
   _restorationEnabled = restorationEnabled;
   _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
   _dartProject = project ?: [[FlutterDartProject alloc] init];
+  _backend = [[FlutterShell alloc] init];
 
   _enableEmbedderAPI = _dartProject.settings.enable_embedder_api;
   if (_enableEmbedderAPI) {
-    NSLog(@"============== iOS: enable_embedder_api is on ==============");
+    [FlutterLogger logInfo:@"Embedder API enabled."];
     _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
     FlutterEngineGetProcAddresses(&_embedderAPI);
   }
@@ -275,6 +250,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                object:nil];
 
   [self setUpLifecycleNotifications:center];
+  [self updateGpuAvailabilityFromLifecycleState];
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -283,20 +259,54 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
 
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    [FlutterPluginSceneLifeCycleDelegate registerEngineForSingleScene:self];
+  }
+
   return self;
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
-  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  NSAssert(NSThread.isMainThread, @"Must be called on the main thread.");
   return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
+// Updates `isGpuDisabled` from the current lifecycle state and propagates to shell if available.
+//
+// This is process-level state that controls whether or not it's safe to submit work to the GPU.
+// Submitting GPU work while the app is backgrounded results in immediate process termination.
+//
+// For apps, we can read the state from `UIApplication.sharedApplication`.
+//
+// In an app extension, the state may be unreadable: there is no `UIApplication`, and the scene is
+// nil until the attached view controller's view is attached to a window's view hierarchy. In these
+// cases, we leave `isGpuDisabled` unmodified. This avoids the possibility of a crash from
+// incorrectly re-enabling the GPU on an engine that was disabled during backgrounding.
+//
+// Aside from on state transitions, the state has to be manually read and updated at the following
+// points:
+//
+// * When the engine is created, to determine if background or foreground.
+// * In app extensions, when a view controller is attached or detached.
+//
+- (void)updateGpuAvailabilityFromLifecycleState {
+  // When UIApplication.sharedApplication is available, it's authoritative for
+  // the process.
+  UIApplication* application = FlutterSharedApplication.application;
+  if (application) {
+    self.isGpuDisabled = application.applicationState == UIApplicationStateBackground;
+    return;
+  }
+
+  // Otherwise, we're in an app extension.
+  // Check if the view is attached to a Window, and query the scene.
+  UIWindowScene* scene = self.viewController.viewIfLoaded.window.windowScene;
+  if (scene) {
+    self.isGpuDisabled = scene.activationState == UISceneActivationStateBackground;
+  }
+}
+
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
-  // If the application is not available, use the scene for lifecycle notifications if available.
-  [center addObserver:self
-             selector:@selector(sceneWillConnect:)
-                 name:UISceneWillConnectNotification
-               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -318,30 +328,8 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                object:nil];
 }
 
-- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
-  UIScene* scene = notification.object;
-  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
-    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
-    // register it to the scene.
-    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
-    // plugins to receive the `scene:willConnectToSession:options` event.
-    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
-    // register their FlutterEngine to the scene manually during this event.
-    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
-        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
-    if (sceneLifeCycleDelegate != nil) {
-      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
-    }
-  }
-}
-
 - (void)recreatePlatformViewsController {
-  _renderingApi = flutter::GetRenderingAPIForProcess(/*force_software=*/false);
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
-}
-
-- (flutter::IOSRenderingAPI)platformViewsRenderingAPI {
-  return _renderingApi;
 }
 
 - (void)dealloc {
@@ -390,7 +378,15 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return;
   }
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(true);
+  }
   self.platformView->DispatchPointerDataPacket(std::move(packet));
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(false);
+  }
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
@@ -452,15 +448,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (FlutterFMLTaskRunner*)platformTaskRunner {
-  return _platformTaskRunnerWrapper;
+  return self.backend.platformTaskRunner;
 }
 
 - (FlutterFMLTaskRunner*)uiTaskRunner {
-  return _uiTaskRunnerWrapper;
+  // The platform and UI threads are always merged on iOS.
+  return self.backend.uiTaskRunner;
 }
 
 - (FlutterFMLTaskRunner*)rasterTaskRunner {
-  return _rasterTaskRunnerWrapper;
+  return self.backend.rasterTaskRunner;
 }
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
@@ -475,7 +472,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   }
   const char* character = event.character;
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = (uint64_t)event.timestamp;
   switch (event.type) {
@@ -520,6 +517,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.platformView);
   _viewController = viewController;
+
+  // Attaching a view controller makes it possible for app extensions to check GPU availability.
+  [self updateGpuAvailabilityFromLifecycleState];
+
   self.platformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
   [self updateDisplays];
@@ -568,15 +569,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)destroyContext {
+  if (self.destroyed) {
+    return;
+  }
+  self.destroyed = YES;
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
-  _profiler.reset();
-  _threadHost.reset();
+  [self.backend destroyThreadHost];
   _platformViewsController = nil;
-  _platformTaskRunnerWrapper = nil;
-  _uiTaskRunnerWrapper = nil;
-  _rasterTaskRunnerWrapper = nil;
+  [self.backend resetTaskRunners];
 }
 
 - (NSURL*)vmServiceUrl {
@@ -598,18 +600,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.settingsChannel = nil;
   self.keyEventChannel = nil;
   self.spellCheckChannel = nil;
-}
-
-- (void)startProfiler {
-  FML_DCHECK(!_threadHost->name_prefix.empty());
-  _profiler = std::make_shared<flutter::SamplingProfiler>(
-      _threadHost->name_prefix.c_str(), _threadHost->profiler_thread->GetTaskRunner(),
-      []() {
-        flutter::ProfilerMetricsIOS profiler_metrics;
-        return profiler_metrics.GenerateSample();
-      },
-      kNumProfilerSamplesPerSec);
-  _profiler->Start();
 }
 
 // If you add a channel, be sure to also update `resetChannels`.
@@ -794,73 +784,33 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.shell.RunEngine(std::move(configuration));
 }
 
-- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
-    withVMServicePublication:(BOOL)doesVMServicePublication {
+/// Takes ownership of `shell` and initializes engine-owned objects whose lifetime is tied to shell
+/// lifetime.
+- (void)adoptShell:(std::unique_ptr<flutter::Shell>)shell {
+  FML_DCHECK(shell);
   _shell = std::move(shell);
-  _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-      initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
-  _uiTaskRunnerWrapper =
-      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:_shell->GetTaskRunners().GetUITaskRunner()];
-  _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-      initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+  // A new shell has not received any display information yet.
+  _hasSentDisplays = NO;
+  [self.backend adoptTaskRunners:_shell->GetTaskRunners()];
+}
 
+/// Configures the engine.
+///
+/// Wires up platform channels, pushes initial state to the framework and starts the VM service
+/// publisher.
+- (void)configureForRunningShellWithVMServicePublication:(BOOL)doesVMServicePublication {
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
   self.publisher = [[FlutterDartVMServicePublisher alloc]
       initWithEnableVMServicePublication:doesVMServicePublication];
   [self maybeSetupPlatformViewChannels];
-  _shell->SetGpuAvailability(_isGpuDisabled ? flutter::GpuAvailability::kUnavailable
-                                            : flutter::GpuAvailability::kAvailable);
 }
 
-+ (BOOL)isProfilerEnabled {
-  bool profilerEnabled = false;
-#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG) || \
-    (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
-  profilerEnabled = true;
-#endif
-  return profilerEnabled;
-}
-
-+ (NSString*)generateThreadLabel:(NSString*)labelPrefix {
-  static size_t s_shellCount = 0;
-  return [NSString stringWithFormat:@"%@.%zu", labelPrefix, ++s_shellCount];
-}
-
-static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
-                                          const flutter::Settings& settings) {
-  // The current thread will be used as the platform thread. Ensure that the message loop is
-  // initialized.
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-
-  uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  if (settings.merged_platform_ui_thread != flutter::Settings::MergedPlatformUIThread::kEnabled) {
-    threadHostType |= flutter::ThreadHost::Type::kUi;
-  }
-
-  if ([FlutterEngine isProfilerEnabled]) {
-    threadHostType = threadHostType | flutter::ThreadHost::Type::kProfiler;
-  }
-
-  flutter::ThreadHost::ThreadHostConfig host_config(thread_label.UTF8String, threadHostType,
-                                                    IOSPlatformThreadConfigSetter);
-
-  host_config.ui_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kUi, thread_label.UTF8String),
-                                fml::Thread::ThreadPriority::kDisplay);
-  host_config.raster_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kRaster, thread_label.UTF8String),
-                                fml::Thread::ThreadPriority::kRaster);
-
-  host_config.io_config =
-      fml::Thread::ThreadConfig(flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-                                    flutter::ThreadHost::Type::kIo, thread_label.UTF8String),
-                                fml::Thread::ThreadPriority::kNormal);
-
-  return (flutter::ThreadHost){host_config};
+- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
+    withVMServicePublication:(BOOL)doesVMServicePublication {
+  [self adoptShell:std::move(shell)];
+  [self configureForRunningShellWithVMServicePublication:doesVMServicePublication];
 }
 
 static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSString* libraryURI) {
@@ -880,6 +830,24 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
+  // MakeThreadHost below adopts the calling thread as this engine's platform/UI thread, which
+  // must be the main thread. The engine relies on UIApplicationMain to pump the platform thread's
+  // run loop, and the platform thread reads UIKit state (UIScreen, CADisplayLink) and runs all
+  // plugin and platform channel callbacks.
+  //
+  // Engines spawned from this one inherit these task runners, so this applies to every engine in a
+  // FlutterEngineGroup.
+  FML_CHECK(NSThread.isMainThread)
+      << "FlutterEngine must be run on the main thread. The engine adopts the calling thread as "
+         "its platform and UI thread, both of which must be the main thread. To start an engine "
+         "from a background queue, dispatch to the main queue first.";
+
+  if (self.destroyed) {
+    [FlutterLogger
+        logWarning:@"This FlutterEngine was destroyed by destroyContext and cannot be run again."];
+    return NO;
+  }
+
   if (_shell != nullptr) {
     [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
@@ -898,9 +866,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   SetEntryPoint(&settings, entrypoint, libraryURI);
 
-  NSString* threadLabel = [FlutterEngine generateThreadLabel:self.labelPrefix];
-  _threadHost = std::make_shared<flutter::ThreadHost>();
-  *_threadHost = MakeThreadHost(threadLabel, settings);
+  [self.backend createThreadHostWithLabelPrefix:self.labelPrefix];
+  NSString* threadLabel = self.backend.threadLabel;
+  const flutter::ThreadHost* threadHost = self.backend.threadHost;
 
   __weak FlutterEngine* weakSelf = self;
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
@@ -912,35 +880,23 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
         [strongSelf recreatePlatformViewsController];
         strongSelf.platformViewsController.taskRunner = [[FlutterFMLTaskRunner alloc]
             initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()];
-        return std::make_unique<flutter::PlatformViewIOS>(
-            shell, strongSelf->_renderingApi, strongSelf.platformViewsController,
-            shell.GetTaskRunners(), shell.GetConcurrentWorkerTaskRunner(),
-            shell.GetIsGpuDisabledSyncSwitch());
+        return std::make_unique<flutter::PlatformViewIOS>(shell, strongSelf.platformViewsController,
+                                                          shell.GetTaskRunners(),
+                                                          shell.GetIsGpuDisabledSyncSwitch());
       };
 
   flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
-  fml::RefPtr<fml::TaskRunner> ui_runner;
-  if (settings.enable_impeller &&
-      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled) {
-    ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  } else {
-    ui_runner = _threadHost->ui_thread->GetTaskRunner();
-  }
-  flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                    _threadHost->raster_thread->GetTaskRunner(),     // raster
-                                    ui_runner,                                       // ui
-                                    _threadHost->io_thread->GetTaskRunner()          // io
+  // The platform and UI threads are always merged on iOS, so the UI task runner is the platform
+  // thread's task runner.
+  fml::RefPtr<fml::TaskRunner> platform_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  flutter::TaskRunners task_runners(threadLabel.UTF8String,                      // label
+                                    platform_runner,                             // platform
+                                    threadHost->raster_thread->GetTaskRunner(),  // raster
+                                    platform_runner,                             // ui
+                                    threadHost->io_thread->GetTaskRunner()       // io
   );
-
-  // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController
-                           ? self.viewController.stateIsBackground
-                           : FlutterSharedApplication.application &&
-                                 FlutterSharedApplication.application.applicationState ==
-                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -958,9 +914,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   } else {
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
-    if ([FlutterEngine isProfilerEnabled]) {
-      [self startProfiler];
-    }
+    [self.backend startProfilerIfEnabled];
   }
 
   return _shell != nullptr;
@@ -982,13 +936,37 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     // Tests may do this.
     return;
   }
+  // Prefer the screen that the view is on. Fallback to main screen if not available (e.g. the
+  // Flutter view hasn't been added to any screen).
+  UIScreen* screen = self.viewController.viewIfLoaded.window.windowScene.screen;
+  if (!screen) {
+    if (_hasSentDisplays) {
+      // Keep the last reported display, rather than regressing to a guess.
+      return;
+    }
+    // The framework can read the display information as soon as the isolate launches, before any
+    // view is on screen (e.g. a headless or pre-warmed engine). Use `UIScreen.mainScreen` as a
+    // best-effort guess until the view is in a window.
+    screen = UIScreen.mainScreen;
+  }
+  CGSize screen_size = screen.nativeBounds.size;
+  CGFloat scale = screen.scale;
+  if (_hasSentDisplays && CGSizeEqualToSize(screen_size, _lastSentScreenNativeSize) &&
+      scale == _lastSentScreenScale) {
+    return;
+  }
+  _hasSentDisplays = YES;
+  _lastSentScreenNativeSize = screen_size;
+  _lastSentScreenScale = scale;
+  [self sendDisplayWithScreenNativeSize:screen_size scale:scale];
+}
+
+- (void)sendDisplayWithScreenNativeSize:(CGSize)screenNativeSize scale:(CGFloat)scale {
   auto vsync_waiter = _shell->GetVsyncWaiter().lock();
   auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
   std::vector<std::unique_ptr<flutter::Display>> displays;
-  auto screen_size = UIScreen.mainScreen.nativeBounds.size;
-  auto scale = UIScreen.mainScreen.scale;
   displays.push_back(std::make_unique<flutter::VariableRefreshRateDisplay>(
-      0, vsync_waiter_ios, screen_size.width, screen_size.height, scale));
+      0, vsync_waiter_ios, screenNativeSize.width, screenNativeSize.height, scale));
   _shell->OnDisplayUpdates(std::move(displays));
 }
 
@@ -1025,11 +1003,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                libraryURI:(NSString*)libraryURI
              initialRoute:(NSString*)initialRoute
            entrypointArgs:(NSArray<NSString*>*)entrypointArgs {
-  if ([self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute]) {
-    [self launchEngine:entrypoint libraryURI:libraryURI entrypointArgs:entrypointArgs];
+  if (![self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute]) {
+    return NO;
   }
-
-  return _shell != nullptr;
+  [self launchEngine:entrypoint libraryURI:libraryURI entrypointArgs:entrypointArgs];
+  return YES;
 }
 
 - (void)notifyLowMemory {
@@ -1160,6 +1138,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       translateSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showTranslateViewControllerForTerm:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     performContextMenuCustomActionWithActionID:(NSString*)actionID
                                textInputClient:(int)client {
   [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
@@ -1268,6 +1251,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
     [self.platformViewsChannel invokeMethod:@"viewFocused" arguments:@(platform_view_id)];
   });
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback {
+  [self.textInputChannel invokeMethod:@"TextInputClient.onFocusReceived"
+                            arguments:@[ @(client) ]
+                               result:callback];
 }
 
 #pragma mark - Undo Manager Delegate
@@ -1392,11 +1383,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)unregisterTexture:(int64_t)textureId {
-  _shell->GetPlatformView()->UnregisterTexture(textureId);
+  flutter::PlatformViewIOS* platform_view = self.platformView;
+  if (!platform_view) {
+    return;
+  }
+  platform_view->UnregisterTexture(textureId);
 }
 
 - (void)textureFrameAvailable:(int64_t)textureId {
-  _shell->GetPlatformView()->MarkTextureFrameAvailable(textureId);
+  flutter::PlatformViewIOS* platform_view = self.platformView;
+  if (!platform_view) {
+    return;
+  }
+  platform_view->MarkTextureFrameAvailable(textureId);
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
@@ -1446,10 +1445,16 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 #pragma mark - Notifications
 
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self flutterWillEnterForeground:notification];
 }
 
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
+  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
+    return;
+  }
   [self flutterDidEnterBackground:notification];
 }
 
@@ -1475,6 +1480,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)setIsGpuDisabled:(BOOL)value {
+  // `fml::SyncSwitch::SetSwitch` notifies its observers whether or not the value changed and is a
+  // blocking call. The Metal backend observes it to drain pending image uploads or flush tasks
+  // awaiting the GPU. Bail out early if unchanged so we only propagate state changes.
+  if (value == _isGpuDisabled) {
+    return;
+  }
   if (_shell) {
     _shell->SetGpuAvailability(value ? flutter::GpuAvailability::kUnavailable
                                      : flutter::GpuAvailability::kAvailable);
@@ -1515,54 +1526,47 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self.statusBarChannel invokeMethod:@"handleScrollToTop" arguments:nil];
 }
 
-- (void)waitForFirstFrameSync:(NSTimeInterval)timeout
-                     callback:(NS_NOESCAPE void (^_Nonnull)(BOOL didTimeout))callback {
-  fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
-  fml::Status status = self.shell.WaitForFirstFrame(waitTime);
-  callback(status.code() == fml::StatusCode::kDeadlineExceeded);
-}
-
 - (void)waitForFirstFrame:(NSTimeInterval)timeout
                  callback:(void (^_Nonnull)(BOOL didTimeout))callback {
-  dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
-  dispatch_group_t group = dispatch_group_create();
-
-  __weak FlutterEngine* weakSelf = self;
-  __block BOOL didTimeout = NO;
-  dispatch_group_async(group, queue, ^{
-    FlutterEngine* strongSelf = weakSelf;
-    if (!strongSelf) {
-      return;
+  // Set up a completion handler that will nil itself out when it fires.
+  __block void (^completion)(BOOL) = [callback copy];
+  void (^complete)(BOOL) = ^(BOOL didTimeout) {
+    if (completion) {
+      void (^cb)(BOOL) = completion;
+      completion = nil;
+      cb(didTimeout);
     }
+  };
 
-    fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
-    fml::Status status = strongSelf.shell.WaitForFirstFrame(waitTime);
-    didTimeout = status.code() == fml::StatusCode::kDeadlineExceeded;
+  if (!_shell) {
+    // No shell. Bail out since there'll never be a first frame.
+    dispatch_async(dispatch_get_main_queue(), ^{
+      complete(YES);
+    });
+    return;
+  }
+
+  // Register the first-frame callback and fire the timeout completion handler.
+  // Both are scheduled on the main thread to guarantee ordering.
+  // The winner nils out the completion handler so the loser is a no-op.
+  _shell->AddFirstFrameCallback([complete] {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      complete(NO);
+    });
   });
 
-  // Only execute the main queue task once the background task has completely finished executing.
-  dispatch_group_notify(group, dispatch_get_main_queue(), ^{
-    // Strongly capture self on the task dispatched to the main thread.
-    //
-    // When we capture weakSelf strongly in the above block on a background thread, we risk the
-    // possibility that all other strong references to FlutterEngine go out of scope while the block
-    // executes and that the engine is dealloc'ed at the end of the above block on a background
-    // thread. FlutterEngine is not safe to release on any thread other than the main thread.
-    //
-    // self is never nil here since it's a strong reference that's verified non-nil above, but we
-    // use a conditional check to avoid an unused expression compiler warning.
-    FlutterEngine* strongSelf = self;
-    if (!strongSelf) {
-      return;
-    }
-    callback(didTimeout);
-  });
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   complete(YES);
+                 });
 }
 
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
                            libraryURI:(/*nullable*/ NSString*)libraryURI
                          initialRoute:(/*nullable*/ NSString*)initialRoute
                        entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs {
+  FML_CHECK(NSThread.isMainThread) << "FlutterEngine must be spawned on the iOS main thread.";
+
   NSAssert(_shell, @"Spawning from an engine without a shell (possibly not run).");
   FlutterEngine* result = [[FlutterEngine alloc] initWithName:self.labelPrefix
                                                       project:self.dartProject
@@ -1604,15 +1608,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   std::unique_ptr<flutter::Shell> shell = _shell->Spawn(
       std::move(configuration), cppInitialRoute, on_create_platform_view, on_create_rasterizer);
 
-  result->_threadHost = _threadHost;
-  result->_profiler = _profiler;
+  [result.backend inheritThreadHostFromShell:self.backend];
   result->_isGpuDisabled = _isGpuDisabled;
   [result setUpShell:std::move(shell) withVMServicePublication:NO];
   return result;
 }
 
 - (const flutter::ThreadHost&)threadHost {
-  return *_threadHost;
+  FML_DCHECK(self.backend.threadHost);
+  return *self.backend.threadHost;
 }
 
 - (FlutterDartProject*)project {
@@ -1658,6 +1662,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   _key = [key copy];
   _flutterEngine = flutterEngine;
   return self;
+}
+
+- (int64_t)engineIdentifier {
+  return _flutterEngine.engineIdentifier;
 }
 
 - (NSObject<FlutterBinaryMessenger>*)messenger {
@@ -1708,14 +1716,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
     NSObject<FlutterPlugin>* delegate) {
   SEL selectors[] = {
-    @selector(applicationDidBecomeActive:),
-    @selector(applicationWillResignActive:),
-    @selector(applicationWillEnterForeground:),
-    @selector(applicationDidEnterBackground:),
-    @selector(application:continueUserActivity:restorationHandler:),
-    @selector(application:performActionForShortcutItem:completionHandler:),
-    @selector(application:openURL:options:),
-    @selector(application:performFetchWithCompletionHandler:),
+      @selector(applicationDidBecomeActive:),
+      @selector(applicationWillResignActive:),
+      @selector(applicationWillEnterForeground:),
+      @selector(applicationDidEnterBackground:),
+      @selector(application:continueUserActivity:restorationHandler:),
+      @selector(application:performActionForShortcutItem:completionHandler:),
+      @selector(application:openURL:options:),
+      @selector(application:performFetchWithCompletionHandler:),
   };
   for (SEL sel : selectors) {
     if ([delegate respondsToSelector:sel]) {

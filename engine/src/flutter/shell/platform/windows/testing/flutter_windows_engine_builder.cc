@@ -51,6 +51,7 @@ FlutterWindowsEngineBuilder::FlutterWindowsEngineBuilder(
   properties_.assets_path = context.GetAssetsPath().c_str();
   properties_.icu_data_path = context.GetIcuDataPath().c_str();
   properties_.aot_library_path = context.GetAotLibraryPath().c_str();
+  properties_.impeller_switch = DefaultImpeller;
 }
 
 FlutterWindowsEngineBuilder::~FlutterWindowsEngineBuilder() = default;
@@ -60,6 +61,11 @@ void FlutterWindowsEngineBuilder::SetDartEntrypoint(std::string entrypoint) {
   properties_.dart_entrypoint = dart_entrypoint_.c_str();
 }
 
+void FlutterWindowsEngineBuilder::SetAotLibraryPath(std::wstring path) {
+  aot_library_path_ = std::move(path);
+  properties_.aot_library_path = aot_library_path_.c_str();
+}
+
 void FlutterWindowsEngineBuilder::AddDartEntrypointArgument(std::string arg) {
   dart_entrypoint_arguments_.emplace_back(std::move(arg));
 }
@@ -67,6 +73,15 @@ void FlutterWindowsEngineBuilder::AddDartEntrypointArgument(std::string arg) {
 void FlutterWindowsEngineBuilder::SetSwitches(
     std::vector<std::string> switches) {
   switches_ = std::move(switches);
+}
+
+void FlutterWindowsEngineBuilder::SetImpellerSwitch(
+    FlutterDesktopImpellerSwitch impeller_switch) {
+  properties_.impeller_switch = impeller_switch;
+}
+
+void FlutterWindowsEngineBuilder::SetEnableFlutterGpu(bool enable_flutter_gpu) {
+  properties_.enable_flutter_gpu = enable_flutter_gpu;
 }
 
 void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(

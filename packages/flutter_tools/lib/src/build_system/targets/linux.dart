@@ -4,6 +4,7 @@
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -129,7 +130,11 @@ abstract class BundleLinuxAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final String versionInfo = getVersionInfo(environment.defines);
+    final String versionInfo = getVersionInfo(
+      environment.defines,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
@@ -137,6 +142,7 @@ abstract class BundleLinuxAssets extends Target {
       dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
+      flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
         'version.json': DevFSStringContent(versionInfo),
         'NativeAssetsManifest.json': DevFSFileContent(
@@ -151,9 +157,14 @@ abstract class BundleLinuxAssets extends Target {
   }
 
   /// Return json encoded string that contains data about version for package_info
-  String getVersionInfo(Map<String, String> defines) {
-    final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, dynamic>;
+  String getVersionInfo(
+    Map<String, String> defines, {
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) {
+    final versionInfo = jsonDecode(
+      FlutterProject.current(fileSystem, logger: logger).getVersionInfo(),
+    ) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];
@@ -172,8 +183,8 @@ class LinuxAotBundle extends Target {
   /// Create a [LinuxAotBundle] wrapper for [aotTarget].
   const LinuxAotBundle(this.aotTarget);
 
-  /// The [AotElfBase] subclass that produces the app.so.
-  final AotElfBase aotTarget;
+  /// The [AotSnapshotBase] subclass that produces the app.so.
+  final AotSnapshotBase aotTarget;
 
   @override
   String get name => 'linux_aot_bundle';
@@ -202,7 +213,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
   const DebugBundleLinuxAssets(super.targetPlatform);
 
   @override
-  String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];
@@ -217,7 +228,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
   const ProfileBundleLinuxAssets(super.targetPlatform);
 
   @override
-  String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'profile_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -225,7 +236,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    LinuxAotBundle(AotElfProfile(targetPlatform)),
+    LinuxAotBundle(AotSnapshotProfile(targetPlatform)),
   ];
 }
 
@@ -233,7 +244,7 @@ class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
   const ReleaseBundleLinuxAssets(super.targetPlatform);
 
   @override
-  String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'release_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -241,6 +252,6 @@ class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    LinuxAotBundle(AotElfRelease(targetPlatform)),
+    LinuxAotBundle(AotSnapshotRelease(targetPlatform)),
   ];
 }

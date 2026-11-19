@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fml/status.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 #include "impeller/renderer/backend/vulkan/command_queue_vk.h"
 
@@ -20,13 +20,12 @@ CommandQueueVK::CommandQueueVK(const std::weak_ptr<ContextVK>& context)
 
 CommandQueueVK::~CommandQueueVK() = default;
 
-fml::Status CommandQueueVK::Submit(
+absl::Status CommandQueueVK::Submit(
     const std::vector<std::shared_ptr<CommandBuffer>>& buffers,
-    const CompletionCallback& completion_callback,
-    bool block_on_schedule) {
+    const CompletionCallback& completion_callback) {
   if (buffers.empty()) {
-    return fml::Status(fml::StatusCode::kInvalidArgument,
-                       "No command buffers provided.");
+    return absl::Status(absl::StatusCode::kInvalidArgument,
+                        "No command buffers provided.");
   }
   // Success or failure, you only get to submit once.
   fml::ScopedCleanupClosure reset([&]() {
@@ -42,8 +41,8 @@ fml::Status CommandQueueVK::Submit(
   for (const std::shared_ptr<CommandBuffer>& buffer : buffers) {
     CommandBufferVK& command_buffer = CommandBufferVK::Cast(*buffer);
     if (!command_buffer.EndCommandBuffer()) {
-      return fml::Status(fml::StatusCode::kCancelled,
-                         "Failed to end command buffer.");
+      return absl::Status(absl::StatusCode::kCancelled,
+                          "Failed to end command buffer.");
     }
     vk_buffers.push_back(command_buffer.GetCommandBuffer());
     tracked_objects.push_back(std::move(command_buffer.tracked_objects_));
@@ -52,39 +51,65 @@ fml::Status CommandQueueVK::Submit(
   auto context = context_.lock();
   if (!context) {
     VALIDATION_LOG << "Device lost.";
-    return fml::Status(fml::StatusCode::kCancelled, "Device lost.");
+    return absl::Status(absl::StatusCode::kCancelled, "Device lost.");
   }
   auto [fence_result, fence] = context->GetDevice().createFenceUnique({});
   if (fence_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Failed to create fence: " << vk::to_string(fence_result);
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to create fence.");
+    return absl::Status(absl::StatusCode::kCancelled,
+                        "Failed to create fence.");
   }
 
-  vk::SubmitInfo submit_info;
-  submit_info.setCommandBuffers(vk_buffers);
-  auto status = context->GetGraphicsQueue()->Submit(submit_info, *fence);
-  if (status != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to submit queue: " << vk::to_string(status);
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to submit queue: ");
-  }
+  // This will be called immediately by FenceWaiterVK::AddFence.
+  auto submit_callback = [&context, &vk_buffers](vk::Fence submit_fence) {
+    vk::SubmitInfo submit_info;
+    submit_info.setCommandBuffers(vk_buffers);
+    auto status =
+        context->GetGraphicsQueue()->Submit(submit_info, submit_fence);
+    if (status != vk::Result::eSuccess) {
+      std::string submit_error =
+          "Failed to submit command: " + vk::to_string(status);
+      VALIDATION_LOG << submit_error;
+      return absl::Status(absl::StatusCode::kCancelled, submit_error);
+    }
+    return absl::OkStatus();
+  };
+
+  std::shared_ptr<GpuSubmissionTracker> tracker =
+      context->GetMutableSubmissionTracker();
+  uint64_t submission_id = tracker->RecordSubmission();
+
+  // This will be called later when the command completes.
+  auto fence_complete_callback = [completion_callback, tracker, submission_id,
+                                  tracked_objects =
+                                      std::move(tracked_objects)]() mutable {
+    // Ensure tracked objects are destructed before calling any final
+    // callbacks.
+    tracked_objects.clear();
+    tracker->RecordCompletion(submission_id);
+    if (completion_callback) {
+      completion_callback(CommandBuffer::Status::kCompleted);
+    }
+  };
 
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
-  auto added_fence = context->GetFenceWaiter()->AddFence(
-      std::move(fence), [completion_callback, tracked_objects = std::move(
-                                                  tracked_objects)]() mutable {
-        // Ensure tracked objects are destructed before calling any final
-        // callbacks.
-        tracked_objects.clear();
-        if (completion_callback) {
-          completion_callback(CommandBuffer::Status::kCompleted);
-        }
-      });
-  if (!added_fence) {
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to add fence.");
+  auto fence_status = context->GetFenceWaiter()->AddFence(
+      std::move(fence), submit_callback, std::move(fence_complete_callback));
+  if (!fence_status.ok()) {
+    tracker->RecordCompletion(submission_id);
+    return fence_status;
   }
   reset.Release();
-  return fml::Status();
+  return absl::OkStatus();
+}
+
+CommandQueue::SubmitResult CommandQueueVK::SubmitWithReceipt(
+    const std::shared_ptr<CommandBuffer>& buffer,
+    const CompletionCallback& completion_callback) {
+  return {
+      .status = Submit({buffer}, completion_callback),
+  };
 }
 
 }  // namespace impeller

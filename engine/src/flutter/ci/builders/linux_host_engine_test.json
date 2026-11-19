@@ -11,7 +11,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -22,8 +21,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/host_debug_test",
             "description": "Builds host-side unit tests for Linux.",
@@ -31,7 +29,7 @@
                 "config": "ci/host_debug_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:dart_sdk",
                     "flutter/shell/testing",
                     "flutter/tools/path_ops"
                 ]
@@ -58,7 +56,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -68,9 +65,9 @@
                 "profile",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--use-glfw-swiftshader",
+                "--rbe"
             ],
             "name": "ci/host_profile_test",
             "description": "Builds host-side unit tests for Linux.",
@@ -78,12 +75,23 @@
                 "config": "ci/host_profile_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:dart_sdk",
                     "flutter/shell/testing",
                     "flutter/tools/path_ops"
                 ]
             },
              "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller tests for host_profile",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_profile_test",
+                        "--type",
+                        "impeller"
+                    ]
+                },
                 {
                     "language": "python3",
                     "name": "Host Tests for host_profile",
@@ -111,7 +119,6 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -121,9 +128,9 @@
                 "release",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--use-glfw-swiftshader",
+                "--rbe"
             ],
             "name": "ci/host_release_test",
             "description": "Builds host-side unit tests and benchmarks for Linux.",
@@ -131,7 +138,7 @@
                 "config": "ci/host_release_test",
                 "targets": [
                     "flutter:unittests",
-                    "flutter/build/dart:copy_dart_sdk",
+                    "flutter/build/dart:dart_sdk",
                     "flutter/display_list:display_list_benchmarks",
                     "flutter/display_list:display_list_builder_benchmarks",
                     "flutter/display_list:display_list_region_benchmarks",
@@ -147,6 +154,17 @@
                 ]
             },
             "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller tests for host_release",
+                    "script": "flutter/testing/run_tests.py",
+                    "parameters": [
+                        "--variant",
+                        "ci/host_release_test",
+                        "--type",
+                        "impeller"
+                    ]
+                },
                 {
                     "language": "python3",
                     "name": "Host Tests for host_release",

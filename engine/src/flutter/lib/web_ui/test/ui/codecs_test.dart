@@ -286,12 +286,15 @@ class BitmapTestCodec extends TestCodec {
 
     await imageElement.decode();
 
-    final DomImageBitmap bitmap = await createImageBitmap(imageElement, (
-      x: 0,
-      y: 0,
-      width: imageElement.naturalWidth.toInt(),
-      height: imageElement.naturalHeight.toInt(),
-    ));
+    final DomImageBitmap bitmap = await createImageBitmap(
+      imageElement,
+      bounds: (
+        x: 0,
+        y: 0,
+        width: imageElement.naturalWidth.toInt(),
+        height: imageElement.naturalHeight.toInt(),
+      ),
+    );
 
     final ui.Image image = await codecFactory(bitmap);
     return BitmapSingleFrameCodec(bitmap, image);
@@ -315,7 +318,7 @@ class BitmapSingleFrameCodec implements ui.Codec {
 
   @override
   Future<ui.FrameInfo> getNextFrame() async {
-    return SingleFrameInfo(image);
+    return AnimatedImageFrameInfo(Duration.zero, image);
   }
 
   @override
@@ -394,6 +397,11 @@ Future<void> testMain() async {
           expect(image.width, isNonZero);
           expect(image.height, isNonZero);
 
+          if (testCodec.description.contains('300 x 300')) {
+            expect(image.width, 300);
+            expect(image.height, 300);
+          }
+
           final ByteData? byteData = await image.toByteData();
           expect(
             byteData,
@@ -423,9 +431,12 @@ Future<void> testMain() async {
       createTestCodecs().forEach(runCodecTest);
     });
 
-    if (browserSupportsImageDecoder) {
+    if (browserSupportsImageDecoder && !browserSupportsCanvaskitChromium) {
       // For the sake of completeness, test codec fallback logic on browsers that support
       // `ImageDecoder`.
+      //
+      // We skip this on Canvaskit Chromium because there is no fallback; the
+      // `ImageDecoder`-based codec is always used.
       group('Codecs (browserSupportsImageDecoder=false)', () {
         setUpAll(() {
           browserSupportsImageDecoder = false;
@@ -450,6 +461,57 @@ Future<void> testMain() async {
       gotError = true;
     }
     expect(gotError, isTrue, reason: 'Should have got CORS error');
+  });
+
+  test('does not upscale when allowUpscaling is false', () async {
+    final HttpFetchResponse response = await httpFetch('/test_images/1x1.png');
+    final Uint8List bytes = (await response.payload.asByteBuffer()).asUint8List();
+    final ui.Codec codec = await renderer.instantiateImageCodec(
+      bytes,
+      targetWidth: 100,
+      targetHeight: 100,
+      allowUpscaling: false,
+    );
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    expect(frame.image.width, 1);
+    expect(frame.image.height, 1);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/194067.
+  test('decodes a Uint8List view into a larger buffer without ImageDecoder', () async {
+    browserSupportsImageDecoder = false;
+    addTearDown(debugResetBrowserSupportsImageDecoder);
+
+    final HttpFetchResponse response = await httpFetch('/test_images/2x2.png');
+    final Uint8List png = (await response.payload.asByteBuffer()).asUint8List();
+    // The PNG with junk bytes before and after it in its backing buffer,
+    // like an image embedded in a larger file.
+    const padding = 8;
+    final backing = Uint8List(png.length + 2 * padding)
+      ..fillRange(0, padding, 0xAB)
+      ..setAll(padding, png)
+      ..fillRange(padding + png.length, png.length + 2 * padding, 0xCD);
+    final view = Uint8List.sublistView(backing, padding, padding + png.length);
+
+    Future<ui.Image> decode(Uint8List bytes) async {
+      final ui.Codec codec = await renderer.instantiateImageCodec(bytes);
+      final ui.Image image = (await codec.getNextFrame()).image;
+      codec.dispose();
+      return image;
+    }
+
+    final ui.Image expected = await decode(Uint8List.fromList(png));
+    addTearDown(expected.dispose);
+    final ui.Image image = await decode(view);
+    addTearDown(image.dispose);
+    expect(image.width, expected.width);
+    expect(image.height, expected.height);
+    final ByteData expectedPixels = (await expected.toByteData())!;
+    final ByteData pixels = (await image.toByteData())!;
+    expect(
+      pixels.buffer.asUint8List(pixels.offsetInBytes, pixels.lengthInBytes),
+      expectedPixels.buffer.asUint8List(expectedPixels.offsetInBytes, expectedPixels.lengthInBytes),
+    );
   });
 
   test('isAvif', () {

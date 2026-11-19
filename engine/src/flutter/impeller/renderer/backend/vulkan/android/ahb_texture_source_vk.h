@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_AHB_TEXTURE_SOURCE_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_ANDROID_AHB_TEXTURE_SOURCE_VK_H_
 
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
@@ -49,7 +50,8 @@ class AHBTextureSourceVK final : public TextureSourceVK {
   vk::ImageView GetImageView() const override;
 
   // |TextureSourceVK|
-  vk::ImageView GetRenderTargetView() const override;
+  vk::ImageView GetRenderTargetView(uint32_t mip_level,
+                                    uint32_t array_layer) const override;
 
   bool IsValid() const;
 
@@ -86,6 +88,7 @@ class AHBTextureSourceVK final : public TextureSourceVK {
       const AHardwareBuffer_Desc& ahb_desc);
 
  private:
+  std::weak_ptr<DeviceHolderVK> device_holder_;
   std::unique_ptr<android::HardwareBuffer> backing_store_;
   vk::UniqueDeviceMemory device_memory_ = {};
   vk::UniqueImage image_ = {};

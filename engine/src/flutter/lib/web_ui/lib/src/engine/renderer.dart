@@ -4,13 +4,12 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
-    // ignore: deprecated_web_configuration
+    // ignore: deprecated_web_configuration, https://github.com/dart-lang/sdk/issues/61464
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -97,16 +96,12 @@ abstract class Renderer {
     rasterizer.dispose();
   }
 
-  ui.Paint createPaint();
+  /// Creates a native paint for a single draw call from [paint].
+  ///
+  /// The caller owns the result and must dispose it after the draw call.
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode});
 
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  });
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
@@ -118,78 +113,190 @@ abstract class Renderer {
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]);
   ui.SceneBuilder createSceneBuilder();
 
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]);
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]);
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]);
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]);
+  );
 
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  );
+
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  );
+
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  );
+
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
     ui.Rect? bounds,
   });
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY});
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
   });
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
   });
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter});
+  BackendColorFilter createColorFilter(EngineColorFilter filter);
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter);
+
+  bool get isMultiThreaded;
+
+  /// Whether this renderer natively supports resizing/scaling animated images during decoding.
+  bool get supportsResizingAnimatedImages;
+
+  /// Whether this renderer can decode images itself via [createAnimatedImage].
+  ///
+  /// When this is false, [createAnimatedImage] must not be called for any
+  /// image, animated or not, and callers must fall back to a browser-provided
+  /// decoder. Some backends (notably the Impeller-based skwasm variants) are
+  /// built without the builtin image codecs.
+  bool get supportsAnimatedImages;
+
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight});
+
+  BackendImage createImageFromImageSource(ImageSource source);
+
+  ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
+    final int width = imageBitmap.width;
+    final int height = imageBitmap.height;
+    final ImageSource source = ImageBitmapImageSource(imageBitmap);
+    final BackendImage backendImage = createImageFromImageSource(source);
+    return EngineImage(backendImage, width, height, imageSource: source);
+  }
+
+  /// Creates a unified [ui.Image] from a raw browser texture source (such as a
+  /// [VideoFrame], [DomImageBitmap], [DomHTMLImageElement], or [DomHTMLCanvasElement]).
+  ///
+  /// This method is a crucial bridge between the browser's DOM environment and
+  /// the engine's rendering backends, particularly when managing multi-threaded
+  /// environments (like Skwasm running in a Web Worker):
+  ///
+  /// - **Thread-Safety & Transferability:** In multi-threaded mode, DOM elements
+  ///    (like `HTMLImageElement` or `HTMLCanvasElement`) cannot be transferred
+  ///    across thread boundaries to a Web Worker. Only "transferable" objects
+  ///    (like `ImageBitmap` and `VideoFrame`) are thread-safe. If the renderer is
+  ///    multi-threaded and the source is non-transferable, we must clone it.
+  /// - **Cloning Heuristic:** We use the browser's native `createImageBitmap` to
+  ///    asynchronously capture a snapshot of the source as a transferable `ImageBitmap`.
+  ///    Cloning is also triggered if [transferOwnership] is false, ensuring the caller's
+  ///    original object remains unaffected by our internal disposal lifecycle.
+  /// - **Ownership Transfer:** If we had to clone the object but the caller requested
+  ///    ownership transfer (`transferOwnership` is true), we eagerly close the original
+  ///    source (if it is closeable like a `VideoFrame` or `ImageBitmap`) to avoid leaking
+  ///    it, as we are now responsible for the cloned copy instead.
+  FutureOr<ui.Image> createImageFromTextureSource(
+    JSAny object, {
+    required int width,
+    required int height,
+    required bool transferOwnership,
+  }) async {
+    var textureSource = object;
+    final originalTextureSource = object;
+    final bool isVideoFrame = object.isA<VideoFrame>();
+    // Although VideoFrame is transferable across threads, drawing directly from a
+    // VideoFrame to a WebGL texture can result in incorrect orientation due to EXIF
+    // metadata handling. Converting it to an ImageBitmap avoids this problem.
+    final bool needsClone =
+        isVideoFrame || !transferOwnership || (isMultiThreaded && !_isTransferable(object));
+    if (needsClone) {
+      textureSource =
+          (await (isVideoFrame
+                  ? createImageBitmap(object)
+                  : createImageBitmap(object, bounds: (x: 0, y: 0, width: width, height: height))))
+              .toJSAnyShallow;
+      if (transferOwnership) {
+        if (originalTextureSource.isA<VideoFrame>()) {
+          (originalTextureSource as VideoFrame).close();
+        } else if (originalTextureSource.isA<DomImageBitmap>()) {
+          (originalTextureSource as DomImageBitmap).close();
+        }
+      }
+    }
+
+    final ImageSource imageSource;
+    if (textureSource.isA<DomImageBitmap>()) {
+      imageSource = ImageBitmapImageSource(textureSource as DomImageBitmap);
+    } else if (textureSource.isA<VideoFrame>()) {
+      imageSource = VideoFrameImageSource(textureSource as VideoFrame);
+    } else if (textureSource.isA<DomHTMLImageElement>()) {
+      imageSource = ImageElementImageSource(textureSource as DomHTMLImageElement);
+    } else {
+      imageSource = CanvasImageSourceWrapper(textureSource as DomCanvasImageSource, width, height);
+    }
+
+    final BackendImage backendImage;
+    try {
+      backendImage = createImageFromImageSource(imageSource);
+    } catch (e) {
+      imageSource.close();
+      rethrow;
+    }
+
+    return EngineImage(backendImage, width, height, imageSource: imageSource);
+  }
+
+  bool _isTransferable(JSAny object) =>
+      object.isA<DomImageBitmap>() || object.isA<DomOffscreenCanvas>() || object.isA<VideoFrame>();
 
   Future<ui.Codec> instantiateImageCodec(
     Uint8List list, {
     int? targetWidth,
     int? targetHeight,
     bool allowUpscaling = true,
-  });
+  }) => engineInstantiateImageCodec(
+    list,
+    targetWidth: targetWidth,
+    targetHeight: targetHeight,
+    allowUpscaling: allowUpscaling,
+  );
 
   Future<ui.Codec> instantiateImageCodecFromUrl(
     Uri uri, {
     ui_web.ImageCodecChunkCallback? chunkCallback,
-  });
+  }) => engineInstantiateImageCodecFromUrl(uri, chunkCallback: chunkCallback);
 
-  FutureOr<ui.Image> createImageFromImageBitmap(DomImageBitmap imageSource);
-
-  FutureOr<ui.Image> createImageFromTextureSource(
-    JSAny object, {
+  FutureOr<BackendImage> decodeBackendImageFromPixels(
+    Uint8List pixels, {
     required int width,
     required int height,
-    required bool transferOwnership,
+    required ui.PixelFormat format,
+    int? rowBytes,
   });
 
   void decodeImageFromPixels(
@@ -202,90 +309,57 @@ abstract class Renderer {
     int? targetWidth,
     int? targetHeight,
     bool allowUpscaling = true,
-  });
+  }) {
+    Timer.run(() async {
+      final BackendImage backendImage = await decodeBackendImageFromPixels(
+        pixels,
+        width: width,
+        height: height,
+        format: format,
+        rowBytes: rowBytes,
+      );
+      final ui.Image image = EngineImage(backendImage, width, height);
+      if (targetWidth != null || targetHeight != null) {
+        final ui.Image scaledImage;
+        try {
+          scaledImage = scaleImageIfNeeded(
+            image,
+            targetWidth: targetWidth,
+            targetHeight: targetHeight,
+            allowUpscaling: allowUpscaling,
+          );
+        } catch (e) {
+          image.dispose();
+          rethrow;
+        }
+        callback(scaledImage);
+      } else {
+        callback(image);
+      }
+    });
+  }
 
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
   );
 
   void clearFragmentProgramCache();
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
 
-  DisposablePathConstructors get pathConstructors;
+  BackendPathConstructors get pathConstructors;
 
-  ui.LineMetrics createLineMetrics({
-    required bool hardBreak,
-    required double ascent,
-    required double descent,
-    required double unscaledAscent,
-    required double height,
-    required double width,
-    required double left,
-    required double baseline,
-    required int lineNumber,
-  });
+  BackendParagraphBuilder createParagraphBuilder(EngineParagraphStyle style);
 
-  ui.TextStyle createTextStyle({
-    required ui.Color? color,
-    required ui.TextDecoration? decoration,
-    required ui.Color? decorationColor,
-    required ui.TextDecorationStyle? decorationStyle,
-    required double? decorationThickness,
-    required ui.FontWeight? fontWeight,
-    required ui.FontStyle? fontStyle,
-    required ui.TextBaseline? textBaseline,
-    required String? fontFamily,
-    required List<String>? fontFamilyFallback,
-    required double? fontSize,
-    required double? letterSpacing,
-    required double? wordSpacing,
-    required double? height,
-    required ui.TextLeadingDistribution? leadingDistribution,
-    required ui.Locale? locale,
-    required ui.Paint? background,
-    required ui.Paint? foreground,
-    required List<ui.Shadow>? shadows,
-    required List<ui.FontFeature>? fontFeatures,
-    required List<ui.FontVariation>? fontVariations,
-  });
-
-  ui.ParagraphStyle createParagraphStyle({
-    ui.TextAlign? textAlign,
-    ui.TextDirection? textDirection,
-    int? maxLines,
-    String? fontFamily,
-    double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
-  });
-
-  ui.StrutStyle createStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  });
-
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
 
   /// Map from view id to the associated [ViewRasterizer] for that view.
   final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};
 
-  Future<void> renderScene(ui.Scene scene, EngineFlutterView view) async {
+  Future<void> renderScene(ui.Scene scene, EngineFlutterView view, {required ui.Size size}) async {
     assert(
       rasterizers.containsKey(view.viewId),
       "Unable to render to a view which hasn't been registered",
@@ -295,16 +369,21 @@ abstract class Renderer {
     final FrameTimingRecorder? recorder = FrameTimingRecorder.frameTimingsEnabled
         ? FrameTimingRecorder()
         : null;
+    // Mark build finish immediately upon receiving the scene from the framework.
+    // If another frame is currently rasterizing, this frame will wait in
+    // [renderQueue.next]; recording build finish now ensures queue waiting time
+    // is not mistakenly counted as build time.
+    recorder?.recordBuildFinish();
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
       renderQueue.next?.completer.complete();
       final completer = Completer<void>();
-      renderQueue.next = (scene: scene, completer: completer, recorder: recorder);
+      renderQueue.next = (scene: scene, size: size, completer: completer, recorder: recorder);
       return completer.future;
     }
     final completer = Completer<void>();
-    renderQueue.current = (scene: scene, completer: completer, recorder: recorder);
+    renderQueue.current = (scene: scene, size: size, completer: completer, recorder: recorder);
     unawaited(_kickRenderLoop(rasterizer));
     return completer.future;
   }
@@ -313,7 +392,7 @@ abstract class Renderer {
     final RenderQueue renderQueue = rasterizer.queue;
     final RenderRequest current = renderQueue.current!;
     try {
-      await _renderScene(current.scene, rasterizer, current.recorder);
+      await _renderScene(current.scene, current.size, rasterizer, current.recorder);
       current.completer.complete();
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
@@ -329,10 +408,11 @@ abstract class Renderer {
 
   Future<void> _renderScene(
     ui.Scene scene,
+    ui.Size size,
     ViewRasterizer rasterizer,
     FrameTimingRecorder? recorder,
   ) async {
-    await rasterizer.draw((scene as LayerScene).layerTree, recorder);
+    await rasterizer.draw((scene as LayerScene).layerTree, size, recorder);
     recorder?.submitTimings();
   }
 

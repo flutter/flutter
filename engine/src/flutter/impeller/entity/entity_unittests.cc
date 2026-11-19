@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <memory>
 #include <optional>
@@ -51,6 +52,7 @@
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/playground/yuv_test_textures.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_pass.h"
@@ -58,6 +60,7 @@
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -204,16 +207,16 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     static Scalar miter_limit = 1.41421357;
     static Scalar width = 30;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Miter limit", &miter_limit, 0, 30);
       ImGui::SliderFloat("Stroke width", &width, 0, 100);
       if (ImGui::Button("Reset")) {
         miter_limit = 1.41421357;
         width = 30;
       }
+      ImGui::End();
     }
-    ImGui::End();
 
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto render_path = [width = width, &context, &pass, &world_matrix](
@@ -393,10 +396,16 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
     const char* input_axis[] = {"X", "Y", "Z"};
     static int rotation_axis_index = 0;
     static float rotation = 0;
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Rotation", &rotation, -kPi, kPi);
-    ImGui::Combo("Rotation Axis", &rotation_axis_index, input_axis,
-                 sizeof(input_axis) / sizeof(char*));
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Rotation", &rotation, -kPi, kPi);
+      ImGui::Combo("Rotation Axis", &rotation_axis_index, input_axis,
+                   sizeof(input_axis) / sizeof(char*));
+      if (ImGui::Button("Reset")) {
+        rotation = 0;
+      }
+      ImGui::End();
+    }
     Matrix rotation_matrix;
     switch (rotation_axis_index) {
       case 0:
@@ -413,10 +422,6 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
         break;
     }
 
-    if (ImGui::Button("Reset")) {
-      rotation = 0;
-    }
-    ImGui::End();
     Matrix current_transform =
         Matrix::MakeScale(GetContentScale())
             .MakeTranslation(
@@ -833,14 +838,16 @@ TEST_P(EntityTest, BlendingModeOptions) {
       return pass.Draw().ok();
     };
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static Color color1(1, 0, 0, 0.5), color2(0, 1, 0, 0.5);
-    ImGui::ColorEdit4("Color 1", reinterpret_cast<float*>(&color1));
-    ImGui::ColorEdit4("Color 2", reinterpret_cast<float*>(&color2));
     static int current_blend_index = 3;
-    ImGui::ListBox("Blending mode", &current_blend_index,
-                   blend_mode_names.data(), blend_mode_names.size());
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::ColorEdit4("Color 1", reinterpret_cast<float*>(&color1));
+      ImGui::ColorEdit4("Color 2", reinterpret_cast<float*>(&color2));
+      ImGui::ListBox("Blending mode", &current_blend_index,
+                     blend_mode_names.data(), blend_mode_names.size());
+      ImGui::End();
+    }
 
     BlendMode selected_mode = blend_mode_values[current_blend_index];
 
@@ -870,9 +877,11 @@ TEST_P(EntityTest, BezierCircleScaled) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     static float scale = 20;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Scale", &scale, 1, 100);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Scale", &scale, 1, 100);
+      ImGui::End();
+    }
 
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
@@ -941,7 +950,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     const char* input_type_names[] = {"Texture", "Solid Color"};
-    const char* blur_type_names[] = {"Image blur", "Mask blur"};
     const char* pass_variation_names[] = {"New"};
     const char* blur_style_names[] = {"Normal", "Solid", "Outer", "Inner"};
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
@@ -955,7 +963,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // UI state.
     static int selected_input_type = 0;
     static Color input_color = Color::Black();
-    static int selected_blur_type = 0;
     static int selected_pass_variation = 0;
     static bool combined_sigma = false;
     static float blur_amount_coarse[2] = {0, 0};
@@ -972,8 +979,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
                                  static_cast<float>(boston->GetSize().width),
                                  static_cast<float>(boston->GetSize().height)};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Input type", &selected_input_type, input_type_names,
                    sizeof(input_type_names) / sizeof(char*));
       if (selected_input_type == 0) {
@@ -982,13 +989,9 @@ TEST_P(EntityTest, GaussianBlurFilter) {
         ImGui::ColorEdit4("Input color",
                           reinterpret_cast<float*>(&input_color));
       }
-      ImGui::Combo("Blur type", &selected_blur_type, blur_type_names,
-                   sizeof(blur_type_names) / sizeof(char*));
-      if (selected_blur_type == 0) {
-        ImGui::Combo("Pass variation", &selected_pass_variation,
-                     pass_variation_names,
-                     sizeof(pass_variation_names) / sizeof(char*));
-      }
+      ImGui::Combo("Pass variation", &selected_pass_variation,
+                   pass_variation_names,
+                   sizeof(pass_variation_names) / sizeof(char*));
       ImGui::Checkbox("Combined sigma", &combined_sigma);
       if (combined_sigma) {
         ImGui::SliderFloat("Sigma (coarse)", blur_amount_coarse, 0, 1000);
@@ -1012,8 +1015,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       ImGui::SliderFloat2("Scale", scale, 0, 3);
       ImGui::SliderFloat2("Skew", skew, -3, 3);
       ImGui::SliderFloat4("Path XYWH", path_rect, -1000, 1000);
+      ImGui::End();
     }
-    ImGui::End();
 
     auto blur_sigma_x = Sigma{blur_amount_coarse[0] + blur_amount_fine[0]};
     auto blur_sigma_y = Sigma{blur_amount_coarse[1] + blur_amount_fine[1]};
@@ -1063,10 +1066,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     };
     FML_CHECK(blur);
 
-    auto mask_blur = FilterContents::MakeBorderMaskBlur(
-        FilterInput::Make(input), blur_sigma_x, blur_sigma_y,
-        blur_styles[selected_blur_style]);
-
     auto ctm = Matrix::MakeScale(GetContentScale()) *
                Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
                Matrix::MakeRotationZ(Radians(rotation)) *
@@ -1074,10 +1073,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
                Matrix::MakeSkew(skew[0], skew[1]) *
                Matrix::MakeTranslation(-Point(input_size) / 2);
 
-    auto target_contents = selected_blur_type == 0 ? blur : mask_blur;
-
     Entity entity;
-    entity.SetContents(target_contents);
+    entity.SetContents(blur);
     entity.SetTransform(ctm);
 
     entity.Render(context, pass);
@@ -1094,12 +1091,10 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
-    std::optional<Rect> target_contents_coverage =
-        target_contents->GetCoverage(entity);
-    if (target_contents_coverage.has_value()) {
-      std::unique_ptr<Geometry> geom =
-          Geometry::MakeFillPath(flutter::DlPath::MakeRect(
-              target_contents->GetCoverage(entity).value()));
+    std::optional<Rect> blur_coverage = blur->GetCoverage(entity);
+    if (blur_coverage.has_value()) {
+      std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
+          flutter::DlPath::MakeRect(blur->GetCoverage(entity).value()));
       auto contents = std::make_shared<SolidColorContents>(geom.get());
       contents->SetColor(bounds_color);
 
@@ -1136,8 +1131,8 @@ TEST_P(EntityTest, MorphologyFilter) {
                                  static_cast<float>(boston->GetSize().height)};
     static float effect_transform_scale = 1;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Morphology type", &selected_morphology_type,
                    morphology_type_names,
                    sizeof(morphology_type_names) / sizeof(char*));
@@ -1154,8 +1149,8 @@ TEST_P(EntityTest, MorphologyFilter) {
       ImGui::SliderFloat4("Path XYWH", path_rect, -1000, 1000);
       ImGui::SliderFloat("Effect transform scale", &effect_transform_scale, 0,
                          3);
+      ImGui::End();
     }
-    ImGui::End();
 
     std::shared_ptr<Contents> input;
     Size input_size;
@@ -1201,16 +1196,19 @@ TEST_P(EntityTest, MorphologyFilter) {
     cover_entity.Render(context, pass);
 
     // Renders a green bounding rect of the target filter.
-    Entity bounds_entity;
-    std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
-        flutter::DlPath::MakeRect(contents->GetCoverage(entity).value()));
-    auto bounds_contents =
-        std::make_shared<SolidColorContents>(bounds_geom.get());
-    bounds_contents->SetColor(bounds_color);
-    bounds_entity.SetContents(std::move(bounds_contents));
-    bounds_entity.SetTransform(Matrix());
+    std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
+    if (contents_coverage.has_value()) {
+      std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
+          flutter::DlPath::MakeRect(contents_coverage.value()));
+      auto bounds_contents =
+          std::make_shared<SolidColorContents>(bounds_geom.get());
+      bounds_contents->SetColor(bounds_color);
+      Entity bounds_entity;
+      bounds_entity.SetContents(std::move(bounds_contents));
+      bounds_entity.SetTransform(Matrix());
 
-    bounds_entity.Render(context, pass);
+      bounds_entity.Render(context, pass);
+    }
 
     return true;
   };
@@ -1358,33 +1356,6 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
   }
 }
 
-TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
-  auto geom = Geometry::MakeFillPath(
-      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
-  auto fill = std::make_shared<SolidColorContents>(geom.get());
-  fill->SetColor(Color::CornflowerBlue());
-  auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
-      FilterInput::Make(fill), Radius{3}, Radius{4});
-
-  {
-    Entity e;
-    e.SetTransform(Matrix());
-    auto actual = border_mask_blur->GetCoverage(e);
-    auto expected = Rect::MakeXYWH(-3, -4, 306, 408);
-    ASSERT_TRUE(actual.has_value());
-    ASSERT_RECT_NEAR(actual.value(), expected);
-  }
-
-  {
-    Entity e;
-    e.SetTransform(Matrix::MakeRotationZ(Radians{kPi / 4}));
-    auto actual = border_mask_blur->GetCoverage(e);
-    auto expected = Rect::MakeXYWH(-287.792, -4.94975, 504.874, 504.874);
-    ASSERT_TRUE(actual.has_value());
-    ASSERT_RECT_NEAR(actual.value(), expected);
-  }
-}
-
 TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   // No transform
   {
@@ -1438,16 +1409,18 @@ TEST_P(EntityTest, RRectShadowTest) {
     static PlaygroundPoint bottom_right_point(Point(600, 400), 30,
                                               Color::White());
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
-    ImGui::SliderFloat("Blur radius", &blur_radius, 0, 300);
-    ImGui::ColorEdit4("Color", reinterpret_cast<Scalar*>(&color));
-    ImGui::Checkbox("Show coverage", &show_coverage);
-    if (show_coverage) {
-      ImGui::ColorEdit4("Coverage color",
-                        reinterpret_cast<Scalar*>(&coverage_color));
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
+      ImGui::SliderFloat("Blur radius", &blur_radius, 0, 300);
+      ImGui::ColorEdit4("Color", reinterpret_cast<Scalar*>(&color));
+      ImGui::Checkbox("Show coverage", &show_coverage);
+      if (show_coverage) {
+        ImGui::ColorEdit4("Coverage color",
+                          reinterpret_cast<Scalar*>(&coverage_color));
+      }
+      ImGui::End();
     }
-    ImGui::End();
 
     auto [top_left, bottom_right] =
         DrawPlaygroundLine(top_left_point, bottom_right_point);
@@ -1527,8 +1500,8 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
     static float skew[2] = {0, 0};
 
     // Define the ImGui
-    ImGui::Begin("Color Matrix", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Color Matrix", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       std::string label = "##1";
       for (int i = 0; i < 20; i += 5) {
         ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float,
@@ -1542,8 +1515,8 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
       ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
       ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
       ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
+      ImGui::End();
     }
-    ImGui::End();
 
     // Set the color matrix filter.
     auto filter = ColorFilterContents::MakeColorMatrix(
@@ -1671,100 +1644,28 @@ TEST_P(EntityTest, SrgbToLinearFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-static Vector3 RGBToYUV(Vector3 rgb, YUVColorSpace yuv_color_space) {
-  Vector3 yuv;
-  switch (yuv_color_space) {
-    case YUVColorSpace::kBT601FullRange:
-      yuv.x = rgb.x * 0.299 + rgb.y * 0.587 + rgb.z * 0.114;
-      yuv.y = rgb.x * -0.169 + rgb.y * -0.331 + rgb.z * 0.5 + 0.5;
-      yuv.z = rgb.x * 0.5 + rgb.y * -0.419 + rgb.z * -0.081 + 0.5;
-      break;
-    case YUVColorSpace::kBT601LimitedRange:
-      yuv.x = rgb.x * 0.257 + rgb.y * 0.516 + rgb.z * 0.100 + 0.063;
-      yuv.y = rgb.x * -0.145 + rgb.y * -0.291 + rgb.z * 0.439 + 0.5;
-      yuv.z = rgb.x * 0.429 + rgb.y * -0.368 + rgb.z * -0.071 + 0.5;
-      break;
-  }
-  return yuv;
-}
-
-static std::vector<std::shared_ptr<Texture>> CreateTestYUVTextures(
-    Context* context,
-    YUVColorSpace yuv_color_space) {
-  Vector3 red = {244.0 / 255.0, 67.0 / 255.0, 54.0 / 255.0};
-  Vector3 green = {76.0 / 255.0, 175.0 / 255.0, 80.0 / 255.0};
-  Vector3 blue = {33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0};
-  Vector3 white = {1.0, 1.0, 1.0};
-  Vector3 red_yuv = RGBToYUV(red, yuv_color_space);
-  Vector3 green_yuv = RGBToYUV(green, yuv_color_space);
-  Vector3 blue_yuv = RGBToYUV(blue, yuv_color_space);
-  Vector3 white_yuv = RGBToYUV(white, yuv_color_space);
-  std::vector<Vector3> yuvs{red_yuv, green_yuv, blue_yuv, white_yuv};
-  std::vector<uint8_t> y_data;
-  std::vector<uint8_t> uv_data;
-  for (int i = 0; i < 4; i++) {
-    auto yuv = yuvs[i];
-    uint8_t y = std::round(yuv.x * 255.0);
-    uint8_t u = std::round(yuv.y * 255.0);
-    uint8_t v = std::round(yuv.z * 255.0);
-    for (int j = 0; j < 16; j++) {
-      y_data.push_back(y);
-    }
-    for (int j = 0; j < 8; j++) {
-      uv_data.push_back(j % 2 == 0 ? u : v);
-    }
-  }
-  auto cmd_buffer = context->CreateCommandBuffer();
-  auto blit_pass = cmd_buffer->CreateBlitPass();
-
-  impeller::TextureDescriptor y_texture_descriptor;
-  y_texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  y_texture_descriptor.format = PixelFormat::kR8UNormInt;
-  y_texture_descriptor.size = {8, 8};
-  auto y_texture =
-      context->GetResourceAllocator()->CreateTexture(y_texture_descriptor);
-  auto y_mapping = std::make_shared<fml::DataMapping>(y_data);
-  auto y_mapping_buffer =
-      context->GetResourceAllocator()->CreateBufferWithCopy(*y_mapping);
-
-  blit_pass->AddCopy(DeviceBuffer::AsBufferView(y_mapping_buffer), y_texture);
-
-  impeller::TextureDescriptor uv_texture_descriptor;
-  uv_texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  uv_texture_descriptor.format = PixelFormat::kR8G8UNormInt;
-  uv_texture_descriptor.size = {4, 4};
-  auto uv_texture =
-      context->GetResourceAllocator()->CreateTexture(uv_texture_descriptor);
-  auto uv_mapping = std::make_shared<fml::DataMapping>(uv_data);
-  auto uv_mapping_buffer =
-      context->GetResourceAllocator()->CreateBufferWithCopy(*uv_mapping);
-
-  blit_pass->AddCopy(DeviceBuffer::AsBufferView(uv_mapping_buffer), uv_texture);
-
-  if (!blit_pass->EncodeCommands() ||
-      !context->GetCommandQueue()->Submit({cmd_buffer}).ok()) {
-    FML_DLOG(ERROR) << "Could not copy contents into Y/UV texture.";
-  }
-
-  return {y_texture, uv_texture};
-}
-
 TEST_P(EntityTest, YUVToRGBFilter) {
-  if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    // TODO(114588) : Support YUV to RGB filter on OpenGLES backend.
-    GTEST_SKIP()
-        << "YUV to RGB filter is not supported on OpenGLES backend yet.";
+  if (GetParam() != PlaygroundBackend::kMetal &&
+      GetParam() != PlaygroundBackend::kMetalSDF) {
+    // @see (114588) : Support YUV to RGB filter on OpenGLES backend.
+    // The issue was closed as low priority as the support is only really
+    // needed for iOS. Also, Vulkan isn't supported either.
+    GTEST_SKIP() << "YUV to RGB filter is only supported on Metal backends.";
+  }
+
+  constexpr std::array<YUVColorSpace, 2> kColorSpaces = {
+      YUVColorSpace::kBT601FullRange, YUVColorSpace::kBT601LimitedRange};
+  std::array<TestYUVTextures, kColorSpaces.size()> textures;
+  for (size_t i = 0; i < kColorSpaces.size(); i++) {
+    auto result = CreateTestYUVTextures(*GetContext(), kColorSpaces[i]);
+    ABSL_ASSERT_OK(result);
+    textures[i] = std::move(result).value();
   }
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    YUVColorSpace yuv_color_space_array[2]{YUVColorSpace::kBT601FullRange,
-                                           YUVColorSpace::kBT601LimitedRange};
-    for (int i = 0; i < 2; i++) {
-      auto yuv_color_space = yuv_color_space_array[i];
-      auto textures =
-          CreateTestYUVTextures(GetContext().get(), yuv_color_space);
+    for (size_t i = 0; i < kColorSpaces.size(); i++) {
       auto filter_contents = FilterContents::MakeYUVToRGBFilter(
-          textures[0], textures[1], yuv_color_space);
+          textures[i].y, textures[i].uv, kColorSpaces[i]);
       Entity filter_entity;
       filter_entity.SetContents(filter_contents);
       auto snapshot =
@@ -1806,7 +1707,7 @@ TEST_P(EntityTest, RuntimeEffect) {
 
     struct FragUniforms {
       Vector2 iResolution;
-      Scalar iTime;
+      Scalar iTime = 0.0f;
     } frag_uniforms = {
         .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
         .iTime = static_cast<Scalar>(GetSecondsElapsed()),
@@ -1830,15 +1731,15 @@ TEST_P(EntityTest, RuntimeEffect) {
   };
 
   // Simulate some renders and hot reloading of the shader.
-  auto content_context = GetContentContext();
+  ContentContext& content_context = GetContentContext();
   {
     RenderTarget target =
-        content_context->GetRenderTargetCache()->CreateOffscreen(
-            *content_context->GetContext(), {1, 1}, 1u);
+        content_context.GetRenderTargetCache()->CreateOffscreen(
+            *content_context.GetContext(), {1, 1}, 1u);
 
     testing::MockRenderPass mock_pass(GetContext(), target);
-    callback(*content_context, mock_pass);
-    callback(*content_context, mock_pass);
+    callback(content_context, mock_pass);
+    callback(content_context, mock_pass);
 
     // Dirty the runtime stage.
     auto runtime_stages_result =
@@ -1849,7 +1750,7 @@ TEST_P(EntityTest, RuntimeEffect) {
     ASSERT_TRUE(runtime_stage->IsDirty());
     expect_dirty = true;
 
-    callback(*content_context, mock_pass);
+    callback(content_context, mock_pass);
   }
 }
 
@@ -1867,7 +1768,7 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 
   struct FragUniforms {
     Vector2 iResolution;
-    Scalar iTime;
+    Scalar iTime = 0.0f;
   } frag_uniforms = {
       .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
       .iTime = static_cast<Scalar>(GetSecondsElapsed()),
@@ -1883,12 +1784,12 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
   // Create a render target with a depth-stencil, similar to how EntityPass
   // does.
   RenderTarget target =
-      GetContentContext()->GetRenderTargetCache()->CreateOffscreenMSAA(
+      GetContentContext().GetRenderTargetCache()->CreateOffscreenMSAA(
           *GetContext(), {GetWindowSize().width, GetWindowSize().height}, 1,
           "RuntimeEffect Texture");
   testing::MockRenderPass pass(GetContext(), target);
 
-  ASSERT_TRUE(contents->Render(*GetContentContext(), entity, pass));
+  ASSERT_TRUE(contents->Render(GetContentContext(), entity, pass));
   ASSERT_EQ(pass.GetCommands().size(), 1u);
   const auto& command = pass.GetCommands()[0];
   ASSERT_TRUE(command.pipeline->GetDescriptor()
@@ -1912,7 +1813,7 @@ TEST_P(EntityTest, RuntimeEffectCanPrecache) {
   auto contents = std::make_shared<RuntimeEffectContents>(geom.get());
   contents->SetRuntimeStage(runtime_stage);
 
-  EXPECT_TRUE(contents->BootstrapShader(*GetContentContext()));
+  EXPECT_TRUE(contents->BootstrapShader(GetContentContext()));
 }
 
 TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
@@ -1933,7 +1834,7 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
 
   struct FragUniforms {
     Vector2 iResolution;
-    Scalar iTime;
+    Scalar iTime = 0.0f;
   } frag_uniforms = {
       .iResolution = Vector2(GetWindowSize().width, GetWindowSize().height),
       .iTime = static_cast<Scalar>(GetSecondsElapsed()),
@@ -1943,7 +1844,7 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   auto buffer_view = RuntimeEffectContents::EmplaceUniform(
-      uniform_data->data(), GetContentContext()->GetTransientsDataBuffer(),
+      uniform_data->data(), GetContentContext().GetTransientsDataBuffer(),
       runtime_stage->GetUniforms()[0]);
 
   // 16 bytes:
@@ -2178,6 +2079,22 @@ TEST_P(EntityTest, TiledTextureContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 }
 
+TEST_P(EntityTest, TiledTextureContentsIsOpaqueNullTexture) {
+  Matrix matrix;
+  auto geom = Geometry::MakeCover();
+  TiledTextureContents contents(geom.get());
+  contents.SetTexture(nullptr);
+  EXPECT_FALSE(contents.IsOpaque(matrix));
+}
+
+TEST_P(EntityTest, TiledTextureContentsRenderToSnapshotNullTexture) {
+  auto geom = Geometry::MakeCover();
+  TiledTextureContents contents(geom.get());
+  contents.SetTexture(nullptr);
+  auto snapshot = contents.RenderToSnapshot(GetContentContext(), Entity(), {});
+  EXPECT_FALSE(snapshot.has_value());
+}
+
 TEST_P(EntityTest, PointFieldGeometryCoverage) {
   std::vector<Point> points = {{10, 20}, {100, 200}};
   PointFieldGeometry geometry(points.data(), 2, 5.0, false);
@@ -2213,13 +2130,13 @@ TEST_P(EntityTest, TextContentsCeilsGlyphScaleToDecimal) {
 }
 
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
-  auto content_context = GetContentContext();
+  ContentContext& content_context = GetContentContext();
 
-  auto default_gyph = content_context->GetGlyphAtlasPipeline({
+  auto default_gyph = content_context.GetGlyphAtlasPipeline({
       .color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
       .has_depth_stencil_attachments = false,
   });
-  auto alt_gyph = content_context->GetGlyphAtlasPipeline(
+  auto alt_gyph = content_context.GetGlyphAtlasPipeline(
       {.color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
        .has_depth_stencil_attachments = true});
 
@@ -2236,9 +2153,12 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
 }
 
 TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
-  auto content_context = GetContentContext();
-  auto default_color_burn = content_context->GetMorphologyFilterPipeline({
+  ContentContext& content_context = GetContentContext();
+  // Morphology filters only draw without depth/stencil attachments, so their
+  // default pipeline has none and variants cannot add them.
+  auto default_color_burn = content_context.GetMorphologyFilterPipeline({
       .color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
+      .has_depth_stencil_attachments = false,
   });
 
   auto decal_supported = static_cast<Scalar>(
@@ -2302,7 +2222,7 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   auto get_result = [this, &mock_pass](const flutter::DlPath& path) {
     auto geometry = Geometry::MakeFillPath(
         path, /* inner rect */ Rect::MakeLTRB(0, 0, 100, 100));
-    return geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+    return geometry->GetPositionBuffer(GetContentContext(), {}, mock_pass);
   };
 
   // Convex path
@@ -2340,7 +2260,7 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
                                                  Degrees(sweep), stroke);
 
         GeometryResult result =
-            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+            geometry->GetPositionBuffer(GetContentContext(), {}, mock_pass);
 
         EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
             << "start: " << start << " sweep: " << sweep;
@@ -2357,7 +2277,7 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
                                                  Degrees(sweep), stroke);
 
         GeometryResult result =
-            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+            geometry->GetPositionBuffer(GetContentContext(), {}, mock_pass);
 
         if (sweep < 348.6) {
           EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
@@ -2379,7 +2299,7 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
                                                  Degrees(sweep), stroke);
 
         GeometryResult result =
-            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+            geometry->GetPositionBuffer(GetContentContext(), {}, mock_pass);
 
         if (sweep < 300.0) {
           EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
@@ -2401,7 +2321,7 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
                                                  Degrees(sweep), stroke);
 
         GeometryResult result =
-            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+            geometry->GetPositionBuffer(GetContentContext(), {}, mock_pass);
 
         if (sweep < 347.4) {
           EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
@@ -2423,7 +2343,7 @@ TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
                                                  Degrees(sweep), stroke);
 
         GeometryResult result =
-            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+            geometry->GetPositionBuffer(GetContentContext(), {}, mock_pass);
 
         if (sweep < 270.1) {
           EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
@@ -2444,7 +2364,7 @@ TEST_P(EntityTest, FailOnValidationError) {
   EXPECT_DEATH(
       // The easiest way to trigger a validation error is to try to compile
       // a shader with an unsupported pixel format.
-      GetContentContext()->GetBlendColorBurnPipeline({
+      GetContentContext().GetBlendColorBurnPipeline({
           .color_attachment_pixel_format = PixelFormat::kUnknown,
           .has_depth_stencil_attachments = false,
       }),
@@ -2460,11 +2380,11 @@ TEST_P(EntityTest, CanComputeGeometryForEmptyPathsWithoutCrashing) {
 
   Entity entity;
   RenderTarget target =
-      GetContentContext()->GetRenderTargetCache()->CreateOffscreen(
-          *GetContext(), {1, 1}, 1u);
+      GetContentContext().GetRenderTargetCache()->CreateOffscreen(*GetContext(),
+                                                                  {1, 1}, 1u);
   testing::MockRenderPass render_pass(GetContext(), target);
   auto position_result =
-      geom->GetPositionBuffer(*GetContentContext(), entity, render_pass);
+      geom->GetPositionBuffer(GetContentContext(), entity, render_pass);
 
   EXPECT_EQ(position_result.vertex_buffer.vertex_count, 0u);
 
@@ -2496,13 +2416,15 @@ TEST_P(EntityTest, DrawSuperEllipse) {
     static int degree = 4;
     static Color color = Color::Red();
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Alpha", &alpha, 0, 100);
-    ImGui::SliderFloat("Beta", &beta, 0, 100);
-    ImGui::SliderInt("Degreee", &degree, 1, 20);
-    ImGui::SliderFloat("Radius", &radius, 0, 400);
-    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Alpha", &alpha, 0, 100);
+      ImGui::SliderFloat("Beta", &beta, 0, 100);
+      ImGui::SliderInt("Degreee", &degree, 1, 20);
+      ImGui::SliderFloat("Radius", &radius, 0, 400);
+      ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
+      ImGui::End();
+    }
 
     std::unique_ptr<SuperellipseGeometry> geom =
         std::make_unique<SuperellipseGeometry>(Point{400, 400}, radius, degree,
@@ -2564,8 +2486,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
       radius_br[1] = radius_br[0];
     }
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Style", &style_index, style_options,
                    sizeof(style_options) / sizeof(char*));
       ImGui::SliderFloat2("Center", &center.x, 0, 1000);
@@ -2593,9 +2515,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
           radius_br = radius_tr;
         }
       }
+      ImGui::End();
     }
-
-    ImGui::End();
 
     RoundingRadii radii{
         .top_left = {radius_tl[0], radius_tl[1]},
@@ -2649,13 +2570,13 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
     // Scale so that "corner radius" is as long as half the canvas.
     float scale = screen_canvas_size / 2 / corner_radius;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
       ImGui::LabelText("Ratio", "%.2g", static_cast<double>(ratio));
       ImGui::Text("  where Ratio = RectSize / CornerRadius");
+      ImGui::End();
     }
-    ImGui::End();
 
     auto top_right = Vector2(screen_canvas_size * 1.3f, screen_canvas_padding);
     auto transform = Matrix::MakeTranslation(top_right) *
@@ -2706,18 +2627,20 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
       } else {
         float portion_of_rect =
             screen_offset_y * GetContentScale().y / scale / rect_size;
-        label = std::format("- {:.2g}", portion_of_rect);
+        label = absl::StrFormat("- %.2g", portion_of_rect);
       }
-      ImGui::GetBackgroundDrawList()->AddText(
-          nullptr, font_size,
-          // Draw the ruler at around the flat part of the curve, which is
-          // somewhere to the left of the top right corner.
-          //
-          // Offset vertically by font_size/2 so that the hyphen aligns with the
-          // top of shape.
-          {screen_top_right.x - 500,
-           screen_top_right.y + screen_offset_y - font_size / 2},
-          IM_COL32_WHITE, label.c_str());
+      if (IsPlaygroundEnabled()) {
+        ImGui::GetBackgroundDrawList()->AddText(
+            nullptr, font_size,
+            // Draw the ruler at around the flat part of the curve, which is
+            // somewhere to the left of the top right corner.
+            //
+            // Offset vertically by font_size/2 so that the hyphen aligns with
+            // the top of shape.
+            {screen_top_right.x - 500,
+             screen_top_right.y + screen_offset_y - font_size / 2},
+            IM_COL32_WHITE, label.c_str());
+      }
     }
     return success;
   };

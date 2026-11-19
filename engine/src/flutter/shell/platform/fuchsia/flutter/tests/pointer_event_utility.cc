@@ -84,6 +84,7 @@ fup_TouchEvent TouchEventBuilder::Build() {
   if (result_) {
     event.set_interaction_result(std::move(result_.value()));
   }
+  event.set_trace_flow_id(123);
   return event;
 }
 

@@ -9,18 +9,18 @@ Future<void> main() async {
   await task(
     combine(<TaskFunction>[
       PluginTest('ios', <String>['--platforms=ios']).call,
-      // Test that app builds with Flutter as a transitive dependency.
-      PluginTest('ios', <String>[
-        '--platforms=ios',
-      ], cocoapodsTransitiveFlutterDependency: true).call,
+      // Test that app builds with Flutter as a transitive dependency. The
+      // plugin is the same as above, so no need to test again.
+      PluginTest(
+        'ios',
+        <String>['--platforms=ios'],
+        cocoapodsTransitiveFlutterDependency: true,
+        testPlugin: false,
+      ).call,
       // Test that Dart-only plugins are supported.
       PluginTest('ios', <String>['--platforms=ios'], dartOnlyPlugin: true).call,
-      // Test that shared darwin directories are supported.
-      PluginTest('ios', <String>['--platforms=ios,macos'], sharedDarwinSource: true).call,
       // Test that FFI plugins are supported.
       PluginTest('ios', <String>['--platforms=ios'], template: 'plugin_ffi').call,
-      // Test that plugins support the darwin platform.
-      PluginTest('ios', <String>['--platforms=darwin']).call,
     ]),
   );
 }

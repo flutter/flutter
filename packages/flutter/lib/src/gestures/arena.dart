@@ -240,6 +240,9 @@ class GestureArenaManager {
         }
       case GestureDisposition.rejected:
         assert(_debugLogDiagnostic(pointer, 'Rejecting: $member'));
+        if (state.eagerWinner == member) {
+          state.eagerWinner = null;
+        }
         state.members.remove(member);
         member.rejectGesture(pointer);
         if (!state.isOpen) {

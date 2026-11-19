@@ -16,17 +16,17 @@ class MatrixFilterContentsTest : public EntityPlayground {
   /// Create a texture that has been cleared to transparent black.
   std::shared_ptr<Texture> MakeTexture(ISize size) {
     std::shared_ptr<CommandBuffer> command_buffer =
-        GetContentContext()->GetContext()->CreateCommandBuffer();
+        GetContentContext().GetContext()->CreateCommandBuffer();
     if (!command_buffer) {
       return nullptr;
     }
 
-    auto render_target = GetContentContext()->MakeSubpass(
+    auto render_target = GetContentContext().MakeSubpass(
         "Clear Subpass", size, command_buffer,
         [](const ContentContext&, RenderPass&) { return true; });
 
     if (!GetContentContext()
-             ->GetContext()
+             .GetContext()
              ->GetCommandQueue()
              ->Submit(/*buffers=*/{command_buffer})
              .ok()) {
@@ -111,9 +111,9 @@ TEST_P(MatrixFilterContentsTest, RenderCoverageMatchesGetCoverageIdentity) {
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   std::optional<Entity> result =
-      contents.GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents.GetEntity(renderer, entity, /*coverage_hint=*/{});
   expectRenderCoverageEqual(result, contents.GetCoverage(entity),
                             Rect::MakeXYWH(100, 200, 100, 100));
 }
@@ -128,9 +128,9 @@ TEST_P(MatrixFilterContentsTest, RenderCoverageMatchesGetCoverageTranslate) {
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   std::optional<Entity> result =
-      contents.GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents.GetEntity(renderer, entity, /*coverage_hint=*/{});
   expectRenderCoverageEqual(result, contents.GetCoverage(entity),
                             Rect::MakeXYWH(150, 300, 100, 100));
 }
@@ -148,9 +148,9 @@ TEST_P(MatrixFilterContentsTest,
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   std::optional<Entity> result =
-      contents.GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents.GetEntity(renderer, entity, /*coverage_hint=*/{});
   expectRenderCoverageEqual(result, contents.GetCoverage(entity),
                             Rect::MakeXYWH(200, 400, 100, 100));
 }
@@ -165,9 +165,9 @@ TEST_P(MatrixFilterContentsTest, RenderCoverageMatchesGetCoverageScale) {
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   std::optional<Entity> result =
-      contents.GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents.GetEntity(renderer, entity, /*coverage_hint=*/{});
   expectRenderCoverageEqual(result, contents.GetCoverage(entity),
                             Rect::MakeXYWH(100, 200, 300, 300));
 }
@@ -185,9 +185,9 @@ TEST_P(MatrixFilterContentsTest,
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   std::optional<Entity> result =
-      contents.GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents.GetEntity(renderer, entity, /*coverage_hint=*/{});
   expectRenderCoverageEqual(result, contents.GetCoverage(entity),
                             Rect::MakeXYWH(100, 200, 300, 300));
 }
@@ -204,9 +204,9 @@ TEST_P(MatrixFilterContentsTest, RenderCoverageMatchesGetCoverageSubpassScale) {
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
 
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
   std::optional<Entity> result =
-      contents.GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents.GetEntity(renderer, entity, /*coverage_hint=*/{});
   expectRenderCoverageEqual(result, contents.GetCoverage(entity),
                             Rect::MakeXYWH(300, 600, 300, 300));
 }

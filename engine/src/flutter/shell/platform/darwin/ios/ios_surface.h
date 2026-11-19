@@ -5,13 +5,14 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+#import <QuartzCore/CALayer.h>
 
 #include <memory>
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
+#import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 @class CALayer;
 
@@ -19,7 +20,8 @@ namespace flutter {
 
 class IOSSurface {
  public:
-  static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context, CALayer* layer);
+  static std::unique_ptr<IOSSurface> Create(const std::shared_ptr<IOSContext>& context,
+                                            CALayer* layer);
 
   std::shared_ptr<IOSContext> GetContext() const;
 

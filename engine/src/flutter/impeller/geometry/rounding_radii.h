@@ -60,6 +60,13 @@ struct RoundingRadii {
            ScalarNearlyEqual(top_left.height, bottom_left.height, tolerance);
   }
 
+  constexpr bool AreAllCornersCircular() const {
+    return ScalarNearlyEqual(top_left.width, top_left.height) &&
+           ScalarNearlyEqual(top_right.width, top_right.height) &&
+           ScalarNearlyEqual(bottom_left.width, bottom_left.height) &&
+           ScalarNearlyEqual(bottom_right.width, bottom_right.height);
+  }
+
   /// @brief  Returns a scaled copy of this object, ensuring that the sum of the
   ///         corner radii on each side does not exceed the width or height of
   ///         the given bounds.

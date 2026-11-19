@@ -11,12 +11,14 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -64,6 +66,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -1576,6 +1579,40 @@ public class AccessibilityBridgeTest {
     assertEquals(ACCESSIBILITY_FEATURE_NO_ANNOUNCE, featuresCaptor.getValue().intValue());
   }
 
+  @Config(sdk = API_LEVELS.API_34)
+  @TargetApi(API_LEVELS.API_34)
+  @Test
+  public void itUnregistersHighContrastObserverOnRelease() {
+    AccessibilityChannel mockChannel = mock(AccessibilityChannel.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    UiModeManager mockUiModeManager = mock(UiModeManager.class);
+
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getSystemService(Context.UI_MODE_SERVICE)).thenReturn(mockUiModeManager);
+    when(context.getMainExecutor())
+        .thenReturn(RuntimeEnvironment.getApplication().getMainExecutor());
+
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            /* rootAccessibilityView= */ mockRootView,
+            /* accessibilityChannel= */ mockChannel,
+            /* accessibilityManager= */ mockManager,
+            /* contentResolver= */ null,
+            /* accessibilityViewEmbedder= */ null,
+            /* platformViewsAccessibilityDelegate= */ null);
+
+    ArgumentCaptor<UiModeManager.ContrastChangeListener> listenerCaptor =
+        ArgumentCaptor.forClass(UiModeManager.ContrastChangeListener.class);
+    verify(mockUiModeManager).addContrastChangeListener(any(), listenerCaptor.capture());
+    UiModeManager.ContrastChangeListener listener = listenerCaptor.getValue();
+
+    accessibilityBridge.release();
+
+    verify(mockUiModeManager).removeContrastChangeListener(listener);
+  }
+
   @Config(sdk = API_LEVELS.API_33)
   @TargetApi(API_LEVELS.API_33)
   @Test
@@ -2606,7 +2643,7 @@ public class AccessibilityBridgeTest {
   public void itAddsProgressBarToClassName() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
     AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
@@ -2614,10 +2651,89 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itAddsComboBoxToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.COMBO_BOX.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.Spinner", nodeInfo.getClassName().toString());
+    assertTrue(nodeInfo.canOpenPopup());
+  }
+
+  @Test
+  public void itAddsMenuToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.Spinner", nodeInfo.getClassName().toString());
+    assertTrue(nodeInfo.canOpenPopup());
+  }
+
+  @Test
+  public void itAddsMenuItemToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU_ITEM.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.view.MenuItem", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsMenuItemCheckboxToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU_ITEM_CHECKBOX.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.view.MenuItem", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsMenuItemRadioToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.MENU_ITEM_RADIO.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.view.MenuItem", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsListViewToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.LIST.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ListView", nodeInfo.getClassName().toString());
+  }
+
+  @Test
+  public void itAddsRadioGroupToClassName() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.RADIO_GROUP.value;
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.RadioGroup", nodeInfo.getClassName().toString());
+  }
+
+  @Test
   public void itAddsRangeInfoToProgressBar() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "100";
@@ -2632,10 +2748,62 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itAddsRangeInfoToSlider_withPercentage() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.SLIDER.value;
+    testSemanticsNode.value = "50%";
+    testSemanticsNode.minValue = "0.0";
+    testSemanticsNode.maxValue = "5.0";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.SeekBar", nodeInfo.getClassName().toString());
+    assertNotNull(nodeInfo.getRangeInfo());
+    assertEquals(0.0f, nodeInfo.getRangeInfo().getMin(), 1e-4f);
+    assertEquals(5.0f, nodeInfo.getRangeInfo().getMax(), 1e-4f);
+    assertEquals(2.5f, nodeInfo.getRangeInfo().getCurrent(), 1e-4f);
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void itAddsActionSetProgressForSlider() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.SLIDER.value;
+    testSemanticsNode.value = "50%";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.SeekBar", nodeInfo.getClassName().toString());
+    assertTrue(
+        nodeInfo
+            .getActionList()
+            .contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS));
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void itOmitsActionSetProgressForProgressBar() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
+    testSemanticsNode.value = "50";
+    TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertEquals("android.widget.ProgressBar", nodeInfo.getClassName().toString());
+    assertFalse(
+        nodeInfo
+            .getActionList()
+            .contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS));
+  }
+
+  @Test
   public void itAddsRangeInfoToProgressBar_missingMinAndMaxValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
@@ -2651,7 +2819,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableMinValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     testSemanticsNode.minValue = "a";
     testSemanticsNode.maxValue = "100";
@@ -2669,7 +2837,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableMaxValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "a";
@@ -2689,7 +2857,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableValue() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "a";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "100";
@@ -2711,7 +2879,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToProgressBar_unparseableValueAPI36() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "a";
     testSemanticsNode.minValue = "0";
     testSemanticsNode.maxValue = "100";
@@ -3245,6 +3413,66 @@ public class AccessibilityBridgeTest {
         contentResolver,
         accessibilityViewEmbedder,
         platformViewsAccessibilityDelegate);
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @SuppressWarnings("deprecation")
+  @Test
+  public void itLogsDeprecationWarningForAnnounceOnAPI36() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    try (MockedStatic<io.flutter.Log> mockedLog = mockStatic(io.flutter.Log.class)) {
+      accessibilityBridge.accessibilityMessageHandler.announce("Hello");
+
+      mockedLog.verify(
+          () ->
+              io.flutter.Log.w(
+                  eq("AccessibilityBridge"),
+                  contains(
+                      "Using AnnounceSemanticsEvent for accessibility is deprecated on Android")));
+    }
+  }
+
+  @Config(sdk = API_LEVELS.API_35)
+  @TargetApi(API_LEVELS.API_35)
+  @SuppressWarnings("deprecation")
+  @Test
+  public void itDoesNotLogDeprecationWarningForAnnounceOnAPI35() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+    try (MockedStatic<io.flutter.Log> mockedLog = mockStatic(io.flutter.Log.class)) {
+      accessibilityBridge.accessibilityMessageHandler.announce("Hello");
+
+      mockedLog.verify(
+          () -> io.flutter.Log.w(eq("AccessibilityBridge"), any(String.class)), never());
+    }
+  }
+
+  @Test
+  public void itSetsVisibleToUserFalseForHiddenNodes() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+
+    TestSemanticsNode visibleNode = new TestSemanticsNode();
+    visibleNode.id = 1;
+    visibleNode.label = "visible";
+    root.children.add(visibleNode);
+
+    TestSemanticsNode hiddenNode = new TestSemanticsNode();
+    hiddenNode.id = 2;
+    hiddenNode.label = "hidden";
+    hiddenNode.addFlag(AccessibilityBridge.Flag.IS_HIDDEN);
+    root.children.add(hiddenNode);
+
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo visibleNodeInfo = accessibilityBridge.createAccessibilityNodeInfo(1);
+    assertTrue(visibleNodeInfo.isVisibleToUser());
+
+    AccessibilityNodeInfo hiddenNodeInfo = accessibilityBridge.createAccessibilityNodeInfo(2);
+    assertFalse(hiddenNodeInfo.isVisibleToUser());
   }
 
   /// The encoding for semantics is described in platform_view_android.cc

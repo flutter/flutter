@@ -248,18 +248,32 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                          height, ui_task, is_impeller_enabled,
                          layer_tree = std::move(layer_tree)]() mutable {
         auto picture_bounds = DlISize(width, height);
-        sk_sp<DisplayList> snapshot_display_list = display_list;
-        if (layer_tree) {
-          FML_DCHECK(picture_bounds == layer_tree->frame_size());
-          snapshot_display_list =
-              layer_tree->Flatten(DlRect::MakeWH(width, height),
-                                  snapshot_delegate->GetTextureRegistry(),
-                                  snapshot_delegate->GetGrContext());
-        }
         if (is_impeller_enabled) {
 #if IMPELLER_SUPPORTS_RENDERING
+          SnapshotDelegate::SnapshotDisplayListProvider provider;
+          if (layer_tree) {
+            FML_DCHECK(picture_bounds == layer_tree->frame_size());
+            // Flatten only once the snapshot controller has made a rendering
+            // context current, and with the AiksContext that renders the
+            // snapshot. Constructing an AiksContext up front, with no context
+            // current, breaks the OpenGL ES backend.
+            // https://github.com/flutter/flutter/issues/192365
+            provider = fml::MakeCopyable(
+                [layer_tree = std::move(layer_tree),
+                 texture_registry = snapshot_delegate->GetTextureRegistry(),
+                 bounds = DlRect::MakeWH(width, height)](
+                    impeller::AiksContext* aiks_context) mutable {
+                  return layer_tree->Flatten(bounds, texture_registry,
+                                             /*gr_context=*/nullptr,
+                                             aiks_context);
+                });
+          } else {
+            provider = [display_list](impeller::AiksContext*) {
+              return display_list;
+            };
+          }
           snapshot_delegate->MakeImpellerSnapshot(
-              snapshot_display_list, picture_bounds,
+              std::move(provider), picture_bounds,
               [ui_task_runner,
                ui_task](const std::shared_ptr<impeller::Texture>& texture) {
                 fml::TaskRunner::RunNowOrPostTask(
@@ -270,6 +284,15 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
               SnapshotPixelFormat::kDontCare);
 #endif  // IMPELLER_SUPPORTS_RENDERING
         } else {
+          sk_sp<DisplayList> snapshot_display_list = display_list;
+          if (layer_tree) {
+            FML_DCHECK(picture_bounds == layer_tree->frame_size());
+            snapshot_display_list =
+                layer_tree->Flatten(DlRect::MakeWH(width, height),
+                                    snapshot_delegate->GetTextureRegistry(),
+                                    snapshot_delegate->GetGrContext(),
+                                    /*aiks_context=*/nullptr);
+          }
           snapshot_delegate->MakeSkiaSnapshot(
               snapshot_display_list, picture_bounds,
               [ui_task_runner, ui_task](const sk_sp<SkImage>& sk_image) {

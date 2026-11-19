@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -22,8 +21,6 @@ abstract class PersistentToolState {
 
   factory PersistentToolState.test({required Directory directory, required Logger logger}) =
       _DefaultPersistentToolState.test;
-
-  static PersistentToolState? get instance => context.get<PersistentToolState>();
 
   /// Whether the welcome message should be redisplayed.
   ///
@@ -43,9 +40,11 @@ abstract class PersistentToolState {
   String? get lastActiveLicenseTermsHash;
   void setLastActiveLicenseTermsHash(String value); // Enforced nonnull setter.
 
-  /// Whether this client was already determined to be or not be a bot.
-  bool? get isRunningOnBot;
-  void setIsRunningOnBot(bool value); // Enforced nonnull setter.
+  /// Whether the Intel Mac warning message should be displayed.
+  ///
+  /// This is typically set to false after the message has been shown once.
+  bool get shouldShowIntelMacWarning;
+  set shouldShowIntelMacWarning(bool value);
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -67,8 +66,8 @@ class _DefaultPersistentToolState implements PersistentToolState {
     Channel.beta: 'last-active-beta-version',
     Channel.stable: 'last-active-stable-version',
   };
-  static const _kBotKey = 'is-bot';
   static const _kLicenseHash = 'license-hash';
+  static const _kHasShownIntelMacWarningKey = 'displayed-intel-warning-message';
 
   final Config _config;
 
@@ -109,10 +108,14 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  bool? get isRunningOnBot => _config.getValue(_kBotKey) as bool?;
+  bool get shouldShowIntelMacWarning => _config.getValue(_kHasShownIntelMacWarningKey) == null;
 
   @override
-  void setIsRunningOnBot(bool value) {
-    _config.setValue(_kBotKey, value);
+  set shouldShowIntelMacWarning(bool value) {
+    if (value) {
+      _config.removeValue(_kHasShownIntelMacWarningKey);
+    } else {
+      _config.setValue(_kHasShownIntelMacWarningKey, true);
+    }
   }
 }

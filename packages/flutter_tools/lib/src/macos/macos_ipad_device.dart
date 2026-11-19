@@ -4,33 +4,26 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
-
 import '../application_package.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/ios_workflow.dart';
+import '../mdns_discovery.dart';
 import '../project.dart';
 
 /// Represents an ARM macOS target that can run iPad apps.
 ///
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
-  MacOSDesignedForIPadDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
+  MacOSDesignedForIPadDevice({required this._mdnsVmServiceDiscovery, required super.toolContext})
+    : super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
-  final OperatingSystemUtils _operatingSystemUtils;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
 
   @override
   String get name => 'Mac Designed for iPad';
@@ -38,9 +31,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
+  // "Designed for iPad" apps are only supported on Apple Silicon Macs.
   @override
-  Future<bool> isSupported() async =>
-      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+  Future<CpuArch> get cpuArch async => CpuArch.arm64;
+
+  @override
+  Future<bool> isSupported() async => toolContext.os.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   bool get supportsFlavors => true;
@@ -48,7 +44,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync() &&
-        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+        toolContext.os.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
@@ -65,11 +61,15 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }) {
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
+      mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
+      // back to log-based protocol discovery.
+      throwOnError: false,
       useDeviceIPAsHost: false,
+      usesIpv6: ipv6,
     );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -115,36 +115,23 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required Platform platform,
-    required IOSWorkflow iosWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _logger = logger,
-       _platform = platform,
-       _iosWorkflow = iosWorkflow,
-       _processManager = processManager,
-       _fileSystem = fileSystem,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('Mac designed for iPad devices');
+    required this._iosWorkflow,
+    required this._mdnsVmServiceDiscovery,
+    required ToolContext super.toolContext,
+  }) : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
 
   @override
-  bool get supportsPlatform => _platform.isMacOS;
+  bool get supportsPlatform => toolContext.platform.isMacOS;
 
   /// iOS (not desktop macOS) development is enabled, the host is an ARM Mac,
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
       _iosWorkflow.canListDevices &&
-      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64 &&
+      toolContext.os.hostPlatform == HostPlatform.darwin_arm64 &&
       allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
@@ -160,10 +147,8 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       MacOSDesignedForIPadDevice(
-        processManager: _processManager,
-        logger: _logger,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
+        mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
+        toolContext: toolContext,
       ),
     ];
   }

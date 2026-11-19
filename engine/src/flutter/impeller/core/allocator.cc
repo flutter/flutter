@@ -48,11 +48,29 @@ std::shared_ptr<DeviceBuffer> Allocator::CreateBuffer(
 
 std::shared_ptr<Texture> Allocator::CreateTexture(const TextureDescriptor& desc,
                                                   bool threadsafe) {
+  if (const absl::Status status = desc.Validate(); !status.ok()) {
+    VALIDATION_LOG << "The texture descriptor is invalid. " << status.message();
+    return nullptr;
+  }
+
   const auto max_size = GetMaxTextureSizeSupported();
   if (desc.size.width > max_size.width || desc.size.height > max_size.height) {
     VALIDATION_LOG << "Requested texture size " << desc.size
                    << " exceeds maximum supported size of " << max_size;
     return nullptr;
+  }
+
+  if (IsCompressed(desc.format)) {
+    // Block-compressed textures are sample-only. They cannot be rendered to,
+    // written from a shader, or allocated as transient attachments.
+    if (desc.usage & TextureUsage::kRenderTarget ||
+        desc.usage & TextureUsage::kShaderWrite ||
+        desc.storage_mode == StorageMode::kDeviceTransient) {
+      VALIDATION_LOG << "Compressed texture format "
+                     << PixelFormatToString(desc.format)
+                     << " can only be used as a sample-only texture.";
+      return nullptr;
+    }
   }
 
   if (desc.mip_count > desc.size.MipCount()) {

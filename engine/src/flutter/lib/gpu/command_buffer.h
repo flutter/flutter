@@ -5,11 +5,22 @@
 #ifndef FLUTTER_LIB_GPU_COMMAND_BUFFER_H_
 #define FLUTTER_LIB_GPU_COMMAND_BUFFER_H_
 
+#include <memory>
+#include <vector>
+
 #include "flutter/lib/gpu/context.h"
+#include "flutter/lib/gpu/device_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/texture.h"
 #include "flutter/lib/ui/dart_wrapper.h"
+#include "impeller/geometry/point.h"
+#include "impeller/geometry/rect.h"
+#include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/render_pass.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter {
 namespace gpu {
@@ -24,7 +35,53 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   std::shared_ptr<impeller::CommandBuffer> GetCommandBuffer();
 
-  void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
+  /// Ends the open pass, then creates a render pass for [render_target] and
+  /// makes it the open pass. Returns null if either step fails.
+  ///
+  /// The open pass is ended before the new backend pass is created, because
+  /// the Metal and Vulkan render pass constructors begin encoding, and Metal
+  /// allows one active encoder per command buffer.
+  std::shared_ptr<impeller::RenderPass> CreateRenderPass(
+      const impeller::RenderTarget& render_target);
+
+  /// Ends [render_pass] if it is the open pass. Does nothing if it was
+  /// already ended by a later command.
+  bool EndRenderPass(const impeller::RenderPass* render_pass);
+
+  /// Ends the open pass, then creates a compute pass and makes it the open
+  /// pass. Returns null if either step fails.
+  ///
+  /// The open pass is ended first for the same reason as in
+  /// `CreateRenderPass`: the Metal compute pass constructor begins encoding.
+  std::shared_ptr<impeller::ComputePass> CreateComputePass();
+
+  /// Ends [compute_pass] if it is the open pass. Does nothing if it was
+  /// already ended by a later command. Returns an error if the pass fails to
+  /// encode. [compute_pass] must not be null.
+  absl::Status EndComputePass(const impeller::ComputePass* compute_pass);
+
+  const std::shared_ptr<impeller::Context>& GetContext() const;
+
+  bool AddCompletionCallback(
+      impeller::CommandBuffer::CompletionCallback completion_callback);
+
+  bool CopyBufferToTexture(DeviceBuffer& source,
+                           size_t source_offset,
+                           size_t source_length,
+                           Texture& destination,
+                           impeller::IRect destination_region,
+                           uint32_t mip_level,
+                           uint32_t slice);
+
+  bool CopyTextureToBuffer(Texture& source,
+                           impeller::IRect source_region,
+                           DeviceBuffer& destination,
+                           size_t destination_offset);
+
+  bool CopyTextureToTexture(Texture& source,
+                            Texture& destination,
+                            impeller::IRect source_region,
+                            impeller::IPoint destination_origin);
 
   bool Submit();
   bool Submit(
@@ -35,7 +92,33 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
  private:
   std::shared_ptr<impeller::Context> context_;
   std::shared_ptr<impeller::CommandBuffer> command_buffer_;
-  std::vector<std::shared_ptr<impeller::RenderPass>> encodables_;
+
+  struct Encodable {
+    std::shared_ptr<impeller::RenderPass> render_pass;
+    std::shared_ptr<impeller::BlitPass> blit_pass;
+    std::shared_ptr<impeller::ComputePass> compute_pass;
+
+    bool EncodeCommands() const;
+  };
+
+  /// Ends the pass that is recording, if any. On Metal and Vulkan the pass is
+  /// encoded now, which ends its backend encoder. On OpenGL ES every pass is
+  /// encoded in creation order at submit, on the raster thread. (OpenGL ES
+  /// never records compute passes, since Flutter GPU does not support compute
+  /// there.)
+  bool EndOpenPass();
+
+  std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();
+
+  // Every pass in creation order, which is also execution order. Only the
+  // last one can be open.
+  std::vector<Encodable> encodables_;
+  bool has_open_pass_ = false;
+  // Set when a pass fails to encode as it ends, so that Submit fails.
+  bool encoding_failed_ = false;
+  std::vector<impeller::CommandBuffer::CompletionCallback>
+      completion_callbacks_;
+  bool submitted_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };
@@ -58,6 +141,43 @@ FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_CommandBuffer_Submit(
     flutter::gpu::CommandBuffer* wrapper,
     Dart_Handle completion_callback);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_CommandBuffer_CopyBufferToTexture(
+    flutter::gpu::CommandBuffer* wrapper,
+    flutter::gpu::DeviceBuffer* source,
+    int source_offset_in_bytes,
+    int source_length_in_bytes,
+    flutter::gpu::Texture* destination,
+    int destination_x,
+    int destination_y,
+    int destination_width,
+    int destination_height,
+    int mip_level,
+    int slice);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_CommandBuffer_CopyTextureToBuffer(
+    flutter::gpu::CommandBuffer* wrapper,
+    flutter::gpu::Texture* source,
+    int source_x,
+    int source_y,
+    int source_width,
+    int source_height,
+    flutter::gpu::DeviceBuffer* destination,
+    int destination_offset_in_bytes);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_CommandBuffer_CopyTextureToTexture(
+    flutter::gpu::CommandBuffer* wrapper,
+    flutter::gpu::Texture* source,
+    flutter::gpu::Texture* destination,
+    int source_x,
+    int source_y,
+    int source_width,
+    int source_height,
+    int destination_x,
+    int destination_y);
 
 }  // extern "C"
 

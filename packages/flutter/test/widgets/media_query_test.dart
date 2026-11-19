@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'widgets_app_tester.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
@@ -156,6 +155,7 @@ void main() {
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
+    expect(data.reduceMotion, false);
     expect(data.boldText, false);
     expect(data.highContrast, false);
     expect(data.onOffSwitchLabels, false);
@@ -173,6 +173,7 @@ void main() {
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
+      reduceMotion: true,
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
@@ -207,6 +208,7 @@ void main() {
     expect(data.accessibleNavigation, platformData.accessibleNavigation);
     expect(data.invertColors, platformData.invertColors);
     expect(data.disableAnimations, platformData.disableAnimations);
+    expect(data.reduceMotion, platformData.reduceMotion);
     expect(data.boldText, platformData.boldText);
     expect(data.highContrast, platformData.highContrast);
     expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
@@ -258,6 +260,7 @@ void main() {
         data.disableAnimations,
         tester.platformDispatcher.accessibilityFeatures.disableAnimations,
       );
+      expect(data.reduceMotion, tester.platformDispatcher.accessibilityFeatures.reduceMotion);
       expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
       expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
       expect(
@@ -284,6 +287,7 @@ void main() {
         accessibleNavigation: true,
         invertColors: true,
         disableAnimations: true,
+        reduceMotion: true,
         boldText: true,
         highContrast: true,
         onOffSwitchLabels: true,
@@ -332,6 +336,7 @@ void main() {
       expect(data.accessibleNavigation, platformData.accessibleNavigation);
       expect(data.invertColors, platformData.invertColors);
       expect(data.disableAnimations, platformData.disableAnimations);
+      expect(data.reduceMotion, platformData.reduceMotion);
       expect(data.boldText, platformData.boldText);
       expect(data.highContrast, platformData.highContrast);
       expect(data.onOffSwitchLabels, platformData.onOffSwitchLabels);
@@ -402,6 +407,7 @@ void main() {
         data.disableAnimations,
         tester.platformDispatcher.accessibilityFeatures.disableAnimations,
       );
+      expect(data.reduceMotion, tester.platformDispatcher.accessibilityFeatures.reduceMotion);
       expect(data.boldText, tester.platformDispatcher.accessibilityFeatures.boldText);
       expect(data.highContrast, tester.platformDispatcher.accessibilityFeatures.highContrast);
       expect(
@@ -428,7 +434,8 @@ void main() {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
-      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn
+      ..alwaysUse24HourFormatTestValue = false;
     tester.view.devicePixelRatio = 44;
 
     late MediaQueryData data;
@@ -474,11 +481,17 @@ void main() {
     expect(data.accessibleNavigation, false);
     expect(rebuildCount, 4);
 
+    expect(data.alwaysUse24HourFormat, false);
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
+    await tester.pump();
+    expect(data.alwaysUse24HourFormat, true);
+    expect(rebuildCount, 5);
+
     expect(data.devicePixelRatio, 44);
     tester.view.devicePixelRatio = 55;
     await tester.pump();
     expect(data.devicePixelRatio, 55);
-    expect(rebuildCount, 5);
+    expect(rebuildCount, 6);
   });
 
   testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (
@@ -490,7 +503,8 @@ void main() {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
-      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+      ..accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn
+      ..alwaysUse24HourFormatTestValue = false;
     tester.view.devicePixelRatio = 44;
 
     late MediaQueryData data;
@@ -501,6 +515,7 @@ void main() {
           textScaler: TextScaler.linear(44),
           platformBrightness: Brightness.dark,
           accessibleNavigation: true,
+          alwaysUse24HourFormat: true,
         ),
         child: MediaQuery.fromView(
           view: tester.view,
@@ -533,6 +548,12 @@ void main() {
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
     await tester.pumpAndSettle();
     expect(data.accessibleNavigation, true);
+    expect(rebuildCount, 1);
+
+    expect(data.alwaysUse24HourFormat, true);
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
+    await tester.pump();
+    expect(data.alwaysUse24HourFormat, true);
     expect(rebuildCount, 1);
 
     expect(data.devicePixelRatio, 44);
@@ -593,6 +614,7 @@ void main() {
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
+    expect(copied.reduceMotion, data.reduceMotion);
     expect(copied.boldText, data.boldText);
     expect(copied.highContrast, data.highContrast);
     expect(copied.onOffSwitchLabels, data.onOffSwitchLabels);
@@ -635,6 +657,7 @@ void main() {
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
+      reduceMotion: true,
       boldText: true,
       highContrast: true,
       onOffSwitchLabels: true,
@@ -655,6 +678,7 @@ void main() {
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
+    expect(copied.reduceMotion, true);
     expect(copied.boldText, true);
     expect(copied.highContrast, true);
     expect(copied.onOffSwitchLabels, true);
@@ -678,9 +702,8 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).applyDisplayCornerRadii(const BorderRadius.all(Radius.circular(99))),
+              data: MediaQuery.of(context)
+                  .applyDisplayCornerRadii(const BorderRadius.all(Radius.circular(99))),
               child: Builder(
                 builder: (BuildContext context) {
                   updatedData = MediaQuery.of(context);
@@ -704,6 +727,7 @@ void main() {
     expect(updatedData.accessibleNavigation, data.accessibleNavigation);
     expect(updatedData.invertColors, data.invertColors);
     expect(updatedData.disableAnimations, data.disableAnimations);
+    expect(updatedData.reduceMotion, data.reduceMotion);
     expect(updatedData.boldText, data.boldText);
     expect(updatedData.highContrast, data.highContrast);
     expect(updatedData.onOffSwitchLabels, data.onOffSwitchLabels);
@@ -748,6 +772,7 @@ void main() {
     expect(updatedData.accessibleNavigation, data.accessibleNavigation);
     expect(updatedData.invertColors, data.invertColors);
     expect(updatedData.disableAnimations, data.disableAnimations);
+    expect(updatedData.reduceMotion, data.reduceMotion);
     expect(updatedData.boldText, data.boldText);
     expect(updatedData.highContrast, data.highContrast);
     expect(updatedData.onOffSwitchLabels, data.onOffSwitchLabels);
@@ -792,6 +817,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -829,6 +855,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -868,6 +895,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -902,6 +930,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -941,6 +970,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -978,6 +1008,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1017,6 +1048,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1051,6 +1083,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1090,6 +1123,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1127,6 +1161,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1166,6 +1201,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1200,6 +1236,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.reduceMotion, true);
     expect(unpadded.boldText, true);
     expect(unpadded.highContrast, true);
     expect(unpadded.onOffSwitchLabels, true);
@@ -1532,6 +1569,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1564,6 +1602,7 @@ void main() {
     expect(subScreenMediaQuery.accessibleNavigation, true);
     expect(subScreenMediaQuery.invertColors, true);
     expect(subScreenMediaQuery.disableAnimations, true);
+    expect(subScreenMediaQuery.reduceMotion, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
@@ -1611,6 +1650,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          reduceMotion: true,
           boldText: true,
           highContrast: true,
           onOffSwitchLabels: true,
@@ -1649,6 +1689,7 @@ void main() {
     expect(subScreenMediaQuery.accessibleNavigation, true);
     expect(subScreenMediaQuery.invertColors, true);
     expect(subScreenMediaQuery.disableAnimations, true);
+    expect(subScreenMediaQuery.reduceMotion, true);
     expect(subScreenMediaQuery.boldText, true);
     expect(subScreenMediaQuery.highContrast, true);
     expect(subScreenMediaQuery.onOffSwitchLabels, true);
@@ -1930,6 +1971,11 @@ void main() {
           MediaQuery.maybeDisableAnimationsOf,
           MediaQueryData(disableAnimations: true),
         ),
+        const _MediaQueryAspectCase(MediaQuery.reduceMotionOf, MediaQueryData(reduceMotion: true)),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybeReduceMotionOf,
+          MediaQueryData(reduceMotion: true),
+        ),
         const _MediaQueryAspectCase(MediaQuery.boldTextOf, MediaQueryData(boldText: true)),
         const _MediaQueryAspectCase(MediaQuery.maybeBoldTextOf, MediaQueryData(boldText: true)),
         const _MediaQueryAspectCase(
@@ -2057,5 +2103,30 @@ void main() {
     expect(find.text('height: 700.0'), findsOneWidget);
     expect(widthBuildCount, 2);
     expect(heightBuildCount, 2);
+  });
+
+  testWidgets('MediaQuery.fromView updates when alwaysUse24HourFormat changes at runtime', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.platformDispatcher.clearAlwaysUse24HourTestValue);
+    await tester.pumpWidget(
+      MediaQuery.fromView(
+        view: tester.view,
+        child: Builder(
+          builder: (BuildContext context) {
+            return Text(
+              MediaQuery.alwaysUse24HourFormatOf(context) ? '24-hour' : '12-hour',
+              textDirection: TextDirection.ltr,
+            );
+          },
+        ),
+      ),
+    );
+    expect(find.text('12-hour'), findsOneWidget);
+
+    tester.platformDispatcher.alwaysUse24HourFormatTestValue = true;
+    await tester.pump();
+
+    expect(find.text('24-hour'), findsOneWidget);
   });
 }

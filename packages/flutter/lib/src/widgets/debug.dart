@@ -7,6 +7,8 @@
 /// @docImport 'package:flutter/scheduler.dart';
 ///
 /// @docImport 'binding.dart';
+/// @docImport 'focus_manager.dart';
+/// @docImport 'focus_scope.dart';
 /// @docImport 'widget_inspector.dart';
 library;
 
@@ -174,6 +176,29 @@ bool debugEnhanceBuildTimelineArguments = false;
 
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
+
+/// Causes each [Focus] widget to paint a box around its bounds.
+///
+/// Different colors indicate different focus states:
+///
+///  * Green: the node has primary focus.
+///  * Blue: the node is in the focus chain but does not
+///    have primary focus (i.e., it is an ancestor of the primary focus).
+///  * Cyan: the node is focusable and participates in focus traversal.
+///  * Yellow: the node skips focus traversal ([FocusNode.skipTraversal] is true)
+///    but can still receive focus directly.
+///  * Red: the node cannot receive focus ([FocusNode.canRequestFocus] is false).
+///
+/// Enabling this causes each [Focus] widget to wrap its child with a widget,
+/// which can cause state loss if the child is a stateful widget that isn't keyed.
+///
+/// This has no effect in release builds.
+///
+/// See also:
+///
+///  * [FocusNode], which manages focus for a widget subtree.
+///  * [debugFocusChanges], which logs to the console when focus changes occur.
+bool debugPaintFocusBoxes = false;
 
 Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
@@ -383,8 +408,8 @@ bool debugCheckHasDirectionality(
         ),
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
-          'Typically, the Directionality widget is introduced by the MaterialApp '
-          'or WidgetsApp widget at the top of your application widget tree. It '
+          'Typically, the Directionality widget is introduced by the WidgetsApp '
+          'widget at the top of your application widget tree. It '
           'determines the ambient reading direction and is used, for example, to '
           'determine how to lay out text, how to interpret "start" and "end" '
           'values, and to resolve EdgeInsetsDirectional, '
@@ -519,7 +544,7 @@ bool debugCheckHasOverlay(BuildContext context) {
         ErrorHint(
           'To introduce an Overlay widget, you can either directly '
           'include one, or use a widget that contains an Overlay itself, '
-          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+          'such as a Navigator or WidgetsApp.',
         ),
         ...context.describeMissingAncestor(expectedAncestorType: Overlay),
       ]);
@@ -543,7 +568,8 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets ||
-        debugProfileBuildsEnabledUserWidgets) {
+        debugProfileBuildsEnabledUserWidgets ||
+        debugPaintFocusBoxes) {
       throw FlutterError(reason);
     }
     return true;

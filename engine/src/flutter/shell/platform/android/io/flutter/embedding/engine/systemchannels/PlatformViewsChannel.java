@@ -75,6 +75,9 @@ public class PlatformViewsChannel {
             case "synchronizeToNativeViewHierarchy":
               synchronizeToNativeViewHierarchy(call, result);
               break;
+            case "rejectGesture":
+              rejectGesture(call, result);
+              break;
             default:
               result.notImplemented();
           }
@@ -173,8 +176,8 @@ public class PlatformViewsChannel {
                     result.error("error", "Failed to resize the platform view", null);
                   } else {
                     final Map<String, Object> response = new HashMap<>();
-                    response.put("width", (double) bufferSize.width);
-                    response.put("height", (double) bufferSize.height);
+                    response.put("width", bufferSize.width);
+                    response.put("height", bufferSize.height);
                     result.success(response);
                   }
                 });
@@ -258,6 +261,19 @@ public class PlatformViewsChannel {
             result.error("error", detailedExceptionString(exception), null);
           }
         }
+
+        private void rejectGesture(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          final Map<String, Object> args = call.arguments();
+          final int viewId = (int) args.get("id");
+          final Number gestureIdNumber = (Number) args.get("gestureId");
+          final long gestureId = gestureIdNumber != null ? gestureIdNumber.longValue() : 0;
+          try {
+            handler.onRejectGesture(viewId, gestureId);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
       };
 
   /**
@@ -297,7 +313,7 @@ public class PlatformViewsChannel {
      * This can only be returned if the {@code PlatformViewCreationRequest} sets
      * {@code TEXTURE_WITH_HYBRID_FALLBACK} as the requested display mode.
      */
-    static final long NON_TEXTURE_FALLBACK = -2;
+    long NON_TEXTURE_FALLBACK = -2;
 
     /**
      * The Flutter application would like to display a new Android {@code View}, i.e., platform
@@ -370,6 +386,17 @@ public class PlatformViewsChannel {
      * to true.
      */
     void synchronizeToNativeViewHierarchy(boolean yes);
+
+    /**
+     * Flutter has won the gesture arena and rejected the platform view.
+     *
+     * @param viewId The ID of the platform view that lost the gesture.
+     * @param gestureId The identifier (motionEventId / embedderId) of the specific gesture that was
+     *     won by Flutter. If non-zero, this corresponds to the MotionEvent tracked by
+     *     MotionEventTracker. If non-matching or zero, embedders safely fall back to standard
+     *     buffered dispatch.
+     */
+    default void onRejectGesture(int viewId, long gestureId) {}
   }
 
   /** Request sent from Flutter to resize a platform view. */
@@ -393,12 +420,12 @@ public class PlatformViewsChannel {
   /** The platform view buffer size. */
   public static class PlatformViewBufferSize {
     /** The width of the screen buffer. */
-    public final int width;
+    public final double width;
 
     /** The height of the screen buffer. */
-    public final int height;
+    public final double height;
 
-    public PlatformViewBufferSize(int width, int height) {
+    public PlatformViewBufferSize(double width, double height) {
       this.width = width;
       this.height = height;
     }

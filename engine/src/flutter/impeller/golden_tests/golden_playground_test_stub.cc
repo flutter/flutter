@@ -35,6 +35,11 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   return false;
 }
 
+bool GoldenPlaygroundTest::OpenPlaygroundHere(
+    const Playground::SinglePassCallback& callback) {
+  return false;
+}
+
 std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {
@@ -56,6 +61,10 @@ std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
   return nullptr;
 }
 
+std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
+  return nullptr;
+}
+
 Point GoldenPlaygroundTest::GetContentScale() const {
   return Point();
 }
@@ -70,10 +79,10 @@ ISize GoldenPlaygroundTest::GetWindowSize() const {
 
 void GoldenPlaygroundTest::SetWindowSize(ISize size) {}
 
-fml::Status GoldenPlaygroundTest::SetCapabilities(
+absl::Status GoldenPlaygroundTest::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
-  return fml::Status(
-      fml::StatusCode::kUnimplemented,
+  return absl::Status(
+      absl::StatusCode::kUnimplemented,
       "GoldenPlaygroundTest-Stub doesn't support SetCapabilities.");
 }
 

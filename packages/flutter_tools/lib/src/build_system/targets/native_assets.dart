@@ -20,7 +20,6 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
@@ -32,10 +31,7 @@ enum HookPlatform { native, web }
 
 /// Runs the dart build of the app.
 class BuildHooks extends Target {
-  const BuildHooks({
-    this.platform = HookPlatform.native,
-    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
-  }) : _buildRunner = buildRunner;
+  const BuildHooks({this.platform = HookPlatform.native, @visibleForTesting this._buildRunner});
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
@@ -57,16 +53,20 @@ class BuildHooks extends Target {
     final FlutterNativeAssetsBuildRunner buildRunner =
         _buildRunner ?? await createFlutterNativeAssetsBuildRunner(environment);
     final (
-      results: SerializedBuildResults results,
-      dependencies: List<Uri> dependencies,
+      :SerializedBuildResults results,
+      :DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
+      androidSdkProvider: environment,
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: environment.featureFlags,
+      logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
+      visualStudio: environment.visualStudio,
     );
 
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(resultFilename);
@@ -74,11 +74,20 @@ class BuildHooks extends Target {
       dartBuildOutputJsonFile.parent.createSync(recursive: true);
     }
 
-    dartBuildOutputJsonFile.writeAsStringSync(json.encode(results));
+    final String encodedResults = json.encode(results);
+    if (!dartBuildOutputJsonFile.existsSync() ||
+        dartBuildOutputJsonFile.readAsStringSync() != encodedResults) {
+      dartBuildOutputJsonFile.writeAsStringSync(encodedResults);
+    }
 
+    final Set<Uri> buildDependencies = buildResult.dependencies.toSet();
     final depfile = Depfile(
-      <File>[for (final Uri dependency in dependencies) fileSystem.file(dependency)],
-      <File>[fileSystem.file(dartBuildOutputJsonFile)],
+      <File>[for (final Uri dependency in buildResult.dependencies) fileSystem.file(dependency)],
+      <File>[
+        fileSystem.file(dartBuildOutputJsonFile),
+        for (final Uri uri in buildResult.filesToBeBundled)
+          if (!buildDependencies.contains(uri)) fileSystem.file(uri),
+      ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     if (!outputDepfile.parent.existsSync()) {
@@ -98,7 +107,6 @@ class BuildHooks extends Target {
     // If different packages are resolved, different native assets might need to
     // be built.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
-    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
   @override
@@ -121,8 +129,8 @@ class LinkHooks extends Target {
   const LinkHooks({
     this.platform = HookPlatform.native,
     this.extraDependencies = const <Target>[],
-    FlutterNativeAssetsBuildRunner? buildRunner,
-  }) : _buildRunner = buildRunner;
+    this._buildRunner,
+  });
 
   final HookPlatform platform;
   final List<Target> extraDependencies;
@@ -134,8 +142,14 @@ class LinkHooks extends Target {
       const BuildHooks(platform: HookPlatform.web)
     else
       const BuildHooks(),
-    if (platform == HookPlatform.native && featureFlags.isRecordUseEnabled) const KernelSnapshot(),
     ...extraDependencies, // Dart2WasmTarget, Dart2JSTarget
+  ];
+
+  @override
+  List<Target> resolveDependencies(Environment environment) => <Target>[
+    ...dependencies,
+    if (platform == HookPlatform.native && environment.featureFlags.isRecordUseEnabled)
+      const KernelSnapshot(),
   ];
 
   static const String recordedUsesWasmFileName = 'recorded_uses_wasm.json';
@@ -151,12 +165,17 @@ class LinkHooks extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{BUILD_DIR}/${BuildHooks.resultFilename}'),
-    if (featureFlags.isRecordUseEnabled)
-      for (final String filename in _recordedUsesFileNames) Source.pattern('{BUILD_DIR}/$filename'),
+    Source.fromEnvironment(
+      (Environment environment) => <Source>[
+        if (environment.featureFlags.isRecordUseEnabled)
+          for (final String filename in _recordedUsesFileNames)
+            Source.pattern('{BUILD_DIR}/$filename'),
+      ],
+    ),
   ];
 
   File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
-    if (!featureFlags.isRecordUseEnabled) {
+    if (!environment.featureFlags.isRecordUseEnabled) {
       return null;
     }
     if (platform == HookPlatform.native && !buildMode.isPrecompiled) {
@@ -197,6 +216,8 @@ class LinkHooks extends Target {
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final File? recordedUsesFileToPass = getRecordedUsesFile(environment, buildMode);
 
+    final linkingEnabled = buildMode != BuildMode.debug;
+
     // Read the result of BuildHooks.
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(BuildHooks.resultFilename);
     if (!dartBuildOutputJsonFile.existsSync()) {
@@ -207,29 +228,57 @@ class LinkHooks extends Target {
     final Map<String, Map<String, Object?>> buildResults = serializedBuildResults
         .cast<String, Map<String, Object?>>();
 
-    final DartHooksResult result = await runFlutterSpecificLinkHooks(
+    final DartHooksResult linkResult;
+    if (linkingEnabled) {
+      linkResult = await runFlutterSpecificLinkHooks(
+        androidSdkProvider: environment,
+        environmentDefines: environment.defines,
+        buildRunner: buildRunner,
+        targetPlatform: targetPlatform,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        featureFlags: environment.featureFlags,
+        logger: environment.logger,
+        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+        buildDataAssets: true,
+        buildResults: buildResults,
+        recordedUsesFile: recordedUsesFileToPass,
+        visualStudio: environment.visualStudio,
+      );
+    } else {
+      linkResult = DartHooksResult.empty();
+    }
+
+    final DartHooksResult combinedResult = combineBuildAndLinkResults(
       environmentDefines: environment.defines,
-      buildRunner: buildRunner,
       targetPlatform: targetPlatform,
-      projectUri: projectUri,
       fileSystem: fileSystem,
+      featureFlags: environment.featureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,
-      recordedUsesFile: recordedUsesFileToPass,
+      linkResult: linkResult,
     );
 
     final File dartHookResultJsonFile = environment.buildDir.childFile(resultFilename);
     if (!dartHookResultJsonFile.parent.existsSync()) {
       dartHookResultJsonFile.parent.createSync(recursive: true);
     }
-    dartHookResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
-
+    // TODO(dcharkes): The build system uses file hashing to determine if
+    // targets need to be rerun. Because combinedResult.toJson() includes
+    // transient build_start and build_end times, this file is rewritten on
+    // every build causing downstream targets to rerun. We should remove
+    // build_start and build_end from the JSON representation entirely in a
+    // future PR.
+    dartHookResultJsonFile.writeAsStringSync(json.encode(combinedResult.toJson()));
+    final Set<Uri> linkDependencies = linkResult.dependencies.toSet();
     final depfile = Depfile(
-      <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
+      <File>[for (final Uri dependency in linkResult.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartHookResultJsonFile),
-        for (final Uri uri in result.filesToBeBundled) fileSystem.file(uri),
+        if (linkingEnabled)
+          for (final Uri uri in linkResult.filesToBeBundled)
+            if (!linkDependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
@@ -278,33 +327,34 @@ class InstallCodeAssets extends Target {
     final FileSystem fileSystem = environment.fileSystem;
     final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
-    // We fetch the result from the [LinkHooks].
-    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
+    // We fetch the combined result from the [LinkHooks].
+    final DartHooksResult combinedResult = await LinkHooks.loadHookResult(environment);
 
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    final String osName = targetPlatform.osName;
-    if (osName == 'linux' || osName == 'windows') {
+    if (targetPlatform.os case .linux || .windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('$osName/');
+      targetUri = targetUri.resolve('${targetPlatform.osName}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(
-      dartHookResult: dartHookResult,
+      dartHookResult: combinedResult,
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
       nativeAssetsFileUri: nativeAssetsFileUri,
       targetUri: targetUri,
     );
     assert(fileSystem.file(nativeAssetsFileUri).existsSync());
 
     final depfile = Depfile(<File>[
-      for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file),
+      for (final Uri file in combinedResult.filesToBeBundled) fileSystem.file(file),
     ], installedFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);
@@ -346,7 +396,7 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   if (targetPlatformEnvironment == null) {
     throw MissingDefineException(kTargetPlatform, name);
   }
-  return getTargetPlatformForName(targetPlatformEnvironment);
+  return TargetPlatform.fromName(targetPlatformEnvironment);
 }
 
 Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
@@ -380,14 +430,34 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
   final BuildMode buildMode = buildModeEnvironment == null
       ? BuildMode.debug
       : BuildMode.fromCliName(buildModeEnvironment);
-  final bool includeDevDependencies = !buildMode.isRelease;
+  final bool includeDevDependencies = !buildMode.isRelease || _isTestTarget(environment);
   return FlutterNativeAssetsBuildRunnerImpl(
     environment.packageConfigPath,
     packageConfig,
     fileSystem,
     environment.logger,
+    environment.platform,
+    environment.processManager,
     runPackageName,
-    includeDevDependencies: includeDevDependencies,
     pubspecPath,
+    flutterRoot: environment.flutterRootDir.path,
+    includeDevDependencies: includeDevDependencies,
   );
+}
+
+bool _isTestTarget(Environment environment) {
+  final String? targetFile = environment.defines[kTargetFile];
+  if (targetFile == null) {
+    return false;
+  }
+  final String absoluteTargetPath = environment.fileSystem.path.isAbsolute(targetFile)
+      ? targetFile
+      : environment.fileSystem.path.join(environment.projectDir.path, targetFile);
+  final String relativePath = environment.fileSystem.path.relative(
+    environment.fileSystem.path.normalize(absoluteTargetPath),
+    from: environment.projectDir.path,
+  );
+  final List<String> parts = environment.fileSystem.path.split(relativePath);
+  return parts.isNotEmpty &&
+      const <String>{'integration_test', 'test_driver', 'test'}.contains(parts.first);
 }

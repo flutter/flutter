@@ -1,0 +1,7 @@
+{
+  "name": "reidbaker-agent",
+  "description": "An agent configured with the 'Expert' persona for maximum rigor and candor.",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

@@ -5,8 +5,11 @@
 #ifndef FLUTTER_LIB_GPU_FORMATS_H_
 #define FLUTTER_LIB_GPU_FORMATS_H_
 
+#include <algorithm>
+
 #include "fml/logging.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/shader_types.h"
 
 // ATTENTION! ATTENTION! ATTENTION!
@@ -38,6 +41,62 @@ constexpr impeller::StorageMode ToImpellerStorageMode(int value) {
   return ToImpellerStorageMode(static_cast<FlutterGPUStorageMode>(value));
 }
 
+constexpr FlutterGPUStorageMode FromImpellerStorageMode(
+    impeller::StorageMode value) {
+  switch (value) {
+    case impeller::StorageMode::kHostVisible:
+      return FlutterGPUStorageMode::kHostVisible;
+    case impeller::StorageMode::kDevicePrivate:
+      return FlutterGPUStorageMode::kDevicePrivate;
+    case impeller::StorageMode::kDeviceTransient:
+      return FlutterGPUStorageMode::kDeviceTransient;
+  }
+}
+
+enum class FlutterGPUTextureType {
+  kTexture2D,
+  kTexture2DMultisample,
+  kTextureCube,
+  kTextureExternalOES,
+  kTexture2DArray,
+};
+
+constexpr impeller::TextureType ToImpellerTextureType(
+    FlutterGPUTextureType value) {
+  switch (value) {
+    case FlutterGPUTextureType::kTexture2D:
+      return impeller::TextureType::kTexture2D;
+    case FlutterGPUTextureType::kTexture2DMultisample:
+      return impeller::TextureType::kTexture2DMultisample;
+    case FlutterGPUTextureType::kTextureCube:
+      return impeller::TextureType::kTextureCube;
+    case FlutterGPUTextureType::kTextureExternalOES:
+      return impeller::TextureType::kTextureExternalOES;
+    case FlutterGPUTextureType::kTexture2DArray:
+      return impeller::TextureType::kTexture2DArray;
+  }
+}
+
+constexpr impeller::TextureType ToImpellerTextureType(int value) {
+  return ToImpellerTextureType(static_cast<FlutterGPUTextureType>(value));
+}
+
+constexpr FlutterGPUTextureType FromImpellerTextureType(
+    impeller::TextureType value) {
+  switch (value) {
+    case impeller::TextureType::kTexture2D:
+      return FlutterGPUTextureType::kTexture2D;
+    case impeller::TextureType::kTexture2DMultisample:
+      return FlutterGPUTextureType::kTexture2DMultisample;
+    case impeller::TextureType::kTextureCube:
+      return FlutterGPUTextureType::kTextureCube;
+    case impeller::TextureType::kTextureExternalOES:
+      return FlutterGPUTextureType::kTextureExternalOES;
+    case impeller::TextureType::kTexture2DArray:
+      return FlutterGPUTextureType::kTexture2DArray;
+  }
+}
+
 enum class FlutterGPUPixelFormat {
   kUnknown,
   kA8UNormInt,
@@ -49,13 +108,57 @@ enum class FlutterGPUPixelFormat {
   kB8G8R8A8UNormIntSRGB,
   kR32G32B32A32Float,
   kR16G16B16A16Float,
-  kB10G10R10XR,
-  kB10G10R10XRSRGB,
-  kB10G10R10A10XR,
+  kR32Float,
   kS8UInt,
   kD24UnormS8Uint,
   kD32FloatS8UInt,
+  // Block-compressed formats. Sample-only; support is per-family.
+  kBC1RGBAUNormInt,
+  kBC1RGBAUNormIntSRGB,
+  kBC3RGBAUNormInt,
+  kBC3RGBAUNormIntSRGB,
+  kBC5RGUNormInt,
+  kBC7RGBAUNormInt,
+  kBC7RGBAUNormIntSRGB,
+  kETC2RGB8UNormInt,
+  kETC2RGB8UNormIntSRGB,
+  kETC2RGBA8UNormInt,
+  kETC2RGBA8UNormIntSRGB,
+  kASTC4x4LDR,
+  kASTC4x4LDRSRGB,
+  kASTC8x8LDR,
+  kASTC8x8LDRSRGB,
+  // ASTC HDR has no sRGB variant; the data is already linear floating point.
+  kASTC4x4HDR,
+  kASTC8x8HDR,
 };
+
+enum class FlutterGPUTextureCompressionFamily {
+  kBC,
+  kETC2,
+  kASTC,
+  kASTCHDR,
+};
+
+constexpr impeller::CompressedTextureFamily ToImpellerCompressedTextureFamily(
+    FlutterGPUTextureCompressionFamily value) {
+  switch (value) {
+    case FlutterGPUTextureCompressionFamily::kBC:
+      return impeller::CompressedTextureFamily::kBC;
+    case FlutterGPUTextureCompressionFamily::kETC2:
+      return impeller::CompressedTextureFamily::kETC2;
+    case FlutterGPUTextureCompressionFamily::kASTC:
+      return impeller::CompressedTextureFamily::kASTC;
+    case FlutterGPUTextureCompressionFamily::kASTCHDR:
+      return impeller::CompressedTextureFamily::kASTCHDR;
+  }
+}
+
+constexpr impeller::CompressedTextureFamily ToImpellerCompressedTextureFamily(
+    int value) {
+  return ToImpellerCompressedTextureFamily(
+      static_cast<FlutterGPUTextureCompressionFamily>(value));
+}
 
 constexpr impeller::PixelFormat ToImpellerPixelFormat(
     FlutterGPUPixelFormat value) {
@@ -80,18 +183,48 @@ constexpr impeller::PixelFormat ToImpellerPixelFormat(
       return impeller::PixelFormat::kR32G32B32A32Float;
     case FlutterGPUPixelFormat::kR16G16B16A16Float:
       return impeller::PixelFormat::kR16G16B16A16Float;
-    case FlutterGPUPixelFormat::kB10G10R10XR:
-      return impeller::PixelFormat::kB10G10R10XR;
-    case FlutterGPUPixelFormat::kB10G10R10XRSRGB:
-      return impeller::PixelFormat::kB10G10R10XRSRGB;
-    case FlutterGPUPixelFormat::kB10G10R10A10XR:
-      return impeller::PixelFormat::kB10G10R10A10XR;
+    case FlutterGPUPixelFormat::kR32Float:
+      return impeller::PixelFormat::kR32Float;
     case FlutterGPUPixelFormat::kS8UInt:
       return impeller::PixelFormat::kS8UInt;
     case FlutterGPUPixelFormat::kD24UnormS8Uint:
       return impeller::PixelFormat::kD24UnormS8Uint;
     case FlutterGPUPixelFormat::kD32FloatS8UInt:
       return impeller::PixelFormat::kD32FloatS8UInt;
+    case FlutterGPUPixelFormat::kBC1RGBAUNormInt:
+      return impeller::PixelFormat::kBC1RGBAUNormInt;
+    case FlutterGPUPixelFormat::kBC1RGBAUNormIntSRGB:
+      return impeller::PixelFormat::kBC1RGBAUNormIntSRGB;
+    case FlutterGPUPixelFormat::kBC3RGBAUNormInt:
+      return impeller::PixelFormat::kBC3RGBAUNormInt;
+    case FlutterGPUPixelFormat::kBC3RGBAUNormIntSRGB:
+      return impeller::PixelFormat::kBC3RGBAUNormIntSRGB;
+    case FlutterGPUPixelFormat::kBC5RGUNormInt:
+      return impeller::PixelFormat::kBC5RGUNormInt;
+    case FlutterGPUPixelFormat::kBC7RGBAUNormInt:
+      return impeller::PixelFormat::kBC7RGBAUNormInt;
+    case FlutterGPUPixelFormat::kBC7RGBAUNormIntSRGB:
+      return impeller::PixelFormat::kBC7RGBAUNormIntSRGB;
+    case FlutterGPUPixelFormat::kETC2RGB8UNormInt:
+      return impeller::PixelFormat::kETC2RGB8UNormInt;
+    case FlutterGPUPixelFormat::kETC2RGB8UNormIntSRGB:
+      return impeller::PixelFormat::kETC2RGB8UNormIntSRGB;
+    case FlutterGPUPixelFormat::kETC2RGBA8UNormInt:
+      return impeller::PixelFormat::kETC2RGBA8UNormInt;
+    case FlutterGPUPixelFormat::kETC2RGBA8UNormIntSRGB:
+      return impeller::PixelFormat::kETC2RGBA8UNormIntSRGB;
+    case FlutterGPUPixelFormat::kASTC4x4LDR:
+      return impeller::PixelFormat::kASTC4x4LDR;
+    case FlutterGPUPixelFormat::kASTC4x4LDRSRGB:
+      return impeller::PixelFormat::kASTC4x4LDRSRGB;
+    case FlutterGPUPixelFormat::kASTC8x8LDR:
+      return impeller::PixelFormat::kASTC8x8LDR;
+    case FlutterGPUPixelFormat::kASTC8x8LDRSRGB:
+      return impeller::PixelFormat::kASTC8x8LDRSRGB;
+    case FlutterGPUPixelFormat::kASTC4x4HDR:
+      return impeller::PixelFormat::kASTC4x4HDR;
+    case FlutterGPUPixelFormat::kASTC8x8HDR:
+      return impeller::PixelFormat::kASTC8x8HDR;
   }
 }
 
@@ -105,8 +238,7 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kUnknown:
       return FlutterGPUPixelFormat::kUnknown;
     case impeller::PixelFormat::kR32Float:
-      FML_DCHECK(false) << "k32Float not implemented.";
-      return FlutterGPUPixelFormat::kUnknown;
+      return FlutterGPUPixelFormat::kR32Float;
     case impeller::PixelFormat::kA8UNormInt:
       return FlutterGPUPixelFormat::kA8UNormInt;
     case impeller::PixelFormat::kR8UNormInt:
@@ -126,39 +258,51 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kR16G16B16A16Float:
       return FlutterGPUPixelFormat::kR16G16B16A16Float;
     case impeller::PixelFormat::kB10G10R10XR:
-      return FlutterGPUPixelFormat::kB10G10R10XR;
     case impeller::PixelFormat::kB10G10R10XRSRGB:
-      return FlutterGPUPixelFormat::kB10G10R10XRSRGB;
     case impeller::PixelFormat::kB10G10R10A10XR:
-      return FlutterGPUPixelFormat::kB10G10R10A10XR;
+      // Apple-only extended-range formats, not exposed by the Flutter GPU API.
+      return FlutterGPUPixelFormat::kUnknown;
     case impeller::PixelFormat::kS8UInt:
       return FlutterGPUPixelFormat::kS8UInt;
     case impeller::PixelFormat::kD24UnormS8Uint:
       return FlutterGPUPixelFormat::kD24UnormS8Uint;
     case impeller::PixelFormat::kD32FloatS8UInt:
       return FlutterGPUPixelFormat::kD32FloatS8UInt;
+    case impeller::PixelFormat::kBC1RGBAUNormInt:
+      return FlutterGPUPixelFormat::kBC1RGBAUNormInt;
+    case impeller::PixelFormat::kBC1RGBAUNormIntSRGB:
+      return FlutterGPUPixelFormat::kBC1RGBAUNormIntSRGB;
+    case impeller::PixelFormat::kBC3RGBAUNormInt:
+      return FlutterGPUPixelFormat::kBC3RGBAUNormInt;
+    case impeller::PixelFormat::kBC3RGBAUNormIntSRGB:
+      return FlutterGPUPixelFormat::kBC3RGBAUNormIntSRGB;
+    case impeller::PixelFormat::kBC5RGUNormInt:
+      return FlutterGPUPixelFormat::kBC5RGUNormInt;
+    case impeller::PixelFormat::kBC7RGBAUNormInt:
+      return FlutterGPUPixelFormat::kBC7RGBAUNormInt;
+    case impeller::PixelFormat::kBC7RGBAUNormIntSRGB:
+      return FlutterGPUPixelFormat::kBC7RGBAUNormIntSRGB;
+    case impeller::PixelFormat::kETC2RGB8UNormInt:
+      return FlutterGPUPixelFormat::kETC2RGB8UNormInt;
+    case impeller::PixelFormat::kETC2RGB8UNormIntSRGB:
+      return FlutterGPUPixelFormat::kETC2RGB8UNormIntSRGB;
+    case impeller::PixelFormat::kETC2RGBA8UNormInt:
+      return FlutterGPUPixelFormat::kETC2RGBA8UNormInt;
+    case impeller::PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return FlutterGPUPixelFormat::kETC2RGBA8UNormIntSRGB;
+    case impeller::PixelFormat::kASTC4x4LDR:
+      return FlutterGPUPixelFormat::kASTC4x4LDR;
+    case impeller::PixelFormat::kASTC4x4LDRSRGB:
+      return FlutterGPUPixelFormat::kASTC4x4LDRSRGB;
+    case impeller::PixelFormat::kASTC8x8LDR:
+      return FlutterGPUPixelFormat::kASTC8x8LDR;
+    case impeller::PixelFormat::kASTC8x8LDRSRGB:
+      return FlutterGPUPixelFormat::kASTC8x8LDRSRGB;
+    case impeller::PixelFormat::kASTC4x4HDR:
+      return FlutterGPUPixelFormat::kASTC4x4HDR;
+    case impeller::PixelFormat::kASTC8x8HDR:
+      return FlutterGPUPixelFormat::kASTC8x8HDR;
   }
-}
-
-enum class FlutterGPUTextureCoordinateSystem {
-  kUploadFromHost,
-  kRenderToTexture,
-};
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    FlutterGPUTextureCoordinateSystem value) {
-  switch (value) {
-    case FlutterGPUTextureCoordinateSystem::kUploadFromHost:
-      return impeller::TextureCoordinateSystem::kUploadFromHost;
-    case FlutterGPUTextureCoordinateSystem::kRenderToTexture:
-      return impeller::TextureCoordinateSystem::kRenderToTexture;
-  }
-}
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    int value) {
-  return ToImpellerTextureCoordinateSystem(
-      static_cast<FlutterGPUTextureCoordinateSystem>(value));
 }
 
 enum class FlutterGPUBlendFactor {
@@ -380,6 +524,28 @@ constexpr impeller::SamplerAddressMode ToImpellerSamplerAddressMode(
 constexpr impeller::SamplerAddressMode ToImpellerSamplerAddressMode(int value) {
   return ToImpellerSamplerAddressMode(
       static_cast<FlutterGPUSamplerAddressMode>(value));
+}
+
+/// Builds a sampler descriptor from the enum indices and anisotropy clamp
+/// that `SamplerOptions` marshals across the Dart boundary.
+inline impeller::SamplerDescriptor ToImpellerSamplerDescriptor(
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy) {
+  impeller::SamplerDescriptor desc;
+  desc.min_filter = ToImpellerMinMagFilter(min_filter);
+  desc.mag_filter = ToImpellerMinMagFilter(mag_filter);
+  desc.mip_filter = ToImpellerMipFilter(mip_filter);
+  desc.width_address_mode = ToImpellerSamplerAddressMode(width_address_mode);
+  desc.height_address_mode = ToImpellerSamplerAddressMode(height_address_mode);
+  // Backends clamp this to the device limit reported by
+  // Capabilities::GetMaxSamplerAnisotropy.
+  desc.max_anisotropy =
+      static_cast<uint8_t>(std::clamp(max_anisotropy, 1, 255));
+  return desc;
 }
 
 enum class FlutterGPUIndexType {

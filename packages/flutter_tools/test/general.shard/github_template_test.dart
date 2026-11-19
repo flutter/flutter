@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/reporting/github_template.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 const _kPluginsFile = '''
 {
@@ -167,6 +168,10 @@ void main() {
           '_Exception',
         );
       });
+
+      testWithoutContext('custom Exception', () {
+        expect(GitHubTemplateCreator.sanitizedCrashException(FakeException()), 'FakeException');
+      });
     });
 
     group('new issue template URL', () {
@@ -186,7 +191,11 @@ void main() {
           final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+            flutterProjectFactory: FlutterProjectFactory(
+              fileSystem: fs,
+              logger: logger,
+              config: FakeConfig(),
+            ),
           );
           expect(
             await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
@@ -211,7 +220,11 @@ void main() {
           final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+            flutterProjectFactory: FlutterProjectFactory(
+              fileSystem: fs,
+              logger: logger,
+              config: FakeConfig(),
+            ),
           );
           final Directory projectDirectory = fs.currentDirectory;
 
@@ -299,6 +312,11 @@ class FakeError extends Error {
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
 
+  @override
+  String toString() => 'PII to ignore';
+}
+
+class FakeException implements Exception {
   @override
   String toString() => 'PII to ignore';
 }

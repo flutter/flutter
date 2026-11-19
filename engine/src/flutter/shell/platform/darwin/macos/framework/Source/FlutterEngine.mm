@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/common/constants.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -339,6 +340,10 @@ constexpr char kTextPlainFormat[] = "text/plain";
 
 #pragma mark - FlutterPluginRegistrar
 
+- (int64_t)engineIdentifier {
+  return _flutterEngine.engineIdentifier;
+}
+
 - (id<FlutterBinaryMessenger>)messenger {
   return _flutterEngine.binaryMessenger;
 }
@@ -390,6 +395,10 @@ constexpr char kTextPlainFormat[] = "text/plain";
 
 - (void)publish:(NSObject*)value {
   _publishedValue = value;
+}
+
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [_flutterEngine valuePublishedByPlugin:pluginKey];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
@@ -512,7 +521,7 @@ static const int kMainThreadPriority = 47;
 static void SetThreadPriority(FlutterThreadPriority priority) {
   if (priority == kDisplay || priority == kRaster) {
     pthread_t thread = pthread_self();
-    sched_param param;
+    sched_param param{};
     int policy;
     if (!pthread_getschedparam(thread, &policy, &param)) {
       param.sched_priority = kMainThreadPriority;
@@ -653,6 +662,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
   if (request->state == kFocused) {
     [controller.flutterView.window makeFirstResponder:controller.flutterView];
+    [controller.flutterView.window makeKeyWindow];
   }
 }
 
@@ -673,9 +683,15 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   std::vector<std::string> switches = self.switches;
 
   // Enable Impeller only if specifically asked for from the project or cmdline arguments.
-  if (_project.enableImpeller ||
-      std::find(switches.begin(), switches.end(), "--enable-impeller=true") != switches.end()) {
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+    // Keep it disabled.
+  } else if (_project.enableImpeller || std::find(switches.begin(), switches.end(),
+                                                  "--enable-impeller=true") != switches.end()) {
     switches.push_back("--enable-impeller=true");
+  }
+
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=true") == switches.end()) {
+    FML_LOG(IMPORTANT) << "Using the Skia rendering backend (Metal).";
   }
 
   if (_project.enableSDFs ||
@@ -727,8 +743,12 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     [FlutterLogger logDirect:[NSString stringWithUTF8String:log.c_str()]];
   };
 
-  flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
-  flutterArguments.enable_wide_gamut = _project.enableWideGamut;
+  flutterArguments.engine_id = self.engineIdentifier;
+  BOOL enableWideGamut = _project.enableWideGamut;
+  if (std::find(switches.begin(), switches.end(), "--enable-impeller=false") != switches.end()) {
+    enableWideGamut = NO;
+  }
+  flutterArguments.enable_wide_gamut = enableWideGamut;
 
   BOOL mergedPlatformUIThread = YES;
   NSNumber* enableMergedPlatformUIThread =
@@ -737,8 +757,17 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     mergedPlatformUIThread = enableMergedPlatformUIThread.boolValue;
   }
 
-  if (mergedPlatformUIThread) {
-    NSLog(@"Running with merged UI and platform thread. Experimental.");
+  if (!mergedPlatformUIThread) {
+    NSLog(@"Warning: Merged threads is disabled. Running Flutter without merged threads is "
+           "deprecated and will be unsupported in a future release.\n"
+           "\n"
+           "To turn on merged threads, update your macos/Runner/Info.plist file:\n"
+           "\n"
+           "  <key>FLTEnableMergedPlatformUIThread</key>\n"
+           "  <true/>\n"
+           "\n"
+           "If you disabled merged threads to work around an issue, please report it here: "
+           "https://github.com/flutter/flutter/issues/150525.");
   }
 
   // The task description needs to be created separately for platform task
@@ -1358,6 +1387,10 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _engine = nullptr;
 }
 
+- (int64_t)engineIdentifier {
+  return reinterpret_cast<int64_t>((__bridge void*)self);
+}
+
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
   NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
   return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
@@ -1634,11 +1667,18 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
  */
 - (void)handleWillBecomeActive:(NSNotification*)notification {
   _active = YES;
-  if (!_visible) {
-    [self setApplicationState:flutter::AppLifecycleState::kHidden];
-  } else {
-    [self setApplicationState:flutter::AppLifecycleState::kResumed];
+  // occlusionState can latch stale on an occlusion->visible transition (same-screen
+  // Cmd-Tab / Mission Control), so `_visible` is unreliable here. Resume from
+  // NSWindow.isVisible instead — NO for a minimized window, so it won't resume hidden.
+  // https://github.com/flutter/flutter/issues/155977
+  for (NSWindow* window in [NSApplication sharedApplication].windows) {
+    if (window.isVisible) {
+      _visible = YES;
+      break;
+    }
   }
+  [self setApplicationState:_visible ? flutter::AppLifecycleState::kResumed
+                                     : flutter::AppLifecycleState::kHidden];
 }
 
 /**
@@ -1655,8 +1695,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 }
 
 /**
- * Called when the |FlutterAppDelegate| gets the applicationDidUnhide
- * notification.
+ * Called when the application's occlusion state changes
+ * (NSApplicationDidChangeOcclusionStateNotification).
  */
 - (void)handleDidChangeOcclusionState:(NSNotification*)notification {
   NSApplicationOcclusionState occlusionState = [[NSApplication sharedApplication] occlusionState];

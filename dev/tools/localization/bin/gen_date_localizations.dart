@@ -12,6 +12,14 @@ import '../localizations_utils.dart';
 
 const String _kCommandName = 'gen_date_localizations.dart';
 
+const Map<String, Map<String, Object>> _dateSymbolOverrides = <String, Map<String, Object>>{
+  // Preserve Flutter's historical generic Arabic DateFormat behavior until
+  // package:intl restores ZERODIGIT for ar.
+  // TODO(QuncCccccc): Remove this override once the upstream intl data is fixed.
+  // See https://github.com/flutter/flutter/issues/187767.
+  'ar': <String, Object>{'ZERODIGIT': '\u0660'},
+};
+
 // Used to let _jsonToMap know what locale it's date symbols converting for.
 // Date symbols for the Kannada locale ('kn') are handled specially because
 // some of the strings contain characters that can crash Emacs on Linux.
@@ -107,6 +115,9 @@ import 'package:intl/date_symbols.dart' as intl;
     currentLocale = locale;
     if (supportedLocales.contains(locale)) {
       final objData = json.decode(data.readAsStringSync()) as Map<String, Object?>;
+      _dateSymbolOverrides[locale]?.forEach((String key, Object value) {
+        objData.putIfAbsent(key, () => value);
+      });
       buffer.writeln("'$locale': intl.DateSymbols(");
       objData.forEach((String key, Object? value) {
         if (value == null) {

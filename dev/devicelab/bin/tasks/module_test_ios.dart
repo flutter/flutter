@@ -671,7 +671,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
 
   final String symbolTable = await dumpSymbolTable(binary);
 
-  return symbolTable.contains('kDartIsolateSnapshotInstructions');
+  return symbolTable.contains('kDartSnapshotText');
 }
 
 Future<void> _createFakeDartPlugin(String name, Directory parent) async {

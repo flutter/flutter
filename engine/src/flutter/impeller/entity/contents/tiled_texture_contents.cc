@@ -111,6 +111,9 @@ bool TiledTextureContents::IsOpaque(const Matrix& transform) const {
   if (color_filter_) {
     return false;
   }
+  if (!texture_) {
+    return false;
+  }
   return texture_->IsOpaque() && !AppliesAlphaForStrokeCoverage(transform);
 }
 
@@ -130,7 +133,6 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   }
 
   VS::FrameInfo frame_info;
-  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.uv_transform =
       Rect::MakeSize(texture_size).GetNormalizingTransform() *
       GetInverseEffectTransform();
@@ -152,7 +154,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_DEBUG
 
           FML_DCHECK(!color_filter_);
-          FSExternal::FragInfo frag_info;
+          FSExternal::FragInfo frag_info{};
           frag_info.x_tile_mode =
               static_cast<Scalar>(sampler_descriptor_.width_address_mode);
           frag_info.y_tile_mode =
@@ -192,7 +194,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
         pass.SetCommandLabel("TextureFill");
 #endif  // IMPELLER_DEBUG
 
-        FS::FragInfo frag_info;
+        FS::FragInfo frag_info{};
         frag_info.x_tile_mode = static_cast<Scalar>(x_tile_mode_);
         frag_info.y_tile_mode = static_cast<Scalar>(y_tile_mode_);
         frag_info.alpha =
@@ -224,6 +226,9 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
     const SnapshotOptions& options) const {
+  if (!texture_) {
+    return std::nullopt;
+  }
   std::optional<Rect> geometry_coverage = GetGeometry()->GetCoverage({});
   if (GetInverseEffectTransform().IsIdentity() &&
       GetGeometry()->IsAxisAlignedRect() &&

@@ -13,21 +13,13 @@
 #include <memory>
 
 #include "flutter/display_list/effects/dl_image_filters.h"
-#include "flutter/fml/synchronization/count_down_latch.h"
-#include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunners+FML.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsTestHelper.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView+Test.h"
-#include "flutter/shell/platform/darwin/ios/ios_context_noop.h"
-#include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -272,48 +264,6 @@ const float kFloatCompareEpsilon = 0.001;
 
 namespace flutter {
 namespace {
-class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::Delegate {
- public:
-  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override {}
-  void OnPlatformViewDestroyed() override {}
-  void OnPlatformViewScheduleFrame() override {}
-  void OnPlatformViewAddView(int64_t view_id,
-                             const ViewportMetrics& viewport_metrics,
-                             AddViewCallback callback) override {}
-  void OnPlatformViewRemoveView(int64_t view_id, RemoveViewCallback callback) override {}
-  void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override {};
-  void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override {}
-  void OnPlatformViewSetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics) override {}
-  const flutter::Settings& OnPlatformViewGetSettings() const override { return settings_; }
-  void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
-  void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
-  }
-  HitTestResponse OnPlatformViewHitTest(int64_t view_id, const flutter::PointData offset) override {
-    return {.has_platform_view = false};
-  }
-  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
-                                             int32_t node_id,
-                                             SemanticsAction action,
-                                             fml::MallocMapping args) override {}
-  void OnPlatformViewSetSemanticsEnabled(bool enabled) override {}
-  void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override {}
-  void OnPlatformViewRegisterTexture(std::shared_ptr<Texture> texture) override {}
-  void OnPlatformViewUnregisterTexture(int64_t texture_id) override {}
-  void OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) override {}
-
-  void LoadDartDeferredLibrary(intptr_t loading_unit_id,
-                               std::unique_ptr<const fml::Mapping> snapshot_data,
-                               std::unique_ptr<const fml::Mapping> snapshot_instructions) override {
-  }
-  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
-                                    const std::string error_message,
-                                    bool transient) override {}
-  void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
-                                 flutter::AssetResolver::AssetResolverType type) override {}
-
-  flutter::Settings settings_;
-};
-
 BOOL BlurRadiusEqualToBlurRadius(CGFloat radius1, CGFloat radius2) {
   const CGFloat epsilon = 0.01;
   return std::abs(radius1 - radius2) < epsilon;
@@ -351,20 +301,36 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   return nil;
 }
 
-- (void)testFlutterViewOnlyCreateOnceInOneFrame {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+// Verifies that a create call whose viewType is not a string returns an error rather than raising.
+// An omitted argument arrives as nil and an explicit Dart null as NSNull, and neither can be
+// converted to the view type the factory lookup needs.
+- (void)testCreateWithInvalidViewTypeReturnsError {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
+  NSArray<NSDictionary*>* invalidArguments = @[
+    @{@"id" : @2},                               // 'viewType' omitted.
+    @{@"id" : @2, @"viewType" : [NSNull null]},  // 'viewType' explicitly null in Dart.
+    @{@"id" : @2, @"viewType" : @7},             // 'viewType' not a string.
+  ];
+
+  for (NSDictionary* arguments in invalidArguments) {
+    __block BOOL errored = NO;
+    FlutterResult result = ^(id result) {
+      if ([result isKindOfClass:[FlutterError class]]) {
+        errored = YES;
+      }
+    };
+    [flutterPlatformViewsController
+        onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create" arguments:arguments]
+              result:result];
+    XCTAssertTrue(errored, @"arguments: %@", arguments);
+  }
+}
+
+- (void)testFlutterViewOnlyCreateOnceInOneFrame {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -406,19 +372,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testCanCreatePlatformViewWithoutFlutterView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -501,19 +456,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testApplyBackdropFilter {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -576,22 +520,16 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     }
   }
   XCTAssertEqual(numberOfExpectedVisualEffectView, 1u);
+
+  // The visual effect view shouldn't swallow touches.
+  // See: https://github.com/flutter/flutter/issues/191203
+  UIView* hitView = [childClippingView hitTest:CGPointMake(5, 5) withEvent:nil];
+  XCTAssertEqual(hitView, gMockPlatformView.superview);
 }
 
 - (void)testApplyBackdropFilterWithCorrectFrame {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -657,19 +595,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testApplyMultipleBackdropFilters {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -736,20 +663,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testAddBackdropFilters {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -862,20 +777,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testRemoveBackdropFilters {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1015,20 +918,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testEditBackdropFilters {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1316,20 +1207,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testApplyBackdropFilterNotDlBlurImageFilter {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1629,20 +1508,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testApplyBackdropFilterRespectsClipRRect {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1706,23 +1573,12 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertEqual(visualEffectView.layer.cornerRadius, radii.top_left.width);
   XCTAssertEqual(visualEffectView.layer.cornerCurve, kCACornerCurveCircular);
+  XCTAssertFalse(visualEffectView.userInteractionEnabled);
 }
 
 - (void)testApplyBackdropFilterRespectsClipRSuperellipse {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1786,6 +1642,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertEqual(visualEffectView.layer.cornerRadius, radii.top_left.width);
   XCTAssertEqual(visualEffectView.layer.cornerCurve, kCACornerCurveContinuous);
+  XCTAssertFalse(visualEffectView.userInteractionEnabled);
 }
 
 - (void)testBackdropFilterVisualEffectSubviewBackgroundColor {
@@ -1814,20 +1671,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testCompositePlatformView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1875,20 +1720,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testBackdropFilterCorrectlyPushedAndReset {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -1920,7 +1753,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
       screenScaleMatrix, flutter::DlSize(10, 10), stack);
 
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(0, 0)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(0, 0)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
   [flutterPlatformViewsController pushVisitedPlatformViewId:2];
@@ -1958,7 +1792,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   // New frame, with no filter pushed.
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
       screenScaleMatrix, flutter::DlSize(10, 10), stack);
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(0, 0)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(0, 0)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams2)];
   [flutterPlatformViewsController
@@ -1981,20 +1816,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testChildClippingViewShouldBeTheBoundingRectOfPlatformView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2056,20 +1879,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipsDoNotInterceptWithPlatformViewShouldNotAddMaskView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2129,20 +1940,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipRRectOnlyHasCornersInterceptWithPlatformViewShouldAddMaskView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2200,21 +1999,66 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertNotNil(childClippingView.maskView);
 }
 
-- (void)testClipRect {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+- (void)testOpacity {
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
 
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  // Push two opacities, which multiply.
+  stack.PushOpacity(128);
+  stack.PushOpacity(128);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(10, 10), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  // Verify the view's alpha is the product of the opacities.
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+  CGFloat expectedAlpha = flutter::DlColor::toOpacity(128) * flutter::DlColor::toOpacity(128);
+  XCTAssertEqualWithAccuracy(touchInterceptor.alpha, expectedAlpha, 1e-3);
+
+  // compositeView:withParams: resets the interceptor's alpha to 1 before applying the opacities.
+  // Verify the opacities are not applied a second time when the view is recomposited.
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+  XCTAssertEqualWithAccuracy(touchInterceptor.alpha, expectedAlpha, 1e-3);
+}
+
+- (void)testClipRect {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2278,20 +2122,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipRect_multipleClips {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2375,20 +2207,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipRRect {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = flutter::testing::GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2480,20 +2300,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipRRect_multipleClips {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2601,21 +2409,146 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   }
 }
 
-- (void)testClipPath {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+- (void)testClipRRect_perCornerRadii {
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
 
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params.
+  flutter::MutatorsStack stack;
+
+  // Layer tree always pushes a screen scale factor to the stack.
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+
+  // Push a clip rrect whose top left and bottom right corners are rounded, and whose other two
+  // corners are square.
+  flutter::DlRoundingRadii radii = {
+      .top_left = flutter::DlSize(8, 8),
+      .bottom_right = flutter::DlSize(4, 4),
+  };
+  flutter::DlRoundRect rrect =
+      flutter::DlRoundRect::MakeRectRadii(flutter::DlRect::MakeXYWH(2, 2, 16, 16), radii);
+  stack.PushClipRRect(rrect);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(20, 20), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  // Verify the pixels in the rounded corners are clipped.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(2, 2) onView:flutterView], 0);
+  XCTAssertNotEqual([self alphaOfPoint:CGPointMake(17, 17) onView:flutterView], 255);
+  // Verify the top left corner has the larger radius, and the bottom right corner the smaller one.
+  // A corner of radius 8 clips the pixel diagonally inward from the corner pixel, and a corner of
+  // radius 4 doesn't.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(3, 3) onView:flutterView], 0);
+  XCTAssertGreaterThan([self alphaOfPoint:CGPointMake(16, 16) onView:flutterView], 0);
+  // Verify the pixels in the square corners are not clipped.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(17, 2) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(2, 17) onView:flutterView], 255);
+  // Verify the centre of the clip rect is visible, and a pixel outside the clip rect is not.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(10, 10) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(1, 1) onView:flutterView], 0);
+}
+
+- (void)testClipRRect_ellipticalRadii {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @2,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+
+  XCTAssertNotNil(gMockPlatformView);
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+  flutterPlatformViewsController.flutterView = flutterView;
+  // Create embedded view params.
+  flutter::MutatorsStack stack;
+  // Layer tree always pushes a screen scale factor to the stack.
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  // Push a clip rrect whose corners are all 8 wide and 2 high.
+  flutter::DlRoundRect rrect =
+      flutter::DlRoundRect::MakeRectXY(flutter::DlRect::MakeXYWH(2, 2, 16, 16), 8, 2);
+  stack.PushClipRRect(rrect);
+
+  auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+      screenScaleMatrix, flutter::DlSize(20, 20), stack);
+
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:2
+                                                    withParams:std::move(embeddedViewParams)];
+  [flutterPlatformViewsController
+      compositeView:2
+         withParams:[flutterPlatformViewsController compositionParamsForView:2]];
+
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  XCTAssertTrue([gMockPlatformView.superview.superview isKindOfClass:[ChildClippingView class]]);
+  ChildClippingView* childClippingView = (ChildClippingView*)gMockPlatformView.superview.superview;
+  [flutterView addSubview:childClippingView];
+
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  // Verify the corners are wider than they are high.
+  // The pixel to the right of the top left corner pixel is outside the corner's curve, and the
+  // pixel below it is inside it. If the radii were swapped, it would be the other way round.
+  XCTAssertLessThan([self alphaOfPoint:CGPointMake(3, 2) onView:flutterView],
+                    [self alphaOfPoint:CGPointMake(2, 3) onView:flutterView]);
+  // Verify the centre of the clip rect is visible, and a pixel outside the clip rect is not.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(10, 10) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(1, 1) onView:flutterView], 0);
+}
+
+- (void)testClipPath {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2707,20 +2640,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipPath_multipleClips {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2829,20 +2750,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testSetFlutterViewControllerAfterCreateCanStillDispatchTouchEvents {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2884,20 +2793,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testSetFlutterViewControllerInTheMiddleOfTouchEventShouldStillAllowGesturesToBeHandled {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -2996,20 +2893,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testSetFlutterViewControllerInTheMiddleOfTouchEventAllowsTheNewControllerToHandleSecondTouchSequence {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -3097,20 +2982,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewTouchesCancelledEventAreForcedToBeCancelled {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -3157,20 +3030,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     return;
   }
 
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -3240,20 +3101,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldRemoveAndAddBackDelayingRecognizerForWebView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockWebViewFactory* factory =
       [[FlutterPlatformViewsTestMockWebViewFactory alloc] init];
   [flutterPlatformViewsController
@@ -3287,8 +3136,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   BOOL shouldReAddDelayingRecognizer = NO;
   if (@available(iOS 26.0, *)) {
-    // TODO(hellohuanlin): find a solution for iOS 26,
-    // https://github.com/flutter/flutter/issues/175099.
+    // We use a different workaround for iOS 26 and it is tested separately.
+    // See:
+    // testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView.
   } else if (@available(iOS 18.2, *)) {
     shouldReAddDelayingRecognizer = YES;
   }
@@ -3304,20 +3154,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldRemoveAndAddBackDelayingRecognizerForWrapperWebView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockWrapperWebViewFactory* factory =
       [[FlutterPlatformViewsTestMockWrapperWebViewFactory alloc] init];
   [flutterPlatformViewsController
@@ -3370,20 +3208,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldRemoveAndAddBackDelayingRecognizerForNestedWrapperWebView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockNestedWrapperWebViewFactory* factory =
       [[FlutterPlatformViewsTestMockNestedWrapperWebViewFactory alloc] init];
   [flutterPlatformViewsController
@@ -3435,20 +3261,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldNotRemoveAndAddBackDelayingRecognizerForNonWebView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -3486,21 +3300,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForSimpleWebView {
-  if (@available(iOS 26.0, *)) {
-    flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-    FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+  if (@available(iOS 26.4, *)) {
+    // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+  } else if (@available(iOS 26.0, *)) {
     FlutterPlatformViewsController* flutterPlatformViewsController =
-        [[FlutterPlatformViewsController alloc] init];
-    flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-        /*delegate=*/mock_delegate,
-        /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-        /*platform_views_controller=*/flutterPlatformViewsController,
-        /*task_runners=*/runners.taskRunners,
-        /*worker_task_runner=*/nil,
-        /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+        CreateTestPlatformViewsController(self.name);
     FlutterPlatformViewsTestMockWebViewFactory* factory =
         [[FlutterPlatformViewsTestMockWebViewFactory alloc] init];
     [flutterPlatformViewsController
@@ -3597,21 +3401,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForMultipleWebViewInDifferentBranches {
-  if (@available(iOS 26.0, *)) {
-    flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-    FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+  if (@available(iOS 26.4, *)) {
+    // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+  } else if (@available(iOS 26.0, *)) {
     FlutterPlatformViewsController* flutterPlatformViewsController =
-        [[FlutterPlatformViewsController alloc] init];
-    flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-        /*delegate=*/mock_delegate,
-        /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-        /*platform_views_controller=*/flutterPlatformViewsController,
-        /*task_runners=*/runners.taskRunners,
-        /*worker_task_runner=*/nil,
-        /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+        CreateTestPlatformViewsController(self.name);
     FlutterPlatformViewsTestMockWrapperWebViewFactory* factory =
         [[FlutterPlatformViewsTestMockWrapperWebViewFactory alloc] init];
     [flutterPlatformViewsController
@@ -3741,21 +3535,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewBlockGestureUnderEagerPolicyShouldDisableAndReEnableTouchEventsGestureRecognizerForNestedMultipleWebView {
-  if (@available(iOS 26.0, *)) {
-    flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-    FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+  if (@available(iOS 26.4, *)) {
+    // Skip workaround as this non-tappable web view bug has been fixed on iOS 26.4.
+  } else if (@available(iOS 26.0, *)) {
     FlutterPlatformViewsController* flutterPlatformViewsController =
-        [[FlutterPlatformViewsController alloc] init];
-    flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-        /*delegate=*/mock_delegate,
-        /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-        /*platform_views_controller=*/flutterPlatformViewsController,
-        /*task_runners=*/runners.taskRunners,
-        /*worker_task_runner=*/nil,
-        /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+        CreateTestPlatformViewsController(self.name);
     FlutterPlatformViewsTestMockWebViewFactory* factory =
         [[FlutterPlatformViewsTestMockWebViewFactory alloc] init];
     [flutterPlatformViewsController
@@ -3895,20 +3679,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewGestureBlockingPolicy_ShouldNotAddDelayingRecognizerUnderDoNotBlockGesturePolicy {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController registerViewFactory:factory
@@ -3938,20 +3710,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewGestureBlockingPolicy_ShouldAddDelayingRecognizerUnderEagerPolicy {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -3982,23 +3742,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewHitTest_AcceptTouchIfInstructedByFramework {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
+      CreateTestPlatformViewsController(self.name);
 
   FlutterViewController* mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
-
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
@@ -4039,23 +3787,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewHitTest_RejectTouchIfInstructedByFramework {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
+      CreateTestPlatformViewsController(self.name);
 
   FlutterViewController* mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
-
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
@@ -4096,23 +3832,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewGestureBlockingPolicy_PolicyMappingIsCorrect {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
+      CreateTestPlatformViewsController(self.name);
 
   FlutterViewController* mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
-
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
 
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
@@ -4203,20 +3927,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewControllerSubmitFrameWithoutFlutterViewNotCrashing {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -4249,15 +3961,20 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
 
+  // A frame whose encode fails is not submitted.
+  auto encode_failed_frame_submitted = std::make_shared<bool>(false);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return false; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      [encode_failed_frame_submitted](const flutter::SurfaceFrame& surface_frame) {
+        *encode_failed_frame_submitted = true;
+        return true;
+      },
       /*frame_size=*/flutter::DlISize(800, 600));
-  XCTAssertFalse([flutterPlatformViewsController
-         submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+  XCTAssertFalse(*encode_failed_frame_submitted);
 
   auto embeddedViewParams_2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
@@ -4267,32 +3984,25 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
       compositeView:2
          withParams:[flutterPlatformViewsController compositionParamsForView:2]];
 
+  // A frame whose encode succeeds is submitted.
+  auto encode_succeeded_frame_submitted = std::make_shared<bool>(false);
   auto mock_surface_submit_true = std::make_unique<flutter::SurfaceFrame>(
       nullptr, framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
+      [encode_succeeded_frame_submitted](const flutter::SurfaceFrame& surface_frame) {
+        *encode_succeeded_frame_submitted = true;
+        return true;
+      },
       /*frame_size=*/flutter::DlISize(800, 600));
-  XCTAssertTrue([flutterPlatformViewsController
-         submitFrame:std::move(mock_surface_submit_true)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface_submit_true)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+  XCTAssertTrue(*encode_succeeded_frame_submitted);
 }
 
 - (void)
     testFlutterPlatformViewControllerResetDeallocsPlatformViewWhenRootViewsNotBindedToFlutterView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -4332,20 +4042,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewControllerBeginFrameShouldResetCompisitionOrder {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -4369,7 +4067,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
             result:result];
 
   // First frame, |embeddedViewCount| is not empty after composite.
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -4383,7 +4082,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
 
   // Second frame, |embeddedViewCount| should be empty at the start
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 0UL);
 
   auto embeddedViewParams2 =
@@ -4399,20 +4099,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewControllerSubmitFrameShouldOrderSubviewsCorrectlyWithDifferentViewHierarchy {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -4445,7 +4133,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
             result:result];
   UIView* view2 = gMockPlatformView;
 
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -4458,15 +4147,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-  XCTAssertTrue([flutterPlatformViewsController
-         submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+  auto mock_surface = CreateTestSurfaceFrame();
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -4476,7 +4159,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                 @"The first clipping view should be added before the second clipping view.");
 
   // Need to recreate these params since they are `std::move`ed.
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   // Process the second frame in the opposite order.
   embeddedViewParams2 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(500, 500), stack);
@@ -4488,14 +4172,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:0
                                                     withParams:std::move(embeddedViewParams1)];
 
-  mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-  XCTAssertTrue([flutterPlatformViewsController
-         submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+  mock_surface = CreateTestSurfaceFrame();
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] >
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4504,20 +4183,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)
     testFlutterPlatformViewControllerSubmitFrameShouldOrderSubviewsCorrectlyWithSameViewHierarchy {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -4550,7 +4217,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
             result:result];
   UIView* view2 = gMockPlatformView;
 
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -4563,15 +4231,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-  XCTAssertTrue([flutterPlatformViewsController
-         submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+  auto mock_surface = CreateTestSurfaceFrame();
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   // platform view is wrapped by touch interceptor, which itself is wrapped by clipping view.
   UIView* clippingView1 = view1.superview.superview;
@@ -4581,7 +4243,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                 @"The first clipping view should be added before the second clipping view.");
 
   // Need to recreate these params since they are `std::move`ed.
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   // Process the second frame in the same order.
   embeddedViewParams1 =
       std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, flutter::DlSize(300, 300), stack);
@@ -4593,14 +4256,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                     withParams:std::move(embeddedViewParams2)];
 
-  mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-  XCTAssertTrue([flutterPlatformViewsController
-         submitFrame:std::move(mock_surface)
-      withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+  mock_surface = CreateTestSurfaceFrame();
+  [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   XCTAssertTrue([flutterView.subviews indexOfObject:clippingView1] <
                     [flutterView.subviews indexOfObject:clippingView2],
@@ -4660,13 +4318,17 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)testFlutterClippingMaskViewPoolReuseViewsAfterRecycle {
   FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
-  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero];
-  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero];
+  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
+  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   [pool insertViewToPoolIfNeeded:view1];
   [pool insertViewToPoolIfNeeded:view2];
   CGRect newRect = CGRectMake(0, 0, 10, 10);
-  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:newRect];
-  FlutterClippingMaskView* view4 = [pool getMaskViewWithFrame:newRect];
+  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:newRect
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
+  FlutterClippingMaskView* view4 = [pool getMaskViewWithFrame:newRect
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   // view3 and view4 should randomly get either of view1 and view2.
   NSSet* set1 = [NSSet setWithObjects:view1, view2, nil];
   NSSet* set2 = [NSSet setWithObjects:view3, view4, nil];
@@ -4677,9 +4339,12 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
 - (void)testFlutterClippingMaskViewPoolAllocsNewMaskViewsAfterReachingCapacity {
   FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
-  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero];
-  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero];
-  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:CGRectZero];
+  FlutterClippingMaskView* view1 = [pool getMaskViewWithFrame:CGRectZero
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
+  FlutterClippingMaskView* view2 = [pool getMaskViewWithFrame:CGRectZero
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
+  FlutterClippingMaskView* view3 = [pool getMaskViewWithFrame:CGRectZero
+                                             devicePixelRatio:[UIScreen mainScreen].scale];
   XCTAssertNotEqual(view1, view3);
   XCTAssertNotEqual(view2, view3);
 }
@@ -4688,7 +4353,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   __weak UIView* weakView;
   @autoreleasepool {
     FlutterClippingMaskViewPool* pool = [[FlutterClippingMaskViewPool alloc] initWithCapacity:2];
-    FlutterClippingMaskView* view = [pool getMaskViewWithFrame:CGRectZero];
+    FlutterClippingMaskView* view = [pool getMaskViewWithFrame:CGRectZero
+                                              devicePixelRatio:[UIScreen mainScreen].scale];
     weakView = view;
     XCTAssertNotNil(weakView);
   }
@@ -4696,20 +4362,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipMaskViewIsReused {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -4754,7 +4408,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertNotNil(maskView1);
 
   // Composite a new frame.
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(100, 100)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   flutter::MutatorsStack stack2;
   auto embeddedViewParams2 = std::make_unique<flutter::EmbeddedViewParams>(
       screenScaleMatrix, flutter::DlSize(10, 10), stack2);
@@ -4795,20 +4450,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testDifferentClipMaskViewIsUsedForEachView {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -4881,20 +4524,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testMaskViewUsesCAShapeLayerAsTheBackingLayer {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -4956,6 +4587,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                       expectedFrame:(CGRect)frame
                         inputRadius:(CGFloat)inputRadius {
   XCTAssertTrue(CGRectEqualToRect(visualEffectView.frame, frame));
+  XCTAssertFalse(visualEffectView.userInteractionEnabled);
   for (UIView* view in visualEffectView.subviews) {
     if (![NSStringFromClass([view class]) hasSuffix:@"BackdropView"]) {
       continue;
@@ -4975,20 +4607,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testDisposingViewInCompositionOrderDoNotCrash {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -5021,7 +4641,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   {
     // **** First frame, view id 0, 1 in the composition_order_, disposing view 0 is called. **** //
     // No view should be disposed, or removed from the composition order.
-    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                      devicePixelRatio:[UIScreen mainScreen].scale];
     flutter::MutatorsStack stack;
     flutter::DlMatrix finalMatrix;
     auto embeddedViewParams0 = std::make_unique<flutter::EmbeddedViewParams>(
@@ -5046,16 +4667,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
               result:disposeResult];
     [self waitForExpectationsWithTimeout:30 handler:nil];
 
-    flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-    auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-        nullptr, framebuffer_info,
-        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-        [](const flutter::SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/flutter::DlISize(800, 600), nullptr,
-        /*display_list_fallback=*/true);
-    XCTAssertTrue([flutterPlatformViewsController
-           submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+    auto mock_surface = CreateTestSurfaceFrame();
+    [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                                 withIosContext:std::make_shared<FakeIOSContext>()];
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 2UL);
@@ -5066,7 +4680,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   {
     // **** Second frame, view id 1 in the composition_order_, no disposing view is called,  **** //
     // View 0 is removed from the composition order in this frame, hence also disposed.
-    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                      devicePixelRatio:[UIScreen mainScreen].scale];
     flutter::MutatorsStack stack;
     flutter::DlMatrix finalMatrix;
     auto embeddedViewParams1 = std::make_unique<flutter::EmbeddedViewParams>(
@@ -5074,15 +4689,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     [flutterPlatformViewsController prerollCompositeEmbeddedView:1
                                                       withParams:std::move(embeddedViewParams1)];
 
-    flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-    auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-        nullptr, framebuffer_info,
-        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-        [](const flutter::SurfaceFrame& surface_frame) { return true; },
-        /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
-    XCTAssertTrue([flutterPlatformViewsController
-           submitFrame:std::move(mock_surface)
-        withIosContext:std::make_shared<flutter::IOSContextNoop>()]);
+    auto mock_surface = CreateTestSurfaceFrame();
+    [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                                 withIosContext:std::make_shared<FakeIOSContext>()];
 
     // Disposing won't remove embedded views until the view is removed from the composition_order_
     XCTAssertEqual(flutterPlatformViewsController.embeddedViewCount, 1UL);
@@ -5090,21 +4699,242 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
 }
-- (void)testOnlyPlatformViewsAreRemovedWhenReset {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+// Prerolls `viewId` with a translation of `offset` points and submits a frame.
+- (void)submitFrameWithController:(FlutterPlatformViewsController*)controller
+                           viewId:(int64_t)viewId
+                           offset:(flutter::DlScalar)offset
+                   backdropFilter:(BOOL)backdropFilter {
+  [controller beginFrameWithSize:flutter::DlISize(300, 300)
+                devicePixelRatio:[UIScreen mainScreen].scale];
+  flutter::MutatorsStack stack;
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
+  flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
+  stack.PushTransform(screenScaleMatrix);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({offset, offset});
+  stack.PushTransform(translateMatrix);
+  auto params = std::make_unique<flutter::EmbeddedViewParams>(screenScaleMatrix * translateMatrix,
+                                                              flutter::DlSize(100, 100), stack);
+  [controller prerollCompositeEmbeddedView:viewId withParams:std::move(params)];
+  if (backdropFilter) {
+    [controller pushVisitedPlatformViewId:viewId];
+    [controller pushFilterToVisitedPlatformViews:flutter::DlBlurImageFilter::Make(
+                                                     5, 5, flutter::DlTileMode::kClamp)
+                                        withRect:flutter::DlRect::MakeLTRB(0, 0, 300, 300)];
+  }
+  [controller submitFrame:CreateTestSurfaceFrame()
+           withIosContext:std::make_shared<FakeIOSContext>()];
+}
 
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+- (void)testSubmitFrameRecompositesOnlyViewsWhoseParamsChanged {
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
 
+  // Verify the view is composited in its first frame.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+
+  // compositeLayer: resets the interceptor's alpha to 1.
+  // Set it to a different value so we can detect whether the view was recomposited below.
+  touchInterceptor.alpha = 0.5;
+
+  // Verify an unchanged view is not recomposited.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 0.5);
+
+  // Verify a changed view is recomposited.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:20
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+  CGRect rectInFlutterView = [gMockPlatformView convertRect:gMockPlatformView.bounds
+                                                     toView:flutterView];
+  XCTAssertTrue(CGRectEqualToRect(rectInFlutterView, CGRectMake(20, 20, 100, 100)));
+}
+
+- (void)testSubmitFrameDoesNotRecompositeUnchangedViewUnderBackdropFilter {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  // The backdrop filter is appended to the parameters after preroll.
+  // Verify that if a view's filter has not changed, it is not recomposited.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:YES];
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  ChildClippingView* clippingView = (ChildClippingView*)touchInterceptor.superview;
+  XCTAssertEqual(clippingView.backdropFilterSubviews.count, 1u);
+  touchInterceptor.alpha = 0.5;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:YES];
+  XCTAssertEqual(touchInterceptor.alpha, 0.5);
+  XCTAssertEqual(clippingView.backdropFilterSubviews.count, 1u);
+
+  // Verify removing the filter triggers a recomposite.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+  XCTAssertEqual(clippingView.backdropFilterSubviews.count, 0u);
+}
+
+- (void)testSubmitFrameRecompositesRecreatedViewWithSameId {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  FlutterMethodCall* create =
+      [FlutterMethodCall methodCallWithMethodName:@"create"
+                                        arguments:@{
+                                          @"id" : @0,
+                                          @"viewType" : @"MockFlutterPlatformView",
+                                          @"gestureBlockingPolicy" : @"eager"
+                                        }];
+  [flutterPlatformViewsController onMethodCall:create result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  UIView* firstView = gMockPlatformView;
+
+  // Dispose the view and submit a frame without it, then recreate it with the same ID.
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@0]
+            result:result];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
+  [flutterPlatformViewsController submitFrame:CreateTestSurfaceFrame()
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+
+  // Verify the old view's clipping view was removed from the Flutter view.
+  XCTAssertNil(firstView.superview.superview.superview);
+  [flutterPlatformViewsController onMethodCall:create result:result];
+  XCTAssertNotEqual(gMockPlatformView, firstView);
+
+  // The new view has never been composited.
+  // Verify it is composited, even when the params are identical.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  CGRect rectInFlutterView = [gMockPlatformView convertRect:gMockPlatformView.bounds
+                                                     toView:flutterView];
+  XCTAssertTrue(CGRectEqualToRect(rectInFlutterView, CGRectMake(10, 10, 100, 100)));
+}
+
+- (void)testSubmitFrameConvertsToPointsUsingDevicePixelRatioOfFrame {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  // Use a device pixel ratio that differs from the scale of the main screen.
+  flutter::DlScalar devicePixelRatio = [UIScreen mainScreen].scale + 1;
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:devicePixelRatio];
+  flutter::MutatorsStack stack;
+  flutter::DlMatrix scaleMatrix =
+      flutter::DlMatrix::MakeScale({devicePixelRatio, devicePixelRatio, 1});
+  stack.PushTransform(scaleMatrix);
+  flutter::DlMatrix translateMatrix = flutter::DlMatrix::MakeTranslation({10, 20});
+  stack.PushTransform(translateMatrix);
+  // Clip the view to its left half.
+  stack.PushClipRect(flutter::DlRect::MakeXYWH(0, 0, 50, 100));
+  auto params = std::make_unique<flutter::EmbeddedViewParams>(scaleMatrix * translateMatrix,
+                                                              flutter::DlSize(100, 100), stack);
+  [flutterPlatformViewsController prerollCompositeEmbeddedView:0 withParams:std::move(params)];
+  [flutterPlatformViewsController submitFrame:CreateTestSurfaceFrame()
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+  gMockPlatformView.backgroundColor = UIColor.redColor;
+  [flutterView setNeedsLayout];
+  [flutterView layoutIfNeeded];
+
+  // Verify the view is positioned and sized in points.
+  CGRect rectInFlutterView = [gMockPlatformView convertRect:gMockPlatformView.bounds
+                                                     toView:flutterView];
+  XCTAssertTrue(CGRectEqualToRect(rectInFlutterView, CGRectMake(10, 20, 100, 100)));
+  // Verify the clip is positioned and sized in points.
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(35, 70) onView:flutterView], 255);
+  XCTAssertEqual([self alphaOfPoint:CGPointMake(85, 70) onView:flutterView], 0);
+}
+
+- (void)testOnlyPlatformViewsAreRemovedWhenReset {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -5123,6 +4953,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
             result:result];
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -5140,14 +4972,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
 
-  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+  auto mock_surface = CreateTestSurfaceFrame();
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   UIView* someView = [[UIView alloc] init];
   [flutterView addSubview:someView];
@@ -5158,20 +4985,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testResetClearsPreviousCompositionOrder {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -5190,6 +5005,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
             result:result];
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -5207,14 +5024,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
 
-  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+  auto mock_surface = CreateTestSurfaceFrame();
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   // The above code should result in previousCompositionOrder having one viewId in it
   XCTAssertEqual(flutterPlatformViewsController.previousCompositionOrder.count, 1ul);
@@ -5227,20 +5039,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testNilPlatformViewDoesntCrash {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestNilFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestNilFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController
@@ -5260,6 +5060,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
@@ -5277,14 +5079,9 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   [flutterPlatformViewsController prerollCompositeEmbeddedView:2
                                                     withParams:std::move(embeddedViewParams)];
 
-  flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
-  auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
-      nullptr, framebuffer_info,
-      [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
-      [](const flutter::SurfaceFrame& surface_frame) { return true; },
-      /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+  auto mock_surface = CreateTestSurfaceFrame();
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   XCTAssertEqual(flutterView.subviews.count, 1u);
 }
@@ -5322,20 +5119,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testFlutterPlatformViewControllerSubmitFramePreservingFrameDamage {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
 
@@ -5366,7 +5151,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                                                      }]
             result:result];
 
-  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
   flutter::MutatorsStack stack;
   flutter::DlMatrix finalMatrix;
   auto embeddedViewParams1 =
@@ -5396,7 +5182,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   });
 
   [flutterPlatformViewsController submitFrame:std::move(mock_surface)
-                               withIosContext:std::make_shared<flutter::IOSContextNoop>()];
+                               withIosContext:std::make_shared<FakeIOSContext>()];
 
   XCTAssertTrue(submit_info.has_value());
   XCTAssertEqual(*submit_info->frame_damage, flutter::DlIRect::MakeWH(800, 600));
@@ -5404,20 +5190,8 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 }
 
 - (void)testClipSuperellipse {
-  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
-
-  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
   FlutterPlatformViewsController* flutterPlatformViewsController =
-      [[FlutterPlatformViewsController alloc] init];
-  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
-  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/mock_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners.taskRunners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
-
+      CreateTestPlatformViewsController(self.name);
   FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
       [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
   [flutterPlatformViewsController

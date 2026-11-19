@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _kTestRed = Color(0xFFFF0000);
 
@@ -450,8 +449,7 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('barrier')),
         findsOneWidget,
-        reason:
-            'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
+        reason: 'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
       );
     });
 
@@ -905,8 +903,7 @@ void main() {
       expect(
         find.byKey(const ValueKey<String>('barrier')),
         findsOneWidget,
-        reason:
-            'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
+        reason: 'The route should not have been dismissed by tapping the barrier, as there was a onDismiss callback given.',
       );
     });
 

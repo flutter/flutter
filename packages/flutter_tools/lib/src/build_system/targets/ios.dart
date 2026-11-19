@@ -16,7 +16,6 @@ import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../macos/xcode.dart';
@@ -46,7 +45,7 @@ abstract class AotAssemblyBase extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: environment.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
@@ -69,17 +68,17 @@ abstract class AotAssemblyBase extends Target {
       kExtraGenSnapshotOptions,
     );
     final buildMode = BuildMode.fromCliName(environmentBuildMode);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
+    final targetPlatform = TargetPlatform.fromName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final List<DarwinArch> darwinArchs =
-        environment.defines[kIosArchs]?.split(' ').map(getIOSArchForName).toList() ??
-        <DarwinArch>[DarwinArch.arm64];
+    final List<CpuArch> cpuArchs =
+        environment.defines[kIosArchs]?.split(' ').map(getCpuArchForName).toList() ??
+        <CpuArch>[CpuArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications.');
     }
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -94,15 +93,15 @@ abstract class AotAssemblyBase extends Target {
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
     final pending = <Future<int>>[];
-    for (final darwinArch in darwinArchs) {
+    for (final cpuArch in cpuArchs) {
       final archExtraGenSnapshotOptions = List<String>.of(extraGenSnapshotOptions);
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('snapshot.${darwinArch.name}.json');
+            .childFile('snapshot.${cpuArch.darwinArchName}.json');
         final File precompilerTraceFile = environment.fileSystem
             .directory(codeSizeDirectory)
-            .childFile('trace.${darwinArch.name}.json');
+            .childFile('trace.${cpuArch.darwinArchName}.json');
         archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -111,8 +110,8 @@ abstract class AotAssemblyBase extends Target {
           platform: targetPlatform,
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
-          outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
-          darwinArch: darwinArch,
+          outputPath: environment.fileSystem.path.join(buildOutputPath, cpuArch.darwinArchName),
+          cpuArch: cpuArch,
           sdkRoot: sdkRoot,
           quiet: true,
           splitDebugInfo: splitDebugInfo,
@@ -129,7 +128,7 @@ abstract class AotAssemblyBase extends Target {
     // Combine the app lib into a fat framework.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework/App',
       inputDir: buildOutputPath,
     );
@@ -137,7 +136,7 @@ abstract class AotAssemblyBase extends Target {
     // And combine the dSYM for each architecture too, if it was created.
     await Lipo.create(
       environment,
-      darwinArchs,
+      cpuArchs,
       relativePath: 'App.framework.dSYM/Contents/Resources/DWARF/App',
       inputDir: buildOutputPath,
       // Don't fail if the dSYM wasn't created (i.e. during a debug build).
@@ -277,7 +276,7 @@ abstract class UnpackIOS extends UnpackDarwin {
     }
 
     // Copy Flutter framework.
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -454,7 +453,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     if (flutterProject.ios.appDelegateSwift.existsSync()) {
       await checkForLaunchRootViewControllerAccessDeprecationSwift(
         environment.logger,
@@ -531,7 +533,7 @@ class DebugIosLLDBInit extends Target {
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
     }
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(
       sdkRoot,
       environment.fileSystem,
     );
@@ -583,7 +585,10 @@ class DebugIosLLDBInit extends Target {
     // Also, this cannot check for a specific path/name for the LLDB Init File
     // since Flutter's LLDB Init file may be imported from within a user's
     // custom LLDB Init File.
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     if (flutterProject.isModule) {
       var anyLLDBInitFound = false;
       await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
@@ -600,6 +605,7 @@ class DebugIosLLDBInit extends Target {
           'ensure debug mode works, please complete instructions found in '
           '"Embed a Flutter module in your iOS app > Use CocoaPods > Set LLDB Init File" '
           'section of https://docs.flutter.dev/to/ios-add-to-app-embed-setup.',
+          logger: environment.logger,
         );
       }
     }
@@ -706,7 +712,9 @@ abstract class IosAssetBundle extends Target {
           .copySync(dsymOutputBinary.path);
     }
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = environment.projectFactory.fromDirectory(
+      environment.projectDir,
+    );
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.
@@ -855,6 +863,7 @@ Future<void> _updateMinimumOSVersion(File infoPlist, Environment environment) as
   if (result.exitCode != 0) {
     printXcodeWarning(
       'Failed to update MinimumOSVersion in ${infoPlist.path}. This may cause AppStore validation failures. Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      logger: environment.logger,
     );
   }
 }
@@ -886,9 +895,9 @@ Future<void> _createStubAppFramework(
   static const int Moo = 88;
   ''');
 
-    final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
+    final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
 
-    await globals.xcode!.clang(<String>[
+    await environment.xcode!.clang(<String>[
       '-x',
       'c',
       for (final String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],

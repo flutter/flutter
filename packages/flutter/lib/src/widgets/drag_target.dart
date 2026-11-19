@@ -48,8 +48,11 @@ typedef DragTargetAcceptWithDetails<T> = void Function(DragTargetDetails<T> deta
 /// not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef DragTargetBuilder<T> =
-    Widget Function(BuildContext context, List<T?> candidateData, List<dynamic> rejectedData);
+typedef DragTargetBuilder<T> = Widget Function(
+  BuildContext context,
+  List<T?> candidateData,
+  List<dynamic> rejectedData,
+);
 
 /// Signature for when a [Draggable] is dragged across the screen.
 ///
@@ -91,8 +94,11 @@ typedef DragTargetMove<T> = void Function(DragTargetDetails<T> details);
 ///
 ///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
 ///    position of the touch that started the drag.
-typedef DragAnchorStrategy =
-    Offset Function(Draggable<Object> draggable, BuildContext context, Offset position);
+typedef DragAnchorStrategy = Offset Function(
+  Draggable<Object> draggable,
+  BuildContext context,
+  Offset position,
+);
 
 /// Display the feedback anchored at the position of the original child.
 ///
@@ -918,7 +924,15 @@ class _DragAvatar<T extends Object> extends Drag {
     }
 
     // If everything's the same, report moves, and bail early.
-    if (listsMatch) {
+    //
+    // The prefix match in `listsMatch` is only sufficient to bail when a target
+    // has already accepted the drag (`_activeTarget != null`), because deeper
+    // targets below the active one are correctly ignored. When nothing has
+    // accepted yet, `_enteredTargets` holds every hit target, so a longer
+    // `targets` list means a new (lower) target has appeared under the pointer
+    // and must be given a chance to be entered. Requiring an exact-length match
+    // in that case avoids missing it.
+    if (listsMatch && (_activeTarget != null || targets.length == _enteredTargets.length)) {
       for (final _DragTargetState<Object> target in _enteredTargets) {
         target.didMove(this);
       }

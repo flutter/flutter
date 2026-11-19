@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.annotation.TargetApi;
 import android.graphics.Canvas;
@@ -58,16 +58,16 @@ public final class SurfaceTextureSurfaceProducerTest {
     Canvas canvas = surface.lockHardwareCanvas();
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
-    shadowOf(Looper.getMainLooper()).idle();
-    assertEquals(frames.get(), 1);
+    shadowMainLooper().idle();
+    assertEquals(1, frames.get());
 
     // Resize and redraw.
     producer.setSize(400, 800);
     canvas = surface.lockHardwareCanvas();
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
-    shadowOf(Looper.getMainLooper()).idle();
-    assertEquals(frames.get(), 2);
+    shadowMainLooper().idle();
+    assertEquals(2, frames.get());
 
     // Done.
     fakeJNI.detachFromNativeAndReleaseResources();

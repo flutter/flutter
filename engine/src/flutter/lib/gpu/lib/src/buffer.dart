@@ -58,13 +58,13 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
     RenderPass renderPass,
     int offsetInBytes,
     int lengthInBytes,
-    int vertexCount,
+    int slot,
   ) {
     renderPass._bindVertexBufferDevice(
       this,
       offsetInBytes,
       lengthInBytes,
-      vertexCount,
+      slot,
     );
   }
 
@@ -73,26 +73,25 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
     int offsetInBytes,
     int lengthInBytes,
     IndexType indexType,
-    int indexCount,
   ) {
     renderPass._bindIndexBufferDevice(
       this,
       offsetInBytes,
       lengthInBytes,
       indexType.index,
-      indexCount,
     );
   }
 
   bool _bindAsUniform(
     RenderPass renderPass,
-    UniformSlot slot,
+    Shader shader,
+    int uniformStructIndex,
     int offsetInBytes,
     int lengthInBytes,
   ) {
-    return renderPass._bindUniformDevice(
-      slot.shader,
-      slot.uniformName,
+    return renderPass._bindUniformDeviceIndexed(
+      shader,
+      uniformStructIndex,
       this,
       offsetInBytes,
       lengthInBytes,
@@ -189,9 +188,10 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
 /// uniform or vertex data that needs to change from frame to frame.
 ///
 /// Different platforms have different data alignment requirements when reading
-/// [DeviceBuffer] data for shader uniforms. [HostBuffer] uses
-/// [GpuContext.minimumUniformByteAlignment] to align each emplacement
-/// automatically, so that they may be used in uniform bindings.
+/// [DeviceBuffer] data for shader uniforms and storage buffers. [HostBuffer]
+/// aligns each emplacement to both [GpuContext.minimumUniformByteAlignment]
+/// and [GpuContext.minimumStorageBufferByteAlignment] automatically, so that
+/// they may be used in uniform and storage buffer bindings.
 ///
 /// The length of each [DeviceBuffer] block is determined by
 /// [blockLengthInBytes] and cannot be changed after creation of the
@@ -227,6 +227,16 @@ base class HostBuffer {
 
   final List<List<DeviceBuffer>> _buffers = [];
 
+  /// The alignment of every emplacement, so that any of them can be bound as
+  /// a uniform or a storage buffer. Both device alignments are powers of two
+  /// (Vulkan requires it, and Metal's are fixed powers of two), so the larger
+  /// one is a multiple of the smaller.
+  late final int _emplacementAlignment =
+      _gpuContext.minimumUniformByteAlignment >
+          _gpuContext.minimumStorageBufferByteAlignment
+      ? _gpuContext.minimumUniformByteAlignment
+      : _gpuContext.minimumStorageBufferByteAlignment;
+
   /// Creates a new HostBuffer.
   HostBuffer._initialize(
     this._gpuContext, {
@@ -258,12 +268,11 @@ base class HostBuffer {
       );
     }
 
-    int padding =
-        _gpuContext.minimumUniformByteAlignment -
-        (_offsetCursor % _gpuContext.minimumUniformByteAlignment);
+    final int alignment = _emplacementAlignment;
+    int padding = alignment - (_offsetCursor % alignment);
     // If the padding is the full alignment size, then we're already aligned.
     // So reset the padding to zero.
-    padding %= _gpuContext.minimumUniformByteAlignment;
+    padding %= alignment;
     if (_offsetCursor + padding >= blockLengthInBytes) {
       DeviceBuffer buffer = _allocateNewBlock(blockLengthInBytes);
       _buffers[_frameCursor].add(buffer);
@@ -291,8 +300,8 @@ base class HostBuffer {
   /// that references the new data in the buffer.
   ///
   /// This method automatically inserts padding in-between emplace calls in the
-  /// buffer if necessary to abide by platform-specific uniform alignment
-  /// requirements.
+  /// buffer if necessary to abide by platform-specific uniform and storage
+  /// buffer alignment requirements.
   ///
   /// The [DeviceBuffer] referenced in the [BufferView] has already been
   /// flushed, so there is no need to call [DeviceBuffer.flush] before

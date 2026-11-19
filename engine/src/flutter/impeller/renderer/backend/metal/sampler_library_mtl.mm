@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 
+#include <algorithm>
+
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 
@@ -16,9 +18,10 @@ SamplerLibraryMTL::~SamplerLibraryMTL() = default;
 raw_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
     const SamplerDescriptor& descriptor) {
   uint64_t p_key = SamplerDescriptor::ToKey(descriptor);
-  for (const auto& [key, value] : samplers_) {
-    if (key == p_key) {
-      return raw_ptr(value);
+  {
+    Lock lock(samplers_mutex_);
+    if (auto sampler = FindSampler(p_key)) {
+      return sampler;
     }
   }
   if (!device_) {
@@ -31,6 +34,9 @@ raw_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
   desc.sAddressMode = ToMTLSamplerAddressMode(descriptor.width_address_mode);
   desc.tAddressMode = ToMTLSamplerAddressMode(descriptor.height_address_mode);
   desc.rAddressMode = ToMTLSamplerAddressMode(descriptor.depth_address_mode);
+  // Metal supports a maxAnisotropy in the range [1, 16] on all devices.
+  desc.maxAnisotropy =
+      std::clamp<NSUInteger>(descriptor.max_anisotropy, 1u, 16u);
   if (@available(iOS 14.0, macos 10.12, *)) {
     desc.borderColor = MTLSamplerBorderColorTransparentBlack;
   }
@@ -47,8 +53,21 @@ raw_ptr<const Sampler> SamplerLibraryMTL::GetSampler(
   }
   auto sampler =
       std::shared_ptr<SamplerMTL>(new SamplerMTL(descriptor, mtl_sampler));
+  Lock lock(samplers_mutex_);
+  if (auto existing = FindSampler(p_key)) {
+    return existing;
+  }
   samplers_.push_back(std::make_pair(p_key, std::move(sampler)));
   return raw_ptr(samplers_.back().second);
+}
+
+raw_ptr<const Sampler> SamplerLibraryMTL::FindSampler(uint64_t key) const {
+  for (const auto& [sampler_key, sampler] : samplers_) {
+    if (sampler_key == key) {
+      return raw_ptr(sampler);
+    }
+  }
+  return raw_ptr<const Sampler>(nullptr);
 }
 
 }  // namespace impeller

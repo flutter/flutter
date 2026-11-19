@@ -19,9 +19,9 @@ template("bin_to_assembly") {
     output = "$target_gen_dir/${invoker.input}.S"
     args = [
       "--input",
-      rebase_path(invoker.input),
+      rebase_path(invoker.input, root_build_dir),
       "--output",
-      rebase_path(output),
+      rebase_path(output, root_build_dir),
       "--symbol_name",
       invoker.symbol,
       "--target_os",
@@ -63,9 +63,9 @@ template("bin_to_coff") {
     output = "$target_gen_dir/${invoker.input}.o"
     args = [
       "--input",
-      rebase_path(invoker.input),
+      rebase_path(invoker.input, root_build_dir),
       "--output",
-      rebase_path(output),
+      rebase_path(output, root_build_dir),
       "--symbol_name",
       invoker.symbol,
     ]

@@ -30,12 +30,13 @@ template("_copy_debug_symbols") {
       "--executable-name",
       target_name,
       "--executable-path",
-      rebase_path(binary_path),
+      rebase_path(binary_path, root_build_dir),
       "--destination-base",
-      rebase_path(_dest_base),
+      rebase_path(_dest_base, root_build_dir),
       "--read-elf",
       rebase_path(
-          "$buildtools_path/${host_os}-${host_cpu}/clang/bin/llvm-readelf"),
+          "$buildtools_path/${host_os}-${host_cpu}/clang/bin/llvm-readelf",
+          root_build_dir),
     ]
 
     if (unstripped) {
@@ -53,7 +54,7 @@ template("fuchsia_debug_symbols") {
 
   _copy_debug_symbols("_${target_name}_stripped") {
     forward_variables_from(invoker, "*")
-    binary_path = rebase_path("${root_out_dir}/$binary")
+    binary_path = "${root_out_dir}/$binary"
     unstripped = false
   }
 

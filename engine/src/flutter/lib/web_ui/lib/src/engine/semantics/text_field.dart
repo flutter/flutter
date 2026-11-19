@@ -2,15 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui.dart' as ui;
+import 'dart:js_interop';
+import 'dart:math' as math;
 
+import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
+import '../browser_detection.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
 
-/// Text editing used by accesibility mode.
+/// The smallest font size that does not make iOS zoom the page.
+///
+/// iOS zooms when it focuses an editable element whose font size is below this,
+/// and leaves the page zoomed afterwards.
+///
+/// See: https://github.com/flutter/flutter/issues/192327
+const double _iosMinimumEditableFontSize = 16.0;
+
+/// Raises [element]'s font size to [_iosMinimumEditableFontSize] on iOS when
+/// [frameworkFontSize] is smaller than that, or absent.
+///
+/// iOS zooms the whole page when it focuses an editable element below the
+/// threshold, and leaves it zoomed. The element is invisible, so enlarging a
+/// small size changes nothing the user sees, and a larger framework size is kept
+/// as it is.
+///
+/// Called from two places. At element creation there is no framework style yet
+/// and the element would fall back to the browser default, 11px on iOS. After
+/// each style sync the framework size has just been written by
+/// [EditableTextStyle.applyToDomElement] and may be below the threshold again.
+///
+/// Assigning `font-size` as a longhand after that inline `font` shorthand
+/// overrides only the size and leaves the rest of the shorthand alone. It also
+/// has to be set on the element rather than in the global stylesheet, because an
+/// inline declaration outranks any stylesheet rule.
+void _applyIosMinimumFontSize(DomHTMLElement element, double? frameworkFontSize) {
+  if (!isIosSafari) {
+    return;
+  }
+  final double effectiveFontSize = math.max(_iosMinimumEditableFontSize, frameworkFontSize ?? 0.0);
+  element.style.fontSize = '${effectiveFontSize}px';
+}
+
+/// Text editing used by accessibility mode.
 ///
 /// [SemanticsTextEditingStrategy] assumes the caller will own the creation,
 /// insertion and disposal of the DOM element. Due to this
@@ -47,6 +85,13 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Current input configuration supplied by the "flutter/textinput" channel.
   InputConfiguration? inputConfig;
 
+  /// Whether an autofill form has been woken up for the active field.
+  ///
+  /// Tracked locally because the base strategy's `_appendedToForm` is private
+  /// to its library, and [SemanticsTextEditingStrategy] fully overrides
+  /// [disable] (it never calls `super.disable()`).
+  bool _formIsActive = false;
+
   /// The semantics implementation does not operate on DOM nodes, but only
   /// remembers the config and callbacks. This is because the DOM nodes are
   /// supplied in the semantics update and enabled by [activate].
@@ -64,41 +109,66 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   /// Attaches the DOM element owned by [textField] to the text editing
   /// strategy.
   ///
-  /// This method must be called after [enable] to name sure that [inputConfig],
-  /// [onChange], and [onAction] are not null.
+  /// Does nothing while no text input connection is open, that is before
+  /// [enable] or after [disable]. A field can stay focused in the semantics
+  /// tree after the framework closes its connection, for example after
+  /// `TextInput.hide`, and [SemanticTextField.update] calls this on every
+  /// semantics update while the field has focus.
   void activate(SemanticTextField textField) {
-    assert(
-      inputConfig != null && onChange != null && onAction != null,
-      '"enable" should be called before "enableFromSemantics" and initialize input configuration',
-    );
+    final InputConfiguration? inputConfig = this.inputConfig;
+    final OnChangeCallback? onChange = this.onChange;
+    final OnActionCallback? onAction = this.onAction;
+    if (inputConfig == null || onChange == null || onAction == null) {
+      return;
+    }
 
     if (activeTextField == textField) {
       // The specified field is already active. Skip.
       return;
     } else if (activeTextField != null) {
-      // Another text field is currently active. Deactivate it before switching.
-      disable();
+      // Another text field is currently active. Detach it before switching.
+      deactivate(activeTextField!);
     }
 
     activeTextField = textField;
     domElement = textField.editableElement;
+    // Enable before syncing the style.
+    // [DefaultTextEditingStrategy.updateElementStyle] only writes to the element
+    // once editing is enabled, so syncing first drops the style silently.
+    super.enable(inputConfig, onChange: onChange, onAction: onAction);
     _syncStyle();
-    super.enable(inputConfig!, onChange: onChange!, onAction: onAction!);
   }
 
   /// Detaches the DOM element owned by [textField] from this text editing
   /// strategy.
   ///
   /// Typically at this point the element loses focus (blurs) and stops being
-  /// used for editing.
+  /// used for editing. This only ends the element's part in editing. The text
+  /// input connection, and the state it owns such as the editing state and the
+  /// style, stays until [disable], so a replacement element for the same field
+  /// is restored by [activate]. The framework does not resend that state while
+  /// its connection is open, for example when the focused field's semantics
+  /// node leaves the tree for one update and comes back with a new element.
+  /// See https://github.com/flutter/flutter/issues/194636.
   void deactivate(SemanticTextField textField) {
     if (activeTextField == textField) {
-      disable();
+      _detachElement();
     }
   }
 
+  /// Ends the text input connection, detaching the active element if any and
+  /// dropping the state the connection owns.
   @override
   void disable() {
+    _detachElement();
+    lastEditingState = null;
+    _queuedStyle = null;
+    inputConfig = null;
+    onChange = null;
+    onAction = null;
+  }
+
+  void _detachElement() {
     // We don't want to remove the DOM element because the caller is responsible
     // for that. However we still want to stop editing, cleanup the handlers.
     if (!isEnabled) {
@@ -113,11 +183,27 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
       subscriptions[i].cancel();
     }
     subscriptions.clear();
-    lastEditingState = null;
+
+    // The focused field is linked to the autofill form by the `form`
+    // attribute. On blur, detach it and leave a synthetic placeholder holding
+    // its value, then keep the form dormant in the DOM so the autofill context
+    // can still be submitted (credential save via
+    // `TextInput.finishAutofillContext`) and the group stays complete when
+    // another field is focused.
+    if (_formIsActive && inputConfiguration.autofillGroup != null) {
+      final EngineAutofillForm group = inputConfiguration.autofillGroup!;
+      if (inputConfiguration.autofill != null) {
+        group.demoteFocusedToSynthetic(activeDomElement, inputConfiguration.autofill!);
+      }
+      if (group.formElement != null) {
+        group.goDormant();
+      }
+      _formIsActive = false;
+    }
+
     EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     domElement = null;
     activeTextField = null;
-    _queuedStyle = null;
   }
 
   @override
@@ -146,8 +232,25 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     OnActionCallback? onAction,
   }) {
     isEnabled = true;
-    inputConfiguration = inputConfig;
-    applyConfiguration(inputConfig);
+    final EngineAutofillForm? autofillGroup = inputConfig.autofillGroup;
+    inputConfiguration = autofillGroup == null
+        ? inputConfig
+        : inputConfig.copyWith(
+            autofillGroup: autofillGroup.copyWith(associateFocusedElementByAttribute: true),
+          );
+    applyConfiguration(inputConfiguration);
+
+    // Build the autofill form here, before [addEventHandlers] runs (it runs
+    // later in the same [enable] call). [addEventHandlers] subscribes to the
+    // `input` events of the synthetic group fields, so those fields must exist
+    // by then or non-focused fields would never propagate autofilled values.
+    //
+    // Note [placeElement]/[placeForm] are never reached via the normal
+    // placement path in semantics mode ([initializeElementPlacement] is a
+    // no-op), so the form must be set up explicitly here.
+    if (hasAutofillGroup) {
+      placeForm();
+    }
   }
 
   @override
@@ -165,7 +268,27 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
   }
 
   @override
-  void placeForm() {}
+  void placeForm() {
+    // Safari autofills grouped credential fields by heuristic without needing a
+    // form. The attribute-linked form regresses that: a non-focused field's real
+    // input is left outside the form and stops being filled
+    // (flutter/flutter#180652). Skip the form on Safari and let its native
+    // heuristic fill the whole group. `_formIsActive` stays false, so [disable]
+    // skips the demote/dormant cleanup too.
+    //
+    // Other WebKit browsers (Chrome, Firefox on iOS) do not fill by heuristic
+    // and need the form path, so they are not skipped here.
+    if (ui_web.browser.isSafari) {
+      return;
+    }
+
+    // The focused element is the real semantics-owned `<input>`. It must not be
+    // moved into the form (that regressed a11y tab traversal, see
+    // flutter/flutter#180652). Link it to the form via the `form` attribute
+    // instead. See [EngineAutofillForm.wakeUp].
+    inputConfiguration.autofillGroup!.wakeUp(activeDomElement, inputConfiguration.autofill!);
+    _formIsActive = true;
+  }
 
   @override
   void updateElementPlacement(EditableTextGeometry textGeometry) {
@@ -190,6 +313,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
       return;
     }
     super.updateElementStyle(_queuedStyle!);
+    _applyIosMinimumFontSize(activeDomElement, _queuedStyle!.fontSize);
   }
 }
 
@@ -282,6 +406,12 @@ class SemanticTextField extends SemanticRole {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
+
+    // No framework style has arrived yet, so the element falls back to the
+    // browser default, which is under the threshold. Seed the floor so a focus
+    // landing before the first style cannot zoom the page.
+    _applyIosMinimumFontSize(editableElement, null);
+
     append(editableElement);
 
     editableElement.addEventListener(
@@ -306,6 +436,9 @@ class SemanticTextField extends SemanticRole {
     editableElement.addEventListener(
       'blur',
       createDomEventListener((DomEvent event) {
+        if (semanticsObject.owner.phase != SemanticsUpdatePhase.idle && semanticsObject.hasFocus) {
+          return;
+        }
         SemanticsTextEditingStrategy._instance?.deactivate(this);
       }),
     );
@@ -349,6 +482,43 @@ class SemanticTextField extends SemanticRole {
     _updateHintDescription();
 
     _updateInputType();
+
+    _updateValue();
+  }
+
+  /// Copies the framework's value into [editableElement] while this field is
+  /// not being edited.
+  ///
+  /// Without this, a field that has never been focused, such as a disabled
+  /// field, exposes an empty value to assistive technologies.
+  ///
+  /// While this field is the active editing element, the text editing strategy
+  /// owns the element's value and selection, so they are left alone. Obscured
+  /// fields are skipped because their semantics value is masked, and fields
+  /// owned by an autofill group are skipped because the group manages their
+  /// value.
+  void _updateValue() {
+    if (!semanticsObject.isValueDirty) {
+      return;
+    }
+    if (SemanticsTextEditingStrategy._instance?.activeTextField == this) {
+      return;
+    }
+    if (semanticsObject.flags.isObscured || _isAutofillOwned) {
+      return;
+    }
+    final String value = semanticsObject.value ?? '';
+    if (editableElement.isA<DomHTMLInputElement>()) {
+      final input = editableElement as DomHTMLInputElement;
+      if (input.value != value) {
+        input.value = value;
+      }
+    } else if (editableElement.isA<DomHTMLTextAreaElement>()) {
+      final textArea = editableElement as DomHTMLTextAreaElement;
+      if (textArea.value != value) {
+        textArea.value = value;
+      }
+    }
   }
 
   void _updateHintDescription() {
@@ -363,6 +533,17 @@ class SemanticTextField extends SemanticRole {
   void _updateEnabledState() {
     (editableElement as DomElementWithDisabledProperty).disabled = !semanticsObject.isEnabled;
   }
+
+  /// Whether an autofill group owns the autofill-related attributes of this
+  /// field.
+  ///
+  /// When the field participates in an autofill group, [AutofillInfo.applyToDomElement]
+  /// sets the element's `name` (and `id`/`autocomplete`) to the autofill hint.
+  /// A plain semantic input never has a `name`, so a non-empty `name` is a
+  /// reliable, order-independent signal that [_updateInputType] must not
+  /// overwrite `autocomplete`, otherwise grouped autofill silently breaks on
+  /// the next semantics update (flutter/flutter#180652).
+  bool get _isAutofillOwned => editableElement.getAttribute('name')?.isNotEmpty ?? false;
 
   void _updateInputType() {
     if (semanticsObject.flags.isMultiline) {
@@ -379,7 +560,9 @@ class SemanticTextField extends SemanticRole {
       // proper selection/cursor operations.
       input.removeAttribute('inputmode');
       input.removeAttribute('autocapitalize');
-      input.autocomplete = 'off';
+      if (!_isAutofillOwned) {
+        input.autocomplete = 'off';
+      }
       input.type = 'text';
 
       switch (semanticsObject.inputType) {
@@ -392,7 +575,9 @@ class SemanticTextField extends SemanticRole {
         case ui.SemanticsInputType.email:
           input.setAttribute('inputmode', 'email');
           input.setAttribute('autocapitalize', 'none');
-          input.autocomplete = 'email';
+          if (!_isAutofillOwned) {
+            input.autocomplete = 'email';
+          }
         default:
       }
     }
