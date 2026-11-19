@@ -324,7 +324,10 @@ void main() {
       logger.statusText,
       contains('Hashed files ("main.dart.<hash>.*" and everything under "assets/")'),
     );
-    expect(logger.statusText, contains('Files under "canvaskit/" are not content-hashed'));
+    expect(
+      logger.statusText,
+      contains('Other files, including everything under "canvaskit/", are not content-hashed'),
+    );
     expect(logger.statusText, contains('deployment/web#web-content-hashing'));
   });
 
