@@ -292,11 +292,6 @@ void main() {
           // activation change, so let it run before reporting back.
           await Future<void>.delayed(Duration.zero);
           return jsonEncode({'isActivated': isActivated});
-        } else if (jsonMap['type'] == 'activate_main_window') {
-          controller.activate();
-          final bool isActivated = controller.isActivated;
-          await Future<void>.delayed(Duration.zero);
-          return jsonEncode({'isActivated': isActivated});
         } else if (jsonMap['type'] == 'are_nested_popups_destroyed') {
           return jsonEncode({
             'outer': outerPopupController?.isDestroyed,
