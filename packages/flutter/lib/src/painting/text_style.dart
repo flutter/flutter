@@ -1190,7 +1190,7 @@ class TextStyle with Diagnosticable {
       return TextStyle(
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
-        backgroundColor: Color.lerp(null, a.backgroundColor, t),
+        backgroundColor: Color.lerp(a.backgroundColor, null, t),
         fontSize: t < 0.5 ? a.fontSize : null,
         fontWeight: FontWeight.lerp(a.fontWeight, null, t),
         fontStyle: t < 0.5 ? a.fontStyle : null,

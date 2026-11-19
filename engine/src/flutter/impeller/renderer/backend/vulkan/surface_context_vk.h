@@ -71,6 +71,10 @@ class SurfaceContextVK : public Context,
   std::shared_ptr<const IdleWaiter> GetIdleWaiter() const override;
 
   // |Context|
+  std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
+      const override;
+
+  // |Context|
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   // |Context|

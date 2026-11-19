@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
@@ -49,6 +48,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -84,7 +84,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -114,11 +114,7 @@ void main() {
 
   testUsingContext(
     'build with assets but not enabled',
-    overrides: <Type, Generator>{
-      // ignore: avoid_redundant_argument_values
-      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
-      ProcessManager: () => FakeProcessManager.empty(),
-    },
+    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -129,7 +125,7 @@ void main() {
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(),
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -160,7 +156,7 @@ void main() {
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -202,7 +198,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -243,7 +239,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -300,7 +296,7 @@ void main() {
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -376,7 +372,7 @@ void main() {
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          featureFlags: featureFlags,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           logger: testLogger,
           buildRunner: FakeFlutterNativeAssetsBuildRunner(
             packagesWithNativeAssetsResult: <String>['bar'],
@@ -437,7 +433,7 @@ void main() {
       targetPlatform: TargetPlatform.tester,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
       logger: testLogger,
       buildRunner: target,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: fileSystem.directory(projectUri)),
@@ -481,7 +477,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.linux_arm64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: target,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: project.childDirectory('build')),
@@ -511,7 +507,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: testLogger,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
@@ -928,6 +924,7 @@ environment:
           flutterHookResult: _,
         ) = await testCompilerBuildNativeAssets(
           buildInfo,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           toolContext: FakeToolContext(
             config: Config.test(),
             fs: hostFileSystem,
@@ -991,6 +988,7 @@ environment:
           flutterHookResult: _,
         ) = await testCompilerBuildNativeAssets(
           buildInfo,
+          featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
           toolContext: FakeToolContext(
             config: Config.test(),
             fs: hostFileSystem,
