@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
@@ -128,6 +129,12 @@ public class AndroidTouchProcessor {
 
   private final Map<Integer, float[]> ongoingPans = new HashMap<>();
 
+  // Tracks the last finite screen coordinates [x, y] for each currently-down pointer, keyed by
+  // uniquePointerIdByType(). Used to ignore subsequent events for pointers whose DOWN was dropped
+  // due to non-finite coordinates, and to close active pointers cleanly at their last finite
+  // position if their UP or CANCEL event reports non-finite coordinates.
+  private final Map<Integer, float[]> ongoingPositions = new HashMap<>();
+
   // Only used on api 25 and below to avoid requerying display metrics.
   private int cachedVerticalScrollFactor;
 
@@ -159,11 +166,11 @@ public class AndroidTouchProcessor {
    * @return True if the event was handled.
    */
   public boolean onTouchEvent(@NonNull MotionEvent event, @NonNull Matrix transformMatrix) {
-    if (!hasFiniteCoordinates(event, transformMatrix)) {
+    int maskedAction = event.getActionMasked();
+    int pointerChange = getPointerChangeForAction(maskedAction);
+    if (pointerChange == -1) {
       return false;
     }
-    int maskedAction = event.getActionMasked();
-    int pointerChange = getPointerChangeForAction(event.getActionMasked());
     boolean updateForSinglePointer =
         maskedAction == MotionEvent.ACTION_DOWN || maskedAction == MotionEvent.ACTION_POINTER_DOWN;
     boolean updateForMultiplePointers =
@@ -171,7 +178,8 @@ public class AndroidTouchProcessor {
             && (maskedAction == MotionEvent.ACTION_UP
                 || maskedAction == MotionEvent.ACTION_POINTER_UP);
 
-    int deviceType = getPointerDeviceTypeForToolType(event.getToolType(event.getActionIndex()));
+    int actionIndex = event.getActionIndex();
+    int deviceType = getPointerDeviceTypeForToolType(event.getToolType(actionIndex));
     boolean shouldRemovePointer =
         updateForMultiplePointers && (deviceType == PointerDeviceKind.TOUCH);
     int originalPointerCount = event.getPointerCount();
@@ -186,46 +194,128 @@ public class AndroidTouchProcessor {
         ByteBuffer.allocateDirect(totalPointerCount * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD);
     packet.order(ByteOrder.LITTLE_ENDIAN);
 
+    // Do not retain raw MotionEvents with non-finite coordinates in MotionEventTracker, so
+    // PlatformViewsController falls back to synthesizing clean MotionEvents from Flutter's
+    // finite coordinates instead of offsetting a NaN MotionEvent.
+    boolean canTrackEvent = trackMotionEvents && hasFiniteCoordinates(event, transformMatrix);
+
     if (updateForSinglePointer) {
       // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
-      addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
+      int pointerId = uniquePointerIdByType(event, actionIndex);
+      float[] coords = getFiniteScreenCoordinates(event, actionIndex, transformMatrix);
+      if (coords == null) {
+        ongoingPositions.remove(pointerId);
+        return false;
+      }
+      ongoingPositions.put(pointerId, coords);
+      addPointerForIndex(event, actionIndex, pointerChange, 0, coords, packet, null, canTrackEvent);
     } else if (updateForMultiplePointers) {
-      // ACTION_UP and ACTION_POINTER_UP may contain position updates for other pointers.
-      // We are converting these updates to move events here in order to preserve this data.
-      // We also mark these events with a flag in order to help the framework reassemble
-      // the original Android event later, should it need to forward it to a PlatformView.
-      for (int p = 0; p < originalPointerCount; p++) {
-        if (p != event.getActionIndex() && event.getToolType(p) == MotionEvent.TOOL_TYPE_FINGER) {
+      int upPointerId = uniquePointerIdByType(event, actionIndex);
+      float[] lastUpCoords = ongoingPositions.remove(upPointerId);
+      if (lastUpCoords == null) {
+        // The lifted pointer's DOWN had non-finite coordinates and was never started in Flutter.
+        // Skip emitting UP/REMOVE for it to preserve PointerDataPacketConverter state invariants,
+        // while still forwarding moves for any other active pointers.
+        appendActiveMoveEvents(event, actionIndex, transformMatrix, packet, canTrackEvent);
+      } else {
+        // ACTION_UP and ACTION_POINTER_UP may contain position updates for other pointers.
+        // We are converting these updates to move events here in order to preserve this data.
+        // We also mark these events with a flag in order to help the framework reassemble
+        // the original Android event later, should it need to forward it to a PlatformView.
+        for (int p = 0; p < originalPointerCount; p++) {
+          if (p != actionIndex && event.getToolType(p) == MotionEvent.TOOL_TYPE_FINGER) {
+            int otherId = uniquePointerIdByType(event, p);
+            if (ongoingPositions.containsKey(otherId)) {
+              float[] otherCoords = getFiniteScreenCoordinates(event, p, transformMatrix);
+              if (otherCoords != null) {
+                ongoingPositions.put(otherId, otherCoords);
+                addPointerForIndex(
+                    event,
+                    p,
+                    PointerChange.MOVE,
+                    POINTER_DATA_FLAG_BATCHED,
+                    otherCoords,
+                    packet,
+                    null,
+                    canTrackEvent);
+              }
+            }
+          }
+        }
+        float[] upCoords = getFiniteScreenCoordinates(event, actionIndex, transformMatrix);
+        if (upCoords == null) {
+          upCoords = lastUpCoords;
+        }
+        // It's important that we're sending the UP event last. This allows PlatformView
+        // to correctly batch everything back into the original Android event if needed.
+        addPointerForIndex(
+            event, actionIndex, pointerChange, 0, upCoords, packet, null, canTrackEvent);
+
+        if (shouldRemovePointer) {
+          // Synthesizes remove events immediately after the UP event so that the touches
+          // are divided into distinct segments, each beginning with a DOWN event and ending with an
+          // UP event.
+          // This approach makes sense since each segment can be considered a separate pointer,
+          // and it prevents Flutter from generating hover events between these segments, which are
+          // not applicable to touch screens, as hovering is not possible.
+          // (Flutter will automatically synthesize an add event before the pointer makes its next
+          // contact.)
           addPointerForIndex(
-              event, p, PointerChange.MOVE, POINTER_DATA_FLAG_BATCHED, transformMatrix, packet);
+              event, actionIndex, PointerChange.REMOVE, 0, upCoords, packet, null, canTrackEvent);
         }
       }
-      // It's important that we're sending the UP event last. This allows PlatformView
-      // to correctly batch everything back into the original Android event if needed.
-      addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
-
-      if (shouldRemovePointer) {
-        // Synthesizes remove events immediately after the UP event so that the touches
-        // are divided into distinct segments, each beginning with a DOWN event and ending with an
-        // UP event.
-        // This approach makes sense since each segment can be considered a separate pointer,
-        // and it prevents Flutter from generating hover events between these segments, which are
-        // not applicable to touch screens, as hovering is not possible.
-        // (Flutter will automatically synthesize an add event before the pointer makes its next
-        // contact.)
-        addPointerForIndex(
-            event, event.getActionIndex(), PointerChange.REMOVE, 0, transformMatrix, packet);
-      }
-    } else {
+    } else if (maskedAction == MotionEvent.ACTION_MOVE) {
       // ACTION_MOVE may not actually mean all pointers have moved
       // but it's the responsibility of a later part of the system to
       // ignore 0-deltas if desired.
+      appendActiveMoveEvents(event, /*excludedIndex=*/ -1, transformMatrix, packet, canTrackEvent);
+    } else if (maskedAction == MotionEvent.ACTION_CANCEL) {
+      int activeCancelCount = 0;
       for (int p = 0; p < originalPointerCount; p++) {
-        int pointerData =
-            POINTER_DATA_FLAG_MULTIPLE
-                | (originalPointerCount << POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT);
-        addPointerForIndex(event, p, pointerChange, pointerData, transformMatrix, packet);
+        if (ongoingPositions.containsKey(uniquePointerIdByType(event, p))) {
+          activeCancelCount++;
+        }
       }
+      int pointerData =
+          POINTER_DATA_FLAG_MULTIPLE
+              | (activeCancelCount << POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT);
+      for (int p = 0; p < originalPointerCount; p++) {
+        int pointerId = uniquePointerIdByType(event, p);
+        float[] lastCoords = ongoingPositions.remove(pointerId);
+        if (lastCoords == null) {
+          continue;
+        }
+        float[] cancelCoords = getFiniteScreenCoordinates(event, p, transformMatrix);
+        if (cancelCoords == null) {
+          cancelCoords = lastCoords;
+        }
+        addPointerForIndex(
+            event, p, PointerChange.CANCEL, pointerData, cancelCoords, packet, null, canTrackEvent);
+      }
+      ongoingPositions.clear();
+      ongoingPans.clear();
+    } else {
+      // ACTION_HOVER_MOVE or ACTION_SCROLL dispatched via onTouchEvent.
+      if (!hasFiniteCoordinates(event, transformMatrix)) {
+        return false;
+      }
+      int pointerData =
+          POINTER_DATA_FLAG_MULTIPLE
+              | (originalPointerCount << POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT);
+      for (int p = 0; p < originalPointerCount; p++) {
+        float[] coords = getFiniteScreenCoordinates(event, p, transformMatrix);
+        if (coords == null) {
+          return false;
+        }
+        if (!addPointerForIndex(
+            event, p, pointerChange, pointerData, coords, packet, null, canTrackEvent)) {
+          return false;
+        }
+      }
+    }
+
+    if (packet.position() == 0) {
+      return false;
     }
 
     // Verify that the packet is the expected size.
@@ -260,7 +350,9 @@ public class AndroidTouchProcessor {
     if (!isPointerEvent || !isMovementEvent) {
       return false;
     }
-    if (!hasFiniteCoordinates(event, IDENTITY_TRANSFORM)) {
+    int actionIndex = event.getActionIndex();
+    float[] coords = getFiniteScreenCoordinates(event, actionIndex, IDENTITY_TRANSFORM);
+    if (coords == null) {
       return false;
     }
 
@@ -270,9 +362,11 @@ public class AndroidTouchProcessor {
             event.getPointerCount() * POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD);
     packet.order(ByteOrder.LITTLE_ENDIAN);
 
-    // ACTION_HOVER_MOVE always applies to a single pointer only.
-    addPointerForIndex(
-        event, event.getActionIndex(), pointerChange, 0, IDENTITY_TRANSFORM, packet, context);
+    // ACTION_HOVER_MOVE and ACTION_SCROLL always apply to a single pointer only.
+    if (!addPointerForIndex(
+        event, actionIndex, pointerChange, 0, coords, packet, context, trackMotionEvents)) {
+      return false;
+    }
     if (packet.position() % (POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD) != 0) {
       throw new AssertionError("Packet position is not on field boundary.");
     }
@@ -280,42 +374,84 @@ public class AndroidTouchProcessor {
     return true;
   }
 
+  private void appendActiveMoveEvents(
+      @NonNull MotionEvent event,
+      int excludedIndex,
+      @NonNull Matrix transformMatrix,
+      @NonNull ByteBuffer packet,
+      boolean canTrackEvent) {
+    final int pointerCount = event.getPointerCount();
+    int activeMoveCount = 0;
+    for (int p = 0; p < pointerCount; p++) {
+      if (p == excludedIndex) {
+        continue;
+      }
+      int pointerId = uniquePointerIdByType(event, p);
+      if (!ongoingPositions.containsKey(pointerId)) {
+        continue;
+      }
+      if (getFiniteScreenCoordinates(event, p, transformMatrix) == null) {
+        // Drop the move batch if any active pointer reports non-finite coordinates so multi-touch
+        // gestures and PlatformView batch counts stay synchronized at their last valid positions.
+        return;
+      }
+      activeMoveCount++;
+    }
+    if (activeMoveCount == 0) {
+      return;
+    }
+    int pointerData =
+        POINTER_DATA_FLAG_MULTIPLE | (activeMoveCount << POINTER_DATA_MULTIPLE_POINTER_COUNT_SHIFT);
+    for (int p = 0; p < pointerCount; p++) {
+      if (p == excludedIndex) {
+        continue;
+      }
+      int pointerId = uniquePointerIdByType(event, p);
+      if (!ongoingPositions.containsKey(pointerId)) {
+        continue;
+      }
+      float[] coords = getFiniteScreenCoordinates(event, p, transformMatrix);
+      if (coords == null) {
+        return;
+      }
+      ongoingPositions.put(pointerId, coords);
+      addPointerForIndex(
+          event, p, PointerChange.MOVE, pointerData, coords, packet, null, canTrackEvent);
+    }
+  }
+
   // Android occasionally delivers MotionEvents with NaN or infinite coordinates (similar to
-  // AndroidComposeView.isBadMotionEvent in AndroidX Compose UI). Drop the event before packing
-  // non-finite values into PointerDataPacket.
+  // AndroidComposeView.isBadMotionEvent in AndroidX Compose UI). Returns the transformed [x, y]
+  // screen coordinates when both raw and transformed values are finite, or null otherwise.
+  @Nullable
+  private static float[] getFiniteScreenCoordinates(
+      @NonNull MotionEvent event, int pointerIndex, @NonNull Matrix transformMatrix) {
+    // We use transformMatrix in lieu of event.getRawX and event.getRawY as we wish to support
+    // earlier versions than API level 29.
+    final float x = event.getX(pointerIndex);
+    final float y = event.getY(pointerIndex);
+    if (!Float.isFinite(x) || !Float.isFinite(y)) {
+      return null;
+    }
+    float[] viewToScreenCoords = {x, y};
+    if (transformMatrix != IDENTITY_TRANSFORM) {
+      transformMatrix.mapPoints(viewToScreenCoords);
+      if (!Float.isFinite(viewToScreenCoords[0]) || !Float.isFinite(viewToScreenCoords[1])) {
+        return null;
+      }
+    }
+    return viewToScreenCoords;
+  }
+
   private static boolean hasFiniteCoordinates(
       @NonNull MotionEvent event, @NonNull Matrix transformMatrix) {
     final int pointerCount = event.getPointerCount();
     for (int i = 0; i < pointerCount; i++) {
-      final float x = event.getX(i);
-      final float y = event.getY(i);
-      if (!Float.isFinite(x) || !Float.isFinite(y)) {
+      if (getFiniteScreenCoordinates(event, i, transformMatrix) == null) {
         return false;
-      }
-      if (transformMatrix != IDENTITY_TRANSFORM) {
-        // Index 0 is x and index 1 is y, matching addPointerForIndex.
-        float[] viewToScreenCoords = {x, y};
-        transformMatrix.mapPoints(viewToScreenCoords);
-        if (!Float.isFinite(viewToScreenCoords[0]) || !Float.isFinite(viewToScreenCoords[1])) {
-          return false;
-        }
       }
     }
     return true;
-  }
-
-  /// Calls addPointerForIndex with null for context.
-  ///
-  /// Without context the scroll wheel will not mimic android's scroll speed.
-  private void addPointerForIndex(
-      MotionEvent event,
-      int pointerIndex,
-      int pointerChange,
-      int pointerData,
-      Matrix transformMatrix,
-      ByteBuffer packet) {
-    addPointerForIndex(
-        event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
   }
 
   // Some screen mirroring tools will occasionally report the same ID as having different associated
@@ -332,16 +468,17 @@ public class AndroidTouchProcessor {
 
   // TODO: consider creating a PointerPacket class instead of using a procedure that
   // mutates inputs. https://github.com/flutter/flutter/issues/132853
-  private void addPointerForIndex(
+  private boolean addPointerForIndex(
       MotionEvent event,
       int pointerIndex,
       int pointerChange,
       int pointerData,
-      Matrix transformMatrix,
+      float[] viewToScreenCoords,
       ByteBuffer packet,
-      Context context) {
+      Context context,
+      boolean canTrackEvent) {
     if (pointerChange == -1) {
-      return;
+      return true;
     }
     // TODO(dkwingsmt): Use the correct source view ID once Android supports
     // multiple views.
@@ -350,10 +487,6 @@ public class AndroidTouchProcessor {
     final int pointerId = uniquePointerIdByType(event, pointerIndex);
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
-    // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
-    // earlier versions than API level 29.
-    float[] viewToScreenCoords = {event.getX(pointerIndex), event.getY(pointerIndex)};
-    transformMatrix.mapPoints(viewToScreenCoords);
     long buttons;
     if (pointerKind == PointerDeviceKind.MOUSE) {
       buttons = event.getButtonState() & 0x1F;
@@ -381,20 +514,42 @@ public class AndroidTouchProcessor {
     if (isTrackpadPan) {
       panZoomType = getPointerChangeForPanZoom(pointerChange);
       if (panZoomType == -1) {
-        return;
+        return true;
       }
-    }
-
-    long motionEventId = 0;
-    if (trackMotionEvents) {
-      MotionEventTracker.MotionEventId trackedEvent = motionEventTracker.track(event);
-      motionEventId = trackedEvent.getId();
     }
 
     int signalKind =
         event.getActionMasked() == MotionEvent.ACTION_SCROLL
             ? PointerSignalKind.SCROLL
             : PointerSignalKind.NONE;
+
+    // See android scrollview for inspiration.
+    // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/ScrollView.java?q=function:onGenericMotionEvent%20filepath:widget%2FScrollView.java&ss=android%2Fplatform%2Fsuperproject%2Fmain
+    double horizontalScrollPixels = 0.0;
+    double verticalScrollPixels = 0.0;
+    if (signalKind == PointerSignalKind.SCROLL) {
+      double horizontalScaleFactor = DEFAULT_HORIZONTAL_SCROLL_FACTOR;
+      double verticalScaleFactor = DEFAULT_VERTICAL_SCROLL_FACTOR;
+      if (context != null) {
+        horizontalScaleFactor = getHorizontalScrollFactor(context);
+        verticalScaleFactor = getVerticalScrollFactor(context);
+      }
+      // We flip the sign of the scroll value below because it aligns the pixel value with the
+      // scroll direction in native android. Read each axis once and drop non-finite scroll deltas.
+      horizontalScrollPixels =
+          horizontalScaleFactor * -event.getAxisValue(MotionEvent.AXIS_HSCROLL, pointerIndex);
+      verticalScrollPixels =
+          verticalScaleFactor * -event.getAxisValue(MotionEvent.AXIS_VSCROLL, pointerIndex);
+      if (!Double.isFinite(horizontalScrollPixels) || !Double.isFinite(verticalScrollPixels)) {
+        return false;
+      }
+    }
+
+    long motionEventId = 0;
+    if (canTrackEvent) {
+      MotionEventTracker.MotionEventId trackedEvent = motionEventTracker.track(event);
+      motionEventId = trackedEvent.getId();
+    }
 
     // Convert from milliseconds to microseconds.
     long timeStamp = event.getEventTime() * 1000;
@@ -472,27 +627,8 @@ public class AndroidTouchProcessor {
 
     packet.putLong(pointerData); // platformData
 
-    // See android scrollview for inspiration.
-    // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/ScrollView.java?q=function:onGenericMotionEvent%20filepath:widget%2FScrollView.java&ss=android%2Fplatform%2Fsuperproject%2Fmain
-    if (signalKind == PointerSignalKind.SCROLL) {
-      double horizontalScaleFactor = DEFAULT_HORIZONTAL_SCROLL_FACTOR;
-      double verticalScaleFactor = DEFAULT_VERTICAL_SCROLL_FACTOR;
-      if (context != null) {
-        horizontalScaleFactor = getHorizontalScrollFactor(context);
-        verticalScaleFactor = getVerticalScrollFactor(context);
-      }
-      // We flip the sign of the scroll value below because it aligns the pixel value with the
-      // scroll direction in native android.
-      final double horizontalScrollPixels =
-          horizontalScaleFactor * -event.getAxisValue(MotionEvent.AXIS_HSCROLL, pointerIndex);
-      final double verticalScrollPixels =
-          verticalScaleFactor * -event.getAxisValue(MotionEvent.AXIS_VSCROLL, pointerIndex);
-      packet.putDouble(horizontalScrollPixels); // scroll_delta_x
-      packet.putDouble(verticalScrollPixels); // scroll_delta_y
-    } else {
-      packet.putDouble(0.0); // scroll_delta_x
-      packet.putDouble(0.0); // scroll_delta_y
-    }
+    packet.putDouble(horizontalScrollPixels); // scroll_delta_x
+    packet.putDouble(verticalScrollPixels); // scroll_delta_y
 
     if (isTrackpadPan) {
       float[] panStart = ongoingPans.get(pointerId);
@@ -511,6 +647,7 @@ public class AndroidTouchProcessor {
     if (isTrackpadPan && (panZoomType == PointerChange.PAN_ZOOM_END)) {
       ongoingPans.remove(pointerId);
     }
+    return true;
   }
 
   private float getHorizontalScrollFactor(@NonNull Context context) {

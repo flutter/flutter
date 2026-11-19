@@ -182,6 +182,30 @@ public class AndroidTouchProcessorTest {
     return buffer.getDouble(25 * AndroidTouchProcessor.BYTES_PER_FIELD);
   }
 
+  private long readPlatformDataForPointer(ByteBuffer buffer, int pointerIndex) {
+    return buffer.getLong(
+        26 * AndroidTouchProcessor.BYTES_PER_FIELD
+            + (AndroidTouchProcessor.BYTES_PER_FIELD
+                * AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT
+                * pointerIndex));
+  }
+
+  private long readEmbedderIdForPointer(ByteBuffer buffer, int pointerIndex) {
+    return buffer.getLong(
+        0 * AndroidTouchProcessor.BYTES_PER_FIELD
+            + (AndroidTouchProcessor.BYTES_PER_FIELD
+                * AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT
+                * pointerIndex));
+  }
+
+  private long readDeviceForPointer(ByteBuffer buffer, int pointerIndex) {
+    return buffer.getLong(
+        5 * AndroidTouchProcessor.BYTES_PER_FIELD
+            + (AndroidTouchProcessor.BYTES_PER_FIELD
+                * AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT
+                * pointerIndex));
+  }
+
   private double readScrollDeltaX(ByteBuffer buffer) {
     return buffer.getDouble(27 * AndroidTouchProcessor.BYTES_PER_FIELD);
   }
@@ -811,7 +835,7 @@ public class AndroidTouchProcessorTest {
   }
 
   @Test
-  public void onTouchEvent_ignoresNonFiniteCoordinates() {
+  public void onTouchEvent_ignoresNonFiniteDownAndSubsequentOrphanEvents() {
     final int primaryPointerId = 0;
     final int noButtons = 0;
     final float finiteX = 10.0f;
@@ -820,6 +844,8 @@ public class AndroidTouchProcessorTest {
         new MotionEventMocker(
             primaryPointerId, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER);
 
+    // Non-finite ACTION_DOWN is dropped, and subsequent events (even with finite coordinates)
+    // for the unstarted pointer are also ignored rather than dispatching orphan MOVE/UP/REMOVE.
     assertFalse(
         touchProcessor.onTouchEvent(
             mocker.mockEvent(MotionEvent.ACTION_DOWN, Float.NaN, finiteY, noButtons)));
@@ -829,13 +855,19 @@ public class AndroidTouchProcessorTest {
                 MotionEvent.ACTION_MOVE, finiteX, Float.POSITIVE_INFINITY, noButtons)));
     assertFalse(
         touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_MOVE, finiteX, finiteY, noButtons)));
+    assertFalse(
+        touchProcessor.onTouchEvent(
             mocker.mockEvent(MotionEvent.ACTION_UP, Float.NEGATIVE_INFINITY, finiteY, noButtons)));
+    assertFalse(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_UP, finiteX, finiteY, noButtons)));
     assertFalse(
         touchProcessor.onTouchEvent(
             mocker.mockEvent(MotionEvent.ACTION_CANCEL, finiteX, Float.NaN, noButtons)));
     verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
 
-    // Subsequent finite events still dispatch normally.
+    // Subsequent finite touch sequence dispatches normally.
     assertTrue(
         touchProcessor.onTouchEvent(
             mocker.mockEvent(MotionEvent.ACTION_DOWN, finiteX, finiteY, noButtons)));
@@ -847,15 +879,190 @@ public class AndroidTouchProcessorTest {
     assertEquals((double) finiteY, readPointerPhysicalY(packet));
   }
 
+  private MotionEvent obtainFingerEvent(int action, float x, float y) {
+    MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
+    properties.id = 0;
+    properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
+    MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
+    coords.x = x;
+    coords.y = y;
+    coords.pressure = pressure;
+    return MotionEvent.obtain(
+        eventTimeMilliseconds,
+        eventTimeMilliseconds,
+        action,
+        1,
+        new MotionEvent.PointerProperties[] {properties},
+        new MotionEvent.PointerCoords[] {coords},
+        0,
+        0,
+        1.0f,
+        1.0f,
+        0,
+        0,
+        InputDevice.SOURCE_TOUCHSCREEN,
+        0);
+  }
+
   @Test
-  public void onTouchEvent_ignoresSecondaryPointerWithNonFiniteCoordinates() {
+  public void onTouchEvent_dropsNonFiniteMoveAndClosesActivePointerWithLastFiniteCoordsOnUp() {
+    final float downX = 10.0f;
+    final float downY = 20.0f;
+    final float moveX = 35.0f;
+    final float moveY = 45.0f;
+    final float nextDownX = 60.0f;
+    final float nextDownY = 70.0f;
+    AndroidTouchProcessor trackingProcessor = new AndroidTouchProcessor(mockRenderer, true);
+    InOrder inOrder = inOrder(mockRenderer);
+
+    assertTrue(
+        trackingProcessor.onTouchEvent(obtainFingerEvent(MotionEvent.ACTION_DOWN, downX, downY)));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.DOWN, readPointerChange(packet));
+    assertNotEquals(0L, readEmbedderIdForPointer(packet, 0));
+
+    // Mid-gesture non-finite ACTION_MOVE is dropped without corrupting ongoing state.
+    assertFalse(
+        trackingProcessor.onTouchEvent(
+            obtainFingerEvent(MotionEvent.ACTION_MOVE, Float.NaN, moveY)));
+    assertFalse(
+        trackingProcessor.onTouchEvent(
+            obtainFingerEvent(MotionEvent.ACTION_MOVE, moveX, Float.POSITIVE_INFINITY)));
+
+    // Subsequent finite ACTION_MOVE dispatches normally.
+    assertTrue(
+        trackingProcessor.onTouchEvent(obtainFingerEvent(MotionEvent.ACTION_MOVE, moveX, moveY)));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.MOVE, readPointerChange(packet));
+    assertEquals((double) moveX, readPointerPhysicalX(packet));
+    assertEquals((double) moveY, readPointerPhysicalY(packet));
+
+    // Non-finite ACTION_UP closes the active pointer using its last finite coordinates (moveX,
+    // moveY) and does not record the malformed MotionEvent in MotionEventTracker.
+    assertTrue(
+        trackingProcessor.onTouchEvent(
+            obtainFingerEvent(MotionEvent.ACTION_UP, Float.NEGATIVE_INFINITY, moveY)));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    packet = packetCaptor.getValue();
+    assertEquals(
+        2 * AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT * AndroidTouchProcessor.BYTES_PER_FIELD,
+        packetSizeCaptor.getValue().intValue());
+    assertEquals(AndroidTouchProcessor.PointerChange.UP, readPointerChangeForPointer(packet, 0));
+    assertEquals((double) moveX, readPointerPhysicalXForPointer(packet, 0));
+    assertEquals((double) moveY, readPointerPhysicalYForPointer(packet, 0));
+    assertEquals(0L, readEmbedderIdForPointer(packet, 0));
+    assertEquals(
+        AndroidTouchProcessor.PointerChange.REMOVE, readPointerChangeForPointer(packet, 1));
+    assertEquals((double) moveX, readPointerPhysicalXForPointer(packet, 1));
+    assertEquals((double) moveY, readPointerPhysicalYForPointer(packet, 1));
+
+    // Next touch sequence starts cleanly.
+    assertTrue(
+        trackingProcessor.onTouchEvent(
+            obtainFingerEvent(MotionEvent.ACTION_DOWN, nextDownX, nextDownY)));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.DOWN, readPointerChange(packet));
+    assertEquals((double) nextDownX, readPointerPhysicalX(packet));
+    assertEquals((double) nextDownY, readPointerPhysicalY(packet));
+    inOrder.verifyNoMoreInteractions();
+  }
+
+  @Test
+  public void
+      onTouchEvent_closesActivePointerAndTrackpadPanWithLastFiniteCoordsOnNonFiniteCancel() {
+    final int primaryPointerId = 0;
+    final int noButtons = 0;
+    final float startX = 10.0f;
+    final float startY = 20.0f;
+    final float moveX = 25.0f;
+    final float moveY = 30.0f;
+    MotionEventMocker trackpadMocker =
+        new MotionEventMocker(
+            primaryPointerId, InputDevice.SOURCE_MOUSE, MotionEvent.TOOL_TYPE_MOUSE);
+    InOrder inOrder = inOrder(mockRenderer);
+
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            trackpadMocker.mockEvent(MotionEvent.ACTION_DOWN, startX, startY, noButtons)));
+    inOrder.verify(mockRenderer).dispatchPointerDataPacket(any(), anyInt());
+
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            trackpadMocker.mockEvent(MotionEvent.ACTION_MOVE, moveX, moveY, noButtons)));
+    inOrder.verify(mockRenderer).dispatchPointerDataPacket(any(), anyInt());
+
+    // Non-finite ACTION_CANCEL terminates the pan-zoom at the last finite position and clears
+    // ongoingPans so subsequent mouse clicks are not misclassified as trackpad pans.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            trackpadMocker.mockEvent(MotionEvent.ACTION_CANCEL, Float.NaN, Float.NaN, noButtons)));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.PAN_ZOOM_END, readPointerChange(packet));
+    assertEquals((double) startX, readPointerPhysicalX(packet));
+    assertEquals((double) startY, readPointerPhysicalY(packet));
+    assertEquals((double) (moveX - startX), readPointerPanX(packet));
+    assertEquals((double) (moveY - startY), readPointerPanY(packet));
+
+    // Verify ongoingPans was cleared by dispatching a normal mouse button press.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            trackpadMocker.mockEvent(
+                MotionEvent.ACTION_DOWN, startX, startY, MotionEvent.BUTTON_PRIMARY)));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.DOWN, readPointerChange(packet));
+    assertEquals(AndroidTouchProcessor.PointerDeviceKind.MOUSE, readPointerDeviceKind(packet));
+    inOrder.verifyNoMoreInteractions();
+  }
+
+  @Test
+  public void onTouchEvent_ignoresSecondaryPointerWithNonFiniteDownThroughoutLifecycle() {
     final int primaryPointerId = 0;
     final int secondaryPointerId = 1;
+    final int primaryActionIndex = 0;
     final int secondaryActionIndex = 1;
     final float primaryX = 100.0f;
     final float primaryY = 200.0f;
-    final float secondaryFiniteY = 300.0f;
+    final float primaryMovedX = 110.0f;
+    final float primaryMovedY = 210.0f;
+    final float primaryFinalX = 120.0f;
+    final float primaryFinalY = 220.0f;
+    final float secondaryFiniteX = 300.0f;
+    final float secondaryFiniteY = 310.0f;
+    InOrder inOrder = inOrder(mockRenderer);
 
+    // Primary finger goes down with finite coordinates.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_DOWN,
+                primaryActionIndex,
+                new int[] {primaryPointerId},
+                new float[] {primaryX},
+                new float[] {primaryY})));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    assertEquals(
+        AndroidTouchProcessor.PointerChange.DOWN, readPointerChange(packetCaptor.getValue()));
+
+    // Secondary finger goes down with NaN: dropped, not registered as active.
     assertFalse(
         touchProcessor.onTouchEvent(
             mockMultiPointerEvent(
@@ -864,15 +1071,143 @@ public class AndroidTouchProcessorTest {
                 new int[] {primaryPointerId, secondaryPointerId},
                 new float[] {primaryX, Float.NaN},
                 new float[] {primaryY, secondaryFiniteY})));
+
+    // Subsequent ACTION_MOVE where secondary is now finite only emits MOVE for the active primary
+    // pointer (with multiple-pointer count = 1) instead of sending an orphan MOVE for secondary.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_MOVE,
+                primaryActionIndex,
+                new int[] {primaryPointerId, secondaryPointerId},
+                new float[] {primaryMovedX, secondaryFiniteX},
+                new float[] {primaryMovedY, secondaryFiniteY})));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer packet = packetCaptor.getValue();
+    assertEquals(
+        AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT * AndroidTouchProcessor.BYTES_PER_FIELD,
+        packetSizeCaptor.getValue().intValue());
+    assertEquals(AndroidTouchProcessor.PointerChange.MOVE, readPointerChangeForPointer(packet, 0));
+    assertEquals((double) primaryMovedX, readPointerPhysicalXForPointer(packet, 0));
+    assertEquals((double) primaryMovedY, readPointerPhysicalYForPointer(packet, 0));
+    assertEquals((1L << 8) | 2L, readPlatformDataForPointer(packet, 0));
+
+    // ACTION_POINTER_UP for the unstarted secondary pointer does not emit UP/REMOVE for secondary,
+    // while still forwarding primary's finite move update.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_POINTER_UP,
+                secondaryActionIndex,
+                new int[] {primaryPointerId, secondaryPointerId},
+                new float[] {primaryFinalX, secondaryFiniteX},
+                new float[] {primaryFinalY, secondaryFiniteY})));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    packet = packetCaptor.getValue();
+    assertEquals(
+        AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT * AndroidTouchProcessor.BYTES_PER_FIELD,
+        packetSizeCaptor.getValue().intValue());
+    assertEquals(AndroidTouchProcessor.PointerChange.MOVE, readPointerChangeForPointer(packet, 0));
+    assertEquals((double) primaryFinalX, readPointerPhysicalXForPointer(packet, 0));
+    assertEquals((double) primaryFinalY, readPointerPhysicalYForPointer(packet, 0));
+
+    // Primary finger lifts cleanly.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_UP,
+                primaryActionIndex,
+                new int[] {primaryPointerId},
+                new float[] {primaryFinalX},
+                new float[] {primaryFinalY})));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    packet = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.UP, readPointerChangeForPointer(packet, 0));
+    assertEquals(
+        AndroidTouchProcessor.PointerChange.REMOVE, readPointerChangeForPointer(packet, 1));
+    inOrder.verifyNoMoreInteractions();
+  }
+
+  @Test
+  public void onTouchEvent_multiTouchHandlesNonFiniteActiveMoveAndPointerUp() {
+    final int primaryPointerId = 0;
+    final int secondaryPointerId = 1;
+    final int primaryActionIndex = 0;
+    final int secondaryActionIndex = 1;
+    final float primaryX = 100.0f;
+    final float primaryY = 200.0f;
+    final float primaryMovedX = 120.0f;
+    final float primaryMovedY = 220.0f;
+    final float secondaryX = 300.0f;
+    final float secondaryY = 400.0f;
+    InOrder inOrder = inOrder(mockRenderer);
+
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_DOWN,
+                primaryActionIndex,
+                new int[] {primaryPointerId},
+                new float[] {primaryX},
+                new float[] {primaryY})));
+    inOrder.verify(mockRenderer).dispatchPointerDataPacket(any(), anyInt());
+
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_POINTER_DOWN,
+                secondaryActionIndex,
+                new int[] {primaryPointerId, secondaryPointerId},
+                new float[] {primaryX, secondaryX},
+                new float[] {primaryY, secondaryY})));
+    inOrder.verify(mockRenderer).dispatchPointerDataPacket(any(), anyInt());
+
+    // When an active pointer reports NaN during ACTION_MOVE, the entire move batch is dropped so
+    // pinch/multi-touch state remains synchronized at the last valid coordinates.
     assertFalse(
         touchProcessor.onTouchEvent(
             mockMultiPointerEvent(
                 MotionEvent.ACTION_MOVE,
-                primaryPointerId,
+                primaryActionIndex,
                 new int[] {primaryPointerId, secondaryPointerId},
-                new float[] {primaryX, secondaryFiniteY},
-                new float[] {primaryY, Float.NEGATIVE_INFINITY})));
-    verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
+                new float[] {primaryMovedX, Float.NaN},
+                new float[] {primaryMovedY, secondaryY})));
+
+    // When secondary lifts with non-finite coordinates, primary's batched finite move is preserved
+    // and secondary closes cleanly at its last finite coordinates (secondaryX, secondaryY).
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mockMultiPointerEvent(
+                MotionEvent.ACTION_POINTER_UP,
+                secondaryActionIndex,
+                new int[] {primaryPointerId, secondaryPointerId},
+                new float[] {primaryMovedX, Float.NaN},
+                new float[] {primaryMovedY, Float.POSITIVE_INFINITY})));
+    inOrder
+        .verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer packet = packetCaptor.getValue();
+    assertEquals(
+        3 * AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT * AndroidTouchProcessor.BYTES_PER_FIELD,
+        packetSizeCaptor.getValue().intValue());
+    assertEquals(AndroidTouchProcessor.PointerChange.MOVE, readPointerChangeForPointer(packet, 0));
+    assertEquals((double) primaryMovedX, readPointerPhysicalXForPointer(packet, 0));
+    assertEquals((double) primaryMovedY, readPointerPhysicalYForPointer(packet, 0));
+    assertEquals(AndroidTouchProcessor.PointerChange.UP, readPointerChangeForPointer(packet, 1));
+    assertEquals((double) secondaryX, readPointerPhysicalXForPointer(packet, 1));
+    assertEquals((double) secondaryY, readPointerPhysicalYForPointer(packet, 1));
+    assertEquals(
+        AndroidTouchProcessor.PointerChange.REMOVE, readPointerChangeForPointer(packet, 2));
+    assertEquals((double) secondaryX, readPointerPhysicalXForPointer(packet, 2));
+    assertEquals((double) secondaryY, readPointerPhysicalYForPointer(packet, 2));
+    assertNotEquals(readDeviceForPointer(packet, 0), readDeviceForPointer(packet, 1));
+    inOrder.verifyNoMoreInteractions();
   }
 
   @Test
@@ -898,10 +1233,25 @@ public class AndroidTouchProcessorTest {
             mocker.mockEvent(MotionEvent.ACTION_DOWN, finiteX, finiteY, noButtons),
             nonFiniteMatrix));
     verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
+
+    // If a gesture started with a finite matrix and the matrix becomes non-finite on ACTION_UP,
+    // the active pointer still closes cleanly using its last finite screen coordinates.
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_DOWN, finiteX, finiteY, noButtons)));
+    assertTrue(
+        touchProcessor.onTouchEvent(
+            mocker.mockEvent(MotionEvent.ACTION_UP, finiteX, finiteY, noButtons), nonFiniteMatrix));
+    verify(mockRenderer, org.mockito.Mockito.times(2))
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    ByteBuffer upPacket = packetCaptor.getValue();
+    assertEquals(AndroidTouchProcessor.PointerChange.UP, readPointerChangeForPointer(upPacket, 0));
+    assertEquals((double) finiteX, readPointerPhysicalXForPointer(upPacket, 0));
+    assertEquals((double) finiteY, readPointerPhysicalYForPointer(upPacket, 0));
   }
 
   @Test
-  public void onGenericMotionEvent_ignoresNonFiniteCoordinates() {
+  public void onGenericMotionEvent_ignoresNonFiniteCoordinatesAndScrollValues() {
     final int primaryPointerId = 0;
     final int noButtons = 0;
     final float finiteCoord = 15.0f;
@@ -918,6 +1268,21 @@ public class AndroidTouchProcessorTest {
         touchProcessor.onGenericMotionEvent(
             mocker.mockEvent(
                 MotionEvent.ACTION_SCROLL, finiteCoord, Float.POSITIVE_INFINITY, noButtons),
+            context));
+    assertFalse(
+        touchProcessor.onGenericMotionEvent(
+            mocker.mockEvent(
+                MotionEvent.ACTION_SCROLL,
+                finiteCoord,
+                finiteCoord,
+                noButtons,
+                Float.NaN,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f),
             context));
     verify(mockRenderer, never()).dispatchPointerDataPacket(any(), anyInt());
   }
