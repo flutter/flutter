@@ -2,15 +2,19 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# The GPU backends of the engine's test suites, built by their own GN rules
-# inside one Bazel action (see ../gn_build/gn_build.bzl), as the Dart SDK is
-# in ../dart_wrap: ANGLE's libEGL_static and libGLESv2_static (OpenGL ES on
-# Vulkan, for //flutter/testing:opengl), SwiftShader's Vulkan driver
-# (libvk_swiftshader.so and its ICD manifest, for //flutter/testing:vulkan
-# and for ANGLE), and the Khronos Vulkan loader ANGLE opens (libvulkan.so.1).
-# ANGLE's BUILD.gn is 2,000 lines over a dozen trees and SwiftShader's build
-# is a JIT compiler's; converting them is a later phase, and the test
-# backends are what blocks the GPU suites now.
+# The GPU backends of the engine's test suites: ANGLE's libEGL_static and
+# libGLESv2_static (OpenGL ES on Vulkan, for //flutter/testing:opengl),
+# SwiftShader's Vulkan driver (libvk_swiftshader.so and its ICD manifest,
+# for //flutter/testing:vulkan and for ANGLE), the Khronos Vulkan loader
+# ANGLE opens (libvulkan.so.1) and the Khronos validation layer the Vulkan
+# playground requires. On Linux the last three are the converted trees'
+# (@swiftshader, @vulkan-loader, @vulkan_validation_layers: their own GN
+# files, converted at fetch time; below), under the names the suites take
+# them by. ANGLE on Linux, and all four on a Mac -- where no run has checked
+# the converted trees' products yet -- are built by their own GN rules
+# inside one Bazel action (//build_defs/gn:gn_build.bzl), as the Dart SDK is
+# in ../dart_wrap: ANGLE's BUILD.gn is 2,000 lines over seven packages,
+# behind templates and arguments of its own.
 #
 # The host is whatever runs the build (@host_platform, as in dart_wrap); the
 # targets are the host's own, Linux arm64 and the Mac's two CPUs. On a Mac
@@ -22,7 +26,7 @@
 # it on a Mac, against the loader rather than through volk, so its facade
 # links the loader there.
 #
-# At run time, the three files must sit next to the test binary: ANGLE
+# At run time, the files must sit next to the test binary: ANGLE
 # dlopens the loader from, and points the loader at the ICD manifest in, the
 # directory of its own module (the executable, with ANGLE linked
 # statically), and the engine's test utilities look next to the executable
@@ -38,6 +42,7 @@ load(
     "HOST_OS",
 )
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/gn:build_directory.bzl", "build_root_binary")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
 load("//build_defs/gn:macos_args.bzl", "MACOS_TARGET_GN_ARGS")
 load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
@@ -106,17 +111,10 @@ _GN_ARGS = {
     "//conditions:default": {},
 })
 
-# The products by platform: the driver, the loader and the layer under their
-# Linux names (.so; the loader as libvulkan.so.1, the loader's GN output
-# name there) or their macOS names (.dylib); the manifests are the same on
-# both. A product of the other platform is one the build does not make
-# (out_paths maps it to the empty path: an empty target).
-_LINUX_LIBRARIES = [
-    "libvk_swiftshader.so",
-    "libvulkan.so.1",
-    "libVkLayer_khronos_validation.so",
-]
-
+# The shared libraries a Mac takes from this build: the driver, the loader
+# and the layer under their macOS names (.dylib), and ANGLE's. A Linux
+# build makes none of them (out_paths maps each to the empty path: an empty
+# target); its files are the converted trees' (below).
 _MACOS_LIBRARIES = [
     "libvk_swiftshader.dylib",
     "libvulkan.dylib",
@@ -129,19 +127,26 @@ _MACOS_LIBRARIES = [
     "libGLESv2.dylib",
 ]
 
-_MANIFESTS = [
-    "vk_swiftshader_icd.json",
-    "VkLayer_khronos_validation.json",
-]
+# The driver's and the layer's manifests as a Mac's build writes them (GN's
+# vk_swiftshader_icd.json and vulkan-data/VkLayer_khronos_validation.json):
+# products under names of their own, since :vk_swiftshader_icd.json and
+# :VkLayer_khronos_validation.json are the platform's manifests (below),
+# the converted trees' on Linux.
+_MACOS_ICD_MANIFEST = "vk_swiftshader_icd.macos.json"
+
+_MACOS_LAYER_MANIFEST = "VkLayer_khronos_validation.macos.json"
 
 gn_build(
     name = "gl_backends",
-    # The driver, its manifest and the loader, in the GN root build
-    # directory, and the layer with its manifest (the manifest from GN's
+    # A Mac's driver, loader and layer, in the GN root build directory, with
+    # the driver's and the layer's manifests (the layer's from GN's
     # vulkan-data/ -- out_paths below -- a product by base name here; the
     # suites' copies put it back under vulkan-data/, which its library_path
-    # is relative to), under both platforms' names.
-    outs = _LINUX_LIBRARIES + _MACOS_LIBRARIES + _MANIFESTS,
+    # is relative to).
+    outs = _MACOS_LIBRARIES + [
+        _MACOS_ICD_MANIFEST,
+        _MACOS_LAYER_MANIFEST,
+    ],
     ar = HOST_CLANG + "//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facade depends on them):
     # abseil, zlib and SPIRV-Tools -- which Impeller links too, so a second
@@ -168,6 +173,14 @@ gn_build(
         "libangle.a": "//flutter/build/bazel/gl_wrap:angle",
         "libvk_swiftshader_static.a": "//flutter/build/bazel/gl_wrap:swiftshader_static",
     },
+    # A Linux build takes the archive alone (the rest is the converted
+    # trees'): the objects of ANGLE's two libraries, without the data_deps
+    # ANGLE's GN gives them -- SwiftShader's driver and the loader again,
+    # which ninja would build for nobody.
+    archives_only = select({
+        "@platforms//os:macos": False,
+        "//conditions:default": True,
+    }),
     build_file = "BUILD.gn",
     # ANGLE's commit id (its version string), from the DEPS pin: the tree
     # holds no git state, as with dart_wrap's SDK hash.
@@ -191,9 +204,20 @@ gn_build(
         "//conditions:default": {},
     }),
     ninja_target = "gl_wrap",
-    out_paths = {"VkLayer_khronos_validation.json": "vulkan-data/VkLayer_khronos_validation.json"} | select({
-        "@platforms//os:macos": {library: "" for library in _LINUX_LIBRARIES},
-        "//conditions:default": {library: "" for library in _MACOS_LIBRARIES},
+    # SwiftShader's static library is the converted tree's on Linux.
+    omit_archives = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["libvk_swiftshader_static.a"],
+    }),
+    out_paths = select({
+        "@platforms//os:macos": {
+            _MACOS_ICD_MANIFEST: "vk_swiftshader_icd.json",
+            _MACOS_LAYER_MANIFEST: "vulkan-data/VkLayer_khronos_validation.json",
+        },
+        "//conditions:default": {library: "" for library in _MACOS_LIBRARIES} | {
+            _MACOS_ICD_MANIFEST: "",
+            _MACOS_LAYER_MANIFEST: "",
+        },
     }),
     root_target_dir = "flutter/build/bazel/gl_wrap",
     # The GN source root: the engine's build configuration, the trees GN
@@ -221,16 +245,21 @@ gn_build(
         "@libcxx//:build_tree": "flutter/third_party/libcxx",
         "@libcxxabi//:build_tree": "flutter/third_party/libcxxabi",
         "@llvm_libc//:build_tree": "flutter/third_party/llvm_libc",
-        "@swiftshader//:build_tree": "flutter/third_party/swiftshader",
+        "@swiftshader_tree//:build_tree": "flutter/third_party/swiftshader",
         "@vulkan_deps_tree//:build_tree": "flutter/third_party/vulkan-deps",
         "@vulkan_memory_allocator_tree//:build_tree": "flutter/third_party/vulkan_memory_allocator",
         "@zlib//:build_tree": "flutter/third_party/zlib",
         "@abseil_cpp_tree//:build_tree": "third_party/abseil-cpp",
     } | select({
+        # The validation layer's tree, which a Mac's build alone compiles
+        # (BUILD.gn).
+        "@platforms//os:macos": {"@vulkan_deps_tree//:layer_tree": "flutter/third_party/vulkan-deps"},
+        "//conditions:default": {},
+    }) | select({
         # Reactor's LLVM backend sources, which SwiftShader's GN build reads
         # on arm64 alone (Subzero on x64): 6,000 files an x64 wrap does not
         # need as inputs.
-        "@platforms//cpu:aarch64": {"@swiftshader//:llvm_sources": "flutter/third_party/swiftshader"},
+        "@platforms//cpu:aarch64": {"@swiftshader_tree//:llvm_sources": "flutter/third_party/swiftshader"},
         "//conditions:default": {},
     }),
 )
@@ -312,14 +341,19 @@ cc_library(
 
 # //flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static:
 # the driver linked into the binary (gpu_surface_vulkan_unittests calls
-# vkGetInstanceProcAddr directly). Self-contained but for the C++ runtime
-# and the system libraries: SwiftShader's own SPIRV-Tools, marl and Subzero
-# are inside, which a binary can hold as long as it links no other copy of
-# SPIRV-Tools (the Vulkan surface's suite does not).
+# vkGetInstanceProcAddr directly). On Linux the converted tree's library
+# (@swiftshader, below); on a Mac the wrapped build's archive, self-contained
+# but for the C++ runtime and the system libraries. Either way SwiftShader's
+# own SPIRV-Tools, marl and Subzero (or LLVM, on arm64) come with it, which
+# a binary can hold as long as it links no other copy of SPIRV-Tools (the
+# Vulkan surface's suite does not).
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "swiftshader_static",
-    srcs = [":libvk_swiftshader_static.a"],
+    srcs = select({
+        "@platforms//os:macos": [":libvk_swiftshader_static.a"],
+        "//conditions:default": [],
+    }),
     # On a Mac: SwiftShader's WSI names Cocoa and QuartzCore (its Metal
     # surface) and -weak_framework Metal (its public config) -- which is
     # where GN's flutter_tester gets QuartzCore for its own Metal context.
@@ -337,14 +371,93 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    deps = ["@vulkan-headers//:vulkan_headers"],
+    deps = ["@vulkan-headers//:vulkan_headers"] + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@swiftshader//src/Vulkan:swiftshader_libvulkan_static"],
+    }),
+)
+
+# ---------------------------------------------------------------------------
+# SwiftShader's driver
+# ---------------------------------------------------------------------------
+
+# //flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan, the
+# driver the loader opens (libvk_swiftshader.so, which the ICD manifest
+# names): on Linux the converted tree's (@swiftshader, SwiftShader's own GN
+# files converted at fetch time), as GN's build root holds it; a Mac's
+# (libvk_swiftshader.dylib) is the wrapped build's product above.
+build_root_binary(
+    name = "libvk_swiftshader.so",
+    binary = "@swiftshader//src/Vulkan:swiftshader_libvulkan",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+# //flutter/third_party/swiftshader/src/Vulkan:icd_file, the driver's ICD
+# manifest (GN's vk_swiftshader_icd.json in the build root, with the
+# driver's path relative to it): the converted tree's action on Linux, the
+# wrapped build's product on a Mac.
+alias(
+    name = "vk_swiftshader_icd.json",
+    actual = select({
+        "@platforms//os:macos": ":" + _MACOS_ICD_MANIFEST,
+        "//conditions:default": "@swiftshader//src/Vulkan:icd_file",
+    }),
+)
+
+# ---------------------------------------------------------------------------
+# The Khronos loader and validation layer
+# ---------------------------------------------------------------------------
+
+# //flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan, the loader
+# ANGLE and GLFW open by name (libvulkan.so.1): on Linux the converted
+# tree's (@vulkan-loader, the tree's own GN converted at fetch time), as
+# GN's build root holds it; a Mac's (libvulkan.dylib) is the wrapped build's
+# product above.
+build_root_binary(
+    name = "libvulkan.so.1",
+    binary = "@vulkan-loader//:libvulkan",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+# //third_party/vulkan_validation_layers:VkLayer_khronos_validation, the
+# layer the Vulkan playground requires. On Linux it is the converted tree's
+# (@vulkan_validation_layers: the engine's GN in the secondary tree,
+# converted at fetch time, which the Android embedding's debug jar packs for
+# arm64 too), not the wrapped build's: the layer is two thirds of that
+# build's compiles (generated validation code, 669 s of ninja against 224 s
+# without it), which as Bazel actions are cached and distributed one by one
+# and rebuilt only when the layer's own trees change. The file is the one
+# GN's build root holds -- stripped under stripped_symbols, as the wrapped
+# build's was -- which is where its manifest's library_path looks.
+build_root_binary(
+    name = "libVkLayer_khronos_validation.so",
+    binary = "@vulkan_validation_layers//:VkLayer_khronos_validation",
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+# :vulkan_gen_json_files, the layer's manifest (GN's
+# vulkan-data/VkLayer_khronos_validation.json): the converted tree's action
+# on Linux, the wrapped build's product on a Mac.
+alias(
+    name = "VkLayer_khronos_validation.json",
+    actual = select({
+        "@platforms//os:macos": ":" + _MACOS_LAYER_MANIFEST,
+        "//conditions:default": "@vulkan_validation_layers//:vulkan_gen_json_files",
+    }),
 )
 
 # The files a GPU test suite needs next to its binary.
 filegroup(
     name = "runtime_files",
-    srcs = [":" + manifest for manifest in _MANIFESTS] + select({
+    srcs = [
+        ":VkLayer_khronos_validation.json",
+        ":vk_swiftshader_icd.json",
+    ] + select({
         "@platforms//os:macos": [":" + library for library in _MACOS_LIBRARIES],
-        "//conditions:default": [":" + library for library in _LINUX_LIBRARIES],
+        "//conditions:default": [
+            ":libVkLayer_khronos_validation.so",
+            ":libvk_swiftshader.so",
+            ":libvulkan.so.1",
+        ],
     }),
 )

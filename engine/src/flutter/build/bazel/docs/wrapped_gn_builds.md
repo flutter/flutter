@@ -131,19 +131,33 @@ The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
 (Vulkan on the CPU): `//flutter/testing:opengl` links ANGLE's
 `libEGL_static` and `libGLESv2_static`, `:vulkan` opens SwiftShader's
 `libvk_swiftshader.so`, and ANGLE itself opens the Khronos loader
-(`libvulkan.so.1`) and, through it, SwiftShader. `gl_wrap/` builds the three,
-and the Khronos validation layer (`libVkLayer_khronos_validation.so` and its
-manifest: `impeller_unittests`' data under `--use-glfw-swiftshader`, the
-configuration of CI's `host_debug_unopt_impeller_tests`, whose
-`run_tests.py --type impeller` run needs it for `--enable_vulkan_validation`),
-with their own GN rules in one `gn_build` action, as `dart_wrap/` builds the
-Dart SDK:
-ANGLE's `BUILD.gn` is 2,000 lines over a dozen trees and SwiftShader's build
-is a JIT compiler's, and the suites are what matters now. The pruned graph
-is about 1,100 compiles without the layer (ANGLE, SwiftShader with its
-Subzero backend and its own SPIRV-Tools, the loader, abseil, zlib, libc++),
-four minutes on 24 cores; the layer's generated validation code triples
-that (669 s against 224 s of `ninja`).
+(`libvulkan.so.1`) and, through it, SwiftShader. `gl_wrap/` provides the
+three, and the Khronos validation layer (`libVkLayer_khronos_validation.so`
+and its manifest: `impeller_unittests`' data under `--use-glfw-swiftshader`,
+the configuration of CI's `host_debug_unopt_impeller_tests` and, since
+flutter/flutter#196282, of `host_profile_test` and `host_release_test`,
+whose `run_tests.py --type impeller` runs need it for Vulkan validation).
+
+On Linux three of the four are converted trees, their own GN files turned
+into BUILD files at fetch time like Skia's: SwiftShader (`@swiftshader`,
+eleven GN files: the driver, its pipeline and device, the Reactor JIT on
+Subzero for x64 and on LLVM for arm64, marl, and SwiftShader's own
+SPIRV-Tools and SPIRV-Headers), the loader (`@vulkan-loader`) and the layer
+(`@vulkan_validation_layers`, which the Android embedding's debug jar packs
+for arm64 as well). `gl_wrap`'s products of those names are
+`build_root_binary` targets (//build_defs/gn:build_directory.bzl) over them:
+the file as GN's build root holds it, stripped under `stripped_symbols`,
+which is what a suite loads (the layer is 300 MB with its symbols). ANGLE on
+Linux, and all four on a Mac -- where no run has checked the converted
+trees' products yet -- are built with their own GN rules in one `gn_build`
+action, as `dart_wrap/` builds the Dart SDK: ANGLE's `BUILD.gn` is 2,000
+lines over a dozen trees behind templates and arguments of its own, and the
+suites are what matters now. ANGLE's GN names SwiftShader's driver and the
+loader as `data_deps`, which ninja would build along with the root group
+for nobody, so the Linux wrap asks ninja for the archive's objects instead
+(`archives_only`): 387 compiles. With all four backends inside, as on a
+Mac, the pruned graph was about 1,100 compiles without the layer and three
+times the time with it (224 s and 669 s of `ninja` on 24 cores).
 
 The wrapped build takes `tools/gn`'s arguments for a host build, and one GN
 default among them matters at run time: `is_minimal_linux` stays `false`.
@@ -168,9 +182,11 @@ allocator's header through it and its implementation comes from
 wrapped build that directory is a stand-in GN file (`gl_wrap/stubs/`): a
 group with the real target's `public_deps` on the Vulkan headers and the
 allocator, and no sources. The trees are the overlays' `build_tree`
-filegroups (`@angle`, `@swiftshader`, `@vulkan_deps_tree` -- the
-`vulkan-deps` directory as files, distinct from the repositories Bazel builds
-from its subdirectories --, `@abseil_cpp_tree`, `@vulkan_memory_allocator_tree`),
+filegroups (`@angle`, `@swiftshader_tree` and `@vulkan_deps_tree` -- the
+SwiftShader and `vulkan-deps` directories as files, distinct from the
+repositories Bazel builds from them, and the validation layer's tree a part
+of its own, `layer_tree`, that a Mac's wrap alone takes --,
+`@abseil_cpp_tree`, `@vulkan_memory_allocator_tree`),
 measured on the build as the Dart SDK's were, and without any `.git`: ANGLE's
 commit id comes from the `DEPS` pin through `ANGLE_UPSTREAM_HASH` (the rule's
 `env`), not from the checkout's git state.

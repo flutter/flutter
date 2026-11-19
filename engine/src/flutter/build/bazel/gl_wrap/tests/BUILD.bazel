@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Smoke test for the wrapped build of the GPU test backends: ANGLE on
+# Smoke tests for the GPU test backends (the package above): ANGLE on
 # SwiftShader through EGL, and SwiftShader as a Vulkan driver, each found
 # next to the binary as the engine's suites find them.
 

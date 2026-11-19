@@ -786,8 +786,14 @@ source_set("x") {
       }
       expect(
         generation.names.where((String n) => generation[n] is GnConditionValue).toList()..sort(),
-        // ... and is_apple, BUILDCONFIG.gn's `is_ios || is_mac`.
-        <String>[...perTargetOsArguments.keys, 'is_apple']..sort(),
+        // ... and is_apple, BUILDCONFIG.gn's `is_ios || is_mac`, and its
+        // Ozone platforms, which are `is_linux`.
+        <String>[
+          ...perTargetOsArguments.keys,
+          'is_apple',
+          'ozone_platform_wayland',
+          'ozone_platform_x11',
+        ]..sort(),
       );
       expect(host.names.where((String name) => generation[name] == null).toList()..sort(), <String>[
         'build_engine_artifacts',
@@ -4647,7 +4653,9 @@ executable("user") {
           '        ":pub",\n'
           '        ":src_config",\n'
           '    ],\n'
-          '    output_name = "lib",\n',
+          // GN's file for a library named `lib` is lib.so: the prefix is
+          // there already.
+          '    output_name = "",\n',
         ),
       );
       // The dependent links the import, not the binary.
@@ -8527,6 +8535,228 @@ cc_library(
         expect(output, isNot(contains('_dir')));
       },
     );
+  });
+
+  group('third-party GN of its own (SwiftShader, the Vulkan loader)', () {
+    test(
+      "a shared library's name loses GN's lib prefix; a Linux extension is the macro's",
+      () async {
+        // GN prepends `lib` to a shared library's output_name unless it is
+        // there already (SwiftShader's libvk_swiftshader); the macro adds it
+        // itself. The Khronos loader is libvulkan.so.1 on Linux.
+        final String output = await convert('''
+shared_library("swiftshader_libvulkan") {
+  output_name = "libvk_swiftshader"
+  sources = [ "a.cc" ]
+}
+shared_library("libvulkan") {
+  output_name = "vulkan"
+  if (is_linux) {
+    output_extension = "so.1"
+  }
+  sources = [ "loader.c" ]
+}
+''', assumptions: generationAssumptions());
+        expect(output, contains('    output_name = "vk_swiftshader",\n'));
+        expect(output, contains('    linux_output_extension = "so.1",\n'));
+        expect(output, contains('    output_name = "vulkan",\n'));
+        // Any other shape of extension has no rendering.
+        await expectLater(
+          convert('''
+shared_library("x") {
+  output_extension = "so.2"
+  sources = [ "a.cc" ]
+}
+''', assumptions: generationAssumptions()),
+          throwsGnError(
+            line: 2,
+            message: 'output_extension of the shared library x is converted when it is one string under is_linux',
+          ),
+        );
+      },
+    );
+
+    test('an include directory outside the package needs a library that carries it', () async {
+      // Bazel's `includes` is package-relative: a directory of another
+      // package is a dependency on the library the table names for it, and
+      // an error without one (the path would come out as a label).
+      final String output = await convert('''
+source_set("x") {
+  include_dirs = [ "//flutter/third_party/angle/include", "include" ]
+  sources = [ "a.cc" ]
+}
+''');
+      expect(output, contains('    includes = ["include"],\n'));
+      expect(output, contains('"@angle//:headers"'));
+      await expectLater(
+        convert('''
+source_set("x") {
+  include_dirs = [ "../other/include" ]
+  sources = [ "a.cc" ]
+}
+'''),
+        throwsGnError(
+          line: 2,
+          message: '../other/include is outside the package of the generated file',
+        ),
+      );
+      // In a repository of several packages the path of a neighbour's
+      // directory is a label (SwiftShader's Reactor names LLVM's include
+      // roots): no directory for `includes`.
+      const layout = OutputLayout.repository(
+        '@example',
+        repositoryGnRoot: '//flutter/third_party/example',
+        packages: <String>{'', 'src/a', 'third_party/b'},
+      );
+      await expectLater(
+        convert(
+          '''
+source_set("x") {
+  include_dirs = [ "../../third_party/b/include" ]
+  sources = [ "a.cc" ]
+}
+''',
+          gnPackage: '//flutter/third_party/example/src/a',
+          layout: layout,
+        ),
+        throwsGnError(
+          line: 2,
+          message:
+              'include directory ../../third_party/b/include is in another package of the '
+              'repository (//third_party/b:include)',
+        ),
+      );
+    });
+
+    test('comparisons decided whatever the build is for', () async {
+      // SwiftShader's GN: a CPU no build is for, a variable against itself,
+      // and "is the ARC config among the target's default configs?".
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (current_cpu == "mips64el") {
+    sources += [ "mips.cc" ]
+  }
+  if (current_cpu != "loong64") {
+    sources += [ "b.cc" ]
+  }
+  if (current_cpu != current_cpu) {
+    sources += [ "cross.cc" ]
+  }
+  if (filter_include(configs, [ "//build/config/compiler:enable_arc" ]) != []) {
+    sources += [ "arc.cc" ]
+  }
+  if (filter_include(configs, [ "//build/config/compiler:enable_arc" ]) == []) {
+    sources += [ "c.cc" ]
+  }
+}
+''', assumptions: generationAssumptions());
+      expect(
+        output,
+        contains(
+          '    srcs = [\n'
+          '        "a.cc",\n'
+          '        "b.cc",  # current_cpu != "loong64"\n'
+          '        "c.cc",  # filter_include(configs, [ "//build/config/compiler:enable_arc" ]) == []\n'
+          '    ],\n',
+        ),
+      );
+      // One of BUILDCONFIG.gn's own configs would need the list modeled.
+      await expectLater(
+        convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (filter_include(configs, [ "//build/config/compiler:no_rtti" ]) != []) {
+    sources += [ "rtti.cc" ]
+  }
+}
+''', assumptions: generationAssumptions()),
+        throwsGnError(line: 3, message: 'filter_include() of the default configs'),
+      );
+    });
+
+    test("a debug build's optimized third-party code: configs swapped under is_debug", () async {
+      // swiftshader.gni: `if (is_debug) { configs -= default_optimization;
+      // configs += optimize }` -- the flags of the config added, under the
+      // condition, on the compile and (for a target that links) the link.
+      final String output = await convert('''
+source_set("lib") {
+  if (is_debug) {
+    configs -= [ "//build/config/compiler:default_optimization" ]
+    configs += [ "//build/config/compiler:optimize" ]
+  }
+  sources = [ "a.cc" ]
+}
+shared_library("so") {
+  if (is_debug) {
+    configs -= [ "//build/config/compiler:default_optimization" ]
+    configs += [ "//build/config/compiler:optimize" ]
+  }
+  sources = [ "b.cc" ]
+}
+''', assumptions: generationAssumptions());
+      // The compile flags on both, under `is_debug && (is_linux || is_mac)`.
+      expect(
+        '''
+        ":when_is_debug_and_is_linux_or_is_mac": [
+            "-O2",  # from //build/config/compiler:optimize
+            "-fno-ident",  # from //build/config/compiler:optimize
+            "-fdata-sections",  # from //build/config/compiler:optimize
+            "-ffunction-sections",  # from //build/config/compiler:optimize
+        ],
+'''
+            .allMatches(output),
+        hasLength(2),
+      );
+      // The link flags on the shared library alone.
+      expect(
+        '''
+        ":when_is_debug_and_is_linux": [
+            "-Wl,-O2",  # from //build/config/compiler:optimize
+            "-Wl,--gc-sections",  # from //build/config/compiler:optimize
+            "-Wl,--as-needed",  # from //build/config/compiler:optimize
+        ],
+'''
+            .allMatches(output),
+        hasLength(1),
+      );
+      expect(
+        '"-Wl,-dead_strip",  # from //build/config/compiler:optimize'.allMatches(output),
+        hasLength(1),
+      );
+    });
+
+    test('a config of a sibling directory, named relative to this one', () {
+      // SwiftShader's WSI: `configs = [ "../Vulkan:swiftshader_libvulkan_private_config" ]`,
+      // a config of another file, which is read like one named absolutely.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/b/BUILD.gn': '''
+config("b_private_config") {
+  defines = [ "B_IMPLEMENTATION=1" ]
+}
+''',
+        'flutter/a/BUILD.gn': '''
+source_set("x") {
+  configs += [ "../b:b_private_config" ]
+  sources = [ "a.cc" ]
+}
+source_set("y") {
+  configs += [ "//flutter/b:b_private_config" ]
+  sources = [ "b.cc" ]
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/a/BUILD.gn'),
+        gnPackage: '//flutter/a',
+        tree: tree,
+        forwardedFlags: DependencyResolver(tree: tree, assumptions: linuxHostAssumptions()),
+      );
+      expect(
+        'implementation_deps = ["//engine/src/flutter/b:b_private_config"]'.allMatches(output),
+        hasLength(2),
+      );
+    });
   });
 
   group('builders', () {

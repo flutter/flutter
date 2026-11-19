@@ -309,6 +309,9 @@ cc_library(
             "-Os",  # from //flutter/third_party/swiftshader:swiftshader_config
         ],
     }),
+    data = [
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",  # !is_fuchsia
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["TEST_VULKAN_PROCS"],
     target_compatible_with = select({
         ":when_enable_unittests_and_shell_enable_vulkan": [],
@@ -317,7 +320,6 @@ cc_library(
     deps = [
         ":skia",
         "//engine/src:include_root",
-        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",  # !is_fuchsia
         "//engine/src/flutter/flutter_vma:flutter_skia_vma",
         "//engine/src/flutter/fml",
         "//engine/src/flutter/shell/common",
@@ -487,6 +489,7 @@ cc_library(
             "-Os",  # from //flutter/third_party/swiftshader:swiftshader_config
         ],
     }),
+    data = ["//engine/src/flutter/build/bazel/gl_wrap:swiftshader"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:ios": ["@platforms//:incompatible"],
@@ -494,7 +497,6 @@ cc_library(
     }),
     deps = [
         "//engine/src:include_root",
-        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",
         "//engine/src/flutter/fml",
     ],
     alwayslink = True,

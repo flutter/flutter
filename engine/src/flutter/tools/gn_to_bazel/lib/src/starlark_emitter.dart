@@ -661,6 +661,14 @@ const Set<String> _gnTargetVariables = <String>{
 /// GN's target variables (see [_gnTargetVariables]).
 bool _isHelperVariable(GnVariable variable) => !_gnTargetVariables.contains(variable.name);
 
+/// The name of a library's file without the `lib` GN's tools put before
+/// it: [name] is the target's `output_name` or its name, and GN adds the
+/// prefix unless the name starts with it already
+/// (Target::GetComputedOutputName) -- SwiftShader's
+/// `output_name = "libvk_swiftshader"` is libvk_swiftshader.so, as
+/// `vk_swiftshader` would be.
+String libraryStem(String name) => name.startsWith('lib') ? name.substring(3) : name;
+
 final class _Emitter {
   _Emitter(
     this.gnPackage,
@@ -2648,15 +2656,16 @@ final class _Emitter {
         case 'shared_library':
           // The platform's file: .so off the Apple platforms, .dylib on
           // them (flutter_shared_library declares both under GN's name).
-          outputs['$buildDirRoot/lib${name()}.so'] = label;
-          outputs['$buildDirRoot/lib${name()}.dylib'] = label;
+          outputs['$buildDirRoot/lib${libraryStem(name())}.so'] = label;
+          outputs['$buildDirRoot/lib${libraryStem(name())}.dylib'] = label;
         case 'static_library':
           final List<GnValue>? complete =
               target.variables['complete_static_lib']?.unconditionalItems;
           if (complete != null &&
               complete.length == 1 &&
               complete.single == const GnBoolValue(true)) {
-            outputs['$buildDirRoot/obj${directory.substring(1)}/lib${name()}.a'] = label;
+            outputs['$buildDirRoot/obj${directory.substring(1)}/lib${libraryStem(name())}.a'] =
+                label;
           }
         case 'copy' || 'action' || 'generated_file':
           // An action's outputs may be partly conditional (android_jar's
@@ -3377,9 +3386,11 @@ final class _Emitter {
   /// anything else -- a label the tables map (configEffects), or a file
   /// the converter does not read.
   GnTarget? _remoteConfig(String config) {
-    if (!config.startsWith('//')) {
+    if (config.startsWith(':')) {
       return null;
     }
+    // An absolute label, or one relative to this file's directory
+    // (SwiftShader's WSI lists `../Vulkan:swiftshader_libvulkan_private_config`).
     return forwarded.configOf(_gnLabel(config));
   }
 
@@ -3513,7 +3524,26 @@ final class _Emitter {
         : target.name;
     final rule = _Rule(ruleKind, name, target.comments);
     if (shared) {
-      rule.scalars['output_name'] = '"${outputName ?? target.name}"';
+      // The macro adds the `lib` itself ([libraryStem]).
+      rule.scalars['output_name'] = '"${libraryStem(outputName ?? target.name)}"';
+      // An output_extension GN sets for Linux (the Khronos loader's `so.1`:
+      // libvulkan.so.1, the name its clients open): a third file of the
+      // macro's, Linux's alone. Any other shape would rename the file on a
+      // platform the macro has no word for.
+      final GnVariable? extension = target.variables['output_extension'];
+      if (extension != null) {
+        final List<GnScalarCase> cases = extension.cases(target.location);
+        final GnValue? value = cases.length == 1 ? cases.single.value : null;
+        if (value is! GnStringValue ||
+            cases.single.condition != const ConditionVariable('is_linux')) {
+          throw GnError(
+            extension.assignments.first.location,
+            'output_extension of the shared library ${target.name} is converted when it is one '
+            'string under is_linux, not $cases',
+          );
+        }
+        rule.scalars['linux_output_extension'] = '"${value.value}"';
+      }
     }
     if (kind == 'cc_test') {
       // A device suite is pushed unstripped and run whole on an emulator:
@@ -3622,7 +3652,7 @@ final class _Emitter {
       rule.list('data').addUnique(Condition.always, const _Item(':$gpuBackendsTargetName'));
     }
     if (shared) {
-      _sharedLibraryOutputs.add('lib${outputName ?? target.name}.so');
+      _sharedLibraryOutputs.add('lib${libraryStem(outputName ?? target.name)}.so');
     }
     var chromiumCode = true;
     // With an explicit `public` list the headers in `sources` are private.
@@ -3716,6 +3746,9 @@ final class _Emitter {
           // The rule's name, with an alias under the target's (above); a
           // test named after its own target (flutter_tester's template
           // forwards the name) is the file Bazel produces anyway.
+          break;
+        case 'output_extension' when shared:
+          // The macro's linux_output_extension (above).
           break;
         default:
           if (_ignoredVariables.contains(variable.name) ||
@@ -5635,9 +5668,21 @@ final class _Emitter {
           return;
         }
       }
-      rule
-          .list('includes')
-          .addUnique(under.and(e.condition), _item(_filePath(path, e.assignment.location), e));
+      // `includes` names directories of this package. One of another
+      // repository goes with a note where the dependency on that repository
+      // carries it (_dropForeignIncludeDirs); one of another package of
+      // this repository that no library carries has no words here: the
+      // file's path comes back as a label (`//third_party/llvm:include`),
+      // which `includes` would take for a directory of that name.
+      final String include = _filePath(path, e.assignment.location);
+      if (!include.startsWith('@') && (include.startsWith('//') || include.contains(':'))) {
+        throw GnError(
+          e.assignment.location,
+          'include directory $path is in another package of the repository ($include): '
+          "name the library that carries it in bazel_mapping.dart's includeDirLibraries",
+        );
+      }
+      rule.list('includes').addUnique(under.and(e.condition), _item(include, e));
     });
   }
 
@@ -5941,7 +5986,10 @@ final class _Emitter {
             }
           case ConfigImplied():
             break;
-          case ConfigCopts(:final List<(Condition, List<String>)> copts):
+          case ConfigCopts(
+            :final List<(Condition, List<String>)> copts,
+            :final List<(Condition, List<String>)> linkopts,
+          ):
             if (assignment.op == '-=') {
               throw GnError(assignment.location, 'removing config $config is not supported');
             }
@@ -5961,18 +6009,30 @@ final class _Emitter {
                 rule.list('copts').addUnique(under, _Item(flag, comment: 'from $config'));
               }
             }
+            // Its link flags, on a target that links: a library's private
+            // config has no link to apply them to.
+            if (rule.kind != 'cc_library') {
+              for (final (Condition condition, List<String> flags) in linkopts) {
+                final Condition under = assignment.condition.and(assumptions.apply(condition));
+                if (under == Condition.never) {
+                  continue;
+                }
+                for (final flag in flags) {
+                  rule.list('linkopts').addUnique(under, _Item(flag, comment: 'from $config'));
+                }
+              }
+            }
           case ConfigToolchain(:final List<String> removalCopts):
             if (assignment.op != '-=') {
               // Already on every compile.
               break;
             }
-            if (!assignment.isUnconditional) {
-              throw GnError(assignment.location, 'conditional removal of $config is not supported');
-            }
+            // Under the removal's own condition, when it has one
+            // (swiftshader.gni's configs_to_delete).
             for (final flag in removalCopts) {
               rule
                   .list('copts')
-                  .addUnique(Condition.always, _Item(flag, comment: 'configs -= $config'));
+                  .addUnique(assignment.condition, _Item(flag, comment: 'configs -= $config'));
             }
         }
       }

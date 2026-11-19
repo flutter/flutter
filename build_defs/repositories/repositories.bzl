@@ -96,10 +96,10 @@ def _directories_with_bazel_files(source):
                     found["/".join(parts[:depth])] = True
     fail("synced_repository: %s has more than %d directories; is there a symlink cycle?" % (source, _MAX_DIRECTORIES))
 
-def _link_tree(rctx, source, overlaying, exclude, links):
+def _link_tree(rctx, source, overlaying, exclude, links, packages = []):
     """Populates the repository with symlinks to the contents of `source`.
 
-    Entries are symlinked whole, with three exceptions, all re-created as real
+    Entries are symlinked whole, with four exceptions, all re-created as real
     directories whose entries are symlinked one by one:
 
     * the root of the tree, so that the overlay BUILD file and the repository
@@ -120,7 +120,13 @@ def _link_tree(rctx, source, overlaying, exclude, links):
       inputs, those would change every wasm action's inputs with the first
       GN link (and vanish under Bazel's feet while it fingerprints the
       directory). These ancestors are listed without a watch, since their
-      entries are exactly what the other build adds and removes.
+      entries are exactly what the other build adds and removes;
+    * each directory in `packages` (paths relative to `source`) and its
+      ancestors: the directories below the root that get a BUILD file of
+      their own (the packages of a tree whose GN files are converted one by
+      one, SwiftShader's `src/Vulkan`), which has to land in the repository
+      -- written into a directory symlinked whole, it would land in the
+      synced tree.
 
     `links` (path to label) puts a directory of another repository at a path
     of the tree, in place of whatever the synced tree has there: the LTO
@@ -140,6 +146,10 @@ def _link_tree(rctx, source, overlaying, exclude, links):
                 unwatched[ancestor] = True
             expanded[ancestor] = True
         excluded[path] = True
+    for path in packages:
+        parts = path.split("/")
+        for depth in range(len(parts) + 1):
+            expanded["/".join(parts[:depth])] = True
     for path, label in links.items():
         target = Label(label)
         root = rctx.path(target.relative(":BUILD.bazel")).dirname
@@ -182,6 +192,14 @@ link_tree = _link_tree
 _CONVERTER = "engine/src/flutter/tools/gn_to_bazel"
 _GN_ROOT = "engine/src"
 
+# What populates a synced directory, for the error when it is absent -- and
+# what needs none of them: a checkout without `gclient sync` is a framework
+# developer's, whose tests run on the prebuilt engine.
+_MISSING_HINT = (
+    "`gclient sync`; run it from the repository root (see DEPS). The framework's and the tool's " +
+    "tests need no engine checkout: --config=prebuilt_engine takes the engine `flutter precache` downloads"
+)
+
 def _host_dart(rctx):
     """The checkout's prebuilt Dart SDK for this host (a DEPS CIPD package)."""
     os_name = rctx.os.name.lower()
@@ -205,6 +223,21 @@ def _host_dart(rctx):
         fail("synced_repository: %s does not exist; it is populated by `gclient sync`" % dart)
     return dart
 
+def _gn_packages(rctx):
+    """The directories below the root that `gn_build_files` makes packages.
+
+    Paths relative to `path`: the directory of each GN file inside the synced
+    tree, other than the tree's root (a GN file of the secondary source tree
+    stands in for the root).
+    """
+    prefix = rctx.attr.path + "/"
+    packages = []
+    for file in rctx.attr.gn_build_files:
+        directory = file.rpartition("/")[0]
+        if directory.startswith(prefix):
+            packages.append(directory[len(prefix):])
+    return packages
+
 def _convert_gn(rctx):
     """Runs tools/gn_to_bazel over `gn_build_files`, writing into the repository.
 
@@ -213,6 +246,14 @@ def _convert_gn(rctx):
     watched, so a roll that changes a `.gni` or an edit to the converter
     re-runs the conversion on the next build.
     """
+
+    # Each package's directory is the repository's own (_link_tree's
+    # `packages`): a BUILD file written through a symlink would be one more
+    # file of the synced tree, which GN and git see.
+    checkout = str(checkout_root(rctx).realpath) + "/"
+    for package in _gn_packages(rctx):
+        if str(rctx.path(package).realpath).startswith(checkout):
+            fail("synced_repository(%s): %s is a symlink into the checkout; its BUILD file would be written there" % (rctx.name, package))
     root = checkout_root(rctx).get_child(_GN_ROOT)
     converter = checkout_root(rctx).get_child(_CONVERTER)
     depfile = rctx.path("gn_to_bazel.d")
@@ -279,10 +320,10 @@ def _synced_repository_impl(rctx):
             return
         fail(
             "synced_repository(%s): %s does not exist. It is populated by " % (rctx.name, source) +
-            (rctx.attr.missing_hint or "`gclient sync`; run it from the repository root (see DEPS)") + ".",
+            (rctx.attr.missing_hint or _MISSING_HINT) + ".",
         )
 
-    _link_tree(rctx, source, overlaying, rctx.attr.exclude, rctx.attr.links)
+    _link_tree(rctx, source, overlaying, rctx.attr.exclude, rctx.attr.links, _gn_packages(rctx))
     if converting:
         _link_secondary(rctx)
         _convert_gn(rctx)

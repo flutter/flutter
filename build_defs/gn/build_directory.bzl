@@ -167,8 +167,14 @@ def _strip(ctx, binary, directory, flag):
     that names a file after its input (create_flutter_jar.py, the jar's
     lib/<abi>/ entries) sees the name GN's layout has.
     """
+
+    # The binary's path below its package. A binary of another repository
+    # has the repository before it (../<repository>/<package>/<path>).
+    short_path = binary.short_path
+    if short_path.startswith("../"):
+        short_path = short_path.split("/", 2)[2]
     package = ctx.label.package
-    relative = binary.short_path[len(package) + 1:] if package else binary.short_path
+    relative = short_path[len(package) + 1:] if package else short_path
     parent = relative[:-len(binary.basename)]
     stripped = ctx.actions.declare_file(parent + directory + "/" + binary.basename)
     objcopy = [f for f in ctx.files._objcopy if f.basename == "llvm-objcopy"]
@@ -323,3 +329,25 @@ def shipped_file(target, file):
     if _CollectedInfo not in target:
         return file
     return target[_CollectedInfo].shipped.get(file, file)
+
+def _build_root_binary_impl(ctx):
+    target = ctx.attr.binary
+    return [DefaultInfo(files = depset([
+        shipped_file(target, f)
+        for f in target[DefaultInfo].files.to_list()
+    ]))]
+
+build_root_binary = rule(
+    implementation = _build_root_binary_impl,
+    doc = "An executable or shared library as GN's build root holds it: the stripped copy under `stripped` " +
+          "(the file an install ships), the binary as linked otherwise. For a consumer that takes the " +
+          "file from the build directory under GN and never debugs it: the GPU test backends' validation " +
+          "layer (build/bazel/gl_wrap), which the loader opens by the path its manifest names.",
+    attrs = {
+        "binary": attr.label(
+            mandatory = True,
+            aspects = [build_directory_aspect],
+            doc = "A cc_binary -- an executable or a shared library -- or an alias of one.",
+        ),
+    },
+)

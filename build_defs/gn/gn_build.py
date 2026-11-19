@@ -10,7 +10,10 @@ first. The rule hands over one JSON parameter file and this script:
      the action's inputs, laid out as `gn` expects them (`.gn`, `build/`,
      `flutter/third_party/dart/`, ...);
   2. writes `args.gn` and runs `gn gen` on that root for one root target;
-  3. runs `ninja` on the target;
+  3. runs `ninja` on the target -- or, for a build asked for its archives
+     alone, on the archives' object files, which leaves aside what the
+     target has beyond them (the `data_deps` of a library whose runtime
+     files the Bazel side takes from elsewhere);
   4. copies the requested build products to the declared outputs, and
      creates one archive per requested GN library target from the object
      files of its dependency closure.
@@ -343,15 +346,20 @@ def _gn_desc(gn, gn_switches, out_dir, what):
     return json.loads(result.stdout)
 
 
-def _make_archives(params, gn, gn_switches, out_dir):
+def _archive_objects(params, gn, gn_switches, out_dir):
+    """Each archive's label and object files (paths in the build directory), by output.
+
+    From `gn desc` alone, which needs the generated build and nothing built.
+    """
     archives = params["archives"]
     if not archives:
-        return
+        return {}
     desc = _gn_desc(gn, gn_switches, out_dir, None)
     source_outputs = _gn_desc(gn, gn_switches, out_dir, "source_outputs")
     exported = {_strip_toolchain(spec["label"]) for spec in archives.values()}
     stop_prefixes = tuple(params["archive_boundaries"])
 
+    result = {}
     claimed = {}
     for output, spec in sorted(archives.items()):
         label = _strip_toolchain(spec["label"])
@@ -369,6 +377,12 @@ def _make_archives(params, gn, gn_switches, out_dir):
                                 "contains it twice" % (path, owner, label))
         if not objects:
             raise SystemExit("gn_build: no object files for %s" % label)
+        result[output] = (label, objects)
+    return result
+
+
+def _make_archives(params, archive_objects, out_dir):
+    for output, (label, objects) in sorted(archive_objects.items()):
         # Object paths are relative to the build directory, so ar runs there.
         response = os.path.basename(output) + ".objects"
         with open(os.path.join(out_dir, response), "w") as f:
@@ -500,10 +514,18 @@ def _build(params, scratch, root, out_dir, jobs, env, started, linked, prepared,
         "--script-executable=" + os.path.relpath(python, out_dir),
     ]
     _run([gn, "gen", out_dir] + gn_switches + ["--export-compile-commands", "--fail-on-unused-args"])
+    archive_objects = _archive_objects(params, gn, gn_switches, out_dir)
     generated = time.monotonic()
 
+    if params.get("archives_only"):
+        # The archives' objects themselves, which ninja builds with the
+        # generated sources they are ordered after and nothing else of the
+        # target (gn_build.bzl's archives_only).
+        targets = sorted({path for _, objects in archive_objects.values() for path in objects})
+    else:
+        targets = [params["ninja_target"]]
     _run(
-        [params["ninja"], "-C", out_dir, "-j", str(jobs), params["ninja_target"]],
+        [params["ninja"], "-C", out_dir, "-j", str(jobs)] + targets,
         log_path=os.path.join(scratch, "ninja.log"),
         env=env,
     )
@@ -516,7 +538,7 @@ def _build(params, scratch, root, out_dir, jobs, env, started, linked, prepared,
             # A dynamic library's install name, rewritten on the copy (see
             # gn_build.bzl's install_names).
             _run([params["install_name_tool"], "-id", install_name, output])
-    _make_archives(params, gn, gn_switches, out_dir)
+    _make_archives(params, archive_objects, out_dir)
 
     if params.get("compile_commands"):
         # GN writes the absolute build directory, and //build/config/gcc's

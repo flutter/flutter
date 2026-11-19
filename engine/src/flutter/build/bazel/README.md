@@ -153,9 +153,10 @@ sandbox contribute.
 - No Windows, Fuchsia or riscv64 Linux build.
 - Tests run with the network blocked, so golden images are neither compared
   nor uploaded under Bazel.
-- The Dart SDK and the GPU test backends (ANGLE, SwiftShader, the Vulkan
-  loader) are GN builds wrapped as single Bazel actions. An edit inside
-  them reruns the whole wrapped build.
+- The Dart SDK and ANGLE are GN builds wrapped as single Bazel actions, as
+  are the other GPU test backends on a Mac (SwiftShader, the Vulkan loader
+  and the validation layer, which Linux builds from converted GN files). An
+  edit inside them reruns the whole wrapped build.
 - The wrapped Dart SDK build compiles the VM without LTO in every build.
   GN compiles it with the engine's LTO: full in the Android AOT and iOS
   device builds, thin in the Linux profile and release builds.

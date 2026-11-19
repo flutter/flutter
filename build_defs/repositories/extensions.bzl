@@ -299,6 +299,15 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src/BUILD.gn"],
         gn_repository = "@vulkan-headers=//flutter/third_party/vulkan-deps/vulkan-headers/src",
     ),
+    # The Khronos Vulkan loader (libvulkan.so.1 on Linux), which ANGLE and
+    # GLFW open in the GPU suites (build/bazel/gl_wrap's product on Linux),
+    # from the tree's own GN.
+    "vulkan-loader": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/vulkan-loader/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-loader/src/BUILD.gn"],
+        gn_repository = "@vulkan-loader=//flutter/third_party/vulkan-deps/vulkan-loader/src",
+    ),
     # The Vulkan validation layer (VkLayer_khronos_validation), which the
     # Android embedding's debug jar packs for arm64
     # (impeller_enable_vulkan_validation_layers; GN builds it at API level 26
@@ -334,15 +343,38 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/angle",
         build_file = _OVERLAYS + ":angle/BUILD.angle.bazel",
     ),
-    # Trees for the wrapped GN build of the GPU test backends
-    # (build/bazel/gl_wrap): SwiftShader, the vulkan-deps directory (over
-    # whose subdirectories @vulkan-headers, @spirv-tools, ... are separate
-    # repositories), abseil-cpp (whose Bazel rules are @abseil-cpp's) and the
-    # allocator (whose library is @vulkan_memory_allocator). Each is the
-    # synced directory as files, nothing more.
+    # SwiftShader (Vulkan on the CPU: the GPU suites' driver, and the static
+    # one flutter_tester links), from the tree's own GN: the driver, its
+    # pipeline, the Reactor JIT over Subzero (x64) or LLVM (arm64), marl,
+    # and its own copies of SPIRV-Tools and SPIRV-Headers.
     "swiftshader": struct(
         path = "engine/src/flutter/third_party/swiftshader",
-        build_file = _OVERLAYS + ":swiftshader/BUILD.swiftshader.bazel",
+        build_file = None,
+        gn_build_files = [
+            "engine/src/flutter/third_party/swiftshader/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/src/Device/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/src/Pipeline/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/src/Reactor/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/src/System/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/src/Vulkan/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/src/WSI/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/third_party/SPIRV-Headers/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/third_party/SPIRV-Tools/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/third_party/llvm-16.0/BUILD.gn",
+            "engine/src/flutter/third_party/swiftshader/third_party/marl/BUILD.gn",
+        ],
+        gn_repository = "@swiftshader=//flutter/third_party/swiftshader",
+    ),
+    # Trees for the wrapped GN build of the GPU test backends
+    # (build/bazel/gl_wrap): SwiftShader (whose Bazel rules are
+    # @swiftshader's), the vulkan-deps directory (over whose subdirectories
+    # @vulkan-headers, @spirv-tools, ... are separate repositories),
+    # abseil-cpp (whose Bazel rules are @abseil-cpp's) and the allocator
+    # (whose library is @vulkan_memory_allocator). Each is the synced
+    # directory as files, nothing more.
+    "swiftshader_tree": struct(
+        path = "engine/src/flutter/third_party/swiftshader",
+        build_file = _OVERLAYS + ":swiftshader_tree/BUILD.swiftshader_tree.bazel",
     ),
     "vulkan_deps_tree": struct(
         path = "engine/src/flutter/third_party/vulkan-deps",

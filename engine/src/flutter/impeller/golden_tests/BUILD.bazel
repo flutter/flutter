@@ -222,7 +222,10 @@ flutter_display_test(
     ] + FLUTTER_COPTS + [
         "-Wno-unguarded-availability",  # from //flutter/display_list
     ],
-    data = [":gpu_test_backends"],
+    data = [
+        ":gpu_test_backends",
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",
+    ],
     env = {"FLUTTER_TEST_TESTING_ASSETS_DIR": "engine/src/flutter/impeller/golden_tests/gen/flutter/testing/assets"},
     local_defines = FLUTTER_LOCAL_DEFINES,
     shard_count = 8,
@@ -234,7 +237,6 @@ flutter_display_test(
         ":digest",
         ":metal_golden_screenshot",
         "//engine/src:include_root",
-        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",
         "//engine/src/flutter/display_list",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/display_list",
