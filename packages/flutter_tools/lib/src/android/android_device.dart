@@ -51,6 +51,10 @@ const kKnownHardware = <String, HardwareType>{
   'samsungexynos7570': HardwareType.physical,
 };
 
+/// How long to wait for `adb shell getprop` before treating the device as
+/// unresponsive.
+const _kGetpropTimeout = Duration(seconds: 30);
+
 /// A physical Android device or emulator.
 ///
 /// While [isLocalEmulator] attempts to distinguish between the device categories,
@@ -104,18 +108,38 @@ class AndroidDevice extends Device {
     _logger.printTrace(propCommand.join(' '));
 
     try {
-      // We pass an encoding of latin1 so that we don't try and interpret the
+      final Process process = await _processManager.start(propCommand);
+      // Decode as latin1 so that we don't try and interpret the
       // `adb shell getprop` result as UTF8.
-      final ProcessResult result = await _processManager.run(
-        propCommand,
-        stdoutEncoding: latin1,
-        stderrEncoding: latin1,
-      );
-      if (result.exitCode == 0 || _allowHeapCorruptionOnWindows(result.exitCode, _platform)) {
-        properties = parseAdbDeviceProperties(result.stdout as String);
+      final List<Object>? result =
+          await Future.wait<Object>(<Future<Object>>[
+                process.exitCode,
+                latin1.decodeStream(process.stdout),
+                latin1.decodeStream(process.stderr),
+              ])
+              .then<List<Object>?>((List<Object> result) => result)
+              .timeout(
+                _kGetpropTimeout,
+                onTimeout: () {
+                  // A frozen device never answers; don't leak the adb process.
+                  process.kill();
+                  return null;
+                },
+              );
+      if (result == null) {
+        _logger.printError(
+          'Timed out retrieving device properties for $name; the device may be unresponsive.',
+        );
+        return properties;
+      }
+      final exitCode = result[0] as int;
+      final stdout = result[1] as String;
+      final stderr = result[2] as String;
+      if (exitCode == 0 || _allowHeapCorruptionOnWindows(exitCode, _platform)) {
+        properties = parseAdbDeviceProperties(stdout);
       } else {
-        _logger.printError('Error ${result.exitCode} retrieving device properties for $name:');
-        _logger.printError(result.stderr as String);
+        _logger.printError('Error $exitCode retrieving device properties for $name:');
+        _logger.printError(stderr);
       }
     } on ProcessException catch (error) {
       _logger.printError('Error retrieving device properties for $name: $error');

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -39,6 +40,43 @@ void main() {
     expect(properties['ro.build.characteristics'], 'emulator');
     expect(properties['ro.product.cpu.abi'], 'x86_64');
     expect(properties['ro.build.version.sdk'], '23');
+  });
+
+  testWithoutContext('getprop times out and kills adb when the device is unresponsive', () {
+    fakeAsync((FakeAsync async) {
+      final logger = BufferLogger.test();
+      final process = FakeProcess(completer: Completer<void>());
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
+          process: process,
+        ),
+      ]);
+      final AndroidDevice device = setUpAndroidDevice(
+        processManager: processManager,
+        logger: logger,
+      );
+
+      TargetPlatform? targetPlatform;
+      device.targetPlatform.then((TargetPlatform result) {
+        targetPlatform = result;
+      });
+
+      async.elapse(const Duration(seconds: 29));
+      expect(targetPlatform, isNull);
+      expect(process.signals, isEmpty);
+
+      async.elapse(const Duration(seconds: 2));
+      expect(targetPlatform, TargetPlatform.unsupported);
+      expect(process.signals, hasLength(1));
+      expect(
+        logger.errorText,
+        contains(
+          'Timed out retrieving device properties for TestModel; the device may be unresponsive.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 
   testWithoutContext('adb exiting with heap corruption is only allowed on windows', () async {
@@ -641,13 +679,14 @@ AndroidDevice setUpAndroidDevice({
   FileSystem? fileSystem,
   ProcessManager? processManager,
   Platform? platform,
+  Logger? logger,
   AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
   androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(
     id ?? '1234',
     modelID: 'TestModel',
-    logger: BufferLogger.test(),
+    logger: logger ?? BufferLogger.test(),
     platform: platform ?? FakePlatform(),
     androidSdk: androidSdk,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
