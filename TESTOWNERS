@@ -261,9 +261,9 @@
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__compile.dart @robert-ancell @flutter/canonical
 /dev/devicelab/bin/tasks/flutter_gallery_win_desktop__start_up.dart @robert-ancell @flutter/canonical
 /dev/devicelab/bin/tasks/flutter_tool_startup.dart @jensjoha @flutter/tool
-/dev/devicelab/bin/tasks/flutter_tool_startup__linux.dart @robert-ancell @flutter/tool
+/dev/devicelab/bin/tasks/flutter_tool_startup__linux.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_tool_startup__macos.dart @jensjoha @flutter/tool
-/dev/devicelab/bin/tasks/flutter_tool_startup__windows.dart @robert-ancell @flutter/tool
+/dev/devicelab/bin/tasks/flutter_tool_startup__windows.dart @jensjoha @flutter/tool
 /dev/devicelab/bin/tasks/flutter_view_macos__start_up.dart @louisehsu @flutter/canonical
 /dev/devicelab/bin/tasks/flutter_view_win_desktop__start_up.dart @robert-ancell @flutter/canonical
 /dev/devicelab/bin/tasks/gradle_desugar_classes_test.dart @mboetger @flutter/tool
