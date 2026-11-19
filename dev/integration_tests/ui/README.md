@@ -9,6 +9,10 @@ Normally they are run via the devicelab.
 
 Verifies that showing and hiding the keyboard resizes the content.
 
+## keyboard\_inset\_jump
+
+Verifies that showing and hiding the keyboard in edge-to-edge mode does not produce terminal insets jumps or discontinuous animation steps (validates fix for flutter/flutter#190974).
+
 ## routing
 
 Verifies that `flutter drive --route` works correctly.

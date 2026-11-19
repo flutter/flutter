@@ -88,5 +88,95 @@ TEST(DeviceBufferGLESTest, BindUniformData) {
   EXPECT_TRUE(device_buffer.GetHandle().has_value());
 }
 
+namespace {
+// Binds |device_buffer| as a vertex buffer and as a uniform buffer and returns
+// the GL handles used for each.
+std::pair<std::optional<GLuint>, std::optional<GLuint>> BindAsVertexAndUniform(
+    const DeviceBufferGLES& device_buffer) {
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kArrayBuffer));
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kUniformBuffer));
+  return {device_buffer.GetHandle(), device_buffer.GetUniformHandle()};
+}
+
+// The reactor only holds a weak reference to |worker|.
+std::shared_ptr<ReactorGLES> CreateReactor(
+    const std::shared_ptr<TestWorker>& worker) {
+  auto proc_table = std::make_unique<ProcTableGLES>(kMockResolverGLES);
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+  return reactor;
+}
+
+void ExpectGenBuffers(MockGLESImpl& mock_gles_impl, int count) {
+  auto next_buffer = std::make_shared<GLuint>(1);
+  EXPECT_CALL(mock_gles_impl, GenBuffers(1, _))
+      .Times(count)
+      .WillRepeatedly([next_buffer](GLsizei n, GLuint* buffers) {
+        buffers[0] = (*next_buffer)++;
+      });
+}
+}  // namespace
+
+TEST(DeviceBufferGLESTest, UniformAndVertexDataShareBuffer) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  ExpectGenBuffers(*mock_gles_impl, 1);
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(_, 0, 16, _)).Times(1);
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = CreateReactor(worker);
+  EXPECT_FALSE(
+      reactor->GetProcTable().GetCapabilities()->NeedsSeparateUniformBuffers());
+
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{16}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 16}, reactor,
+                                 std::move(backing_store));
+  device_buffer.Flush();
+
+  auto [vertex_handle, uniform_handle] = BindAsVertexAndUniform(device_buffer);
+  ASSERT_TRUE(vertex_handle.has_value());
+  EXPECT_EQ(vertex_handle, uniform_handle);
+}
+
+TEST(DeviceBufferGLESTest, UniformDataUsesSeparateBufferOnSVGA3D) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+  ExpectGenBuffers(*mock_gles_impl, 2);
+  // Each buffer receives its own copy of every flushed range.
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(GL_ARRAY_BUFFER, 0, 16, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(GL_UNIFORM_BUFFER, 0, 16, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(GL_ARRAY_BUFFER, 4, 4, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(GL_UNIFORM_BUFFER, 4, 4, _))
+      .Times(1);
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl), std::nullopt, "OpenGL ES 3.2",
+                     "SVGA3D; build: RELEASE; LLVM;");
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = CreateReactor(worker);
+  EXPECT_TRUE(
+      reactor->GetProcTable().GetCapabilities()->NeedsSeparateUniformBuffers());
+
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{16}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 16}, reactor,
+                                 std::move(backing_store));
+  device_buffer.Flush();
+
+  auto [vertex_handle, uniform_handle] = BindAsVertexAndUniform(device_buffer);
+  ASSERT_TRUE(vertex_handle.has_value());
+  ASSERT_TRUE(uniform_handle.has_value());
+  EXPECT_NE(vertex_handle, uniform_handle);
+
+  device_buffer.Flush(Range{4, 4});
+  BindAsVertexAndUniform(device_buffer);
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 /// An exception thrown by a tool extension or host handler to report an
@@ -41,6 +42,17 @@ class ToolExtensionException implements Exception {
 
   /// Human-readable error message surfaced by the Flutter Tool.
   final String message;
+
+  @override
+  bool operator ==(Object other) {
+    return other is ToolExtensionException &&
+        other.code == code &&
+        other.message == message &&
+        const DeepCollectionEquality().equals(other.data, data);
+  }
+
+  @override
+  int get hashCode => Object.hash(code, message, const DeepCollectionEquality().hash(data));
 
   @override
   String toString() => 'ToolExtensionException: $message';

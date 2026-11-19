@@ -142,16 +142,17 @@ class ToolExtensionEntryPoint {
             '${error.message}',
           );
           throw json_rpc.RpcException(error.code, error.message, data: error.data);
-        } on UnsupportedError catch (error) {
-          final String message = error.message ?? 'Unsupported operation.';
-          logger?.call(
-            '[ToolExtensionIsolate] RPC request "$fullMethod" threw UnsupportedError: $message',
-          );
-          throw json_rpc.RpcException(
-            ToolExtensionException.unsupportedCapabilityErrorCode,
-            message,
-          );
         } on Object catch (error, stackTrace) {
+          if (error is UnsupportedError && error is! UnimplementedError) {
+            final String message = error.message ?? 'Unsupported operation.';
+            logger?.call(
+              '[ToolExtensionIsolate] RPC request "$fullMethod" threw UnsupportedError: $message',
+            );
+            throw json_rpc.RpcException(
+              ToolExtensionException.unsupportedCapabilityErrorCode,
+              message,
+            );
+          }
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',
           );

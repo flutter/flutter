@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/experimental/config.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -339,6 +340,19 @@ void main() {
       );
     });
 
+    testWithoutContext('analytics usage mentions feature branch when on a user branch', () async {
+      fakeFlutterVersion.channel = kUserBranch;
+      final ConfigCommand configCommand = createConfigCommand();
+      createRunner(configCommand);
+
+      expect(
+        configCommand.usage,
+        containsIgnoringWhitespace(
+          'Analytics reporting is currently disabled when running from a feature branch.',
+        ),
+      );
+    });
+
     testWithoutContext('resolves dependencies from injected ToolContext on write', () async {
       final fakeInjectedConfig = Config.test(name: 'injected', directory: fs.directory('/'));
       final fakeInjectedLogger = BufferLogger.test();
@@ -443,18 +457,53 @@ void main() {
 
         await commandRunner.run(<String>['config', '--my-ext-feature', '--my-ext-option=my-value']);
 
-        expect(defaultConfig.getValue('my-ext-feature'), true);
-        expect(defaultConfig.getValue('my-ext-option'), 'my-value');
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-feature',
+            extensionName: 'My Extension',
+          ),
+          true,
+        );
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-option',
+            extensionName: 'My Extension',
+          ),
+          'my-value',
+        );
 
         // Test disabling flag
         await commandRunner.run(<String>['config', '--no-my-ext-feature']);
-        expect(defaultConfig.getValue('my-ext-feature'), false);
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-feature',
+            extensionName: 'My Extension',
+          ),
+          false,
+        );
 
         await commandRunner.run(<String>['config', '--clear-features']);
-        expect(defaultConfig.getValue('my-ext-feature'), null);
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-feature',
+            extensionName: 'My Extension',
+          ),
+          null,
+        );
 
         await commandRunner.run(<String>['config', '--my-ext-option=']);
-        expect(defaultConfig.getValue('my-ext-option'), null);
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-option',
+            extensionName: 'My Extension',
+          ),
+          null,
+        );
       },
     );
 
@@ -544,7 +593,7 @@ class FakeExtensionManager extends Fake implements ExtensionManager {
   void enableMachineMode() {}
 }
 
-class FakeConfigurationExtension extends Fake implements ConfigurationExtension {
+final class FakeConfigurationExtension extends ConfigurationExtension {
   FakeConfigurationExtension({
     required this.title,
     required this.featureFlags,

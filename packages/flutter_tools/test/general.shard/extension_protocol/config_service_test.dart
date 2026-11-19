@@ -10,7 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -27,7 +26,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-class _SecondaryConfigurationExtension extends ConfigurationExtension {
+final class _SecondaryConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Secondary Configuration Extension';
 
@@ -50,7 +49,7 @@ class _SecondaryConfigurationExtension extends ConfigurationExtension {
   }
 }
 
-class _FailingConfigurationExtension extends ConfigurationExtension {
+final class _FailingConfigurationExtension extends ConfigurationExtension {
   @override
   String get title => 'Failing Configuration Extension';
 
@@ -84,28 +83,7 @@ void _secondaryExtensionEntryPoint(SendPort sendPort) {
   ], extensionName: 'secondary_config_ext');
 }
 
-class _DomainErrorConfigurationExtension extends ConfigurationExtension {
-  @override
-  String get title => 'Custom Config';
-
-  @override
-  Future<List<FeatureFlag>> getFeatureFlags() async {
-    throw const ToolExtensionException('Config failed with actionable user error.');
-  }
-
-  @override
-  Future<List<ConfigOption>> getConfigurations() async {
-    throw const ToolExtensionException('Config options failed with actionable user error.');
-  }
-}
-
-void _domainErrorConfigEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-    _DomainErrorConfigurationExtension(),
-  ], extensionName: 'custom_config_ext');
-}
-
-class _InteractiveSigningConfigExtension extends ConfigurationExtension {
+final class _InteractiveSigningConfigExtension extends ConfigurationExtension {
   static const String kEnableSigning = 'enable-custom-signing';
   static const String kEnableSigningEnv = 'FLUTTER_CUSTOM_SIGNING';
   static const String kCustomSdkPath = 'custom-sdk-path';
@@ -117,6 +95,7 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
   static const String kSelectManyAction = 'select-many-signing-settings';
   static const String kClearSigningAction = 'clear-custom-signing-settings';
   static const String kReadOwnedValuesAction = 'read-owned-config-values';
+  static const String kUpdateDeclaredOptionAction = 'update-declared-option-action';
   static const String kUndeclaredKeyAction = 'undeclared-key-action';
 
   var _featureFlagsFetchCount = 0;
@@ -170,6 +149,11 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
       ConfigAction(
         name: kReadOwnedValuesAction,
         help: 'Snapshot owned configuration values via extension.getConfigurationValues.',
+        settingsKeys: <String>[kSigningCert],
+      ),
+      ConfigAction(
+        name: kUpdateDeclaredOptionAction,
+        help: 'Action updating a declared ConfigOption key without repeating it in settingsKeys.',
         settingsKeys: <String>[kSigningCert],
       ),
       ConfigAction(
@@ -230,6 +214,11 @@ class _InteractiveSigningConfigExtension extends ConfigurationExtension {
               ..sort();
         return <String, String?>{
           kSigningCert: 'fetches=$_featureFlagsFetchCount;${summary.join(',')}',
+        };
+      case kUpdateDeclaredOptionAction:
+        return const <String, String?>{
+          kCustomSdkPath: '/opt/action-updated-sdk',
+          kSigningCert: 'cert-alpha',
         };
       case kUndeclaredKeyAction:
         return const <String, String?>{'unowned-secret-key': 'bad'};
@@ -295,6 +284,27 @@ class _EchoTrackingStdio extends FakeStdio {
 
   @override
   Stream<List<int>> get stdin => _fakeStdin;
+}
+
+final class _DomainErrorConfigurationExtension extends ConfigurationExtension {
+  @override
+  String get title => 'Custom Config';
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async {
+    throw const ToolExtensionException('Config failed with actionable user error.');
+  }
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async {
+    throw const ToolExtensionException('Config options failed with actionable user error.');
+  }
+}
+
+void _domainErrorConfigEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+    _DomainErrorConfigurationExtension(),
+  ], extensionName: 'custom_config_ext');
 }
 
 void main() {
@@ -444,6 +454,7 @@ void main() {
         expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
         expect(await clientWithNull.getFeatureFlags(), isEmpty);
         expect(await clientWithNull.getConfigurations(), isEmpty);
+        expect(await clientWithNull.getConfigActions(), isEmpty);
 
         final clientWithInvalid = ConfigurationExtensionClient(
           _FakeExtensionConnection(response: 'not-a-list'),
@@ -452,6 +463,7 @@ void main() {
 
         expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
         expect(await clientWithInvalid.getConfigurations(), isEmpty);
+        expect(await clientWithInvalid.getConfigActions(), isEmpty);
       },
     );
 
@@ -502,42 +514,45 @@ void main() {
       );
     });
 
-    testWithoutContext('ToolExtensionService host RPC helpers throw StateError before peer attachment and FormatException on malformed responses', () async {
-      final service = _SecondaryConfigurationExtension();
+    testWithoutContext(
+      'ToolExtensionService host RPC helpers throw StateError before peer attachment',
+      () async {
+        final service = _SecondaryConfigurationExtension();
 
-      await expectLater(
-        service.getConfigurationValues(),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('extension.getConfigurationValues'),
+        await expectLater(
+          service.getConfigurationValues(),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('extension.getConfigurationValues'),
+            ),
           ),
-        ),
-      );
-      await expectLater(
-        service.promptForOption(message: 'Select option', options: const <String>['Option A']),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('terminal.promptForOption'),
+        );
+        await expectLater(
+          service.promptForOption(message: 'Select option', options: const <String>['Option A']),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('terminal.promptForOption'),
+            ),
           ),
-        ),
-      );
-      await expectLater(
-        service.promptForInput(message: 'Enter text'),
-        throwsA(
-          isA<StateError>().having(
-            (StateError e) => e.message,
-            'message',
-            contains('terminal.promptForInput'),
+        );
+        await expectLater(
+          service.promptForInput(message: 'Enter text'),
+          throwsA(
+            isA<StateError>().having(
+              (StateError e) => e.message,
+              'message',
+              contains('terminal.promptForInput'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
 
-    testWithoutContext('extension.getConfigurationValues resolves environmentOverride > nested extensions settings > legacy aliases > defaults with zero re-entrant RPCs', () async {
+    testWithoutContext('extension.getConfigurationValues resolves nested settings and legacy aliases without re-entrant RPCs', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       hostConfig
@@ -551,11 +566,9 @@ void main() {
           'other_ext': <String, Object?>{'secret-key': 'should-not-leak'},
         });
 
-      final env = <String, String>{};
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         config: hostConfig,
-        environment: env,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
@@ -567,16 +580,15 @@ void main() {
         extensions: manager.configurationExtensions,
         logger: logger,
       );
-      final List<ExtensionSettingsGroup> groups = await extConfig.fetchExtensionSettings();
-      final ExtensionSettingsGroup group = groups.single;
+      final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
       final ConfigAction readAction = group.configActions.firstWhere(
         (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kReadOwnedValuesAction,
       );
 
       final Map<String, String?> updates = await extConfig.runConfigAction(
-        extension: group.extension!,
         action: readAction,
         currentSettings: const <String, String?>{},
+        group: group,
       );
       expect(
         updates[_InteractiveSigningConfigExtension.kSigningCert],
@@ -594,9 +606,9 @@ void main() {
         extensionName: 'custom_signing_ext',
       );
       final Map<String, String?> updated = await extConfig.runConfigAction(
-        extension: group.extension!,
         action: readAction,
         currentSettings: const <String, String?>{},
+        group: group,
       );
       expect(
         updated[_InteractiveSigningConfigExtension.kSigningCert],
@@ -605,36 +617,65 @@ void main() {
         'custom-signing-cert=cert-alpha(String),'
         'enable-custom-signing=true(bool)',
       );
-
-      // Environment overrides take precedence over persisted `"extensions"` settings.
-      env[_InteractiveSigningConfigExtension.kEnableSigningEnv] = '0';
-      env[_InteractiveSigningConfigExtension.kCustomSdkEnv] = '/opt/env-sdk';
-      final Map<String, String?> envOverridden = await extConfig.runConfigAction(
-        extension: group.extension!,
-        action: readAction,
-        currentSettings: const <String, String?>{},
-      );
-      expect(
-        envOverridden[_InteractiveSigningConfigExtension.kSigningCert],
-        'fetches=1;'
-        'custom-sdk-path=/opt/env-sdk(String),'
-        'custom-signing-cert=cert-alpha(String),'
-        'enable-custom-signing=false(bool)',
-      );
     });
+
+    testWithoutContext(
+      'extension.getConfigurationValues resolves environmentOverride ahead of persisted settings',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final hostConfig = Config.test(directory: fs.directory('/'));
+        hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
+          'custom_signing_ext': <String, Object?>{
+            'enable-custom-signing': true,
+            'custom-sdk-path': '/opt/scoped-sdk',
+            'custom-signing-cert': 'cert-alpha',
+          },
+        });
+
+        final env = <String, String>{
+          _InteractiveSigningConfigExtension.kEnableSigningEnv: '0',
+          _InteractiveSigningConfigExtension.kCustomSdkEnv: '/opt/env-sdk',
+        };
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          config: hostConfig,
+          environment: env,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
+
+        final extConfig = ExtensionConfiguration(
+          extensions: manager.configurationExtensions,
+          logger: logger,
+        );
+        final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
+        final ConfigAction readAction = group.configActions.firstWhere(
+          (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kReadOwnedValuesAction,
+        );
+
+        final Map<String, String?> envOverridden = await extConfig.runConfigAction(
+          action: readAction,
+          currentSettings: const <String, String?>{},
+          group: group,
+        );
+        expect(
+          envOverridden[_InteractiveSigningConfigExtension.kSigningCert],
+          'fetches=1;'
+          'custom-sdk-path=/opt/env-sdk(String),'
+          'custom-signing-cert=cert-alpha(String),'
+          'enable-custom-signing=false(bool)',
+        );
+      },
+    );
 
     testWithoutContext('terminal.promptForOption and terminal.promptForInput succeed on a single-subscription stdin stream with AnsiTerminal', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       final logger = BufferLogger.test();
-      final fakeStdin = _SingleSubscriptionStdin(const <String>[
-        '2',
-        'super-secret-passphrase\n',
-        'invalid\n',
-        '99\n',
-        'cert-2\n',
-        '10\n',
-      ]);
+      final fakeStdin = _SingleSubscriptionStdin(const <String>['2', 'super-secret-passphrase\n']);
       final stdio = _EchoTrackingStdio(fakeStdin);
       final terminal = AnsiTerminal(stdio: stdio, platform: FakePlatform());
 
@@ -659,9 +700,9 @@ void main() {
       );
 
       final Map<String, String?> updates = await extConfig.runConfigAction(
-        extension: group.extension!,
         action: selectAction,
         currentSettings: const <String, String?>{},
+        group: group,
       );
 
       expect(updates, const <String, String?>{
@@ -673,27 +714,58 @@ void main() {
       expect(logger.statusText, contains('[2] Developer Beta (TEAM2)'));
       expect(logger.statusText, contains('Select a signing certificate (or "q" to quit): '));
       expect(logger.statusText, contains('Enter certificate passphrase [default-secret]: '));
-
-      // Also exercise > 9 options re-prompting on invalid input, out-of-range index, and raw key before accepting '10'.
-      final ConfigAction selectManyAction = group.configActions.firstWhere(
-        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectManyAction,
-      );
-      final Map<String, String?> manyUpdates = await extConfig.runConfigAction(
-        extension: group.extension!,
-        action: selectManyAction,
-        currentSettings: const <String, String?>{},
-      );
-      expect(manyUpdates, const <String, String?>{
-        _InteractiveSigningConfigExtension.kSigningCert: 'cert-10',
-      });
     });
 
-    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in non-TTY and --machine modes and reject invalid params', () async {
+    testWithoutContext(
+      'terminal.promptForOption supports >9 options with line-based re-prompting on invalid input',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final hostConfig = Config.test(directory: fs.directory('/'));
+        final logger = BufferLogger.test();
+        final fakeStdin = _SingleSubscriptionStdin(const <String>[
+          'invalid\n',
+          '99\n',
+          'cert-2\n',
+          '10\n',
+        ]);
+        final stdio = _EchoTrackingStdio(fakeStdin);
+        final terminal = AnsiTerminal(stdio: stdio, platform: FakePlatform());
+
+        final manager = ExtensionManager(
+          config: hostConfig,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          stdio: stdio,
+          terminal: terminal,
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
+
+        final extConfig = ExtensionConfiguration(
+          extensions: manager.configurationExtensions,
+          logger: logger,
+        );
+        final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
+        final ConfigAction selectManyAction = group.configActions.firstWhere(
+          (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectManyAction,
+        );
+
+        final Map<String, String?> updates = await extConfig.runConfigAction(
+          action: selectManyAction,
+          currentSettings: const <String, String?>{},
+          group: group,
+        );
+        expect(updates, const <String, String?>{
+          _InteractiveSigningConfigExtension.kSigningCert: 'cert-10',
+        });
+      },
+    );
+
+    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in non-TTY mode', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       final logger = BufferLogger.test();
-
-      // 1. Non-TTY mode (Terminal.test() has stdinHasTerminal == false).
       final nonTtyManager = ExtensionManager(
         config: hostConfig,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -718,9 +790,9 @@ void main() {
 
       await expectLater(
         nonTtyConfig.runConfigAction(
-          extension: nonTtyGroup.extension!,
           action: selectAction,
           currentSettings: const <String, String?>{},
+          group: nonTtyGroup,
         ),
         throwsA(
           isA<ToolExtensionException>()
@@ -736,9 +808,13 @@ void main() {
               ),
         ),
       );
+    });
 
-      // Out-of-range defaultChoiceIndex fails with INVALID_PARAMS (-32602).
-      final prompter = ExtensionTerminalPrompter(logger: logger, terminal: Terminal.test());
+    testWithoutContext('terminal.promptForOption rejects out-of-range defaultChoiceIndex with INVALID_PARAMS (-32602)', () async {
+      final prompter = ExtensionTerminalPrompter(
+        logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+      );
       await expectLater(
         prompter.handlePromptForOption(const <String, Object?>{
           'message': 'Pick one',
@@ -753,8 +829,12 @@ void main() {
           ),
         ),
       );
+    });
 
-      // 2. --machine mode with an interactive terminal still fails with domainErrorCode (-32001).
+    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in --machine mode', () async {
+      final fs = MemoryFileSystem.test();
+      final hostConfig = Config.test(directory: fs.directory('/'));
+      final logger = BufferLogger.test();
       final machineStdio = _EchoTrackingStdio(_SingleSubscriptionStdin(const <String>['1']));
       final machineManager = ExtensionManager(
         config: hostConfig,
@@ -775,12 +855,15 @@ void main() {
       );
       final ExtensionSettingsGroup machineGroup =
           (await machineConfig.fetchExtensionSettings()).single;
+      final ConfigAction selectAction = machineGroup.configActions.firstWhere(
+        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectSigningAction,
+      );
 
       await expectLater(
         machineConfig.runConfigAction(
-          extension: machineGroup.extension!,
           action: selectAction,
           currentSettings: const <String, String?>{},
+          group: machineGroup,
         ),
         throwsA(
           isA<ToolExtensionException>()
@@ -794,7 +877,7 @@ void main() {
       );
     });
 
-    testWithoutContext('ExtensionConfiguration.runConfigAction rejects undeclared setting keys and invalid RPC params', () async {
+    testWithoutContext('ExtensionConfiguration.runConfigAction allows updating declared ConfigOptions and rejects undeclared setting keys and invalid RPC params', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
@@ -809,15 +892,29 @@ void main() {
         logger: logger,
       );
       final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
+
+      final ConfigAction updateOptionAction = group.configActions.firstWhere(
+        (ConfigAction a) =>
+            a.name == _InteractiveSigningConfigExtension.kUpdateDeclaredOptionAction,
+      );
+      final Map<String, String?> optionUpdates = await extConfig.runConfigAction(
+        action: updateOptionAction,
+        currentSettings: const <String, String?>{},
+        group: group,
+      );
+      expect(optionUpdates, const <String, String?>{
+        _InteractiveSigningConfigExtension.kCustomSdkPath: '/opt/action-updated-sdk',
+        _InteractiveSigningConfigExtension.kSigningCert: 'cert-alpha',
+      });
+
       final ConfigAction undeclaredAction = group.configActions.firstWhere(
         (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kUndeclaredKeyAction,
       );
-
       await expectLater(
         extConfig.runConfigAction(
-          extension: group.extension!,
           action: undeclaredAction,
           currentSettings: const <String, String?>{},
+          group: group,
         ),
         throwsA(
           isA<ToolExtensionException>().having(

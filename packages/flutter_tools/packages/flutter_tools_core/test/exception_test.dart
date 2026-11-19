@@ -21,16 +21,30 @@ void main() {
       },
     );
 
-    test('supports custom error code and structured diagnostic data', () {
+    test('supports custom error code, structured diagnostic data, and deep equality', () {
       const exception = ToolExtensionException(
         'Emulator creation is not supported.',
         code: ToolExtensionException.unsupportedCapabilityErrorCode,
         data: <String, Object?>{'capability': 'createEmulator'},
       );
+      final nonConstData = <String, Object?>{'capability': 'createEmulator'};
+      final equalCopy = ToolExtensionException(
+        'Emulator creation is not supported.',
+        code: ToolExtensionException.unsupportedCapabilityErrorCode,
+        data: nonConstData,
+      );
+      const differentData = ToolExtensionException(
+        'Emulator creation is not supported.',
+        code: ToolExtensionException.unsupportedCapabilityErrorCode,
+        data: <String, Object?>{'capability': 'other'},
+      );
 
       expect(exception.message, 'Emulator creation is not supported.');
       expect(exception.code, -32002);
       expect(exception.data, const <String, Object?>{'capability': 'createEmulator'});
+      expect(exception, equals(equalCopy));
+      expect(exception.hashCode, equals(equalCopy.hashCode));
+      expect(exception, isNot(equals(differentData)));
     });
   });
 }

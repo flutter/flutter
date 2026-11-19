@@ -28,6 +28,13 @@ FLUTTER_DARWIN_EXPORT
 @protocol FlutterPluginRegistrar <NSObject>
 
 /**
+ * The unique identifier for the `FlutterEngine` associated with this registrar.
+ *
+ * This corresponds to `PlatformDispatcher.instance.engineId` in Dart.
+ */
+@property(nonatomic, readonly) int64_t engineIdentifier;
+
+/**
  * The binary messenger used for creating channels to communicate with the Flutter engine.
  */
 @property(nonnull, readonly) id<FlutterBinaryMessenger> messenger;

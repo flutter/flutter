@@ -22,9 +22,10 @@ typedef ExtensionRequestSender = Future<Object?> Function(String method, [Object
 
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
-/// Extension authors implement this class to group related RPC endpoints under
-/// a specific [namespace] (e.g. `diagnostics`, `configuration`, `device`, `build`, `templates`).
-abstract class ToolExtensionService {
+/// Extension authors extend this class (via specific service base classes) to
+/// group related RPC endpoints under a specific [namespace] (e.g.
+/// `diagnostics`, `config`, `device`, `build`, `template`).
+abstract base class ToolExtensionService {
   /// Host RPC method name for querying the extension's owned configuration values.
   static const String getConfigurationValuesMethod = 'extension.getConfigurationValues';
 

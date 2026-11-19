@@ -6,19 +6,26 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:isolate';
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[]));
+}
+
+void _singleServiceEntryPoint(SendPort sendPort) {
+  unawaited(
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_DummyService('test', 'ping')],
+      supportedPlatforms: const <String>{'linux', 'macos'},
+    ),
+  );
 }
 
 void _failingExtensionEntryPoint(SendPort sendPort) {
@@ -39,7 +46,7 @@ void _duplicateRpcEntryPoint(SendPort sendPort) {
   );
 }
 
-class _DummyService extends ToolExtensionService {
+final class _DummyService extends ToolExtensionService {
   _DummyService(this.namespace, this.methodName);
 
   @override
@@ -52,7 +59,7 @@ class _DummyService extends ToolExtensionService {
   }
 }
 
-class _FailingInitService extends ToolExtensionService {
+final class _FailingInitService extends ToolExtensionService {
   @override
   String get namespace => 'failing';
 
@@ -62,7 +69,7 @@ class _FailingInitService extends ToolExtensionService {
   }
 }
 
-class _NotificationTestService extends ToolExtensionService {
+final class _NotificationTestService extends ToolExtensionService {
   @override
   String get namespace => 'notify';
 
@@ -83,7 +90,7 @@ void _notificationExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
-class _ExitingService extends ToolExtensionService {
+final class _ExitingService extends ToolExtensionService {
   @override
   String get namespace => 'exit';
 
@@ -101,7 +108,7 @@ void _exitingExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitingService()]));
 }
 
-class _AsyncErrorService extends ToolExtensionService {
+final class _AsyncErrorService extends ToolExtensionService {
   @override
   String get namespace => 'error';
 
@@ -122,7 +129,7 @@ void _asyncErrorExtensionEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_AsyncErrorService()]));
 }
 
-class _ProtocolHardeningService extends ToolExtensionService {
+final class _ProtocolHardeningService extends ToolExtensionService {
   @override
   String get namespace => 'hardening';
 
@@ -141,6 +148,9 @@ class _ProtocolHardeningService extends ToolExtensionService {
       'throwUnsupportedCapability': (Map<String, Object?> _) {
         throw UnsupportedError('Screen recording is not supported.');
       },
+      'throwUnimplementedError': (Map<String, Object?> _) {
+        throw UnimplementedError('Not implemented yet');
+      },
       'callProcessExit': (Map<String, Object?> _) {
         io.exit(42);
       },
@@ -154,7 +164,7 @@ void _protocolHardeningEntryPoint(SendPort sendPort) {
   );
 }
 
-class _ExitInInitService extends ToolExtensionService {
+final class _ExitInInitService extends ToolExtensionService {
   @override
   String get namespace => 'exit_init';
 
@@ -168,11 +178,12 @@ void _exitInInitEntryPoint(SendPort sendPort) {
   unawaited(ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_ExitInInitService()]));
 }
 
-class _ShutdownTrackingService extends ToolExtensionService {
-  _ShutdownTrackingService(this.namespace, {this.throwOnShutdown = false});
+final class _ShutdownTrackingService extends ToolExtensionService {
+  _ShutdownTrackingService(this.namespace, {this.gateSendPort, this.throwOnShutdown = false});
 
   @override
   final String namespace;
+  final SendPort? gateSendPort;
   final bool throwOnShutdown;
 
   @override
@@ -182,6 +193,12 @@ class _ShutdownTrackingService extends ToolExtensionService {
 
   @override
   Future<void> shutdown() async {
+    if (gateSendPort case final SendPort gate) {
+      final releasePort = ReceivePort();
+      gate.send(releasePort.sendPort);
+      await releasePort.first;
+      releasePort.close();
+    }
     sendNotification('lifecycle.shutdown', <String, Object?>{'service': namespace});
     if (throwOnShutdown) {
       throw StateError('Simulated shutdown failure in $namespace');
@@ -378,69 +395,35 @@ void main() {
       );
     });
 
-    test('ExtensionConnection.spawnUri spawns extension script and completes handshake', () async {
+    test('ExtensionConnection.spawn completes handshake and matches expectedConfig', () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _singleServiceEntryPoint,
+        expectedConfig: ExtensionPackageConfig(
+          name: 'test_extension',
+          hostPlatforms: const <String>{'linux', 'macos'},
+          services: const <String>{'test'},
         ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
-      final fs = LocalFileSystem.test(signals: LocalSignals.instance);
-      addTearDown(fs.dispose);
-      final Uri configUri = libUri.resolve('../extension/flutter_tools/config.yaml');
-      final rawYaml = loadYaml(fs.file(configUri).readAsStringSync()) as YamlMap;
-      final expectedConfig = ExtensionPackageConfig.fromMap(
-        rawYaml.cast<String, Object?>(),
-        packageName: 'flutter_tools_extension_linux_prototype',
-      );
-
-      final ExtensionConnection connection = await ExtensionConnection.spawnUri(
-        entrypointUri,
-        expectedConfig: expectedConfig,
         logger: logger,
-        packageConfigUri: packageConfigUri!,
-        extensionName: 'flutter_tools_extension_linux_prototype',
       );
       addTearDown(connection.dispose);
 
-      expect(connection.extensionName, 'flutter_tools_extension_linux_prototype');
-      expect(
-        connection.capabilities.services,
-        containsAll(const <String>['diagnostics', 'config', 'build', 'template']),
-      );
+      expect(connection.extensionName, 'test_extension');
+      expect(connection.capabilities.services, const <String>['test']);
+      expect(connection.capabilities.supportedPlatforms, const <String>{'linux', 'macos'});
     });
 
-    test('ExtensionConnection.spawnUri throws StateError when expectedConfig does not match capabilities', () async {
+    test('ExtensionConnection.spawn throws StateError when expectedConfig does not match capabilities', () async {
       final logger = BufferLogger.test();
-      final Uri? libUri = await Isolate.resolvePackageUri(
-        Uri.parse(
-          'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart',
-        ),
-      );
-      expect(libUri, isNotNull);
-      final Uri entrypointUri = libUri!.resolve(
-        '../bin/flutter_tools_extension_linux_prototype.dart',
-      );
-      final Uri? packageConfigUri = await Isolate.packageConfig;
-      expect(packageConfigUri, isNotNull);
-
       await expectLater(
-        ExtensionConnection.spawnUri(
-          entrypointUri,
+        ExtensionConnection.spawn(
+          _dummyExtensionEntryPoint,
           expectedConfig: ExtensionPackageConfig(
-            name: 'flutter_tools_extension_linux_prototype',
+            name: 'test_extension',
             hostPlatforms: const <String>{'linux'},
             services: const <String>{'diagnostics'},
           ),
           logger: logger,
-          packageConfigUri: packageConfigUri!,
         ),
         throwsA(
           isA<StateError>().having(
@@ -454,22 +437,76 @@ void main() {
       );
 
       await expectLater(
-        ExtensionConnection.spawnUri(
-          entrypointUri,
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
           expectedConfig: ExtensionPackageConfig(
-            name: 'flutter_tools_extension_linux_prototype',
-            hostPlatforms: const <String>{'macos'},
-            services: const <String>{
-              'diagnostics',
-              'config',
-              'template',
-              'device',
-              'build',
-              'clean',
-            },
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'macos'},
+            services: const <String>{'other'},
           ),
           logger: logger,
-          packageConfigUri: packageConfigUri,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'macos'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares services',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux', 'windows'},
+            services: const <String>{'test'},
+          ),
+          logger: logger,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            contains(
+              'capabilities mismatch: extension/flutter_tools/config.yaml declares host_platforms',
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        ExtensionConnection.spawn(
+          _singleServiceEntryPoint,
+          expectedConfig: ExtensionPackageConfig(
+            name: 'test_extension',
+            hostPlatforms: const <String>{'linux'},
+            services: const <String>{'test'},
+          ),
+          logger: logger,
         ),
         throwsA(
           isA<StateError>().having(
@@ -666,7 +703,7 @@ void main() {
       );
     });
 
-    test('ToolExtensionEntryPoint maps UnsupportedError to unsupportedCapabilityErrorCode (-32002) on ExtensionConnection.sendRequest', () async {
+    test('ToolExtensionEntryPoint maps UnsupportedError to unsupportedCapabilityErrorCode (-32002) while preserving UnimplementedError as SERVER_ERROR (-32000)', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         _protocolHardeningEntryPoint,
@@ -689,6 +726,19 @@ void main() {
                 ToolExtensionException.unsupportedCapabilityErrorCode,
               )
               .having((ToolExtensionException e) => e.data, 'data', isNull),
+        ),
+      );
+
+      await expectLater(
+        connection.sendRequest('hardening.throwUnimplementedError'),
+        throwsA(
+          isA<json_rpc.RpcException>()
+              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+              .having(
+                (json_rpc.RpcException e) => e.message,
+                'message',
+                contains('Not implemented yet'),
+              ),
         ),
       );
     });
@@ -777,5 +827,55 @@ void main() {
       expect(shutdownServices, unorderedEquals(const <String>['service_a', 'service_b']));
       expect(logger.traceText, isNot(contains('did not complete cleanly')));
     });
+
+    test(
+      'concurrent ExtensionConnection.dispose calls await in-flight shutdown before resolving',
+      () async {
+        final logger = BufferLogger.test();
+        final gatePort = ReceivePort();
+        addTearDown(gatePort.close);
+        final SendPort gateSendPort = gatePort.sendPort;
+
+        void gatedShutdownEntryPoint(SendPort sendPort) {
+          unawaited(
+            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+              _ShutdownTrackingService('gated_service', gateSendPort: gateSendPort),
+            ]),
+          );
+        }
+
+        final ExtensionConnection connection = await ExtensionConnection.spawn(
+          gatedShutdownEntryPoint,
+          logger: logger,
+        );
+
+        final shutdownServices = <String>[];
+        final StreamSubscription<Map<String, Object?>> subscription = connection
+            .onNotification('lifecycle.shutdown')
+            .listen((Map<String, Object?> event) {
+              if (event['service'] case final String serviceName) {
+                shutdownServices.add(serviceName);
+              }
+            });
+        addTearDown(subscription.cancel);
+
+        final Future<void> firstDispose = connection.dispose();
+        expect(connection.isDisposed, isTrue);
+
+        final releaseSendPort = await gatePort.first as SendPort;
+        var secondDisposeCompleted = false;
+        final Future<void> secondDispose = connection.dispose().then((_) {
+          secondDisposeCompleted = true;
+        });
+
+        await pumpEventQueue();
+        expect(secondDisposeCompleted, isFalse);
+
+        releaseSendPort.send(null);
+        await Future.wait(<Future<void>>[firstDispose, secondDispose]);
+        expect(secondDisposeCompleted, isTrue);
+        expect(shutdownServices, const <String>['gated_service']);
+      },
+    );
   });
 }

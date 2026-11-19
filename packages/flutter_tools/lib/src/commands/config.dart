@@ -32,7 +32,7 @@ import '../version.dart';
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required this._androidContext,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required this.featureFlags,
     this._verboseHelp = false,
     this._extensionManager,
@@ -48,6 +48,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ToolContext get toolContext => _toolContext;
 
   var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
+  final _acceptedExtensionFlags = <({String extensionName, FeatureFlag flag})>[];
+  final _acceptedExtensionOptions = <({String extensionName, ConfigOption option})>[];
+  final _acceptedExtensionActions = <({ConfigAction action, ExtensionSettingsGroup group})>[];
 
   @override
   ArgParser createBaseArgParser() {
@@ -168,21 +171,22 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   @override
   ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
     final Logger logger = _toolContext.logger;
+    _acceptedExtensionFlags.clear();
+    _acceptedExtensionOptions.clear();
+    _acceptedExtensionActions.clear();
     // Maps registered option/alias names to their owning extension identifier,
     // or `null` for built-in ConfigCommand / global FlutterCommandRunner options.
     final optionOwners = <String, String?>{
       for (final String name in _builtInOptionNames(dynamicParser)) name: null,
     };
-    for (final ExtensionSettingsGroup(
-          :title,
-          :extensionName,
-          :displayTitle,
-          :featureFlags,
-          :configOptions,
-          :configActions,
-        )
-        in _extensionSettingsGroups) {
-      final String extensionId = extensionName ?? title;
+    for (final ExtensionSettingsGroup group in _extensionSettingsGroups) {
+      final ExtensionSettingsGroup(
+        :String extensionName,
+        :String displayTitle,
+        :List<FeatureFlag> featureFlags,
+        :List<ConfigOption> configOptions,
+        :List<ConfigAction> configActions,
+      ) = group;
       var addedSeparator = false;
       void ensureSeparator() {
         if (!addedSeparator) {
@@ -193,11 +197,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
       bool claimName(String kind, String name) {
         if (!optionOwners.containsKey(name)) {
-          optionOwners[name] = extensionId;
+          optionOwners[name] = extensionName;
           return true;
         }
-        final String reason = _formatCollisionConflict(extensionId, optionOwners[name]);
-        logger.printWarning('Extension "$extensionId" $kind "--$name" $reason and was skipped.');
+        final String reason = _formatCollisionConflict(extensionName, optionOwners[name]);
+        logger.printWarning('Extension "$extensionName" $kind "--$name" $reason and was skipped.');
         return false;
       }
 
@@ -205,36 +209,57 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         final availableAliases = <String>[];
         for (final alias in aliases) {
           if (!optionOwners.containsKey(alias)) {
-            optionOwners[alias] = extensionId;
+            optionOwners[alias] = extensionName;
             availableAliases.add(alias);
           } else {
-            final String reason = _formatCollisionConflict(extensionId, optionOwners[alias]);
+            final String reason = _formatCollisionConflict(extensionName, optionOwners[alias]);
             logger.printWarning(
-              'Extension "$extensionId" $kind alias "--$alias" for "--$name" $reason and was skipped.',
+              'Extension "$extensionName" $kind alias "--$alias" for "--$name" $reason and was skipped.',
             );
           }
         }
         return availableAliases;
       }
 
-      for (final FeatureFlag(:name, :help, :enabledByDefault) in featureFlags) {
-        if (claimName('feature flag', name)) {
+      for (final flag in featureFlags) {
+        if (claimName('feature flag', flag.name)) {
           ensureSeparator();
-          dynamicParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
+          dynamicParser.addFlag(flag.name, help: flag.help, defaultsTo: flag.enabledByDefault);
+          _acceptedExtensionFlags.add((extensionName: extensionName, flag: flag));
         }
       }
-      for (final ConfigOption(:name, :help, :value, :aliases) in configOptions) {
-        if (claimName('config option', name)) {
-          final List<String> availableAliases = claimAliases('config option', name, aliases);
+      for (final option in configOptions) {
+        if (claimName('config option', option.name)) {
+          final List<String> availableAliases = claimAliases(
+            'config option',
+            option.name,
+            option.aliases,
+          );
           ensureSeparator();
-          dynamicParser.addOption(name, help: help, defaultsTo: value, aliases: availableAliases);
+          dynamicParser.addOption(
+            option.name,
+            help: option.help,
+            defaultsTo: option.value,
+            aliases: availableAliases,
+          );
+          _acceptedExtensionOptions.add((extensionName: extensionName, option: option));
         }
       }
-      for (final ConfigAction(:name, :help, :aliases) in configActions) {
-        if (claimName('config action', name)) {
-          final List<String> availableAliases = claimAliases('config action', name, aliases);
+      for (final action in configActions) {
+        if (claimName('config action', action.name)) {
+          final List<String> availableAliases = claimAliases(
+            'config action',
+            action.name,
+            action.aliases,
+          );
           ensureSeparator();
-          dynamicParser.addFlag(name, help: help, aliases: availableAliases, negatable: false);
+          dynamicParser.addFlag(
+            action.name,
+            help: action.help,
+            aliases: availableAliases,
+            negatable: false,
+          );
+          _acceptedExtensionActions.add((action: action, group: group));
         }
       }
     }
@@ -386,115 +411,71 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
     }
 
+    for (final (:String extensionName, :FeatureFlag flag) in _acceptedExtensionFlags) {
+      if (argResults!.wasParsed(flag.name)) {
+        final bool keyValue = boolArg(flag.name);
+        ExtensionConfiguration.setSettingValue(
+          config,
+          flag.settingName,
+          keyValue,
+          extensionName: extensionName,
+        );
+        logger.printStatus('Setting "${flag.name}" value to "$keyValue".');
+      }
+    }
+    for (final (:String extensionName, :ConfigOption option) in _acceptedExtensionOptions) {
+      if (argResults!.wasParsed(option.name)) {
+        _updateConfig(
+          option.name,
+          stringArg(option.name),
+          extensionName: extensionName,
+          aliases: option.aliases,
+        );
+      }
+    }
     ExtensionConfiguration? activeExtensionConfig;
-    final Set<String> claimedOptionNames = _builtInOptionNames(baseArgParser);
-    for (final ExtensionSettingsGroup group in _extensionSettingsGroups) {
-      final ExtensionSettingsGroup(
-        :ConfigurationExtension? extension,
-        :String? extensionName,
-        :List<FeatureFlag> featureFlags,
-        :List<ConfigOption> configOptions,
-        :List<ConfigAction> configActions,
-      ) = group;
-      for (final FeatureFlag(:name, :settingName) in featureFlags) {
-        if (!claimedOptionNames.add(name)) {
+    for (final (:ConfigAction action, :ExtensionSettingsGroup group) in _acceptedExtensionActions) {
+      if (argResults!.wasParsed(action.name) && boolArg(action.name)) {
+        activeExtensionConfig ??= await _activeExtensionConfig;
+        if (activeExtensionConfig == null) {
           continue;
         }
-        if (argResults!.options.contains(name) && argResults!.wasParsed(name)) {
-          final bool keyValue = boolArg(name);
-          ExtensionConfiguration.setSettingValue(
-            config,
-            settingName,
-            keyValue,
-            extensionName: extensionName,
+        final Map<String, String?> currentSettings = ExtensionConfiguration.collectActionSettings(
+          config,
+          group,
+        );
+        try {
+          final Map<String, String?> updates = await activeExtensionConfig.runConfigAction(
+            action: action,
+            currentSettings: currentSettings,
+            group: group,
           );
-          logger.printStatus('Setting "$name" value to "$keyValue".');
-        }
-      }
-      for (final ConfigOption(:name, :aliases) in configOptions) {
-        if (!claimedOptionNames.add(name)) {
-          continue;
-        }
-        claimedOptionNames.addAll(aliases);
-        if (argResults!.options.contains(name) && argResults!.wasParsed(name)) {
-          _updateExtensionConfig(
-            name,
-            stringArg(name),
-            extensionName: extensionName,
-            aliases: aliases,
-          );
-        }
-      }
-      for (final action in configActions) {
-        if (!claimedOptionNames.add(action.name)) {
-          continue;
-        }
-        claimedOptionNames.addAll(action.aliases);
-        if (argResults!.options.contains(action.name) &&
-            argResults!.wasParsed(action.name) &&
-            boolArg(action.name) &&
-            extension != null) {
-          activeExtensionConfig ??= await _activeExtensionConfig;
-          if (activeExtensionConfig == null) {
-            continue;
-          }
-          final Map<String, String?> currentSettings = ExtensionConfiguration.collectActionSettings(
-            config,
-            group,
-          );
-          try {
-            final Map<String, String?> updates = await activeExtensionConfig.runConfigAction(
-              extension: extension,
-              action: action,
-              currentSettings: currentSettings,
-            );
-            final aliasesByOptionName = <String, List<String>>{
-              for (final ConfigOption(:name, :aliases) in configOptions) name: aliases,
-            };
-            final featureFlagSettingNames = <String>{
-              for (final FeatureFlag(:settingName) in featureFlags) settingName,
-            };
-            for (final MapEntry(:key, :value) in updates.entries) {
-              final List<String> aliases = aliasesByOptionName[key] ?? const <String>[];
-              if (value == null) {
-                ExtensionConfiguration.removeSettingValue(
-                  config,
-                  key,
-                  extensionName: extensionName,
-                  aliases: aliases,
-                );
-                logger.printStatus('Removing "$key" value.');
-              } else if (featureFlagSettingNames.contains(key)) {
-                final bool boolValue = switch (value.toLowerCase()) {
-                  'true' => true,
-                  'false' => false,
-                  _ => throw ToolExtensionException(
-                    'Extension "${extensionName ?? group.title}" config action "${action.name}" '
-                    'returned non-boolean value "$value" for feature flag "$key".',
-                  ),
-                };
-                ExtensionConfiguration.setSettingValue(
-                  config,
-                  key,
-                  boolValue,
-                  extensionName: extensionName,
-                  aliases: aliases,
-                );
-                logger.printStatus('Setting "$key" value to "$boolValue".');
-              } else {
-                ExtensionConfiguration.setSettingValue(
-                  config,
-                  key,
-                  value,
-                  extensionName: extensionName,
-                  aliases: aliases,
-                );
-                logger.printStatus('Setting "$key" value to "$value".');
-              }
+          final aliasesByOptionName = <String, List<String>>{
+            for (final ConfigOption(:name, :aliases) in group.configOptions) name: aliases,
+          };
+          for (final MapEntry(:key, :value) in updates.entries) {
+            final List<String> aliases = aliasesByOptionName[key] ?? const <String>[];
+            if (value == null) {
+              ExtensionConfiguration.removeSettingValue(
+                config,
+                key,
+                extensionName: group.extensionName,
+                aliases: aliases,
+              );
+              logger.printStatus('Removing "$key" value.');
+            } else {
+              ExtensionConfiguration.setSettingValue(
+                config,
+                key,
+                value,
+                extensionName: group.extensionName,
+                aliases: aliases,
+              );
+              logger.printStatus('Setting "$key" value to "$value".');
             }
-          } on ToolExtensionException catch (error) {
-            throwToolExit(error.message);
           }
+        } on ToolExtensionException catch (error) {
+          throwToolExit(error.message);
         }
       }
     }
@@ -533,18 +514,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     logger.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String? keyValue) {
-    final ToolContext(:Config config, :Logger logger) = _toolContext;
-    if (keyValue == null || keyValue.isEmpty) {
-      config.removeValue(keyName);
-      logger.printStatus('Removing "$keyName" value.');
-    } else {
-      config.setValue(keyName, keyValue);
-      logger.printStatus('Setting "$keyName" value to "$keyValue".');
-    }
-  }
-
-  void _updateExtensionConfig(
+  void _updateConfig(
     String keyName,
     String? keyValue, {
     String? extensionName,
@@ -552,21 +522,29 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   }) {
     final ToolContext(:Config config, :Logger logger) = _toolContext;
     if (keyValue == null || keyValue.isEmpty) {
-      ExtensionConfiguration.removeSettingValue(
-        config,
-        keyName,
-        extensionName: extensionName,
-        aliases: aliases,
-      );
+      if (extensionName != null) {
+        ExtensionConfiguration.removeSettingValue(
+          config,
+          keyName,
+          extensionName: extensionName,
+          aliases: aliases,
+        );
+      } else {
+        config.removeValue(keyName);
+      }
       logger.printStatus('Removing "$keyName" value.');
     } else {
-      ExtensionConfiguration.setSettingValue(
-        config,
-        keyName,
-        keyValue,
-        extensionName: extensionName,
-        aliases: aliases,
-      );
+      if (extensionName != null) {
+        ExtensionConfiguration.setSettingValue(
+          config,
+          keyName,
+          keyValue,
+          extensionName: extensionName,
+          aliases: aliases,
+        );
+      } else {
+        config.setValue(keyName, keyValue);
+      }
       logger.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
@@ -617,7 +595,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         }
         final ExtensionSettingsGroup(
           :String displayTitle,
-          :String? extensionName,
+          :String extensionName,
           :List<FeatureFlag> featureFlags,
           :List<ConfigOption> configOptions,
           :List<String> actionOnlySettingsKeys,
@@ -656,7 +634,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
     }
 
-    final activeExtensionNames = <String>{for (final group in groups) ?group.extensionName};
+    final activeExtensionNames = <String>{for (final group in groups) group.extensionName};
     final Map<String, Map<String, Object?>> inactiveSettings =
         ExtensionConfiguration.inactiveSavedExtensionSettings(
           config,
@@ -677,6 +655,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
+    if (_toolContext.flutterVersion.channel == kUserBranch) {
+      return 'Analytics reporting is currently disabled when running from a feature branch.';
+    }
     return 'Analytics reporting is currently ${analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 

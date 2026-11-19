@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -78,8 +77,9 @@ name: my_app
             kBuildMode: BuildMode.debug.cliName,
           },
           artifacts: Artifacts.test(),
+          featureFlags: TestFeatureFlags(isRecordUseEnabled: true),
           processManager: processManager,
-          logger: globals.logger,
+          logger: BufferLogger.test(),
           fileSystem: fs,
         );
         environment.buildDir.createSync(recursive: true);

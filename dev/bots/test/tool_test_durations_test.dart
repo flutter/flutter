@@ -12,8 +12,8 @@ import 'package:path/path.dart' as p;
 
 import './common.dart';
 
-/// Keeps `dev/bots/tool_integration_test_durations.json` in sync with
-/// `packages/flutter_tools/test/integration.shard`.
+/// Keeps `dev/bots/tool_test_durations.json` in sync with the
+/// `packages/flutter_tools/test/<shard>.shard` directories it covers.
 void main() {
   final String flutterRoot = () {
     io.Directory current = io.Directory.current;
@@ -28,8 +28,9 @@ void main() {
     return current.path;
   }();
 
-  const durationsPath = 'dev/bots/tool_integration_test_durations.json';
+  const durationsPath = 'dev/bots/tool_test_durations.json';
   const hosts = <String>['linux', 'macos', 'windows'];
+  const shards = <String>['integration.shard', 'commands.shard', 'web.shard'];
 
   late Map<String, Map<String, int>> durations;
   late Set<String> testFiles;
@@ -47,12 +48,14 @@ void main() {
     );
 
     final String toolsRoot = p.join(flutterRoot, 'packages', 'flutter_tools');
-    testFiles = io.Directory(p.join(toolsRoot, 'test', 'integration.shard'))
-        .listSync(recursive: true)
-        .whereType<io.File>()
-        .map((io.File file) => p.posix.joinAll(p.split(p.relative(file.path, from: toolsRoot))))
-        .where((String file) => file.endsWith('_test.dart'))
-        .toSet();
+    testFiles = <String>{
+      for (final shard in shards)
+        ...io.Directory(p.join(toolsRoot, 'test', shard))
+            .listSync(recursive: true)
+            .whereType<io.File>()
+            .map((io.File file) => p.posix.joinAll(p.split(p.relative(file.path, from: toolsRoot))))
+            .where((String file) => file.endsWith('_test.dart')),
+    };
   });
 
   test('has an entry for every host', () {
@@ -60,7 +63,7 @@ void main() {
   });
 
   for (final host in hosts) {
-    test('$host lists exactly the files in integration.shard', () {
+    test('$host lists exactly the files in ${shards.join(' and ')}', () {
       final Map<String, int> forHost = durations[host]!;
       final List<String> missing = testFiles.difference(forHost.keys.toSet()).toList()..sort();
       final List<String> stale = forHost.keys.toSet().difference(testFiles).toList()..sort();
@@ -77,7 +80,7 @@ void main() {
         if (missing.isNotEmpty || stale.isNotEmpty) ...<String>[
           '',
           'Either run:',
-          '  dart dev/bots/update_tool_integration_test_durations.dart',
+          '  dart dev/bots/update_tool_test_durations.dart',
           'or edit $durationsPath by hand. Each host needs an entry; use the',
           "test's wall time in seconds, or 0 on hosts where it does not run.",
         ],

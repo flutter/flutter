@@ -8,11 +8,8 @@ import 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
 
 import 'protocol_base/service.dart';
 
-/// Alias for [ConfigurationExtension] matching the `ConfigService` protocol name.
-typedef ConfigService = ConfigurationExtension;
-
 /// Extension service interface for retrieving and managing configuration flags and feature toggles.
-abstract class ConfigurationExtension extends ToolExtensionService {
+abstract base class ConfigurationExtension extends ToolExtensionService {
   /// Service namespace identifier for configuration services.
   static const String serviceNamespace = 'config';
 
@@ -59,7 +56,8 @@ abstract class ConfigurationExtension extends ToolExtensionService {
   /// [currentSettings] and returns a map of updated setting keys to their new
   /// values (or `null` to clear a setting).
   ///
-  /// Every returned key must be declared in the corresponding [ConfigAction.settingsKeys].
+  /// Every returned key must belong to this extension's declared [ConfigOption]
+  /// names or the corresponding [ConfigAction.settingsKeys].
   Future<Map<String, String?>> runConfigAction(
     String name, {
     required Map<String, String?> currentSettings,

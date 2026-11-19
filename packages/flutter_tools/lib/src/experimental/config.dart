@@ -13,29 +13,29 @@ import '../base/config.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../convert.dart';
 import 'extension_discovery.dart';
 
 /// Represents a group of configuration settings provided by a specific extension.
 class ExtensionSettingsGroup {
   const ExtensionSettingsGroup({
-    required this.title,
-    required this.featureFlags,
     required this.configOptions,
+    required this.extension,
+    required this.extensionName,
+    required this.featureFlags,
+    required this.title,
     this.configActions = const <ConfigAction>[],
-    this.extension,
-    this.extensionName,
   });
 
   /// The human-readable title of the extension.
   final String title;
 
-  /// Optional identifier of the extension package (used to namespace settings
-  /// under `"extensions": { "<extensionName>": { ... } }` in `flutter_settings`).
-  final String? extensionName;
+  /// Identifier of the extension (package name when backed by an isolate
+  /// connection, or extension title otherwise), used to namespace settings
+  /// under `"extensions": { "<extensionName>": { ... } }` in `flutter_settings`.
+  final String extensionName;
 
-  /// The [ConfigurationExtension] that produced this group, if available.
-  final ConfigurationExtension? extension;
+  /// The [ConfigurationExtension] that produced this group.
+  final ConfigurationExtension extension;
 
   /// Feature flags registered by the extension.
   final List<FeatureFlag> featureFlags;
@@ -47,12 +47,8 @@ class ExtensionSettingsGroup {
   final List<ConfigAction> configActions;
 
   /// Section header attributing this group to its declaring extension package.
-  String get displayTitle {
-    if (extensionName case final name? when name.isNotEmpty) {
-      return '$title (package:$name)';
-    }
-    return title;
-  }
+  String get displayTitle =>
+      extension is ConfigurationExtensionClient ? '$title (package:$extensionName)' : title;
 
   /// Settings keys declared by [configActions] that do not already correspond to
   /// a [FeatureFlag] or [ConfigOption] in this group.
@@ -114,28 +110,21 @@ class ExtensionConfiguration {
   static String _extensionIdentifier(ConfigurationExtension ext) =>
       ext is ConfigurationExtensionClient ? ext.connection.extensionName : ext.title;
 
-  String? _extensionStorageNamespace(ConfigurationExtension ext) =>
-      ext is ConfigurationExtensionClient ? ext.connection.extensionName : null;
-
-  /// Looks up a persisted setting [key] (and optional [aliases]) in [config],
-  /// checking `"extensions"[extensionName]` first when [extensionName] is
-  /// non-empty before falling back to legacy top-level [aliases].
+  /// Looks up a persisted setting [key] (and optional [aliases]) under
+  /// `"extensions"[extensionName]` in [config], falling back to legacy
+  /// top-level [aliases].
   static Object? lookupSettingValue(
     Config config,
     String key, {
-    String? extensionName,
+    required String extensionName,
     List<String> aliases = const <String>[],
   }) {
-    if (extensionName != null && extensionName.isNotEmpty) {
-      if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> extensionsMap) {
-        if (extensionsMap[extensionName] case final Map<String, Object?> pkgMap) {
-          if (pkgMap[key] case final Object value) {
-            return value;
-          }
+    if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> extensionsMap) {
+      if (extensionsMap[extensionName] case final Map<String, Object?> pkgMap) {
+        if (pkgMap[key] case final Object value) {
+          return value;
         }
       }
-    } else if (config.getValue(key) case final Object unprefixed) {
-      return unprefixed;
     }
     for (final alias in aliases) {
       if (config.getValue(alias) case final Object aliasValue) {
@@ -150,7 +139,7 @@ class ExtensionConfiguration {
   static void removeSettingValue(
     Config config,
     String key, {
-    String? extensionName,
+    required String extensionName,
     List<String> aliases = const <String>[],
   }) {
     for (final alias in aliases) {
@@ -158,27 +147,21 @@ class ExtensionConfiguration {
         config.removeValue(alias);
       }
     }
-    if (extensionName != null && extensionName.isNotEmpty) {
-      if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> existing) {
-        final extensionsMap = <String, Object?>{...existing};
-        if (extensionsMap[extensionName] case final Map<String, Object?> existingPkg) {
-          final pkgMap = <String, Object?>{...existingPkg}..remove(key);
-          if (pkgMap.isEmpty) {
-            extensionsMap.remove(extensionName);
-          } else {
-            extensionsMap[extensionName] = pkgMap;
-          }
-          if (extensionsMap.isEmpty) {
-            config.removeValue(extensionsSettingsKey);
-          } else {
-            config.setValue(extensionsSettingsKey, extensionsMap);
-          }
+    if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> existing) {
+      final extensionsMap = <String, Object?>{...existing};
+      if (extensionsMap[extensionName] case final Map<String, Object?> existingPkg) {
+        final pkgMap = <String, Object?>{...existingPkg}..remove(key);
+        if (pkgMap.isEmpty) {
+          extensionsMap.remove(extensionName);
+        } else {
+          extensionsMap[extensionName] = pkgMap;
+        }
+        if (extensionsMap.isEmpty) {
+          config.removeValue(extensionsSettingsKey);
+        } else {
+          config.setValue(extensionsSettingsKey, extensionsMap);
         }
       }
-      return;
-    }
-    if (config.containsKey(key)) {
-      config.removeValue(key);
     }
   }
 
@@ -188,7 +171,7 @@ class ExtensionConfiguration {
     Config config,
     String key,
     Object value, {
-    String? extensionName,
+    required String extensionName,
     List<String> aliases = const <String>[],
   }) {
     for (final alias in aliases) {
@@ -196,30 +179,25 @@ class ExtensionConfiguration {
         config.removeValue(alias);
       }
     }
-    if (extensionName != null && extensionName.isNotEmpty) {
-      final extensionsMap = <String, Object?>{
-        if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> existing)
-          ...existing,
-      };
-      final pkgMap = <String, Object?>{
-        if (extensionsMap[extensionName] case final Map<String, Object?> existingPkg)
-          ...existingPkg,
-      };
-      pkgMap[key] = value;
-      extensionsMap[extensionName] = pkgMap;
-      config.setValue(extensionsSettingsKey, extensionsMap);
-      return;
-    }
-    config.setValue(key, value);
+    final extensionsMap = <String, Object?>{
+      if (config.getValue(extensionsSettingsKey) case final Map<String, Object?> existing)
+        ...existing,
+    };
+    final pkgMap = <String, Object?>{
+      if (extensionsMap[extensionName] case final Map<String, Object?> existingPkg) ...existingPkg,
+    };
+    pkgMap[key] = value;
+    extensionsMap[extensionName] = pkgMap;
+    config.setValue(extensionsSettingsKey, extensionsMap);
   }
 
-  /// Resolves the effective value of [flag] (`environmentOverride` > persisted
+  /// Resolves the value of [flag] (`environmentOverride` > persisted
   /// `"extensions"` setting > [FeatureFlag.enabledByDefault]).
   static bool resolveFeatureFlagValue(
     Config config,
     FeatureFlag flag, {
+    required String extensionName,
     Map<String, String> environment = const <String, String>{},
-    String? extensionName,
   }) {
     if (flag.environmentOverride case final String envVar when envVar.isNotEmpty) {
       switch (environment[envVar]?.trim().toLowerCase()) {
@@ -242,14 +220,14 @@ class ExtensionConfiguration {
     };
   }
 
-  /// Resolves the effective value of [option] (`environmentOverride` >
-  /// persisted `"extensions"` setting / legacy [ConfigOption.aliases] >
+  /// Resolves the value of [option] (`environmentOverride` > persisted
+  /// `"extensions"` setting / legacy [ConfigOption.aliases] >
   /// [ConfigOption.value]).
   static String? resolveConfigOptionValue(
     Config config,
     ConfigOption option, {
+    required String extensionName,
     Map<String, String> environment = const <String, String>{},
-    String? extensionName,
   }) {
     if (option.environmentOverride case final String envVar when envVar.isNotEmpty) {
       final String? envValue = environment[envVar];
@@ -304,10 +282,23 @@ class ExtensionConfiguration {
   /// flags unless explicitly listed in [ConfigAction.settingsKeys]), normalized
   /// to `String?` for passing to [ConfigurationExtension.runConfigAction].
   static Map<String, String?> collectActionSettings(Config config, ExtensionSettingsGroup group) {
+    return _collectScopedActionSettings(
+      config,
+      configActions: group.configActions,
+      configOptions: group.configOptions,
+      extensionName: group.extensionName,
+    );
+  }
+
+  static Map<String, String?> _collectScopedActionSettings(
+    Config config, {
+    required List<ConfigAction> configActions,
+    required List<ConfigOption> configOptions,
+    required String extensionName,
+  }) {
     final values = <String, String?>{};
-    final String? extensionName = group.extensionName;
     final aliasesByOptionName = <String, List<String>>{};
-    for (final ConfigOption(:name, :aliases) in group.configOptions) {
+    for (final ConfigOption(:name, :aliases) in configOptions) {
       aliasesByOptionName[name] = aliases;
       final Object? rawValue = lookupSettingValue(
         config,
@@ -319,7 +310,7 @@ class ExtensionConfiguration {
         values[name] = rawValue.toString();
       }
     }
-    for (final ConfigAction(:settingsKeys) in group.configActions) {
+    for (final ConfigAction(:settingsKeys) in configActions) {
       for (final key in settingsKeys) {
         if (values.containsKey(key)) {
           continue;
@@ -346,21 +337,20 @@ class ExtensionConfiguration {
   static Future<Map<String, Object?>> resolveConfigurationValues({
     required Config config,
     required ConfigurationExtension extension,
+    required String extensionName,
     Map<String, String> environment = const <String, String>{},
-    String? extensionName,
   }) async {
     final List<FeatureFlag> flags = await extension.getFeatureFlags();
     final List<ConfigOption> options = await extension.getConfigurations();
     final List<ConfigAction> actions = await extension.getConfigActions();
-    final group = ExtensionSettingsGroup(
-      title: extension.title,
-      extension: extension,
-      extensionName: extensionName,
-      featureFlags: flags,
-      configOptions: options,
-      configActions: actions,
-    );
-    final values = <String, Object?>{...collectActionSettings(config, group)};
+    final values = <String, Object?>{
+      ..._collectScopedActionSettings(
+        config,
+        configActions: actions,
+        configOptions: options,
+        extensionName: extensionName,
+      ),
+    };
     for (final flag in flags) {
       values[flag.settingName] = resolveFeatureFlagValue(
         config,
@@ -435,23 +425,27 @@ class ExtensionConfiguration {
     return options;
   }
 
-  /// Executes [action] on [extension] with [currentSettings] and validates that
-  /// every returned setting key is declared in [ConfigAction.settingsKeys].
+  /// Executes [action] on [group]'s extension with [currentSettings] and
+  /// validates that every returned setting key belongs to the extension's
+  /// declared [ConfigOption] names or [ConfigAction.settingsKeys].
   Future<Map<String, String?>> runConfigAction({
-    required ConfigurationExtension extension,
     required ConfigAction action,
     required Map<String, String?> currentSettings,
+    required ExtensionSettingsGroup group,
   }) async {
-    final Map<String, String?> updates = await extension.runConfigAction(
+    final Map<String, String?> updates = await group.extension.runConfigAction(
       action.name,
       currentSettings: currentSettings,
     );
-    final Set<String> allowedKeys = action.settingsKeys.toSet();
+    final allowedKeys = <String>{
+      for (final ConfigOption(:name) in group.configOptions) name,
+      ...action.settingsKeys,
+    };
     for (final String key in updates.keys) {
       if (!allowedKeys.contains(key)) {
         throw ToolExtensionException(
-          'Extension "${_extensionIdentifier(extension)}" config action "${action.name}" '
-          'returned undeclared setting key "$key" (allowed: ${action.settingsKeys}).',
+          'Extension "${group.extensionName}" config action "${action.name}" '
+          'returned undeclared setting key "$key" (allowed: ${allowedKeys.toList()}).',
         );
       }
     }
@@ -473,12 +467,12 @@ class ExtensionConfiguration {
           final List<ConfigOption> options = await ext.getConfigurations();
           final List<ConfigAction> actions = await ext.getConfigActions();
           return ExtensionSettingsGroup(
-            title: title,
-            extension: ext,
-            extensionName: _extensionStorageNamespace(ext),
-            featureFlags: flags,
-            configOptions: options,
             configActions: actions,
+            configOptions: options,
+            extension: ext,
+            extensionName: _extensionIdentifier(ext),
+            featureFlags: flags,
+            title: title,
           );
         } on ToolExtensionException catch (err) {
           _logger.printWarning('Extension "${_extensionIdentifier(ext)}": ${err.message}');
@@ -499,13 +493,12 @@ class ExtensionConfiguration {
 /// Handles host-side interactive terminal prompt RPCs (`terminal.promptForOption`
 /// and `terminal.promptForInput`) for tool extensions.
 class ExtensionTerminalPrompter {
-  ExtensionTerminalPrompter({required this._logger, this._stdio, this._terminal});
+  ExtensionTerminalPrompter({required this._logger, required this._terminal, this._stdio});
 
   final Logger _logger;
+  final Terminal _terminal;
   final Stdio? _stdio;
-  final Terminal? _terminal;
   bool _isMachineMode = false;
-  Stream<String>? _stdioLines;
 
   /// Marks the current CLI invocation as running in `--machine` mode so
   /// interactive terminal prompt RPCs fail fast with
@@ -520,9 +513,7 @@ class ExtensionTerminalPrompter {
         'Cannot prompt for user input when "--machine" is enabled.',
       );
     }
-    final bool hasTerminal =
-        (_terminal?.stdinHasTerminal ?? false) || (_stdio?.stdinHasTerminal ?? false);
-    if (!hasTerminal) {
+    if (!_terminal.stdinHasTerminal) {
       throw const ToolExtensionException(
         'Cannot prompt for user input in a non-interactive terminal.',
       );
@@ -530,28 +521,9 @@ class ExtensionTerminalPrompter {
   }
 
   Future<String?> _readStdinLine() async {
-    final Terminal? terminal = _terminal;
-    if (terminal != null && terminal.stdinHasTerminal) {
-      terminal.usesTerminalUi = true;
-      try {
-        return await terminal.readLine();
-      } on StateError {
-        return null;
-      }
-    }
-    final Stdio? stdio = _stdio;
-    if (stdio == null) {
-      return null;
-    }
-    final Stream<String> lines = _stdioLines ??= stdio.stdin
-        .transform<String>(const Utf8Decoder(reportErrors: false))
-        .transform<String>(const LineSplitter())
-        .asBroadcastStream(
-          onListen: (StreamSubscription<String> subscription) => subscription.resume(),
-          onCancel: (StreamSubscription<String> subscription) => subscription.pause(),
-        );
+    _terminal.usesTerminalUi = true;
     try {
-      return await lines.first;
+      return await _terminal.readLine();
     } on StateError {
       return null;
     }
@@ -591,12 +563,11 @@ class ExtensionTerminalPrompter {
     }
     final promptText = '$message (or "q" to quit)';
 
-    final Terminal? terminal = _terminal;
-    if (terminal != null && terminal.stdinHasTerminal && count <= 9) {
-      terminal.usesTerminalUi = true;
+    if (count <= 9) {
+      _terminal.usesTerminalUi = true;
       final String choice;
       try {
-        choice = await terminal.promptForCharInput(
+        choice = await _terminal.promptForCharInput(
           List<String>.generate(count, (int number) => '${number + 1}')..add('q'),
           prompt: promptText,
           defaultChoiceIndex: defaultChoiceIndex,
@@ -691,7 +662,7 @@ class ExtensionTerminalPrompter {
 }
 
 /// A host-side [ConfigurationExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
-class ConfigurationExtensionClient extends ConfigurationExtension {
+final class ConfigurationExtensionClient extends ConfigurationExtension {
   ConfigurationExtensionClient(
     this.connection, {
     required this._logger,
@@ -774,10 +745,7 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
       'feature flag(s)',
       FeatureFlag.fromJson,
     );
-    if (flags != null) {
-      return _featureFlagsCache = flags;
-    }
-    return const <FeatureFlag>[];
+    return flags != null ? (_featureFlagsCache = flags) : const <FeatureFlag>[];
   }
 
   @override
@@ -790,10 +758,7 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
       'config option(s)',
       ConfigOption.fromJson,
     );
-    if (options != null) {
-      return _configurationsCache = options;
-    }
-    return const <ConfigOption>[];
+    return options != null ? (_configurationsCache = options) : const <ConfigOption>[];
   }
 
   @override
@@ -801,31 +766,12 @@ class ConfigurationExtensionClient extends ConfigurationExtension {
     if (_configActionsCache case final cached?) {
       return cached;
     }
-    const String method = ConfigurationExtension.getConfigActionsMethod;
-    _logger.printTrace(
-      'ConfigurationExtensionClient fetching config action(s) via RPC ("$method")...',
+    final List<ConfigAction>? actions = await _fetchList(
+      ConfigurationExtension.getConfigActionsMethod,
+      'config action(s)',
+      ConfigAction.fromJson,
     );
-    try {
-      final Object? rawResult = await connection.sendRequest(method);
-      if (rawResult case final List<Object?> list) {
-        final results = List<ConfigAction>.unmodifiable(ConfigAction.listFromJson(list));
-        _configActionsCache = results;
-        _logger.printTrace(
-          'ConfigurationExtensionClient received ${results.length} config action(s) via RPC.',
-        );
-        return results;
-      }
-      _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null config action(s) response: $rawResult',
-      );
-    } on ToolExtensionException {
-      rethrow;
-    } on Object catch (err, stack) {
-      _logger.printTrace(
-        'ConfigurationExtensionClient failed to get config action(s): $err\n$stack',
-      );
-    }
-    return const <ConfigAction>[];
+    return actions != null ? (_configActionsCache = actions) : const <ConfigAction>[];
   }
 
   @override
