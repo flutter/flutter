@@ -114,6 +114,9 @@ const kAdvancedBlendTest = 'advancedBlendTest';
 /// Scenario name for rendering a centered BackdropFilter Gaussian blur layer.
 const kBackdropFilterBlurTest = 'backdropFilterBlurTest';
 
+/// Scenario name for stressing engine teardown while rendering is active.
+const kEngineTeardownTest = 'engineTeardownTest';
+
 /// The prefix shared by all platform view scenario names.
 const platformViewPrefix = 'platformView';
 
