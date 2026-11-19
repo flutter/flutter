@@ -989,10 +989,10 @@ class AccessibilityFeatures {
   ///  * iOS: set when the "Reduce Motion" accessibility setting is enabled.
   ///  * Web: set, together with [disableAnimations], when the
   ///    `prefers-reduced-motion` media query matches.
-  ///  * Android and Linux: never set. Use [disableAnimations] there.
+  ///  * Android and Linux: never set. [disableAnimations] is set instead.
   ///
-  /// Because [disableAnimations] is not set on iOS, check both flags to honor
-  /// the user's preference on every platform.
+  /// Because [disableAnimations] is not set on iOS, consider checking both
+  /// flags to honor the user's preference on every platform.
   ///
   /// See also:
   ///
