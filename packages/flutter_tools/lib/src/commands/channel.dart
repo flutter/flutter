@@ -15,7 +15,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false}) {
+  ChannelCommand({required super.toolContext, super.verboseHelp = false}) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -36,9 +36,6 @@ class ChannelCommand extends FlutterCommand {
       negatable: false,
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'channel';

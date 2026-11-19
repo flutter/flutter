@@ -24,15 +24,17 @@ const kIntegrationTestMethod = 'ext.flutter.integrationTest';
 
 class IntegrationTestTestDevice extends TestDevice {
   IntegrationTestTestDevice({
-    required this.id,
-    required this.device,
-    required this.debuggingOptions,
-    required this.userIdentifier,
+    required this.applicationPackageFactory,
     required this.compileExpression,
+    required this.debuggingOptions,
+    required this.device,
+    required this.id,
     required super.toolContext,
+    required this.userIdentifier,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 
+  final ApplicationPackageFactory applicationPackageFactory;
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
@@ -53,7 +55,7 @@ class IntegrationTestTestDevice extends TestDevice {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
         toolContext;
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
+    _applicationPackage = await applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: debuggingOptions.buildInfo,
     );

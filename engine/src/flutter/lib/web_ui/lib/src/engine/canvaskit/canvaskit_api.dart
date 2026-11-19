@@ -1534,16 +1534,6 @@ Float32List toFlatSkPoints(List<ui.Offset> points) {
   return result;
 }
 
-/// Converts a list of [ui.Color] into a flat list of ints.
-Uint32List toFlatColors(List<ui.Color> colors) {
-  final int len = colors.length;
-  final result = Uint32List(len);
-  for (var i = 0; i < len; i++) {
-    result[i] = colors[i].value;
-  }
-  return result;
-}
-
 Uint16List toUint16List(List<int> ints) {
   final int len = ints.length;
   final result = Uint16List(len);
@@ -1930,6 +1920,7 @@ extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
   external set replaceTabCharacters(bool? bool);
   external set applyRoundingHack(bool applyRoundingHack);
   external set renderSoftHyphens(bool renderSoftHyphens);
+  external set softHyphenString(String? softHyphenString);
 }
 
 extension type SkTextStyle(JSObject _) implements JSObject {}

@@ -139,6 +139,7 @@ GetActualRenderingAPIForImpeller(
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
           .enable_gpu_tracing = settings.enable_gpu_tracing,
           .enable_surface_control = settings.enable_surface_control,
+          .impeller_flags = settings.impeller_flags,
       });
   if (!vulkan_backend->IsValid()) {
     FML_LOG(INFO)
@@ -208,7 +209,8 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
   if (!vk_context_) {
     gl_context_ = std::make_shared<AndroidContextGLImpeller>(
         std::make_unique<impeller::egl::Display>(),
-        settings_.enable_gpu_tracing, io_task_runner_);
+        settings_.enable_gpu_tracing, settings_.impeller_flags,
+        io_task_runner_);
   }
   // The id is only meaningful while setup is in flight. Cleared before the
   // signal so a waiter can never observe a completed setup alongside a stale

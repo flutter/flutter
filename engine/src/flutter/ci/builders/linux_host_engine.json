@@ -43,8 +43,7 @@
                 "debug",
                 "--prebuilt-dart-sdk",
                 "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--rbe"
             ],
             "name": "ci/host_debug",
             "description": "Produces debug mode Linux host-side tooling.",
@@ -92,9 +91,8 @@
                 "--runtime-mode",
                 "release",
                 "--prebuilt-dart-sdk",
-                "--no-lto",
-                "--rbe",
-                "--no-goma"
+                "--thin-lto",
+                "--rbe"
             ],
             "name": "ci/host_release",
             "description": "Produces flutter_patched_sdk_product.zip shared by all Flutter release builds.",

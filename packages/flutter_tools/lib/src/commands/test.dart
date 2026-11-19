@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -68,16 +69,16 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
-    required TemplateRenderer templateRenderer,
+    required this._assetBundleFactory,
+    required this._templateRenderer,
     required super.toolContext,
+    super.applicationPackages,
     this.nativeAssetsBuilder,
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
     this.verbose = false,
     super.verboseHelp = false,
-  }) : _testRunner =
-           testRunner ??
-           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!) {
+  }) : _customTestRunner = testRunner {
     requiresPubspecYaml();
     registerOptionBundles(const <OptionBundle>[
       DdsAndDevToolsOptionsBundle(includeDevTools: false),
@@ -137,7 +138,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     name: 'experimental-faster-testing',
     negatable: false,
     verboseOnly: true,
-    help: 'Run each test in a separate lightweight Flutter Engine to speed up testing.',
+    help:
+        '(deprecated) This option is deprecated and no longer has any effect. '
+        'This flag will be removed in a future version of Flutter.',
   );
 
   static const _name = MultiOptionDescriptor(
@@ -377,14 +380,22 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'Set "--no-uninstall" to keep the app installed on the device.',
   );
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   /// The interface for starting and configuring the tester.
   final TestWrapper testWrapper;
 
+  final AssetBundleFactory _assetBundleFactory;
+  final TemplateRenderer _templateRenderer;
+  final FlutterTestRunner? _customTestRunner;
+
   /// Interface for running the tester process.
-  final FlutterTestRunner _testRunner;
+  late final FlutterTestRunner _testRunner =
+      _customTestRunner ??
+      FlutterTestRunner(
+        analytics: analytics,
+        applicationPackageFactory: applicationPackages,
+        templateRenderer: _templateRenderer,
+        toolContext: toolContext,
+      );
 
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
@@ -520,21 +531,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    bool experimentalFasterTesting = getValue(_experimentalFasterTesting);
-    if (experimentalFasterTesting) {
-      if (_isIntegrationTest || isWeb) {
-        experimentalFasterTesting = false;
-        logger.printStatus(
-          '--experimental-faster-testing was parsed but will be ignored. This '
-          'option is not supported when running integration tests or web tests.',
-        );
-      } else if (_testFileUris.length == 1) {
-        experimentalFasterTesting = false;
-        logger.printStatus(
-          '--experimental-faster-testing was parsed but will be ignored. This '
-          'option should not be used when running a single test file.',
-        );
-      }
+    if (getValue(_experimentalFasterTesting)) {
+      logger.printWarning(
+        'The "--experimental-faster-testing" flag is deprecated and no longer '
+        'has any effect. This flag will be removed in a future version of Flutter.',
+      );
     }
 
     final bool startPaused = getValue(_startPaused);
@@ -572,7 +573,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             nativeAssetsManifest: null,
             flutterHookResult: null,
           ) // Don't build for host when running integration tests.
-        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo, toolContext: toolContext) ??
+        : (await nativeAssetsBuilder?.buildWithHookResult(
+                buildInfo,
+                featureFlags: runner!.featureFlags,
+                toolContext: toolContext,
+              ) ??
               (nativeAssetsManifest: null, flutterHookResult: null));
     String? testAssetPath;
     if (buildTestAssets) {
@@ -615,13 +620,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       // Running with concurrency will result in deploying multiple test apps
       // on the connected device concurrently, which is not supported.
       jobs = 1;
-    } else if (experimentalFasterTesting) {
-      if (wasParsed(_concurrency)) {
-        logger.printStatus(
-          '-j/--concurrency was parsed but will be ignored. This option is not '
-          'compatible with --experimental-faster-testing.',
-        );
-      }
     }
 
     final int? shardIndex = getValue(_shardIndex);
@@ -646,23 +644,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
 
     final bool enableVmService = getValue(_enableVmService);
-    if (experimentalFasterTesting && enableVmService) {
-      logger.printStatus(
-        '--enable-vmservice was parsed but will be ignored. This option is not '
-        'compatible with --experimental-faster-testing.',
-      );
-    }
-
-    final bool ipv6 = getValue(_ipv6);
-    if (experimentalFasterTesting && ipv6) {
-      // [ipv6] is set when the user desires for the test harness server to use
-      // IPv6, but a test harness server will not be started at all when
-      // [experimentalFasterTesting] is set.
-      logger.printStatus(
-        '--ipv6 was parsed but will be ignored. This option is not compatible '
-        'with --experimental-faster-testing.',
-      );
-    }
 
     CoverageCollector? collector;
     if (getValue(_coverage) || getValue(_mergeCoverage) || getValue(_branchCoverage)) {
@@ -770,16 +751,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final Stopwatch? testRunnerTimeRecorderStopwatch = testTimeRecorder?.start(
       TestTimePhases.TestRunner,
     );
-    final int result;
-    if (experimentalFasterTesting) {
-      assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
-      result = await _testRunner.runTestsBySpawningLightweightEngines(
-        _testFileUris.toList(),
-        executionSpec,
-      );
-    } else {
-      result = await _testRunner.runTests(testWrapper, _testFileUris.toList(), executionSpec);
-    }
+    final int result = await _testRunner.runTests(
+      testWrapper,
+      _testFileUris.toList(),
+      executionSpec,
+    );
     testTimeRecorder?.stop(TestTimePhases.TestRunner, testRunnerTimeRecorderStopwatch!);
 
     if (collector != null) {
@@ -866,7 +842,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterHookResult? flutterHookResult,
   }) async {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final AssetBundle assetBundle = _assetBundleFactory.createBundle();
     final int build = await assetBundle.build(
       flutterHookResult: flutterHookResult,
       packageConfigPath: packageConfigPath,
@@ -877,7 +853,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    if (_needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
+    if (await _needsRebuild(assetBundle.entries, flavor, flutterHookResult)) {
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
@@ -901,15 +877,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needsRebuild(
+  Future<bool> _needsRebuild(
     Map<String, AssetBundleEntry> entries,
     String? flavor,
     FlutterHookResult? flutterHookResult,
-  ) {
-    // TODO(andrewkolos): This logic might fail in the future if we change the
-    //  schema of the contents of the asset manifest file and the user does not
-    //  perform a `flutter clean` after upgrading.
-    //  See https://github.com/flutter/flutter/issues/128563.
+  ) async {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final String unitTestAssetsDir = fs.path.join(
       getBuildDirectory(config, fs),
@@ -925,13 +897,24 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       return true;
     }
 
-    for (final MapEntry<String, AssetBundleEntry> entry in entries.entries) {
-      final DevFSContent content = entry.value.content;
+    for (final MapEntry(key: String assetPath, value: AssetBundleEntry assetEntry)
+        in entries.entries) {
+      final File file = fs.file(fs.path.join(unitTestAssetsDir, assetPath));
+      if (!file.existsSync()) {
+        return true;
+      }
+      final DevFSContent content = assetEntry.content;
       if (content is DevFSFileContent) {
-        if (!fs.file(fs.path.join(unitTestAssetsDir, entry.key)).existsSync()) {
+        if (content.isModifiedAfter(lastModified)) {
           return true;
         }
-        if (content.isModifiedAfter(lastModified)) {
+      } else {
+        final List<int> entryBytes = await assetEntry.contentsAsBytes();
+        if (entryBytes.length != await file.length()) {
+          return true;
+        }
+        final List<int> fileBytes = await file.readAsBytes();
+        if (!listEquals(entryBytes, fileBytes)) {
           return true;
         }
       }

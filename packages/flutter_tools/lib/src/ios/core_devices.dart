@@ -564,7 +564,7 @@ class IOSCoreDeviceControl {
       logger.printError('Error executing devicectl: $err');
       return <Object?>[];
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -642,7 +642,7 @@ class IOSCoreDeviceControl {
       logger.printTrace('Error executing devicectl: $err');
       return (false, null);
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -692,7 +692,7 @@ class IOSCoreDeviceControl {
       logger.printError('Error executing devicectl: $err');
       return false;
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -788,7 +788,7 @@ class IOSCoreDeviceControl {
       logger.printTrace('Error executing devicectl: $err');
       return null;
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -940,7 +940,7 @@ class IOSCoreDeviceControl {
       logger.printTrace('Error executing devicectl: $err');
       return false;
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -991,7 +991,7 @@ class IOSCoreDeviceControl {
       logger.printTrace('Error reading output file: $err');
       return <Object?>[];
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -1051,11 +1051,7 @@ class IOSCoreDeviceControl {
         return false;
       }
     } finally {
-      try {
-        tempDirectory.deleteSync(recursive: true);
-      } on FileSystemException {
-        // Ignore.
-      }
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 }

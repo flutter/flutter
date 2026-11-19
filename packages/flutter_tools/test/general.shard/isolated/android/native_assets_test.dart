@@ -6,18 +6,22 @@ import 'package:code_assets/code_assets.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/context/android_context.dart' show AndroidSdkProvider;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
+import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -41,6 +45,7 @@ void main() {
       fileSystem.currentDirectory,
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -54,11 +59,7 @@ void main() {
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.empty(),
-        FeatureFlags: () =>
-            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-      },
+      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
@@ -100,6 +101,10 @@ void main() {
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          featureFlags: TestFeatureFlags(
+            isNativeAssetsEnabled: true,
+            isDartDataAssetsEnabled: true,
+          ),
           logger: logger,
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
@@ -154,6 +159,7 @@ void main() {
         targetPlatform: TargetPlatform.android_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
         logger: logger,
         buildRunner: _BuildRunnerWithoutNdk(),
         buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
@@ -164,32 +170,81 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'throw if NDK not present and there are native assets',
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
-    () async {
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.parent.create();
-      await packageConfig.create();
-      expect(
-        await runFlutterSpecificHooks(
-          environmentDefines: <String, String>{
-            kBuildMode: BuildMode.debug.cliName,
-            kMinSdkVersion: minSdkVersion,
-          },
-          targetPlatform: TargetPlatform.android_arm64,
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          logger: logger,
-          buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
-          buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
-          buildDataAssets: true,
-          recordedUsesFile: null,
-        ),
-        isA<DartHooksResult>(),
-      );
-    },
-  );
+  testUsingContext('throw if NDK not present and there are native assets', () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.parent.create();
+    await packageConfig.create();
+    expect(
+      await runFlutterSpecificHooks(
+        environmentDefines: <String, String>{
+          kBuildMode: BuildMode.debug.cliName,
+          kMinSdkVersion: minSdkVersion,
+        },
+        targetPlatform: TargetPlatform.android_arm64,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
+        logger: logger,
+        buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+        buildDataAssets: true,
+        recordedUsesFile: null,
+      ),
+      isA<DartHooksResult>(),
+    );
+  });
+
+  testWithoutContext('does not look up AndroidSdk when running data-only build hooks', () async {
+    final androidSdkProvider = _CountingAndroidSdkProvider(androidSdk: _FakeAndroidSdk());
+    final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
+      androidSdkProvider: androidSdkProvider,
+      environmentDefines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+        kMinSdkVersion: minSdkVersion,
+      },
+      targetPlatform: TargetPlatform.android_arm64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      logger: logger,
+      buildRunner: _DelegatingCCompilerConfigBuildRunner(
+        logger: logger,
+        processManager: processManager,
+        packagesWithNativeAssetsResult: <String>['bar'],
+      ),
+      buildCodeAssets: null,
+      buildDataAssets: true,
+      visualStudio: null,
+    );
+    expect(buildResult.codeAssets, isEmpty);
+    expect(androidSdkProvider.lookupCount, 0);
+  });
+
+  testWithoutContext('looks up AndroidSdk when building code assets on Android', () async {
+    final androidSdkProvider = _CountingAndroidSdkProvider(androidSdk: _FakeAndroidSdk());
+    final (:DartHooksResult buildResult, results: _) = await runFlutterSpecificBuildHooks(
+      androidSdkProvider: androidSdkProvider,
+      environmentDefines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+        kMinSdkVersion: minSdkVersion,
+      },
+      targetPlatform: TargetPlatform.android_arm64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      logger: logger,
+      buildRunner: _DelegatingCCompilerConfigBuildRunner(
+        logger: logger,
+        processManager: processManager,
+        packagesWithNativeAssetsResult: <String>['bar'],
+      ),
+      buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+      buildDataAssets: true,
+      visualStudio: null,
+    );
+    expect(buildResult.codeAssets, isEmpty);
+    expect(androidSdkProvider.lookupCount, 1);
+  });
 }
 
 class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
@@ -197,4 +252,44 @@ class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
 
   @override
   CCompilerConfig? get ndkCCompilerConfigResult => null;
+}
+
+class _DelegatingCCompilerConfigBuildRunner extends FakeFlutterNativeAssetsBuildRunner {
+  _DelegatingCCompilerConfigBuildRunner({
+    required this.logger,
+    required this.processManager,
+    super.packagesWithNativeAssetsResult,
+  });
+
+  final Logger logger;
+  final ProcessManager processManager;
+
+  @override
+  Future<void> setCCompilerConfig(CodeAssetTarget target) => target.setCCompilerConfig(
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+  );
+}
+
+class _CountingAndroidSdkProvider implements AndroidSdkProvider {
+  _CountingAndroidSdkProvider({this._androidSdk});
+
+  final AndroidSdk? _androidSdk;
+  int lookupCount = 0;
+
+  @override
+  AndroidSdk? get androidSdk {
+    lookupCount++;
+    return _androidSdk;
+  }
+}
+
+class _FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String? getNdkClangPath() => null;
+
+  @override
+  String? getNdkArPath() => null;
+
+  @override
+  String? getNdkLdPath() => null;
 }
