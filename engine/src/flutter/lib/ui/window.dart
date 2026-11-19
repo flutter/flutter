@@ -959,7 +959,8 @@ class AccessibilityFeatures {
   /// How this flag is set depends on the platform:
   ///
   ///  * Android: set when the "Transition animation scale" developer setting
-  ///    (the "Remove animations" accessibility setting) is turned off.
+  ///    is set to zero (or the "Remove animations" accessibility setting is
+  ///    enabled).
   ///  * Linux: set when the desktop environment has animations disabled.
   ///  * Web: set together with [reduceMotion] when the
   ///    `prefers-reduced-motion` media query matches.
