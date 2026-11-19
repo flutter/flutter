@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
+import 'android/android_workflow.dart';
 import 'android/gradle_utils.dart';
 import 'android/java.dart';
 import 'artifacts.dart';
@@ -52,6 +53,7 @@ import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
+import 'windows/windows_workflow.dart';
 
 // TODO(ianh): We should remove all the global variables and replace them with
 // arguments (to constructors, methods, etc, as appropriate).
@@ -72,14 +74,17 @@ OperatingSystemUtils get os => context.get<OperatingSystemUtils>()!;
 Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
+AndroidWorkflow? get androidWorkflow => context.get<AndroidWorkflow>();
+FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+WindowsWorkflow? get windowsWorkflow => context.get<WindowsWorkflow>();
 
-PersistentToolState? get persistentToolState => PersistentToolState.instance;
+PersistentToolState? get persistentToolState => context.get<PersistentToolState>();
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
 final _defaultBotDetector = BotDetector(platform: platform);
