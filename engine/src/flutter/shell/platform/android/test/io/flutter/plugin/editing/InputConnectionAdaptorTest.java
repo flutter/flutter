@@ -3,6 +3,7 @@ package io.flutter.plugin.editing;
 import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -1169,7 +1170,7 @@ public class InputConnectionAdaptorTest {
 
     testImm.resetStates();
 
-    // Monitoring only. Does not send update immediately.
+    // The caret geometry isn't known when monitoring starts.
     adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
     assertNull(testImm.lastCursorAnchorInfo);
 
@@ -1329,6 +1330,104 @@ public class InputConnectionAdaptorTest {
   }
 
   @Test
+  public void testCursorAnchorInfo_monitoringBeforeFirstCaretRect() {
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(sampleEditable(5, 5));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    Matrix transform = new Matrix();
+    RectF bounds = new RectF(0, 0, 100, 50);
+
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    adaptor.setEditableGeometry(transform, bounds, null);
+    assertNull(testImm.lastCursorAnchorInfo);
+    adaptor.setEditableGeometry(transform, bounds, new RectF(30, 5, 32, 25));
+    assertEquals(30, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+  }
+
+  @Test
+  public void testCursorAnchorInfo_restartingMonitoringReportsLatestCaret() {
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(sampleEditable(5, 5));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    Matrix transform = new Matrix();
+    RectF bounds = new RectF(0, 0, 100, 50);
+    adaptor.setEditableGeometry(transform, bounds, new RectF(30, 5, 32, 25));
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    assertNotNull(testImm.lastCursorAnchorInfo);
+    assertEquals(30, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+
+    testImm.resetStates();
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    assertNull(testImm.lastCursorAnchorInfo);
+    adaptor.requestCursorUpdates(0);
+    adaptor.setEditableGeometry(transform, bounds, new RectF(0, 25, 2, 45));
+    assertNull(testImm.lastCursorAnchorInfo);
+
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    assertNotNull(testImm.lastCursorAnchorInfo);
+    assertEquals(0, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+    assertEquals(25, testImm.lastCursorAnchorInfo.getInsertionMarkerTop(), 0);
+  }
+
+  @Test
+  public void testCursorAnchorInfo_monitoringDuringBatchEditReceivesFinalCaret() {
+    ListenableEditingState editable = sampleEditable(5, 5);
+    InputConnectionAdaptor first = sampleInputConnectionAdaptor(editable);
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    Matrix transform = new Matrix();
+    RectF bounds = new RectF(0, 0, 100, 50);
+
+    first.beginBatchEdit();
+    InputConnectionAdaptor second = sampleInputConnectionAdaptor(editable);
+    second.setEditableGeometry(transform, bounds, new RectF(10, 5, 12, 25));
+    second.beginBatchEdit();
+    second.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    assertNull(testImm.lastCursorAnchorInfo);
+
+    Selection.setSelection(editable, 3);
+    editable.notifyEditableGeometryChanged(transform, bounds, new RectF(30, 5, 32, 25));
+    second.endBatchEdit();
+    assertNull(testImm.lastCursorAnchorInfo);
+    first.endBatchEdit();
+    assertNotNull(testImm.lastCursorAnchorInfo);
+    assertEquals(3, testImm.lastCursorAnchorInfo.getSelectionStart());
+    assertEquals(30, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+  }
+
+  @Test
+  public void testCursorAnchorInfo_monitoringDuringUnchangedBatchEdit() {
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(sampleEditable(5, 5));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    adaptor.setEditableGeometry(new Matrix(), new RectF(0, 0, 100, 50), new RectF(30, 5, 32, 25));
+    adaptor.beginBatchEdit();
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    assertNull(testImm.lastCursorAnchorInfo);
+    adaptor.endBatchEdit();
+    assertEquals(30, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+
+    adaptor.requestCursorUpdates(0);
+    testImm.resetStates();
+    adaptor.beginBatchEdit();
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    adaptor.requestCursorUpdates(0);
+    adaptor.endBatchEdit();
+    assertNull(testImm.lastCursorAnchorInfo);
+  }
+
+  @Test
+  public void testCursorAnchorInfo_immediateRequestDuringBatchEdit() {
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(sampleEditable(5, 5));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    adaptor.setEditableGeometry(new Matrix(), new RectF(0, 0, 100, 50), new RectF(30, 5, 32, 25));
+    adaptor.beginBatchEdit();
+    adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    adaptor.requestCursorUpdates(
+        InputConnection.CURSOR_UPDATE_IMMEDIATE | InputConnection.CURSOR_UPDATE_MONITOR);
+    assertEquals(30, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+    testImm.resetStates();
+    adaptor.endBatchEdit();
+    assertNull(testImm.lastCursorAnchorInfo);
+  }
+
+  @Test
   public void testRequestCursorUpdatesWithFilter() {
     ListenableEditingState editable = sampleEditable(5, 5);
     InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
@@ -1401,14 +1500,19 @@ public class InputConnectionAdaptorTest {
   @Test
   public void testCleanUpBatchEndsOnCloseConnection() {
     final ListenableEditingState editable = sampleEditable(0, 0);
-    InputConnectionAdaptor adaptor = spy(sampleInputConnectionAdaptor(editable));
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+    InputConnectionAdaptor other = sampleInputConnectionAdaptor(editable);
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
     for (int i = 0; i < 5; i++) {
       adaptor.beginBatchEdit();
     }
     adaptor.endBatchEdit();
-    verify(adaptor, times(1)).endBatchEdit();
+    other.setEditableGeometry(new Matrix(), new RectF(0, 0, 100, 50), new RectF(30, 5, 32, 25));
+    other.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    assertNull(testImm.lastCursorAnchorInfo);
     adaptor.closeConnection();
-    verify(adaptor, times(4)).endBatchEdit();
+    assertNotNull(testImm.lastCursorAnchorInfo);
+    assertEquals(30, testImm.lastCursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
   }
 
   private static final String SAMPLE_TEXT =

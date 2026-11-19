@@ -252,6 +252,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     platformViewsController2.detachTextInputPlugin();
     textInputChannel.setTextInputMethodHandler(null);
     notifyViewExited();
+    setInputTarget(InputTarget.Type.NO_TARGET, 0);
     mEditable.removeEditingStateListener(this);
     if (imeSyncCallback != null) {
       imeSyncCallback.remove();
@@ -430,7 +431,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     if ((inputTarget.type == InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW
             || inputTarget.type == InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW)
         && inputTarget.id == platformViewId) {
-      inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
+      setInputTarget(InputTarget.Type.NO_TARGET, 0);
       notifyViewExited();
       mImm.hideSoftInputFromWindow(mView.getApplicationWindowToken(), 0);
       mImm.restartInput(mView);
@@ -470,7 +471,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     // Call notifyViewExited on the previous field.
     notifyViewExited();
     this.configuration = configuration;
-    inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
+    setInputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
 
     mEditable.removeEditingStateListener(this);
     mEditable =
@@ -483,9 +484,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mRestartInputPending = true;
     unlockPlatformViewInputConnection();
     lastClientRect = null;
-    lastClientTransform = null;
-    lastClientBounds = null;
-    lastCaretRect = null;
     mEditable.addEditingStateListener(this);
   }
 
@@ -496,12 +494,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // Not asking for focus here specifically manifested in a bug on API 28 devices where the
       // platform view's request to show a keyboard was ignored.
       mView.requestFocus();
-      inputTarget = new InputTarget(InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW, platformViewId);
+      setInputTarget(InputTarget.Type.VIRTUAL_DISPLAY_PLATFORM_VIEW, platformViewId);
       mImm.restartInput(mView);
       mRestartInputPending = false;
     } else {
-      inputTarget =
-          new InputTarget(InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW, platformViewId);
+      setInputTarget(InputTarget.Type.PHYSICAL_DISPLAY_PLATFORM_VIEW, platformViewId);
       lastInputConnection = null;
     }
   }
@@ -645,12 +642,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     configuration = null;
     updateAutofillConfigurationIfNeeded(null);
     lastClientRect = null;
-    lastClientTransform = null;
-    lastClientBounds = null;
-    lastCaretRect = null;
-    // The input method may still be using a connection to the cleared client.
-    updateEditableGeometry();
-    inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
+    setInputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     // When the IME is hidden, we need to restart the input method manager to accomodate
     // some keyboards like the Samsung keyboard that may be caching old state.
@@ -658,6 +650,16 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     if (insets != null && !insets.isVisible(WindowInsetsCompat.Type.ime())) {
       mImm.restartInput(mView);
     }
+  }
+
+  private void setInputTarget(InputTarget.Type type, int id) {
+    if (inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT) {
+      mEditable.notifyTextInputClientDetached();
+    }
+    lastClientTransform = null;
+    lastClientBounds = null;
+    lastCaretRect = null;
+    inputTarget = new InputTarget(type, id);
   }
 
   private static class InputTarget {
