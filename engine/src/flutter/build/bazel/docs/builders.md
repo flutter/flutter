@@ -47,7 +47,9 @@ whether the shared libraries an install or archive ships are stripped, as
 GN's `stripped_symbols`; executables always are; for the web, whose
 toolchain strips nothing, the flag is nothing),
 `--asan` the asan flag (`//engine/src/flutter/build/bazel:asan`: the
-toolchain's `asan` feature on every compile and link, `is_asan` in the
+toolchain's `asan` feature on every compile and link -- which, as in GN,
+then leave `-z defs` out: an instrumented shared library takes the
+sanitizer's runtime from the executable that loads it --, `is_asan` in the
 wrapped GN builds, and CI's sanitizer environment --
 `testing/sanitizer_suppressions.sh`, leak detection on with its suppression
 lists, the toolchain's `llvm-symbolizer` -- exported by every test launcher,

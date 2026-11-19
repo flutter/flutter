@@ -389,11 +389,18 @@ ANDROID_RISCV64_LINK_FLAGS = ["--target=riscv64-linux-androideabi35"]
 # dependencies, and with -nostdlib++ the C++ runtime, unresolved; it has no GN
 # counterpart and nothing consumes it with --dynamic_mode=off, but `bazel build
 # //...` still produces it, so it is excluded from this check.
+#
+# Under a sanitizer GN leaves -z defs out (`if (!using_sanitizer)`): an
+# instrumented shared library takes the sanitizer's runtime from the
+# executable that loads it, so its references to the runtime are unresolved
+# by design (the GPU test backends' driver, loader and layer in the asan
+# build, which failed to link with it).
 _LINUX_COMPLETE_LINK_FLAGS = ["-Wl,-z,defs"]
 
 # Android's complete links say it twice (-z defs and --no-undefined, both in
-# GN's ldflags); the nodeps library is excused from both for the same reason.
-_ANDROID_COMPLETE_LINK_FLAGS = ["-Wl,-z,defs", "-Wl,--no-undefined"]
+# GN's ldflags, the second whatever the sanitizer); the nodeps library is
+# excused from both for the same reason.
+_ANDROID_NO_UNDEFINED_LINK_FLAGS = ["-Wl,--no-undefined"]
 
 _COMPLETE_LINK_ACTION_NAMES = CC_LINK_EXECUTABLE_ACTION_NAMES + [
     ACTION_NAMES.cpp_link_dynamic_library,
@@ -570,7 +577,7 @@ def _impl(ctx):
         compile_flags = _ANDROID_COMPILE_FLAGS + _defines(_ANDROID_DEFINES)
         link_flags = _ANDROID_LINK_FLAGS
         opt_compile_flags = _ANDROID_OPT_COMPILE_FLAGS
-        complete_link_flags = _ANDROID_COMPLETE_LINK_FLAGS
+        complete_link_flags = ([] if ctx.attr.asan else _LINUX_COMPLETE_LINK_FLAGS) + _ANDROID_NO_UNDEFINED_LINK_FLAGS
         executable_link_flags = []
         if not ctx.file.crt_begin_so or not ctx.file.crt_end_so or not ctx.file.crt_begin_exe or not ctx.file.crt_end_exe:
             fail("%s: an Android toolchain names its four crt objects" % ctx.label)
@@ -606,7 +613,7 @@ def _impl(ctx):
         compile_flags = _LINUX_COMPILE_FLAGS + _defines(_LINUX_DEFINES)
         link_flags = _LINUX_LINK_FLAGS
         opt_compile_flags = _OPT_COMPILE_FLAGS
-        complete_link_flags = _LINUX_COMPLETE_LINK_FLAGS
+        complete_link_flags = [] if ctx.attr.asan else _LINUX_COMPLETE_LINK_FLAGS
         executable_link_flags = _LINUX_EXECUTABLE_LINK_FLAGS
         executable_link_libs = _LINUX_LINK_LIBS
         dynamic_library_link_libs = _LINUX_LINK_LIBS

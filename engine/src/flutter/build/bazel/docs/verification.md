@@ -31,7 +31,16 @@ change to a test macro (`build_defs/web/web_ui_tests.bzl`,
 suites it declares on both hosts; a change to the engine's rules the
 wildcard on both; a change to the Android toolchains, the NDK overlay, the
 Dart wrap or the Android shell's file the eighth besides the Linux Android
-builds. `bazel query 'tests(<suite>)' | wc -l` says what a suite
+builds; a change to a C/C++ toolchain or to the GPU test backends
+(`build/bazel/gl_wrap` and the converted trees behind it) the builders'
+other configurations besides the default one -- the ASan build
+(`--config=ci_host_debug_unopt`) and a ThinLTO one
+(`--config=host_release_test`), each with
+`//engine/src/flutter/build/bazel/gl_wrap/tests:all` and a suite that loads
+the backends (`shell_unittests` under ASan, `impeller_unittests` under
+ThinLTO): 576, run in the debug configuration alone, left the ASan build
+unable to link the backends' three shared libraries (577).
+`bazel query 'tests(<suite>)' | wc -l` says what a suite
 holds on this host before a run. Disk: the framework tests' kernels and the
 engine's extra configurations write on the order of a gigabyte a minute at
 full load, and the home-directory disk cache (`--disk_cache` in the root
