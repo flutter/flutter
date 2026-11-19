@@ -24,7 +24,22 @@ class FontCollection {
 
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
-  void SetupDefaultFontManager(uint32_t font_initialization_data);
+  /// Eagerly resolves and installs the platform's default font manager.
+  ///
+  /// Virtual for testing.
+  ///
+  /// @see `DeferDefaultFontManager`
+  /// @see `txt::FontCollection::SetupDefaultFontManager`
+  virtual void SetupDefaultFontManager(uint32_t font_initialization_data);
+
+  /// Records `font_initialization_data` and defers resolving the platform's
+  /// default font manager until first font usage.
+  ///
+  /// Virtual for testing.
+  ///
+  /// @see `SetupDefaultFontManager`
+  /// @see `txt::FontCollection::DeferDefaultFontManager`
+  virtual void DeferDefaultFontManager(uint32_t font_initialization_data);
 
   // Virtual for testing.
   virtual void RegisterFonts(

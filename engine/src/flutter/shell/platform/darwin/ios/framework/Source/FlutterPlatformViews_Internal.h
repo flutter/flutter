@@ -31,7 +31,7 @@
 // is replaced with the alpha channel of the |FlutterClippingMaskView|.
 @interface FlutterClippingMaskView : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
+- (instancetype)initWithFrame:(CGRect)frame devicePixelRatio:(CGFloat)devicePixelRatio;
 
 - (void)reset;
 
@@ -70,7 +70,11 @@
 - (instancetype)initWithCapacity:(NSInteger)capacity;
 
 // Reuse a maskView from the pool, or allocate a new one.
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame;
+//
+// `devicePixelRatio` is the number of physical pixels per point that the mask view converts its
+// clips with.
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame
+                                devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Insert the `maskView` into the pool.
 - (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView;
