@@ -166,22 +166,28 @@ public class InputConnectionAdaptor extends BaseInputConnection
       matrix.preScale(density, density);
       matrix.preConcat(editableTransform);
       mCursorAnchorInfoBuilder.setMatrix(matrix);
-      // The framework doesn't report whether the caret is clipped by an ancestor, so the caret is
-      // considered visible as long as it overlaps the bounds of the text input client.
-      final boolean isCaretVisible =
-          caretRect.left <= editableBounds.right
-              && caretRect.right >= editableBounds.left
-              && caretRect.top <= editableBounds.bottom
-              && caretRect.bottom >= editableBounds.top;
+      // The framework doesn't report whether the caret is clipped by an ancestor, so check the
+      // insertion marker's endpoints against the bounds of the text input client.
+      final boolean isXVisible =
+          editableBounds.left <= caretRect.left && caretRect.left <= editableBounds.right;
+      final boolean isTopVisible =
+          isXVisible
+              && editableBounds.top <= caretRect.top
+              && caretRect.top <= editableBounds.bottom;
+      final boolean isBottomVisible =
+          isXVisible
+              && editableBounds.top <= caretRect.bottom
+              && caretRect.bottom <= editableBounds.bottom;
+      int insertionMarkerFlags = 0;
+      if (isTopVisible || isBottomVisible) {
+        insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+      }
+      if (!isTopVisible || !isBottomVisible) {
+        insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+      }
       // The baseline of the caret is unknown, so the bottom of the caret is used instead.
       mCursorAnchorInfoBuilder.setInsertionMarkerLocation(
-          caretRect.left,
-          caretRect.top,
-          caretRect.bottom,
-          caretRect.bottom,
-          isCaretVisible
-              ? CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION
-              : CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION);
+          caretRect.left, caretRect.top, caretRect.bottom, caretRect.bottom, insertionMarkerFlags);
     }
     return mCursorAnchorInfoBuilder.build();
   }

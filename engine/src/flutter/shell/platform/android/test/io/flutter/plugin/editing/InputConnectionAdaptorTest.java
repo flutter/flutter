@@ -1253,6 +1253,22 @@ public class InputConnectionAdaptorTest {
   }
 
   @Test
+  public void testCursorAnchorInfo_partiallyVisibleInsertionMarkerSetsBothFlags() {
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(sampleEditable(5, 5));
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    RectF editableBounds = new RectF(0, 0, 100, 50);
+
+    for (RectF caretRect : new RectF[] {new RectF(30, -10, 32, 10), new RectF(30, 40, 32, 60)}) {
+      testImm.resetStates();
+      adaptor.setEditableGeometry(new Matrix(), editableBounds, caretRect);
+      adaptor.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+      assertEquals(
+          CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION | CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION,
+          testImm.lastCursorAnchorInfo.getInsertionMarkerFlags());
+    }
+  }
+
+  @Test
   @Config(sdk = API_LEVELS.API_28)
   public void testCursorAnchorInfo_insertionMarkerBeforeApi29() {
     ListenableEditingState editable = sampleEditable(5, 5);
