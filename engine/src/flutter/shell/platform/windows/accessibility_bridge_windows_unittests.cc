@@ -97,6 +97,12 @@ class FlutterWindowsViewSpy : public FlutterWindowsView {
                            false,
                            BoxConstraints()) {}
 
+  HWND GetWindowHandle() const override {
+    return native_attached ? reinterpret_cast<HWND>(1) : nullptr;
+  }
+
+  bool native_attached = true;
+
  protected:
   virtual std::shared_ptr<AccessibilityBridgeWindows>
   CreateAccessibilityBridge() override {
@@ -204,6 +210,7 @@ void ExpectWinEventFromAXEvent(int32_t node_id,
       engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
   EngineModifier modifier{engine.get()};
   modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
   view.OnUpdateSemanticsEnabled(true);
 
   auto bridge = GetAccessibilityBridgeSpy(view);
@@ -214,6 +221,7 @@ void ExpectWinEventFromAXEvent(int32_t node_id,
                                 {ax_event, ax::mojom::EventFrom::kNone, {}}});
   ASSERT_EQ(bridge->dispatched_events().size(), 1);
   EXPECT_EQ(bridge->dispatched_events()[0].event_type, expected_event);
+  engine->RemoveView(view.view_id());
 }
 
 void ExpectWinEventFromAXEventOnFocusNode(int32_t node_id,
@@ -225,6 +233,7 @@ void ExpectWinEventFromAXEventOnFocusNode(int32_t node_id,
       engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
   EngineModifier modifier{engine.get()};
   modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
   view.OnUpdateSemanticsEnabled(true);
 
   auto bridge = GetAccessibilityBridgeSpy(view);
@@ -241,6 +250,7 @@ void ExpectWinEventFromAXEventOnFocusNode(int32_t node_id,
   EXPECT_EQ(bridge->dispatched_events()[0].event_type, expected_event);
   EXPECT_EQ(bridge->dispatched_events()[0].node_delegate->GetAXNode()->id(),
             focus_id);
+  engine->RemoveView(view.view_id());
 }
 
 }  // namespace
@@ -251,6 +261,7 @@ TEST(AccessibilityBridgeWindows, GetParent) {
       engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
   EngineModifier modifier{engine.get()};
   modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
   view.OnUpdateSemanticsEnabled(true);
 
   auto bridge = view.accessibility_bridge().lock();
@@ -260,6 +271,7 @@ TEST(AccessibilityBridgeWindows, GetParent) {
   auto node1_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(1).lock();
   EXPECT_EQ(node0_delegate->GetNativeViewAccessible(),
             node1_delegate->GetParent());
+  engine->RemoveView(view.view_id());
 }
 
 TEST(AccessibilityBridgeWindows, GetParentOnRootRetunsNullptr) {
@@ -268,6 +280,7 @@ TEST(AccessibilityBridgeWindows, GetParentOnRootRetunsNullptr) {
       engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
   EngineModifier modifier{engine.get()};
   modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
   view.OnUpdateSemanticsEnabled(true);
 
   auto bridge = view.accessibility_bridge().lock();
@@ -275,6 +288,7 @@ TEST(AccessibilityBridgeWindows, GetParentOnRootRetunsNullptr) {
 
   auto node0_delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
   ASSERT_TRUE(node0_delegate->GetParent() == nullptr);
+  engine->RemoveView(view.view_id());
 }
 
 TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
@@ -283,6 +297,7 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
       engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
   EngineModifier modifier{engine.get()};
   modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
   view.OnUpdateSemanticsEnabled(true);
 
   auto bridge = view.accessibility_bridge().lock();
@@ -300,11 +315,56 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
   AccessibilityBridgeWindows delegate(&view);
   delegate.DispatchAccessibilityAction(1, kFlutterSemanticsActionCopy, {});
   EXPECT_EQ(actual_action, kFlutterSemanticsActionCopy);
+  engine->RemoveView(view.view_id());
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventAlert) {
   ExpectWinEventFromAXEvent(0, ui::AXEventGenerator::Event::ALERT,
                             ax::mojom::Event::kAlert);
+}
+
+TEST(AccessibilityBridgeWindows, RetainsFocusWithoutOSSideEffects) {
+  auto engine = GetTestEngine();
+  FlutterWindowsViewSpy view{
+      engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
+  EngineModifier modifier{engine.get()};
+  modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
+  ASSERT_FALSE(engine->semantics_enabled());
+  auto bridge = GetAccessibilityBridgeSpy(view);
+  ASSERT_TRUE(bridge);
+  PopulateAXTree(bridge);
+  FlutterSemanticsFlags flags = {};
+  flags.is_focused = kFlutterTristateTrue;
+  FlutterSemanticsNode2 child = {};
+  child.struct_size = sizeof(child);
+  child.id = 1;
+  child.flags2 = &flags;
+  child.label = "focused child";
+  bridge->AddFlutterSemanticsNodeUpdate(child);
+  bridge->CommitUpdates();
+  EXPECT_EQ(bridge->GetAXTreeData().focus_id, 1);
+  EXPECT_TRUE(bridge->dispatched_events().empty());
+  EXPECT_TRUE(bridge->focused_nodes().empty());
+  auto event = ui::AXEventGenerator::TargetedEvent{
+      AXNodeFromID(bridge, 1),
+      {ui::AXEventGenerator::Event::FOCUS_CHANGED,
+       ax::mojom::EventFrom::kNone,
+       {}}};
+  bridge->OnAccessibilityEvent(event);
+  EXPECT_TRUE(bridge->dispatched_events().empty());
+  EXPECT_TRUE(bridge->focused_nodes().empty());
+  view.OnUpdateSemanticsEnabled(true);
+  bridge->OnAccessibilityEvent(event);
+  ASSERT_EQ(bridge->dispatched_events().size(), 1u);
+  EXPECT_EQ(bridge->focused_nodes(), std::vector<int32_t>{1});
+  bridge->ResetRecords();
+  view.native_attached = false;
+  bridge->OnAccessibilityEvent(event);
+  EXPECT_TRUE(bridge->dispatched_events().empty());
+  EXPECT_TRUE(bridge->focused_nodes().empty());
+  EXPECT_EQ(bridge->GetAXTreeData().focus_id, 1);
+  engine->RemoveView(view.view_id());
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventChildrenChanged) {
@@ -318,6 +378,7 @@ TEST(AccessibilityBridgeWindows, OnAccessibilityEventFocusChanged) {
       engine.get(), std::make_unique<NiceMock<MockWindowBindingHandler>>()};
   EngineModifier modifier{engine.get()};
   modifier.SetImplicitView(&view);
+  engine->SetSemanticsTreeEnabled(true);
   view.OnUpdateSemanticsEnabled(true);
 
   auto bridge = GetAccessibilityBridgeSpy(view);
@@ -334,6 +395,7 @@ TEST(AccessibilityBridgeWindows, OnAccessibilityEventFocusChanged) {
 
   ASSERT_EQ(bridge->focused_nodes().size(), 1);
   EXPECT_EQ(bridge->focused_nodes()[0], 1);
+  engine->RemoveView(view.view_id());
 }
 
 TEST(AccessibilityBridgeWindows, OnAccessibilityEventIgnoredChanged) {

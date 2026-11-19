@@ -228,6 +228,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
         EXPECT_NE(args->vsync_callback, nullptr);
         EXPECT_EQ(args->update_semantics_callback, nullptr);
         EXPECT_NE(args->update_semantics_callback2, nullptr);
+        EXPECT_NE(args->semantics_tree_enabled_callback, nullptr);
         EXPECT_EQ(args->update_semantics_node_callback, nullptr);
         EXPECT_EQ(args->update_semantics_custom_action_callback, nullptr);
         EXPECT_NE(args->view_focus_change_request_callback, nullptr);
@@ -2004,6 +2005,60 @@ TEST_F(FlutterWindowsEngineTest, OnViewFocusChangeRequest) {
   modifier.OnViewFocusChangeRequest(&request);
 }
 
+TEST_F(FlutterWindowsEngineTest, FrameworkGenerationOwnsAccessibilityBridges) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  auto engine = builder.Build();
+  EngineModifier modifier{engine.get()};
+  auto original_run = modifier.embedder_api().Run;
+  FlutterSemanticsTreeEnabledCallback generation_callback = nullptr;
+  OnPreEngineRestartCallback restart_callback = nullptr;
+  void* callback_data = nullptr;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&](size_t version, const FlutterRendererConfig* config,
+                const FlutterProjectArgs* args, void* user_data,
+                FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+        generation_callback = args->semantics_tree_enabled_callback;
+        restart_callback = args->on_pre_engine_restart_callback;
+        callback_data = user_data;
+        return original_run(version, config, args, user_data, engine_out);
+      }));
+  ASSERT_TRUE(engine->Run());
+  ASSERT_NE(generation_callback, nullptr);
+  ASSERT_NE(restart_callback, nullptr);
+  int demand_updates = 0;
+  modifier.embedder_api().UpdateSemanticsEnabled =
+      MOCK_ENGINE_PROC(UpdateSemanticsEnabled, ([&](auto engine, bool enabled) {
+                         ++demand_updates;
+                         return kSuccess;
+                       }));
+  generation_callback(true, callback_data);
+  EXPECT_EQ(demand_updates, 0);
+  EXPECT_FALSE(engine->semantics_enabled());
+  auto view =
+      engine->CreateView(std::make_unique<NiceMock<MockWindowBindingHandler>>(),
+                         /*is_sized_to_content=*/false, BoxConstraints(),
+                         /*allow_implicit_view=*/true);
+  auto bridge = view->accessibility_bridge();
+  ASSERT_FALSE(bridge.expired());
+  engine->UpdateSemanticsEnabled(true);
+  engine->UpdateSemanticsEnabled(false);
+  EXPECT_EQ(demand_updates, 2);
+  EXPECT_EQ(view->accessibility_bridge().lock(), bridge.lock());
+  generation_callback(false, callback_data);
+  EXPECT_TRUE(bridge.expired());
+  EXPECT_EQ(demand_updates, 2);
+  generation_callback(true, callback_data);
+  bridge = view->accessibility_bridge();
+  ASSERT_FALSE(bridge.expired());
+  restart_callback(callback_data);
+  EXPECT_TRUE(bridge.expired());
+  generation_callback(true, callback_data);
+  bridge = view->accessibility_bridge();
+  ASSERT_FALSE(bridge.expired());
+  ASSERT_TRUE(engine->Stop());
+  EXPECT_TRUE(bridge.expired());
+}
+
 TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   auto& context = GetContext();
   WindowsConfigBuilder builder{context};
@@ -2079,6 +2134,8 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
   auto tree2 = accessibility_bridge2->GetTree();
   EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
   EXPECT_NE(tree2->GetFromId(view2->view_id() + 1), nullptr);
+  windows_engine->RemoveView(view1->view_id());
+  windows_engine->RemoveView(view2->view_id());
 }
 
 #ifndef FLUTTER_RELEASE

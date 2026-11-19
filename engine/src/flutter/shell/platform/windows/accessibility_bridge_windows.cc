@@ -17,6 +17,9 @@ AccessibilityBridgeWindows::AccessibilityBridgeWindows(FlutterWindowsView* view)
 
 void AccessibilityBridgeWindows::OnAccessibilityEvent(
     ui::AXEventGenerator::TargetedEvent targeted_event) {
+  if (!view_->GetEngine()->semantics_enabled() || !view_->GetWindowHandle()) {
+    return;
+  }
   ui::AXNode* ax_node = targeted_event.node;
   ui::AXEventGenerator::Event event_type = targeted_event.event_params.event;
 

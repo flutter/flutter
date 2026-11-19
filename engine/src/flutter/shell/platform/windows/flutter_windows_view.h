@@ -276,7 +276,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 
   // Called to re/set the accessibility bridge pointer.
-  virtual void UpdateSemanticsEnabled(bool enabled);
+  virtual void SetSemanticsTreeEnabled(bool enabled);
 
   std::weak_ptr<AccessibilityBridgeWindows> accessibility_bridge() {
     return accessibility_bridge_;
@@ -503,9 +503,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Target for the window width. Valid when resize_pending_ is set. Guarded by
   // resize_mutex_.
   size_t resize_target_height_ = 0;
-
-  // True when flutter's semantics tree is enabled.
-  bool semantics_enabled_ = false;
 
   // The accessibility bridge associated with this view.
   std::shared_ptr<AccessibilityBridgeWindows> accessibility_bridge_;

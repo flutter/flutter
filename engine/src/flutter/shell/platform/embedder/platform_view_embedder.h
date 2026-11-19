@@ -35,6 +35,7 @@ namespace flutter {
 
 class PlatformViewEmbedder final : public PlatformView {
  public:
+  using SemanticsTreeEnabledCallback = std::function<void(bool)>;
   using UpdateSemanticsCallback =
       std::function<void(int64_t view_id,
                          flutter::SemanticsNodeUpdates update,
@@ -59,7 +60,8 @@ class PlatformViewEmbedder final : public PlatformView {
     OnPreEngineRestartCallback on_pre_engine_restart_callback;  // optional
     ChanneUpdateCallback on_channel_update;                     // optional
     ViewFocusChangeRequestCallback
-        view_focus_change_request_callback;  // optional
+        view_focus_change_request_callback;                        // optional
+    SemanticsTreeEnabledCallback semantics_tree_enabled_callback;  // optional
   };
 
   // Create a platform view that sets up a software rasterizer.
@@ -102,6 +104,9 @@ class PlatformViewEmbedder final : public PlatformView {
 #endif
 
   ~PlatformViewEmbedder() override;
+
+  // |PlatformView|
+  void SetSemanticsTreeEnabled(bool enabled) override;
 
   // |PlatformView|
   void UpdateSemantics(

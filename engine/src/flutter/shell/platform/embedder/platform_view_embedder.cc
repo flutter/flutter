@@ -112,6 +112,12 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
+void PlatformViewEmbedder::SetSemanticsTreeEnabled(bool enabled) {
+  if (platform_dispatch_table_.semantics_tree_enabled_callback) {
+    platform_dispatch_table_.semantics_tree_enabled_callback(enabled);
+  }
+}
+
 void PlatformViewEmbedder::UpdateSemantics(
     int64_t view_id,
     flutter::SemanticsNodeUpdates update,

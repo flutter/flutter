@@ -88,6 +88,41 @@ using AccessibilityBridgeMacTest = AutoreleasePoolTest;
 
 }  // namespace
 
+TEST_F(AccessibilityBridgeMacWindowTest, RetainsFocusWithoutOSSideEffects) {
+  FlutterViewController* controller = CreateTestViewController();
+  FlutterEngine* engine = controller.engine;
+  NSWindow* window = GetWindow();
+  window.contentView = controller.view;
+  [engine setSemanticsTreeEnabled:YES];
+  ASSERT_FALSE(engine.semanticsEnabled);
+  auto bridge =
+      std::static_pointer_cast<AccessibilityBridgeMacSpy>(controller.accessibilityBridge.lock());
+  ASSERT_TRUE(bridge);
+  NSResponder* responder = window.firstResponder;
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  flags.is_focused = kFlutterTristateTrue;
+  FlutterSemanticsNode2 root = {};
+  root.struct_size = sizeof(root);
+  root.id = 0;
+  root.flags2 = &flags;
+  root.value = "early text";
+  root.text_selection_base = 0;
+  root.text_selection_extent = 1;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+  EXPECT_EQ(bridge->GetAXTreeData().focus_id, 0);
+  EXPECT_EQ(bridge->actual_notifications.count, 0u);
+  auto delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(delegate);
+  bridge->OnAccessibilityEvent(
+      {delegate->GetAXNode(),
+       {ui::AXEventGenerator::Event::VALUE_CHANGED, ax::mojom::EventFrom::kNone, {}}});
+  EXPECT_EQ(window.firstResponder, responder);
+  EXPECT_EQ(bridge->actual_notifications.count, 0u);
+  [engine shutDownEngine];
+}
+
 TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlutterViewWindow) {
   FlutterViewController* viewController = CreateTestViewController();
   FlutterEngine* engine = viewController.engine;
@@ -96,6 +131,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
 
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
@@ -156,6 +192,7 @@ TEST_F(AccessibilityBridgeMacWindowTest, NonZeroRootNodeId) {
 
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
@@ -225,6 +262,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
 
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
@@ -274,6 +312,7 @@ TEST_F(AccessibilityBridgeMacTest, DoesNotSendAccessibilityCreateNotificationWhe
 
   // Setting up bridge so that the AccessibilityBridgeMacDelegateSpy
   // can query semantics information from.
+  [engine setSemanticsTreeEnabled:YES];
   engine.semanticsEnabled = YES;
   auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
       viewController.accessibilityBridge.lock());
