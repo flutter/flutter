@@ -370,6 +370,65 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqualObjects(object.accessibilityLabel, @"Temp");
 }
 
+- (void)testFocusBlockedNodeDoesNotHideItsChildren {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  // Node rects are in physical pixels and hit test points are in logical points.
+  CGFloat scale = ((bridge->view().window.screen ?: UIScreen.mainScreen)).scale;
+
+  flutter::SemanticsNode root;
+  root.id = 0;
+  root.rect = SkRect::MakeXYWH(0, 0, 100 * scale, 100 * scale);
+  root.childrenInTraversalOrder.push_back(1);
+  root.childrenInHitTestOrder.push_back(1);
+
+  flutter::SemanticsNode blocked;
+  blocked.id = 1;
+  blocked.label = "Blocked";
+  blocked.rect = SkRect::MakeXYWH(0, 0, 100 * scale, 100 * scale);
+  blocked.flags.isAccessibilityFocusBlocked = true;
+  blocked.childrenInTraversalOrder.push_back(2);
+  blocked.childrenInHitTestOrder.push_back(2);
+
+  flutter::SemanticsNode child;
+  child.id = 2;
+  child.label = "Child";
+  child.rect = SkRect::MakeXYWH(0, 0, 50 * scale, 50 * scale);
+
+  FlutterSemanticsObject* rootObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [rootObject setSemanticsNode:&root];
+  FlutterSemanticsObject* blockedObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                     uid:1];
+  [blockedObject setSemanticsNode:&blocked];
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:2];
+  [childObject setSemanticsNode:&child];
+  rootObject.children = @[ blockedObject ];
+  rootObject.childrenInHitTestOrder = @[ blockedObject ];
+  blockedObject.children = @[ childObject ];
+  blockedObject.childrenInHitTestOrder = @[ childObject ];
+  [rootObject accessibilityBridgeDidFinishUpdate];
+  [blockedObject accessibilityBridgeDidFinishUpdate];
+  [childObject accessibilityBridgeDidFinishUpdate];
+
+  SemanticsObjectContainer* rootContainer =
+      static_cast<SemanticsObjectContainer*>(rootObject.accessibilityContainer);
+  SemanticsObjectContainer* blockedContainer =
+      static_cast<SemanticsObjectContainer*>(blockedObject.accessibilityContainer);
+
+  XCTAssertFalse(blockedObject.isAccessibilityElement);
+  XCTAssertTrue(childObject.isAccessibilityElement);
+  XCTAssertEqual([rootContainer accessibilityElementAtIndex:1], blockedContainer);
+  XCTAssertEqual([blockedContainer accessibilityElementCount], 2);
+  XCTAssertEqual([blockedContainer accessibilityElementAtIndex:0], blockedObject);
+  XCTAssertEqual([blockedContainer accessibilityElementAtIndex:1], childObject);
+  XCTAssertEqual([rootObject _accessibilityHitTest:CGPointMake(10, 10) withEvent:nil], childObject);
+  // This point is inside the blocked node but outside the child.
+  XCTAssertNil([rootObject _accessibilityHitTest:CGPointMake(75, 75) withEvent:nil]);
+}
+
 - (void)testIntresetingSemanticsObjectWithLabelHasStaticTextTrait {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
