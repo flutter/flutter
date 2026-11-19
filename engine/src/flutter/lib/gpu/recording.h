@@ -186,7 +186,7 @@ struct CopyTextureToTextureOp : Op<RecordedOp::kCopyTextureToTexture> {
 struct RecordingChunk {
   static constexpr size_t kSize = 64 * 1024;
 
-  RecordingChunk* next = nullptr;
+  std::unique_ptr<RecordingChunk> next;
   size_t used = 0;
   alignas(alignof(std::max_align_t)) uint8_t data[kSize - 2 * sizeof(void*)];
 };
@@ -219,7 +219,8 @@ class OpStream {
   /// appended while this runs.
   template <typename Visitor>
   void ForEach(Visitor&& visitor) const {
-    for (RecordingChunk* chunk = head_; chunk; chunk = chunk->next) {
+    for (const RecordingChunk* chunk = head_.get(); chunk;
+         chunk = chunk->next.get()) {
       const uint8_t* cursor = chunk->data;
       const uint8_t* end = chunk == tail_ ? cursor_ : chunk->data + chunk->used;
       while (cursor < end) {
@@ -238,7 +239,9 @@ class OpStream {
 
   void AddChunk();
 
-  RecordingChunk* head_ = nullptr;
+  // Each chunk owns the one after it.
+  std::unique_ptr<RecordingChunk> head_;
+  // The chunk being appended to, owned through `head_`.
   RecordingChunk* tail_ = nullptr;
   uint8_t* cursor_ = nullptr;
   uint8_t* limit_ = nullptr;

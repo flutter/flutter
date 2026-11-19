@@ -50,8 +50,8 @@ fml::RefPtr<Shader> Shader::Make(
     std::shared_ptr<fml::Mapping> code_mapping,
     std::vector<impeller::ShaderStageIOSlot> inputs,
     std::vector<impeller::ShaderStageBufferLayout> layouts,
-    std::unordered_map<std::string, UniformBinding> uniform_structs,
-    std::unordered_map<std::string, TextureBinding> uniform_textures,
+    absl::flat_hash_map<std::string, UniformBinding> uniform_structs,
+    absl::flat_hash_map<std::string, TextureBinding> uniform_textures,
     std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
     absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers,
     std::optional<std::array<uint32_t, 3>> workgroup_size) {
@@ -71,8 +71,8 @@ fml::RefPtr<Shader> Shader::Make(
 }
 
 std::shared_ptr<const Shader::Reflection> Shader::MakeReflection(
-    std::unordered_map<std::string, UniformBinding> uniform_structs,
-    std::unordered_map<std::string, TextureBinding> uniform_textures,
+    absl::flat_hash_map<std::string, UniformBinding> uniform_structs,
+    absl::flat_hash_map<std::string, TextureBinding> uniform_textures,
     absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers) {
   auto reflection = std::make_shared<Reflection>();
   reflection->uniform_structs = std::move(uniform_structs);

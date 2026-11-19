@@ -7,7 +7,6 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
 #include "flutter/lib/gpu/binding_set.h"
@@ -42,7 +41,7 @@ using ::testing::Truly;
 // A compute shader declaring one uniform struct ("Params"), one storage
 // buffer ("Particles") and one texture ("tex").
 fml::RefPtr<Shader> MakeComputeShader() {
-  std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
+  absl::flat_hash_map<std::string, Shader::UniformBinding> uniform_structs;
   uniform_structs["Params"] = Shader::UniformBinding{
       .slot =
           impeller::ShaderUniformSlot{
@@ -50,7 +49,7 @@ fml::RefPtr<Shader> MakeComputeShader() {
       .metadata = impeller::ShaderMetadata{.name = "Params", .members = {}},
       .size_in_bytes = 16,
   };
-  std::unordered_map<std::string, Shader::TextureBinding> uniform_textures;
+  absl::flat_hash_map<std::string, Shader::TextureBinding> uniform_textures;
   Shader::TextureBinding texture_binding;
   texture_binding.slot = impeller::SampledImageSlot{
       .name = "tex", .texture_index = 0, .set = 0, .binding = 2};

@@ -7,7 +7,6 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
 #include "gtest/gtest.h"
@@ -27,7 +26,7 @@ constexpr size_t kTextureIndex = 2;
 // A shader declaring one uniform struct ("FrameInfo") and one texture
 // ("tex"), which is all a binding set resolves against.
 fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
-  std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
+  absl::flat_hash_map<std::string, Shader::UniformBinding> uniform_structs;
   uniform_structs["FrameInfo"] = Shader::UniformBinding{
       .slot =
           impeller::ShaderUniformSlot{
@@ -40,7 +39,7 @@ fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
       .size_in_bytes = 64,
   };
 
-  std::unordered_map<std::string, Shader::TextureBinding> uniform_textures;
+  absl::flat_hash_map<std::string, Shader::TextureBinding> uniform_textures;
   Shader::TextureBinding texture_binding;
   texture_binding.slot = impeller::SampledImageSlot{
       .name = "tex",

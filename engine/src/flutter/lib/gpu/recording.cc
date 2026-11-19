@@ -4,6 +4,9 @@
 
 #include "flutter/lib/gpu/recording.h"
 
+#include <memory>
+#include <utility>
+
 namespace flutter {
 namespace gpu {
 
@@ -13,23 +16,24 @@ OpStream::~OpStream() {
 
 void OpStream::AddChunk() {
   // Not value-initialized, which would zero the whole chunk.
-  auto* chunk = new RecordingChunk;
+  auto chunk = std::make_unique_for_overwrite<RecordingChunk>();
+  RecordingChunk* added = chunk.get();
   if (tail_) {
     tail_->used = cursor_ - tail_->data;
-    tail_->next = chunk;
+    tail_->next = std::move(chunk);
   } else {
-    head_ = chunk;
+    head_ = std::move(chunk);
   }
-  tail_ = chunk;
-  cursor_ = chunk->data;
-  limit_ = chunk->data + sizeof(chunk->data);
+  tail_ = added;
+  cursor_ = added->data;
+  limit_ = added->data + sizeof(added->data);
 }
 
 void OpStream::Reset() {
+  // One chunk at a time, since dropping the head alone would recurse through
+  // every chunk after it.
   while (head_) {
-    RecordingChunk* next = head_->next;
-    delete head_;
-    head_ = next;
+    head_ = std::move(head_->next);
   }
   tail_ = nullptr;
   cursor_ = nullptr;

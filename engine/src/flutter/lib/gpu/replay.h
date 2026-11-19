@@ -38,6 +38,8 @@ class PassReplayer {
   explicit PassReplayer(impeller::Context& context);
 
   /// Replays a render pass. Draws whose pipeline fails to build are dropped.
+  /// The pipelines it builds are retained by [recording], which is what keeps
+  /// them alive until the GPU finishes.
   void ReplayRender(PassRecording& recording, impeller::RenderPass& pass);
 
   /// Replays a compute pass. Returns false if the backend rejected a dispatch.

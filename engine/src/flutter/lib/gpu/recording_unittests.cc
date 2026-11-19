@@ -8,7 +8,6 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -177,7 +176,7 @@ class FakeRenderPass : public impeller::RenderPass {
 };
 
 fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
-  std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
+  absl::flat_hash_map<std::string, Shader::UniformBinding> uniform_structs;
   for (const char* name : {"FrameInfo", "NodeInfo"}) {
     uniform_structs[name] = Shader::UniformBinding{
         .slot = impeller::ShaderUniformSlot{.name = name},
@@ -185,7 +184,7 @@ fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
         .size_in_bytes = 64,
     };
   }
-  std::unordered_map<std::string, Shader::TextureBinding> uniform_textures;
+  absl::flat_hash_map<std::string, Shader::TextureBinding> uniform_textures;
   Shader::TextureBinding texture_binding;
   texture_binding.slot = impeller::SampledImageSlot{.name = "tex"};
   texture_binding.metadata =

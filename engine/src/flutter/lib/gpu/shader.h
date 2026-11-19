@@ -12,7 +12,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "flutter/lib/gpu/context.h"
@@ -75,8 +74,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
   /// wholesale on reload, so a recording that retains it keeps every binding
   /// pointer it took valid until the recording is replayed.
   struct Reflection {
-    std::unordered_map<std::string, UniformBinding> uniform_structs;
-    std::unordered_map<std::string, TextureBinding> uniform_textures;
+    absl::flat_hash_map<std::string, UniformBinding> uniform_structs;
+    absl::flat_hash_map<std::string, TextureBinding> uniform_textures;
     absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers;
     // The maps' entries in a stable order for index-based lookup. The maps
     // are never modified once built, so entry pointers stay valid.
@@ -94,8 +93,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::shared_ptr<fml::Mapping> code_mapping,
       std::vector<impeller::ShaderStageIOSlot> inputs,
       std::vector<impeller::ShaderStageBufferLayout> layouts,
-      std::unordered_map<std::string, UniformBinding> uniform_structs,
-      std::unordered_map<std::string, TextureBinding> uniform_textures,
+      absl::flat_hash_map<std::string, UniformBinding> uniform_structs,
+      absl::flat_hash_map<std::string, TextureBinding> uniform_textures,
       std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
       absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers =
           {},
@@ -224,8 +223,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
   bool is_dirty_ = true;
 
   static std::shared_ptr<const Reflection> MakeReflection(
-      std::unordered_map<std::string, UniformBinding> uniform_structs,
-      std::unordered_map<std::string, TextureBinding> uniform_textures,
+      absl::flat_hash_map<std::string, UniformBinding> uniform_structs,
+      absl::flat_hash_map<std::string, TextureBinding> uniform_textures,
       absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);

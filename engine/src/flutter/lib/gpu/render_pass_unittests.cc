@@ -31,7 +31,7 @@ fml::RefPtr<Shader> MakeShader(impeller::ShaderStage stage) {
 
 // A shader declaring one uniform struct, "FrameInfo".
 fml::RefPtr<Shader> MakeShaderWithUniform(impeller::ShaderStage stage) {
-  std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
+  absl::flat_hash_map<std::string, Shader::UniformBinding> uniform_structs;
   uniform_structs["FrameInfo"] = Shader::UniformBinding{
       .slot = impeller::ShaderUniformSlot{.name = "FrameInfo"},
       .metadata = impeller::ShaderMetadata{.name = "FrameInfo", .members = {}},
