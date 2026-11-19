@@ -111,9 +111,8 @@ TEST(MockWindow, OnImeCompositionComposeWhileImeInactiveIsIgnored) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
-// A composing string that arrives without WM_IME_STARTCOMPOSITION while the IME
-// window is active begins a composition. Otherwise the text input model would
-// insert the composing string as plain text.
+// A composing string that arrives without WM_IME_STARTCOMPOSITION begins a
+// composition. Otherwise the text input model would insert it twice.
 TEST(MockWindow, OnImeCompositionComposeWithoutStartBeginsComposition) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
@@ -141,9 +140,8 @@ TEST(MockWindow, OnImeCompositionComposeWithoutStartBeginsComposition) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
-// A WM_IME_STARTCOMPOSITION that arrives after the composition was begun
-// implicitly must not begin it again. Otherwise the composing text applied so
-// far would be left behind as plain text.
+// Beginning the composition again would leave the composing text applied so
+// far behind as plain text.
 TEST(MockWindow, OnImeStartCompositionAfterImplicitBeginDoesNotBeginAgain) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
@@ -173,8 +171,8 @@ TEST(MockWindow, OnImeStartCompositionAfterImplicitBeginDoesNotBeginAgain) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
-// A composition that was begun implicitly ends once a message leaves no
-// composing text, because a WM_IME_ENDCOMPOSITION may never arrive for it.
+// WM_IME_ENDCOMPOSITION may never arrive for a composition that was begun
+// implicitly, so it ends once no composing text is left.
 TEST(MockWindow, OnImeCompositionImplicitCompositionEndsWithResult) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
@@ -207,8 +205,7 @@ TEST(MockWindow, OnImeCompositionImplicitCompositionEndsWithResult) {
 }
 
 // A result string that arrives with neither WM_IME_STARTCOMPOSITION nor
-// WM_IME_ENDCOMPOSITION while the IME window is active is committed in a
-// composition of its own.
+// WM_IME_ENDCOMPOSITION is committed in a composition of its own.
 TEST(MockWindow, OnImeCompositionResultWithoutStartOrEndIsCommitted) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
@@ -235,8 +232,8 @@ TEST(MockWindow, OnImeCompositionResultWithoutStartOrEndIsCommitted) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
 }
 
-// Ending an implicitly begun composition leaves the IME window active, so the
-// next string that arrives without WM_IME_STARTCOMPOSITION is still read.
+// The IME window stays active after an implicitly begun composition ends, so
+// the next string is still read.
 TEST(MockWindow, OnImeCompositionResultAfterImplicitCompositionIsCommitted) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
@@ -360,12 +357,9 @@ TEST(MockWindow, OnImeCompositionResultAndCompose) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/140537.
-//
-// The Microsoft Korean IME in the 3-beolsik layouts sends
-// WM_IME_ENDCOMPOSITION before the WM_IME_COMPOSITION carrying the result
-// string when a space or punctuation key ends the composition. The end of the
-// composition must wait for the queued result so that the result, which
-// contains the typed character, is applied to the composition.
+// The legacy Microsoft Korean IME sends WM_IME_ENDCOMPOSITION before the result
+// string. In the 3-beolsik layouts that string also carries the space, digit or
+// punctuation that ended the composition.
 TEST(MockWindow, OnImeEndCompositionWaitsForQueuedResult) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockTextInputManager();
@@ -409,11 +403,9 @@ TEST(MockWindow, OnImeEndCompositionWaitsForQueuedResult) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/140537.
-//
-// With nothing being composed, the Microsoft Korean IME in the 3-beolsik
-// layouts sends WM_IME_ENDCOMPOSITION followed by a GCS_RESULTSTR for a space
-// or punctuation key, without any WM_IME_STARTCOMPOSITION. A composition is
-// begun for the result so that it is committed exactly once.
+// With nothing being composed, the 3-beolsik layouts of the legacy Microsoft
+// Korean IME send WM_IME_ENDCOMPOSITION and the result without
+// WM_IME_STARTCOMPOSITION.
 TEST(MockWindow, OnImeEndCompositionWithoutStartBeginsComposition) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockTextInputManager();
@@ -451,11 +443,8 @@ TEST(MockWindow, OnImeEndCompositionWithoutStartBeginsComposition) {
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/140537.
-//
-// Once a composition has ended, the IME window is no longer active and its
-// strings are not readable. A bare space typed next arrives as a result string
-// without any WM_IME_STARTCOMPOSITION. The composition begun for it must
-// activate the IME window again so that the result is read and committed.
+// Ending a composition deactivates the IME window, so the composition begun
+// for a following bare space must activate it again to read the result.
 TEST(MockWindow, OnImeCompositionResultAfterPreviousCompositionIsCommitted) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
@@ -506,11 +495,9 @@ TEST(MockWindow, OnImeCompositionResultAfterPreviousCompositionIsCommitted) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
 }
 
-// When the window loses focus during a composition, the Microsoft Korean IME
-// sends WM_IME_ENDCOMPOSITION with nothing queued and then re-sends the
-// composing text in a trailing GCS_RESULTSTR. The composition ends immediately,
-// committing its text. The IME window is then inactive, so the trailing result
-// is not read and the text is not inserted again.
+// When the window loses focus during a composition, the legacy Microsoft Korean
+// IME may send WM_IME_ENDCOMPOSITION with nothing queued and then the composing
+// text in a GCS_RESULTSTR. That text must not be inserted again.
 TEST(MockWindow, OnImeCompositionResultAfterEndCompositionIsIgnored) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
   auto* text_input_manager = new MockImmTextInputManager();
