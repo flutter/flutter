@@ -38,6 +38,74 @@ void doTests() {
     });
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196861.
+  group('when reading the size changes the visual viewport scale', () {
+    late FullPageDimensionsProvider provider;
+    final fakes = <String>[];
+
+    final JSObject visualViewport = globalContext.getProperty<JSObject>('visualViewport'.toJS);
+
+    // Shadows a read-only property of the visual viewport until tearDown.
+    void fake(String name, JSObject descriptor) {
+      descriptor.setProperty('configurable'.toJS, true.toJS);
+      objectConstructor.callMethod<JSAny?>(
+        'defineProperty'.toJS,
+        visualViewport,
+        name.toJS,
+        descriptor,
+      );
+      fakes.add(name);
+    }
+
+    void fakeValue(String name, double value) {
+      fake(name, JSObject()..setProperty('value'.toJS, value.toJS));
+    }
+
+    setUp(() {
+      // The real ratio, which includes `visualViewport.scale`.
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+      provider = FullPageDimensionsProvider();
+
+      // A zoomed-out layout that the browser hasn't redone yet. Reading the
+      // size flushes the layout, which resets the scale to 1, as in Chrome's
+      // mobile emulation after the engine adds its viewport meta tag.
+      fakeValue('scale', 0.42);
+      fake(
+        'width',
+        JSObject()..setProperty(
+          'get'.toJS,
+          (() {
+            fakeValue('scale', 1);
+            return 412.toJS;
+          }).toJS,
+        ),
+      );
+      fakeValue('height', 839);
+    });
+
+    tearDown(() {
+      provider.close();
+      for (final name in fakes) {
+        visualViewport.delete(name.toJS);
+      }
+      fakes.clear();
+    });
+
+    test('computePhysicalSize uses the scale after the layout', () {
+      final double dpr = domWindow.devicePixelRatio;
+
+      expect(provider.computePhysicalSize(), ui.Size(412 * dpr, 839 * dpr));
+    });
+
+    test('computeKeyboardInsets reports no keyboard', () {
+      final double physicalHeight = provider.computePhysicalSize().height;
+
+      final ViewPadding computed = provider.computeKeyboardInsets(physicalHeight, false);
+
+      expect(computed.bottom, 0);
+    });
+  });
+
   group('computeKeyboardInsets', () {
     late FullPageDimensionsProvider provider;
 

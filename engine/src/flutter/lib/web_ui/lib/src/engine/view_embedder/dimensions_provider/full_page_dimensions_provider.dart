@@ -80,28 +80,32 @@ class FullPageDimensionsProvider extends DimensionsProvider {
 
   @override
   ui.Size computePhysicalSize() {
-    late double windowInnerWidth;
-    late double windowInnerHeight;
-    final DomVisualViewport? viewport = domWindow.visualViewport;
-    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+    // The size has to be read before the device pixel ratio. Reading the size
+    // flushes any pending layout, and that layout can change
+    // `visualViewport.scale`, which the device pixel ratio includes. Reading
+    // the ratio first would scale the new size by the old ratio, while
+    // `computeKeyboardInsets` uses the new one, so the difference would be
+    // reported as a (possibly negative) keyboard inset. Chrome's mobile
+    // emulation does this when the engine adds its viewport meta tag to a page
+    // that had none. See https://github.com/flutter/flutter/issues/196861.
+    final ui.Size logicalSize = _computeLogicalSize();
+    return logicalSize * EngineFlutterDisplay.instance.devicePixelRatio;
+  }
 
-    if (viewport != null) {
-      if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        // Chrome on iOS reports incorrect viewport.height when app
-        // starts in portrait orientation and the phone is rotated to
-        // landscape, so the size is read from documentElement instead. See
-        // `_iOSHeight` for when the height comes from the visual viewport.
-        windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
-        windowInnerHeight = _iOSHeight(viewport) * devicePixelRatio;
-      } else {
-        windowInnerWidth = viewport.width! * devicePixelRatio;
-        windowInnerHeight = viewport.height! * devicePixelRatio;
-      }
-    } else {
-      windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
+  /// The size of the view, in CSS pixels.
+  ui.Size _computeLogicalSize() {
+    final DomVisualViewport? viewport = domWindow.visualViewport;
+    if (viewport == null) {
+      return ui.Size(domWindow.innerWidth!, domWindow.innerHeight!);
     }
-    return ui.Size(windowInnerWidth, windowInnerHeight);
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
+      // Chrome on iOS reports incorrect viewport.height when app
+      // starts in portrait orientation and the phone is rotated to
+      // landscape, so the size is read from documentElement instead. See
+      // `_iOSHeight` for when the height comes from the visual viewport.
+      return ui.Size(domDocument.documentElement!.clientWidth, _iOSHeight(viewport));
+    }
+    return ui.Size(viewport.width!, viewport.height!);
   }
 
   /// The view height on iOS, in CSS pixels.
@@ -128,22 +132,23 @@ class FullPageDimensionsProvider extends DimensionsProvider {
 
   @override
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile) {
-    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
     final DomVisualViewport? viewport = domWindow.visualViewport;
-    late double windowInnerHeight;
+    late double logicalHeight;
 
     if (viewport != null) {
       if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs && !isEditingOnMobile) {
         // Must match computePhysicalSize, or the difference would be reported
         // as an open keyboard.
-        windowInnerHeight = _iOSHeight(viewport) * devicePixelRatio;
+        logicalHeight = _iOSHeight(viewport);
       } else {
-        windowInnerHeight = viewport.height! * devicePixelRatio;
+        logicalHeight = viewport.height!;
       }
     } else {
-      windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
+      logicalHeight = domWindow.innerHeight!;
     }
-    final double bottomPadding = physicalHeight - windowInnerHeight;
+    // Read after the height, for the same reason as in computePhysicalSize.
+    final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
+    final double bottomPadding = physicalHeight - logicalHeight * devicePixelRatio;
 
     return ViewPadding(bottom: bottomPadding, left: 0, right: 0, top: 0);
   }
