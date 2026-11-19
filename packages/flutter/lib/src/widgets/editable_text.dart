@@ -5176,7 +5176,9 @@ class EditableTextState extends State<EditableText>
     if (selection == null || !selection.isValid) {
       return;
     }
-    final currentTextPosition = TextPosition(offset: selection.start);
+    final TextPosition currentTextPosition = selection.isCollapsed
+        ? selection.extent
+        : TextPosition(offset: selection.start);
     final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
