@@ -48,6 +48,26 @@ void main() {
     late List<String> detectedNonDartFileChanges;
     late LspPreviewDetector detector;
 
+    LspPreviewDetector createDetector() => LspPreviewDetector(
+      dtd: fakeDtd,
+      onChangeDetected: detectedChanges.add,
+      onPubspecChangeDetected: detectedPubspecChanges.add,
+      previewAnalytics: previewAnalytics,
+      project: project,
+      suppressAnalytics: false,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+        shutdownHooks: shutdownHooks,
+      ),
+      analysisServerFactory: () async => fakeAnalysisServer,
+      onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
+      watcherBuilder: (_) => fakeWatcher,
+    );
+
     setUp(() async {
       fs = MemoryFileSystem.test();
       logger = BufferLogger.test();
@@ -66,25 +86,7 @@ void main() {
       detectedPubspecChanges = <String>[];
       detectedNonDartFileChanges = <String>[];
 
-      detector = LspPreviewDetector(
-        dtd: fakeDtd,
-        onChangeDetected: detectedChanges.add,
-        onPubspecChangeDetected: detectedPubspecChanges.add,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        suppressAnalytics: false,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
-          shutdownHooks: shutdownHooks,
-        ),
-        analysisServerFactory: () async => fakeAnalysisServer,
-        onNonDartFileChangeDetected: detectedNonDartFileChanges.add,
-        watcherBuilder: (_) => fakeWatcher,
-      );
+      detector = createDetector();
       await detector.initialize();
     });
 
@@ -217,28 +219,12 @@ void main() {
       void runWithFakeAsyncDetector(
         void Function(FakeAsync time, LspPreviewDetector detector) body,
       ) {
+        final originalWatcher = fakeWatcher;
         FakeAsync().run((FakeAsync time) {
           fakeDtd = FakeWidgetPreviewDtdServices()
             ..pendingRequests = <Completer<FlutterWidgetPreviews>>[];
           fakeWatcher = FakeWatcher();
-          final fakeAsyncDetector = LspPreviewDetector(
-            dtd: fakeDtd,
-            onChangeDetected: detectedChanges.add,
-            onPubspecChangeDetected: detectedPubspecChanges.add,
-            previewAnalytics: previewAnalytics,
-            project: project,
-            suppressAnalytics: false,
-            toolContext: FakeToolContext(
-              artifacts: Artifacts.test(),
-              fs: fs,
-              logger: logger,
-              platform: platform,
-              processManager: FakeProcessManager.any(),
-              shutdownHooks: shutdownHooks,
-            ),
-            analysisServerFactory: () async => fakeAnalysisServer,
-            watcherBuilder: (_) => fakeWatcher,
-          );
+          final LspPreviewDetector fakeAsyncDetector = createDetector();
           unawaited(fakeAsyncDetector.initialize());
           time.flushMicrotasks();
 
@@ -250,8 +236,10 @@ void main() {
             }
           }
           unawaited(fakeAsyncDetector.dispose());
+          unawaited(fakeWatcher.close());
           time.flushMicrotasks();
         });
+        fakeWatcher = originalWatcher;
       }
 
       testWithoutContext('applies a response that arrives after its request timed out', () {
@@ -261,15 +249,12 @@ void main() {
           expect(fakeDtd.pendingRequests, hasLength(2));
           expect(detectedChanges, isEmpty);
 
-          // The analysis server answers the first request once it finishes resolving the
-          // workspace, which takes longer than the timeout in large projects.
           fakeDtd.pendingRequests!.first.complete(previews);
           time.flushMicrotasks();
 
           expect(detectedChanges, <FlutterWidgetPreviews>[previews]);
           expectNPreviewReloadTimingEvents(1);
 
-          // The response to the superseded request is ignored.
           fakeDtd.pendingRequests!.last.complete(
             const FlutterWidgetPreviews(
               namespaces: <String, String>{},
@@ -405,24 +390,7 @@ void main() {
       await detector.dispose();
 
       fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
-      detector = LspPreviewDetector(
-        dtd: fakeDtd,
-        onChangeDetected: detectedChanges.add,
-        onPubspecChangeDetected: detectedPubspecChanges.add,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        suppressAnalytics: false,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
-          shutdownHooks: shutdownHooks,
-        ),
-        analysisServerFactory: () async => fakeAnalysisServer,
-        watcherBuilder: (_) => fakeWatcher,
-      );
+      detector = createDetector();
       await detector.initialize();
 
       expect(detector.analysisServer, isNull);
