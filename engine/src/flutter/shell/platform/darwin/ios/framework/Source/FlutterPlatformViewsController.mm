@@ -70,6 +70,11 @@ static void ResetAnchor(CALayer* layer) {
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
 
+/// The number of physical pixels per point in the current frame.
+///
+/// This state is only modified on the raster thread.
+@property(nonatomic, assign) CGFloat devicePixelRatio;
+
 /// The task runner for posting tasks to the platform thread.
 @property(nonatomic, readonly) FlutterFMLTaskRunner* platformTaskRunner;
 
@@ -147,20 +152,22 @@ static void ResetAnchor(CALayer* layer) {
                 unusedLayers:
                     (const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers
                surfaceFrames:
-                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames;
+                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames
+            devicePixelRatio:(CGFloat)devicePixelRatio;
 
 - (void)onCreate:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (void)onDispose:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (void)onAcceptGesture:(FlutterMethodCall*)call result:(FlutterResult)result;
 - (void)onRejectGesture:(FlutterMethodCall*)call result:(FlutterResult)result;
 
-- (void)clipViewSetMaskView:(UIView*)clipView;
+- (void)clipViewSetMaskView:(UIView*)clipView devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Composites the platform view described by `layer`.
 //
 // This method sets the frames of the view's |ChildClippingView| and
 // |FlutterTouchInterceptingView|, then applies the layer's mutators.
-- (void)compositeLayer:(FlutterPlatformViewLayer*)layer;
+// This method divides by `devicePixelRatio` to convert the layer from physical pixels to points.
+- (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Applies the mutators to the UIView chain that was constructed by
 // `ReconstructClipViewsChain`
@@ -169,9 +176,13 @@ static void ResetAnchor(CALayer* layer) {
 // |FlutterClippingMaskView|. Transforms are applied to `embeddedView`
 //
 // This method is only called when the `embeddedView` needs to be re-composited at the current
-// frame. See: `compositeView:withParams:` for details.
+// frame. See: `performSubmit:` for details.
+//
+// This method divides by `devicePixelRatio` to convert the transforms and the backdrop filter rect
+// from physical pixels to points.
 - (void)applyMutators:(NSArray<FlutterPlatformViewMutator*>*)mutators
-         embeddedView:(UIView*)embeddedView;
+         embeddedView:(UIView*)embeddedView
+     devicePixelRatio:(CGFloat)devicePixelRatio;
 
 // Appends the overlay views and platform view and sets their z index based on the composition
 // order.
@@ -410,9 +421,11 @@ static void ResetAnchor(CALayer* layer) {
   self.gestureRecognizersBlockingPoliciesByType[factoryId] = @(gestureRecognizerBlockingPolicy);
 }
 
-- (void)beginFrameWithSize:(DlISize)frameSize {
+- (void)beginFrameWithSize:(DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio {
+  FML_DCHECK(devicePixelRatio > 0);
   [self resetFrameState];
   self.frameSize = frameSize;
+  self.devicePixelRatio = devicePixelRatio;
 }
 
 - (void)cancelFrame {
@@ -461,7 +474,7 @@ static void ResetAnchor(CALayer* layer) {
   return -1;
 }
 
-- (void)clipViewSetMaskView:(UIView*)clipView {
+- (void)clipViewSetMaskView:(UIView*)clipView devicePixelRatio:(CGFloat)devicePixelRatio {
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   if (clipView.maskView) {
     return;
@@ -469,11 +482,13 @@ static void ResetAnchor(CALayer* layer) {
   CGRect frame =
       CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
                  CGRectGetWidth(self.flutterView.bounds), CGRectGetHeight(self.flutterView.bounds));
-  clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame];
+  clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame
+                                             devicePixelRatio:devicePixelRatio];
 }
 
 - (void)applyMutators:(NSArray<FlutterPlatformViewMutator*>*)mutators
-         embeddedView:(UIView*)embeddedView {
+         embeddedView:(UIView*)embeddedView
+     devicePixelRatio:(CGFloat)devicePixelRatio {
   if (self.flutterView == nil) {
     return;
   }
@@ -491,7 +506,6 @@ static void ResetAnchor(CALayer* layer) {
     [self.maskViewPool insertViewToPoolIfNeeded:(FlutterClippingMaskView*)(clipView.maskView)];
     clipView.maskView = nil;
   }
-  CGFloat screenScale = [UIScreen mainScreen].scale;
   for (FlutterPlatformViewMutator* mutator in mutators) {
     switch (mutator.type) {
       case FlutterPlatformViewMutatorTypeTransform: {
@@ -499,20 +513,20 @@ static void ResetAnchor(CALayer* layer) {
         break;
       }
       case FlutterPlatformViewMutatorTypeClipRect: {
-        [self clipViewSetMaskView:clipView];
+        [self clipViewSetMaskView:clipView devicePixelRatio:devicePixelRatio];
         [(FlutterClippingMaskView*)clipView.maskView clipRect:mutator.rect matrix:transformMatrix];
         break;
       }
       case FlutterPlatformViewMutatorTypeClipRoundedRect:
       case FlutterPlatformViewMutatorTypeClipRoundedSuperellipse: {
-        [self clipViewSetMaskView:clipView];
+        [self clipViewSetMaskView:clipView devicePixelRatio:devicePixelRatio];
         [(FlutterClippingMaskView*)clipView.maskView clipRRect:mutator.rect
                                                          radii:mutator.cornerRadii
                                                         matrix:transformMatrix];
         break;
       }
       case FlutterPlatformViewMutatorTypeClipPath: {
-        [self clipViewSetMaskView:clipView];
+        [self clipViewSetMaskView:clipView devicePixelRatio:devicePixelRatio];
         [(FlutterClippingMaskView*)clipView.maskView clipPath:mutator.path matrix:transformMatrix];
         break;
       }
@@ -526,7 +540,7 @@ static void ResetAnchor(CALayer* layer) {
         CGRect filterRect = mutator.rect;
         // `filterRect` is in global coordinates. We need to convert to local space.
         filterRect = CGRectApplyAffineTransform(
-            filterRect, CGAffineTransformMakeScale(1 / screenScale, 1 / screenScale));
+            filterRect, CGAffineTransformMakeScale(1 / devicePixelRatio, 1 / devicePixelRatio));
         // `filterRect` reprents the rect that should be filtered inside the `_flutterView`.
         // The `PlatformViewFilter` needs the frame inside the `clipView` that needs to be
         // filtered.
@@ -607,7 +621,7 @@ static void ResetAnchor(CALayer* layer) {
   // However, flow is based on the physical resolution. For example, 1000 pixels in flow equals
   // 500 points in UIKit for devices that has screenScale of 2. We need to scale the transformMatrix
   // down to the logical resoltion before applying it to the layer of PlatformView.
-  CGFloat pointScale = 1.0 / screenScale;
+  CGFloat pointScale = 1.0 / devicePixelRatio;
   transformMatrix =
       CATransform3DConcat(transformMatrix, CATransform3DMakeScale(pointScale, pointScale, 1));
 
@@ -628,13 +642,14 @@ static void ResetAnchor(CALayer* layer) {
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params {
   CGFloat screenScale = [UIScreen mainScreen].scale;
   [self compositeLayer:flutter::GetPlatformViewLayerFromEmbeddedViewParams(viewId, params,
-                                                                           screenScale)];
+                                                                           screenScale)
+      devicePixelRatio:screenScale];
 }
 
-- (void)compositeLayer:(FlutterPlatformViewLayer*)layer {
-  CGFloat screenScale = [UIScreen mainScreen].scale;
+- (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio {
   // TODO(https://github.com/flutter/flutter/issues/109700)
-  CGRect frame = CGRectMake(0, 0, layer.size.width / screenScale, layer.size.height / screenScale);
+  CGRect frame =
+      CGRectMake(0, 0, layer.size.width / devicePixelRatio, layer.size.height / devicePixelRatio);
   FlutterTouchInterceptingView* touchInterceptor =
       self.platformViews[@(layer.viewId)].touchInterceptor;
   touchInterceptor.layer.transform = CATransform3DIdentity;
@@ -644,12 +659,15 @@ static void ResetAnchor(CALayer* layer) {
   UIView* clippingView = self.platformViews[@(layer.viewId)].rootView;
   // The frame of the clipping view should be the final bounding rect.
   // Because the translate matrix in the Mutator Stack also includes the offset,
-  // when we apply the transforms matrix in |applyMutators:embeddedView:|, we need
+  // when we apply the transforms matrix in |applyMutators:embeddedView:devicePixelRatio:|, we need
   // to remember to do a reverse translate.
   CGRect rect = layer.boundingRect;
-  clippingView.frame = CGRectMake(rect.origin.x / screenScale, rect.origin.y / screenScale,
-                                  rect.size.width / screenScale, rect.size.height / screenScale);
-  [self applyMutators:layer.mutators embeddedView:touchInterceptor];
+  clippingView.frame =
+      CGRectMake(rect.origin.x / devicePixelRatio, rect.origin.y / devicePixelRatio,
+                 rect.size.width / devicePixelRatio, rect.size.height / devicePixelRatio);
+  [self applyMutators:layer.mutators
+          embeddedView:touchInterceptor
+      devicePixelRatio:devicePixelRatio];
 }
 
 - (flutter::DlCanvas*)compositeEmbeddedViewWithId:(int64_t)viewId {
@@ -809,13 +827,15 @@ static void ResetAnchor(CALayer* layer) {
                                  viewsToRecomposite = std::move(viewsToRecomposite),        //
                                  compositionOrder = self.compositionOrder,                  //
                                  unusedLayers = std::move(unusedLayers),                    //
-                                 surfaceFrames = std::move(surfaceFrames)]() mutable {
+                                 surfaceFrames = std::move(surfaceFrames),                  //
+                                 devicePixelRatio = self.devicePixelRatio]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
-                   surfaceFrames:surfaceFrames];
+                   surfaceFrames:surfaceFrames
+                devicePixelRatio:devicePixelRatio];
   });
 
   [self.taskRunner runNowOrPostTask:^{
@@ -866,7 +886,8 @@ static void ResetAnchor(CALayer* layer) {
                 unusedLayers:
                     (const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers
                surfaceFrames:
-                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames {
+                   (const std::vector<std::unique_ptr<flutter::SurfaceFrame>>&)surfaceFrames
+            devicePixelRatio:(CGFloat)devicePixelRatio {
   TRACE_EVENT0("flutter", "PlatformViewsController::PerformSubmit");
   FML_DCHECK([[NSThread currentThread] isMainThread]);
 
@@ -874,10 +895,11 @@ static void ResetAnchor(CALayer* layer) {
 
   // Configure Flutter overlay views.
   for (const auto& [viewId, layerData] : platformViewLayers) {
-    layerData.layer->UpdateViewState(self.flutterView,     //
-                                     layerData.rect,       //
-                                     layerData.view_id,    //
-                                     layerData.overlay_id  //
+    layerData.layer->UpdateViewState(self.flutterView,      //
+                                     layerData.rect,        //
+                                     layerData.view_id,     //
+                                     layerData.overlay_id,  //
+                                     devicePixelRatio       //
     );
   }
 
@@ -888,7 +910,9 @@ static void ResetAnchor(CALayer* layer) {
 
   // Composite Platform Views.
   for (int64_t viewId : viewsToRecomposite) {
-    [self compositeView:viewId withParams:currentCompositionParams[viewId]];
+    FlutterPlatformViewLayer* layer = flutter::GetPlatformViewLayerFromEmbeddedViewParams(
+        viewId, currentCompositionParams[viewId], devicePixelRatio);
+    [self compositeLayer:layer devicePixelRatio:devicePixelRatio];
   }
 
   // Present callbacks.
