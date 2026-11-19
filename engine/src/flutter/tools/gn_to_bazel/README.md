@@ -396,7 +396,20 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `-=` on a variable of an enclosing scope (a template body appending to a
    forwarded `public_configs`) modify a copy in the current scope and leave
    the enclosing variable alone, as GN does; a `config`'s `_`-prefixed
-   variables are its locals and carry nothing.
+   variables are its locals and carry nothing. `set_defaults()` for a
+   template of the file's own gives its invocations' blocks their starting
+   variables (angle.gni's `configs` and `suppressed_configs`; a built-in
+   target type's defaults are BUILDCONFIG.gn's, which the tables stand
+   for), and `target(type, name)` invokes such a template when the type
+   names one. A list less the items of another (which it must hold), a
+   string plus an integer, a scope's member inside a string
+   (`"${invoker.output_name}_autogen.def"`) and `rebase_path(x, base, from)`
+   for a source directory `base` (the paths below it: ANGLE's backends'
+   source lists, rebased to its root) are understood too.
+   `filter_include(configs, [...])` answers from what the block added to
+   its configs, and of the default ones only that a config outside them is
+   not there; `write_file()` is ignored for the generation log
+   (`gn_logs.txt`) and an error otherwise.
 3. `starlark_emitter.dart` -- the mapping from GN targets to Bazel rules:
    `source_set`/`static_library` to `cc_library` (with headers in `hdrs`, or
    the `public` list when there is one; a `source_set` is `alwayslink`,
@@ -511,7 +524,14 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `build/dart/tools/dart_pkg.py`, which assembles sky_engine's package
    directory) is converted as a template invocation would be, its
    variables the macro's arguments (`dart_pkg` in
-   `build_defs/dart/dart_pkg.bzl`).
+   `build_defs/dart/dart_pkg.bzl`). GN's `response_file_contents` is the
+   rule's attribute of that name: arguments too many for a command line,
+   written to a file, shell-quoted, whose name `args` gets in place of
+   `{{response_file_name}}` (ANGLE's program version is a hash of a
+   thousand sources). What a script would read outside its inputs comes
+   through the rule's `env` from a Bazel-side constant
+   (`scriptEnvironment`: the engine's revision for `copy_info_plist.py`;
+   ANGLE's for its `commit_id.py`, which would ask git).
    `generated_file()` with `contents` becomes a `gn_generated_file` writing
    the lines, named after GN's output path under the build directory; the
    `metadata`-walking form (`data_keys`, the macOS archives' entitlements
@@ -521,7 +541,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `copy()`'s, says where GN's build directory holds its files
    (`BuildDirectoryInfo`), which `install` reads. A dependency on an action of the same file becomes a
    source of the dependent, since the outputs are inputs of its compile in
-   Bazel where GN only ordered the two; one on a `copy()` of the same file,
+   Bazel where GN only ordered the two -- a public dependency on one that
+   writes headers alone publishes them instead (the library's `hdrs`:
+   ANGLE's version headers), and either way the action's `public_configs`
+   (the headers' include directory) become dependencies of the dependent,
+   the action's rule having no way to carry them; one on a `copy()` of the same file,
    or on a target of a template whose macro produces files rather than a
    library (`TemplateMapping.files`: `dart_snapshot_aot`,
    `dart_snapshot_kernel`, `impellerc`), becomes `data`, since the dependent
@@ -529,7 +553,9 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    GSettings schemas; `//flutter/testing:fixture_test` and the VM service's
    AOT snapshot in the profile mode). A generated directory in
    `include_dirs` is the package's, as Bazel's `includes` spans the output
-   tree; an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
+   tree; one outside its own generated tree that a converted repository
+   writes to (`$root_gen_dir/angle`, wherever ANGLE is checked out) has a
+   home inside it (`genDirHomes`); an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
    the target whose `includes` already name that directory
    (`genDirIncludeTargets`); an include directory in another repository, or
    in another package of this one, is a dependency on the library that

@@ -35,6 +35,10 @@ the paths in the arguments as tokens this rule expands:
                       directory itself), as the directory the action's own
                       build outputs are declared in.
 
+GN's own `{{response_file_name}}` in an argument is the file the rule writes
+`response_file_contents` to: arguments too many for a command line, each
+expanded as above and quoted for a shell, as GN writes them.
+
 The script runs with the checkout's hermetic Python (`@cpython3`), from the
 execution root, in a sandbox that holds exactly the declared inputs: an
 undeclared input GN would have tolerated is a failure here, by design.
@@ -342,7 +346,24 @@ def _gn_action_impl(ctx):
         expand_gn_paths(ctx, arg, targets.values(), placed, read, staged, own)
         for arg in ctx.attr.args
     ]
-    inputs = ctx.files.srcs + ctx.files.inputs + dep_files + [file for file in read if file not in own]
+
+    # GN's response file: arguments too many for a command line, written to
+    # a file whose name the script is given where `args` says
+    # {{response_file_name}}. Quoted for a shell, as GN writes them and the
+    # scripts read them (shlex.split).
+    response_files = []
+    if ctx.attr.response_file_contents:
+        response_file = ctx.actions.declare_file(ctx.label.name + ".rsp")
+        contents = ctx.actions.args()
+        contents.set_param_file_format("shell")
+        contents.add_all([
+            expand_gn_paths(ctx, item, targets.values(), placed, read, staged, own)
+            for item in ctx.attr.response_file_contents
+        ])
+        ctx.actions.write(response_file, contents)
+        arguments = [arg.replace("{{response_file_name}}", response_file.path) for arg in arguments]
+        response_files.append(response_file)
+    inputs = ctx.files.srcs + ctx.files.inputs + dep_files + [file for file in read if file not in own] + response_files
     run_python(
         ctx,
         script = ctx.file.script,
@@ -460,6 +481,10 @@ gn_action = rule(
         ),
         "args": attr.string_list(
             doc = "GN's `args`, with paths as $(execpath LABEL), $(src PATH), $(gen PATH) and $(built PATH) tokens.",
+        ),
+        "response_file_contents": attr.string_list(
+            doc = "GN's `response_file_contents`: arguments written to a file, shell-quoted, with paths as " +
+                  "in `args`; `args` names the file as `{{response_file_name}}`.",
         ),
         "env": attr.string_dict(
             doc = "Environment variables for the script. Also what puts in the action's key a value the script " +

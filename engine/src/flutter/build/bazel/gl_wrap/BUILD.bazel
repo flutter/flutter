@@ -7,24 +7,21 @@
 # SwiftShader's Vulkan driver (libvk_swiftshader.so and its ICD manifest,
 # for //flutter/testing:vulkan and for ANGLE), the Khronos Vulkan loader
 # ANGLE opens (libvulkan.so.1) and the Khronos validation layer the Vulkan
-# playground requires. On Linux the last three are the converted trees'
-# (@swiftshader, @vulkan-loader, @vulkan_validation_layers: their own GN
+# playground requires. On Linux all four are the converted trees' (@angle,
+# @swiftshader, @vulkan-loader, @vulkan_validation_layers: their own GN
 # files, converted at fetch time; below), under the names the suites take
-# them by. ANGLE on Linux, and all four on a Mac -- where no run has checked
-# the converted trees' products yet -- are built by their own GN rules
-# inside one Bazel action (//build_defs/gn:gn_build.bzl), as the Dart SDK is
-# in ../dart_wrap: ANGLE's BUILD.gn is 2,000 lines over seven packages,
-# behind templates and arguments of its own.
+# them by. On a Mac -- where no run has checked the converted trees'
+# products yet -- all four are built by their own GN rules inside one Bazel
+# action (//build_defs/gn:gn_build.bzl), as the Dart SDK is in ../dart_wrap.
 #
-# The host is whatever runs the build (@host_platform, as in dart_wrap); the
-# targets are the host's own, Linux arm64 and the Mac's two CPUs. On a Mac
-# the products take their Mach-O names (libvk_swiftshader.dylib, the loader
-# libvulkan.dylib -- what tools/gn's --use-glfw-swiftshader names as
-# glfw_vulkan_library there --, the layer's .dylib) and the GN build takes
-# the host's Xcode as the Dart wrap does; ANGLE is built without its GL
-# backend (tools/gn's angle_enable_gl = false on a Mac) and, as its gni has
-# it on a Mac, against the loader rather than through volk, so its facade
-# links the loader there.
+# The wrapped build's host is whatever runs the build (@host_platform, as in
+# dart_wrap); its targets are the Mac's two CPUs. The products take their
+# Mach-O names (libvk_swiftshader.dylib, the loader libvulkan.dylib -- what
+# tools/gn's --use-glfw-swiftshader names as glfw_vulkan_library there --,
+# the layer's .dylib) and the GN build takes the host's Xcode as the Dart
+# wrap does; ANGLE is built without its GL backend (tools/gn's
+# angle_enable_gl = false on a Mac) and, as its gni has it on a Mac, against
+# the loader rather than through volk, so its facade links the loader there.
 #
 # At run time, the files must sit next to the test binary: ANGLE
 # dlopens the loader from, and points the loader at the ICD manifest in, the
@@ -45,13 +42,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/gn:build_directory.bzl", "build_root_binary")
 load("//build_defs/gn:gn_build.bzl", "gn_build")
 load("//build_defs/gn:macos_args.bzl", "MACOS_TARGET_GN_ARGS")
-load("//build_defs/repositories:deps.lock.bzl", "GIT_DEPS")
+load(":angle_version.bzl", "ANGLE_UPSTREAM_HASH")
 
 package(default_visibility = ["//visibility:public"])
 
-_ANGLE_REVISION = GIT_DEPS["engine/src/flutter/third_party/angle"]["revision"]
-
-# What tools/gn writes to args.gn for a host build, restricted to the
+# What tools/gn writes to args.gn for a Mac's host build, restricted to the
 # arguments the pruned GN graph declares (gn gen runs with
 # --fail-on-unused-args): the toolchain, and tools/gn's ANGLE arguments for a
 # host build (no commit id, nothing beyond the libraries, no X11 or Wayland,
@@ -77,27 +72,18 @@ _GN_ARGS = {
     "host_cpu": '"%s"' % HOST_CPU,
     "host_os": '"%s"' % HOST_OS,
     "is_clang": "true",
-    # is_minimal_linux stays at GN's default (false), as in every host build
-    # tools/gn configures: build_overrides/vulkan_headers.gni derives
-    # vulkan_use_x11 from it, and a loader built without
-    # VK_USE_PLATFORM_XCB_KHR drops VK_KHR_xcb_surface from SwiftShader's
-    # extension list, after which GLFW cannot create a Vulkan window surface
-    # (the playground's Vulkan backend). The price is //build/config/linux
-    # probing the sysroot's pkg-config metadata with the host's pkg-config at
-    # gn gen time, as GN's own host build does.
     "is_official_build": "true",
     "stripped_symbols": "true",
+} | MACOS_TARGET_GN_ARGS | {
+    # The target OS, with what tools/gn sets on a Mac and the host's Xcode
+    # (//build_defs/gn:macos_args.bzl); and no GL backend for ANGLE (tools/gn:
+    # angle_enable_gl = false when the host is a Mac; OpenGL is deprecated
+    # there).
+    "angle_enable_gl": "false",
 } | select({
-    # The target OS: mac for the macOS platforms, with what tools/gn sets on
-    # a Mac and the host's Xcode (//build_defs/gn:macos_args.bzl), and
-    # without ANGLE's GL backend (tools/gn: angle_enable_gl = false when the
-    # host is a Mac; OpenGL is deprecated there); Linux otherwise.
-    "@platforms//os:macos": MACOS_TARGET_GN_ARGS | {"angle_enable_gl": "false"},
-    "//conditions:default": {"target_os": '"linux"'},
-}) | select({
-    # The target CPU, as in dart_wrap: the host's, or arm64 for the Linux
-    # arm64 cross build and the arm64 Mac (SwiftShader's Reactor on LLVM
-    # there, Subzero on x64; flutter_tester links swiftshader_static on any).
+    # The target CPU, as in dart_wrap: the arm64 Mac (SwiftShader's Reactor
+    # on LLVM there) or the x64 one (Subzero; flutter_tester links
+    # swiftshader_static on either).
     "@platforms//cpu:aarch64": {"target_cpu": '"arm64"'},
     "//conditions:default": {"target_cpu": '"x64"'},
 }) | select({
@@ -112,9 +98,7 @@ _GN_ARGS = {
 })
 
 # The shared libraries a Mac takes from this build: the driver, the loader
-# and the layer under their macOS names (.dylib), and ANGLE's. A Linux
-# build makes none of them (out_paths maps each to the empty path: an empty
-# target); its files are the converted trees' (below).
+# and the layer under their macOS names (.dylib), and ANGLE's.
 _MACOS_LIBRARIES = [
     "libvk_swiftshader.dylib",
     "libvulkan.dylib",
@@ -173,73 +157,43 @@ gn_build(
         "libangle.a": "//flutter/build/bazel/gl_wrap:angle",
         "libvk_swiftshader_static.a": "//flutter/build/bazel/gl_wrap:swiftshader_static",
     },
-    # A Linux build takes the archive alone (the rest is the converted
-    # trees'): the objects of ANGLE's two libraries, without the data_deps
-    # ANGLE's GN gives them -- SwiftShader's driver and the loader again,
-    # which ninja would build for nobody.
-    archives_only = select({
-        "@platforms//os:macos": False,
-        "//conditions:default": True,
-    }),
     build_file = "BUILD.gn",
     # ANGLE's commit id (its version string), from the DEPS pin: the tree
     # holds no git state, as with dart_wrap's SDK hash.
-    env = {"ANGLE_UPSTREAM_HASH": _ANGLE_REVISION[:12]},
+    env = {"ANGLE_UPSTREAM_HASH": ANGLE_UPSTREAM_HASH},
     gn_args = _GN_ARGS,
-    # The loader's install name on a Mac: GN's mac toolchain gives a shared
-    # library `./libvulkan.dylib`, which dyld resolves against the working
-    # directory -- GN's build directory, where run_tests.py runs the suites
-    # -- and ANGLE's facade links the loader directly there (below); Bazel
-    # runs a test from the runfiles root with the loader beside the binary,
-    # which `@rpath/libvulkan.dylib` finds through the binary's
-    # @loader_path rpath (the Mac's T11: `Library not loaded:
-    # ./libvulkan.dylib`). SwiftShader sets its own (`@rpath/...`, its
-    # ldflags), and the layer is opened by the path its manifest names.
-    install_name_tool = select({
-        "@platforms//os:macos": HOST_CLANG + "//:bin/llvm-install-name-tool",
-        "//conditions:default": None,
-    }),
-    install_names = select({
-        "@platforms//os:macos": {"libvulkan.dylib": "@rpath/libvulkan.dylib"},
-        "//conditions:default": {},
-    }),
+    # The loader's install name: GN's mac toolchain gives a shared library
+    # `./libvulkan.dylib`, which dyld resolves against the working directory
+    # -- GN's build directory, where run_tests.py runs the suites -- and
+    # ANGLE's facade links the loader directly (below); Bazel runs a test
+    # from the runfiles root with the loader beside the binary, which
+    # `@rpath/libvulkan.dylib` finds through the binary's @loader_path rpath
+    # (the Mac's T11: `Library not loaded: ./libvulkan.dylib`). SwiftShader
+    # sets its own (`@rpath/...`, its ldflags), and the layer is opened by
+    # the path its manifest names.
+    install_name_tool = HOST_CLANG + "//:bin/llvm-install-name-tool",
+    install_names = {"libvulkan.dylib": "@rpath/libvulkan.dylib"},
     ninja_target = "gl_wrap",
-    # SwiftShader's static library is the converted tree's on Linux.
-    omit_archives = select({
-        "@platforms//os:macos": [],
-        "//conditions:default": ["libvk_swiftshader_static.a"],
-    }),
-    out_paths = select({
-        "@platforms//os:macos": {
-            _MACOS_ICD_MANIFEST: "vk_swiftshader_icd.json",
-            _MACOS_LAYER_MANIFEST: "vulkan-data/VkLayer_khronos_validation.json",
-        },
-        "//conditions:default": {library: "" for library in _MACOS_LIBRARIES} | {
-            _MACOS_ICD_MANIFEST: "",
-            _MACOS_LAYER_MANIFEST: "",
-        },
-    }),
+    out_paths = {
+        _MACOS_ICD_MANIFEST: "vk_swiftshader_icd.json",
+        _MACOS_LAYER_MANIFEST: "vulkan-data/VkLayer_khronos_validation.json",
+    },
     root_target_dir = "flutter/build/bazel/gl_wrap",
+    # A Mac's alone: Linux takes all four backends from the converted trees
+    # (below).
+    target_compatible_with = ["@platforms//os:macos"],
     # The GN source root: the engine's build configuration, the trees GN
     # reads, the toolchain, and the stand-ins (stubs/) for the engine
-    # directories ANGLE's GN reaches -- each at the path the GN files expect.
+    # directories ANGLE's GN reaches -- each at the path the GN files expect
+    # (a Mac's Xcode SDK is named in the GN args).
     tree = {
         "//engine/src:gn_root_files": "",
         "//engine/src/flutter/build/bazel/gl_wrap/stubs": "",
         "//engine/src/build:gn_files": "build",
-    } | select({
-        # The Linux sysroots, for the Linux targets (a Mac's Xcode SDK is
-        # named in the GN args instead), as in dart_wrap.
-        "@platforms//os:macos": {},
-        "//conditions:default": {
-            "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
-            "@sysroot_linux_arm64//:build_tree": "build/linux/debian_bullseye_arm64-sysroot",
-        },
-    }) | {
         "//engine/src/flutter/build:gn_files": "flutter/build",
         HOST_CLANG + "//:all_files": "flutter/buildtools/%s/clang" % HOST_BUILDTOOLS,
         "@cpython3//:runtime": "flutter/buildtools/%s/cpython3" % HOST_BUILDTOOLS,
-        "@angle//:build_tree": "flutter/third_party/angle",
+        "@angle_tree//:build_tree": "flutter/third_party/angle",
         # ANGLE's gni imports one file of the Dart tree.
         "@dart//:gclient_args": "flutter/third_party/dart",
         "@libcxx//:build_tree": "flutter/third_party/libcxx",
@@ -251,11 +205,6 @@ gn_build(
         "@zlib//:build_tree": "flutter/third_party/zlib",
         "@abseil_cpp_tree//:build_tree": "third_party/abseil-cpp",
     } | select({
-        # The validation layer's tree, which a Mac's build alone compiles
-        # (BUILD.gn).
-        "@platforms//os:macos": {"@vulkan_deps_tree//:layer_tree": "flutter/third_party/vulkan-deps"},
-        "//conditions:default": {},
-    }) | select({
         # Reactor's LLVM backend sources, which SwiftShader's GN build reads
         # on arm64 alone (Subzero on x64): 6,000 files an x64 wrap does not
         # need as inputs.
@@ -268,34 +217,39 @@ gn_build(
 # Facades
 # ---------------------------------------------------------------------------
 
-# //flutter/third_party/angle:libEGL_static and :libGLESv2_static (one
-# archive stands for both, as GN links both into every user). Its
-# dependencies outside the archive, in GN's terms: the engine's
-# flutter_vma (ANGLE's VulkanMemoryAllocator, through
-# build_overrides/angle.gni, whose implementation the engine compiles),
-# abseil's hash containers, zlib and its gzip helpers (ANGLE's shader
-# cache), SPIRV-Tools' validator, and the system libraries. The headers are
-# the ones GN's external_config exposes.
+# //flutter/third_party/angle:libEGL_static and :libGLESv2_static, which GN
+# links both into every user. On Linux the converted tree's two libraries
+# (@angle: ANGLE's own GN files converted at fetch time), with the
+# dependencies and the headers GN gives them. On a Mac one archive of the
+# wrapped build stands for both; its dependencies outside the archive, in
+# GN's terms: the engine's flutter_vma (ANGLE's VulkanMemoryAllocator,
+# through build_overrides/angle.gni, whose implementation the engine
+# compiles), abseil's hash containers, zlib and its gzip helpers (ANGLE's
+# shader cache), SPIRV-Tools' validator, and the system libraries; the
+# headers are the ones GN's external_config exposes.
+# buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "angle",
-    # On a Mac ANGLE calls the loader directly (angle.gni's
+    # A Mac's ANGLE calls the loader directly (angle.gni's
     # angle_shared_libvulkan is false there; its Vulkan backend depends on
     # the loader's shared library rather than loading it through volk), so
     # its users link libvulkan.dylib, found at run time through the
     # executable's own directory (the suites' copies) or Bazel's rpath.
-    srcs = [":libangle.a"] + select({
-        "@platforms//os:macos": [":libvulkan.dylib"],
+    srcs = select({
+        "@platforms//os:macos": [
+            ":libangle.a",
+            ":libvulkan.dylib",
+        ],
         "//conditions:default": [],
     }),
     # On a Mac: libANGLE's Metal (BUILD.gn, is_apple), its Metal backend's
     # IOSurface, QuartzCore and Cocoa (and -weak_framework Metal, its
     # config's ldflags), gpu_info_util's CoreFoundation, CoreGraphics and
     # IOKit.
-    linkopts = [
-        "-ldl",
-        "-lpthread",
-    ] + select({
+    linkopts = select({
         "@platforms//os:macos": [
+            "-ldl",
+            "-lpthread",
             "-framework",
             "Metal",
             "-framework",
@@ -315,18 +269,42 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    deps = [
-        "//engine/src/flutter/flutter_vma",
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/container:flat_hash_set",
-        "@abseil-cpp//absl/container:inlined_vector",
-        "@abseil-cpp//absl/hash",
-        "@angle//:headers",
-        "@spirv-tools//:spvtools",
-        "@spirv-tools//:spvtools_val",
-        "@zlib",
-        "@zlib//:compression_utils_portable",
-    ],
+    deps = select({
+        "@platforms//os:macos": [
+            "//engine/src/flutter/flutter_vma",
+            "@abseil-cpp//absl/container:flat_hash_map",
+            "@abseil-cpp//absl/container:flat_hash_set",
+            "@abseil-cpp//absl/container:inlined_vector",
+            "@abseil-cpp//absl/hash",
+            "@angle//:headers",
+            "@spirv-tools//:spvtools",
+            "@spirv-tools//:spvtools_val",
+            "@zlib",
+            "@zlib//:compression_utils_portable",
+        ],
+        "//conditions:default": [
+            "@angle//:libEGL_static",
+            "@angle//:libGLESv2_static",
+        ],
+    }),
+)
+
+# //flutter/third_party/angle:libEGL and :libGLESv2, ANGLE's shared
+# libraries, which a Mac's Impeller golden suite depends on in GN (its
+# playground opens libGLESv2.dylib by name there, where the other hosts
+# link ANGLE in): the wrapped build's products as runfiles, beside the
+# copies the suite's flutter_gpu_test_backends puts next to its binary.
+# Nothing to link, and nothing at all off a Mac, where no target names them.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "angle_shared_libraries",
+    data = select({
+        "@platforms//os:macos": [
+            ":libEGL.dylib",
+            ":libGLESv2.dylib",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # //flutter/third_party/swiftshader: GN's group whose data_deps are the

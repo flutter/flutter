@@ -217,6 +217,7 @@ Future<int> run(List<String> arguments) async {
         forwardedFlags: forwardedFlags,
         unconvertedDeps: manifest?.unconvertedDeps ?? const <String>[],
         filesGroups: manifest?.filesGroups ?? const <String>{},
+        uncarriedDataDeps: manifest?.uncarriedDataDeps ?? const <String, String>{},
         linkedStaticLibraries: manifest?.linkedStaticLibraries ?? const <String>{},
         extraSources: manifest?.extraSources ?? const <String, List<String>>{},
         interfaceDeps: manifest?.interfaceDeps ?? const <String, List<String>>{},

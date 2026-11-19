@@ -45,6 +45,7 @@ use_repo(
     "android_embedding_dependencies",
     "android_tools",
     "angle",
+    "angle_tree",
     "benchmark",
     "boringssl",
     "brotli",

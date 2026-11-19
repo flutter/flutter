@@ -60,6 +60,7 @@ Future<String> convert(
   Set<String> linkedStaticLibraries = const <String>{},
   Map<String, List<String>> extraSources = const <String, List<String>>{},
   Map<String, List<String>> interfaceDeps = const <String, List<String>>{},
+  Map<String, String> uncarriedDataDeps = const <String, String>{},
 }) async {
   return emitBuildFile(
     await evaluate(
@@ -77,6 +78,7 @@ Future<String> convert(
     linkedStaticLibraries: linkedStaticLibraries,
     extraSources: extraSources,
     interfaceDeps: interfaceDeps,
+    uncarriedDataDeps: uncarriedDataDeps,
   );
 }
 
@@ -765,9 +767,15 @@ source_set("x") {
       for (final String name in generation.names) {
         final GnValue? value = generation[name];
         if (value is GnConditionValue) {
+          final GnValue? expected = host[name];
+          if (name == 'using_sanitizer') {
+            // BUILDCONFIG.gn's formula over is_asan, a setting both scopes
+            // leave open: the same formula in both.
+            expect(expected, value, reason: name);
+            continue;
+          }
           // An argument the web build passes differently: a formula over
           // the OS that comes out as the host's value on the host.
-          final GnValue? expected = host[name];
           expect(expected, isA<GnBoolValue>(), reason: name);
           expect(
             host.apply(value.condition),
@@ -786,13 +794,15 @@ source_set("x") {
       }
       expect(
         generation.names.where((String n) => generation[n] is GnConditionValue).toList()..sort(),
-        // ... and is_apple, BUILDCONFIG.gn's `is_ios || is_mac`, and its
-        // Ozone platforms, which are `is_linux`.
+        // ... and is_apple, BUILDCONFIG.gn's `is_ios || is_mac`, its Ozone
+        // platforms, which are `is_linux`, and its using_sanitizer, which
+        // is `is_asan`.
         <String>[
           ...perTargetOsArguments.keys,
           'is_apple',
           'ozone_platform_wayland',
           'ozone_platform_x11',
+          'using_sanitizer',
         ]..sort(),
       );
       expect(host.names.where((String name) => generation[name] == null).toList()..sort(), <String>[
@@ -8756,6 +8766,441 @@ source_set("y") {
         'implementation_deps = ["//engine/src/flutter/b:b_private_config"]'.allMatches(output),
         hasLength(2),
       );
+    });
+  });
+
+  group('third-party GN behind templates of its own (ANGLE)', () {
+    /// The items of [target]'s `configs` by the operator that put them there.
+    Map<String, List<String>> configsByOperator(GnTarget target) {
+      final result = <String, List<String>>{};
+      for (final GnAssignment assignment in target.variables['configs']!.assignments) {
+        result.putIfAbsent(assignment.op, () => <String>[]).addAll(<String>[
+          for (final GnValue item in assignment.items) (item as GnStringValue).value,
+        ]);
+      }
+      return result;
+    }
+
+    test("set_defaults() gives a file's own templates what their invocations start with", () {
+      // angle.gni: an angle_source_set starts with the common configs and a
+      // list of default configs to take off, which the template applies;
+      // its tests start with the common ones less some (a list `-`).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'lib/templates.gni': '''
+_common = [
+  "//lib:internal",
+  "//lib:warnings",
+]
+set_defaults("my_source_set") {
+  configs = _common
+  suppressed_configs = [ "//build/config/compiler:chromium_code" ]
+}
+set_defaults("my_test") {
+  configs = _common - [ "//lib:warnings" ]
+}
+template("my_source_set") {
+  source_set(target_name) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "suppressed_configs",
+                           ])
+    configs += invoker.configs
+    configs -= invoker.suppressed_configs
+  }
+}
+template("my_test") {
+  executable(target_name) {
+    forward_variables_from(invoker, "*", [ "configs" ])
+    configs += invoker.configs
+  }
+}
+''',
+        'a/BUILD.gn': '''
+import("//lib/templates.gni")
+
+my_source_set("x") {
+  sources = [ "a.cc" ]
+  configs += [ "//lib:extra" ]
+}
+
+my_source_set("y") {
+  sources = [ "b.cc" ]
+}
+
+my_test("t") {
+  sources = [ "t.cc" ]
+}
+''',
+      });
+      final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+      expect(evaluation.targets.map((GnTarget t) => t.name), <String>['x', 'y', 't']);
+      expect(configsByOperator(evaluation.targets[0]), <String, List<String>>{
+        '+=': <String>['//lib:internal', '//lib:warnings', '//lib:extra'],
+        '-=': <String>['//build/config/compiler:chromium_code'],
+      });
+      // The defaults are each invocation's own copy.
+      expect(configsByOperator(evaluation.targets[1]), <String, List<String>>{
+        '+=': <String>['//lib:internal', '//lib:warnings'],
+        '-=': <String>['//build/config/compiler:chromium_code'],
+      });
+      expect(configsByOperator(evaluation.targets[2]), <String, List<String>>{
+        '+=': <String>['//lib:internal'],
+      });
+      expect(evaluation.targets[0].variables.containsKey('suppressed_configs'), isFalse);
+    });
+
+    test('a list less the items of another holds them, or is an error', () async {
+      await expectLater(
+        evaluate('''
+_all = [
+  "a.cc",
+  "b.cc",
+]
+source_set("x") {
+  sources = _all - [ "c.cc" ]
+}
+'''),
+        throwsGnError(line: 6, message: 'which the list does not hold unconditionally'),
+      );
+    });
+
+    test('target(type, name) invokes a template; a scope member in a string; a string '
+        'and an integer', () {
+      // ANGLE's libEGL_template is `target(invoker.target_type, target_name)`
+      // over its own angle_static_library; its file names and labels are
+      // made of the invoker's strings ("${invoker.output_name}_autogen.def"),
+      // and a define of a number. Its import of
+      // `//build_overrides//vulkan_headers.gni` has a doubled separator.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'lib/templates.gni': r'''
+template("my_library") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}
+template("my_libraries") {
+  target(invoker.target_type, "${target_name}_${invoker.suffix}") {
+    sources = [ "${invoker.directory}/a.cc" ]
+    defines = [ "MODE=" + invoker.mode ]
+  }
+}
+''',
+        'a/BUILD.gn': '''
+import("//lib//templates.gni")
+
+my_libraries("x") {
+  target_type = "my_library"
+  suffix = "static"
+  directory = "src"
+  mode = 2
+}
+''',
+      });
+      final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+      final GnTarget target = evaluation.targets.single;
+      expect(target.name, 'x_static');
+      expect(target.rule, 'source_set');
+      expect(strings(target, 'sources'), <String>['src/a.cc']);
+      expect(strings(target, 'defines'), <String>['MODE=2']);
+    });
+
+    test('rebase_path(files, base, from) is the files as paths under the base', () {
+      // ANGLE's program version hashes every source that shapes a program
+      // binary: each backend's own list, written relative to the backend's
+      // directory, rebased to the root, where the action that reads them is
+      // -- from a .gni, whose directory a relative `from` is relative to.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'lib/src/sources.gni': '''
+_backend_sources = [
+  "Context.cpp",
+  "linux/Display.cpp",
+]
+hashed_sources = rebase_path(_backend_sources, "//lib", "backend/")
+''',
+        'lib/BUILD.gn': '''
+import("//lib/src/sources.gni")
+
+source_set("x") {
+  sources = hashed_sources
+}
+''',
+        'lib/src/outside.gni': '''
+outside_sources = rebase_path([ "../../../other/a.cc" ], "//lib", "backend/")
+''',
+        'lib/outside/BUILD.gn': '''
+import("//lib/src/outside.gni")
+
+source_set("x") {
+  sources = outside_sources
+}
+''',
+      });
+      final GnFileEvaluation evaluation = evaluateIn(tree, '//lib/BUILD.gn');
+      expect(strings(evaluation.targets.single, 'sources'), <String>[
+        'src/backend/Context.cpp',
+        'src/backend/linux/Display.cpp',
+      ]);
+      expect(
+        () => evaluateIn(tree, '//lib/outside/BUILD.gn'),
+        throwsGnError(line: 1, message: '//other/a.cc is not below it'),
+      );
+    });
+
+    test('filter_include() of the configs sees what the block added', () async {
+      // angle.gni's "is the ARC config there?" comes after the template
+      // appended the invocation's configs.
+      final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  configs += [ ":mine" ]
+  if (filter_include(configs, [ "//build/config/compiler:enable_arc" ]) != []) {
+    sources += [ "arc.mm" ]
+  }
+  if (filter_include(configs, [ ":mine" ]) != []) {
+    sources += [ "mine.cc" ]
+  }
+}
+''');
+      expect(strings(evaluation.targets.single, 'sources'), <String>['a.cc', 'mine.cc']);
+      // Asking for a config the block took off again would need the list
+      // modeled.
+      await expectLater(
+        evaluate('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  configs += [ ":mine" ]
+  configs -= [ ":mine" ]
+  if (filter_include(configs, [ ":mine" ]) != []) {
+    sources += [ "mine.cc" ]
+  }
+}
+'''),
+        throwsGnError(line: 5, message: 'which the target removed, is not supported'),
+      );
+    });
+
+    test('write_file() is the generation log or an error', () async {
+      final GnFileEvaluation evaluation = await evaluate(r'''
+write_file("$root_build_dir/gn_logs.txt", [ "Generated." ])
+
+source_set("x") {
+  sources = [ "a.cc" ]
+}
+''');
+      expect(evaluation.targets.single.name, 'x');
+      await expectLater(
+        evaluate(r'''
+write_file("$root_build_dir/list.txt", [ "a.cc" ])
+
+source_set("x") {
+  sources = [ "a.cc" ]
+}
+'''),
+        throwsGnError(line: 1, message: 'write_file() of'),
+      );
+    });
+
+    test("a label of the file's own package written in full is the local one", () async {
+      // ANGLE's root file names its own configs and targets through
+      // `angle_root + ":name"`: local ones all the same -- a private config
+      // inlined, a sibling by its short label.
+      final String output = await convert('''
+config("internal") {
+  defines = [ "INTERNAL" ]
+}
+
+source_set("other") {
+  sources = [ "b.cc" ]
+}
+
+source_set("lib") {
+  sources = [ "a.cc" ]
+  configs += [ "//flutter/example:internal" ]
+  deps = [ "//flutter/example:other" ]
+}
+''');
+      expect(output, contains('    local_defines = FLUTTER_LOCAL_DEFINES + ["INTERNAL"],\n'));
+      expect(output, contains('        ":other",\n'));
+      expect(output, isNot(contains('//engine/src/flutter/example:')));
+    });
+
+    test("an action's header is its public dependent's own, with the action's public config; "
+        'a response file; a generated directory with a home', () {
+      // ANGLE's version headers: actions that write under
+      // `$root_gen_dir/angle` (a directory `angle` of the repository's
+      // generated tree here: genDirHomes), with the include directory as
+      // their public config; the library that publishes them
+      // (`public_deps`); and the list of sources one of them hashes, too
+      // long for a command line (`response_file_contents`).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/angle/src/version.py': '',
+        'flutter/third_party/angle/src/a.cpp': '',
+        'flutter/third_party/angle/src/b.h': '',
+        'flutter/third_party/angle/BUILD.gn': r'''
+config("version_config") {
+  include_dirs = [ "$root_gen_dir/angle" ]
+}
+
+action("version_id") {
+  script = "src/version.py"
+  _header = "$root_gen_dir/angle/Version.h"
+  outputs = [ _header ]
+  _hashed = [
+    "src/a.cpp",
+    "src/b.h",
+  ]
+  inputs = _hashed
+  response_file_contents = rebase_path(_hashed, root_build_dir)
+  args = [
+    rebase_path(_header, root_build_dir),
+    "{{response_file_name}}",
+  ]
+  public_configs = [ ":version_config" ]
+}
+
+source_set("version") {
+  sources = [ "src/version.h" ]
+  public_deps = [ ":version_id" ]
+}
+
+source_set("uses_privately") {
+  sources = [ "src/a.cpp" ]
+  deps = [ ":version_id" ]
+}
+''',
+      });
+      const layout = OutputLayout.repository(
+        '@angle',
+        repositoryGnRoot: '//flutter/third_party/angle',
+      );
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/third_party/angle/BUILD.gn'),
+        gnPackage: '//flutter/third_party/angle',
+        layout: layout,
+        tree: tree,
+      );
+      expect(output, contains('    includes = ["angle"],\n'));
+      expect(
+        output,
+        contains(r'''
+gn_action(
+    name = "version_id",
+    args = [
+        "$(gen angle/Version.h)",
+        "{{response_file_name}}",
+    ],
+    inputs = [
+        "src/a.cpp",
+        "src/b.h",
+    ],
+    outputs = ["angle/Version.h"],
+    response_file_contents = [
+        "$(execpath :src/a.cpp)",
+        "$(execpath :src/b.h)",
+    ],
+    script = "src/version.py",
+)
+'''),
+      );
+      // Published by the library that depends on it publicly; a source of
+      // the one that depends on it privately. The config reaches both.
+      expect(
+        output,
+        contains('    hdrs = [\n        "src/version.h",\n        ":version_id",\n    ],\n'),
+      );
+      expect(
+        output,
+        contains('    srcs = [\n        "src/a.cpp",\n        ":version_id",\n    ],\n'),
+      );
+      expect('    deps = [":version_config"],\n'.allMatches(output), hasLength(2));
+    });
+
+    test("an action's public config of another file is not converted", () {
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/example/gen.py': '',
+        'flutter/example/BUILD.gn': r'''
+action("gen") {
+  script = "gen.py"
+  outputs = [ "$target_gen_dir/gen.h" ]
+  public_configs = [ "//flutter/other:config" ]
+}
+
+source_set("lib") {
+  sources = [ "a.cc" ]
+  deps = [ ":gen" ]
+}
+''',
+      });
+      expect(
+        () => emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        ),
+        throwsGnError(line: 4, message: 'a public config of the action gen is converted when'),
+      );
+    });
+
+    test("a linking group's data_deps are dropped by the manifest's word alone", () async {
+      // ANGLE's groups over the Vulkan loader name it as data: run-time
+      // files, which a library of dependencies has no words for and the
+      // suites get another way.
+      const gn = '''
+source_set("lib") {
+  sources = [ "a.cc" ]
+}
+
+group("loader") {
+  public_deps = [ ":lib" ]
+  data_deps = [ "//flutter/other:libvulkan" ]
+}
+''';
+      final String output = await convert(
+        gn,
+        uncarriedDataDeps: <String, String>{'loader': 'a suite places the loader itself'},
+      );
+      expect(
+        output,
+        contains(
+          "# GN's data_deps are not carried (//flutter/other:libvulkan): a suite places the "
+          'loader itself.\n',
+        ),
+      );
+      expect(output, isNot(contains('libvulkan"')));
+      await expectLater(
+        convert(gn),
+        throwsGnError(line: 7, message: 'variable data_deps of group loader is not converted yet'),
+      );
+      await expectLater(
+        convert(gn, uncarriedDataDeps: <String, String>{'lib': 'not a group'}),
+        throwsGnError(line: 0, message: 'uncarriedDataDeps names lib, which is not a group'),
+      );
+    });
+
+    test('optimize_max in an optimized build; default configs taken off', () async {
+      // angle.gni: `if (!is_debug) { configs -= default_optimization;
+      // configs += optimize_max }`, and two of BUILDCONFIG.gn's configs
+      // taken off every target (the source root as an include directory;
+      // the Chromium plugin's checks), which add no flag here to take back.
+      final String output = await convert('''
+source_set("lib") {
+  configs -= [
+    "//build/config/compiler:default_include_dirs",
+    "//build/config/clang:find_bad_constructs",
+  ]
+  if (!is_debug) {
+    configs -= [ "//build/config/compiler:default_optimization" ]
+    configs += [ "//build/config/compiler:optimize_max" ]
+  }
+  sources = [ "a.cc" ]
+}
+''', assumptions: generationAssumptions());
+      expect(output, contains('"-O2",  # from //build/config/compiler:optimize_max\n'));
+      expect(output, contains('"//engine/src/flutter/build/bazel:optimized"'));
+      expect(output, isNot(contains('default_include_dirs')));
+      expect(output, isNot(contains('find_bad_constructs')));
     });
   });
 

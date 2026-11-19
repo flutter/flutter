@@ -345,8 +345,8 @@ _gn_build = rule(
             doc = "Build the archives' object files rather than `ninja_target`: for a configuration " +
                   "whose products are archives alone (every `outs` path empty). What the target has " +
                   "beyond the objects is then not built -- the `data_deps` of a library, which ninja " +
-                  "orders before the library's own stamp: ANGLE's name SwiftShader's driver and the " +
-                  "Vulkan loader, which a Linux build takes from the converted trees.",
+                  "orders before the library's own stamp (ANGLE's name SwiftShader's driver and the " +
+                  "Vulkan loader, which a platform may take from the converted trees instead).",
         ),
         "ar": attr.label(
             allow_single_file = True,

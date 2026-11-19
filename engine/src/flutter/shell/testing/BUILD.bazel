@@ -497,6 +497,11 @@ cc_binary(
             "-Wno-unused-variable",  # from :tester_opengles_gpu_configuration
         ],
         "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_linux": [
+            "-Wno-redundant-parens",  # from //flutter/testing:test_swangle_utils
+        ],
+        "//conditions:default": [],
     }),
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES + select({
@@ -658,5 +663,14 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/impeller/tools:opengles",
         "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && is_linux`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_linux",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        "@platforms//os:linux",
     ],
 )

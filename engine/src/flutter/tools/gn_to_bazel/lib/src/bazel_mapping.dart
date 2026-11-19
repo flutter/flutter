@@ -573,11 +573,29 @@ const Map<String, String> labelOverrides = <String, String>{
   // The Khronos Vulkan loader (libvulkan.so.1, which ANGLE and GLFW open in
   // the GPU suites; the tree's own GN).
   '//flutter/third_party/vulkan-deps/vulkan-loader/src': '@vulkan-loader',
-  // The GPU test backends, built by gn_build (build/bazel/gl_wrap): ANGLE's
-  // two static libraries are one archive behind one facade, and
-  // SwiftShader's group of runtime files is the other.
+  // ANGLE's tree (its own GN, converted for Linux), by its root; and what
+  // its files name outside it beside the repositories above: zlib's gzip
+  // helpers (its shader cache; a library of the overlay) with zlib's public
+  // config (zlib's root as an include directory, which the library
+  // carries), and abseil's two configs that its own abseil config lists
+  // (libraries of the abseil tree's overlay).
+  '//flutter/third_party/angle': '@angle',
+  '//third_party/zlib/google:compression_utils_portable': '@zlib//:compression_utils_portable',
+  '//third_party/zlib:zlib_config': '@zlib',
+  '//third_party/abseil-cpp:absl_define_config': '@abseil_cpp_tree//:absl_define_config',
+  '//third_party/abseil-cpp:absl_include_config': '@abseil_cpp_tree//:absl_include_config',
+  // The GPU test backends as the engine's files name them
+  // (build/bazel/gl_wrap): ANGLE's two static libraries behind one facade
+  // (the converted tree's on Linux, the wrapped GN build's archive on a
+  // Mac), its shared ones behind another (a Mac's golden suite names them:
+  // the wrapped build's products, which the conversion skips), and
+  // SwiftShader's group of runtime files and its static driver.
   '//flutter/third_party/angle:libEGL_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
   '//flutter/third_party/angle:libGLESv2_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
+  '//flutter/third_party/angle:libEGL':
+      '//engine/src/flutter/build/bazel/gl_wrap:angle_shared_libraries',
+  '//flutter/third_party/angle:libGLESv2':
+      '//engine/src/flutter/build/bazel/gl_wrap:angle_shared_libraries',
   '//flutter/third_party/swiftshader': '//engine/src/flutter/build/bazel/gl_wrap:swiftshader',
   '//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static':
       '//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static',
@@ -695,6 +713,12 @@ const Map<String, Map<String, String>> scriptEnvironment = <String, Map<String, 
   '//flutter/build/copy_info_plist.py': <String, String>{
     'FLUTTER_ENGINE_VERSION': 'engine_version',
   },
+  // ANGLE's commit id (its version string): commit_id.py asks git, which a
+  // sandboxed action has none of, unless the variable names the revision --
+  // the DEPS pin's, as the wrapped build of a Mac's ANGLE passes it.
+  '//flutter/third_party/angle/src/commit_id.py': <String, String>{
+    'ANGLE_UPSTREAM_HASH': 'angle_upstream_hash',
+  },
 };
 
 /// The platform a GN toolchain on an action's dependency edge stands for
@@ -744,6 +768,15 @@ const Map<String, String> genDirIncludeTargets = <String, String>{
       '//engine/src/flutter/shell/platform/darwin/common:config',
 };
 
+/// Directories of GN's generated tree that a converted repository writes
+/// to outside its own (`$root_gen_dir/<its GN directory>`), with the place
+/// in its own they stand for: ANGLE generates its version headers into
+/// `$root_gen_dir/angle` whatever directory it is checked out in, a
+/// directory `angle` of the repository's generated tree here.
+const Map<String, String> genDirHomes = <String, String>{
+  '$genDirRoot/angle': '$genDirRoot/flutter/third_party/angle/angle',
+};
+
 /// Include directories in another repository that a Bazel library of that
 /// repository carries in its `includes`: GN's `include_dirs = [
 /// "//flutter/third_party/angle/include" ]` cannot be written as a
@@ -752,6 +785,19 @@ const Map<String, String> genDirIncludeTargets = <String, String>{
 /// paths as `//dir`.
 const Map<String, String> includeDirLibraries = <String, String>{
   '//flutter/third_party/angle/include': '@angle//:headers',
+  // ANGLE's other include roots, which its packages name from below them
+  // (`include_dirs = [ "$angle_root/src" ]`): libraries of the root
+  // package (its manifest appendix).
+  '//flutter/third_party/angle/src': '@angle//:src_include',
+  '//flutter/third_party/angle/src/third_party/khronos': '@angle//:khronos_include',
+  // What ANGLE's allocator wrapper names beside its dependency on the
+  // engine's flutter_vma (build_overrides/angle.gni's
+  // angle_vulkan_memory_allocator_dir + "/include"): a directory that holds
+  // no header (a README says so), for which the library stands.
+  '//flutter/flutter_vma/include': '//engine/src/flutter/flutter_vma',
+  // zlib's google/ directory (ANGLE's compression config), which the
+  // library of the gzip helpers carries.
+  '//third_party/zlib/google': '@zlib//:compression_utils_portable',
   // SPIRV-Tools' root, which the Vulkan validation layer's GN names as an
   // include directory (build_overrides' vvl_glslang_dir): the appendix's
   // root_include library of @spirv-tools.
@@ -1262,8 +1308,30 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
       (ConditionVariable('is_mac'), <String>['-Wl,-dead_strip']),
     ],
   ),
-  // ANGLE's configs (build/bazel/gl_wrap builds ANGLE; the overlay @angle
-  // carries its headers and this define-only config).
+  // //build/config/compiler:optimize_max, which ANGLE lists in place of
+  // the default optimization in a build that is not a debug one:
+  // -O2 and the flags :optimize has with it, on the hosts that build ANGLE.
+  '//build/config/compiler:optimize_max': ConfigCopts(
+    <(Condition, List<String>)>[
+      (
+        ConditionOr(<Condition>[ConditionVariable('is_linux'), ConditionVariable('is_mac')]),
+        <String>['-O2', '-fno-ident', '-fdata-sections', '-ffunction-sections'],
+      ),
+    ],
+    linkopts: <(Condition, List<String>)>[
+      (ConditionVariable('is_linux'), <String>['-Wl,-O2', '-Wl,--gc-sections', '-Wl,--as-needed']),
+      (ConditionVariable('is_mac'), <String>['-Wl,-dead_strip']),
+    ],
+  ),
+  // Default configs ANGLE takes off its targets: the source root and the
+  // generated root as include directories (which a converted tree's targets
+  // are not given in the first place) and Chromium's clang plugin (an empty
+  // config in this buildroot).
+  '//build/config/compiler:default_include_dirs': ConfigToolchain(removalCopts: <String>[]),
+  '//build/config/clang:find_bad_constructs': ConfigToolchain(removalCopts: <String>[]),
+  // ANGLE's configs as the engine's files list them: @angle's library of
+  // the Khronos headers it ships (its manifest appendix; external_config is
+  // their include directory) and its define-only config.
   '//flutter/third_party/angle:external_config': ConfigDependency('@angle//:headers'),
   '//flutter/third_party/angle:gl_prototypes': ConfigDependency('@angle//:gl_prototypes'),
   // SwiftShader's config, which the test utilities list privately: -Wno-shadow
@@ -1446,6 +1514,8 @@ final Map<String, String> negatedSettings = Map<String, String>.unmodifiable(<St
   'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
   'is_win': '//engine/src/flutter/build/bazel:not_win',
   'is_asan': '//engine/src/flutter/build/bazel:asan_disabled',
+  // An optimized build (-c opt), which is tools/gn without --unoptimized.
+  'is_debug': '//engine/src/flutter/build/bazel:optimized',
   // The JIT modes (debug, jit_release).
   'is_aot': '//engine/src/flutter/testing:aot_disabled',
   // Not the simulator: a device, or not iOS at all.
@@ -1722,6 +1792,10 @@ final Set<String> knownBooleanVariables = Set<String>.unmodifiable(<String>{
   'is_android',
   'is_apple',
   'is_chromeos',
+  'ozone_platform_headless',
+  'is_chromeos_lacros',
+  'is_chromecast',
+  'is_castos',
   'is_clang',
   'is_component_build',
   'is_fuchsia',
@@ -1739,6 +1813,8 @@ final Set<String> knownBooleanVariables = Set<String>.unmodifiable(<String>{
 /// GN variables an imported `.gni` defines and that build files may read or
 /// test. Reads become references that [referenceConstants] resolve.
 const Set<String> knownExternalVariables = <String>{
+  // //build/gn_logs.gni
+  'build_gn_logs',
   // //build/config/BUILDCONFIG.gn
   'current_cpu',
   'current_os',
@@ -1752,6 +1828,10 @@ const Set<String> knownExternalVariables = <String>{
   'is_apple',
   'is_asan',
   'is_chromeos',
+  'ozone_platform_headless',
+  'is_chromeos_lacros',
+  'is_chromecast',
+  'is_castos',
   'is_clang',
   'is_component_build',
   'is_debug',
@@ -1770,6 +1850,7 @@ const Set<String> knownExternalVariables = <String>{
   'is_win',
   'ozone_platform_wayland',
   'ozone_platform_x11',
+  'using_sanitizer',
   'target_cpu',
   'target_os',
   'use_flutter_cxx',
@@ -2043,6 +2124,11 @@ const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceCons
   'content_hash': ReferenceConstant(_versionBzl, 'CONTENT_HASH'),
   'skia_version': ReferenceConstant(_versionBzl, 'SKIA_VERSION'),
   'dart_version': ReferenceConstant(_versionBzl, 'DART_VERSION'),
+  // No GN variable: the revision of ANGLE's DEPS pin (scriptEnvironment).
+  'angle_upstream_hash': ReferenceConstant(
+    '//engine/src/flutter/build/bazel/gl_wrap:angle_version.bzl',
+    'ANGLE_UPSTREAM_HASH',
+  ),
 };
 
 /// How a template argument translates to a macro attribute.
@@ -2732,6 +2818,14 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // to its build_overrides.
     '//build_overrides/swiftshader.gni',
     '//flutter/third_party/swiftshader/',
+    // ANGLE's own .gni files (its arguments, templates and source lists),
+    // the engine's values for it, and the two files its arguments read
+    // beside them: dcheck_always_on and the Dart checkout's gclient
+    // arguments.
+    '//build_overrides/angle.gni',
+    '//flutter/third_party/angle/',
+    '//build/config/dcheck_always_on.gni',
+    '//flutter/third_party/dart/build/config/gclient_args.gni',
     // What SwiftShader's files import of the engine's build configuration:
     // the sanitizers' arguments (is_ubsan_vptr and friends, all off), the
     // Ozone and UI switches (ozone_platform_gbm, use_x11, use_ozone: off)
@@ -2795,6 +2889,13 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // The secondary tree's test() template, which SwiftShader's marl
     // imports for a suite it defines under build_with_chromium alone.
     '//testing/test.gni',
+    // The pkg_config() template, which ANGLE imports and invokes for X11
+    // and libdrm alone (off: tools/gn's arguments), and the fuzzers'
+    // template, whose targets are not converted.
+    '//build/config/linux/pkg_config.gni',
+    '//testing/libfuzzer/fuzzer_test.gni',
+    // build_gn_logs, the lines ANGLE's root file writes to gn_logs.txt.
+    '//build/gn_logs.gni',
     // The Dart tree's copy_tree and copy_trees templates: copy_tree in
     // templateMappings (the iOS scenario app's project), copy_trees imported
     // by the root file without invoking.
@@ -2958,6 +3059,10 @@ Assumptions generationAssumptions() {
     // BUILDCONFIG.gn's is_chromeos, true for a target OS no builder names
     // (the Khronos loader's GN reads it beside is_linux).
     'is_chromeos': const GnBoolValue(false),
+    'ozone_platform_headless': const GnBoolValue(false),
+    'is_chromeos_lacros': const GnBoolValue(false),
+    'is_chromecast': const GnBoolValue(false),
+    'is_castos': const GnBoolValue(false),
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
     // BUILDCONFIG.gn's sanitizer arguments other than is_asan (a setting):
@@ -2969,6 +3074,9 @@ Assumptions generationAssumptions() {
     // BUILDCONFIG.gn's Ozone platforms, "needed for SwiftShader and ANGLE":
     // X11 and Wayland on Linux, nothing elsewhere.
     'ozone_platform_x11': const GnConditionValue(ConditionVariable('is_linux')),
+    // BUILDCONFIG.gn's using_sanitizer: any of its sanitizer arguments, of
+    // which is_asan alone is ever set.
+    'using_sanitizer': const GnConditionValue(ConditionVariable('is_asan')),
     'ozone_platform_wayland': const GnConditionValue(ConditionVariable('is_linux')),
     // build/toolchain/toolchain.gni's buildtools_path, as tools/gn passes
     // it (the clang, gn and ninja under flutter/buildtools/<host>): read
@@ -3257,6 +3365,10 @@ Assumptions linuxHostAssumptions() {
     'is_android': GnBoolValue(false),
     'is_apple': GnBoolValue(false),
     'is_chromeos': GnBoolValue(false),
+    'ozone_platform_headless': GnBoolValue(false),
+    'is_chromeos_lacros': GnBoolValue(false),
+    'is_chromecast': GnBoolValue(false),
+    'is_castos': GnBoolValue(false),
     // is_clang, dart_src: build invariants (gn_eval's buildInvariants).
     'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
@@ -3265,6 +3377,7 @@ Assumptions linuxHostAssumptions() {
     'is_tsan': GnBoolValue(false),
     'is_ubsan': GnBoolValue(false),
     'ozone_platform_x11': GnBoolValue(true),
+    'using_sanitizer': GnConditionValue(ConditionVariable('is_asan')),
     'ozone_platform_wayland': GnBoolValue(true),
     'buildtools_path': GnStringValue('//flutter/buildtools'),
     'is_ios': GnBoolValue(false),
