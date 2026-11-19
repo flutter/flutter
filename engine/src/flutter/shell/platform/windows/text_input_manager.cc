@@ -116,17 +116,10 @@ long TextInputManager::GetComposingCursorPosition() const {
 }
 
 std::optional<std::u16string> TextInputManager::GetComposingString() const {
-  // The composing string is only meaningful while an IME window is active.
-  if (!ime_active_) {
-    return std::nullopt;
-  }
   return GetString(GCS_COMPSTR);
 }
 
 std::optional<std::u16string> TextInputManager::GetResultString() const {
-  // Unlike the composing string, the result string is read even when no IME
-  // window is active: some IMEs deliver it after WM_IME_ENDCOMPOSITION, or
-  // without a preceding WM_IME_STARTCOMPOSITION.
   return GetString(GCS_RESULTSTR);
 }
 
@@ -150,7 +143,7 @@ void TextInputManager::AbortComposing() {
 }
 
 std::optional<std::u16string> TextInputManager::GetString(int type) const {
-  if (window_handle_ == nullptr) {
+  if (window_handle_ == nullptr || !ime_active_) {
     return std::nullopt;
   }
   return ReadImmString(type);

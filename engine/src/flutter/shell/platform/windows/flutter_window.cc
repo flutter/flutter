@@ -972,9 +972,13 @@ void FlutterWindow::OnImeStartComposition(UINT const message,
     // never arrived. End that composition before starting a new one.
     EndImeComposition();
   }
-  ime_composing_ = true;
-  text_input_manager_->CreateImeWindow();
-  OnComposeBegin();
+  if (ime_composing_implicitly_) {
+    // A composition message that arrived before this message has already
+    // begun the composition.
+    ime_composing_implicitly_ = false;
+    return;
+  }
+  BeginImeComposition();
 }
 
 void FlutterWindow::OnImeComposition(UINT const message,
@@ -988,6 +992,15 @@ void FlutterWindow::OnImeComposition(UINT const message,
     OnComposeCommit();
   }
 
+  // The strings below are only readable while the IME window is active. A
+  // string that arrives without WM_IME_STARTCOMPOSITION while the IME window
+  // is active begins a composition implicitly. A string that arrives after the
+  // composition has ended is not readable and is ignored. For example, when
+  // the window loses focus during a composition, the Microsoft Korean IME may
+  // deliver the composing text in a GCS_RESULTSTR after WM_IME_ENDCOMPOSITION
+  // has already committed it.
+  bool has_composing_text = false;
+
   // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
   // send both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send
   // new composing text.
@@ -995,39 +1008,39 @@ void FlutterWindow::OnImeComposition(UINT const message,
     // Read the committed composing string.
     std::optional<std::u16string> text = text_input_manager_->GetResultString();
     if (text) {
-      if (ime_composing_) {
-        // Commit but don't end composing.
-        int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
-                                                  text->length());
-        OnComposeChange(*text, pos);
-        OnComposeCommit();
-      } else if (ime_end_composition_deferred_) {
-        // The IME ended a composition that it never started. For example, the
-        // Microsoft Korean IME in the 3-beolsik layouts sends
-        // WM_IME_ENDCOMPOSITION followed by a GCS_RESULTSTR when a space or
-        // punctuation key is pressed while nothing is being composed. There is
-        // no composing text to replace, so the result is plain text input.
-        OnText(*text);
+      if (!ime_composing_) {
+        BeginImeComposition();
+        ime_composing_implicitly_ = true;
       }
-      // Otherwise the composition has already ended and its text was committed
-      // by OnImeEndComposition. Some IMEs re-send that text in a trailing
-      // GCS_RESULTSTR, for example when the window loses focus during
-      // composition. Ignore it so that the text is not inserted twice.
+      // Commit but don't end composing.
+      int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
+                                                text->length());
+      OnComposeChange(*text, pos);
+      OnComposeCommit();
     }
   }
-  if (ime_composing_ && (lparam & GCS_COMPSTR)) {
+  if (lparam & GCS_COMPSTR) {
     // Read the in-progress composing string.
     std::optional<std::u16string> text =
         text_input_manager_->GetComposingString();
     if (text) {
+      if (!ime_composing_) {
+        BeginImeComposition();
+        ime_composing_implicitly_ = true;
+      }
       int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
                                                 text->length());
       OnComposeChange(text.value(), pos);
+      has_composing_text = !text->empty();
     }
   }
 
   if (ime_end_composition_deferred_) {
     // This is the result that WM_IME_ENDCOMPOSITION was waiting for.
+    EndImeComposition();
+  } else if (ime_composing_implicitly_ && !has_composing_text) {
+    // Nothing is left to compose in a composition that was begun implicitly.
+    // A WM_IME_ENDCOMPOSITION may never arrive for it, so end it here.
     EndImeComposition();
   }
 }
@@ -1043,15 +1056,29 @@ void FlutterWindow::OnImeEndComposition(UINT const message,
     // and leave no composition for the result to be applied to, dropping the
     // typed character. Wait for the queued result instead.
     // See https://github.com/flutter/flutter/issues/140537.
+    if (!ime_composing_) {
+      // The same IME sends WM_IME_ENDCOMPOSITION followed by the result,
+      // without any WM_IME_STARTCOMPOSITION, when a space or punctuation key
+      // is pressed while nothing is being composed. Begin the composition
+      // here so that the result can be read and committed.
+      BeginImeComposition();
+    }
     ime_end_composition_deferred_ = true;
     return;
   }
   EndImeComposition();
 }
 
+void FlutterWindow::BeginImeComposition() {
+  ime_composing_ = true;
+  text_input_manager_->CreateImeWindow();
+  OnComposeBegin();
+}
+
 void FlutterWindow::EndImeComposition() {
   ime_end_composition_deferred_ = false;
   ime_composing_ = false;
+  ime_composing_implicitly_ = false;
   text_input_manager_->DestroyImeWindow();
   OnComposeEnd();
 }

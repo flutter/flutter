@@ -331,6 +331,10 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // (GCS_RESULTSTR) is already queued for this window.
   bool HasQueuedImeResult();
 
+  // Begins an IME composition: creates the IME window and notifies the
+  // delegate that composing has begun.
+  void BeginImeComposition();
+
   // Ends the current IME composition: destroys the IME window and notifies the
   // delegate that composing has ended.
   void EndImeComposition();
@@ -368,9 +372,16 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // message.
   int keycode_for_char_message_ = 0;
 
-  // True while an IME composition is in progress, i.e. between
-  // WM_IME_STARTCOMPOSITION and the WM_IME_ENDCOMPOSITION that ends it.
+  // True while an IME composition is in progress. A composition begins with
+  // WM_IME_STARTCOMPOSITION, or implicitly when the IME sends composition
+  // messages without it, and ends with EndImeComposition().
   bool ime_composing_ = false;
+
+  // True if the composition in progress was begun by a WM_IME_COMPOSITION
+  // message that arrived without WM_IME_STARTCOMPOSITION. A
+  // WM_IME_ENDCOMPOSITION may never arrive for such a composition, so it is
+  // ended as soon as no composing text is left.
+  bool ime_composing_implicitly_ = false;
 
   // True if a WM_IME_ENDCOMPOSITION message was received while the
   // WM_IME_COMPOSITION message carrying the result string was still queued
