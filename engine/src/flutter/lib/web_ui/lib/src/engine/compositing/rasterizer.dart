@@ -108,9 +108,6 @@ abstract class ViewRasterizer {
   }
 
   /// Do some initialization to prepare to draw a frame.
-  ///
-  /// For example, in the [MultiSurfaceRasterizer], this ensures the base
-  /// canvas is the correct size to draw the frame.
   Future<void> prepareToDraw();
 
   /// Rasterizes the given [pictures] into the [displayCanvases].

@@ -443,6 +443,9 @@ abstract class CkSurface extends Surface {
   @override
   Future<void> rasterizeToCanvas(ui.Picture picture) async {
     await _initialized.future;
+    if (isDisposed) {
+      return;
+    }
     _drawPicture(picture as CkPicture);
   }
 

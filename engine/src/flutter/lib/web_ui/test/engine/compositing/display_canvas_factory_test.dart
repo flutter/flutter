@@ -39,23 +39,17 @@ void testMain() {
 
     test('getCanvas', () {
       final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
-      expect(factory.hasBaseCanvas, isFalse);
-      expect(factory.baseCanvas, isNotNull);
-      expect(factory.hasBaseCanvas, isTrue);
-
-      expect(factory.debugSurfaceCount, equals(1));
+      expect(factory.debugSurfaceCount, equals(0));
 
       // Get a canvas from the factory, it should be unique.
-      final DisplayCanvas newCanvas = factory.getCanvas();
-      expect(newCanvas, isNot(equals(factory.baseCanvas)));
+      final DisplayCanvas firstCanvas = factory.getCanvas();
+      expect(firstCanvas, isNotNull);
+      expect(factory.debugSurfaceCount, equals(1));
 
-      expect(factory.debugSurfaceCount, equals(2));
-
-      // Get another canvas from the factory. Now we are at maximum capacity.
+      // Get another canvas from the factory.
       final DisplayCanvas anotherCanvas = factory.getCanvas();
-      expect(anotherCanvas, isNot(equals(factory.baseCanvas)));
-
-      expect(factory.debugSurfaceCount, equals(3));
+      expect(anotherCanvas, isNot(equals(firstCanvas)));
+      expect(factory.debugSurfaceCount, equals(2));
     });
 
     test('releaseCanvas', () {
@@ -74,8 +68,6 @@ void testMain() {
     test('isLive', () {
       final factory = DisplayCanvasFactory<DisplayCanvas>(createCanvas: () => DummyDisplayCanvas());
 
-      expect(factory.isLive(factory.baseCanvas), isTrue);
-
       final DisplayCanvas canvas = factory.getCanvas();
       expect(factory.isLive(canvas), isTrue);
 
@@ -93,29 +85,23 @@ void testMain() {
       final DisplayCanvasFactory<DisplayCanvas> originalFactory =
           renderer.rasterizers[implicitView.viewId]!.displayFactory;
 
-      // Cause the surface and its canvas to be attached to the page
-      final DisplayCanvas baseCanvas = originalFactory.baseCanvas;
-      implicitView.dom.sceneHost.prepend(baseCanvas.hostElement);
-      expect(baseCanvas.isConnected, isTrue);
-
-      // Create a few overlay canvases
+      // Create a few overlay canvases and attach them to the page.
       final overlays = <DisplayCanvas>[];
       for (var i = 0; i < 3; i++) {
         final DisplayCanvas canvas = originalFactory.getCanvas();
         implicitView.dom.sceneHost.prepend(canvas.hostElement);
+        expect(canvas.isConnected, isTrue);
         overlays.add(canvas);
       }
-      expect(originalFactory.debugSurfaceCount, 4);
+      expect(originalFactory.debugSurfaceCount, 3);
 
       // Trigger hot restart clean-up logic and check that we indeed clean up.
       debugEmulateHotRestart();
-      expectDisposed(baseCanvas);
       overlays.forEach(expectDisposed);
-      expect(originalFactory.hasBaseCanvas, isFalse);
       expect(originalFactory.debugSurfaceCount, 0);
     });
 
-    test('dispose without accessing baseCanvas does not allocate canvas', () {
+    test('dispose on empty factory does not allocate canvas', () {
       var createdCount = 0;
       final factory = DisplayCanvasFactory<DisplayCanvas>(
         createCanvas: () {
@@ -123,50 +109,46 @@ void testMain() {
           return DummyDisplayCanvas();
         },
       );
-      expect(factory.hasBaseCanvas, isFalse);
+      expect(factory.debugSurfaceCount, 0);
       expect(createdCount, 0);
 
       factory.dispose();
-      expect(factory.hasBaseCanvas, isFalse);
+      expect(factory.debugSurfaceCount, 0);
       expect(createdCount, 0);
     });
 
-    test(
-      'inspecting and releasing overlays before accessing baseCanvas does not allocate baseCanvas',
-      () {
-        var createdCount = 0;
-        final factory = DisplayCanvasFactory<DummyDisplayCanvas>(
-          createCanvas: () {
-            createdCount++;
-            return DummyDisplayCanvas();
-          },
-        );
+    test('forEachCanvas visits live and cached canvases without allocating', () {
+      var createdCount = 0;
+      final factory = DisplayCanvasFactory<DummyDisplayCanvas>(
+        createCanvas: () {
+          createdCount++;
+          return DummyDisplayCanvas();
+        },
+      );
 
-        expect(factory.hasBaseCanvas, isFalse);
-        expect(factory.debugSurfaceCount, 0);
-        final initialVisited = <DisplayCanvas>[];
-        factory.forEachCanvas(initialVisited.add);
-        expect(initialVisited, isEmpty);
-        expect(createdCount, 0);
+      expect(factory.debugSurfaceCount, 0);
+      final initialVisited = <DisplayCanvas>[];
+      factory.forEachCanvas(initialVisited.add);
+      expect(initialVisited, isEmpty);
+      expect(createdCount, 0);
 
-        final DummyDisplayCanvas overlay = factory.getCanvas();
-        expect(factory.hasBaseCanvas, isFalse);
-        expect(factory.debugSurfaceCount, 1);
-        expect(factory.isLive(overlay), isTrue);
+      final DummyDisplayCanvas overlay = factory.getCanvas();
+      expect(factory.debugSurfaceCount, 1);
+      expect(factory.isLive(overlay), isTrue);
 
-        final liveVisited = <DisplayCanvas>[];
-        factory.forEachCanvas(liveVisited.add);
-        expect(liveVisited, <DisplayCanvas>[overlay]);
-        expect(factory.hasBaseCanvas, isFalse);
-        expect(createdCount, 1);
+      final liveVisited = <DisplayCanvas>[];
+      factory.forEachCanvas(liveVisited.add);
+      expect(liveVisited, <DisplayCanvas>[overlay]);
+      expect(createdCount, 1);
 
-        factory.releaseCanvas(overlay);
-        expect(factory.isLive(overlay), isFalse);
-        expect(factory.hasBaseCanvas, isFalse);
-        expect(factory.debugSurfaceCount, 1);
-        expect(createdCount, 1);
-      },
-    );
+      factory.releaseCanvas(overlay);
+      expect(factory.isLive(overlay), isFalse);
+      expect(factory.debugSurfaceCount, 1);
+      final cachedVisited = <DisplayCanvas>[];
+      factory.forEachCanvas(cachedVisited.add);
+      expect(cachedVisited, <DisplayCanvas>[overlay]);
+      expect(createdCount, 1);
+    });
 
     test('calling dispose multiple times is idempotent', () {
       var createdCount = 0;
@@ -177,19 +159,16 @@ void testMain() {
         },
       );
 
-      final DummyDisplayCanvas base = factory.baseCanvas;
       final DummyDisplayCanvas cached = factory.getCanvas();
       final DummyDisplayCanvas live = factory.getCanvas();
       factory.releaseCanvas(cached);
-      expect(factory.debugSurfaceCount, 3);
-      expect(createdCount, 3);
+      expect(factory.debugSurfaceCount, 2);
+      expect(createdCount, 2);
 
       factory.dispose();
       factory.dispose();
-      expect(factory.hasBaseCanvas, isFalse);
       expect(factory.debugSurfaceCount, 0);
-      expect(createdCount, 3);
-      expect(base.disposeCount, 1);
+      expect(createdCount, 2);
       expect(cached.disposeCount, 1);
       expect(live.disposeCount, 1);
     });
@@ -204,9 +183,7 @@ void testMain() {
       );
 
       factory.dispose();
-      expect(() => factory.baseCanvas, throwsAssertionError);
       expect(factory.getCanvas, throwsAssertionError);
-      expect(factory.hasBaseCanvas, isFalse);
       expect(factory.debugSurfaceCount, 0);
       expect(createdCount, 0);
     });

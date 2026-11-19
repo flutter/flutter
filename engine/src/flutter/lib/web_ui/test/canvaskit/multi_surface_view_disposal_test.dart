@@ -106,18 +106,26 @@ void testMain() {
       }
     }
 
+    List<CkOnscreenSurface> surfacesOf(MultiSurfaceViewRasterizer viewRasterizer) {
+      final surfaces = <CkOnscreenSurface>[];
+      viewRasterizer.displayFactory.forEachCanvas((OnscreenSurface surface) {
+        surfaces.add(surface as CkOnscreenSurface);
+      });
+      return surfaces;
+    }
+
     test('a disposed view does not rebuild its surface when its context is lost', () async {
       final EngineFlutterView view = createAndRegisterView();
       await renderBlueBox(view);
 
       final viewRasterizer = renderer.rasterizers[view.viewId]! as MultiSurfaceViewRasterizer;
-      final baseSurface = viewRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
-      final initialCanvas = baseSurface.canvas as DomHTMLCanvasElement;
-      final int initialGlContext = baseSurface.glContext;
+      final CkOnscreenSurface surface = surfacesOf(viewRasterizer).single;
+      final initialCanvas = surface.canvas as DomHTMLCanvasElement;
+      final int initialGlContext = surface.glContext;
       final WebGLContext gl = initialCanvas.getGlContext(webGLVersion);
 
       expect(initialGlContext, greaterThan(0));
-      expect(baseSurface.skSurface, isNotNull);
+      expect(surface.skSurface, isNotNull);
       expect(gl.isContextLost(), isFalse);
 
       final contextLost = Completer<void>();
@@ -136,12 +144,12 @@ void testMain() {
       await contextLost.future;
 
       expect(
-        baseSurface.canvas.strictEquals(initialCanvas).toDart,
+        surface.canvas.strictEquals(initialCanvas).toDart,
         isTrue,
         reason: 'The removed view acquired a new canvas after its context was lost.',
       );
-      expect(baseSurface.skSurface, isNull);
-      expect(baseSurface.glContext, -1);
+      expect(surface.skSurface, isNull);
+      expect(surface.glContext, -1);
       expect(gl.isContextLost(), isTrue);
     }, skip: _skipContextLoss);
 
@@ -206,12 +214,12 @@ void testMain() {
       );
       expect(
         nonLostWebGlContexts,
-        2,
+        1,
         reason:
-            'Only the active live view base canvas and overlay should hold '
-            'non-lost WebGL contexts. $diagnostics',
+            'Only the active live view display surface should hold a '
+            'non-lost WebGL context. $diagnostics',
       );
-      expect(liveSnapshots, hasLength(2), reason: diagnostics);
+      expect(liveSnapshots, hasLength(1), reason: diagnostics);
       expect(
         liveContextsLost,
         everyElement(isFalse),
@@ -242,13 +250,13 @@ void testMain() {
       await renderBlueBox(renderedView);
       final renderedRasterizer =
           renderer.rasterizers[renderedView.viewId]! as MultiSurfaceViewRasterizer;
-      final renderedSurface = renderedRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
+      final CkOnscreenSurface renderedSurface = surfacesOf(renderedRasterizer).single;
       final renderedCanvas = renderedSurface.canvas as DomHTMLCanvasElement;
 
       final EngineFlutterView unflushedView = createAndRegisterView();
       final unflushedRasterizer =
           renderer.rasterizers[unflushedView.viewId]! as MultiSurfaceViewRasterizer;
-      final unflushedSurface = unflushedRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
+      final unflushedSurface = unflushedRasterizer.getOverlay() as CkOnscreenSurface;
       await unflushedSurface.initialized;
       final unflushedCanvas = unflushedSurface.canvas as DomHTMLCanvasElement;
 
@@ -288,7 +296,7 @@ void testMain() {
       final rasterizerB = renderer.rasterizers[renderedViewB.viewId]! as MultiSurfaceViewRasterizer;
       final unrenderedRasterizer =
           renderer.rasterizers[unrenderedView.viewId]! as MultiSurfaceViewRasterizer;
-      expect(unrenderedRasterizer.displayFactory.hasBaseCanvas, isFalse);
+      expect(unrenderedRasterizer.displayFactory.debugSurfaceCount, 0);
 
       final multiSurfaceRasterizer = renderer.rasterizer as MultiSurfaceRasterizer;
       final extraSurface =
@@ -317,7 +325,6 @@ void testMain() {
       multiSurfaceRasterizer.dispose();
 
       expect(counter.createdCount, 0);
-      expect(unrenderedRasterizer.displayFactory.hasBaseCanvas, isFalse);
       expect(unrenderedRasterizer.displayFactory.debugSurfaceCount, 0);
       for (var i = 0; i < trackedSurfaces.length; i++) {
         expect(trackedSurfaces[i].isDisposed, isTrue);
@@ -340,24 +347,21 @@ void testMain() {
       await renderBlueBox(disposedView);
       await renderBlueBox(liveView);
 
-      final disposedBase =
-          (renderer.rasterizers[disposedView.viewId]! as MultiSurfaceViewRasterizer)
-                  .displayFactory
-                  .baseCanvas
+      final disposedSurface =
+          surfacesOf(renderer.rasterizers[disposedView.viewId]! as MultiSurfaceViewRasterizer)
+                  .single
               as _TrackingCkOnscreenSurface;
-      final liveBase =
-          (renderer.rasterizers[liveView.viewId]! as MultiSurfaceViewRasterizer)
-                  .displayFactory
-                  .baseCanvas
+      final liveSurface =
+          surfacesOf(renderer.rasterizers[liveView.viewId]! as MultiSurfaceViewRasterizer).single
               as _TrackingCkOnscreenSurface;
 
       customRasterizer.setResourceCacheMaxBytes(1000000);
-      expect(disposedBase.resourceCacheLimitUpdates, 1);
-      expect(liveBase.resourceCacheLimitUpdates, 1);
+      expect(disposedSurface.resourceCacheLimitUpdates, 1);
+      expect(liveSurface.resourceCacheLimitUpdates, 1);
 
-      final ui.VoidCallback? providerOnDispose = disposedBase.onDispose;
+      final ui.VoidCallback? providerOnDispose = disposedSurface.onDispose;
       var onDisposeCount = 0;
-      disposedBase.onDispose = () {
+      disposedSurface.onDispose = () {
         onDisposeCount++;
         providerOnDispose?.call();
       };
@@ -365,19 +369,17 @@ void testMain() {
       disposeAndRemoveView(disposedView);
       final int deleteCallsAfterFirstDispose = deleteContextCalls();
 
-      expect(disposedBase.isDisposed, isTrue);
+      expect(disposedSurface.isDisposed, isTrue);
       expect(onDisposeCount, 1);
-      // One `deleteContext` call each for the view's base canvas and the
-      // overlay used to composite its scene.
-      expect(deleteCallsAfterFirstDispose, 2);
+      expect(deleteCallsAfterFirstDispose, 1);
 
-      disposedBase.dispose();
+      disposedSurface.dispose();
       expect(onDisposeCount, 1);
       expect(deleteContextCalls(), deleteCallsAfterFirstDispose);
 
       customRasterizer.setResourceCacheMaxBytes(2000000);
-      expect(disposedBase.resourceCacheLimitUpdates, 1);
-      expect(liveBase.resourceCacheLimitUpdates, 2);
+      expect(disposedSurface.resourceCacheLimitUpdates, 1);
+      expect(liveSurface.resourceCacheLimitUpdates, 2);
     });
 
     test(
@@ -389,8 +391,11 @@ void testMain() {
           FrameTimingRecorder.debugResetFrameTimings();
         });
 
-        final EngineFlutterView view = createAndRegisterView();
-        final viewRasterizer = renderer.rasterizers[view.viewId]! as MultiSurfaceViewRasterizer;
+        // Case 1: Dispose while `draw` is suspended in `prepareToDraw` (before
+        // `submitFrame` allocates any display surface).
+        final EngineFlutterView viewBeforeSubmit = createAndRegisterView();
+        final rasterizerBeforeSubmit =
+            renderer.rasterizers[viewBeforeSubmit.viewId]! as MultiSurfaceViewRasterizer;
 
         final ui.Scene scene1 = buildBlueScene();
         final ui.Scene scene2 = buildBlueScene();
@@ -399,27 +404,72 @@ void testMain() {
           scene2.dispose();
         });
 
-        final Future<void> render1 = renderer.renderScene(scene1, view, size: view.physicalSize);
-        expect(viewRasterizer.displayFactory.hasBaseCanvas, isTrue);
-        final baseSurface = viewRasterizer.displayFactory.baseCanvas as CkOnscreenSurface;
-        final Future<void> render2 = renderer.renderScene(scene2, view, size: view.physicalSize);
-        expect(viewRasterizer.queue.current, isNotNull);
-        expect(viewRasterizer.queue.next, isNotNull);
-
         final _WebGlContextCounter counter = _installWebGlContextCounter();
         addTearDown(counter.restore);
 
-        disposeAndRemoveView(view);
+        final Future<void> render1 = renderer.renderScene(
+          scene1,
+          viewBeforeSubmit,
+          size: viewBeforeSubmit.physicalSize,
+        );
+        expect(rasterizerBeforeSubmit.displayFactory.debugSurfaceCount, 0);
+        final Future<void> render2 = renderer.renderScene(
+          scene2,
+          viewBeforeSubmit,
+          size: viewBeforeSubmit.physicalSize,
+        );
+        expect(rasterizerBeforeSubmit.queue.current, isNotNull);
+        expect(rasterizerBeforeSubmit.queue.next, isNotNull);
+
+        disposeAndRemoveView(viewBeforeSubmit);
 
         await Future.wait<void>(<Future<void>>[render1, render2])
             .timeout(const Duration(seconds: 2));
 
         expect(counter.createdCount, 0);
-        expect(viewRasterizer.displayFactory.hasBaseCanvas, isFalse);
-        expect(viewRasterizer.displayFactory.debugSurfaceCount, 0);
-        expect(baseSurface.isDisposed, isTrue);
-        expect(baseSurface.skSurface, isNull);
-        expect(baseSurface.glContext, -1);
+        expect(rasterizerBeforeSubmit.displayFactory.debugSurfaceCount, 0);
+
+        // Case 2: Dispose after `prepareToDraw` finishes and `submitFrame` has
+        // allocated the display surface and suspended in `rasterize`.
+        final EngineFlutterView viewDuringRasterize = createAndRegisterView();
+        final rasterizerDuringRasterize =
+            renderer.rasterizers[viewDuringRasterize.viewId]! as MultiSurfaceViewRasterizer;
+
+        final ui.Scene scene3 = buildBlueScene();
+        final ui.Scene scene4 = buildBlueScene();
+        addTearDown(() {
+          scene3.dispose();
+          scene4.dispose();
+        });
+
+        final Future<void> render3 = renderer.renderScene(
+          scene3,
+          viewDuringRasterize,
+          size: viewDuringRasterize.physicalSize,
+        );
+        // Advance past `await prepareToDraw()` so `submitFrame` allocates the
+        // display surface and suspends in `rasterizeToCanvas`.
+        await Future<void>.value();
+        final CkOnscreenSurface allocatedSurface = surfacesOf(rasterizerDuringRasterize).single;
+        final Future<void> render4 = renderer.renderScene(
+          scene4,
+          viewDuringRasterize,
+          size: viewDuringRasterize.physicalSize,
+        );
+        expect(rasterizerDuringRasterize.queue.current, isNotNull);
+        expect(rasterizerDuringRasterize.queue.next, isNotNull);
+
+        final int createdBeforeDispose = counter.createdCount;
+        disposeAndRemoveView(viewDuringRasterize);
+
+        await Future.wait<void>(<Future<void>>[render3, render4])
+            .timeout(const Duration(seconds: 2));
+
+        expect(counter.createdCount, createdBeforeDispose);
+        expect(rasterizerDuringRasterize.displayFactory.debugSurfaceCount, 0);
+        expect(allocatedSurface.isDisposed, isTrue);
+        expect(allocatedSurface.skSurface, isNull);
+        expect(allocatedSurface.glContext, -1);
       },
     );
 

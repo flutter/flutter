@@ -219,5 +219,23 @@ void testMain() {
       addTearDown(recreated.dispose);
       expect(recreated, isNot(same(viewRasterizer)));
     });
+
+    test('MultiSurfaceViewRasterizer.prepareToDraw does not allocate a surface', () async {
+      final multiSurfaceRasterizer = MultiSurfaceRasterizer(
+        (_) => throw StateError('Unexpected onscreen surface creation'),
+      );
+      addTearDown(multiSurfaceRasterizer.dispose);
+
+      final testView = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('test-view'),
+      );
+      final MultiSurfaceViewRasterizer viewRasterizer = multiSurfaceRasterizer.createViewRasterizer(
+        testView,
+      );
+
+      await viewRasterizer.prepareToDraw();
+      expect(viewRasterizer.displayFactory.debugSurfaceCount, 0);
+    });
   });
 }

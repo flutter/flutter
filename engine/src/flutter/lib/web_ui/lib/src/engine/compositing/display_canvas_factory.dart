@@ -17,23 +17,6 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   /// create new display canvases.
   final T Function() createCanvas;
 
-  // Nullable so we can check for the base canvas without lazily creating it.
-  T? _baseCanvas;
-
-  /// The base canvas to paint on. This is the default canvas which will be
-  /// painted to. If there are no platform views, then this canvas will render
-  /// the entire scene.
-  ///
-  /// Must not be called after [dispose].
-  T get baseCanvas {
-    assert(!_isDisposed, 'Attempting to get the base canvas of a disposed factory');
-    return _baseCanvas ??= (createCanvas()..initialize());
-  }
-
-  /// Whether [baseCanvas] has been created and not yet disposed.
-  @visibleForTesting
-  bool get hasBaseCanvas => _baseCanvas != null;
-
   /// Canvases created by this factory which are currently in use.
   final List<T> _liveCanvases = <T>[];
 
@@ -42,7 +25,7 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
   final List<T> _cache = <T>[];
 
   /// The number of canvases which have been created by this factory.
-  int get _canvasCount => _liveCanvases.length + _cache.length + (_baseCanvas != null ? 1 : 0);
+  int get _canvasCount => _liveCanvases.length + _cache.length;
 
   /// The number of surfaces created by this factory. Used for testing.
   @visibleForTesting
@@ -82,7 +65,7 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
     _liveCanvases.clear();
   }
 
-  /// Removes all canvases except the base canvas from the DOM.
+  /// Removes all canvases from the DOM.
   ///
   /// This is called at the beginning of the frame to prepare for painting into
   /// the new canvases.
@@ -93,9 +76,6 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
 
   /// Calls [callback] on each canvas created by this factory.
   void forEachCanvas(void Function(T canvas) callback) {
-    if (_baseCanvas != null) {
-      callback(_baseCanvas!);
-    }
     _cache.forEach(callback);
     _liveCanvases.forEach(callback);
   }
@@ -107,7 +87,6 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
 
   /// Signals that a canvas is no longer being used. It can be reused.
   void releaseCanvas(T canvas) {
-    assert(canvas != _baseCanvas, 'Attempting to release the base canvas');
     assert(
       _liveCanvases.contains(canvas),
       'Attempting to release a Canvas which was not created by this factory',
@@ -119,12 +98,10 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
 
   /// Returns [true] if [canvas] is currently being used to paint content.
   ///
-  /// The base canvas always counts as live.
-  ///
   /// If a canvas is not live, then it must be in the cache and ready to be
   /// reused.
   bool isLive(T canvas) {
-    if (canvas == _baseCanvas || _liveCanvases.contains(canvas)) {
+    if (_liveCanvases.contains(canvas)) {
       return true;
     }
     assert(_cache.contains(canvas));
@@ -150,9 +127,6 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
       canvas.dispose();
       canvas.hostElement.remove();
     }
-    _baseCanvas?.dispose();
-    _baseCanvas?.hostElement.remove();
-    _baseCanvas = null;
     _liveCanvases.clear();
     _cache.clear();
   }

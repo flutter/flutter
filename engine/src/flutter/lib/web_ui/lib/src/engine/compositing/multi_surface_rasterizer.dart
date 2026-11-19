@@ -75,14 +75,19 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
   late final DisplayCanvasFactory<OnscreenSurface> displayFactory =
       DisplayCanvasFactory<OnscreenSurface>(createCanvas: surfaceProvider.createSurface);
 
+  // Nothing to prepare. Each display surface is resized in `rasterizeToCanvas`.
   @override
-  Future<void> prepareToDraw() async {
-    await displayFactory.baseCanvas.setSize(currentFrameSize);
-  }
+  Future<void> prepareToDraw() => Future<void>.value();
 
   /// Rasterizes the given [picture] directly to the given [canvas].
   Future<void> rasterizeToCanvas(OnscreenSurface canvas, ui.Picture picture) async {
+    if (canvas.isDisposed) {
+      return;
+    }
     await canvas.setSize(currentFrameSize);
+    if (canvas.isDisposed) {
+      return;
+    }
     return canvas.rasterizeToCanvas(picture);
   }
 
