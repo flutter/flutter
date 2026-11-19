@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -26,6 +27,7 @@ void main() {
       fileSystem.directory('/project'),
       defines: defines,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       processManager: FakeProcessManager.any(),
