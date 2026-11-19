@@ -77,7 +77,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       });
       _devToolsProcess!.stderr.transform(utf8LineDecoder).listen(_logger.printError);
 
-      final bool runningOnBot = await _botDetector.isRunningOnBot;
+      final bool runningOnBot = _botDetector.isRunningOnBot;
       devToolsProcessExit = _devToolsProcess!.exitCode.then((int exitCode) {
         if (!_devToolsProcessKilled && runningOnBot) {
           throwToolExit('DevTools process failed: exitCode=$exitCode');

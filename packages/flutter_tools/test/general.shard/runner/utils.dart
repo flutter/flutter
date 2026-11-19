@@ -2,7 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 typedef CommandFunction = Future<FlutterCommandResult> Function();
 
@@ -15,8 +25,28 @@ class DummyFlutterCommand extends FlutterCommand {
     this.packagesPath,
     this.fileSystemScheme,
     this.fileSystemRoots = const <String>[],
-    super.toolContext,
-  });
+    ToolContext? toolContext,
+    DeviceManager? deviceManager,
+    Doctor? doctor,
+  }) : super(
+         toolContext: toolContext ?? const DelegatingToolContext(),
+         deviceManager: deviceManager ?? _defaultFromContext<DeviceManager>(),
+         doctor: doctor ?? _defaultFromContext<Doctor>(),
+       );
+
+  @override
+  FlutterCommandRunner? get runner => super.runner ?? _fallbackRunner;
+  late final FlutterCommandRunner _fallbackRunner = TestFlutterCommandRunner(
+    toolContext: toolContext,
+  );
+
+  static T? _defaultFromContext<T>() {
+    if (Zone.current[contextKey] case final AppContext appContext
+        when appContext.runtimeType == AppContext) {
+      return appContext.get<T>();
+    }
+    return null;
+  }
 
   final bool noUsagePath;
   final CommandFunction? commandFunction;

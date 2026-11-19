@@ -74,6 +74,26 @@ class TaskResult {
       detailFiles = null,
       benchmarkScoreKeys = null;
 
+  /// Merges successful benchmark [results], keyed by task name. Keys become
+  /// `<task>/<key>` so `metrics_center.dart` can keep each Skia Perf trace.
+  factory TaskResult.merge(Map<String, TaskResult> results) {
+    final data = <String, dynamic>{};
+    final scoreKeys = <String>[];
+    final detailFiles = <String>[];
+    for (final MapEntry<String, TaskResult>(key: task, value: result) in results.entries) {
+      if (result.failed) {
+        throw ArgumentError('Cannot merge failed result for "$task": ${result.message}');
+      }
+      for (final MapEntry<String, dynamic>(key: name, value: value)
+          in (result.data ?? const <String, dynamic>{}).entries) {
+        data['$task/$name'] = value;
+      }
+      scoreKeys.addAll((result.benchmarkScoreKeys ?? const []).map((key) => '$task/$key'));
+      detailFiles.addAll(result.detailFiles ?? const []);
+    }
+    return TaskResult.success(data, benchmarkScoreKeys: scoreKeys, detailFiles: detailFiles);
+  }
+
   /// Whether the task succeeded.
   final bool succeeded;
 

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/commands/build_appbundle.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
@@ -40,7 +41,6 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('flutter');
-    Cache.flutterRoot = flutterRoot.path;
     logger = BufferLogger.test();
     platform = FakePlatform(environment: const <String, String>{'PATH': ''});
     processManager = FakeProcessManager.empty();
@@ -55,7 +55,7 @@ void main() {
       logger: logger,
       platform: platform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: FakeConfig()),
     );
     androidContext = FakeAndroidContext(androidSdk: FakeAndroidSdk());
   });
@@ -91,6 +91,7 @@ flutter:
       androidBuilder: FakeAndroidBuilder(),
       androidContext: androidContext,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
     );
@@ -104,6 +105,7 @@ flutter:
       androidBuilder: FakeAndroidBuilder(),
       androidContext: FakeAndroidContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
     );
@@ -136,6 +138,7 @@ flutter:
       androidBuilder: fakeBuilder,
       androidContext: androidContext,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
     );
@@ -158,6 +161,7 @@ flutter:
       androidBuilder: FakeAndroidBuilder(),
       androidContext: androidContext,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
     );
@@ -201,6 +205,7 @@ flutter:
       androidBuilder: fakeBuilder,
       androidContext: androidContext,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
       templateRenderer: const MustacheTemplateRenderer(),
       toolContext: toolContext,
     );

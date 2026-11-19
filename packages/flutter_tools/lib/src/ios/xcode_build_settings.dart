@@ -163,18 +163,23 @@ String? parsedBuildNumber({
 Future<List<String>> _xcodeBuildSettingsLines({
   required FlutterProject project,
   required BuildInfo buildInfo,
+  required bool printWarnings,
   required ToolContext toolContext,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
-  required bool printWarnings,
 }) async {
-  final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs, :Logger logger) =
-      toolContext;
+  final ToolContext(
+    :Artifacts artifacts,
+    :Cache cache,
+    :Config config,
+    :FileSystem fs,
+    :Logger logger,
+  ) = toolContext;
   final xcodeBuildSettings = <String>[];
 
-  final String flutterRoot = fs.path.normalize(Cache.flutterRoot!);
+  final String flutterRoot = fs.path.normalize(cache.flutterRoot);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command

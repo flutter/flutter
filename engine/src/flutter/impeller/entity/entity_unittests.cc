@@ -60,6 +60,7 @@
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
+#include "third_party/abseil-cpp/absl/strings/str_format.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -2626,7 +2627,7 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
       } else {
         float portion_of_rect =
             screen_offset_y * GetContentScale().y / scale / rect_size;
-        label = std::format("- {:.2g}", portion_of_rect);
+        label = absl::StrFormat("- %.2g", portion_of_rect);
       }
       if (IsPlaygroundEnabled()) {
         ImGui::GetBackgroundDrawList()->AddText(

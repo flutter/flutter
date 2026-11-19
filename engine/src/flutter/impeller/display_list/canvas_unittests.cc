@@ -4,12 +4,8 @@
 
 #include <unordered_map>
 #include "flutter/display_list/dl_tile_mode.h"
-#include "flutter/display_list/effects/dl_image_filter.h"
-#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
-#include "impeller/core/formats.h"
-#include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/aiks_unittests.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_image_impeller.h"

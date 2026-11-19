@@ -951,6 +951,9 @@ TEST_F(FlutterEngineTest, CanGetEngineForId) {
   if (!engineId.has_value()) {
     return;
   }
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+  EXPECT_EQ(engine.engineIdentifier, *engineId);
+  EXPECT_EQ(registrar.engineIdentifier, *engineId);
   EXPECT_EQ(engine, [FlutterEngine engineForIdentifier:*engineId]);
   ShutDownEngine();
 }
