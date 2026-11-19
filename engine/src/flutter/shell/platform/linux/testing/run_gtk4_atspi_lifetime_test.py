@@ -82,6 +82,13 @@ def probe(binary, output):
       try:
         tap(controller)
 
+        def renamed():
+          drain()
+          return named('Lifetime renamed child') == child
+
+        wait_until(renamed, 'parent role replacement and retained child rename')
+        tap(controller)
+
         def moved():
           drain()
           child.clear_cache()
@@ -89,14 +96,14 @@ def probe(binary, output):
           return child.get_parent() == root and root.get_child_count() == 1
 
         wait_until(moved, 'root-only reparenting')
-        if named('Lifetime child') != child or named('Lifetime old parent') is not None:
+        if named('Lifetime renamed child') != child or named('Lifetime old parent') is not None:
           raise RuntimeError('Reparenting replaced the child or retained the removed parent')
         # The retained, moved object still dispatches to its original view/id.
         tap(child)
         tap(controller)
         wait_until(lambda: named('Lifetime destroyed'), 'target window/view disposal')
         drain()
-        if named('Lifetime child') is not None or named('Lifetime root') is not None:
+        if named('Lifetime renamed child') is not None or named('Lifetime root') is not None:
           raise RuntimeError('Destroyed view remains in native traversal')
         stale = []
         for name, node in [('root', root), ('old_parent', parent), ('child', child)]:
@@ -134,9 +141,9 @@ def probe(binary, output):
           raise RuntimeError('Lifetime fixture routing/teardown assertions failed')
         return {
             'reparented_identity': True, 'target_view_destroyed': True, 'retained_queries': stale,
-            'stale_action_no_dispatch': True, 'controller_taps': 3, 'moved_child_taps': 1,
-            'event_listener_active_during_transitions': True, 'events': events,
-            'gtk_libraries': libraries, 'gtk_library_sha256': [
+            'renamed_child_identity': True, 'stale_action_no_dispatch': True, 'controller_taps': 4,
+            'moved_child_taps': 1, 'event_listener_active_during_transitions': True,
+            'events': events, 'gtk_libraries': libraries, 'gtk_library_sha256': [
                 hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in libraries
             ], 'passed': True
         }

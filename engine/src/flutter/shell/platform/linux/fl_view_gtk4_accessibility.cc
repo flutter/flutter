@@ -62,7 +62,8 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
     FlViewGtk4Accessibility* self,
     const FlAccessibilitySemanticsNode* semantics,
     const FlutterTransformation& parent_transform,
-    GHashTable* visited) {
+    GHashTable* visited,
+    GPtrArray* replaced_nodes) {
   if (semantics == nullptr) {
     return nullptr;
   }
@@ -82,8 +83,9 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
                                         transform, node);
   if (node != previous_node) {
     if (previous_node != nullptr) {
-      // Clients can retain the replaced object after the cache releases it.
-      fl_gtk4_accessible_node_detach(previous_node);
+      // Reused children can notify GTK while still linked to this parent.
+      // Keep its AT context alive until their new links are installed.
+      g_ptr_array_add(replaced_nodes, g_object_ref(previous_node));
     }
     g_hash_table_insert(self->native_nodes_by_id,
                         GINT_TO_POINTER(semantics->id), node);
@@ -103,7 +105,7 @@ static FlGtk4AccessibleNode* fl_view_gtk4_accessibility_build_native_node(
 
       FlGtk4AccessibleNode* child_node =
           fl_view_gtk4_accessibility_build_native_node(self, child, transform,
-                                                       visited);
+                                                       visited, replaced_nodes);
       if (child_node != nullptr) {
         g_ptr_array_add(children, child_node);
       }
@@ -160,8 +162,24 @@ static const gchar* fl_view_gtk4_accessibility_get_root_label(
 }
 
 #if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
+// Unrealizing a proxy can flush GTK notifications through its accessible
+// parent. Keep every parent context valid until all retiring proxies are quiet.
+static void detach_nodes(GPtrArray* nodes) {
+  for (guint i = 0; i < nodes->len; i++) {
+    GtkWidget* widget = GTK_WIDGET(g_ptr_array_index(nodes, i));
+    if (gtk_widget_get_realized(widget)) {
+      gtk_widget_unrealize(widget);
+    }
+  }
+  for (guint i = 0; i < nodes->len; i++) {
+    fl_gtk4_accessible_node_detach(
+        FL_GTK4_ACCESSIBLE_NODE(g_ptr_array_index(nodes, i)));
+  }
+}
+
 static void fl_view_gtk4_accessibility_rebuild_native_tree(
-    FlViewGtk4Accessibility* self) {
+    FlViewGtk4Accessibility* self,
+    GtkAccessible* replaced_leaf = nullptr) {
   FlRenderTextureGtk4* render_area =
       FL_RENDER_TEXTURE_GTK4(self->view->render_area);
 
@@ -186,9 +204,15 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
 
   g_autoptr(GHashTable) visited =
       g_hash_table_new(g_direct_hash, g_direct_equal);
+  g_autoptr(GPtrArray) replaced_nodes =
+      g_ptr_array_new_with_free_func(g_object_unref);
+  if (replaced_leaf != nullptr) {
+    g_ptr_array_add(replaced_nodes, g_object_ref(replaced_leaf));
+  }
   FlGtk4AccessibleNode* previous_root = self->root_node;
   self->root_node = fl_view_gtk4_accessibility_build_native_node(
-      self, root, fl_gtk4_accessibility_identity_transform(), visited);
+      self, root, fl_gtk4_accessibility_identity_transform(), visited,
+      replaced_nodes);
   if (self->root_node != nullptr && self->root_node != previous_root) {
     fl_gtk_runtime_accessible_set_accessible_parent(
         GTK_ACCESSIBLE(self->root_node),
@@ -197,15 +221,13 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
         render_area, GTK_ACCESSIBLE(self->root_node));
   }
 
-  // Disconnect the entire removed subtree while the table still owns every
-  // node. Accessibility clients may retain nodes after their parents are freed.
   g_hash_table_iter_init(&nodes_iter, self->native_nodes_by_id);
   while (g_hash_table_iter_next(&nodes_iter, &node_key, &node_value)) {
     if (!g_hash_table_contains(visited, node_key)) {
-      auto* node = FL_GTK4_ACCESSIBLE_NODE(node_value);
-      fl_gtk4_accessible_node_detach(node);
+      g_ptr_array_add(replaced_nodes, g_object_ref(node_value));
     }
   }
+  detach_nodes(replaced_nodes);
   g_hash_table_iter_init(&nodes_iter, self->native_nodes_by_id);
   while (g_hash_table_iter_next(&nodes_iter, &node_key, nullptr)) {
     if (!g_hash_table_contains(visited, node_key)) {
@@ -241,12 +263,14 @@ void fl_view_gtk4_accessibility_dispose(FlViewGtk4Accessibility* self) {
   self->root_node = nullptr;
   // Clients can retain native objects after the view is destroyed. Disconnect
   // every node before releasing the table's ownership of parents and siblings.
+  g_autoptr(GPtrArray) retiring = g_ptr_array_new();
   GHashTableIter iter;
   gpointer value = nullptr;
   g_hash_table_iter_init(&iter, self->native_nodes_by_id);
   while (g_hash_table_iter_next(&iter, nullptr, &value)) {
-    fl_gtk4_accessible_node_detach(FL_GTK4_ACCESSIBLE_NODE(value));
+    g_ptr_array_add(retiring, value);
   }
+  detach_nodes(retiring);
   g_clear_pointer(&self->native_nodes_by_id, g_hash_table_unref);
 #endif
   g_clear_object(&self->semantics_store);
@@ -274,6 +298,7 @@ void fl_view_gtk4_accessibility_handle_update(
     for (size_t i = 0; !rebuild && i < update->node_count; i++) {
       rebuild = update->nodes[i]->child_count != 0;
     }
+    g_autoptr(GtkAccessible) replaced_leaf = nullptr;
     if (!rebuild) {
       for (size_t i = 0; i < update->node_count; i++) {
         const int32_t id = update->nodes[i]->id;
@@ -296,15 +321,16 @@ void fl_view_gtk4_accessibility_handle_update(
         auto* updated = fl_gtk4_accessible_node_update(
             self->view, self->view_id, semantics, transform, node);
         if (updated != node) {
-          fl_gtk4_accessible_node_detach(node);
+          replaced_leaf = GTK_ACCESSIBLE(g_object_ref(node));
           g_hash_table_insert(self->native_nodes_by_id, GINT_TO_POINTER(id),
                               updated);
           rebuild = TRUE;
+          break;
         }
       }
     }
     if (rebuild) {
-      fl_view_gtk4_accessibility_rebuild_native_tree(self);
+      fl_view_gtk4_accessibility_rebuild_native_tree(self, replaced_leaf);
     }
     fl_view_gtk4_accessibility_update_accessible_name(self);
   } else {

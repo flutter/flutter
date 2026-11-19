@@ -1122,7 +1122,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiLifetime) {
         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
         if (info->view_id == target_id) {
           EXPECT_EQ(info->node_id, 19u);
-          EXPECT_EQ(steps, 1u);
+          EXPECT_EQ(steps, 2u);
           EXPECT_FALSE(destroyed);
           child_calls++;
           return kSuccess;
@@ -1131,6 +1131,24 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiLifetime) {
         EXPECT_EQ(info->node_id, 0u);
         steps++;
         if (steps == 1) {
+          // Removing the label changes the parent role from GROUP to GENERIC.
+          // Keep the child's ID and role while changing its published label.
+          parent.label = "";
+          child.label = "Lifetime renamed child";
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+          g_autoptr(GtkAccessible) replacement =
+              fl_gtk_runtime_accessible_get_first_accessible_child(
+                  retained_root);
+          EXPECT_NE(replacement, retained_parent);
+          if (replacement == nullptr) {
+            ADD_FAILURE() << "Missing replacement parent";
+            return kInternalInconsistency;
+          }
+          g_autoptr(GtkAccessible) current =
+              fl_gtk_runtime_accessible_get_first_accessible_child(replacement);
+          EXPECT_EQ(current, retained_child);
+        } else if (steps == 2) {
           // Root-only reparenting preserves the omitted child and removes its
           // old parent while all proxies have native AT-SPI contexts.
           root.children_in_traversal_order = &child_id;
@@ -1142,7 +1160,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiLifetime) {
                   retained_root);
           EXPECT_EQ(current, retained_child);
           EXPECT_TRUE(gtk_widget_get_realized(GTK_WIDGET(retained_child)));
-        } else if (steps == 2) {
+        } else if (steps == 3) {
           gtk_window_set_child(window, nullptr);
           gtk_box_append(GTK_BOX(view), surface);
           gtk_window_destroy(window);
@@ -1159,7 +1177,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiLifetime) {
           fl_view_gtk4_accessibility_handle_update(
               control->accessibility_backend, &control_update);
         } else {
-          EXPECT_EQ(steps, 3u);
+          EXPECT_EQ(steps, 4u);
           EXPECT_EQ(child_calls, 1u);
           g_main_loop_quit(loop);
         }
@@ -1176,7 +1194,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiLifetime) {
   if (steps == 3) {
     g_source_remove(timeout);
   }
-  EXPECT_EQ(steps, 3u);
+  EXPECT_EQ(steps, 4u);
   EXPECT_EQ(child_calls, 1u);
   EXPECT_TRUE(destroyed);
   gtk_window_set_child(control_window, nullptr);
