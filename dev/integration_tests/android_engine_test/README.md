@@ -37,6 +37,7 @@ on an Android device or emulator.
 - [`platform_view/virtual_display_platform_view`](#platform_viewvirtual_display_platform_view)
 - [`platform_view_tap_color_change`](#platform_view_tap_color_change)
 - [`system_ui_mode_transitions`](#system_ui_mode_transitions)
+- [`hcpp/platform_view_backdrop_blur`](#hcppplatform_view_backdrop_blur)
 
 ### `flutter_rendered_blue_rectangle`
 
@@ -166,6 +167,32 @@ $ flutter run lib/system_ui_mode_transitions_main.dart
 
 # Run the test
 $ flutter drive lib/system_ui_mode_transitions_main.dart
+```
+
+### `hcpp/platform_view_backdrop_blur`
+
+This app places a rounded `BackdropFilter` blur across the edge of a Hybrid
+Composition++ platform view, with a Flutter button above it. Under HCPP the
+platform view's pixels never reach Flutter, so the engine asks SurfaceFlinger
+to blur behind the Flutter overlay instead (see `BackdropBlurCarrier.java`).
+That needs Android 17 (API 37) and a device with cross-window blur enabled, so
+the test picks one of two goldens from the device's capabilities:
+
+- `*.native_blur.png`: platform view and Flutter content are blurred together.
+- `*.no_native_blur.png`: the filter is left to Flutter, so only the Flutter
+  content is blurred and the platform view stays sharp. This is what the CI
+  emulator (API 35) produces.
+
+The test also taps the button through the OS input pipeline (`adb shell input
+tap`) to verify that the carrier `SurfaceView` does not intercept touches, and
+checks that removing the filter clears the blur.
+
+```sh
+# Run the app
+$ flutter run --enable-hcpp lib/hcpp/platform_view_backdrop_blur_main.dart
+
+# Run the test
+$ flutter drive --enable-hcpp lib/hcpp/platform_view_backdrop_blur_main.dart
 ```
 
 ## Deflaking
