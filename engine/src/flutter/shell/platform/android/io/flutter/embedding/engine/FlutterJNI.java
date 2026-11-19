@@ -1340,11 +1340,9 @@ public class FlutterJNI {
   @UiThread
   public void destroyOverlaySurfaces() {
     ensureRunningOnMainThread();
-    if (platformViewsController == null) {
-      throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+    if (platformViewsController != null) {
+      platformViewsController.destroyOverlaySurfaces();
     }
-    platformViewsController.destroyOverlaySurfaces();
   }
 
   @SuppressWarnings("unused")

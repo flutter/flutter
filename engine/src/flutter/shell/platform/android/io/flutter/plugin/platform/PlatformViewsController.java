@@ -145,6 +145,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Overlay layer IDs that were displayed since the start of the current frame.
   private final HashSet<Integer> currentFrameUsedOverlayLayerIds;
 
+  // Overlay layer IDs whose ImageReaders were closed by destroyOverlaySurfaces() and can be
+  // pruned from overlayLayerViews once removed from flutterView outside dispatchDetachedFromWindow.
+  private final HashSet<Integer> destroyedOverlayLayerIds;
+
   // Platform view IDs that were displayed since the start of the current frame.
   private final HashSet<Integer> currentFrameUsedPlatformViewIds;
 
@@ -804,6 +808,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     contextToEmbeddedView = new HashMap<>();
     overlayLayerViews = new SparseArray<>();
     currentFrameUsedOverlayLayerIds = new HashSet<>();
+    destroyedOverlayLayerIds = new HashSet<>();
     currentFrameUsedPlatformViewIds = new HashSet<>();
     viewWrappers = new SparseArray<>();
     platformViews = new SparseArray<>();
@@ -1361,7 +1366,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
         // Hide overlay surfaces that aren't rendered in the current frame.
         overlayView.setVisibility(View.GONE);
-        flutterView.removeView(overlayView);
+        if (flutterView != null) {
+          flutterView.removeView(overlayView);
+        }
+        if (destroyedOverlayLayerIds.remove(overlayId)) {
+          overlayLayerViews.removeAt(i);
+          i--;
+        }
       }
     }
 
@@ -1431,8 +1442,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * <p>This method is used only internally by {@code FlutterJNI}.
    */
   public void destroyOverlaySurfaces() {
-    for (int viewId = 0; viewId < overlayLayerViews.size(); viewId++) {
-      final PlatformOverlayView overlayView = overlayLayerViews.valueAt(viewId);
+    for (int viewIndex = 0; viewIndex < overlayLayerViews.size(); viewIndex++) {
+      final int overlayId = overlayLayerViews.keyAt(viewIndex);
+      if (!destroyedOverlayLayerIds.add(overlayId)) {
+        continue;
+      }
+      final PlatformOverlayView overlayView = overlayLayerViews.valueAt(viewIndex);
       overlayView.detachFromRenderer();
       overlayView.closeImageReader();
       // Don't remove overlayView from the view hierarchy since this method can
@@ -1451,6 +1466,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       flutterView.removeView(overlayLayerViews.valueAt(viewId));
     }
     overlayLayerViews.clear();
+    destroyedOverlayLayerIds.clear();
   }
 
   @VisibleForTesting

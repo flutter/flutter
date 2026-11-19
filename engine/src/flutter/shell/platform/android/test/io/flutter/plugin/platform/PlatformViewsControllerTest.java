@@ -1813,6 +1813,84 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void finishFrame_prunesDestroyedOverlaySurfacesFromOverlayLayerViews() {
+    // Initial and resized viewport bounds in physical pixels.
+    final int initialSizePx = 10;
+    final int resizedSizePx = 20;
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    final FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.acquireLatestImageViewFrame()).thenReturn(true);
+    platformViewsController.attachToView(flutterView);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+
+    final PlatformOverlayView destroyedOverlay = mock(PlatformOverlayView.class);
+    when(destroyedOverlay.acquireLatestImage()).thenReturn(true);
+    final FlutterOverlaySurface destroyedSurface =
+        platformViewsController.createOverlaySurface(destroyedOverlay);
+
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId,
+        0,
+        0,
+        initialSizePx,
+        initialSizePx,
+        initialSizePx,
+        initialSizePx,
+        new FlutterMutatorsStack());
+    platformViewsController.onDisplayOverlaySurface(
+        destroyedSurface.getId(), 0, 0, initialSizePx, initialSizePx);
+    platformViewsController.onEndFrame();
+    assertEquals(1, platformViewsController.getOverlayLayerViews().size());
+
+    platformViewsController.destroyOverlaySurfaces();
+    platformViewsController.destroyOverlaySurfaces();
+    verify(destroyedOverlay, times(1)).closeImageReader();
+    verify(flutterView, never()).removeView(destroyedOverlay);
+    assertEquals(1, platformViewsController.getOverlayLayerViews().size());
+
+    final PlatformOverlayView activeOverlay = mock(PlatformOverlayView.class);
+    when(activeOverlay.acquireLatestImage()).thenReturn(true);
+    final FlutterOverlaySurface activeSurface =
+        platformViewsController.createOverlaySurface(activeOverlay);
+    assertEquals(2, platformViewsController.getOverlayLayerViews().size());
+
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId,
+        0,
+        0,
+        resizedSizePx,
+        resizedSizePx,
+        resizedSizePx,
+        resizedSizePx,
+        new FlutterMutatorsStack());
+    platformViewsController.onDisplayOverlaySurface(
+        activeSurface.getId(), 0, 0, resizedSizePx, resizedSizePx);
+    platformViewsController.onEndFrame();
+
+    verify(flutterView, times(1)).removeView(destroyedOverlay);
+    assertEquals(1, platformViewsController.getOverlayLayerViews().size());
+    assertNull(platformViewsController.getOverlayLayerViews().get(destroyedSurface.getId()));
+    assertEquals(
+        activeOverlay, platformViewsController.getOverlayLayerViews().get(activeSurface.getId()));
+  }
+
+  @Test
   public void checkInputConnectionProxy_falseIfViewIsNull() {
     final PlatformViewsController platformViewsController = new PlatformViewsController();
     boolean shouldProxying = platformViewsController.checkInputConnectionProxy(null);

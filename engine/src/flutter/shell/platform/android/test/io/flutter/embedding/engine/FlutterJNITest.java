@@ -282,6 +282,24 @@ public class FlutterJNITest {
   }
 
   @Test
+  public void destroyOverlaySurfaces_callsPlatformViewsControllerWhenSet() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setPlatformViewsController(platformViewsController);
+
+    flutterJNI.destroyOverlaySurfaces();
+
+    verify(platformViewsController, times(1)).destroyOverlaySurfaces();
+  }
+
+  @Test
+  public void destroyOverlaySurfaces_isNoOpWhenPlatformViewsControllerIsNull() {
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.destroyOverlaySurfaces();
+  }
+
+  @Test
   public void setSemanticsTreeEnabled_callsAccessibilityDelegate() {
     FlutterJNI.AccessibilityDelegate accessibilityDelegate =
         mock(FlutterJNI.AccessibilityDelegate.class);

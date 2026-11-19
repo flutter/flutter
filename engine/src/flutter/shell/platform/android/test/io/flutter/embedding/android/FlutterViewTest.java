@@ -6,16 +6,22 @@ package io.flutter.embedding.android;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNotSame;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertSame;
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,6 +33,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -60,20 +67,24 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -1060,6 +1071,449 @@ public class FlutterViewTest {
 
     imageView.closeImageReader();
     verify(mockReader, times(1)).close();
+  }
+
+  @Test
+  public void flutterImageView_onSizeChangedSwapsSurfaceBeforeClosingOldReaderAndCurrentImage() {
+    // Initial and resized viewport dimensions in physical pixels.
+    final int initialSizePx = 100;
+    final int resizedWidthPx = 200;
+    final int resizedHeightPx = 300;
+    final ImageReader oldReader = mock(ImageReader.class);
+    when(oldReader.getWidth()).thenReturn(initialSizePx);
+    when(oldReader.getHeight()).thenReturn(initialSizePx);
+
+    final Image currentImage = mock(Image.class);
+    when(oldReader.acquireLatestImage()).thenReturn(currentImage);
+
+    final FlutterImageView imageView =
+        spy(new FlutterImageView(ctx, oldReader, FlutterImageView.SurfaceKind.background));
+    doNothing().when(imageView).invalidate();
+
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    final FlutterRenderer renderer = spy(new FlutterRenderer(jni));
+    imageView.attachToRenderer(renderer);
+    assertTrue(imageView.acquireLatestImage());
+    reset(renderer);
+
+    imageView.onSizeChanged(resizedWidthPx, resizedHeightPx, initialSizePx, initialSizePx);
+
+    final Surface newSurface = imageView.getSurface();
+    final InOrder inOrder = inOrder(renderer, currentImage, oldReader);
+    inOrder.verify(renderer, times(1)).swapSurface(newSurface);
+    inOrder.verify(currentImage, times(1)).close();
+    inOrder.verify(oldReader, times(1)).close();
+
+    imageView.closeImageReader();
+  }
+
+  @Test
+  public void flutterImageView_onSizeChangedWhileDetachedDoesNotSwapSurfaceUntilAttach() {
+    final int initialSizePx = 100;
+    final int resizedWidthPx = 200;
+    final int resizedHeightPx = 300;
+    final ImageReader oldReader = mock(ImageReader.class);
+    when(oldReader.getWidth()).thenReturn(initialSizePx);
+    when(oldReader.getHeight()).thenReturn(initialSizePx);
+
+    final FlutterImageView imageView =
+        new FlutterImageView(ctx, oldReader, FlutterImageView.SurfaceKind.background);
+    final FlutterJNI jni = mock(FlutterJNI.class);
+    final FlutterRenderer renderer = spy(new FlutterRenderer(jni));
+
+    imageView.attachToRenderer(renderer);
+    imageView.detachFromRenderer();
+    clearInvocations(renderer);
+
+    imageView.onSizeChanged(resizedWidthPx, resizedHeightPx, initialSizePx, initialSizePx);
+    verify(renderer, never()).swapSurface(any());
+    verify(oldReader, never()).close();
+
+    imageView.resizeIfNeeded(resizedWidthPx, resizedHeightPx);
+    verify(renderer, never()).swapSurface(any());
+    verify(oldReader, times(1)).close();
+
+    imageView.attachToRenderer(renderer);
+    verify(renderer, times(1)).swapSurface(imageView.getSurface());
+
+    imageView.closeImageReader();
+  }
+
+  @Test
+  public void flutterView_convertToImageViewIsIdempotentAndPreservesPreviousRenderSurface() {
+    final int viewSizePx = 100;
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    doReturn(true).when(surfaceView).isSurfaceAvailableForRendering();
+    final FlutterView flutterView = new FlutterView(ctx, surfaceView);
+    flutterView.layout(0, 0, viewSizePx, viewSizePx);
+
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    flutterView.convertToImageView();
+    final FlutterImageView imageView = flutterView.getCurrentImageSurface();
+    assertNotNull(imageView);
+    clearInvocations(flutterRenderer);
+
+    flutterView.convertToImageView();
+    assertSame(imageView, flutterView.getCurrentImageSurface());
+    verify(flutterRenderer, never()).swapSurface(any());
+
+    flutterView.revertImageView(() -> {});
+    assertSame(surfaceView, flutterView.renderSurface);
+
+    final ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(flutterRenderer).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    flutterView.detachFromFlutterEngine();
+    verify(flutterRenderer, times(1))
+        .removeIsDisplayingFlutterUiListener(listenerCaptor.getValue());
+  }
+
+  @Test
+  public void flutterView_reconvertAfterRevertDrainsPendingImagesBeforeSwappingSurface() {
+    final int viewSizePx = 100;
+    final ImageReader reader = mock(ImageReader.class);
+    when(reader.getWidth()).thenReturn(viewSizePx);
+    when(reader.getHeight()).thenReturn(viewSizePx);
+    final Surface surface = mock(Surface.class);
+    when(reader.getSurface()).thenReturn(surface);
+    final Image stalePreRevertImage = mock(Image.class);
+    when(reader.acquireLatestImage()).thenReturn(stalePreRevertImage);
+
+    final FlutterImageView reusableImageView =
+        new FlutterImageView(ctx, reader, FlutterImageView.SurfaceKind.background);
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    doReturn(true).when(surfaceView).isSurfaceAvailableForRendering();
+    final FlutterView flutterView =
+        new FlutterView(ctx, surfaceView) {
+          @Override
+          public FlutterImageView createImageView() {
+            return reusableImageView;
+          }
+        };
+    flutterView.layout(0, 0, viewSizePx, viewSizePx);
+
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    flutterView.convertToImageView();
+    flutterView.revertImageView(() -> {});
+    clearInvocations(flutterRenderer, reader, stalePreRevertImage);
+
+    flutterView.convertToImageView();
+    final InOrder inOrder = inOrder(reader, stalePreRevertImage, flutterRenderer);
+    inOrder.verify(reader, times(1)).acquireLatestImage();
+    inOrder.verify(stalePreRevertImage, times(1)).close();
+    inOrder.verify(flutterRenderer, times(1)).swapSurface(surface);
+  }
+
+  @Test
+  public void flutterView_revertImageViewDoesNotRunOnDoneOrReleaseAfterReconversion() {
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    doReturn(true).when(surfaceView).isSurfaceAvailableForRendering();
+    final FlutterView flutterView = new FlutterView(ctx, surfaceView);
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.convertToImageView();
+    assertTrue(flutterView.renderSurface instanceof FlutterImageView);
+    clearInvocations(flutterRenderer);
+
+    final AtomicBoolean onDoneCalled = new AtomicBoolean(false);
+    flutterView.revertImageView(() -> onDoneCalled.set(true));
+    assertFalse(flutterView.renderSurface instanceof FlutterImageView);
+
+    final ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(flutterRenderer).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+
+    flutterView.convertToImageView();
+    assertTrue(flutterView.renderSurface instanceof FlutterImageView);
+    verify(flutterRenderer, times(1))
+        .removeIsDisplayingFlutterUiListener(listenerCaptor.getValue());
+
+    listenerCaptor.getValue().onFlutterUiDisplayed();
+    assertFalse(onDoneCalled.get());
+    assertTrue(flutterView.renderSurface instanceof FlutterImageView);
+    assertNotNull(flutterView.getCurrentImageSurface());
+
+    flutterView.detachFromFlutterEngine();
+  }
+
+  @Test
+  public void flutterView_resizeDuringRevertDoesNotHijackRendererOrCloseActiveSurface() {
+    final int initialSizePx = 100;
+    final int resizedWidthPx = 200;
+    final int resizedHeightPx = 300;
+    final ImageReader oldReader = mock(ImageReader.class);
+    when(oldReader.getWidth()).thenReturn(initialSizePx);
+    when(oldReader.getHeight()).thenReturn(initialSizePx);
+    when(oldReader.getSurface()).thenReturn(mock(Surface.class));
+
+    final FlutterImageView imageView =
+        new FlutterImageView(ctx, oldReader, FlutterImageView.SurfaceKind.background);
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    doReturn(true).when(surfaceView).isSurfaceAvailableForRendering();
+    final FlutterView flutterView =
+        new FlutterView(ctx, surfaceView) {
+          @Override
+          public FlutterImageView createImageView() {
+            return imageView;
+          }
+        };
+    flutterView.layout(0, 0, initialSizePx, initialSizePx);
+
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    flutterView.convertToImageView();
+    clearInvocations(flutterRenderer);
+    final AtomicBoolean onDoneCalled = new AtomicBoolean(false);
+    flutterView.revertImageView(() -> onDoneCalled.set(true));
+
+    final ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(flutterRenderer).addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+    final FlutterUiDisplayListener revertListener = listenerCaptor.getValue();
+    clearInvocations(flutterRenderer, oldReader);
+
+    flutterView.layout(0, 0, resizedWidthPx, resizedHeightPx);
+    verify(flutterRenderer, never()).swapSurface(any());
+    verify(oldReader, never()).close();
+
+    revertListener.onFlutterUiDisplayed();
+    assertTrue(onDoneCalled.get());
+    assertFalse(flutterView.renderSurface instanceof FlutterImageView);
+    assertNull(flutterView.getCurrentImageSurface());
+    verify(oldReader, times(1)).close();
+    verify(flutterRenderer, never()).swapSurface(any());
+
+    flutterView.detachFromFlutterEngine();
+  }
+
+  @Test
+  public void flutterView_resizeDuringRevertThenReconvertSwapsSurfaceOnce() {
+    final int initialSizePx = 100;
+    final int resizedWidthPx = 200;
+    final int resizedHeightPx = 300;
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    doReturn(true).when(surfaceView).isSurfaceAvailableForRendering();
+    final FlutterView flutterView = new FlutterView(ctx, surfaceView);
+    flutterView.layout(0, 0, initialSizePx, initialSizePx);
+
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    flutterView.convertToImageView();
+    flutterView.revertImageView(() -> {});
+    clearInvocations(flutterRenderer);
+
+    flutterView.layout(0, 0, resizedWidthPx, resizedHeightPx);
+    verify(flutterRenderer, never()).swapSurface(any());
+
+    flutterView.convertToImageView();
+    final FlutterImageView activeImageView = flutterView.getCurrentImageSurface();
+    assertNotNull(activeImageView);
+    assertEquals(resizedWidthPx, activeImageView.getImageReader().getWidth());
+    assertEquals(resizedHeightPx, activeImageView.getImageReader().getHeight());
+    verify(flutterRenderer, times(1)).swapSurface(activeImageView.getSurface());
+
+    flutterView.detachFromFlutterEngine();
+  }
+
+  @Test
+  public void
+      flutterView_detachFromFlutterEngineDetachesPlatformViewsAfterStopRenderingToSurface() {
+    final FlutterView flutterView = new FlutterView(ctx);
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    final PlatformViewsController pvc1 = mock(PlatformViewsController.class);
+    final PlatformViewsController2 pvc2 = mock(PlatformViewsController2.class);
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    when(flutterEngine.getPlatformViewsController()).thenReturn(pvc1);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(pvc2);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.detachFromFlutterEngine();
+
+    final InOrder order = inOrder(flutterRenderer, pvc1, pvc2);
+    order.verify(flutterRenderer).stopRenderingToSurface();
+    order.verify(pvc1).detachFromView();
+    order.verify(pvc2).detachFromView();
+  }
+
+  @Test
+  public void
+      flutterView_revertImageViewWithDestroyedSurfaceWhenDisplayingUiCompletesImmediately() {
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    final FlutterView flutterView = new FlutterView(ctx, surfaceView);
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.convertToImageView();
+    clearInvocations(flutterRenderer, surfaceView);
+
+    doReturn(false).when(surfaceView).isSurfaceAvailableForRendering();
+    when(flutterRenderer.isDisplayingFlutterUi()).thenReturn(true);
+
+    final AtomicBoolean onDoneCalled = new AtomicBoolean(false);
+    flutterView.revertImageView(() -> onDoneCalled.set(true));
+
+    assertTrue(onDoneCalled.get());
+    assertNull(flutterView.getCurrentImageSurface());
+    verify(flutterRenderer, times(1)).stopRenderingToSurface();
+    verify(surfaceView, times(1)).resume();
+    verify(flutterRenderer, never()).addIsDisplayingFlutterUiListener(any());
+  }
+
+  @Test
+  public void
+      flutterView_revertImageViewWithDestroyedSurfaceBeforeFirstFrameCompletesImmediately() {
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    final FlutterView flutterView = new FlutterView(ctx, surfaceView);
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.convertToImageView();
+    clearInvocations(flutterRenderer, surfaceView);
+
+    doReturn(false).when(surfaceView).isSurfaceAvailableForRendering();
+    when(flutterRenderer.isDisplayingFlutterUi()).thenReturn(false);
+
+    final AtomicBoolean onDoneCalled = new AtomicBoolean(false);
+    flutterView.revertImageView(() -> onDoneCalled.set(true));
+
+    assertTrue(onDoneCalled.get());
+    assertNull(flutterView.getCurrentImageSurface());
+    verify(flutterRenderer, times(1)).stopRenderingToSurface();
+    verify(surfaceView, times(1)).resume();
+    verify(flutterRenderer, never()).addIsDisplayingFlutterUiListener(any());
+  }
+
+  @Test
+  public void flutterImageView_onSizeChangedAfterCloseImageReaderReplacesClosedReader() {
+    final int sizePx = 100;
+    final ImageReader oldReader = mock(ImageReader.class);
+    when(oldReader.getWidth()).thenReturn(sizePx);
+    when(oldReader.getHeight()).thenReturn(sizePx);
+    when(oldReader.getSurface()).thenReturn(mock(Surface.class));
+
+    final FlutterImageView imageView =
+        new FlutterImageView(ctx, oldReader, FlutterImageView.SurfaceKind.background);
+    final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
+    imageView.attachToRenderer(flutterRenderer);
+    clearInvocations(flutterRenderer, oldReader);
+
+    imageView.closeImageReader();
+    imageView.closeImageReader();
+    verify(oldReader, times(1)).close();
+
+    assertFalse(imageView.acquireLatestImage());
+    imageView.drainPendingImages();
+    verify(oldReader, never()).acquireLatestImage();
+
+    imageView.onSizeChanged(sizePx, sizePx, sizePx, sizePx);
+    assertNotSame(oldReader, imageView.getImageReader());
+    verify(flutterRenderer, times(1)).swapSurface(imageView.getSurface());
+    verify(oldReader, never()).acquireLatestImage();
+    verify(oldReader, times(1)).close();
+
+    imageView.closeImageReader();
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_28)
+  public void flutterImageView_acquireLatestImageReturnsFalseAfterResizeUntilNewFrame() {
+    // 100x100 RGBA_8888 plane (4 bytes per pixel => row stride 400).
+    final int initialSizePx = 100;
+    final int bytesPerPixel = 4;
+    final int rowStrideBytes = initialSizePx * bytesPerPixel;
+    final int firstResizePx = 200;
+    final int secondResizePx = 300;
+
+    final ImageReader initialReader = mock(ImageReader.class);
+    when(initialReader.getWidth()).thenReturn(initialSizePx);
+    when(initialReader.getHeight()).thenReturn(initialSizePx);
+    when(initialReader.getSurface()).thenReturn(mock(Surface.class));
+
+    final Image image = mock(Image.class);
+    final Plane plane = mock(Plane.class);
+    when(plane.getRowStride()).thenReturn(rowStrideBytes);
+    when(plane.getPixelStride()).thenReturn(bytesPerPixel);
+    when(plane.getBuffer()).thenReturn(ByteBuffer.allocate(rowStrideBytes * initialSizePx));
+    when(image.getPlanes()).thenReturn(new Plane[] {plane});
+    when(image.getHeight()).thenReturn(initialSizePx);
+    when(initialReader.acquireLatestImage()).thenReturn(image);
+
+    final FlutterImageView imageView =
+        spy(new FlutterImageView(ctx, initialReader, FlutterImageView.SurfaceKind.background));
+    final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
+    imageView.attachToRenderer(flutterRenderer);
+
+    imageView.resizeIfNeeded(firstResizePx, firstResizePx);
+    imageView.resizeIfNeeded(secondResizePx, secondResizePx);
+
+    assertFalse(imageView.acquireLatestImage());
+    final Canvas canvas = mock(Canvas.class);
+    imageView.onDraw(canvas);
+    verify(canvas, times(1)).drawBitmap(any(Bitmap.class), eq(0.0f), eq(0.0f), isNull());
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_28)
+  public void flutterImageView_pauseAndResumeControlResizeSurfaceSwapping() {
+    final int initialSizePx = 100;
+    final int pausedResizePx = 200;
+    final int resumedResizePx = 300;
+    final int detachedResizePx = 400;
+
+    final ImageReader initialReader = mock(ImageReader.class);
+    when(initialReader.getWidth()).thenReturn(initialSizePx);
+    when(initialReader.getHeight()).thenReturn(initialSizePx);
+    when(initialReader.getSurface()).thenReturn(mock(Surface.class));
+
+    final FlutterImageView imageView =
+        new FlutterImageView(ctx, initialReader, FlutterImageView.SurfaceKind.background);
+    final FlutterRenderer flutterRenderer = mock(FlutterRenderer.class);
+    imageView.attachToRenderer(flutterRenderer);
+    clearInvocations(flutterRenderer);
+
+    imageView.pause();
+    imageView.resizeIfNeeded(pausedResizePx, pausedResizePx);
+    verify(flutterRenderer, never()).swapSurface(any());
+
+    imageView.resume();
+    imageView.resizeIfNeeded(resumedResizePx, resumedResizePx);
+    verify(flutterRenderer, times(1)).swapSurface(any());
+
+    imageView.detachFromRenderer();
+    clearInvocations(flutterRenderer);
+    imageView.resume();
+    imageView.resizeIfNeeded(detachedResizePx, detachedResizePx);
+    verify(flutterRenderer, never()).swapSurface(any());
   }
 
   @Test
