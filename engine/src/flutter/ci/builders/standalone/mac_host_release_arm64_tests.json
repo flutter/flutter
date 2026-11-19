@@ -21,7 +21,6 @@
         "--build-embedder-examples",
         "--use-glfw-swiftshader",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks"
     ],
     "name": "ci/host_release_arm64_tests",
@@ -33,13 +32,35 @@
     "tests": [
         {
             "language": "python3",
-            "name": "Dart and engine tests for host_release",
+            "name": "Engine unit tests for host_release",
             "script": "flutter/testing/run_tests.py",
             "parameters": [
                 "--variant",
                 "ci/host_release_arm64_tests",
                 "--type",
-                "dart,dart-host,engine"
+                "engine"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart tests for host_release",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_release_arm64_tests",
+                "--type",
+                "dart"
+            ]
+        },
+        {
+            "language": "python3",
+            "name": "Dart host tests for host_release",
+            "script": "flutter/testing/run_tests.py",
+            "parameters": [
+                "--variant",
+                "ci/host_release_arm64_tests",
+                "--type",
+                "dart-host"
             ]
         }
     ]

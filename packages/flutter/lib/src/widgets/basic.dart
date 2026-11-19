@@ -6670,6 +6670,8 @@ class RichText extends MultiChildRenderObjectWidget {
   ///
   /// It's rarely necessary to set this property. By default its value
   /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  /// If the app did not choose its locale (see [Localizations.isDefaultLocale]),
+  /// no locale is used and the platform's default locale applies.
   ///
   /// See [RenderParagraph.locale] for more information.
   final Locale? locale;
@@ -6703,6 +6705,16 @@ class RichText extends MultiChildRenderObjectWidget {
   double _getDevicePixelRatio(BuildContext context) =>
       MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
 
+  // A default locale that the app didn't choose isn't passed to the engine, so
+  // the platform's default locale is used for font fallback.
+  // See https://github.com/flutter/flutter/issues/194931.
+  Locale? _effectiveLocale(BuildContext context) {
+    if (locale != null) {
+      return locale;
+    }
+    return Localizations.isDefaultLocaleOf(context) ? null : Localizations.maybeLocaleOf(context);
+  }
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6718,7 +6730,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
-      locale: locale ?? Localizations.maybeLocaleOf(context),
+      locale: _effectiveLocale(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
@@ -6740,7 +6752,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
       ..hyphens = hyphens
-      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..locale = _effectiveLocale(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
       ..devicePixelRatio = _getDevicePixelRatio(context);

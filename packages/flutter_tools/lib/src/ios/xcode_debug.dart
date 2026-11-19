@@ -29,15 +29,17 @@ import 'xcode_build_settings.dart';
 /// Scripting to debug Flutter applications.
 class XcodeDebug {
   XcodeDebug({
+    required this._fileSystem,
     required Logger logger,
     required ProcessManager processManager,
+    required this._templatePathProvider,
     required this._xcode,
-    required this._fileSystem,
   }) : _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final TemplatePathProvider _templatePathProvider;
   final Xcode _xcode;
   final FileSystem _fileSystem;
 
@@ -377,6 +379,7 @@ class XcodeDebug {
       fileSystem: _fileSystem,
       templateManifest: null,
       logger: _logger,
+      templatePathProvider: _templatePathProvider,
       templateRenderer: templateRenderer,
     );
 

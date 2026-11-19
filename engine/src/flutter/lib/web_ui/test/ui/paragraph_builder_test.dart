@@ -224,4 +224,21 @@ Future<void> testMain() async {
       expect(unspecified.longestLine, manual.longestLine);
     });
   });
+
+  group('hyphenCharacter', () {
+    double longestLine(String? hyphenCharacter) {
+      final builder = ParagraphBuilder(
+        ParagraphStyle(fontSize: 10, fontFamily: 'FlutterTest', hyphenCharacter: hyphenCharacter),
+      );
+      // Breaks at the soft hyphen into 'abcd' and 'efg'.
+      builder.addText('abcd\u00ADefg');
+      return (builder.build()..layout(const ParagraphConstraints(width: 65))).longestLine;
+    }
+
+    test('is drawn at a soft hyphen line break', () {
+      expect(longestLine(null), 50);
+      expect(longestLine('--'), 60);
+      expect(longestLine(''), 40);
+    });
+  });
 }
