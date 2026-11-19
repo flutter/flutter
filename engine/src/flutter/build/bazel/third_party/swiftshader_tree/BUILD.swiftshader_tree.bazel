@@ -2,10 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Root BUILD file of @swiftshader: the tree as files, for the wrapped GN
-# build of the GPU test backends (//engine/src/flutter/build/bazel/gl_wrap),
-# which builds libvk_swiftshader.so from SwiftShader's own GN rules. No
-# Bazel rules of its own yet.
+# Root BUILD file of @swiftshader_tree: the SwiftShader tree as files, for
+# the wrapped GN build of the GPU test backends
+# (//engine/src/flutter/build/bazel/gl_wrap), which on a Mac builds
+# libvk_swiftshader.dylib from SwiftShader's own GN rules and on Linux still
+# loads them (ANGLE's GN names the driver as data). The repository Bazel
+# builds SwiftShader from is @swiftshader, the same tree with its GN
+# converted.
 
 package(default_visibility = ["//visibility:public"])
 

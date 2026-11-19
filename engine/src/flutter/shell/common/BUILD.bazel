@@ -903,7 +903,12 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }),
-    data = [":gpu_test_backends"],
+    data = [":gpu_test_backends"] + select({
+        "//engine/src/flutter/shell:enable_gl": [
+            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",  # !(is_fuchsia) && shell_enable_gl
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -931,7 +936,6 @@ flutter_cc_test(
     ] + select({
         "//engine/src/flutter/shell:enable_gl": [
             "//engine/src/flutter/build/bazel/gl_wrap:angle",  # shell_enable_gl
-            "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",  # !(is_fuchsia) && shell_enable_gl
         ],
         "//conditions:default": [],
     }),

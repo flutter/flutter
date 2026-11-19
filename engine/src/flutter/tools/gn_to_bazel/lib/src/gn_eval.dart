@@ -54,6 +54,24 @@ const Map<String, String> osNamePredicates = <String, String>{
   'win': 'is_win',
 };
 
+/// BUILDCONFIG.gn's CPU names (`target_cpu`, `current_cpu`) that a
+/// comparison may stand on: the CPUs the engine builds for, and the two
+/// names cpu_features' chain tests besides (the mapping's settings for
+/// those are keys no platform of the build sets). A comparison with any
+/// other name is decided, the build never being for that CPU: SwiftShader's
+/// reactor.gni rules Subzero out for mips64el, ppc64 and loong64, and its
+/// Subzero config has a case for mipsel.
+const Set<String> comparableCpuNames = <String>{
+  'arm',
+  'arm64',
+  'mips',
+  'ppc',
+  'riscv64',
+  'wasm',
+  'x64',
+  'x86',
+};
+
 /// What a value of config.gni's `full_target_platform_name`
 /// (`<target_platform_name>-<target_cpu>`, with mac spelled `darwin` and win
 /// `windows`) asserts: its OS predicate and its CPU. Null for a string that
@@ -1603,6 +1621,49 @@ List<GnAssignment> _under(
 /// that a target may `+=` to them without assigning them first.
 const Set<String> _predefinedTargetVariables = <String>{'configs'};
 
+/// The configs BUILDCONFIG.gn's set_defaults() gives a target (its
+/// `_native_compiler_configs`, on any platform and in any mode): what
+/// `configs` holds before the target's block touches it. The converter does
+/// not model the list -- a block's `configs -=` and `+=` are what it
+/// records -- but a `filter_include(configs, [...])` asked of the untouched
+/// list (swiftshader.gni's and angle.gni's "is the ARC config there?") has
+/// an answer all the same: nothing, for a config that is not one of these.
+const Set<String> _defaultTargetConfigs = <String>{
+  '//build/config:debug',
+  '//build/config:feature_flags',
+  '//build/config:release',
+  '//build/config:symbol_visibility_hidden',
+  '//build/config/android:sdk',
+  '//build/config/clang:extra_warnings',
+  '//build/config/clang:find_bad_constructs',
+  '//build/config/compiler:chromium_code',
+  '//build/config/compiler:compiler',
+  '//build/config/compiler:compiler_arm_fpu',
+  '//build/config/compiler:cxx_version_default',
+  '//build/config/compiler:default_include_dirs',
+  '//build/config/compiler:default_optimization',
+  '//build/config/compiler:minimal_symbols',
+  '//build/config/compiler:no_optimize',
+  '//build/config/compiler:no_rtti',
+  '//build/config/compiler:no_symbols',
+  '//build/config/compiler:optimize',
+  '//build/config/compiler:runtime_library',
+  '//build/config/compiler:symbols',
+  '//build/config/gcc:no_exceptions',
+  '//build/config/gcc:relative_paths',
+  '//build/config/gcc:symbol_visibility_hidden',
+  '//build/config/ios:sdk',
+  '//build/config/linux:sdk',
+  '//build/config/mac:sdk',
+  '//build/config/win:lean_and_mean',
+  '//build/config/win:nominmax',
+  '//build/config/win:sdk',
+  '//build/config/win:unicode',
+  '//build/config/win:winver',
+  '//flutter/third_party/libcxx:libcxx_config',
+  '//flutter/third_party/libcxxabi:libcxxabi_config',
+};
+
 /// Functions whose calls have no effect on the data the converter extracts.
 const Set<String> _ignoredFunctions = <String>{'assert', 'not_needed', 'print', 'set_defaults'};
 
@@ -1892,6 +1953,8 @@ final class _Evaluator {
         index is GnIdentifier ? '$base.${index.name}' : '$base[${_gnText(index)}]',
       GnFunctionCall(:final String name, :final List<GnNode> args) =>
         '$name(${args.map(_gnText).join(', ')})',
+      GnList(:final List<GnNode> items) =>
+        items.isEmpty ? '[]' : '[ ${items.map(_gnText).join(', ')} ]',
       _ => '<${node.runtimeType}>',
     };
   }
@@ -2427,7 +2490,14 @@ final class _Evaluator {
       if (when == Condition.never) {
         continue;
       }
-      if (op == '-=' && groupCondition != Condition.always) {
+      if (op == '-=' &&
+          groupCondition != Condition.always &&
+          !(_predefinedTargetVariables.contains(name) && scope.isTarget)) {
+        // A target's default configs may lose one under a condition
+        // (swiftshader.gni's configs_to_delete: the default optimization
+        // in a debug build), which the emitter turns into flags under
+        // that condition; any other list is read item by item, where a
+        // removal that may or may not happen has no rendering.
         throw GnError(node.location, '-= of conditional elements is not supported');
       }
       final items = groupItems;
@@ -2880,7 +2950,6 @@ final class _Evaluator {
         if (args.length != 2) {
           throw GnError(node.location, 'filter_include() takes a list and the patterns');
         }
-        final _Expression list = _expression(args[0], scope);
         final patterns = <String>[
           for (final _Value v in _expression(args[1], scope).items)
             if (v.value case GnStringValue(:final String value))
@@ -2888,6 +2957,25 @@ final class _Evaluator {
             else
               throw GnError(node.location, 'filter_include() patterns must be strings'),
         ];
+        if (args[0] case GnIdentifier(:final String name)
+            when _predefinedTargetVariables.contains(name) && scope.lookup(name) == null) {
+          // The target's default configs, untouched so far
+          // ([_defaultTargetConfigs]): none of them is a config outside
+          // that set; which of them a platform has is not modeled.
+          for (final pattern in patterns) {
+            if (_defaultTargetConfigs.any(
+              (String config) => _matchesFilePattern(config, pattern),
+            )) {
+              throw GnError(
+                node.location,
+                'filter_include() of the default configs for $pattern, one of '
+                "BUILDCONFIG.gn's own, is not supported",
+              );
+            }
+          }
+          return const _Expression(<_Value>[], isList: true);
+        }
+        final _Expression list = _expression(args[0], scope);
         final kept = <_Value>[];
         for (final _Value item in list.items) {
           switch (item.value) {
@@ -3860,10 +3948,32 @@ final class _Evaluator {
       }
       throw GnError(node.location, 'comparison of ${element.scalar} with a string');
     }
+    if (right case GnList(items: final List<GnNode> none) when none.isEmpty) {
+      // A list against the empty one: swiftshader.gni's and angle.gni's
+      // `filter_include(configs, [ "//build/config/compiler:enable_arc" ]) != []`,
+      // "is that config among the target's?". The list holds something
+      // wherever one of its items does.
+      final _Expression list = _expression(left, scope);
+      if (!list.isList) {
+        throw GnError(node.location, 'comparison of a value that is not a list with []');
+      }
+      final Condition holdsSomething = list.items.isEmpty
+          ? Condition.never
+          : Condition.disjunction(<Condition>[
+              for (final _Value item in list.items) item.condition,
+            ]);
+      return equals ? holdsSomething.negated : holdsSomething;
+    }
     if (left is! GnIdentifier) {
       throw GnError(node.location, 'only `variable == "string"` comparisons are supported');
     }
     final String? leftValue = _knownString(left.name, scope);
+    if (right is GnIdentifier && right.name == left.name) {
+      // A variable against itself (`current_cpu != current_cpu`, what a
+      // generator left of "is this a cross build" in SwiftShader's LLVM
+      // file): decided whatever the value.
+      return ConditionConstant(equals);
+    }
     if (right is GnIdentifier) {
       // `current_toolchain == host_toolchain`: both sides must be known -- or
       // neither, when the comparison is GN's "is this the host's own build"
@@ -3921,6 +4031,11 @@ final class _Evaluator {
       _ => null,
     };
     if (predicate != null && assumptions[predicate] == const GnBoolValue(false)) {
+      return ConditionConstant(!equals);
+    }
+    if ((left.name == 'current_cpu' || left.name == 'target_cpu') &&
+        !comparableCpuNames.contains(value)) {
+      // A CPU no build is for ([comparableCpuNames]).
       return ConditionConstant(!equals);
     }
     return ConditionComparison(left.name, equals, value);

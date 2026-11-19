@@ -27,6 +27,12 @@ As GN's mac toolchain names no install name (its solink tool links with
 `-o ./lib<name>.dylib` and nothing else), neither does this: a dylib's
 install name is the path the link names.
 
+A library whose GN target sets `output_extension` for Linux (the Khronos
+loader: `so.1`, for libvulkan.so.1, the name its clients open) has a third
+file, `lib<output_name>.<extension>`, compatible with Linux alone
+(`linux_output_extension`); `lib<output_name>.so` is then the other
+non-Apple platforms'.
+
 A GN target that lists a shared_library in its deps links against the
 library (the iOS shell's test library, ios_test_flutter, against OCMock's
 dylib). Bazel's C++ rules take no cc_binary in deps, so the macro also
@@ -47,13 +53,17 @@ _APPLE = [
     "@platforms//os:macos",
 ]
 
-def flutter_shared_library(name, output_name, target_compatible_with = [], visibility = None, testonly = None, interface_deps = [], **kwargs):
+_LINUX = "@platforms//os:linux"
+
+def flutter_shared_library(name, output_name, linux_output_extension = None, target_compatible_with = [], visibility = None, testonly = None, interface_deps = [], **kwargs):
     """GN's shared_library(): see the file's docstring.
 
     Args:
       name: GN's target name; an alias of the platform's library.
       output_name: GN's output_name, or the target's name: the library is
         lib<output_name>.so or lib<output_name>.dylib.
+      linux_output_extension: GN's output_extension where the target sets
+        one for Linux: the library is lib<output_name>.<extension> there.
       target_compatible_with: the target's own constraints, on top of the
         platform family each library is for.
       visibility: visibility of the alias and the libraries.
@@ -63,19 +73,19 @@ def flutter_shared_library(name, output_name, target_compatible_with = [], visib
         configs reaching it): dependencies of `<name>_import`.
       **kwargs: cc_binary's attributes (srcs, deps, copts, linkopts, ...).
     """
-    files = {
-        "lib%s.so" % output_name: False,
-        "lib%s.dylib" % output_name: True,
-    }
-    for file, apple in files.items():
+
+    # The platform's file, by the select() key it is built under.
+    files = {os: "lib%s.dylib" % output_name for os in _APPLE}
+    if linux_output_extension:
+        files[_LINUX] = "lib%s.%s" % (output_name, linux_output_extension)
+    files["//conditions:default"] = "lib%s.so" % output_name
+    for file in {file: None for file in files.values()}:
         cc_binary(
             name = file,
             linkshared = True,
             target_compatible_with = select({
-                os: [] if apple else ["@platforms//:incompatible"]
-                for os in _APPLE
-            } | {
-                "//conditions:default": ["@platforms//:incompatible"] if apple else [],
+                key: [] if platform_file == file else ["@platforms//:incompatible"]
+                for key, platform_file in files.items()
             }) + target_compatible_with,
             visibility = visibility,
             testonly = testonly,
@@ -83,12 +93,7 @@ def flutter_shared_library(name, output_name, target_compatible_with = [], visib
         )
     native.alias(
         name = name,
-        actual = select({
-            os: ":lib%s.dylib" % output_name
-            for os in _APPLE
-        } | {
-            "//conditions:default": ":lib%s.so" % output_name,
-        }),
+        actual = select({key: ":" + file for key, file in files.items()}),
         visibility = visibility,
         testonly = testonly,
     )

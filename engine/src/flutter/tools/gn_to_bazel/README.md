@@ -179,7 +179,11 @@ watches every file in the depfile and the converter's sources, so a roll of
 the synced tree or an edit to the GN re-converts on the next build. Labels
 into the main repository are written through its module name
 (`@flutter//engine/src/...`), which is how an extension-generated repository
-sees it.
+sees it. A repository of several packages (Skia's modules, SwiftShader's
+`src/Vulkan`) gets a BUILD file in each package's directory, which the rule
+makes a directory of the repository first: the tree is otherwise symlinked
+directory by directory, and a file written through such a link would land
+in the synced tree.
 
 ### The oracle
 
@@ -399,7 +403,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    since GN links all of its objects), `group` to a `cc_library` of only
    `deps`, test executables to `cc_test`, `shared_library` to a
    `cc_binary(linkshared = True)` named after the file GN produces
-   (`lib<output_name>.so`, which Bazel requires of a shared binary) with an
+   (`lib<output_name>.so`, which Bazel requires of a shared binary; GN adds
+   the `lib` unless the name starts with it, so SwiftShader's
+   `libvk_swiftshader` is taken without; an `output_extension` under
+   `is_linux`, the Khronos loader's `so.1`, is the macro's
+   `linux_output_extension`, a third file) with an
    `alias` under the GN name -- an executable with an `output_name` of its
    own (`_font-subset`, producing `font-subset`) the same way, since a
    `cc_binary`'s file is its name -- the C++ runtime in a shared library's
@@ -528,8 +536,12 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    carries it when `includeDirLibraries` names one (ANGLE's `include/`; the
    core client wrapper's `include/flutter`, a library its manifest appendix
    adds, since Bazel's `includes` is package-relative), and is otherwise
-   dropped with a note (the dependency on that repository carries it, or
-   nothing does). A config another file computes with `exec_script()`
+   dropped with a note when it is another repository's (the dependency on
+   that repository carries it, or nothing does) and an error when it is
+   another package's of this repository (SwiftShader's Reactor naming
+   LLVM's include roots: the path would come out as a label, which
+   `includes` takes for a directory of that name). A config another file
+   computes with `exec_script()`
    (`//flutter/shell/platform/linux/config`'s `pkg_config()` answers) is
    hand-written and named in `configEffects` like any other. `copy()` becomes a `gn_copy`, whose content is its
    sources; GN's destination under the build directory is recorded, not

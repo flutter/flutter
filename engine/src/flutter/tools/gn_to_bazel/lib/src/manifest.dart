@@ -2817,6 +2817,301 @@ cc_library(
 )
 ''',
   ),
+  // SwiftShader (Vulkan on the CPU): the GPU suites' driver
+  // (libvk_swiftshader.so and its ICD manifest) and the static one
+  // flutter_tester and the Vulkan surface's suite link, from the tree's own
+  // GN -- the driver, its pipeline and device, the Reactor JIT on Subzero
+  // (x64) or LLVM (arm64), marl, and its own SPIRV-Tools and SPIRV-Headers.
+  // The engine's labels for it are gl_wrap's facades, which take these
+  // targets on Linux.
+  ConvertedFile(
+    '//flutter/third_party/swiftshader',
+    // The root group's data_deps, the driver and its manifest: a group of
+    // files.
+    filesGroups: <String>{'swiftshader'},
+    skip: <String, String>{
+      'swiftshader_config':
+          'a config of compiler flags alone, which every SwiftShader target lists through '
+          "swiftshader.gni's templates: the tables carry it (configEffects)",
+    },
+    // The include roots the packages below name from under them (Bazel's
+    // `includes` is package-relative; includeDirLibraries), and the trees
+    // that have no GN file of their own -- Subzero and the LLVM subset under
+    // it, which src/Reactor compiles, and the ASTC codec, which src/Device
+    // does -- as files and include roots. src/ as an include root is every
+    // header under it ("System/Debug.hpp", "Vulkan/VkImage.hpp"), whichever
+    // GN target lists the header or none: the packages' headers libraries.
+    appendix: '''
+cc_library(
+    name = "src_include",
+    includes = ["src"],
+    deps = [
+        "//src/Device:headers",
+        "//src/Pipeline:headers",
+        "//src/Reactor:headers",
+        "//src/System:headers",
+        "//src/Vulkan:headers",
+        "//src/WSI:headers",
+    ],
+)
+
+cc_library(
+    name = "include",
+    hdrs = glob(["include/**"]),
+    includes = ["include"],
+)
+
+exports_files(glob([
+    "third_party/astc-encoder/Source/**",
+    "third_party/llvm-subzero/**",
+    "third_party/subzero/**",
+]))
+
+cc_library(
+    name = "subzero_include",
+    hdrs = glob([
+        "third_party/llvm-subzero/include/**",
+        "third_party/llvm-subzero/lib/**/*.h",
+        "third_party/llvm-subzero/lib/**/*.inc",
+        "third_party/subzero/pnacl-llvm/include/**",
+        "third_party/subzero/src/**/*.def",
+        "third_party/subzero/src/**/*.h",
+    ]),
+    includes = [
+        # do not sort
+        "third_party/subzero",
+        "third_party/subzero/pnacl-llvm/include",
+        "third_party/llvm-subzero/include",
+    ],
+)
+
+cc_library(
+    name = "llvm_subzero_linux_include",
+    hdrs = glob(["third_party/llvm-subzero/build/Linux/include/**"]),
+    includes = ["third_party/llvm-subzero/build/Linux/include"],
+)
+
+cc_library(
+    name = "llvm_subzero_macos_include",
+    hdrs = glob(["third_party/llvm-subzero/build/MacOS/include/**"]),
+    includes = ["third_party/llvm-subzero/build/MacOS/include"],
+)
+
+cc_library(
+    name = "astc_encoder_include",
+    hdrs = glob(["third_party/astc-encoder/Source/*.h"]),
+    includes = ["third_party/astc-encoder/Source"],
+)
+''',
+  ),
+  // The packages under src/: GN lists some of their headers and names
+  // none of the dependencies the includes cross (Reactor lists no header at
+  // all), so each package has a library of its headers, which its own
+  // targets depend on and the src/ include root carries (the root's
+  // appendix).
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/src/Device',
+    implicitDeps: <String>['@swiftshader//src/Device:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.hpp"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/src/Pipeline',
+    implicitDeps: <String>['@swiftshader//src/Pipeline:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.hpp"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/src/Reactor',
+    implicitDeps: <String>['@swiftshader//src/Reactor:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "*.hpp",
+        "*.inl",
+    ]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/src/System',
+    implicitDeps: <String>['@swiftshader//src/System:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["**/*.hpp"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/src/Vulkan',
+    implicitDeps: <String>['@swiftshader//src/Vulkan:headers'],
+    // The driver as a complete static library, which flutter_tester and the
+    // Vulkan surface's suite link (through gl_wrap's facade): a library of
+    // the same objects.
+    linkedStaticLibraries: <String>{'swiftshader_libvulkan_static'},
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "**/*.h",
+        "**/*.hpp",
+    ]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/src/WSI',
+    implicitDeps: <String>['@swiftshader//src/WSI:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.hpp"]),
+)
+''',
+  ),
+  // SwiftShader's own copies of marl, SPIRV-Headers and SPIRV-Tools (the
+  // engine's are @spirv-headers and @spirv-tools, at other revisions), and
+  // the LLVM its Reactor JIT is built on where Subzero has no backend
+  // (arm64): the headers GN leaves out, and the include roots other
+  // packages name (includeDirLibraries).
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/third_party/marl',
+    implicitDeps: <String>['@swiftshader//third_party/marl:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "include/marl/*.h",
+        "src/*.h",
+    ]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/third_party/SPIRV-Headers',
+    // The GN target lists eleven headers; SPIRV-Tools includes others
+    // (spirv.hpp11, the extended instruction set headers), and its actions
+    // read the grammars and the registry from here.
+    appendix: '''
+cc_library(
+    name = "include",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+    ]),
+    includes = ["include"],
+    textual_hdrs = glob(["include/**/*.hpp11"]),
+)
+
+exports_files(glob(["include/**"]))
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/third_party/SPIRV-Tools',
+    implicitDeps: <String>['@swiftshader//third_party/SPIRV-Tools:headers'],
+    appendix: '''
+cc_library(
+    name = "include",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+    ]),
+    includes = ["include"],
+)
+
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+        "source/**/*.h",
+    ]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/swiftshader/third_party/llvm-16.0',
+    implicitDeps: <String>['@swiftshader//third_party/llvm-16.0:headers'],
+    // GN lists LLVM's sources alone: the headers, and the tables its build
+    // would generate (configs/), are these libraries -- one of everything
+    // for the package's own compiles, and one per include root for the
+    // Reactor's (src/Reactor names them as include directories).
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "configs/**",
+        "llvm/include/**/*.def",
+        "llvm/include/**/*.h",
+        "llvm/include/**/*.inc",
+        "llvm/lib/**/*.def",
+        "llvm/lib/**/*.h",
+        "llvm/lib/**/*.inc",
+    ]),
+)
+
+cc_library(
+    name = "llvm_include",
+    hdrs = glob([
+        "llvm/include/**/*.def",
+        "llvm/include/**/*.h",
+        "llvm/include/**/*.inc",
+    ]),
+    includes = ["llvm/include"],
+)
+
+cc_library(
+    name = "configs_common_include",
+    hdrs = glob(["configs/common/include/**"]),
+    includes = ["configs/common/include"],
+)
+
+cc_library(
+    name = "configs_linux_include",
+    hdrs = glob(["configs/linux/include/**"]),
+    includes = ["configs/linux/include"],
+)
+
+cc_library(
+    name = "configs_android_include",
+    hdrs = glob(["configs/android/include/**"]),
+    includes = ["configs/android/include"],
+)
+
+cc_library(
+    name = "configs_darwin_include",
+    hdrs = glob(["configs/darwin/include/**"]),
+    includes = ["configs/darwin/include"],
+)
+''',
+  ),
+  // The Khronos Vulkan loader (libvulkan.so.1 on Linux, which ANGLE and GLFW
+  // open in the GPU suites: gl_wrap's product there), from the tree's own
+  // GN.
+  ConvertedFile(
+    '//flutter/third_party/vulkan-deps/vulkan-loader/src',
+    implicitDeps: <String>['@vulkan-loader//:headers'],
+    // loader.c includes generated/vk_loader_extensions.c, a source no GN
+    // list names (ninja finds it through the depfile; a sandboxed compile
+    // has to be given it).
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["loader/**/*.h"]),
+    textual_hdrs = ["loader/generated/vk_loader_extensions.c"],
+)
+''',
+  ),
   ConvertedFile(
     '//flutter/third_party/vulkan-deps/glslang/src',
     implicitDeps: <String>['@glslang//:headers'],

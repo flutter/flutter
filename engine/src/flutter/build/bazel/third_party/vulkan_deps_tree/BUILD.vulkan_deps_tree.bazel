@@ -29,24 +29,45 @@ cc_library(
     include_prefix = "third_party/vulkan-deps",
 )
 
+# What no wrapped build reads.
+_NOT_BUILT = [
+    "BUILD.bazel",
+    "REPO.bazel",
+    "*.bzl",
+    # The checkout's git state is no input of the build.
+    "**/.git/**",
+    # Nor the bytecode caches a GN build in the same checkout
+    # leaves beside the Python scripts it runs (Bazel's own runs
+    # write none: PYTHONDONTWRITEBYTECODE).
+    "**/__pycache__/**",
+    "**/test/**",
+    "**/tests/**",
+    "**/docs/**",
+    "spirv-cross/**",
+]
+
+# The Khronos validation layer's tree, which only a Mac's wrapped build
+# compiles (gl_wrap/BUILD.gn): a Linux build takes the layer from
+# @vulkan_validation_layers, and its wrapped build is then no function of
+# these files. (The utility libraries, whose layer-settings library the
+# layer links, stay with the rest: lunarg-vulkantools' GN file, which
+# ANGLE's loads, names that library.)
+_LAYER_TREES = [
+    "vulkan-validation-layers/**",
+]
+
 filegroup(
     name = "build_tree",
     srcs = glob(
         ["**"],
-        exclude = [
-            "BUILD.bazel",
-            "REPO.bazel",
-            "*.bzl",
-            # The checkout's git state is no input of the build.
-            "**/.git/**",
-            # Nor the bytecode caches a GN build in the same checkout
-            # leaves beside the Python scripts it runs (Bazel's own runs
-            # write none: PYTHONDONTWRITEBYTECODE).
-            "**/__pycache__/**",
-            "**/test/**",
-            "**/tests/**",
-            "**/docs/**",
-            "spirv-cross/**",
-        ],
+        exclude = _NOT_BUILT + _LAYER_TREES,
+    ),
+)
+
+filegroup(
+    name = "layer_tree",
+    srcs = glob(
+        _LAYER_TREES,
+        exclude = _NOT_BUILT,
     ),
 )

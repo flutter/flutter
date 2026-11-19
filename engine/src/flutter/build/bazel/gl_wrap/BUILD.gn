@@ -3,27 +3,41 @@
 # found in the LICENSE file.
 
 # The root target of the Bazel-wrapped GN build of the GPU test backends:
-# ANGLE (GL on Vulkan) and SwiftShader (Vulkan on the CPU), with the Vulkan
-# loader ANGLE opens (see BUILD.bazel next to this file). Not part of the
-# engine's own GN build, which never references this directory: gn_build
-# runs GN with `--root-target=//flutter/build/bazel/gl_wrap`, so that only
-# this file, the targets below and their dependencies are loaded.
+# ANGLE (GL on Vulkan) and, on a Mac, SwiftShader (Vulkan on the CPU), the
+# Vulkan loader ANGLE opens and the validation layer (see BUILD.bazel next
+# to this file). Not part of the engine's own GN build, which never
+# references this directory: gn_build runs GN with
+# `--root-target=//flutter/build/bazel/gl_wrap`, so that only this file, the
+# targets below and their dependencies are loaded.
 
 group("gl_wrap") {
   testonly = true
-  deps = [
-    ":angle",
-    ":swiftshader_static",
-    "//flutter/third_party/swiftshader",
-    "//flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan",
 
-    # The Khronos validation layer and its manifest: the Vulkan playground
-    # requires validation (impeller/playground/playground_impl.cc), and
-    # testing/run_tests.py points the loader at them (vulkan_validation_env).
-    "//third_party/vulkan_validation_layers:VkLayer_khronos_validation",
-    "//third_party/vulkan_validation_layers:vulkan_gen_json_files",
-  ]
+  # A Linux build takes ANGLE alone from here: SwiftShader, the loader and
+  # the layer are the converted trees' there (@swiftshader, @vulkan-loader,
+  # @vulkan_validation_layers; BUILD.bazel next to this file). ANGLE's own
+  # data_deps still name SwiftShader's driver and the loader, which is why
+  # that build asks ninja for the archive's objects rather than this group
+  # (gn_build's archives_only).
+  deps = [ ":angle" ]
   if (is_mac) {
+    # SwiftShader's driver with its ICD manifest (the group's data_deps),
+    # and the driver as a static library.
+    deps += [
+      ":swiftshader_static",
+      "//flutter/third_party/swiftshader",
+    ]
+
+    # The Khronos loader, and the validation layer with its manifest: the
+    # Vulkan playground requires validation
+    # (impeller/playground/playground_impl.cc), and testing/run_tests.py
+    # points the loader at the layer (vulkan_validation_env).
+    deps += [
+      "//flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan",
+      "//third_party/vulkan_validation_layers:VkLayer_khronos_validation",
+      "//third_party/vulkan_validation_layers:vulkan_gen_json_files",
+    ]
+
     # ANGLE's shared libraries: the Impeller playground on a Mac opens
     # libGLESv2.dylib by name for its OpenGLES variants (use_angle,
     # playground_impl_gles.cc), where the other hosts link ANGLE in; the
@@ -44,9 +58,10 @@ group("angle") {
   ]
 }
 
-# Likewise libvk_swiftshader_static.a: the driver as a static library (GN's
-# complete_static_lib), which the Vulkan surface's suite links directly
-# rather than opening the shared one. The same objects as the driver's.
+# Likewise libvk_swiftshader_static.a, a Mac's alone: the driver as a static
+# library (GN's complete_static_lib), which the Vulkan surface's suite links
+# directly rather than opening the shared one. The same objects as the
+# driver's.
 group("swiftshader_static") {
   deps = [
     "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",

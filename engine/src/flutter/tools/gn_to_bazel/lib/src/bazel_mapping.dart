@@ -570,6 +570,9 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/vulkan-deps/vulkan-headers/src': '@vulkan-headers',
   // VulkanMemoryAllocator (header-only; the secondary tree's GN).
   '//flutter/third_party/vulkan_memory_allocator': '@vulkan_memory_allocator',
+  // The Khronos Vulkan loader (libvulkan.so.1, which ANGLE and GLFW open in
+  // the GPU suites; the tree's own GN).
+  '//flutter/third_party/vulkan-deps/vulkan-loader/src': '@vulkan-loader',
   // The GPU test backends, built by gn_build (build/bazel/gl_wrap): ANGLE's
   // two static libraries are one archive behind one facade, and
   // SwiftShader's group of runtime files is the other.
@@ -627,11 +630,15 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/vulkan-deps/vulkan-utility-libraries/src/': '@vulkan-utility-libraries//',
   '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
   '//flutter/third_party/vulkan-deps/vulkan-headers/src/': '@vulkan-headers//',
+  '//flutter/third_party/vulkan-deps/vulkan-loader/src/': '@vulkan-loader//',
   '//flutter/third_party/vulkan_memory_allocator/': '@vulkan_memory_allocator//',
   // ANGLE's headers (the overlay); the GLES backend lists two among its
   // sources.
   '//flutter/third_party/angle/': '@angle//',
   '//flutter/third_party/shaderc/': '@shaderc//',
+  // SwiftShader (Vulkan on the CPU: the GPU suites' driver and
+  // flutter_tester's), the tree's own GN.
+  '//flutter/third_party/swiftshader/': '@swiftshader//',
   '//flutter/third_party/re2/': '@re2//',
   '//flutter/third_party/libtess2/': '@libtess2//',
   '//flutter/third_party/harfbuzz/': '@harfbuzz//',
@@ -754,6 +761,40 @@ const Map<String, String> includeDirLibraries = <String, String>{
   // withoutSystemIncludeDirs): the overlay's headers library.
   '//flutter/third_party/icu/source/common': '@icu//:headers',
   '//flutter/third_party/icu/source/i18n': '@icu//:headers',
+  // SwiftShader's include roots, which its packages name from below them
+  // (`include_dirs = [ "..", "../../include", ... ]`): libraries of the
+  // root package (its manifest appendix) for the directories that are no
+  // package of their own -- src/ ("System/Debug.hpp"), include/ (the Vulkan
+  // headers it implements), Subzero's and its LLVM subset's, the ASTC
+  // codec's -- and libraries of the packages' appendices for SPIRV-Tools',
+  // SPIRV-Headers' and LLVM's own, each with the headers under the root.
+  '//flutter/third_party/swiftshader/src': '@swiftshader//:src_include',
+  '//flutter/third_party/swiftshader/include': '@swiftshader//:include',
+  '//flutter/third_party/swiftshader/third_party/subzero': '@swiftshader//:subzero_include',
+  '//flutter/third_party/swiftshader/third_party/subzero/pnacl-llvm/include':
+      '@swiftshader//:subzero_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-subzero/include':
+      '@swiftshader//:subzero_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-subzero/build/Linux/include':
+      '@swiftshader//:llvm_subzero_linux_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-subzero/build/MacOS/include':
+      '@swiftshader//:llvm_subzero_macos_include',
+  '//flutter/third_party/swiftshader/third_party/astc-encoder/Source':
+      '@swiftshader//:astc_encoder_include',
+  '//flutter/third_party/swiftshader/third_party/SPIRV-Tools/include':
+      '@swiftshader//third_party/SPIRV-Tools:include',
+  '//flutter/third_party/swiftshader/third_party/SPIRV-Headers/include':
+      '@swiftshader//third_party/SPIRV-Headers:include',
+  '//flutter/third_party/swiftshader/third_party/llvm-16.0/llvm/include':
+      '@swiftshader//third_party/llvm-16.0:llvm_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-16.0/configs/common/include':
+      '@swiftshader//third_party/llvm-16.0:configs_common_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-16.0/configs/linux/include':
+      '@swiftshader//third_party/llvm-16.0:configs_linux_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-16.0/configs/android/include':
+      '@swiftshader//third_party/llvm-16.0:configs_android_include',
+  '//flutter/third_party/swiftshader/third_party/llvm-16.0/configs/darwin/include':
+      '@swiftshader//third_party/llvm-16.0:configs_darwin_include',
   // tonic's config: its headers as "tonic/..." and "third_party/tonic/...".
   '//flutter/third_party': '//engine/src/flutter/third_party:include_dir',
   '//flutter': '//engine/src/flutter:config',
@@ -1007,6 +1048,16 @@ String bazelLabel(String gnLabel, {required String package, GnLocation? location
     if (absolute.startsWith(entry.key)) {
       return entry.value + absolute.substring(entry.key.length);
     }
+    // A target of the repository's root package (`//dir:name`) where the
+    // directory's own label is a target's override rather than the
+    // repository's name (SwiftShader's root group, a facade of gl_wrap's):
+    // the directory is the repository's root all the same. A prefix with
+    // no word for the directory itself is a tree of files, whose targets
+    // are not converted (ANGLE's headers).
+    final String root = entry.key.substring(0, entry.key.length - 1);
+    if (absolute.startsWith('$root:') && labelOverrides.containsKey(root)) {
+      return '${entry.value}${absolute.substring(root.length)}';
+    }
   }
   if (absolute.startsWith('//flutter/') ||
       absolute.startsWith('//flutter:') ||
@@ -1052,11 +1103,16 @@ final class ConfigWarningSet extends ConfigEffect {
 /// which the dependents derive from the owner's GN file
 /// (dependency_resolver.dart), not from this table.
 final class ConfigCopts extends ConfigEffect {
-  const ConfigCopts(this.copts);
+  const ConfigCopts(this.copts, {this.linkopts = const <(Condition, List<String>)>[]});
 
   /// The flags, each group with the condition under which the config sets
   /// it.
   final List<(Condition, List<String>)> copts;
+
+  /// The config's link flags, likewise: on the link of a listing target
+  /// that links (a shared library, an executable), as GN applies a private
+  /// config's ldflags to the target's own link and to nothing else.
+  final List<(Condition, List<String>)> linkopts;
 }
 
 /// The config is one GN's BUILDCONFIG.gn applies to every target and the
@@ -1181,6 +1237,31 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
     copts: <String>['-fapplication-extension'],
   ),
   '//build/config/compiler:rtti': ConfigCopts(<(Condition, List<String>)>[]),
+  // //build/config/compiler:default_optimization, a default config that is
+  // empty in this buildroot (BUILDCONFIG.gn lists the mode's own
+  // optimization config beside it): SwiftShader removes it and adds
+  // :optimize in a debug build, which then compiles with :optimize's flags
+  // after the mode's.
+  '//build/config/compiler:default_optimization': ConfigToolchain(removalCopts: <String>[]),
+  // //build/config/compiler:optimize as a target lists it over the mode's
+  // default (SwiftShader's sources in a debug build, optimized all the
+  // same: swiftshader_optimized_debug_build): its flags on Linux and macOS,
+  // the hosts that build SwiftShader -- -O2 (optimize_for_size is no host
+  // builder's), no GCC ident, sections for --gc-sections -- and its link
+  // flags there (enable_lto is off in a debug build, which is where a
+  // target lists it).
+  '//build/config/compiler:optimize': ConfigCopts(
+    <(Condition, List<String>)>[
+      (
+        ConditionOr(<Condition>[ConditionVariable('is_linux'), ConditionVariable('is_mac')]),
+        <String>['-O2', '-fno-ident', '-fdata-sections', '-ffunction-sections'],
+      ),
+    ],
+    linkopts: <(Condition, List<String>)>[
+      (ConditionVariable('is_linux'), <String>['-Wl,-O2', '-Wl,--gc-sections', '-Wl,--as-needed']),
+      (ConditionVariable('is_mac'), <String>['-Wl,-dead_strip']),
+    ],
+  ),
   // ANGLE's configs (build/bazel/gl_wrap builds ANGLE; the overlay @angle
   // carries its headers and this define-only config).
   '//flutter/third_party/angle:external_config': ConfigDependency('@angle//:headers'),
@@ -1640,6 +1721,7 @@ const Map<String, String> _osNameNegatedSettings = <String, String>{
 final Set<String> knownBooleanVariables = Set<String>.unmodifiable(<String>{
   'is_android',
   'is_apple',
+  'is_chromeos',
   'is_clang',
   'is_component_build',
   'is_fuchsia',
@@ -1669,18 +1751,25 @@ const Set<String> knownExternalVariables = <String>{
   'is_android',
   'is_apple',
   'is_asan',
+  'is_chromeos',
   'is_clang',
   'is_component_build',
   'is_debug',
   'is_fuchsia',
   'is_ios',
   'is_linux',
+  'is_lsan',
   'is_mac',
   'is_minimal_linux',
+  'is_msan',
   'is_official_build',
   'is_qnx',
+  'is_tsan',
+  'is_ubsan',
   'is_wasm',
   'is_win',
+  'ozone_platform_wayland',
+  'ozone_platform_x11',
   'target_cpu',
   'target_os',
   'use_flutter_cxx',
@@ -2633,9 +2722,24 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build_overrides/spirv_tools.gni',
     '//build_overrides/glslang.gni',
     '//build_overrides/vulkan_headers.gni',
+    '//build_overrides/vulkan_loader.gni',
     '//build_overrides/vulkan_utility_libraries.gni',
     '//build_overrides/vulkan_validation_layers.gni',
     '//flutter/third_party/vulkan-deps/',
+    // SwiftShader's argument and template files (swiftshader.gni's
+    // swiftshader_source_set and friends, which edit the default configs;
+    // reactor.gni's choice of JIT backend by CPU) and the engine's answer
+    // to its build_overrides.
+    '//build_overrides/swiftshader.gni',
+    '//flutter/third_party/swiftshader/',
+    // What SwiftShader's files import of the engine's build configuration:
+    // the sanitizers' arguments (is_ubsan_vptr and friends, all off), the
+    // Ozone and UI switches (ozone_platform_gbm, use_x11, use_ozone: off)
+    // and where Wayland's GN would be (nowhere).
+    '//build/config/sanitizers/sanitizers.gni',
+    '//build/config/ozone.gni',
+    '//build/config/ui.gni',
+    '//build_overrides/wayland.gni',
     // The Dart SDK's library source lists (<library>_sources.gni) and
     // dart:ui's (dart_ui.gni), which sky/packages/sky_engine copies into the
     // sky_engine package.
@@ -2688,6 +2792,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build/config/android/config.gni',
     // The bin_to_assembly template (templateMappings).
     '//flutter/build/bin_to_obj.gni',
+    // The secondary tree's test() template, which SwiftShader's marl
+    // imports for a suite it defines under build_with_chromium alone.
+    '//testing/test.gni',
     // The Dart tree's copy_tree and copy_trees templates: copy_tree in
     // templateMappings (the iOS scenario app's project), copy_trees imported
     // by the root file without invoking.
@@ -2848,8 +2955,21 @@ Assumptions generationAssumptions() {
     // (its declare_args defaults, which tools/gn leaves alone).
     'mac_testing_deployment_target': const GnStringValue('14.0'),
     ..._iosSdkAssumptions,
+    // BUILDCONFIG.gn's is_chromeos, true for a target OS no builder names
+    // (the Khronos loader's GN reads it beside is_linux).
+    'is_chromeos': const GnBoolValue(false),
     'is_component_build': const GnBoolValue(false),
     'is_fuchsia': const GnBoolValue(false),
+    // BUILDCONFIG.gn's sanitizer arguments other than is_asan (a setting):
+    // tools/gn has flags for them and no builder passes one.
+    'is_lsan': const GnBoolValue(false),
+    'is_msan': const GnBoolValue(false),
+    'is_tsan': const GnBoolValue(false),
+    'is_ubsan': const GnBoolValue(false),
+    // BUILDCONFIG.gn's Ozone platforms, "needed for SwiftShader and ANGLE":
+    // X11 and Wayland on Linux, nothing elsewhere.
+    'ozone_platform_x11': const GnConditionValue(ConditionVariable('is_linux')),
+    'ozone_platform_wayland': const GnConditionValue(ConditionVariable('is_linux')),
     // build/toolchain/toolchain.gni's buildtools_path, as tools/gn passes
     // it (the clang, gn and ninja under flutter/buildtools/<host>): read
     // by the iOS shell for the ASan runtime's path.
@@ -3136,9 +3256,16 @@ Assumptions linuxHostAssumptions() {
     'target_os': GnStringValue('linux'),
     'is_android': GnBoolValue(false),
     'is_apple': GnBoolValue(false),
+    'is_chromeos': GnBoolValue(false),
     // is_clang, dart_src: build invariants (gn_eval's buildInvariants).
     'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
+    'is_lsan': GnBoolValue(false),
+    'is_msan': GnBoolValue(false),
+    'is_tsan': GnBoolValue(false),
+    'is_ubsan': GnBoolValue(false),
+    'ozone_platform_x11': GnBoolValue(true),
+    'ozone_platform_wayland': GnBoolValue(true),
     'buildtools_path': GnStringValue('//flutter/buildtools'),
     'is_ios': GnBoolValue(false),
     'enable_ios_unittests': GnBoolValue(false),

@@ -447,6 +447,12 @@ OutputLayout _layout(String? repository, Iterable<String> gnPackages, {String? s
 
 /// The package path of [gnPackage] within the repository of [layout].
 String _repositoryPackage(String gnPackage, OutputLayout layout) {
+  if (gnPackage == layout.repositoryGnRoot) {
+    // The repository's own GN directory is its root package, whatever the
+    // tables make of the directory's default target (SwiftShader's root
+    // group is a facade of gl_wrap's).
+    return '';
+  }
   final package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
   if (package.repository != layout.repository) {
     throw FormatException(

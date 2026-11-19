@@ -143,7 +143,14 @@ def _gn_build_impl(ctx):
     if install_names and not ctx.file.install_name_tool:
         fail("%s: install_names needs install_name_tool" % ctx.label)
     archives = {}
+    for file_name in ctx.attr.omit_archives:
+        if file_name not in ctx.attr.archives:
+            fail("%s: omit_archives names %s, which is not in archives" % (ctx.label, file_name))
     for file_name, label in ctx.attr.archives.items():
+        if file_name in ctx.attr.omit_archives:
+            # An archive the build does not make in this configuration: no
+            # file, an empty output group (below).
+            continue
         archives[ctx.actions.declare_file(paths.join(name, file_name))] = label
     compile_commands = ctx.actions.declare_file(paths.join(name, "compile_commands.json"))
 
@@ -214,6 +221,15 @@ def _gn_build_impl(ctx):
         # (and its cache entries) as they were.
         params["install_names"] = install_names
         params["install_name_tool"] = ctx.file.install_name_tool.path
+    if ctx.attr.archives_only:
+        if outputs:
+            fail("%s: archives_only, with products of its own (%s)" % (
+                ctx.label,
+                ", ".join([f.basename for f in outputs]),
+            ))
+        if not archives:
+            fail("%s: archives_only, without an archive" % ctx.label)
+        params["archives_only"] = True
     if rbe:
         params["rbe"] = rbe
     params_file = ctx.actions.declare_file(name + ".params.json")
@@ -252,6 +268,8 @@ def _gn_build_impl(ctx):
     for product, gn_path in ctx.attr.outs.items():
         if not gn_path:
             groups[product] = depset()
+    for file_name in ctx.attr.omit_archives:
+        groups[file_name] = depset()
 
     # Where each product sits in GN's build directory: an `outs` entry at
     # its path (out_paths), an archive where GN writes a static library
@@ -314,9 +332,21 @@ _gn_build = rule(
             doc = "Archives to produce: file name to the GN label of the library target whose " +
                   "object closure it contains.",
         ),
+        "omit_archives": attr.string_list(
+            doc = "Archives (keys of `archives`) the build does not make in this configuration: " +
+                  "a select() over the platforms, for a library only some of them take from the " +
+                  "wrapped build. The archive's target is empty there.",
+        ),
         "archive_boundaries": attr.string_list(
             doc = "GN label prefixes whose targets are never archived (a Bazel dependency " +
                   "provides them).",
+        ),
+        "archives_only": attr.bool(
+            doc = "Build the archives' object files rather than `ninja_target`: for a configuration " +
+                  "whose products are archives alone (every `outs` path empty). What the target has " +
+                  "beyond the objects is then not built -- the `data_deps` of a library, which ninja " +
+                  "orders before the library's own stamp: ANGLE's name SwiftShader's driver and the " +
+                  "Vulkan loader, which a Linux build takes from the converted trees.",
         ),
         "ar": attr.label(
             allow_single_file = True,
@@ -383,7 +413,7 @@ def gn_build(name, outs = [], out_paths = None, archives = {}, visibility = None
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
-        `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`, `env`,
+        `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `omit_archives`, `archives_only`, `ar`, `env`,
         `install_names`, `install_name_tool`).
     """
     for out in outs:

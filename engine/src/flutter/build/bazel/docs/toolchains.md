@@ -19,9 +19,9 @@ target configuration only: the exec configuration keeps the host's, so the
 tools a build runs (`gen_snapshot_host`, `impellerc`, the shader compilers,
 the Dart SDK's `dart`) are x64 binaries built once, as GN builds them in its
 `host_toolchain`, and what the build ships is aarch64 -- `flutter_tester`
-included, which links SwiftShader's LLVM Reactor there (the GPU backends'
-wrap carries LLVM's sources in its tree under arm64, as GN's
-`swiftshader_static` picks Reactor over x64's Subzero). The generated files
+included, which links SwiftShader's Reactor on LLVM there (`@swiftshader`
+compiles its LLVM 16 for arm64, as GN's `swiftshader_static` picks that
+backend over x64's Subzero). The generated files
 needed nothing: the converter already rendered `current_cpu`/`target_cpu`
 conditions as `select()`s over `@platforms//cpu:*`; the hand-written
 overlays that lacked an aarch64 branch (zlib's) got one. `host_toolchain`,
