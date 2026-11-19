@@ -26,6 +26,11 @@ final ValueNotifier<DialogWindowController?> dialogController = ValueNotifier(nu
 /// be queried.
 BaseWindowController? secondaryController;
 
+/// Popups used by the nested popup tests. The inner popup is owned by the outer
+/// popup, which is owned by the main window.
+PopupWindowController? outerPopupController;
+PopupWindowController? innerPopupController;
+
 /// Positioner used when creating child secondary windows (tooltip, popup,
 /// satellite).
 const WindowPositioner _kSecondaryPositioner = WindowPositioner(
@@ -259,6 +264,46 @@ void main() {
           return jsonEncode({'isDestroyed': secondaryController?.isDestroyed});
         } else if (jsonMap['type'] == 'destroy_window') {
           secondaryController?.destroy();
+          return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'create_nested_popups') {
+          // Destroying the outer popup also destroys the inner popup it owns.
+          outerPopupController?.destroy();
+          try {
+            final outerPopup = PopupWindowController(
+              parent: controller,
+              anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+              positioner: _kSecondaryPositioner,
+            );
+            outerPopupController = outerPopup;
+            innerPopupController = PopupWindowController(
+              parent: outerPopup,
+              anchorRect: const Rect.fromLTWH(0, 0, 100, 100),
+              positioner: _kSecondaryPositioner,
+            );
+          } on UnsupportedError {
+            return jsonEncode({'result': 'unsupported'});
+          }
+          return jsonEncode({'result': true});
+        } else if (jsonMap['type'] == 'activate_inner_popup') {
+          innerPopupController!.activate();
+          // Read before yielding, as a dismissed popup can no longer be queried.
+          final bool isActivated = innerPopupController!.isActivated;
+          // Popups are dismissed in a microtask scheduled while handling the
+          // activation change, so let it run before reporting back.
+          await Future<void>.delayed(Duration.zero);
+          return jsonEncode({'isActivated': isActivated});
+        } else if (jsonMap['type'] == 'activate_main_window') {
+          controller.activate();
+          final bool isActivated = controller.isActivated;
+          await Future<void>.delayed(Duration.zero);
+          return jsonEncode({'isActivated': isActivated});
+        } else if (jsonMap['type'] == 'are_nested_popups_destroyed') {
+          return jsonEncode({
+            'outer': outerPopupController?.isDestroyed,
+            'inner': innerPopupController?.isDestroyed,
+          });
+        } else if (jsonMap['type'] == 'destroy_nested_popups') {
+          outerPopupController?.destroy();
           return jsonEncode({'result': true});
         } else {
           throw ArgumentError('Unknown message type: ${jsonMap['type']}');

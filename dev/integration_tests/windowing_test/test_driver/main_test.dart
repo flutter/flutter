@@ -279,5 +279,56 @@ void main() {
     test('Satellite window is not destroyed until closed', () async {
       await _expectIsDestroyedTransition(driver, 'satellite');
     }, timeout: Timeout.none);
+
+    test(
+      'Activating a nested popup does not close its parent popup',
+      () async {
+        final String createResponse = await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'create_nested_popups'}),
+        );
+        if ((jsonDecode(createResponse) as Map<String, Object?>)['result'] == 'unsupported') {
+          markTestSkipped('Popup windows are not supported on this platform.');
+          return;
+        }
+
+        try {
+          String response = await _requestDataWithRetry(
+            driver,
+            jsonEncode({'type': 'activate_inner_popup'}),
+          );
+          expect((jsonDecode(response) as Map<String, Object?>)['isActivated'], true);
+
+          response = await _requestDataWithRetry(
+            driver,
+            jsonEncode({'type': 'are_nested_popups_destroyed'}),
+          );
+          var data = jsonDecode(response) as Map<String, Object?>;
+          expect(data['outer'], false);
+          expect(data['inner'], false);
+
+          // Activating the main window closes the inner popup, as the main
+          // window is neither its parent nor its descendant, but keeps the outer
+          // popup, whose parent is the main window.
+          response = await _requestDataWithRetry(
+            driver,
+            jsonEncode({'type': 'activate_main_window'}),
+          );
+          expect((jsonDecode(response) as Map<String, Object?>)['isActivated'], true);
+
+          response = await _requestDataWithRetry(
+            driver,
+            jsonEncode({'type': 'are_nested_popups_destroyed'}),
+          );
+          data = jsonDecode(response) as Map<String, Object?>;
+          expect(data['outer'], false);
+          expect(data['inner'], true);
+        } finally {
+          await _requestDataWithRetry(driver, jsonEncode({'type': 'destroy_nested_popups'}));
+        }
+      },
+      timeout: Timeout.none,
+      testOn: 'windows',
+    );
   });
 }
