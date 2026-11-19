@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
@@ -302,6 +303,37 @@ void _throwingQueryExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+final class _DomainErrorBuildTarget extends BuildTarget {
+  const _DomainErrorBuildTarget()
+    : super(
+        description: 'Custom target throwing ToolExtensionException',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom_os',
+        targetPlatform: 'linux-x64',
+      );
+
+  @override
+  String get name => 'custom-os-bundle';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    throw const ToolExtensionException('Custom compiler missing.');
+  }
+}
+
+final class _DomainErrorBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[_DomainErrorBuildTarget()];
+}
+
+void _domainErrorBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_DomainErrorBuildService()],
+    extensionName: 'custom_build_ext',
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -399,6 +431,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(fs: MemoryFileSystem.test(), logger: testLogger),
         );
@@ -759,6 +792,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
@@ -1040,6 +1074,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
@@ -1156,6 +1191,7 @@ void main() {
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           templateRenderer: FakeTemplateRenderer(),
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
@@ -1179,5 +1215,35 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testWithoutContext('ExtensionBuildManager.build returns failed ExtensionBuildResult when build target throws ToolExtensionException', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_domainErrorBuildExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      addTearDown(manager.dispose);
+
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final ExtensionBuildResult result = await buildManager.build(
+        buildMode: .debug,
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: 'lib/main.dart',
+        outputDir: Uri.directory('/project/build/custom_os'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{},
+        targetName: 'custom-os-bundle',
+      );
+      expect(result.success, isFalse);
+      expect(result.errorMessage, 'Custom compiler missing.');
+    });
   });
 }

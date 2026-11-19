@@ -28,6 +28,7 @@ void main() {
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
+        isLocalEngineBuilder: () => false,
         platform: platform,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
@@ -292,6 +293,7 @@ void main() {
       cache = Cache(
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
+        isLocalEngineBuilder: () => false,
         platform: platform,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
