@@ -327,16 +327,14 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // Once set, they are not reset to nullptr.
   void CreateAxFragmentRoot();
 
-  // Returns true if a WM_IME_COMPOSITION message carrying a result string
-  // (GCS_RESULTSTR) is already queued for this window.
+  // Returns true if the next WM_IME_COMPOSITION message queued for this window
+  // carries a result string (GCS_RESULTSTR).
   bool HasQueuedImeResult();
 
-  // Begins an IME composition: creates the IME window and notifies the
-  // delegate that composing has begun.
+  // Begins an IME composition.
   void BeginImeComposition();
 
-  // Ends the current IME composition: destroys the IME window and notifies the
-  // delegate that composing has ended.
+  // Ends the current IME composition.
   void EndImeComposition();
 
   // A pointer to a FlutterWindowsView that can be used to update engine
@@ -372,21 +370,16 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
   // message.
   int keycode_for_char_message_ = 0;
 
-  // True while an IME composition is in progress. A composition begins with
-  // WM_IME_STARTCOMPOSITION, or implicitly when the IME sends composition
-  // messages without it.
+  // True while an IME composition is in progress.
   bool ime_composing_ = false;
 
   // True if the composition in progress was begun by a WM_IME_COMPOSITION
-  // message that arrived without WM_IME_STARTCOMPOSITION. A
-  // WM_IME_ENDCOMPOSITION may never arrive for such a composition, so it is
-  // ended as soon as no composing text is left, without destroying the IME
-  // window.
+  // message that arrived without WM_IME_STARTCOMPOSITION.
   bool ime_composing_implicitly_ = false;
 
-  // True if a WM_IME_ENDCOMPOSITION message was received while the
-  // WM_IME_COMPOSITION message carrying the result string was still queued
-  // behind it. The composition is ended once that result has been processed.
+  // True if WM_IME_ENDCOMPOSITION arrived while the WM_IME_COMPOSITION message
+  // carrying the result string was still queued. The composition ends once
+  // that message has been processed.
   bool ime_end_composition_deferred_ = false;
 
   // Keeps track of the last mouse coordinates by a WM_MOUSEMOVE message.

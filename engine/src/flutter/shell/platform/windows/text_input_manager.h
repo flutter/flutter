@@ -82,8 +82,7 @@ class TextInputManager {
   void AbortComposing();
 
  protected:
-  // Reads the composing or result string, selected by |type|, from the IMM
-  // context of the window.
+  // Reads the string selected by |type| from the IMM context of the window.
   virtual std::optional<std::u16string> ReadImmString(int type) const;
 
  private:

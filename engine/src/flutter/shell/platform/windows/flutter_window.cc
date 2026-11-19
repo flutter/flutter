@@ -968,13 +968,12 @@ void FlutterWindow::OnImeStartComposition(UINT const message,
                                           WPARAM const wparam,
                                           LPARAM const lparam) {
   if (ime_end_composition_deferred_) {
-    // The result string that the previous composition's end was waiting for
-    // never arrived. End that composition before starting a new one.
+    // The result that the previous composition's end is waiting for has not
+    // arrived yet. End that composition before starting a new one.
     EndImeComposition();
   }
   if (ime_composing_implicitly_) {
-    // A composition message that arrived before this message has already
-    // begun the composition.
+    // A WM_IME_COMPOSITION message has already begun this composition.
     ime_composing_implicitly_ = false;
     return;
   }
@@ -992,13 +991,10 @@ void FlutterWindow::OnImeComposition(UINT const message,
     OnComposeCommit();
   }
 
-  // The strings below are only readable while the IME window is active. A
-  // string that arrives without WM_IME_STARTCOMPOSITION while the IME window
-  // is active begins a composition implicitly. A string that arrives after
-  // WM_IME_ENDCOMPOSITION has ended the composition is not readable and is
-  // ignored. For example, when the window loses focus during a composition,
-  // the Microsoft Korean IME may deliver the composing text in a GCS_RESULTSTR
-  // after WM_IME_ENDCOMPOSITION has already committed it.
+  // The strings below are readable only while the IME window is active, so a
+  // string that arrives after the composition has ended is ignored. The legacy
+  // Microsoft Korean IME may send the composing text that way when the window
+  // loses focus.
   bool has_composing_text = false;
 
   // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
@@ -1009,6 +1005,7 @@ void FlutterWindow::OnImeComposition(UINT const message,
     std::optional<std::u16string> text = text_input_manager_->GetResultString();
     if (text) {
       if (!ime_composing_) {
+        // No WM_IME_STARTCOMPOSITION preceded this message.
         BeginImeComposition();
         ime_composing_implicitly_ = true;
       }
@@ -1039,10 +1036,9 @@ void FlutterWindow::OnImeComposition(UINT const message,
     // This is the result that WM_IME_ENDCOMPOSITION was waiting for.
     EndImeComposition();
   } else if (ime_composing_implicitly_ && !has_composing_text) {
-    // Nothing is left to compose in a composition that was begun implicitly.
-    // A WM_IME_ENDCOMPOSITION may never arrive for it, so end it here. The IME
-    // window is left active, as it was before the composition began, so that
-    // later strings can still be read.
+    // WM_IME_ENDCOMPOSITION may never arrive for a composition that was begun
+    // implicitly, so end it once no composing text is left. The IME window
+    // stays active so that later strings can still be read.
     ime_composing_ = false;
     ime_composing_implicitly_ = false;
     OnComposeEnd();
@@ -1053,18 +1049,16 @@ void FlutterWindow::OnImeEndComposition(UINT const message,
                                         WPARAM const wparam,
                                         LPARAM const lparam) {
   if (HasQueuedImeResult()) {
-    // The Microsoft Korean IME in the 3-beolsik layouts sends
-    // WM_IME_ENDCOMPOSITION *before* the WM_IME_COMPOSITION message that
-    // carries the result string when a space or punctuation key ends the
-    // composition. Ending the composition now would commit the composing text
-    // and leave no composition for the result to be applied to, dropping the
-    // typed character. Wait for the queued result instead.
+    // The legacy Microsoft Korean IME sends WM_IME_ENDCOMPOSITION before the
+    // result string when a non-Hangul key such as space, a digit or
+    // punctuation ends the composition. In the 3-beolsik layouts the result
+    // also carries that key's character, which arrives in no other message.
+    // Ending the composition now would deactivate the IME window, leaving the
+    // result unreadable, so wait for the result.
     // See https://github.com/flutter/flutter/issues/140537.
     if (!ime_composing_) {
-      // The same IME sends WM_IME_ENDCOMPOSITION followed by the result,
-      // without any WM_IME_STARTCOMPOSITION, when a space or punctuation key
-      // is pressed while nothing is being composed. Begin the composition
-      // here so that the result can be read and committed.
+      // The 3-beolsik layouts send the same messages, without
+      // WM_IME_STARTCOMPOSITION, when nothing is being composed.
       BeginImeComposition();
     }
     ime_end_composition_deferred_ = true;
