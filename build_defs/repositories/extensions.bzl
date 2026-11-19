@@ -335,13 +335,26 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn"],
         gn_repository = "@vulkan_memory_allocator=//flutter/third_party/vulkan_memory_allocator",
     ),
-    # ANGLE's headers alone (GLES2/GLES3/EGL/KHR), which Impeller's GLES
-    # backend includes on every platform; ANGLE as a GL implementation (the
-    # test surfaces' libEGL/libGLESv2) is a later conversion of its 2,000-line
-    # BUILD.gn, so the overlay stands in until then.
+    # ANGLE (OpenGL ES over Vulkan and over the desktop's GL), from the
+    # tree's own GN: the Khronos headers it ships (GLES2/GLES3/EGL/KHR), which
+    # Impeller's GLES backend includes on every platform, and libEGL_static
+    # and libGLESv2_static for Linux, the GPU suites' GL implementation -- the
+    # libraries, the translator, and the Vulkan and GL backends. A Mac's
+    # ANGLE is the wrapped GN build's (build/bazel/gl_wrap), from
+    # @angle_tree.
     "angle": struct(
         path = "engine/src/flutter/third_party/angle",
-        build_file = _OVERLAYS + ":angle/BUILD.angle.bazel",
+        build_file = None,
+        gn_build_files = [
+            "engine/src/flutter/third_party/angle/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/common/linux/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/common/spirv/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/common/vulkan/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/libANGLE/renderer/gl/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/libANGLE/renderer/vulkan/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/third_party/volk/BUILD.gn",
+        ],
+        gn_repository = "@angle=//flutter/third_party/angle",
     ),
     # SwiftShader (Vulkan on the CPU: the GPU suites' driver, and the static
     # one flutter_tester links), from the tree's own GN: the driver, its
@@ -366,12 +379,16 @@ _SOURCE_REPOSITORIES = {
         gn_repository = "@swiftshader=//flutter/third_party/swiftshader",
     ),
     # Trees for the wrapped GN build of the GPU test backends
-    # (build/bazel/gl_wrap): SwiftShader (whose Bazel rules are
-    # @swiftshader's), the vulkan-deps directory (over whose subdirectories
-    # @vulkan-headers, @spirv-tools, ... are separate repositories),
-    # abseil-cpp (whose Bazel rules are @abseil-cpp's) and the allocator
-    # (whose library is @vulkan_memory_allocator). Each is the synced
-    # directory as files, nothing more.
+    # (build/bazel/gl_wrap): ANGLE and SwiftShader (whose Bazel rules are
+    # @angle's and @swiftshader's), the vulkan-deps directory (over whose
+    # subdirectories @vulkan-headers, @spirv-tools, ... are separate
+    # repositories), abseil-cpp (whose Bazel rules are @abseil-cpp's) and the
+    # allocator (whose library is @vulkan_memory_allocator). Each is the
+    # synced directory as files, nothing more.
+    "angle_tree": struct(
+        path = "engine/src/flutter/third_party/angle",
+        build_file = _OVERLAYS + ":angle_tree/BUILD.angle_tree.bazel",
+    ),
     "swiftshader_tree": struct(
         path = "engine/src/flutter/third_party/swiftshader",
         build_file = _OVERLAYS + ":swiftshader_tree/BUILD.swiftshader_tree.bazel",

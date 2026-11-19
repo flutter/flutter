@@ -35,6 +35,22 @@ cc_library(
     include_prefix = "third_party/abseil-cpp",
 )
 
+# config("absl_define_config") of abseil's Chromium-style BUILD.gn, which
+# ANGLE's own abseil config lists (so that ANGLE's sources see abseil's
+# allocator trait as abseil's GN-built sources do): as a library, for the
+# converted ANGLE to depend on.
+cc_library(
+    name = "absl_define_config",
+    defines = ["ABSL_ALLOCATOR_NOTHROW=1"],
+)
+
+# config("absl_include_config") of the same file: abseil's root as an
+# include directory, which every library of @abseil-cpp carries already;
+# the label exists so that the GN configs naming it have a home.
+cc_library(
+    name = "absl_include_config",
+)
+
 filegroup(
     name = "build_tree",
     srcs = glob(

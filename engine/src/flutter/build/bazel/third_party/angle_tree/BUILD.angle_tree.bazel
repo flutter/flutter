@@ -1,0 +1,41 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @angle_tree: the ANGLE tree as files, for the wrapped
+# GN build of a Mac's GPU test backends
+# (//engine/src/flutter/build/bazel/gl_wrap), which builds ANGLE there from
+# ANGLE's own GN rules. The repository Bazel builds ANGLE from on Linux, and
+# takes its Khronos headers from on every platform, is @angle: the same tree
+# with its GN converted.
+
+package(default_visibility = ["//visibility:public"])
+
+# What the wrapped GN build of libEGL_static and libGLESv2_static reads of
+# the tree (measured on that build: GN's inputs, the compiler's dependency
+# output and the explicit inputs of the build graph), with slack. Of
+# third_party/, whose directories are mostly empty here (the engine's DEPS
+# does not fetch ANGLE's own copies of its dependencies), only rapidjson's
+# GN file is loaded.
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
+            "doc/**",
+            "infra/**",
+            "samples/**",
+            "src/tests/**",
+            "third_party/**",
+        ],
+    ) + glob(["third_party/rapidjson/**"]),
+)

@@ -506,7 +506,12 @@ cc_library(
     name = "test_swangle_utils",
     srcs = ["test_swangle_utils.cc"],
     hdrs = ["test_swangle_utils.h"],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:linux": [
+            "-Wno-redundant-parens",  # from //flutter/third_party/angle:libGLESv2_static
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/build/bazel:host_toolchain": [],
@@ -544,6 +549,11 @@ cc_library(
         ],
         "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "-Wno-redundant-parens",  # from :test_swangle_utils
         ],
         "//conditions:default": [],
     }),

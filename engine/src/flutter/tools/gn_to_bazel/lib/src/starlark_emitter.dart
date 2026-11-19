@@ -501,6 +501,7 @@ String emitBuildFile(
   DependencyResolver? forwardedFlags,
   List<String> unconvertedDeps = const <String>[],
   Set<String> filesGroups = const <String>{},
+  Map<String, String> uncarriedDataDeps = const <String, String>{},
   Set<String> linkedStaticLibraries = const <String>{},
   Map<String, List<String>> extraSources = const <String, List<String>>{},
   Map<String, List<String>> interfaceDeps = const <String, List<String>>{},
@@ -512,6 +513,8 @@ String emitBuildFile(
           : DependencyResolver(tree: tree, assumptions: evaluation.assumptions));
   final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions, forwarded)
     ..inheritedConfigs.addAll(evaluation.inheritedConfigs);
+  _localizeOwnLabels(evaluation.targets, gnPackage);
+  _rehomeGenDirs(evaluation.targets);
   for (final GnTarget target in evaluation.targets) {
     emitter.localTargets[target.name] = target;
     if (target.rule == 'config') {
@@ -537,6 +540,15 @@ String emitBuildFile(
   emitter.skippedTargets.addAll(skipped);
   emitter.unconvertedDeps.addAll(unconvertedDeps);
   emitter.filesGroups.addAll(filesGroups);
+  emitter.uncarriedDataDeps.addAll(uncarriedDataDeps);
+  for (final String name in uncarriedDataDeps.keys) {
+    if (!evaluation.targets.any((GnTarget t) => t.name == name && t.rule == 'group')) {
+      throw GnError(
+        GnLocation(gnPackage, 0, 0),
+        'uncarriedDataDeps names $name, which is not a group of the file',
+      );
+    }
+  }
   for (final name in filesGroups) {
     if (emitter.localTargets[name]?.rule != 'group') {
       throw GnError(
@@ -661,6 +673,130 @@ const Set<String> _gnTargetVariables = <String>{
 /// GN's target variables (see [_gnTargetVariables]).
 bool _isHelperVariable(GnVariable variable) => !_gnTargetVariables.contains(variable.name);
 
+/// Rewrites the paths under a generated directory that has a home in the
+/// repository's own ([genDirHomes]) to that home, wherever a target of the
+/// file names one: an output, an include directory, an argument.
+void _rehomeGenDirs(List<GnTarget> targets) {
+  if (genDirHomes.isEmpty) {
+    return;
+  }
+  String? rehomed(String text) {
+    var result = text;
+    for (final MapEntry<String, String> home in genDirHomes.entries) {
+      // The directory itself or a path below it, not a longer name.
+      result = result.replaceAllMapped(
+        RegExp('${RegExp.escape(home.key)}(?![A-Za-z0-9_.-])'),
+        (Match m) => home.value,
+      );
+    }
+    return result == text ? null : result;
+  }
+
+  GnValue? rehomedValue(GnValue value) {
+    switch (value) {
+      case GnStringValue(value: final String text):
+        final String? result = rehomed(text);
+        return result == null ? null : GnStringValue(result);
+      case GnExpandedString(:final List<GnValue> parts):
+        var changed = false;
+        final out = <GnValue>[
+          for (final GnValue part in parts)
+            () {
+              final GnValue? result = rehomedValue(part);
+              changed = changed || result != null;
+              return result ?? part;
+            }(),
+        ];
+        return changed ? GnExpandedString(List<GnValue>.unmodifiable(out)) : null;
+      default:
+        return null;
+    }
+  }
+
+  for (final target in targets) {
+    for (final GnVariable variable in target.variables.values) {
+      for (var i = 0; i < variable.assignments.length; i++) {
+        final GnAssignment assignment = variable.assignments[i];
+        var changed = false;
+        final items = <GnValue>[
+          for (final GnValue item in assignment.items)
+            () {
+              final GnValue? result = rehomedValue(item);
+              changed = changed || result != null;
+              return result ?? item;
+            }(),
+        ];
+        if (changed) {
+          variable.assignments[i] = GnAssignment(
+            assignment.location,
+            assignment.condition,
+            assignment.op,
+            items,
+            sourceConditions: assignment.sourceConditions,
+            comments: assignment.comments,
+            itemComments: assignment.itemComments,
+          );
+        }
+      }
+    }
+  }
+}
+
+/// The variables of a target that hold labels.
+const Set<String> _labelListVariables = <String>{
+  'all_dependent_configs',
+  'configs',
+  'data_deps',
+  'deps',
+  'public_configs',
+  'public_deps',
+};
+
+/// Rewrites a label of the file's own package that is written in full as
+/// the local `:name` it is: ANGLE's root file lists its configs through
+/// `angle_root + ":internal_config"`, `angle_root` being the root itself,
+/// and a config is this file's -- its flags inlined, its library a sibling
+/// -- by the local form of its label.
+void _localizeOwnLabels(List<GnTarget> targets, String gnPackage) {
+  for (final target in targets) {
+    for (final String name in _labelListVariables) {
+      final GnVariable? variable = target.variables[name];
+      if (variable == null) {
+        continue;
+      }
+      for (var i = 0; i < variable.assignments.length; i++) {
+        final GnAssignment assignment = variable.assignments[i];
+        var changed = false;
+        final items = <GnValue>[
+          for (final GnValue item in assignment.items)
+            if (item is GnStringValue &&
+                !item.value.startsWith(':') &&
+                !item.value.contains('(') &&
+                item.value.contains(':') &&
+                absoluteGnLabel(item.value, package: gnPackage).startsWith('$gnPackage:'))
+              () {
+                changed = true;
+                return GnStringValue(item.value.substring(item.value.indexOf(':')));
+              }()
+            else
+              item,
+        ];
+        if (changed) {
+          variable.assignments[i] = GnAssignment(
+            assignment.location,
+            assignment.condition,
+            assignment.op,
+            items,
+            sourceConditions: assignment.sourceConditions,
+            comments: assignment.comments,
+            itemComments: assignment.itemComments,
+          );
+        }
+      }
+    }
+  }
+}
+
 /// The name of a library's file without the `lib` GN's tools put before
 /// it: [name] is the target's `output_name` or its name, and GN adds the
 /// prefix unless the name starts with it already
@@ -728,6 +864,10 @@ final class _Emitter {
   /// Groups of the file that are groups of things to build, never linked
   /// against (the manifest's filesGroups): filegroups.
   final Set<String> filesGroups = <String>{};
+
+  /// The file's groups whose `data_deps` are not carried, with the reason
+  /// (the manifest's uncarriedDataDeps).
+  final Map<String, String> uncarriedDataDeps = <String, String>{};
 
   /// The complete static libraries other targets link (the manifest's
   /// linkedStaticLibraries): cc_libraries of their dependencies.
@@ -1238,6 +1378,19 @@ final class _Emitter {
             publicConfigs: const <String>{},
             propagatedFlags: propagated,
           );
+        case 'data_deps' when uncarriedDataDeps.containsKey(target.name):
+          // Run-time files the rule does not carry (the manifest's
+          // uncarriedDataDeps): on record, with the reason.
+          final labels = <String>[
+            for (final GnListItem item in variable.liveItems)
+              if (item.value case GnStringValue(:final String value)) value,
+          ];
+          if (labels.isNotEmpty) {
+            rule.comments.add(
+              "# GN's data_deps are not carried (${labels.join(', ')}): "
+              '${uncarriedDataDeps[target.name]}.',
+            );
+          }
         default:
           if (_ignoredVariables.contains(variable.name) ||
               variable.forwarded ||
@@ -1438,7 +1591,13 @@ final class _Emitter {
               'action variable data is converted only as a subset of the outputs',
             );
           }
-        case 'data_deps' || 'response_file_contents' || 'metadata' || 'assert_no_deps':
+        case 'response_file_contents':
+          break; // With the arguments, whose kind of list it is (below).
+        case 'public_configs':
+          // For the targets that depend on the action, which take them with
+          // its outputs (_actionPublicConfigsInto).
+          break;
+        case 'data_deps' || 'metadata' || 'assert_no_deps' || 'all_dependent_configs':
           throw GnError(
             variable.assignments.first.location,
             'action variable ${variable.name} is not converted yet',
@@ -1449,6 +1608,14 @@ final class _Emitter {
           // attributes above.
           break;
       }
+    }
+    // GN's response file: arguments too many for a command line (ANGLE's
+    // thousand sources, whose hash versions its program cache), which the
+    // rule writes to a file and names where `args` says
+    // `{{response_file_name}}`.
+    final GnVariable? responseFile = target.variables['response_file_contents'];
+    if (responseFile != null) {
+      _argsInto(rule, responseFile, target, into: 'response_file_contents');
     }
     if (args != null) {
       _argsInto(rule, args, target);
@@ -1636,8 +1803,8 @@ final class _Emitter {
   /// (`flutter_runtime_mode`, or `"--mode=$flutter_runtime_mode"`) spelled
   /// out as one argument per value under that value's condition
   /// ([_enumeratedElements]).
-  void _argsInto(_Rule rule, GnVariable variable, GnTarget target) {
-    final _ListAttribute attribute = rule.list('args');
+  void _argsInto(_Rule rule, GnVariable variable, GnTarget target, {String into = 'args'}) {
+    final _ListAttribute attribute = rule.list(into);
     // The files named already, under any condition (the whole file's
     // condition, which the target's platform carries, goes at the layout).
     final declared = <String>{
@@ -5333,11 +5500,24 @@ final class _Emitter {
         return;
       }
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
-      final list = _isLocalAction(gnLabel)
-          ? 'srcs'
+      final bool action = _isLocalAction(gnLabel);
+      // A public dependency on an action that generates headers publishes
+      // them: the library's own headers, for its dependents' compiles too
+      // (GN's public_deps let a dependent include what the dependency
+      // makes: ANGLE's version headers); a private one's outputs are the
+      // target's sources.
+      final list = action
+          ? (variable.name == 'public_deps' &&
+                    rule.kind == 'cc_library' &&
+                    _localActionMakesHeadersOnly(gnLabel)
+                ? 'hdrs'
+                : 'srcs')
           : _isLocalData(gnLabel)
           ? 'data'
           : 'deps';
+      if (action) {
+        _actionPublicConfigsInto(rule, gnLabel, e);
+      }
       // A dependency on a shared_library links against it: the macro's
       // cc_import of the library (flutter_shared_library's `<name>_import`),
       // as Bazel's C++ rules take no cc_binary in deps.
@@ -5350,6 +5530,51 @@ final class _Emitter {
           .addUnique(e.condition, _item(_localLabel(sharedLibrary ? '${label}_import' : label), e));
       _rootIncludeViewsInto(rule.list(list), label, e.condition);
     });
+  }
+
+  /// Whether every output of the action [gnLabel] of this file is a header:
+  /// what a dependent library's `hdrs` can hold.
+  bool _localActionMakesHeadersOnly(String gnLabel) {
+    final GnTarget action = localTargets[_localName(gnLabel)]!;
+    final List<GnListItem> outputs = action.variables['outputs']?.liveItems ?? const <GnListItem>[];
+    return outputs.isNotEmpty &&
+        outputs.every(
+          (GnListItem item) => switch (item.value) {
+            GnStringValue(:final String value) =>
+              value.endsWith('.h') || value.endsWith('.hpp') || value.endsWith('.inc'),
+            _ => false,
+          },
+        );
+  }
+
+  /// The public configs of the action [gnLabel] of this file (the include
+  /// directory of the header it generates), which GN applies to whatever
+  /// depends on the action: dependencies of [rule] on the configs'
+  /// libraries, as the rule's own public configs are, under the conditions
+  /// of the [dependency] and of the listing. The action's own rule has no
+  /// way to carry them.
+  void _actionPublicConfigsInto(_Rule rule, String gnLabel, _Element dependency) {
+    final GnTarget action = localTargets[_localName(gnLabel)]!;
+    final GnVariable? configs = action.variables['public_configs'];
+    if (configs == null) {
+      return;
+    }
+    for (final GnListItem item in configs.liveItems) {
+      final GnValue value = item.value;
+      final GnTarget? config = value is GnStringValue && value.value.startsWith(':')
+          ? localConfigs[value.value.substring(1)]
+          : null;
+      if (config == null || flagsOfConfig(config).isNotEmpty) {
+        throw GnError(
+          item.assignment.location,
+          'a public config of the action ${action.name} is converted when it is a config of '
+          'the same file without compiler flags',
+        );
+      }
+      rule
+          .list('deps')
+          .addUnique(dependency.condition.and(item.condition), _Item(':${config.name}'));
+    }
   }
 
   /// The shortest way to write [label] from the generated file: `:x` within

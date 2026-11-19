@@ -1074,6 +1074,9 @@ final class GnVariable {
       // A bare variable the converter does not evaluate (`"_" +
       // flutter_runtime_mode`): its expansion, as in a string.
       GnReference() => <GnValue>[v],
+      // An integer, which GN writes out in decimal (ANGLE's
+      // `"ANGLE_VULKAN_API_PERF_COUNTERS_MODE=" + mode`).
+      GnIntValue(:final int value) => <GnValue>[GnStringValue('$value')],
       _ => throw GnError(location, '+ of $v to a string'),
     };
     final joined = <GnValue>[];
@@ -1665,7 +1668,7 @@ const Set<String> _defaultTargetConfigs = <String>{
 };
 
 /// Functions whose calls have no effect on the data the converter extracts.
-const Set<String> _ignoredFunctions = <String>{'assert', 'not_needed', 'print', 'set_defaults'};
+const Set<String> _ignoredFunctions = <String>{'assert', 'not_needed', 'print'};
 
 final class _Scope {
   _Scope(this.parent, {this.isTarget = false, this.isPass = false});
@@ -1696,6 +1699,10 @@ final class _Scope {
   final Map<String, GnVariable> variables = <String, GnVariable>{};
   final Map<String, _Template> templates = <String, _Template>{};
 
+  /// What `set_defaults("name") { ... }` gave the invocations of a template
+  /// of that name: the variables their blocks start with.
+  final Map<String, Map<String, GnVariable>> templateDefaults = <String, Map<String, GnVariable>>{};
+
   /// The names of [variables] something read (see [GnTarget.readVariables]).
   final Set<String> readNames = <String>{};
 
@@ -1715,6 +1722,9 @@ final class _Scope {
   GnVariable? find(String name) => variables[name] ?? parent?.find(name);
 
   _Template? lookupTemplate(String name) => templates[name] ?? parent?.lookupTemplate(name);
+
+  Map<String, GnVariable>? lookupTemplateDefaults(String name) =>
+      templateDefaults[name] ?? parent?.lookupTemplateDefaults(name);
 }
 
 /// A `template("name") { body }`: a closure over the scope it was defined in.
@@ -1729,10 +1739,11 @@ final class _Template {
 
 /// What an evaluated `.gni` contributes to its importers.
 final class _ImportedFile {
-  const _ImportedFile(this.variables, this.templates);
+  const _ImportedFile(this.variables, this.templates, this.templateDefaults);
 
   final Map<String, GnVariable> variables;
   final Map<String, _Template> templates;
+  final Map<String, Map<String, GnVariable>> templateDefaults;
 }
 
 /// One element of an expression's value: the GN value, the comments around
@@ -1970,6 +1981,21 @@ final class _Evaluator {
     if (_ignoredFunctions.contains(call.name)) {
       return;
     }
+    if (call.name == 'set_defaults') {
+      _setDefaults(call, scope);
+      return;
+    }
+    if (call.name == 'write_file') {
+      // A file written while GN generates. The log a build file keeps of
+      // its generation (//build/gn_logs.gni's lines, ANGLE's and
+      // Chromium's gn_logs.txt) is read by no build step; any other file
+      // may be, and is not converted.
+      final String destination = call.args.isEmpty ? '' : _gnText(call.args.first);
+      if (destination.endsWith('/gn_logs.txt"')) {
+        return;
+      }
+      throw GnError(call.location, 'write_file() of $destination is not supported');
+    }
     if (call.name == 'error') {
       // GN stops at error(). Reached unconditionally, the file does not
       // generate and neither does the conversion; under a condition the
@@ -2043,6 +2069,15 @@ final class _Evaluator {
       }
       rule = _stringExpression(call.args[0], scope);
       name = _stringExpression(call.args[1], scope);
+      // The type may be a template's name (ANGLE's libEGL_template takes
+      // `angle_shared_library` or `angle_static_library` from its invoker).
+      final _Template? named = settings.templates.contains(rule)
+          ? null
+          : scope.lookupTemplate(rule);
+      if (named != null) {
+        _invokeTemplate(named, call, scope, condition, source, comments: comments, name: name);
+        return;
+      }
     } else {
       rule = call.name;
       name = _stringArgument(call, scope);
@@ -2183,6 +2218,7 @@ final class _Evaluator {
           for (final MapEntry<String, _Template> e in evaluator.fileScope.templates.entries)
             if (!e.key.startsWith('_')) e.key: e.value,
         },
+        evaluator.fileScope.templateDefaults,
       );
     });
     // Merge; a conflict with a different value is GN's "import clobbers" error.
@@ -2200,6 +2236,24 @@ final class _Evaluator {
       }
       scope.templates[e.key] = e.value;
     }
+    scope.templateDefaults.addAll(imported.templateDefaults);
+  }
+
+  /// `set_defaults("name") { ... }`: what the block of every later
+  /// invocation of the template `name` starts with (angle.gni gives its
+  /// angle_source_set a `configs` and a `suppressed_configs`, which the
+  /// invocations append to and the template applies). The defaults of a
+  /// built-in target type are BUILDCONFIG.gn's, which the converter's
+  /// tables stand for; a file's own for one are not something it reads.
+  void _setDefaults(GnFunctionCall call, _Scope scope) {
+    final String name = _stringArgument(call, scope);
+    final GnBlock? block = call.block;
+    if (block == null) {
+      throw GnError(call.location, 'set_defaults() without a block');
+    }
+    final defaults = _Scope(scope);
+    _evaluateBlock(block, defaults, Condition.always, const <String>[], target: null);
+    scope.owner.templateDefaults[name] = defaults.variables;
   }
 
   /// The GN path (`//a/b.gni`) of an import, resolved against the importing
@@ -2215,7 +2269,9 @@ final class _Evaluator {
   String _importPath(GnFunctionCall call, _Scope scope) {
     final String path = _stringArgument(call, scope);
     if (path.startsWith('//')) {
-      return path;
+      // GN collapses a doubled separator (ANGLE imports
+      // `//build_overrides//vulkan_headers.gni`).
+      return '//${path.substring(2).replaceAll(RegExp('/+'), '/')}';
     }
     final GnSourceTree? tree = settings.tree;
     if (tree == null) {
@@ -2261,8 +2317,11 @@ final class _Evaluator {
     Condition condition,
     List<String> source, {
     required List<String> comments,
+    String? name,
   }) {
-    final String name = _stringArgument(call, scope);
+    // The invocation's name: its argument, or the second of `target(type,
+    // name)` where the type named the template.
+    name ??= _stringArgument(call, scope);
     final GnBlock? block = call.block;
     if (block == null) {
       throw GnError(call.location, '${call.name}() without a block');
@@ -2274,6 +2333,14 @@ final class _Evaluator {
       ..assignments.add(
         GnAssignment(call.location, Condition.always, '=', <GnValue>[GnStringValue(name)]),
       );
+    // What set_defaults() gave the template's invocations, as copies the
+    // block appends to.
+    final Map<String, GnVariable>? defaults = scope.lookupTemplateDefaults(template.name);
+    if (defaults != null) {
+      for (final MapEntry<String, GnVariable> e in defaults.entries) {
+        invokerScope.variables[e.key] = _copy(e.value, forwarded: false);
+      }
+    }
     _evaluateBlock(block, invokerScope, Condition.always, const <String>[], target: null);
     final bodyScope = _Scope(template.scope);
     bodyScope.variables['invoker'] = GnVariable('invoker', isList: false)
@@ -2543,6 +2610,30 @@ final class _Evaluator {
             else
               ..._expression(item, scope).items,
         ], isList: true);
+      case GnBinary(op: '-', :final GnNode left, :final GnNode right):
+        // A list without the items of another (angle.gni's defaults for its
+        // tests: the common configs less two): each must be in the list,
+        // as GN has it, and plainly so on both sides.
+        final _Expression l = _expression(left, scope);
+        final _Expression r = _expression(right, scope);
+        if (!l.isList || !r.isList) {
+          throw GnError(node.location, '- of values that are not lists');
+        }
+        final remaining = <_Value>[...l.items];
+        for (final _Value item in r.items) {
+          final int index = remaining.indexWhere(
+            (_Value candidate) =>
+                candidate.value == item.value && candidate.condition == Condition.always,
+          );
+          if (index < 0 || item.condition != Condition.always) {
+            throw GnError(
+              node.location,
+              '- of ${item.value}, which the list does not hold unconditionally',
+            );
+          }
+          remaining.removeAt(index);
+        }
+        return _Expression(remaining, isList: true);
       case GnBinary(op: '+', :final GnNode left, :final GnNode right):
         _Expression l = _expression(left, scope);
         _Expression r = _expression(right, scope);
@@ -2919,6 +3010,55 @@ final class _Evaluator {
           }
           return _Expression.scalar(GnStringValue(rebased(_stringExpression(args[0], scope))));
         }
+        // rebase_path(x, base, from): x, relative to the directory `from`
+        // (itself relative to this file's, as GN reads a relative one),
+        // as a path relative to the source directory `base` -- ANGLE's list
+        // of every source the program cache's version is a hash of, each
+        // backend's own list (written relative to the backend's directory)
+        // rebased to ANGLE's root, where the action that reads them is.
+        // Below the base alone: the result is a file of that directory's
+        // for one of its targets to list.
+        if (args.length == 3) {
+          final GnValue? base = _expression(args[1], scope).scalar;
+          final GnValue? from = _expression(args[2], scope).scalar;
+          if (base is GnStringValue &&
+              from is GnStringValue &&
+              base.value.startsWith('//') &&
+              !base.value.startsWith(buildDirRoot) &&
+              !from.value.startsWith(rebasedPathMarker)) {
+            final String fromDirectory = _absolutePath(from.value.isEmpty ? '.' : from.value, node);
+            final String prefix = base.value.endsWith('/') ? base.value : '${base.value}/';
+            String rebased(String path) {
+              final String absolute = path.startsWith('//')
+                  ? path
+                  : _normalizedPath('$fromDirectory/$path', node);
+              if (!absolute.startsWith(prefix)) {
+                throw GnError(
+                  node.location,
+                  'rebase_path() of $path against ${base.value}: $absolute is not below it',
+                );
+              }
+              return absolute.substring(prefix.length);
+            }
+
+            final _Expression input = _expression(args[0], scope);
+            if (input.isList) {
+              return _Expression(<_Value>[
+                for (final _Value item in input.items)
+                  if (item.value case GnStringValue(:final String value))
+                    _Value(
+                      GnStringValue(rebased(value)),
+                      item.comments,
+                      condition: item.condition,
+                      sourceConditions: item.sourceConditions,
+                    )
+                  else
+                    throw GnError(node.location, 'rebase_path() of a list of ${item.value}'),
+              ], isList: true);
+            }
+            return _Expression.scalar(GnStringValue(rebased(_stringExpression(args[0], scope))));
+          }
+        }
         return _Expression.scalar(GnOpaqueValue(_gnText(node)));
       case GnFunctionCall(name: 'get_label_info', :final List<GnNode> args):
         if (args.length != 2) {
@@ -2958,10 +3098,14 @@ final class _Evaluator {
               throw GnError(node.location, 'filter_include() patterns must be strings'),
         ];
         if (args[0] case GnIdentifier(:final String name)
-            when _predefinedTargetVariables.contains(name) && scope.lookup(name) == null) {
-          // The target's default configs, untouched so far
-          // ([_defaultTargetConfigs]): none of them is a config outside
-          // that set; which of them a platform has is not modeled.
+            when _predefinedTargetVariables.contains(name) && scope.isTarget) {
+          // The target's configs: the default ones ([_defaultTargetConfigs]:
+          // none of them is a config outside that set; which of them a
+          // platform has is not modeled) and what the block added to them
+          // so far. A removal is of no consequence unless it is of a
+          // config asked for.
+          bool matches(String config) =>
+              patterns.any((String pattern) => _matchesFilePattern(config, pattern));
           for (final pattern in patterns) {
             if (_defaultTargetConfigs.any(
               (String config) => _matchesFilePattern(config, pattern),
@@ -2973,7 +3117,24 @@ final class _Evaluator {
               );
             }
           }
-          return const _Expression(<_Value>[], isList: true);
+          final kept = <_Value>[];
+          final GnVariable? variable = scope.lookup(name);
+          for (final GnAssignment assignment in variable?.assignments ?? const <GnAssignment>[]) {
+            for (final GnValue item in assignment.items) {
+              if (item is! GnStringValue || !matches(item.value)) {
+                continue;
+              }
+              if (assignment.op == '-=') {
+                throw GnError(
+                  node.location,
+                  'filter_include() of $name for ${item.value}, which the target removed, is '
+                  'not supported',
+                );
+              }
+              kept.add(_Value(item, GnItemComments.none, condition: assignment.condition));
+            }
+          }
+          return _Expression(kept, isList: true);
         }
         final _Expression list = _expression(args[0], scope);
         final kept = <_Value>[];
@@ -3482,7 +3643,8 @@ final class _Evaluator {
   }
 
   static final RegExp _expansion = RegExp(
-    r'\$(?:\{([A-Za-z_][A-Za-z0-9_]*)\}|([A-Za-z_][A-Za-z0-9_]*))',
+    r'\$(?:\{([A-Za-z_][A-Za-z0-9_]*)\}|([A-Za-z_][A-Za-z0-9_]*)|'
+    r'\{([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)\})',
   );
 
   static final RegExp _defaultToolchainSuffix = RegExp(
@@ -3507,9 +3669,27 @@ final class _Evaluator {
     final parts = <GnValue>[];
     final literal = StringBuffer();
     for (final Match match in _expansion.allMatches(text)) {
-      final String name = match.group(1) ?? match.group(2)!;
       literal.write(text.substring(last, match.start));
       last = match.end;
+      if (match.group(3) case final String base) {
+        // `${scope.member}` (ANGLE's templates name their invoker's
+        // strings inside labels and file names): the member's string.
+        final String memberName = match.group(4)!;
+        final GnVariable? member = scope == null
+            ? null
+            : _scopeVariables(base, node.location, scope)[memberName];
+        final GnValue? value = member == null ? null : _variableItems(member, node).scalar;
+        if (value is! GnStringValue) {
+          throw GnError(
+            node.location,
+            'string expansion of \${$base.$memberName}, which is not one plain string, is not '
+            'supported: ${node.raw}',
+          );
+        }
+        literal.write(value.value);
+        continue;
+      }
+      final String name = match.group(1) ?? match.group(2)!;
       // A variable bound to one of its cases ([_expandExpression]): its
       // string, or the parts of a string around a reference.
       final GnValue? boundValue = bound[name];
@@ -3598,6 +3778,10 @@ final class _Evaluator {
     // Each variable with more than one case, by its place in the text.
     final conditional = <String, List<_Value>>{};
     for (final Match match in _expansion.allMatches(text)) {
+      if (match.group(3) != null) {
+        // `${scope.member}`: one plain string ([_expand]), no cases.
+        continue;
+      }
       final String name = match.group(1) ?? match.group(2)!;
       if (conditional.containsKey(name)) {
         continue;

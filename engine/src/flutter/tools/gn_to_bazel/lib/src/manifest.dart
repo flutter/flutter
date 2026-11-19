@@ -47,6 +47,7 @@ final class ConvertedFile {
     this.interfaceDeps = const <String, List<String>>{},
     this.assume = const <String, GnValue>{},
     this.targetConditions = const <String, String>{},
+    this.uncarriedDataDeps = const <String, String>{},
   });
 
   /// The GN directory (`//flutter/fml`); the input is its `BUILD.gn`.
@@ -150,12 +151,72 @@ final class ConvertedFile {
   /// compiling for them alone. The target is evaluated as if inside
   /// `if (variable)`, so it is incompatible elsewhere.
   final Map<String, String> targetConditions;
+
+  /// The file's groups whose `data_deps` are not carried, with the reason
+  /// for each: run-time files the Bazel side places another way (ANGLE's
+  /// groups over the Vulkan loader, which it opens from beside the
+  /// executable, where a suite's flutter_gpu_test_backends puts it) or that
+  /// nothing loads. A group that links (a cc_library of its dependencies)
+  /// has no words for run-time files of its own, and the converter refuses
+  /// to drop them unasked; the reason goes on the generated rule. A group
+  /// of files (filesGroups) lists its data_deps as members.
+  final Map<String, String> uncarriedDataDeps;
 }
 
 /// The macOS branches of a file deferred to the Apple products' phase
 /// (research/20, M4): evaluated as if `is_mac` were false, as before the
 /// macOS port, so the file's Linux targets stay what they were.
 const Map<String, GnValue> macosDeferred = <String, GnValue>{'is_mac': GnBoolValue(false)};
+
+/// What ANGLE's files are evaluated under: ANGLE is the hosts' (the GPU
+/// suites' GL implementation), and a Mac's stays the wrapped GN build's
+/// until a Mac run has checked the converted one (as [macosDeferred]), so
+/// the target is Linux -- its Vulkan and desktop GL backends, no Metal --
+/// with tools/gn's arguments for ANGLE.
+const Map<String, GnValue> angleHosts = <String, GnValue>{
+  'is_android': GnBoolValue(false),
+  'is_ios': GnBoolValue(false),
+  'is_mac': GnBoolValue(false),
+  'is_apple': GnBoolValue(false),
+  'host_os': GnStringValue('linux'),
+  'target_os': GnStringValue('linux'),
+  // tools/gn's arguments for ANGLE (to_gn_args): nothing beyond the
+  // libraries, no X11 or Wayland, no validation layers, the Vulkan trees of
+  // vulkan-deps.
+  'angle_build_all': GnBoolValue(false),
+  'angle_enable_commit_id': GnBoolValue(false),
+  'angle_enable_libdrm': GnBoolValue(false),
+  'angle_enable_vulkan_validation_layers': GnBoolValue(false),
+  'angle_has_astc_encoder': GnBoolValue(false),
+  'angle_use_wayland': GnBoolValue(false),
+  'angle_use_x11': GnBoolValue(false),
+  'angle_vulkan_headers_dir': GnStringValue('//flutter/third_party/vulkan-deps/vulkan-headers/src'),
+  'angle_vulkan_loader_dir': GnStringValue('//flutter/third_party/vulkan-deps/vulkan-loader/src'),
+  'angle_vulkan_tools_dir': GnStringValue('//flutter/third_party/vulkan-deps/vulkan-tools/src'),
+  'angle_lunarg_vulkantools_dir': GnStringValue(
+    '//flutter/third_party/vulkan-deps/lunarg-vulkantools/src',
+  ),
+};
+
+/// Why ANGLE's shared libraries are not converted.
+const String _angleSharedLibrary =
+    "the shared libraries, which no Linux build of the engine's links (its suites link "
+    'libEGL_static and libGLESv2_static)';
+
+/// Why ANGLE's frame capture is not converted.
+const String _angleFrameCapture =
+    'frame capture, which the libraries the engine links are built without '
+    '(angle_frame_capture_mock)';
+
+/// Why ANGLE's second set of libraries is not converted.
+const String _angleSecondaries =
+    'the second set of libraries, which only tests of ANGLE itself load';
+
+/// Why the data_deps of ANGLE's groups over the Vulkan loader are not
+/// carried.
+const String _angleLoaderAtRunTime =
+    "the loader, which ANGLE opens from beside the executable: a suite's "
+    'flutter_gpu_test_backends puts it there';
 
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   // The root: GN's default target `flutter` (what `ninja` with no target
@@ -3093,6 +3154,194 @@ cc_library(
     hdrs = glob(["configs/darwin/include/**"]),
     includes = ["configs/darwin/include"],
 )
+''',
+  ),
+  // ANGLE (OpenGL ES over Vulkan and over the desktop's GL): libEGL_static
+  // and libGLESv2_static, which the GPU suites and flutter_tester link, from
+  // the tree's own GN -- the libraries, the translator and the preprocessor,
+  // the Vulkan and GL backends -- for Linux. A Mac's ANGLE stays the wrapped
+  // GN build's (build/bazel/gl_wrap), like the rest of its GPU backends, so
+  // the files are evaluated for Linux alone (angleHosts). The engine's labels
+  // for the two libraries are gl_wrap's facade, which takes these targets on
+  // Linux.
+  ConvertedFile(
+    '//flutter/third_party/angle',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    skip: <String, String>{
+      'xxhash_fuzzer': 'a fuzzer (fuzzer_test(), which no engine build has)',
+      'translator_fuzzer': 'a fuzzer (which no engine build has)',
+      'angle': _angleSharedLibrary,
+      'libEGL': _angleSharedLibrary,
+      'libGLESv2': _angleSharedLibrary,
+      'libGLESv1_CM': _angleSharedLibrary,
+      'libEGL_egl_loader': _angleSharedLibrary,
+      'libANGLE_with_capture': _angleFrameCapture,
+      'angle_capture_common': _angleFrameCapture,
+      'angle_frame_capture_shared': _angleFrameCapture,
+      'angle_json_serializer': _angleFrameCapture,
+      'libGLESv2_capture_complement': _angleFrameCapture,
+      'libANGLE_vulkan_secondaries': _angleSecondaries,
+      'libANGLE_vulkan_secondaries_with_capture': _angleSecondaries,
+      'libEGL_vulkan_secondaries': _angleSecondaries,
+      'libGLESv2_vulkan_secondaries': _angleSecondaries,
+      'angle_shader_translator':
+          "the translator's command-line tool, which nothing of the engine's runs",
+      'libfeature_support':
+          'the feature-support library (a shared library over jsoncpp), which nothing the '
+          'engine builds reaches',
+      'opencl_no_pragma_messages':
+          'a config of compiler flags for the OpenCL front end, which is off (angle_enable_cl): '
+          'no target lists it',
+      'angle_translator_ir':
+          'the config of the IR translator, which is off (angle_ir): its include directories '
+          "are of Chromium's generated tree",
+    },
+    // What the overlay that stood here before the conversion had (the
+    // Khronos headers ANGLE ships, which Impeller's GLES backend compiles
+    // against on every platform), and the include roots the packages below
+    // name from under them (Bazel's `includes` is package-relative;
+    // includeDirLibraries). GN's lists do not carry every header along the
+    // dependency edges the includes cross (angle_common includes the
+    // translator's <GLSLANG/ShaderLang.h> and depends on nothing that lists
+    // it), so every target takes the tree's headers from one library:
+    // include/ and src/ here, and the packages' headers libraries.
+    appendix: '''
+# gles_config's include directory, as a library for its dependents; also
+# config("external_config") for dependents outside this repository, the same
+# directory with its headers.
+cc_library(
+    name = "headers",
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+)
+
+# For the GN targets that list ANGLE's headers among their sources.
+exports_files(glob(["include/**/*.h"]))
+
+cc_library(
+    name = "all_headers",
+    hdrs = glob([
+        "include/**/*.h",
+        "src/**/*.h",
+        "src/**/*.inc",
+    ]),
+    deps = [
+        "//src/common/linux:headers",
+        "//src/common/spirv:headers",
+        "//src/common/vulkan:headers",
+        "//src/libANGLE/renderer/gl:headers",
+        "//src/libANGLE/renderer/vulkan:headers",
+        "//src/third_party/volk:headers",
+    ],
+)
+
+cc_library(
+    name = "src_include",
+    includes = ["src"],
+    deps = [":all_headers"],
+)
+
+cc_library(
+    name = "khronos_include",
+    includes = ["src/third_party/khronos"],
+    deps = [":all_headers"],
+)
+''',
+  ),
+  // The packages under src/: each with a library of its headers, which the
+  // src/ include root carries (the root's appendix), and with the sources
+  // exported that the root file's targets list from here (the libraries'
+  // platform sources; the program version's hash, which reads every source
+  // that shapes a program binary).
+  ConvertedFile(
+    '//flutter/third_party/angle/src/common/vulkan',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    uncarriedDataDeps: <String, String>{
+      'angle_libvulkan': _angleLoaderAtRunTime,
+      'angle_vulkan_entry_points': _angleLoaderAtRunTime,
+      'lunarg_vulkantools':
+          "the API dump layer of a debug build, which no suite of the engine's loads",
+    },
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.h"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/angle/src/common/spirv',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.h"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/angle/src/libANGLE/renderer/vulkan',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "**/*.h",
+        "**/*.inc",
+    ]),
+)
+
+exports_files(glob([
+    "**/*.cpp",
+    "**/*.h",
+]))
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/angle/src/libANGLE/renderer/gl',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["**/*.h"]),
+)
+
+exports_files(glob([
+    "**/*.cpp",
+    "**/*.h",
+]))
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/angle/src/third_party/volk',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.h"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/angle/src/common/linux',
+    assume: angleHosts,
+    implicitDeps: <String>['@angle//:all_headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["*.h"]),
+)
+
+exports_files(glob([
+    "*.cpp",
+    "*.h",
+]))
 ''',
   ),
   // The Khronos Vulkan loader (libvulkan.so.1 on Linux, which ANGLE and GLFW

@@ -902,6 +902,11 @@ flutter_cc_test(
             "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
         ],
         "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_gl_and_is_linux": [
+            "-Wno-redundant-parens",  # from //flutter/third_party/angle:libGLESv2_static
+        ],
+        "//conditions:default": [],
     }),
     data = [":gpu_test_backends"] + select({
         "//engine/src/flutter/shell:enable_gl": [
@@ -1115,5 +1120,14 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
         "//engine/src/flutter/build/bazel:not_mac",
+    ],
+)
+
+# `shell_enable_gl && is_linux`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_gl_and_is_linux",
+    match_all = [
+        "//engine/src/flutter/shell:enable_gl",
+        "@platforms//os:linux",
     ],
 )

@@ -153,10 +153,10 @@ sandbox contribute.
 - No Windows, Fuchsia or riscv64 Linux build.
 - Tests run with the network blocked, so golden images are neither compared
   nor uploaded under Bazel.
-- The Dart SDK and ANGLE are GN builds wrapped as single Bazel actions, as
-  are the other GPU test backends on a Mac (SwiftShader, the Vulkan loader
-  and the validation layer, which Linux builds from converted GN files). An
-  edit inside them reruns the whole wrapped build.
+- The Dart SDK is a GN build wrapped as a single Bazel action, as are the
+  GPU test backends on a Mac (ANGLE, SwiftShader, the Vulkan loader and the
+  validation layer, which Linux builds from converted GN files). An edit
+  inside them reruns the whole wrapped build.
 - The wrapped Dart SDK build compiles the VM without LTO in every build.
   GN compiles it with the engine's LTO: full in the Android AOT and iOS
   device builds, thin in the Linux profile and release builds.
@@ -174,7 +174,7 @@ sandbox contribute.
 |---|---|
 | `docs/dependencies.md` | How dependencies reach Bazel; adding one |
 | `docs/toolchains.md` | The C/C++ toolchains: Linux, Android, macOS and iOS, Emscripten |
-| `docs/wrapped_gn_builds.md` | The Dart SDK and the GPU test backends as wrapped GN builds |
+| `docs/wrapped_gn_builds.md` | The Dart SDK as a wrapped GN build; the GPU test backends (converted on Linux, wrapped on a Mac) |
 | `docs/engine_tests.md` | The engine's C++, Dart and Java tests |
 | `docs/framework_tests.md` | The framework's and the tool's tests; the prebuilt engine; `dev/bots/test.dart` |
 | `docs/web_tests.md` | The web engine's unit tests |
