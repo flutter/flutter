@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.editing;
 
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -22,6 +24,8 @@ import java.util.ArrayList;
 /// (i.e. when the outermost batch edit ends). Listeners added during a batch edit will always be
 /// notified when all batch edits end, even if there's no real change.
 ///
+/// Geometry updates are sent immediately, even to listeners added during a batch edit.
+///
 /// Adding/removing listeners or changing the editing state in a didChangeEditingState callback may
 /// cause unexpected behavior.
 //
@@ -33,6 +37,11 @@ class ListenableEditingState extends SpannableStringBuilder {
     // behavior.
     void didChangeEditingState(
         boolean textChanged, boolean selectionChanged, boolean composingRegionChanged);
+
+    // The bounds and caret rect are in the client's local coordinates. The transform maps them to
+    // FlutterView coordinates in logical pixels. Each value is null if unknown.
+    default void setEditableGeometry(
+        @Nullable Matrix transform, @Nullable RectF bounds, @Nullable RectF caretRect) {}
   }
 
   private static final String TAG = "ListenableEditingState";
@@ -190,6 +199,16 @@ class ListenableEditingState extends SpannableStringBuilder {
     mListeners.remove(listener);
     if (mBatchEditNestDepth > 0) {
       mPendingListeners.remove(listener);
+    }
+  }
+
+  void notifyEditableGeometryChanged(
+      @Nullable Matrix transform, @Nullable RectF bounds, @Nullable RectF caretRect) {
+    for (EditingStateWatcher listener : mListeners) {
+      listener.setEditableGeometry(transform, bounds, caretRect);
+    }
+    for (EditingStateWatcher listener : mPendingListeners) {
+      listener.setEditableGeometry(transform, bounds, caretRect);
     }
   }
 

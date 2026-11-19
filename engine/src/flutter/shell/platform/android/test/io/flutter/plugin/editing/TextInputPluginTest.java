@@ -1650,6 +1650,49 @@ public class TextInputPluginTest {
   }
 
   @SuppressWarnings("deprecation")
+  @Test
+  public void caretRectChange_reachesMonitoredConnectionWhenNewerConnectionExists()
+      throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    DartExecutor messenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(messenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> handlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    verify(messenger).setMessageHandler(any(String.class), handlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler = handlerCaptor.getValue();
+    KeyboardManager keyboardManager = mock(KeyboardManager.class);
+
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(0, 0));
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+    InputConnection monitoredConnection =
+        textInputPlugin.createInputConnection(testView, keyboardManager, new EditorInfo());
+    monitoredConnection.requestCursorUpdates(
+        InputConnection.CURSOR_UPDATE_IMMEDIATE | InputConnection.CURSOR_UPDATE_MONITOR);
+    assertEquals(5, testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal(), 0);
+
+    InputConnection newerConnection =
+        textInputPlugin.createInputConnection(testView, keyboardManager, new EditorInfo());
+    sendCaretRect(binaryMessageHandler, 25, 2, 2, 16);
+    assertEquals(25, testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal(), 0);
+
+    monitoredConnection.closeConnection();
+    sendCaretRect(binaryMessageHandler, 45, 2, 2, 16);
+    assertEquals(25, testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal(), 0);
+    newerConnection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+    assertEquals(45, testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal(), 0);
+  }
+
+  @SuppressWarnings("deprecation")
   // setMessageHandler is deprecated.
   @Test
   public void setTextInputClient_clearsCaretRect() throws JSONException {

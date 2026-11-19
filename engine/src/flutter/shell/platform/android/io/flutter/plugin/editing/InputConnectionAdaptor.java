@@ -220,7 +220,8 @@ public class InputConnectionAdaptor extends BaseInputConnection
    * @param caretRect the caret rect in the local coordinate system of the text input client, or
    *     null if unknown.
    */
-  void setEditableGeometry(
+  @Override
+  public void setEditableGeometry(
       @Nullable Matrix editableTransform,
       @Nullable RectF editableBounds,
       @Nullable RectF caretRect) {

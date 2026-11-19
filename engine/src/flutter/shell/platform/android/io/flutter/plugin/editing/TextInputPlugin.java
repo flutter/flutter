@@ -613,15 +613,12 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     updateEditableGeometry();
   }
 
-  // Sends the latest geometry of the current client to its input connection.
+  // Sends the latest geometry of the current client to its input connections.
   private void updateEditableGeometry() {
-    // Until the input method is restarted, lastInputConnection belongs to the previous client. The
-    // input connection of the current client gets the geometry when it's created.
-    if (mRestartInputPending || !(lastInputConnection instanceof InputConnectionAdaptor)) {
-      return;
+    if (inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT) {
+      // The input method may still be monitoring an earlier input connection.
+      mEditable.notifyEditableGeometryChanged(lastClientTransform, lastClientBounds, lastCaretRect);
     }
-    ((InputConnectionAdaptor) lastInputConnection)
-        .setEditableGeometry(lastClientTransform, lastClientBounds, lastCaretRect);
   }
 
   @VisibleForTesting
@@ -647,14 +644,14 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     notifyViewExited();
     configuration = null;
     updateAutofillConfigurationIfNeeded(null);
-    inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
-    unlockPlatformViewInputConnection();
     lastClientRect = null;
     lastClientTransform = null;
     lastClientBounds = null;
     lastCaretRect = null;
-    // The input method may still be using the current input connection.
+    // The input method may still be using a connection to the cleared client.
     updateEditableGeometry();
+    inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
+    unlockPlatformViewInputConnection();
     // When the IME is hidden, we need to restart the input method manager to accomodate
     // some keyboards like the Samsung keyboard that may be caching old state.
     WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
