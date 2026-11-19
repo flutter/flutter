@@ -296,37 +296,61 @@ base class ExtensionBuildManager {
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
   }) async {
-    final (ExtensionConnection connection, Object? result) = await _sendBuildOrAssembleRpc(
-      buildFlags: buildFlags,
-      buildMode: buildMode,
-      buildName: buildName,
-      buildNumber: buildNumber,
-      buildOptions: buildOptions,
+    final ExtensionConnection connection = await _resolveTargetConnection(
       codeSizeDirectory: codeSizeDirectory,
       connectionMap: _buildTargetToConnection,
-      dartDefines: dartDefines,
-      dartObfuscation: dartObfuscation,
       ensureTargetsLoaded: () async {
         if (_cachedBuildTargets == null) {
           await getBuildTargets();
         }
       },
-      extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
-      flavor: flavor,
       flutterRoot: flutterRoot,
-      mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
-      resolvedArtifacts: resolvedArtifacts,
-      rpcMethod: BuildService.buildMethod,
       splitDebugInfo: splitDebugInfo,
-      targetDeviceId: targetDeviceId,
       targetKind: 'build',
       targetName: targetName,
-      targetPlatform: targetPlatform,
-      trackWidgetCreation: trackWidgetCreation ?? (buildMode == BuildMode.debug),
-      treeShakeIcons: treeShakeIcons ?? buildMode.isPrecompiled,
+    );
+    final Map<String, Object?> resolvedConfiguration =
+        connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)
+        ? await _resolveExtensionConfiguration(connection)
+        : const <String, Object?>{};
+    final String? resolvedTargetPlatform =
+        targetPlatform ??
+        _cachedBuildTargets
+            ?.where((ExtensionBuildTarget t) => t.name == targetName)
+            .firstOrNull
+            ?.targetPlatforms
+            .firstOrNull;
+    final Object? result = await _sendTargetRpc(
+      connection: connection,
+      contextParams: ExtensionBuildContext(
+        buildFlags: buildFlags,
+        buildMode: buildMode,
+        buildName: buildName,
+        buildNumber: buildNumber,
+        buildOptions: buildOptions,
+        codeSizeDirectory: codeSizeDirectory,
+        configuration: resolvedConfiguration,
+        dartDefines: dartDefines,
+        dartObfuscation: dartObfuscation,
+        extraFrontEndOptions: extraFrontEndOptions,
+        extraGenSnapshotOptions: extraGenSnapshotOptions,
+        flavor: flavor,
+        flutterRoot: flutterRoot,
+        mainPath: mainPath,
+        outputDir: outputDir,
+        projectRoot: projectRoot,
+        resolvedArtifacts: resolvedArtifacts,
+        splitDebugInfo: splitDebugInfo,
+        targetDeviceId: targetDeviceId,
+        targetPlatform: resolvedTargetPlatform,
+        trackWidgetCreation: trackWidgetCreation ?? (buildMode == BuildMode.debug),
+        treeShakeIcons: treeShakeIcons ?? buildMode.isPrecompiled,
+      ).toMap(),
+      rpcMethod: BuildService.buildMethod,
+      targetKind: 'build',
+      targetName: targetName,
     );
     if (result case final Map<String, Object?> resultMap) {
       try {
@@ -368,79 +392,77 @@ base class ExtensionBuildManager {
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
   }) async {
-    await _sendBuildOrAssembleRpc(
-      buildDir: buildDir,
-      buildMode: buildMode,
-      buildName: buildName,
-      buildNumber: buildNumber,
+    if (!buildDir.hasAbsolutePath) {
+      throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
+    }
+    final ExtensionConnection connection = await _resolveTargetConnection(
       codeSizeDirectory: codeSizeDirectory,
-      configuration: configuration,
       connectionMap: _assembleTargetToConnection,
-      dartDefines: dartDefines,
-      dartObfuscation: dartObfuscation,
       ensureTargetsLoaded: () async {
         if (_cachedAssembleTargets == null) {
           await getAssembleTargets();
         }
       },
-      extraDefines: extraDefines,
-      extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
-      flavor: flavor,
       flutterRoot: flutterRoot,
-      mainPath: mainPath,
       outputDir: outputDir,
       projectRoot: projectRoot,
-      resolvedArtifacts: resolvedArtifacts,
-      rpcMethod: BuildService.assembleMethod,
       splitDebugInfo: splitDebugInfo,
       targetKind: 'assemble',
       targetName: targetName,
-      targetPlatform: targetPlatform,
-      trackWidgetCreation: trackWidgetCreation ?? (buildMode == BuildMode.debug),
-      treeShakeIcons: treeShakeIcons ?? buildMode.isPrecompiled,
+    );
+    final String? resolvedTargetPlatform =
+        targetPlatform ??
+        _cachedAssembleTargets
+            ?.where((ExtensionAssembleTarget t) => t.name == targetName)
+            .firstOrNull
+            ?.targetPlatform;
+    await _sendTargetRpc(
+      connection: connection,
+      contextParams: ExtensionAssembleContext(
+        buildDir: buildDir,
+        buildMode: buildMode,
+        buildName: buildName,
+        buildNumber: buildNumber,
+        codeSizeDirectory: codeSizeDirectory,
+        configuration: configuration ?? const <String, Object?>{},
+        dartDefines: dartDefines,
+        dartObfuscation: dartObfuscation,
+        extraDefines: extraDefines,
+        extraFrontEndOptions: extraFrontEndOptions,
+        extraGenSnapshotOptions: extraGenSnapshotOptions,
+        flavor: flavor,
+        flutterRoot: flutterRoot,
+        mainPath: mainPath,
+        outputDir: outputDir,
+        projectRoot: projectRoot,
+        resolvedArtifacts: resolvedArtifacts,
+        splitDebugInfo: splitDebugInfo,
+        targetPlatform: resolvedTargetPlatform,
+        trackWidgetCreation: trackWidgetCreation ?? (buildMode == BuildMode.debug),
+        treeShakeIcons: treeShakeIcons ?? buildMode.isPrecompiled,
+      ).toMap(),
+      rpcMethod: BuildService.assembleMethod,
+      targetKind: 'assemble',
+      targetName: targetName,
     );
   }
 
-  Future<(ExtensionConnection, Object?)> _sendBuildOrAssembleRpc({
-    required BuildMode buildMode,
+  Future<ExtensionConnection> _resolveTargetConnection({
     required Map<String, ExtensionConnection> connectionMap,
     required Future<void> Function() ensureTargetsLoaded,
     required Uri flutterRoot,
-    required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
-    required Map<String, String> resolvedArtifacts,
-    required String rpcMethod,
     required String targetKind,
     required String targetName,
-    required bool trackWidgetCreation,
-    required bool treeShakeIcons,
-    Uri? buildDir,
-    Map<String, bool> buildFlags = const <String, bool>{},
-    String? buildName,
-    String? buildNumber,
-    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, Object?>? configuration,
-    Map<String, String> dartDefines = const <String, String>{},
-    bool dartObfuscation = false,
-    Map<String, String> extraDefines = const <String, String>{},
-    List<String> extraFrontEndOptions = const <String>[],
-    List<String> extraGenSnapshotOptions = const <String>[],
-    String? flavor,
     Uri? splitDebugInfo,
-    String? targetDeviceId,
-    String? targetPlatform,
   }) async {
     if (!projectRoot.hasAbsolutePath) {
       throw ArgumentError.value(projectRoot, 'projectRoot', 'Must be an absolute path.');
     }
     if (!outputDir.hasAbsolutePath) {
       throw ArgumentError.value(outputDir, 'outputDir', 'Must be an absolute path.');
-    }
-    if (buildDir != null && !buildDir.hasAbsolutePath) {
-      throw ArgumentError.value(buildDir, 'buildDir', 'Must be an absolute path.');
     }
     if (!flutterRoot.hasAbsolutePath) {
       throw ArgumentError.value(flutterRoot, 'flutterRoot', 'Must be an absolute path.');
@@ -478,87 +500,24 @@ base class ExtensionBuildManager {
     if (connection == null) {
       throw ToolExtensionException('No extension found to handle $targetKind target $targetName.');
     }
+    return connection;
+  }
 
-    final Map<String, Object?> resolvedConfiguration =
-        buildDir == null &&
-            connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)
-        ? await _resolveExtensionConfiguration(connection)
-        : (configuration ?? const <String, Object?>{});
-
-    var resolvedTargetPlatform = targetPlatform;
-    if (resolvedTargetPlatform == null) {
-      if (buildDir == null) {
-        resolvedTargetPlatform = _cachedBuildTargets
-            ?.where((ExtensionBuildTarget t) => t.name == targetName)
-            .firstOrNull
-            ?.targetPlatforms
-            .firstOrNull;
-      } else {
-        resolvedTargetPlatform = _cachedAssembleTargets
-            ?.where((ExtensionAssembleTarget t) => t.name == targetName)
-            .firstOrNull
-            ?.targetPlatform;
-      }
-    }
-
-    final Map<String, Object?> contextParams = buildDir != null
-        ? ExtensionAssembleContext(
-            buildDir: buildDir,
-            buildMode: buildMode,
-            buildName: buildName,
-            buildNumber: buildNumber,
-            codeSizeDirectory: codeSizeDirectory,
-            configuration: resolvedConfiguration,
-            dartDefines: dartDefines,
-            dartObfuscation: dartObfuscation,
-            extraDefines: extraDefines,
-            extraFrontEndOptions: extraFrontEndOptions,
-            extraGenSnapshotOptions: extraGenSnapshotOptions,
-            flavor: flavor,
-            flutterRoot: flutterRoot,
-            mainPath: mainPath,
-            outputDir: outputDir,
-            projectRoot: projectRoot,
-            resolvedArtifacts: resolvedArtifacts,
-            splitDebugInfo: splitDebugInfo,
-            targetPlatform: resolvedTargetPlatform,
-            trackWidgetCreation: trackWidgetCreation,
-            treeShakeIcons: treeShakeIcons,
-          ).toMap()
-        : ExtensionBuildContext(
-            buildFlags: buildFlags,
-            buildMode: buildMode,
-            buildName: buildName,
-            buildNumber: buildNumber,
-            buildOptions: buildOptions,
-            codeSizeDirectory: codeSizeDirectory,
-            configuration: resolvedConfiguration,
-            dartDefines: dartDefines,
-            dartObfuscation: dartObfuscation,
-            extraFrontEndOptions: extraFrontEndOptions,
-            extraGenSnapshotOptions: extraGenSnapshotOptions,
-            flavor: flavor,
-            flutterRoot: flutterRoot,
-            mainPath: mainPath,
-            outputDir: outputDir,
-            projectRoot: projectRoot,
-            resolvedArtifacts: resolvedArtifacts,
-            splitDebugInfo: splitDebugInfo,
-            targetDeviceId: targetDeviceId,
-            targetPlatform: resolvedTargetPlatform,
-            trackWidgetCreation: trackWidgetCreation,
-            treeShakeIcons: treeShakeIcons,
-          ).toMap();
-
+  Future<Object?> _sendTargetRpc({
+    required ExtensionConnection connection,
+    required Map<String, Object?> contextParams,
+    required String rpcMethod,
+    required String targetKind,
+    required String targetName,
+  }) async {
     try {
-      final Object? result = await connection.sendRequest(
+      return await connection.sendRequest(
         rpcMethod,
         params: <String, Object?>{BuildService.targetNameParam: targetName, ...contextParams},
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.
         timeout: null,
       );
-      return (connection, result);
     } on ToolExtensionException {
       rethrow;
     } on Object catch (e) {
