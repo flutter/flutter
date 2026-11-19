@@ -64,10 +64,20 @@ Future<void> main() async {
     expect(matchFast, isNotNull);
 
     framesProduced = double.parse(matchFast.group(1)!);
-    expect(framesProduced, closeTo(flutterFrameRate * 2.0, 5.0));
+    // The producer asks for 2x Flutter's frame rate (see the
+    // `FrameState.afterSlow` case of `MyAppState._nextState` in
+    // lib/frame_rate_main.dart), but on a CPU-starved emulator it can't
+    // reliably get there (https://github.com/flutter/flutter/issues/192748).
+    // What matters is that it clearly outpaces Flutter, so that consumption is
+    // limited by Flutter's frame rate.
+    expect(
+      framesProduced,
+      greaterThan(flutterFrameRate * 1.25),
+      reason: 'Producer must outpace Flutter for this phase to be meaningful.',
+    );
     framesConsumed = double.parse(matchFast.group(2)!);
     expect(framesConsumed, closeTo(flutterFrameRate, 10.0));
-    widgetBuilds = int.parse(matchSlow.group(3)!);
+    widgetBuilds = int.parse(matchFast.group(3)!);
     expect(widgetBuilds, 1);
   }, timeout: Timeout.none);
 }
