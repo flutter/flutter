@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,10 +13,13 @@ import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/java.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -32,6 +34,8 @@ import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
+import '../hook_runner.dart' show FlutterHookRunner;
+import '../ios/ios_workflow.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../proxied_devices/debounce_data_stream.dart';
@@ -54,13 +58,18 @@ const protocolVersion = '0.6.1';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
     required this._androidContext,
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
+    required this._devtoolsLauncher,
     required super.toolContext,
     required this._xcode,
     this._androidWorkflow,
+    super.applicationPackages,
     this._deviceManager,
+    this._flutterHookRunner,
     this.hidden = false,
+    this._webRunnerFactory,
   }) {
     argParser.addOption(
       'listen-on-tcp-port',
@@ -70,17 +79,18 @@ class DaemonCommand extends FlutterCommand {
   }
 
   final AndroidContext _androidContext;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final DevtoolsLauncher _devtoolsLauncher;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
 
   AndroidSdk? get _androidSdk => _androidContext.androidSdk;
   Java? get _java => _androidContext.java;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'daemon';
@@ -113,22 +123,27 @@ class DaemonCommand extends FlutterCommand {
 
       await DaemonServer(
         analytics: analytics,
+        androidSdk: _androidSdk,
+        androidWorkflow: _androidWorkflow,
+        applicationPackageFactory: applicationPackages,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        featureFlags: featureFlags,
+        deviceManager: _deviceManager,
+        devtoolsLauncher: _devtoolsLauncher,
+        featureFlags: runner!.featureFlags,
+        flutterHookRunner: _flutterHookRunner,
+        java: _java,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
           outputPreferences: outputPreferences,
         ),
-        toolContext: toolContext,
-        xcode: _xcode,
-        androidSdk: _androidSdk,
-        androidWorkflow: _androidWorkflow,
-        deviceManager: _deviceManager,
-        java: _java,
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         port: port,
+        toolContext: toolContext,
+        webRunnerFactory: _webRunnerFactory,
+        xcode: _xcode,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -138,16 +153,21 @@ class DaemonCommand extends FlutterCommand {
         logger: logger,
       ),
       analytics: analytics,
-      buildSystem: _buildSystem,
-      buildTargets: _buildTargets,
-      featureFlags: featureFlags,
-      toolContext: toolContext,
-      xcode: _xcode,
       androidSdk: _androidSdk,
       androidWorkflow: _androidWorkflow,
+      applicationPackageFactory: applicationPackages,
+      assetBundleFactory: _assetBundleFactory,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
       deviceManager: _deviceManager,
+      devtoolsLauncher: _devtoolsLauncher,
+      featureFlags: runner!.featureFlags,
+      flutterHookRunner: _flutterHookRunner,
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
+      toolContext: toolContext,
+      webRunnerFactory: _webRunnerFactory,
+      xcode: _xcode,
     );
     logger.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
@@ -162,8 +182,11 @@ class DaemonCommand extends FlutterCommand {
 class DaemonServer {
   DaemonServer({
     required this.analytics,
+    required this.applicationPackageFactory,
+    required this.assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
+    required this.devtoolsLauncher,
     required this.featureFlags,
     required this.logger,
     required this.toolContext,
@@ -172,15 +195,22 @@ class DaemonServer {
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
+    this.flutterHookRunner,
     this.java,
     this.notifyingLogger,
     this.port,
+    this.webRunnerFactory,
   });
 
   final int? port;
+  final ApplicationPackageFactory applicationPackageFactory;
+  final AssetBundleFactory assetBundleFactory;
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
+  final DevtoolsLauncher devtoolsLauncher;
+  final FlutterHookRunner? flutterHookRunner;
   final ToolContext toolContext;
+  final WebRunnerFactory? webRunnerFactory;
   final Xcode? xcode;
 
   /// Stdout logger used to print general server-related errors.
@@ -229,16 +259,21 @@ class DaemonServer {
           logger: logger,
         ),
         analytics: analytics,
+        androidSdk: androidSdk,
+        androidWorkflow: androidWorkflow,
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: toolContext,
-        xcode: xcode,
-        notifyingLogger: notifyingLogger,
         deviceManager: deviceManager,
-        java: java,
-        androidSdk: androidSdk,
+        devtoolsLauncher: devtoolsLauncher,
         featureFlags: featureFlags,
-        androidWorkflow: androidWorkflow,
+        flutterHookRunner: flutterHookRunner,
+        java: java,
+        notifyingLogger: notifyingLogger,
+        toolContext: toolContext,
+        webRunnerFactory: webRunnerFactory,
+        xcode: xcode,
       );
       await daemon.onExit;
       await socketDone;
@@ -263,54 +298,52 @@ class Daemon {
   Daemon(
     this.connection, {
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required DevtoolsLauncher devtoolsLauncher,
     required FeatureFlags featureFlags,
-    required ToolContext toolContext,
+    required this._toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
     FileTransfer fileTransfer = const FileTransfer(),
+    FlutterHookRunner? flutterHookRunner,
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
-  }) : _logger = notifyingLogger ?? toolContext.logger,
-       _fs = toolContext.fs,
-       _stdio = toolContext.stdio {
-    final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
-        toolContext;
+    WebRunnerFactory? webRunnerFactory,
+  }) {
+    final Platform platform = _toolContext.platform;
     final AndroidWorkflow workflow =
         androidWorkflow ??
         AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: featureFlags);
+    final IOSWorkflow? iosWorkflow = xcode == null
+        ? null
+        : IOSWorkflow(featureFlags: featureFlags, xcode: xcode, platform: platform);
 
     // Set up domains.
-    registerDomain(
-      daemonDomain = DaemonDomain(
-        this,
-        featureFlags: featureFlags,
-        fileSystem: _fs,
-        logger: _logger,
-        projectFactory: projectFactory,
-        stdio: _stdio,
-      ),
-    );
+    registerDomain(daemonDomain = DaemonDomain(this, featureFlags: featureFlags));
     registerDomain(
       appDomain = AppDomain(
         this,
         analytics: analytics,
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: assetBundleFactory,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: toolContext,
+        featureFlags: featureFlags,
+        flutterHookRunner: flutterHookRunner,
+        webRunnerFactory: webRunnerFactory,
         xcode: xcode,
       ),
     );
     registerDomain(
       deviceDomain = DeviceDomain(
         this,
-        fileSystem: _fs,
-        logger: _logger,
-        projectFactory: projectFactory,
+        applicationPackageFactory: applicationPackageFactory,
         deviceManager: deviceManager,
       ),
     );
@@ -318,17 +351,14 @@ class Daemon {
       emulatorDomain = EmulatorDomain(
         this,
         androidWorkflow: workflow,
-        fileSystem: _fs,
-        logger: _logger,
-        processManager: processManager,
+        iosWorkflow: iosWorkflow,
+        xcode: xcode,
         androidSdk: androidSdk,
         java: java,
       ),
     );
-    registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(
-      proxyDomain = ProxyDomain(this, fileSystem: _fs, fileTransfer: fileTransfer, logger: _logger),
-    );
+    registerDomain(devToolsDomain = DevToolsDomain(this, devtoolsLauncher: devtoolsLauncher));
+    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -344,15 +374,20 @@ class Daemon {
 
   factory Daemon.createMachineDaemon({
     required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
+    required DevtoolsLauncher devtoolsLauncher,
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
+    FlutterHookRunner? flutterHookRunner,
     Java? java,
+    WebRunnerFactory? webRunnerFactory,
   }) {
     final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
@@ -361,27 +396,30 @@ class Daemon {
         logger: logger,
       ),
       analytics: analytics,
+      androidSdk: androidSdk,
+      androidWorkflow: androidWorkflow,
+      applicationPackageFactory: applicationPackageFactory,
+      assetBundleFactory: assetBundleFactory,
       buildSystem: buildSystem,
       buildTargets: buildTargets,
-      toolContext: toolContext,
-      xcode: xcode,
+      deviceManager: deviceManager,
+      devtoolsLauncher: devtoolsLauncher,
+      featureFlags: featureFlags,
+      flutterHookRunner: flutterHookRunner,
+      java: java,
+      logToStdout: true,
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
-      logToStdout: true,
-      deviceManager: deviceManager,
-      java: java,
-      androidSdk: androidSdk,
-      featureFlags: featureFlags,
-      androidWorkflow: androidWorkflow,
+      toolContext: toolContext,
+      webRunnerFactory: webRunnerFactory,
+      xcode: xcode,
     );
     return daemon;
   }
 
   final DaemonConnection connection;
-  final Stdio _stdio;
-  final Logger _logger;
-  final FileSystem _fs;
+  final ToolContext _toolContext;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -411,7 +449,7 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      _stdio.stderrWrite('no id for request: $request\n');
+      _toolContext.stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -460,6 +498,10 @@ abstract class Domain {
 
   final Daemon daemon;
   final String name;
+
+  @protected
+  ToolContext get toolContext => daemon._toolContext;
+
   final _handlers = <String, CommandHandler>{};
   final _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
@@ -547,15 +589,7 @@ abstract class Domain {
 ///
 /// This domain fires the `daemon.logMessage` event.
 class DaemonDomain extends Domain {
-  DaemonDomain(
-    Daemon daemon, {
-    required this._featureFlags,
-    required FileSystem fileSystem,
-    required this._logger,
-    required this._projectFactory,
-    required this._stdio,
-  }) : _fs = fileSystem,
-       super(daemon, 'daemon') {
+  DaemonDomain(Daemon daemon, {required this._featureFlags}) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
@@ -571,9 +605,10 @@ class DaemonDomain extends Domain {
           // ignore: avoid_print
           print(message.message);
         } else if (message.level == 'error' || message.level == 'warning') {
-          _stdio.stderrWrite('${message.message}\n');
+          final Stdio stdio = toolContext.stdio;
+          stdio.stderrWrite('${message.message}\n');
           if (message.stackTrace != null) {
-            _stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
+            stdio.stderrWrite('${message.stackTrace.toString().trimRight()}\n');
           }
         }
       } else {
@@ -593,11 +628,9 @@ class DaemonDomain extends Domain {
     });
   }
 
-  final FileSystem _fs;
   final FeatureFlags _featureFlags;
-  final Logger _logger;
-  final FlutterProjectFactory _projectFactory;
-  final Stdio _stdio;
+
+  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
 
   StreamSubscription<LogMessage>? _subscription;
 
@@ -644,9 +677,8 @@ class DaemonDomain extends Domain {
     final platformTypes = <String>[];
     final platformTypesMap = <String, Object>{};
     try {
-      final FlutterProject flutterProject = _projectFactory.fromDirectory(
-        _fs.directory(projectRoot),
-      );
+      final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+      final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectRoot));
       final Set<SupportedPlatform> supportedPlatforms = flutterProject
           .getSupportedPlatforms()
           .toSet();
@@ -831,25 +863,29 @@ class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
     required this._analytics,
+    required this._applicationPackageFactory,
+    required this._assetBundleFactory,
     required this._buildSystem,
     required this._buildTargets,
-    required this._toolContext,
+    required this._featureFlags,
     required this._xcode,
-  }) : _fs = _toolContext.fs,
-       _logger = _toolContext.logger,
-       super(daemon, 'app') {
+    this._flutterHookRunner,
+    this._webRunnerFactory,
+  }) : super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
   }
 
-  final FileSystem _fs;
   final Analytics _analytics;
-  final Logger _logger;
-  final ToolContext _toolContext;
+  final ApplicationPackageFactory _applicationPackageFactory;
+  final AssetBundleFactory _assetBundleFactory;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
+  final FlutterHookRunner? _flutterHookRunner;
+  final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
 
   static const _uuidGenerator = Uuid();
@@ -884,16 +920,17 @@ class AppDomain extends Domain {
       );
     }
 
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        toolContext;
+
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = _fs.currentDirectory;
-    _fs.currentDirectory = _fs.directory(projectDirectory);
-    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
-      _fs.currentDirectory,
-    );
+    final Directory cwd = fs.currentDirectory;
+    fs.currentDirectory = fs.directory(projectDirectory);
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: options.buildInfo,
       target: target,
       userIdentifier: userIdentifier,
@@ -902,47 +939,59 @@ class AppDomain extends Domain {
     ResidentRunner runner;
 
     if (await device.targetPlatform == TargetPlatform.web_javascript) {
-      runner = webRunnerFactory!.createWebRunner(
+      runner = _webRunnerFactory!.createWebRunner(
         flutterDevice,
-        flutterProject: flutterProject,
-        target: target,
-        debuggingOptions: options,
-        stayResident: true,
-        urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
-        machine: machine,
         analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        toolContext: _toolContext,
+        debuggingOptions: options,
+        featureFlags: _featureFlags,
+        flutterHookRunner: _flutterHookRunner,
+        flutterProject: flutterProject,
+        machine: machine,
+        stayResident: true,
+        target: target,
+        toolContext: toolContext,
+        urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
-        target: target,
-        debuggingOptions: options,
-        applicationBinary: applicationBinary,
-        projectRootPath: projectRootPath,
-        dillOutputPath: dillOutputPath,
-        hostIsIde: true,
-        machine: machine,
         analytics: _analytics,
+        applicationBinary: applicationBinary,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        toolContext: _toolContext,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: options,
+        dillOutputPath: dillOutputPath,
+        featureFlags: _featureFlags,
+        hostIsIde: true,
+        machine: machine,
+        projectRootPath: projectRootPath,
+        target: target,
+        toolContext: toolContext,
         xcode: _xcode,
       );
     } else {
       runner = ColdRunner(
         <FlutterDevice>[flutterDevice],
-        target: target,
-        debuggingOptions: options,
-        applicationBinary: applicationBinary,
-        machine: machine,
         analytics: _analytics,
+        applicationBinary: applicationBinary,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        toolContext: _toolContext,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: options,
+        featureFlags: _featureFlags,
+        machine: machine,
+        target: target,
+        toolContext: toolContext,
         xcode: _xcode,
       );
     }
@@ -964,7 +1013,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<MachineOutputLogger>(_logger),
+      asLogger<MachineOutputLogger>(logger),
     );
   }
 
@@ -1044,7 +1093,7 @@ class AppDomain extends Domain {
       } finally {
         // If the full directory is used instead of the path then this causes
         // a TypeError with the ErrorHandlingFileSystem.
-        _fs.currentDirectory = cwd.path;
+        toolContext.fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });
@@ -1239,14 +1288,8 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(
-    Daemon daemon, {
-    required FileSystem fileSystem,
-    required this._logger,
-    required this._projectFactory,
-    this._deviceManager,
-  }) : _fs = fileSystem,
-       super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {required this._applicationPackageFactory, this._deviceManager})
+    : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1271,10 +1314,10 @@ class DeviceDomain extends Domain {
     _deviceManager?.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
+  final ApplicationPackageFactory _applicationPackageFactory;
   final DeviceManager? _deviceManager;
-  final FileSystem _fs;
-  final Logger _logger;
-  final FlutterProjectFactory _projectFactory;
+
+  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1404,7 +1447,7 @@ class DeviceDomain extends Domain {
     final File applicationBinary = daemon.proxyDomain.tempDirectory.childFile(
       _getStringArg(args, 'applicationBinary', required: true)!,
     );
-    final ApplicationPackage? applicationPackage = await ApplicationPackageFactory.instance!
+    final ApplicationPackage? applicationPackage = await _applicationPackageFactory
         .getPackageForPlatform(targetPlatform, applicationBinary: applicationBinary);
     final id = 'application_package_${_id++}';
     _applicationPackages[id] = applicationPackage;
@@ -1435,7 +1478,7 @@ class DeviceDomain extends Domain {
   /// Stops a log reader that was previously started.
   Future<void> stopLogReader(Map<String, Object?> args) async {
     final String? id = _getStringArg(args, 'id', required: true);
-    _logReaders.remove(id)?.dispose();
+    await _logReaders.remove(id)?.dispose();
   }
 
   /// Starts an app on a device.
@@ -1525,15 +1568,18 @@ class DeviceDomain extends Domain {
       devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
     }
 
+    final ToolContext(:Artifacts artifacts, :FileSystem fs, :FlutterProjectFactory projectFactory) =
+        toolContext;
     FlutterProject? project;
     try {
-      project = _projectFactory.fromDirectory(_fs.currentDirectory);
+      project = projectFactory.fromDirectory(fs.currentDirectory);
     } on ToolExit {
       // In daemon mode the cwd may not be a Flutter project, so we just ignore
       // these errors and use 'Unknown' as the package name below.
     }
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
+      artifacts: artifacts,
       appName:
           'Kind: Flutter - Device: ${device.displayName} - '
           'Package: ${project?.manifest.appName ?? 'Unknown'}',
@@ -1634,21 +1680,20 @@ class DeviceDomain extends Domain {
 }
 
 class DevToolsDomain extends Domain {
-  DevToolsDomain(Daemon daemon) : super(daemon, 'devtools') {
+  DevToolsDomain(Daemon daemon, {required this._devtoolsLauncher}) : super(daemon, 'devtools') {
     registerHandler('serve', serve);
   }
 
-  DevtoolsLauncher? _devtoolsLauncher;
+  final DevtoolsLauncher _devtoolsLauncher;
 
   Future<Map<String, Object?>> serve([Map<String, Object?>? args]) async {
-    _devtoolsLauncher ??= DevtoolsLauncher.instance;
-    final DevToolsServerAddress? server = await _devtoolsLauncher?.serve();
+    final DevToolsServerAddress? server = await _devtoolsLauncher.serve();
     return <String, Object?>{'host': server?.host, 'port': server?.port};
   }
 
   @override
   Future<void> dispose() async {
-    await _devtoolsLauncher?.close();
+    await _devtoolsLauncher.close();
   }
 }
 
@@ -1876,29 +1921,28 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(
     Daemon daemon, {
     required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
+    required IOSWorkflow? iosWorkflow,
+    required Xcode? xcode,
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
     Java? java,
-  }) : emulators =
-           emulatorManager ??
-           EmulatorManager(
-             fileSystem: fileSystem,
-             logger: logger,
-             javaBuilder: () => java,
-             androidSdkBuilder: () => androidSdk,
-             processManager: processManager,
-             androidWorkflow: androidWorkflow,
-           ),
-       super(daemon, 'emulator') {
+  }) : super(daemon, 'emulator') {
+    emulators =
+        emulatorManager ??
+        EmulatorManager(
+          androidWorkflow: androidWorkflow,
+          iosWorkflow: iosWorkflow,
+          javaBuilder: () => java,
+          toolContext: toolContext,
+          xcode: xcode,
+          androidSdkBuilder: () => androidSdk,
+        );
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
     registerHandler('create', create);
   }
 
-  final EmulatorManager emulators;
+  late final EmulatorManager emulators;
 
   Future<List<Map<String, Object?>>> getEmulators([Map<String, Object?>? args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();
@@ -1930,13 +1974,7 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(
-    Daemon daemon, {
-    required FileSystem fileSystem,
-    required this._fileTransfer,
-    required this._logger,
-  }) : _fs = fileSystem,
-       super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {required this._fileTransfer}) : super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);
@@ -1946,8 +1984,8 @@ class ProxyDomain extends Domain {
   }
 
   final FileTransfer _fileTransfer;
-  final FileSystem _fs;
-  final Logger _logger;
+
+  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
 
   final _forwardedConnections = <String, Socket>{};
   var _id = 0;
@@ -2085,7 +2123,7 @@ class ProxyDomain extends Domain {
 
   Directory? _tempDirectory;
   Directory get tempDirectory =>
-      _tempDirectory ??= _fs.systemTempDirectory.childDirectory('flutter_tool_daemon')
+      _tempDirectory ??= toolContext.fs.systemTempDirectory.childDirectory('flutter_tool_daemon')
         ..createSync();
 }
 

@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -75,6 +76,9 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: const DelegatingToolContext(),
@@ -102,6 +106,9 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: const DelegatingToolContext(),
@@ -128,6 +135,9 @@ void main() {
       daemon = Daemon(
         serverDaemonConnection,
         analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
         toolContext: const DelegatingToolContext(),
@@ -156,7 +166,7 @@ void main() {
 
       // Now try to stop the log reader
       expect(fakeLogReader.disposeCalled, false);
-      logReader.dispose();
+      await logReader.dispose();
       await pumpEventQueue();
       expect(fakeLogReader.disposeCalled, true);
     });
@@ -166,6 +176,9 @@ void main() {
         daemon = Daemon(
           serverDaemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const BuildTargetsImpl(),
           toolContext: const DelegatingToolContext(),
@@ -220,7 +233,6 @@ void main() {
       },
       overrides: <Type, Generator>{
         Java: () => FakeJava(),
-        ApplicationPackageFactory: () => applicationPackageFactory,
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => fakeProcessManager,
       },
@@ -232,6 +244,9 @@ void main() {
         daemon = Daemon(
           serverDaemonConnection,
           analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           buildTargets: const BuildTargetsImpl(),
           toolContext: const DelegatingToolContext(),
@@ -401,7 +416,7 @@ class FakeDeviceLogReader implements DeviceLogReader {
   Future<void> provideVmService(FlutterVmService? connectedVmService) async {}
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposeCalled = true;
   }
 
@@ -435,3 +450,5 @@ class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplication
   @override
   late File applicationPackage;
 }
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}

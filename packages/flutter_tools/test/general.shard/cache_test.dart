@@ -9,12 +9,12 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -79,23 +79,18 @@ void main() {
     });
 
     testWithoutContext('should not throw when lock is acquired', () async {
-      final String? oldRoot = Cache.flutterRoot;
-      Cache.flutterRoot = '';
-      try {
-        final FileSystem fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-        fileSystem
-            .file(fileSystem.path.join('bin', 'cache', 'lockfile'))
-            .createSync(recursive: true);
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(
+        fileSystem: fileSystem,
+        flutterRoot: '',
+        processManager: FakeProcessManager.any(),
+      );
+      fileSystem.file(fileSystem.path.join('bin', 'cache', 'lockfile')).createSync(recursive: true);
 
-        await cache.lock();
+      await cache.lock();
 
-        expect(cache.checkLockAcquired, returnsNormally);
-        expect(cache.releaseLock, returnsNormally);
-      } finally {
-        Cache.flutterRoot = oldRoot;
-      }
-      // TODO(zanderso): implement support for lock so this can be tested with the memory file system.
+      expect(cache.checkLockAcquired, returnsNormally);
+      expect(cache.releaseLock, returnsNormally);
     }, skip: true); // https://github.com/flutter/flutter/issues/87923
 
     testWithoutContext('throws tool exit when lockfile open fails', () async {
@@ -302,7 +297,7 @@ void main() {
       expect(artifact2.didUpdate, true);
     });
 
-    testUsingContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+    testWithoutContext('should skip EngineCachedArtifacts when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
@@ -311,15 +306,16 @@ void main() {
       final cacheWithArtifacts = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
+        isLocalEngineBuilder: () => true,
         processManager: FakeProcessManager.any(),
       );
 
       await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
-    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+    });
 
-    testUsingContext('should skip engine_stamp artifact when local engine is provided', () async {
+    testWithoutContext('should skip engine_stamp artifact when local engine is provided', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
       final fileSystem = MemoryFileSystem.test();
       final artifact2 = FakeEngineStampArtifact()..upToDate = false;
@@ -327,13 +323,14 @@ void main() {
       final cacheWithArtifacts = Cache.test(
         fileSystem: fileSystem,
         artifacts: <CachedArtifact>[artifact1, artifact2],
+        isLocalEngineBuilder: () => true,
         processManager: FakeProcessManager.any(),
       );
 
       await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
       expect(artifact1.didUpdate, true);
       expect(artifact2.didUpdate, false);
-    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+    });
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
@@ -1384,6 +1381,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1410,6 +1408,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1435,6 +1434,7 @@ void main() {
     artifactSet.stampName = 'STAMP';
     final cache = Cache(
       artifacts: <ArtifactSet>[artifactSet],
+      isLocalEngineBuilder: () => false,
       logger: logger,
       fileSystem: fileSystem,
       platform: FakePlatform(),
@@ -1765,7 +1765,11 @@ void main() {
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
-      cache = Cache.test(fileSystem: memoryFileSystem, processManager: FakeProcessManager.any());
+      cache = Cache.test(
+        fileSystem: memoryFileSystem,
+        flutterRoot: '',
+        processManager: FakeProcessManager.any(),
+      );
       fakeAndroidSdk = FakeAndroidSdk();
     });
 
@@ -1774,46 +1778,18 @@ void main() {
         cache!,
         java: FakeJava(),
         platform: FakePlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.empty(),
+        ),
       );
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
-    testUsingContext(
+    testWithoutContext(
       'AndroidMavenArtifacts can invoke Gradle resolve dependencies if Android SDK is present',
       () async {
-        final String? oldRoot = Cache.flutterRoot;
-        Cache.flutterRoot = '';
-        try {
-          final mavenArtifacts = AndroidMavenArtifacts(
-            cache!,
-            java: FakeJava(),
-            platform: FakePlatform(),
-          );
-          expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-
-          final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')
-            ..createSync(recursive: true);
-          gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
-          gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
-
-          await mavenArtifacts.update(
-            FakeArtifactUpdater(),
-            BufferLogger.test(),
-            memoryFileSystem!,
-            FakeOperatingSystemUtils(),
-          );
-
-          expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-          expect(fakeAndroidSdk!.reinitialized, true);
-        } finally {
-          Cache.flutterRoot = oldRoot;
-        }
-      },
-      overrides: <Type, Generator>{
-        Cache: () => cache,
-        FileSystem: () => memoryFileSystem,
-        Platform: () => FakePlatform(),
-        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        final processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
               '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
@@ -1824,20 +1800,24 @@ void main() {
               'resolveDependencies',
             ],
           ),
-        ]),
-        AndroidSdk: () => fakeAndroidSdk,
-      },
-    );
-
-    testUsingContext(
-      'AndroidMavenArtifacts is a no-op if the Android SDK is absent',
-      () async {
+        ]);
+        final processUtils = ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: processManager,
+        );
         final mavenArtifacts = AndroidMavenArtifacts(
           cache!,
           java: FakeJava(),
           platform: FakePlatform(),
+          androidSdk: fakeAndroidSdk,
+          processUtils: processUtils,
         );
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
+
+        final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')
+          ..createSync(recursive: true);
+        gradleWrapperDir.childFile('gradlew').writeAsStringSync('irrelevant');
+        gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
         await mavenArtifacts.update(
           FakeArtifactUpdater(),
@@ -1847,14 +1827,75 @@ void main() {
         );
 
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
-      },
-      overrides: <Type, Generator>{
-        Cache: () => cache,
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-        AndroidSdk: () => null, // Android SDK was not located.
+        expect(fakeAndroidSdk!.reinitialized, true);
       },
     );
+
+    testWithoutContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
+      final mavenArtifacts = AndroidMavenArtifacts(
+        cache!,
+        java: FakeJava(),
+        platform: FakePlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.empty(),
+        ),
+      );
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
+
+      await mavenArtifacts.update(
+        FakeArtifactUpdater(),
+        BufferLogger.test(),
+        memoryFileSystem!,
+        FakeOperatingSystemUtils(),
+      );
+
+      expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
+    });
+  });
+
+  testWithoutContext('Cache.flutterRoot precedence prefers explicit flutterRoot, then rootOverride, then defaultFlutterRoot', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final logger = BufferLogger.test();
+    final osUtils = FakeOperatingSystemUtils();
+    final platform = FakePlatform(
+      environment: const <String, String>{'FLUTTER_ROOT': '/env/flutter'},
+    );
+    final Directory rootOverride = fileSystem.directory('/override/flutter');
+
+    final explicitCache = Cache(
+      fileSystem: fileSystem,
+      flutterRoot: '/explicit/flutter',
+      isLocalEngineBuilder: () => false,
+      logger: logger,
+      osUtils: osUtils,
+      platform: platform,
+      rootOverride: rootOverride,
+    );
+    expect(explicitCache.flutterRoot, '/explicit/flutter');
+
+    final overrideCache = Cache(
+      fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
+      logger: logger,
+      osUtils: osUtils,
+      platform: platform,
+      rootOverride: rootOverride,
+    );
+    expect(overrideCache.flutterRoot, '/override/flutter');
+
+    final mutableEnv = <String, String>{'FLUTTER_ROOT': '/env/flutter'};
+    final defaultCache = Cache(
+      fileSystem: fileSystem,
+      isLocalEngineBuilder: () => false,
+      logger: logger,
+      osUtils: osUtils,
+      platform: FakePlatform(environment: mutableEnv),
+    );
+    expect(defaultCache.flutterRoot, '/env/flutter');
+    // Subsequent accesses should return the memoized value.
+    mutableEnv['FLUTTER_ROOT'] = '/mutated/flutter';
+    expect(defaultCache.flutterRoot, '/env/flutter');
   });
 }
 
@@ -1936,17 +1977,6 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
   @override
   String stampName = 'ios-usb';
-}
-
-class FakeLocalEngineArtifacts extends Fake implements Artifacts {
-  @override
-  LocalEngineInfo get localEngineInfo => const LocalEngineInfo(
-    targetOutPath: 'out/android_debug_unopt',
-    hostOutPath: 'out/host_debug_unopt',
-  );
-
-  @override
-  bool get usesLocalArtifacts => true;
 }
 
 class FakeEngineCachedArtifact extends EngineCachedArtifact {
@@ -2085,7 +2115,7 @@ class FakeCache extends Cache {
     required super.fileSystem,
     required super.platform,
     required super.osUtils,
-  }) : super(artifacts: <ArtifactSet>[]);
+  }) : super(artifacts: <ArtifactSet>[], isLocalEngineBuilder: () => false);
 
   late File stampFile;
 

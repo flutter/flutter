@@ -137,6 +137,14 @@ run-configs:
     wasm-allow-list:
       gecko: true
 
+  - name: firefox-wimp
+    browser: firefox
+    canvaskit-variant: full
+    cross-origin-isolated: true
+    enable-wimp: true
+    wasm-allow-list:
+      gecko: true
+
   - name: safari
     browser: safari
     canvaskit-variant: full
@@ -151,6 +159,14 @@ run-configs:
     browser: safari
     canvaskit-variant: full
     cross-origin-isolated: true
+    wasm-allow-list:
+      webkit: true
+
+  - name: safari-wimp
+    browser: safari
+    canvaskit-variant: full
+    cross-origin-isolated: true
+    enable-wimp: true
     wasm-allow-list:
       webkit: true
 
@@ -251,6 +267,12 @@ test-suites:
     run-config: firefox-coi-wasm
     artifact-deps: [ skwasm ]
 
+  - name: firefox-dart2wasm-wimp-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: firefox-wimp
+    artifact-deps: [ skwasm ]
+    enable-ci: false
+
   - name: safari-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
     run-config: safari
@@ -285,6 +307,12 @@ test-suites:
     test-bundle: dart2wasm-skwasm-skwasm
     run-config: safari-coi-wasm
     artifact-deps: [ skwasm ]
+
+  - name: safari-dart2wasm-wimp-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: safari-wimp
+    artifact-deps: [ skwasm ]
+    enable-ci: false
 
   - name: chrome-dart2wasm-canvaskit-engine
     test-bundle: dart2wasm-canvaskit-engine

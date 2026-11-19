@@ -30,7 +30,6 @@
                 "--simulator",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim",
@@ -47,8 +46,7 @@
                     "debug",
                     "--simulator",
                     "--no-lto",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -77,7 +75,6 @@
                 "--simulator-cpu=arm64",
                 "--no-lto",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_arm64",
@@ -95,8 +92,7 @@
                     "--simulator",
                     "--simulator-cpu=arm64",
                     "--no-lto",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -122,7 +118,6 @@
                 "--runtime-mode",
                 "debug",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug",
@@ -141,8 +136,7 @@
                     "--ios",
                     "--runtime-mode",
                     "debug",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -168,7 +162,6 @@
                 "--runtime-mode",
                 "profile",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_profile",
@@ -187,8 +180,7 @@
                     "--ios",
                     "--runtime-mode",
                     "profile",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -214,7 +206,6 @@
                 "--runtime-mode",
                 "release",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_release",
@@ -233,8 +224,7 @@
                     "--ios",
                     "--runtime-mode",
                     "release",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -263,7 +253,6 @@
                 "--no-lto",
                 "--darwin-extension-safe",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_extension_safe",
@@ -281,8 +270,7 @@
                     "--simulator",
                     "--no-lto",
                     "--darwin-extension-safe",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -312,7 +300,6 @@
                 "--no-lto",
                 "--darwin-extension-safe",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_arm64_extension_safe",
@@ -331,8 +318,7 @@
                     "--simulator-cpu=arm64",
                     "--no-lto",
                     "--darwin-extension-safe",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -359,7 +345,6 @@
                 "debug",
                 "--darwin-extension-safe",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_extension_safe",
@@ -379,8 +364,7 @@
                     "--runtime-mode",
                     "debug",
                     "--darwin-extension-safe",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -407,7 +391,6 @@
                 "profile",
                 "--darwin-extension-safe",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_profile_extension_safe",
@@ -427,8 +410,7 @@
                     "--runtime-mode",
                     "profile",
                     "--darwin-extension-safe",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {
@@ -455,7 +437,6 @@
                 "release",
                 "--darwin-extension-safe",
                 "--rbe",
-                "--no-goma",
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_release_extension_safe",
@@ -475,8 +456,7 @@
                     "--runtime-mode",
                     "release",
                     "--darwin-extension-safe",
-                    "--no-rbe",
-                    "--no-goma"
+                    "--no-rbe"
                 ]
             },
             "properties": {

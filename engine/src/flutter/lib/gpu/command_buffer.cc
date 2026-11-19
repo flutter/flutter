@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/command_buffer.h"
 
 #include "dart_api.h"
+#include "fml/logging.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/renderer/command_buffer.h"
@@ -32,6 +33,9 @@ bool CommandBuffer::Encodable::EncodeCommands() const {
   if (blit_pass) {
     return blit_pass->EncodeCommands();
   }
+  if (compute_pass) {
+    return compute_pass->EncodeCommands();
+  }
   return false;
 }
 
@@ -39,16 +43,85 @@ std::shared_ptr<impeller::CommandBuffer> CommandBuffer::GetCommandBuffer() {
   return command_buffer_;
 }
 
-void CommandBuffer::AddRenderPass(
-    std::shared_ptr<impeller::RenderPass> render_pass) {
+std::shared_ptr<impeller::RenderPass> CommandBuffer::CreateRenderPass(
+    const impeller::RenderTarget& render_target) {
+  if (!EndOpenPass()) {
+    return nullptr;
+  }
+  auto render_pass = command_buffer_->CreateRenderPass(render_target);
+  if (!render_pass) {
+    return nullptr;
+  }
   Encodable encodable;
-  encodable.render_pass = std::move(render_pass);
+  encodable.render_pass = render_pass;
   encodables_.push_back(std::move(encodable));
+  has_open_pass_ = true;
+  return render_pass;
+}
+
+bool CommandBuffer::EndRenderPass(const impeller::RenderPass* render_pass) {
+  if (!render_pass || !has_open_pass_ ||
+      encodables_.back().render_pass.get() != render_pass) {
+    return true;
+  }
+  return EndOpenPass();
+}
+
+std::shared_ptr<impeller::ComputePass> CommandBuffer::CreateComputePass() {
+  if (!EndOpenPass()) {
+    return nullptr;
+  }
+  auto compute_pass = command_buffer_->CreateComputePass();
+  if (!compute_pass) {
+    return nullptr;
+  }
+  Encodable encodable;
+  encodable.compute_pass = compute_pass;
+  encodables_.push_back(std::move(encodable));
+  has_open_pass_ = true;
+  return compute_pass;
+}
+
+absl::Status CommandBuffer::EndComputePass(
+    const impeller::ComputePass* compute_pass) {
+  FML_DCHECK(compute_pass);
+  if (!has_open_pass_ ||
+      encodables_.back().compute_pass.get() != compute_pass) {
+    return absl::OkStatus();
+  }
+  if (!EndOpenPass()) {
+    return absl::InternalError("Failed to encode the compute pass.");
+  }
+  return absl::OkStatus();
+}
+
+const std::shared_ptr<impeller::Context>& CommandBuffer::GetContext() const {
+  return context_;
+}
+
+bool CommandBuffer::EndOpenPass() {
+  if (!has_open_pass_) {
+    return true;
+  }
+  has_open_pass_ = false;
+  // GLES passes are encoded at submit, on the raster thread.
+  if (context_->GetBackendType() == impeller::Context::BackendType::kOpenGLES) {
+    return true;
+  }
+  if (!encodables_.back().EncodeCommands()) {
+    encoding_failed_ = true;
+    return false;
+  }
+  return true;
 }
 
 std::shared_ptr<impeller::BlitPass> CommandBuffer::GetOrCreateBlitPass() {
-  if (!encodables_.empty() && encodables_.back().blit_pass) {
+  // Consecutive copies share one blit pass.
+  if (has_open_pass_ && encodables_.back().blit_pass) {
     return encodables_.back().blit_pass;
+  }
+  if (!EndOpenPass()) {
+    return nullptr;
   }
   auto blit_pass = command_buffer_->CreateBlitPass();
   if (!blit_pass) {
@@ -57,6 +130,7 @@ std::shared_ptr<impeller::BlitPass> CommandBuffer::GetOrCreateBlitPass() {
   Encodable encodable;
   encodable.blit_pass = blit_pass;
   encodables_.push_back(std::move(encodable));
+  has_open_pass_ = true;
   return blit_pass;
 }
 
@@ -126,6 +200,10 @@ bool CommandBuffer::Submit(
   }
   submitted_ = true;
 
+  // On Metal and Vulkan this encodes the last pass. Every earlier pass was
+  // encoded when it ended.
+  EndOpenPass();
+
   std::vector<impeller::CommandBuffer::CompletionCallback> callbacks =
       std::move(completion_callbacks_);
   if (completion_callback) {
@@ -172,10 +250,11 @@ bool CommandBuffer::Submit(
     return true;
   }
 
-  for (auto& encodable : encodables_) {
-    if (!encodable.EncodeCommands()) {
-      return false;
+  if (encoding_failed_) {
+    if (combined_completion_callback) {
+      combined_completion_callback(impeller::CommandBuffer::Status::kError);
     }
+    return false;
   }
 
   auto status = context_->GetCommandQueue()->Submit(

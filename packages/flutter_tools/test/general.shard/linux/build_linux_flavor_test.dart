@@ -41,7 +41,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
   });

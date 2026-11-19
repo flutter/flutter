@@ -3032,6 +3032,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
   ///
   /// This value indicates whether this node has any ancestors with
   /// [mergeAllDescendantsIntoThisNode] set to true.
+  ///
+  /// Changing this value marks this node and its parent as needing to be sent
+  /// to the engine again, and updates the value on this node's descendants
+  /// (unless this node merges them itself via [mergeAllDescendantsIntoThisNode]),
+  /// since their value is derived from this node's [isPartOfNodeMerging].
   bool get isMergedIntoParent => _isMergedIntoParent;
   bool _isMergedIntoParent = false;
   set isMergedIntoParent(bool value) {
@@ -3039,7 +3044,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
       return;
     }
     _isMergedIntoParent = value;
+    // This node's own serialization changes: a node that stops being merged
+    // has to be sent to the engine as a standalone node (and a node that
+    // starts being merged has to stop being sent). The parent's merged data
+    // and child list change as well.
+    _markDirty();
     parent?._markDirty();
+    // Descendants derive their flag from this node's `isPartOfNodeMerging`,
+    // so they need to be re-evaluated unless this node merges them itself.
+    if (!mergeAllDescendantsIntoThisNode) {
+      _updateChildrenMergeFlags();
+    }
   }
 
   /// Whether the user can interact with this node in assistive technologies.
@@ -3307,25 +3322,20 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _children?.forEach(_redepthChild);
   }
 
-  void _updateChildMergeFlagRecursively(SemanticsNode child) {
-    assert(child.owner == owner);
-    final bool childShouldMergeToParent = isPartOfNodeMerging;
-
-    if (childShouldMergeToParent == child.isMergedIntoParent) {
+  void _updateChildMergeFlag(SemanticsNode child) {
+    if (child.parent != this) {
+      // While the tree is being rebuilt bottom-up, `_children` can still list
+      // a node that a deeper node has already adopted in this pass (see
+      // [_replaceChildren]). Its merge flag is owned by its new parent.
       return;
     }
-
-    child.isMergedIntoParent = childShouldMergeToParent;
-
-    if (child.mergeAllDescendantsIntoThisNode) {
-      // No need to update the descendants since `child` has the merge flag set.
-    } else {
-      child._updateChildrenMergeFlags();
-    }
+    assert(child.owner == owner);
+    // The setter re-evaluates `child`'s own descendants when the flag changes.
+    child.isMergedIntoParent = isPartOfNodeMerging;
   }
 
   void _updateChildrenMergeFlags() {
-    _children?.forEach(_updateChildMergeFlagRecursively);
+    _children?.forEach(_updateChildMergeFlag);
   }
 
   void _adoptChild(SemanticsNode child) {
@@ -3348,7 +3358,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // still possible that this child was an extra node introduced in
     // RenderObject.assembleSemanticsNode. We have to make sure their
     // `isMergedIntoParent` is updated correctly.
-    _updateChildMergeFlagRecursively(child);
+    _updateChildMergeFlag(child);
   }
 
   void _dropChild(SemanticsNode child) {
@@ -3394,6 +3404,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
     if (_traversalChildIdentifier case final Object identifier?) {
       owner!._traversalParentNodes[identifier]?._markDirty();
+    }
+    // If a traversal parent detaches while its traversal children remain
+    // attached, mark their hit-test parents dirty so they drop the orphaned
+    // traversal children from childrenInHitTestOrder.
+    if (_traversalParentIdentifier case final Object identifier?) {
+      if (owner!._traversalChildNodes[identifier] case final Set<SemanticsNode> childNodes?) {
+        for (final childNode in childNodes) {
+          childNode.parent?._markDirty();
+        }
+      }
     }
 
     // Clean up the according entry in owner._traversalParentNodes map.
@@ -3853,6 +3873,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     final mergeAllDescendantsIntoThisNodeValueChanged =
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
 
+    // Changing whether this node is a traversal child affects whether its
+    // hit-test parent includes it in traversal and hit-test child lists.
+    if (_traversalChildIdentifier != config.traversalChildIdentifier) {
+      parent?._markDirty();
+    }
+
     _identifier = config.identifier;
     _traversalParentIdentifier = config.traversalParentIdentifier;
     _traversalChildIdentifier = config.traversalChildIdentifier;
@@ -4171,6 +4197,43 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return childrenInTraversalOrder;
   }
 
+  // Returns true if this node is a grafted traversal child whose traversal
+  // parent is missing (or itself skipped) in the semantics tree.
+  bool _shouldSkipInHitTest([Set<SemanticsNode>? visited]) {
+    if (kIsWeb) {
+      return false;
+    }
+    if (_isTraversalChild && !(parent?._isTraversalParent ?? false)) {
+      final SemanticsNode? traversalParent =
+          owner!._traversalParentNodes[_traversalChildIdentifier];
+      if (traversalParent == null) {
+        return true;
+      }
+      visited ??= <SemanticsNode>{};
+      if (!visited.add(this)) {
+        return false;
+      }
+      return traversalParent._isSkippedInHitTestTree(visited);
+    }
+    return false;
+  }
+
+  // Returns true if this node or any of its hit-test ancestors is skipped due
+  // to a missing traversal parent.
+  bool _isSkippedInHitTestTree([Set<SemanticsNode>? visited]) {
+    if (kIsWeb) {
+      return false;
+    }
+    SemanticsNode? current = this;
+    while (current != null) {
+      if (current._shouldSkipInHitTest(visited)) {
+        return true;
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
   List<SemanticsNode> _childrenInHitTestOrder() {
     if (_children == null) {
       return const <SemanticsNode>[];
@@ -4183,16 +4246,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // dropped from the hit-test tree to keep the two trees in sync.
     // Otherwise, the user might accidentally hit test a node that cannot
     // be traversed.
-    bool shouldNotSkipInHitTest(SemanticsNode child) {
-      if (child._isTraversalChild) {
-        final SemanticsNode? traversalParent =
-            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
-        return traversalParent != null;
-      }
-      return true;
-    }
-
-    return _children!.where(shouldNotSkipInHitTest).toList();
+    return _children!.where((SemanticsNode child) => !child._shouldSkipInHitTest()).toList();
   }
 
   Int32List _childrenIdInHitTestOrder() {
@@ -4341,7 +4395,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         // order, is the child of the traversal child. In this case, no grafting
         // needed, otherwise, it will cause infinite loop.
         SemanticsNode? traversalParent =
-            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
+            owner!._traversalParentNodes[child._traversalChildIdentifier];
         final int? traversalParentId = traversalParent?.id;
         while (traversalParent != null) {
           if (traversalParent == child) {
@@ -5135,9 +5189,31 @@ class SemanticsOwner extends ChangeNotifier {
           }
         }
 
+        // Track whether this node was already registered as the traversal
+        // parent for its current identifier before refreshing the map.
+        final bool hadSameTraversalParent =
+            node._isTraversalParent &&
+            _traversalParentNodes[node.traversalParentIdentifier!] == node;
+
         // Clean up the dirty entry in owner._traversalParentNodes map because it
-        // will be updated later.
-        _traversalParentNodes.removeWhere((Object key, SemanticsNode oldNode) => node == oldNode);
+        // will be updated later. If the node's traversalParentIdentifier changed,
+        // mark the hit-test parents of its former traversal children dirty so
+        // they can update childrenInHitTestOrder.
+        _traversalParentNodes.removeWhere((Object key, SemanticsNode oldNode) {
+          if (node == oldNode) {
+            if (!kIsWeb && key != node.traversalParentIdentifier) {
+              if (_traversalChildNodes[key] case final Set<SemanticsNode> childNodes?) {
+                for (final childNode in childNodes) {
+                  if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
+                    childNode.parent!._markDirty();
+                  }
+                }
+              }
+            }
+            return true;
+          }
+          return false;
+        });
         // Clean up the node from the value set in owner._traversalChildNodes.
         for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
           childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
@@ -5175,6 +5251,36 @@ class SemanticsOwner extends ChangeNotifier {
               parentNode._markDirty();
             }
           }
+          if (node._isTraversalParent) {
+            // Mark attached traversal children dirty so they recompute their
+            // traversal transform. If this traversal parent was newly registered,
+            // also mark each traversal child's hit-test parent and unmerged
+            // descendants dirty so previously skipped nodes are included in the
+            // semantics update.
+            final Set<SemanticsNode>? childNodes =
+                _traversalChildNodes[node.traversalParentIdentifier];
+            if (childNodes != null) {
+              for (final SemanticsNode childNode in childNodes) {
+                if (!childNode.attached) {
+                  continue;
+                }
+                if (!visitedNodes.contains(childNode)) {
+                  childNode._markDirty();
+                }
+                if (!hadSameTraversalParent) {
+                  if (childNode.parent != null && !visitedNodes.contains(childNode.parent)) {
+                    childNode.parent!._markDirty();
+                  }
+                  childNode._visitDescendants((SemanticsNode descendant) {
+                    if (!descendant.isMergedIntoParent && !visitedNodes.contains(descendant)) {
+                      descendant._markDirty();
+                    }
+                    return true;
+                  });
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -5200,7 +5306,16 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if (node._dirty && node.attached) {
-        node._addToUpdate(builder, customSemanticsActionIds);
+        if (node._isSkippedInHitTestTree()) {
+          // Do not serialize nodes that are dropped from the tree due to a
+          // missing traversal parent, as they would be orphans in the update.
+          node._dirty = false;
+          if (node._isTraversalParent) {
+            _traversalParentNodes.remove(node.traversalParentIdentifier);
+          }
+        } else {
+          node._addToUpdate(builder, customSemanticsActionIds);
+        }
       }
     }
     _dirtyNodes.clear();

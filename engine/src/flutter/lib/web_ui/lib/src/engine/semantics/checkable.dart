@@ -58,7 +58,8 @@ class SemanticRadioGroup extends SemanticRole {
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
 }
 
-/// Renders semantics objects that have checkable (on/off) states.
+/// Renders semantics objects that have checkable (on/off) states, plus the mixed
+/// state of a tristate checkbox.
 ///
 /// Three objects which are implemented by this class are checkboxes, radio
 /// buttons and switches.
@@ -100,13 +101,18 @@ class SemanticCheckable extends SemanticRole {
       /// technologies of disabled elements.
       _updateDisabledAttribute();
 
-      setAttribute(
-        'aria-checked',
-        (semanticsObject.flags.isChecked == ui.CheckedState.isTrue ||
-                semanticsObject.flags.isToggled == ui.Tristate.isTrue)
-            ? 'true'
-            : 'false',
-      );
+      final String ariaChecked;
+      if (semanticsObject.flags.isChecked == ui.CheckedState.isTrue ||
+          semanticsObject.flags.isToggled == ui.Tristate.isTrue) {
+        ariaChecked = 'true';
+      } else if (_kind == _CheckableKind.checkbox &&
+          semanticsObject.flags.isChecked == ui.CheckedState.mixed) {
+        // ARIA defines "mixed" for checkboxes only, not for radio buttons or switches.
+        ariaChecked = 'mixed';
+      } else {
+        ariaChecked = 'false';
+      }
+      setAttribute('aria-checked', ariaChecked);
     }
   }
 
