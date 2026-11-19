@@ -452,15 +452,20 @@ void main() {
     return _createAndAnalyzeProject(
       projectDir,
       <String>[],
-      <String>['lib/flutter_project.dart', 'test/flutter_project_test.dart'],
+      <String>[
+        'example/analysis_options.yaml',
+        'example/ios/Runner/AppDelegate.swift',
+        'example/lib/main.dart',
+        'example/pubspec.yaml',
+        'lib/flutter_project.dart',
+        'test/flutter_project_test.dart',
+      ],
       unexpectedPaths: <String>[
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
-        'example/ios/Runner/AppDelegate.swift',
         'example/ios/Runner/main.m',
-        'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.h',
         'ios/Classes/FlutterProjectPlugin.m',
         'ios/Runner/AppDelegate.h',
@@ -495,21 +500,21 @@ void main() {
   testUsingContext('can create a package project', () async {
     await _createAndAnalyzeProject(
       projectDir,
-      <String>['--template=package'],
+      <String>['--template=package', '-a', 'java'],
       <String>[
         'analysis_options.yaml',
+        'example/analysis_options.yaml',
+        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+        'example/lib/main.dart',
+        'example/pubspec.yaml',
         'lib/flutter_project.dart',
+        'pubspec.yaml',
         'test/flutter_project_test.dart',
       ],
       unexpectedPaths: <String>[
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-        'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-        'example/ios/Runner/AppDelegate.h',
-        'example/ios/Runner/AppDelegate.m',
-        'example/ios/Runner/main.m',
-        'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.h',
         'ios/Classes/FlutterProjectPlugin.m',
         'ios/Runner/AppDelegate.h',
@@ -4861,11 +4866,13 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     // 3. It's non-trivial to use MemoryFileSystem.test(), we need real template files
     await io.IOOverrides.runZoned<Future<void>>(() async {
       final ToolContext toolContext = _createToolContext();
-      final CommandRunner<void> runner = createTestCommandRunner(
+      final runner = TestFlutterCommandRunner(toolContext: toolContext);
+      runner.addCommand(
         CreateCommand(
           androidContext: FakeAndroidContext(),
           appleContext: FakeAppleContext(),
-          pub: Pub(toolContext: toolContext),
+          featureFlags: runner.featureFlags,
+          pub: Pub(featureFlags: runner.featureFlags, toolContext: toolContext),
           templatePathProvider: TemplatePathProvider(flutterRoot: toolContext.cache.flutterRoot),
           templateRenderer: const MustacheTemplateRenderer(),
           toolContext: toolContext,
@@ -5020,6 +5027,7 @@ CreateCommand createCreateCommand({
   AndroidContext? androidContext,
   AppleContext? appleContext,
   ExtensionTemplateManager? extensionTemplateManager,
+  FeatureFlags? featureFlags,
   Java? java,
   Net? net,
   Pub? pub,
@@ -5028,6 +5036,7 @@ CreateCommand createCreateCommand({
   bool verboseHelp = false,
 }) {
   final ToolContext resolvedToolContext = toolContext ?? _createToolContext();
+  final FeatureFlags resolvedFeatureFlags = featureFlags ?? TestFlutterCommandRunner().featureFlags;
   final ToolContext(:Cache cache, :Logger logger, :OperatingSystemUtils os, :Platform platform) =
       resolvedToolContext;
   return CreateCommand(
@@ -5051,7 +5060,8 @@ CreateCommand createCreateCommand({
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           ),
         ),
-    pub: pub ?? Pub(toolContext: resolvedToolContext),
+    featureFlags: resolvedFeatureFlags,
+    pub: pub ?? Pub(featureFlags: resolvedFeatureFlags, toolContext: resolvedToolContext),
     templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext: resolvedToolContext,
