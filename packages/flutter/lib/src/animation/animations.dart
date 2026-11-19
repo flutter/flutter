@@ -226,18 +226,14 @@ class ProxyAnimation extends Animation<double>
 
   @override
   void didStartListening() {
-    if (_parent != null) {
-      _parent!.addListener(notifyListeners);
-      _parent!.addStatusListener(notifyStatusListeners);
-    }
+    _parent?.addListener(notifyListeners);
+    _parent?.addStatusListener(notifyStatusListeners);
   }
 
   @override
   void didStopListening() {
-    if (_parent != null) {
-      _parent!.removeListener(notifyListeners);
-      _parent!.removeStatusListener(notifyStatusListeners);
-    }
+    _parent?.removeListener(notifyListeners);
+    _parent?.removeStatusListener(notifyStatusListeners);
   }
 
   @override
