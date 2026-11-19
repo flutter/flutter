@@ -32,6 +32,7 @@ on an Android device or emulator.
 - [`flutter_rendered_blue_rectangle`](#flutter_rendered_blue_rectangle)
 - [`external_texture/surface_producer_smiley_face`](#external_texturesurface_producer_smiley_face)
 - [`external_texture/surface_texture_smiley_face`](#external_texturesurface_texture_smiley_face)
+- [`platform_view/hybrid_composition_lifecycle`](#platform_viewhybrid_composition_lifecycle)
 - [`platform_view/hybrid_composition_platform_view`](#platform_viewhybrid_composition_platform_view)
 - [`platform_view/texture_layer_hybrid_composition_platform_view`](#platform_viewtexture_layer_hybrid_composition_platform_view)
 - [`platform_view/virtual_display_platform_view`](#platform_viewvirtual_display_platform_view)
@@ -91,6 +92,18 @@ $ flutter run lib/external_texture/surface_texture_smiley_face_main.dart
 
 # Run the test
 $ flutter drive lib/external_texture/surface_texture_smiley_face_main.dart
+```
+
+### `platform_view/hybrid_composition_lifecycle`
+
+Tests Hybrid Composition `FlutterImageView` and overlay surface lifecycle transitions across `FlutterView` resizes and background surface destruction.
+
+```sh
+# Run the app
+$ flutter run lib/platform_view/hybrid_composition_lifecycle_main.dart
+
+# Run the test
+$ flutter drive lib/platform_view/hybrid_composition_lifecycle_main.dart
 ```
 
 ### `platform_view/hybrid_composition_platform_view`
