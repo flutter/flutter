@@ -32,7 +32,15 @@ struct OverlayLayer {
   std::unique_ptr<IOSSurface> ios_surface;
   std::unique_ptr<Surface> surface;
 
-  void UpdateViewState(UIView* flutter_view, DlRect rect, int64_t view_id, int64_t overlay_id);
+  /// Sets the frames and accessibility identifiers of the overlay views.
+  ///
+  /// This method divides `rect` by `device_pixel_ratio` to convert it from physical pixels to
+  /// points.
+  void UpdateViewState(UIView* flutter_view,
+                       DlRect rect,
+                       int64_t view_id,
+                       int64_t overlay_id,
+                       double device_pixel_ratio);
 };
 
 /// @brief Storage for Overlay layers across frames.

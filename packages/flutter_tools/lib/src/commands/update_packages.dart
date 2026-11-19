@@ -113,7 +113,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   late final Pub _pub = _injectedPub ?? _createPub();
 
   Pub _createPub() {
-    return Pub(toolContext: toolContext);
+    return Pub(featureFlags: runner!.featureFlags, toolContext: toolContext);
   }
 
   late final Net _net = _createNet();
