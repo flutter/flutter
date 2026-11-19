@@ -80,7 +80,7 @@ class MacOSDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
+  Future<CpuArch> get cpuArch async => toolContext.os.hostPlatform.cpuArch;
 
   @override
   Future<String> get targetPlatformDisplayName async {

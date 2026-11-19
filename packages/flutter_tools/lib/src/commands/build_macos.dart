@@ -35,10 +35,7 @@ class BuildMacosCommand extends BuildSubCommand {
       DartCompileOptionsBundle(),
       AppleBuildOptionsBundle(),
     ]);
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      BuildInfoOptions.trackWidgetCreation,
-      AppleBuildOptionsBundle.configOnly,
-    ], verboseHelp: verboseHelp);
+    argParser.addDescriptor(AppleBuildOptionsBundle.configOnly, verboseHelp: verboseHelp);
   }
 
   /// Holds Apple-specific dependencies.

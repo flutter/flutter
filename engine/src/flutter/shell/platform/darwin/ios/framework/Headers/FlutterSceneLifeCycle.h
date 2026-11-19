@@ -258,6 +258,22 @@ API_AVAILABLE(ios(13.0))
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler;
 
+#pragma mark - Responding to geometry changes
+
+/**
+ * Updates the display information of the Flutter engines associated with `windowScene`.
+ *
+ * Call this from `-[UIWindowSceneDelegate windowScene:didUpdateEffectiveGeometry:]`. UIKit calls
+ * that method whenever a `UIWindowScene` moves between screens, even if no Flutter view changes
+ * size. `FlutterSceneDelegate` forwards this automatically.
+ *
+ * `previousEffectiveGeometry` is nonnull to match UIKit, but UIKit passes `nil` on the first call
+ * while the scene is being created. This method ignores it.
+ */
+- (void)windowScene:(UIWindowScene*)windowScene
+    didUpdateEffectiveGeometry:(UIWindowSceneGeometry*)previousEffectiveGeometry
+    API_AVAILABLE(ios(26.0));
+
 @end
 
 /**
