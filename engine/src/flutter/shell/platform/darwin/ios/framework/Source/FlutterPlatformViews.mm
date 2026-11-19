@@ -6,70 +6,10 @@
 
 #import <WebKit/WebKit.h>
 
-#include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
 FLUTTER_ASSERT_ARC
-
-namespace {
-static CGRect GetCGRectFromDlRect(const flutter::DlRect& clipDlRect) {
-  return CGRectMake(clipDlRect.GetX(),      //
-                    clipDlRect.GetY(),      //
-                    clipDlRect.GetWidth(),  //
-                    clipDlRect.GetHeight());
-}
-
-CATransform3D GetCATransform3DFromDlMatrix(const flutter::DlMatrix& matrix) {
-  CATransform3D transform = CATransform3DIdentity;
-  transform.m11 = matrix.m[0];
-  transform.m12 = matrix.m[1];
-  transform.m13 = matrix.m[2];
-  transform.m14 = matrix.m[3];
-
-  transform.m21 = matrix.m[4];
-  transform.m22 = matrix.m[5];
-  transform.m23 = matrix.m[6];
-  transform.m24 = matrix.m[7];
-
-  transform.m31 = matrix.m[8];
-  transform.m32 = matrix.m[9];
-  transform.m33 = matrix.m[10];
-  transform.m34 = matrix.m[11];
-
-  transform.m41 = matrix.m[12];
-  transform.m42 = matrix.m[13];
-  transform.m43 = matrix.m[14];
-  transform.m44 = matrix.m[15];
-  return transform;
-}
-
-class CGPathReceiver final : public flutter::DlPathReceiver {
- public:
-  void MoveTo(const flutter::DlPoint& p2, bool will_be_closed) override {  //
-    CGPathMoveToPoint(path_ref_, nil, p2.x, p2.y);
-  }
-  void LineTo(const flutter::DlPoint& p2) override {
-    CGPathAddLineToPoint(path_ref_, nil, p2.x, p2.y);
-  }
-  void QuadTo(const flutter::DlPoint& cp, const flutter::DlPoint& p2) override {
-    CGPathAddQuadCurveToPoint(path_ref_, nil, cp.x, cp.y, p2.x, p2.y);
-  }
-  // bool conic_to(...) { CGPath has no equivalent to the conic curve type }
-  void CubicTo(const flutter::DlPoint& cp1,
-               const flutter::DlPoint& cp2,
-               const flutter::DlPoint& p2) override {
-    CGPathAddCurveToPoint(path_ref_, nil,  //
-                          cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
-  }
-  void Close() override { CGPathCloseSubpath(path_ref_); }
-
-  CGMutablePathRef TakePath() const { return path_ref_; }
-
- private:
-  CGMutablePathRef path_ref_ = CGPathCreateMutable();
-};
-}  // namespace
 
 @interface PlatformViewFilter ()
 
@@ -231,17 +171,41 @@ static BOOL _preparedOnce = NO;
 
 @end
 
+// Returns YES if `size` has no area.
+static BOOL IsEmpty(CGSize size) {
+  return !(size.width > 0 && size.height > 0);
+}
+
+// Returns YES if none of the corners in `radii` are rounded.
+static BOOL AreAllCornersSquare(FlutterPlatformViewCornerRadii radii) {
+  return IsEmpty(radii.topLeft) && IsEmpty(radii.topRight) && IsEmpty(radii.bottomLeft) &&
+         IsEmpty(radii.bottomRight);
+}
+
+// Returns YES if all of the corners in `radii` have the same radii.
+static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
+  // The tolerance that `impeller::RoundingRadii::AreAllCornersSame` uses.
+  static const CGFloat kTolerance = 1e-3;
+  return fabs(radii.topLeft.width - radii.topRight.width) <= kTolerance &&
+         fabs(radii.topLeft.width - radii.bottomRight.width) <= kTolerance &&
+         fabs(radii.topLeft.width - radii.bottomLeft.width) <= kTolerance &&
+         fabs(radii.topLeft.height - radii.topRight.height) <= kTolerance &&
+         fabs(radii.topLeft.height - radii.bottomRight.height) <= kTolerance &&
+         fabs(radii.topLeft.height - radii.bottomLeft.height) <= kTolerance;
+}
+
 @interface FlutterClippingMaskView ()
 
-// A `CATransform3D` matrix represnts a scale transform that revese UIScreen.scale.
+// A `CATransform3D` matrix that represents a scale transform that reverses the device pixel ratio.
 //
 // The transform matrix passed in clipRect/clipRRect/clipPath methods are in device coordinate
-// space. The transfrom matrix concats `reverseScreenScale` to create a transform matrix in the iOS
-// logical coordinates (points).
+// space. The transfrom matrix concats `reverseDevicePixelRatio` to create a transform matrix in the
+// iOS logical coordinates (points).
 //
-// See https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc for
-// information about screen scale.
-@property(nonatomic) CATransform3D reverseScreenScale;
+// The device pixel ratio is the number of physical pixels per point. See
+// https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc for
+// information about screen scale, which is the device pixel ratio of a screen.
+@property(nonatomic) CATransform3D reverseDevicePixelRatio;
 
 - (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
@@ -254,13 +218,14 @@ static BOOL _preparedOnce = NO;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
-  return [self initWithFrame:frame screenScale:[UIScreen mainScreen].scale];
+  return [self initWithFrame:frame devicePixelRatio:[UIScreen mainScreen].scale];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
+- (instancetype)initWithFrame:(CGRect)frame devicePixelRatio:(CGFloat)devicePixelRatio {
   if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
-    _reverseScreenScale = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
+    _reverseDevicePixelRatio =
+        CATransform3DMakeScale(1 / devicePixelRatio, 1 / devicePixelRatio, 1);
     rectSoFar_ = self.bounds;
     containsNonRectPath_ = NO;
   }
@@ -318,20 +283,17 @@ static BOOL _preparedOnce = NO;
         [self shapeLayer].path = paths_.at(0);
       } else {
         // Multiple paths, all paths must be rects.
-        CGPathRef pathSoFar = CGPathCreateWithRect(rectSoFar_, nil);
+        fml::CFRef<CGPathRef> pathSoFar(CGPathCreateWithRect(rectSoFar_, nil));
         [self shapeLayer].path = pathSoFar;
-        CGPathRelease(pathSoFar);
       }
     }
   }
 }
 
-- (void)clipRect:(const flutter::DlRect&)clipDlRect matrix:(const flutter::DlMatrix&)matrix {
-  CGRect clipRect = GetCGRectFromDlRect(clipDlRect);
-  CGPathRef path = CGPathCreateWithRect(clipRect, nil);
+- (void)clipRect:(CGRect)clipRect matrix:(CATransform3D)matrix {
+  fml::CFRef<CGPathRef> path(CGPathCreateWithRect(clipRect, nil));
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
-  CATransform3D matrixInPoints =
-      CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseDevicePixelRatio);
   paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
   CGAffineTransform affine = [self affineWithMatrix:matrixInPoints];
   // Make sure the rect is not rotated (only translated or scaled).
@@ -342,34 +304,32 @@ static BOOL _preparedOnce = NO;
   }
 }
 
-- (void)clipRRect:(const flutter::DlRoundRect&)clipDlRRect matrix:(const flutter::DlMatrix&)matrix {
-  if (clipDlRRect.IsEmpty()) {
+- (void)clipRRect:(CGRect)clipRect
+            radii:(FlutterPlatformViewCornerRadii)radii
+           matrix:(CATransform3D)matrix {
+  if (IsEmpty(clipRect.size)) {
     return;
-  } else if (clipDlRRect.IsRect()) {
-    [self clipRect:clipDlRRect.GetBounds() matrix:matrix];
+  } else if (AreAllCornersSquare(radii)) {
+    [self clipRect:clipRect matrix:matrix];
     return;
   } else {
-    CGPathRef pathRef = nullptr;
+    fml::CFRef<CGPathRef> pathRef;
     containsNonRectPath_ = YES;
 
-    if (clipDlRRect.GetRadii().AreAllCornersSame()) {
-      CGRect clipRect = GetCGRectFromDlRect(clipDlRRect.GetBounds());
-      auto radii = clipDlRRect.GetRadii();
-      pathRef =
-          CGPathCreateWithRoundedRect(clipRect, radii.top_left.width, radii.top_left.height, nil);
+    if (AreAllCornersSame(radii)) {
+      pathRef.Reset(
+          CGPathCreateWithRoundedRect(clipRect, radii.topLeft.width, radii.topLeft.height, nil));
     } else {
       CGMutablePathRef mutablePathRef = CGPathCreateMutable();
       // Complex types, we manually add each corner.
-      flutter::DlRect clipDlRect = clipDlRRect.GetBounds();
-      auto left = clipDlRect.GetLeft();
-      auto top = clipDlRect.GetTop();
-      auto right = clipDlRect.GetRight();
-      auto bottom = clipDlRect.GetBottom();
-      flutter::DlRoundingRadii radii = clipDlRRect.GetRadii();
-      auto& top_left = radii.top_left;
-      auto& top_right = radii.top_right;
-      auto& bottom_left = radii.bottom_left;
-      auto& bottom_right = radii.bottom_right;
+      CGFloat left = CGRectGetMinX(clipRect);
+      CGFloat top = CGRectGetMinY(clipRect);
+      CGFloat right = CGRectGetMaxX(clipRect);
+      CGFloat bottom = CGRectGetMaxY(clipRect);
+      CGSize top_left = radii.topLeft;
+      CGSize top_right = radii.topRight;
+      CGSize bottom_left = radii.bottomLeft;
+      CGSize bottom_right = radii.bottomRight;
 
       // Start drawing RRect
       // These calculations are off, the AddCurve methods add a Bezier curve
@@ -407,11 +367,10 @@ static BOOL _preparedOnce = NO;
                             left + top_left.width, top,  //
                             left + top_left.width, top);
       CGPathCloseSubpath(mutablePathRef);
-      pathRef = mutablePathRef;
+      pathRef.Reset(mutablePathRef);
     }
     // The `matrix` is based on the physical pixels, convert it to UIKit points.
-    CATransform3D matrixInPoints =
-        CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
+    CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseDevicePixelRatio);
     // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated
     // that the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard
     // edge clipping on iOS.
@@ -419,20 +378,12 @@ static BOOL _preparedOnce = NO;
   }
 }
 
-- (void)clipPath:(const flutter::DlPath&)dlPath matrix:(const flutter::DlMatrix&)matrix {
+- (void)clipPath:(CGPathRef)path matrix:(CATransform3D)matrix {
   containsNonRectPath_ = YES;
 
-  CGPathReceiver receiver;
-
-  // TODO(flar): https://github.com/flutter/flutter/issues/164826
-  // CGPaths do not have an inherit fill type, we would need to remember
-  // the fill type and employ it when we use the path.
-  dlPath.Dispatch(receiver);
-
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
-  CATransform3D matrixInPoints =
-      CATransform3DConcat(GetCATransform3DFromDlMatrix(matrix), _reverseScreenScale);
-  paths_.push_back([self getTransformedPath:receiver.TakePath() matrix:matrixInPoints]);
+  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseDevicePixelRatio);
+  paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
 }
 
 - (CGAffineTransform)affineWithMatrix:(CATransform3D)matrix {
@@ -442,10 +393,7 @@ static BOOL _preparedOnce = NO;
 
 - (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix {
   CGAffineTransform affine = [self affineWithMatrix:matrix];
-  CGPathRef transformedPath = CGPathCreateCopyByTransformingPath(path, &affine);
-
-  CGPathRelease(path);
-  return fml::CFRef<CGPathRef>(transformedPath);
+  return fml::CFRef<CGPathRef>(CGPathCreateCopyByTransformingPath(path, &affine));
 }
 
 @end
@@ -474,15 +422,17 @@ static BOOL _preparedOnce = NO;
   return self;
 }
 
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame
+                                devicePixelRatio:(CGFloat)devicePixelRatio {
   FML_DCHECK(self.pool.count <= self.capacity);
   if (self.pool.count == 0) {
     // The pool is empty, alloc a new one.
-    return [[FlutterClippingMaskView alloc] initWithFrame:frame
-                                              screenScale:UIScreen.mainScreen.scale];
+    return [[FlutterClippingMaskView alloc] initWithFrame:frame devicePixelRatio:devicePixelRatio];
   }
   FlutterClippingMaskView* maskView = [self.pool anyObject];
   maskView.frame = frame;
+  maskView.reverseDevicePixelRatio =
+      CATransform3DMakeScale(1 / devicePixelRatio, 1 / devicePixelRatio, 1);
   [maskView reset];
   [self.pool removeObject:maskView];
   return maskView;
@@ -495,6 +445,21 @@ static BOOL _preparedOnce = NO;
     return;
   }
   [self.pool addObject:maskView];
+}
+
+@end
+
+@implementation FlutterPlatformViewInfo
+
+- (instancetype)initWithView:(NSObject<FlutterPlatformView>*)view
+            touchInterceptor:(FlutterTouchInterceptingView*)touchInterceptor
+                    rootView:(UIView*)rootView {
+  if (self = [super init]) {
+    _view = view;
+    _touchInterceptor = touchInterceptor;
+    _rootView = rootView;
+  }
+  return self;
 }
 
 @end

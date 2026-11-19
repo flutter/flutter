@@ -67,7 +67,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
         entity.GetTransform() * input_snapshot->transform *
             Matrix::MakeScale(Vector2(size)));
 
-    FS::FragInfo frag_info;
+    FS::FragInfo frag_info{};
     frag_info.input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
             ? input_snapshot->opacity

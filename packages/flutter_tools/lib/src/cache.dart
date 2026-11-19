@@ -16,9 +16,7 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import 'artifacts.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart'
@@ -149,28 +147,27 @@ class DevelopmentArtifact {
 /// For more details on specific URLs used to download artifacts, see
 /// [storageBaseUrl] and [cipdBaseUrl].
 class Cache {
-  /// [rootOverride] is configurable for testing.
+  /// [_rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   /// [artifactUpdater] is configurable for testing.
   Cache({
-    @protected Directory? rootOverride,
+    required FileSystem fileSystem,
+    required this._isLocalEngineBuilder,
+    required Logger logger,
+    required this._osUtils,
+    required Platform platform,
     @protected List<ArtifactSet>? artifacts,
     @visibleForTesting ArtifactUpdater? artifactUpdater,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required OperatingSystemUtils osUtils,
-    Stdio? stdio,
-  }) : _rootOverride = rootOverride,
+    this._flutterRoot,
+    @protected this._rootOverride,
+    this._stdio,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
-       _fileSystem = fileSystem,
        _platform = platform,
-       _osUtils = osUtils,
-       _stdio = stdio,
-       _net = Net(logger: logger, platform: platform),
-       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _artifacts = artifacts ?? <ArtifactSet>[],
-       _artifactUpdaterOverride = artifactUpdater;
+       _artifactUpdaterOverride = artifactUpdater,
+       _net = Net(logger: logger, platform: platform),
+       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
   /// Create a [Cache] for testing.
   ///
@@ -181,6 +178,8 @@ class Cache {
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
     ArtifactUpdater? artifactUpdater,
+    String? flutterRoot,
+    bool Function()? isLocalEngineBuilder,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
@@ -204,6 +203,8 @@ class Cache {
       rootOverride: rootOverride ?? fileSystem.currentDirectory,
       artifacts: artifacts ?? <ArtifactSet>[],
       artifactUpdater: artifactUpdater,
+      flutterRoot: flutterRoot,
+      isLocalEngineBuilder: isLocalEngineBuilder ?? _defaultIsLocalEngine,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -218,6 +219,8 @@ class Cache {
     );
   }
 
+  static bool _defaultIsLocalEngine() => false;
+
   final Logger _logger;
   final Platform _platform;
   final FileSystem _fileSystem;
@@ -225,6 +228,7 @@ class Cache {
   OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
+  final bool Function() _isLocalEngineBuilder;
   final Stdio? _stdio;
   final Net _net;
   final FileSystemUtils _fsUtils;
@@ -257,9 +261,25 @@ class Cache {
     'chrome-infra-packages.appspot.com',
   ];
 
-  // Initialized by FlutterCommandRunner on startup.
-  // Explore making this field lazy to catch non-initialized access.
-  static String? flutterRoot;
+  /// The root directory of the Flutter SDK checkout.
+  String get flutterRoot {
+    if (_flutterRoot != null) {
+      return _flutterRoot!;
+    }
+    if (_rootOverride != null) {
+      return _rootOverride.path;
+    }
+    return _flutterRoot = defaultFlutterRoot(
+      platform: _platform,
+      fileSystem: _fileSystem,
+      userMessages: UserMessages(),
+    );
+  }
+
+  @visibleForTesting
+  set flutterRoot(String? value) => _flutterRoot = value;
+
+  String? _flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.
@@ -301,9 +321,8 @@ class Cache {
       final String Function(String) dirname = fileSystem.path.dirname;
 
       if (platform.script.scheme == 'package') {
-        final String packageConfigPath = Uri.parse(
-          platform.packageConfig!,
-        ).toFilePath(windows: platform.isWindows);
+        final String packageConfigPath = Uri.parse(platform.packageConfig!)
+            .toFilePath(windows: platform.isWindows);
         return normalize(dirname(dirname(dirname(dirname(packageConfigPath)))));
       }
 
@@ -378,7 +397,7 @@ class Cache {
     }
     assert(_lock == null);
     final File lockFile = _fileSystem.file(
-      _fileSystem.path.join(flutterRoot!, 'bin', 'cache', 'lockfile'),
+      _fileSystem.path.join(flutterRoot, 'bin', 'cache', 'lockfile'),
     );
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
@@ -623,12 +642,12 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
     return _fileSystem.directory(
-      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot!, 'bin', 'cache'),
+      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'cache'),
     );
   }
 
   String getHostPlatformArchName() {
-    return _osUtils.hostPlatform.platformName;
+    return _osUtils.hostPlatform.cpuArchName;
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
@@ -651,7 +670,7 @@ class Cache {
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Location of LICENSE file.
-  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'LICENSE'));
+  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -690,7 +709,7 @@ class Cache {
   String? getVersionFor(String artifactName) {
     final File versionFile = _fileSystem.file(
       _fileSystem.path.join(
-        _rootOverride?.path ?? flutterRoot!,
+        _rootOverride?.path ?? flutterRoot,
         'bin',
         'internal',
         '$artifactName.version',
@@ -704,7 +723,7 @@ class Cache {
   String? getRealmFor(String artifactName) {
     final File realmFile = _fileSystem.file(
       _fileSystem.path.join(
-        _rootOverride?.path ?? flutterRoot!,
+        _rootOverride?.path ?? flutterRoot,
         'bin',
         'cache',
         '$artifactName.realm',
@@ -770,7 +789,7 @@ class Cache {
     Set<DevelopmentArtifact> requiredArtifacts,
   ) async {
     final artifactsToUpdate = <ArtifactSet>[];
-    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
+    final bool isLocalEngine = _isLocalEngineBuilder();
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
@@ -1138,22 +1157,15 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 /// additional source code.
 class ArtifactUpdater {
   ArtifactUpdater({
-    required OperatingSystemUtils operatingSystemUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Directory tempStorage,
-    required HttpClient httpClient,
-    required Platform platform,
-    required List<String> allowedBaseUrls,
-    Stdio? stdio,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _httpClient = httpClient,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _tempStorage = tempStorage,
-       _platform = platform,
-       _allowedBaseUrls = allowedBaseUrls,
-       _stdio = stdio;
+    required this._operatingSystemUtils,
+    required this._logger,
+    required this._fileSystem,
+    required this._tempStorage,
+    required this._httpClient,
+    required this._platform,
+    required this._allowedBaseUrls,
+    this._stdio,
+  });
 
   /// The number of times the artifact updater will repeat the artifact download loop.
   static const _kRetryCount = 2;
@@ -1569,7 +1581,7 @@ abstract class _DownloadDisplay {
 
 /// Displays an ANSI progress bar with speed, ETA, and percentage.
 class _ProgressBarDisplay extends _DownloadDisplay {
-  _ProgressBarDisplay({required Stdio stdio, required this.statusMessage}) : _stdio = stdio;
+  _ProgressBarDisplay({required this._stdio, required this.statusMessage});
 
   static const int _maxTerminalWidth = 80;
   static const int _progressUpdateIntervalMs = 100;
@@ -1638,9 +1650,7 @@ class _ProgressBarDisplay extends _DownloadDisplay {
 
 /// Displays a spinner via [Logger.startProgress].
 class _SpinnerDisplay extends _DownloadDisplay {
-  _SpinnerDisplay({required Logger logger, required String statusMessage})
-    : _logger = logger,
-      _statusMessage = statusMessage;
+  _SpinnerDisplay({required this._logger, required this._statusMessage});
 
   final Logger _logger;
   final String _statusMessage;

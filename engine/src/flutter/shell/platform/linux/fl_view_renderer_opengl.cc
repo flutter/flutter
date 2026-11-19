@@ -138,6 +138,11 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor =
       fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
+
+  // Any frames rendered before this point were dropped, as there was nothing
+  // to present them to. Ask for another one so the view isn't left empty until
+  // something else causes Flutter to render.
+  fl_engine_schedule_frame(self->engine);
 }
 
 // Implements GtkWidget::draw.

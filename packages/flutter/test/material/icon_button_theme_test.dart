@@ -103,9 +103,8 @@ void main() {
         },
       );
       return MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(iconButtonTheme: IconButtonThemeData(style: overallStyle)),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(iconButtonTheme: IconButtonThemeData(style: overallStyle)),
         home: Scaffold(
           body: Center(
             // If the IconButtonTheme widget is present, it's used

@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/codec.h"
 #include "flutter/lib/ui/painting/image_generator.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 #include <utility>
 
@@ -15,7 +16,20 @@ namespace flutter {
 
 class MultiFrameCodec : public Codec {
  public:
-  explicit MultiFrameCodec(std::shared_ptr<ImageGenerator> generator);
+  /// @brief Creates a codec for an animated (multi-frame) image.
+  ///
+  /// @param[in] generator    The decoder for the encoded image.
+  /// @param[in] target_size  The size at which frames are delivered to Dart,
+  ///                         as requested through `targetWidth` and
+  ///                         `targetHeight`. Frames are always decoded and
+  ///                         composited at the intrinsic size of the image,
+  ///                         so that blending and disposal stay exact, and
+  ///                         only the finished frame is resized. Like
+  ///                         single-frame images, it is resized with bilinear
+  ///                         filtering and no mipmaps
+  ///                         (`SkFilterMode::kLinear`, `SkMipmapMode::kNone`).
+  MultiFrameCodec(std::shared_ptr<ImageGenerator> generator,
+                  SkISize target_size);
 
   ~MultiFrameCodec() override;
 
@@ -39,12 +53,15 @@ class MultiFrameCodec : public Codec {
   // shares it with the IO task runner's decoding work, and sets the live_
   // member to false when it is destructed.
   struct State {
-    explicit State(std::shared_ptr<ImageGenerator> generator);
+    State(std::shared_ptr<ImageGenerator> generator, SkISize target_size);
 
     const std::shared_ptr<ImageGenerator> generator_;
     const int frameCount_;
     const int repetitionCount_;
     bool is_impeller_enabled_ = false;
+    // The size of the frames delivered to Dart, as requested through
+    // `targetWidth` and `targetHeight`.
+    const SkISize target_size_;
 
     // The non-const members and functions below here are only read or written
     // to on the IO thread. They are not safe to access or write on the UI

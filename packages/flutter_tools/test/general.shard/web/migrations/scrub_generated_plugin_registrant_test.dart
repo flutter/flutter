@@ -20,7 +20,6 @@ import '../../../src/throwing_pub.dart'; // legacy
 
 void main() {
   setUpAll(() {
-    Cache.flutterRoot = '';
     Cache.disableLocking();
   });
 
@@ -64,9 +63,8 @@ void main() {
         expect(gitignore.existsSync(), isFalse);
         expect(registrant.existsSync(), isFalse);
 
-        await createTestCommandRunner(
-          createBuildCommand(loggerOverride: BufferLogger.test()),
-        ).run(<String>['build', 'web', '--no-pub']);
+        await createTestCommandRunner(createBuildCommand(loggerOverride: BufferLogger.test()))
+            .run(<String>['build', 'web', '--no-pub']);
 
         final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
         expect(buildDir.existsSync(), true);
@@ -87,9 +85,8 @@ void main() {
         final String contentsBeforeBuild = gitignore.readAsStringSync();
         expect(contentsBeforeBuild, isNot(contains('lib/generated_plugin_registrant.dart')));
 
-        await createTestCommandRunner(
-          createBuildCommand(),
-        ).run(<String>['build', 'web', '--no-pub']);
+        await createTestCommandRunner(createBuildCommand())
+            .run(<String>['build', 'web', '--no-pub']);
 
         expect(gitignore.readAsStringSync(), contentsBeforeBuild);
       },
@@ -109,9 +106,8 @@ void main() {
         expect(gitignore.existsSync(), isTrue);
         expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
-        await createTestCommandRunner(
-          createBuildCommand(),
-        ).run(<String>['build', 'web', '--no-pub']);
+        await createTestCommandRunner(createBuildCommand())
+            .run(<String>['build', 'web', '--no-pub']);
 
         expect(
           gitignore.readAsStringSync(),
@@ -133,9 +129,8 @@ void main() {
 
         expect(registrant.existsSync(), isTrue);
 
-        await createTestCommandRunner(
-          createBuildCommand(),
-        ).run(<String>['build', 'web', '--no-pub']);
+        await createTestCommandRunner(createBuildCommand())
+            .run(<String>['build', 'web', '--no-pub']);
 
         expect(registrant.existsSync(), isFalse);
       },
@@ -156,9 +151,8 @@ void main() {
         expect(registrant.existsSync(), isTrue);
         expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
-        await createTestCommandRunner(
-          createBuildCommand(),
-        ).run(<String>['build', 'web', '--no-pub']);
+        await createTestCommandRunner(createBuildCommand())
+            .run(<String>['build', 'web', '--no-pub']);
 
         expect(registrant.existsSync(), isFalse);
         expect(

@@ -14,12 +14,11 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -31,7 +30,6 @@
         "--simulator",
         "--no-lto",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -50,7 +48,6 @@
           "--simulator",
           "--no-lto",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
@@ -63,12 +60,11 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -81,7 +77,6 @@
         "--simulator-cpu=arm64",
         "--no-lto",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -101,7 +96,6 @@
           "--simulator-cpu=arm64",
           "--no-lto",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
@@ -114,12 +108,11 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -129,7 +122,6 @@
         "--runtime-mode",
         "debug",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -150,7 +142,6 @@
           "--runtime-mode",
           "debug",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },
@@ -163,12 +154,11 @@
     {
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7",
+        "os=Mac-15.7|Mac-26.6",
         "cpu=arm64"
       ],
       "gclient_variables": {
         "download_android_deps": false,
-        "download_jdk": false,
         "use_rbe": true
       },
       "gn": [
@@ -178,7 +168,6 @@
         "--runtime-mode",
         "release",
         "--rbe",
-        "--no-goma",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true"
       ],
@@ -199,7 +188,6 @@
           "--runtime-mode",
           "release",
           "--no-rbe",
-          "--no-goma",
           "--gn-args=dart_dynamic_modules=true"
         ]
       },

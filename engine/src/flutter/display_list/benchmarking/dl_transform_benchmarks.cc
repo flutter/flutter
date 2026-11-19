@@ -76,7 +76,7 @@ enum class AdapterType {
 union TestPoint {
   TestPoint() {}
 
-  SkPoint sk_point;
+  SkPoint sk_point{};
   impeller::Point impeller_point;
 };
 

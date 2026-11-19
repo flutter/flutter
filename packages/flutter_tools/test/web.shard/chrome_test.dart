@@ -42,7 +42,7 @@ const kChromeArgs = <String>[
 
 const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
 
-const kDevtoolsStderr = '\n\nDevTools listening\n\n';
+const kDevtoolsStderr = '\n\nDevTools listening on ws://127.0.0.1:12345/devtools/browser/rand\n\n';
 
 void main() {
   late FileExceptionHandler exceptionHandler;
@@ -88,7 +88,7 @@ void main() {
         command: <String>[
           'example_chrome',
           '--user-data-dir=$userDataDir',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -108,6 +108,64 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('launches Chrome with --remote-debugging-port=0 when debugPort is null and parses bound port from DevTools listening stderr', () async {
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: _FailOnFindFreePortOperatingSystemUtils(),
+      browserFinder: findChromeExecutable,
+      logger: testLogger,
+    );
+
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=0',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: '\nDevTools listening on ws://127.0.0.1:45678/devtools/browser/abc-123\n',
+      ),
+    );
+
+    final Chromium chrome = await chromiumLauncher.launch('example_url', skipCheck: true);
+    expect(chrome.debugPort, 45678);
+  });
+
+  testWithoutContext(
+    'launches Chrome and connects to IPv6 loopback when DevTools reports IPv6 address',
+    () async {
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: _FailOnFindFreePortOperatingSystemUtils(),
+        browserFinder: findChromeExecutable,
+        logger: testLogger,
+      );
+
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=0',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          stderr: '\nDevTools listening on ws://[::1]:54321/devtools/browser/ipv6-guid\n',
+        ),
+      );
+
+      final Chromium chrome = await chromiumLauncher.launch('example_url', skipCheck: true);
+      expect(chrome.debugPort, 54321);
+      expect(chrome.chromeConnection.url, Uri.parse('http://[::1]:54321/'));
+    },
+  );
 
   testWithoutContext('filters out Chromium D-Bus error lines from stderr logs', () async {
     final logger = BufferLogger.test();
@@ -132,7 +190,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -174,7 +232,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       'Using Chromium 115\n'
       '[CHROME]: \n'
       '[CHROME]: \n'
-      '[CHROME]: DevTools listening\n'
+      '[CHROME]: DevTools listening on ws://127.0.0.1:12345/devtools/browser/rand\n'
       '[CHROME]:',
     );
   });
@@ -358,7 +416,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -405,7 +463,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -448,7 +506,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -479,7 +537,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             '--use-angle=metal',
             '--no-sandbox',
@@ -517,7 +575,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -549,7 +607,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgsLinux,
           'example_url',
         ],
@@ -584,7 +642,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           '--autoplay-policy=no-user-gesture-required',
           '--incognito',
@@ -614,7 +672,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           '--no-sandbox',
           '--headless',
@@ -640,7 +698,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
@@ -686,7 +744,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: const <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -742,7 +800,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     final expectedArgs = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-      '--remote-debugging-port=12345',
+      '--remote-debugging-port=0',
       ...kChromeArgs.where((String arg) => arg != '--use-mock-keychain'),
       '--no-sandbox',
       '--headless',
@@ -779,7 +837,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     const args = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-      '--remote-debugging-port=12345',
+      '--remote-debugging-port=0',
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
@@ -816,7 +874,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
@@ -830,9 +888,123 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
 
     await expectToolExitLater(
       chromiumLauncher.launch('example_url', skipCheck: true, headless: true),
-      contains('Failed to launch browser.'),
+      allOf(
+        contains('Failed to launch browser.'),
+        contains('https://github.com/flutter/flutter/issues\n'),
+      ),
     );
     expect(logger.errorText, contains('nothing in the std error indicating glibc error'));
+  });
+
+  group('Chrome stays alive without reporting DevTools listening', () {
+    // Regression tests for https://github.com/flutter/flutter/issues/192013.
+    const devToolsServerFailureStderr =
+        '[ERROR:net/socket/socket_posix.cc:153] bind() failed: Address already in use (48)\n'
+        '[ERROR:content/browser/devtools/devtools_http_handler.cc:313] '
+        'Cannot start http server for devtools.\n';
+
+    List<String> headlessArgs(int port) => <String>[
+      'example_chrome',
+      '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+      '--remote-debugging-port=$port',
+      ...kChromeArgs,
+      '--no-sandbox',
+      '--headless',
+      '--window-size=1024,1024',
+      'example_url',
+    ];
+
+    ChromiumLauncher createLauncher(OperatingSystemUtils osUtils, Logger logger) {
+      return ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: osUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+    }
+
+    testWithoutContext('retries on a fresh port when the DevTools server fails to start', () async {
+      // A Chrome that never exits on its own.
+      final neverExits = Completer<void>();
+      processManager.addCommand(
+        FakeCommand(
+          command: headlessArgs(0),
+          stderr: devToolsServerFailureStderr,
+          completer: neverExits,
+        ),
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: headlessArgs(0),
+          stderr: '\nDevTools listening on ws://127.0.0.1:12346/devtools/browser/rand\n',
+        ),
+      );
+
+      final ChromiumLauncher launcher = createLauncher(operatingSystemUtils, BufferLogger.test());
+      final Chromium chrome = await launcher.launch('example_url', skipCheck: true, headless: true);
+
+      expect(chrome.debugPort, 12346);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('gives up when the DevTools server repeatedly fails to start', () async {
+      final neverExits = Completer<void>();
+      for (var i = 0; i < 4; i++) {
+        processManager.addCommand(
+          FakeCommand(
+            command: headlessArgs(12345),
+            stderr: devToolsServerFailureStderr,
+            completer: neverExits,
+          ),
+        );
+      }
+
+      final logger = BufferLogger.test();
+      await expectToolExitLater(
+        createLauncher(
+          operatingSystemUtils,
+          logger,
+        ).launch('example_url', skipCheck: true, headless: true, debugPort: 12345),
+        contains('Chrome failed to start the DevTools server on port 12345.'),
+      );
+      expect(logger.errorText, contains('Cannot start http server for devtools'));
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('times out when Chrome never reports DevTools listening', () async {
+      final neverExits = Completer<void>();
+      for (var i = 0; i < 4; i++) {
+        processManager.addCommand(
+          FakeCommand(command: headlessArgs(0), stderr: 'unrelated', completer: neverExits),
+        );
+      }
+
+      // Results are captured inside the FakeAsync zone: futures completed there
+      // deliver their callbacks via FakeAsync's microtask queue, so awaiting
+      // them from outside would never complete.
+      Object? error;
+      var completed = false;
+      FakeAsync().run((FakeAsync time) {
+        createLauncher(operatingSystemUtils, BufferLogger.test())
+            .launch('example_url', skipCheck: true, headless: true)
+            .then<void>((_) => completed = true, onError: (Object e) => error = e);
+        for (var i = 0; i < 4; i++) {
+          time.flushMicrotasks();
+          expect(error, isNull, reason: 'attempt ${i + 1} should still be waiting');
+          time.elapse(kDevToolsListeningTimeout + const Duration(seconds: 2));
+        }
+        time.flushMicrotasks();
+      });
+
+      expect(completed, isFalse);
+      await expectToolExitLater(
+        Future<void>.error(error!),
+        contains('Chrome did not report "DevTools listening" within'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 
   testWithoutContext('Logs an error and exits if connection check fails.', () async {
@@ -850,7 +1022,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -1030,6 +1202,142 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     },
   );
 
+  testWithoutContext('Chromium close does not hang when Browser.close never replies', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // Process outlives the Browser.close timeout (6s > 5s), so the
+      // timeout must fire and escalate to SIGTERM. Without the timeout,
+      // close() would wait here forever.
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      // 5s timeout + wait up to 5s more for the 6s process to exit.
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
+  testWithoutContext('Chromium close does not hang when Chrome never responds', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangGetTab: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+    expect(logger.traceText, contains('Chrome did not complete a graceful shutdown within 5s.'));
+  });
+
+  testWithoutContext('Chromium close returns promptly when Chrome already exited', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // The process has already exited, so the reply never arrives. The exit
+      // should win the race and skip the timeout.
+      final process = FakeProcess();
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      // The process exit timer is already due.
+      fakeAsync.elapse(Duration.zero);
+      expect(closeCompleted, isTrue);
+      expect(process.signals, isEmpty);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
   testWithoutContext(
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {
@@ -1063,7 +1371,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=$customUserDataDir',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -1128,17 +1436,24 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
     OnSendCommand? onSendCommand,
     this.onGetTab,
     bool throwWebSocketException = false,
-  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException);
+    bool hangBrowserClose = false,
+    this.hangGetTab = false,
+  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException, hangBrowserClose);
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
   bool throwSocketExceptions = false;
+  final bool hangGetTab;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
     onGetTab?.call();
     if (throwSocketExceptions) {
       throw const io.SocketException('test');
+    }
+    if (hangGetTab) {
+      // Simulate a Chrome that is alive but never answers.
+      return Completer<ChromeTab?>().future;
     }
     return _tab;
   }
@@ -1156,27 +1471,36 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.onSendCommand, this.throwWebSocketException);
+  FakeChromeTab(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
-    return FakeWipConnection(onSendCommand, throwWebSocketException);
+    return FakeWipConnection(onSendCommand, throwWebSocketException, hangBrowserClose);
   }
 }
 
 class FakeWipConnection extends Fake implements WipConnection {
-  FakeWipConnection(this.onSendCommand, this.throwWebSocketException);
+  FakeWipConnection(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
-  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) {
     onSendCommand?.call(method);
-    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+    if (hangBrowserClose && method == 'Browser.close') {
+      // Simulate Chrome exiting before its Browser.close reply arrives,
+      // so the pending future in webkit_inspection_protocol never completes.
+      return Completer<WipResponse>().future;
+    }
+    return Future<WipResponse>.value(
+      WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}}),
+    );
   }
 
   @override
@@ -1184,5 +1508,14 @@ class FakeWipConnection extends Fake implements WipConnection {
     if (throwWebSocketException) {
       throw const io.WebSocketException('test');
     }
+  }
+}
+
+class _FailOnFindFreePortOperatingSystemUtils extends FakeOperatingSystemUtils {
+  @override
+  Future<int> findFreePort({bool ipv6 = false}) async {
+    throw StateError(
+      'OperatingSystemUtils.findFreePort should not be called when port-0 binding is used',
+    );
   }
 }

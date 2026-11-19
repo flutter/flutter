@@ -38,17 +38,14 @@ class IconTreeShaker {
   IconTreeShaker(
     this._environment,
     DevFSStringContent? fontManifest, {
-    required ProcessManager processManager,
+    required this._processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required TargetPlatform targetPlatform,
-  }) : _processManager = processManager,
-       _logger = logger,
+    required this._artifacts,
+    required this._targetPlatform,
+  }) : _logger = logger,
        _fs = fileSystem,
-       _artifacts = artifacts,
-       _fontManifest = fontManifest?.string,
-       _targetPlatform = targetPlatform {
+       _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError(
@@ -72,7 +69,7 @@ class IconTreeShaker {
   ///
   /// Web targets (such as `WebReleaseBundle`) do not use this field because
   /// their recorded uses inputs are dynamically provided via
-  /// `Dart2WebTarget.buildPatternStems`.
+  /// `Dart2WebTarget.buildPatternStemsFor`.
   ///
   /// See [Target.inputs].
   static const inputs = <Source>[

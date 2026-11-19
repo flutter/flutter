@@ -39,6 +39,16 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   FlCompositorOpenGL* compositor = nullptr;
 };
 
+// The layers replace the target contents, so a frame with nothing to
+// rasterize (which has no layers) clears the previous frame.
+TEST_F(FlCompositorOpenGLTest, CompositeNoLayers) {
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  EXPECT_CALL(epoxy, glClear(GL_COLOR_BUFFER_BIT));
+
+  fl_compositor_opengl_composite_layers(compositor, nullptr, 0);
+}
+
 TEST_F(FlCompositorOpenGLTest, Composite) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
@@ -132,6 +142,43 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,
                         .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+
+  std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
+    fl_compositor_opengl_composite_layers(compositor, layers, 1);
+  }).join();
+}
+
+TEST_F(FlCompositorOpenGLTest, BlitFramebufferOffset) {
+  constexpr size_t width = 100;
+  constexpr size_t height = 50;
+
+  // OpenGL 3.0
+  ON_CALL(epoxy, glGetString(GL_VENDOR))
+      .WillByDefault(
+          ::testing::Return(reinterpret_cast<const GLubyte*>("Intel")));
+  ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
+  EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
+
+  // The whole source framebuffer is copied, positioned at the layer offset
+  // with the y axis flipped to the OpenGL bottom-left origin.
+  EXPECT_CALL(epoxy, glBlitFramebuffer(0, 0, 100, 50, 10, -20, 110, 30,
+                                       GL_COLOR_BUFFER_BIT, GL_NEAREST));
+
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGB, width, height, FALSE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {10, 20},
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 

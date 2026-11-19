@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
+
 import '../test_driver/image_utils.dart';
 
 void main() {
@@ -14,10 +15,7 @@ void main() {
     });
 
     test('returns true for a fully transparent image (all zero bytes)', () {
-      final image = img.Image(
-        width: 10,
-        height: 10,
-      ); // default is transparent black (all 0s)
+      final image = img.Image(width: 10, height: 10); // default is transparent black (all 0s)
       expect(isImageBlank(image), isTrue);
     });
 

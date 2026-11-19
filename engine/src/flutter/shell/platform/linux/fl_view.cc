@@ -260,6 +260,12 @@ static void fl_view_present_layers(FlRenderable* renderable,
                                    size_t layers_count) {
   FlView* self = FL_VIEW(renderable);
 
+  // If widget was destroyed then dispose will have been called and the
+  // renderer will be null.
+  if (self->renderer == nullptr) {
+    return;
+  }
+
   fl_view_renderer_present_layers(self->renderer, layers, layers_count);
 }
 
@@ -570,6 +576,7 @@ static void fl_view_dispose(GObject* object) {
                           nullptr);
   }
 
+  g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
@@ -704,6 +711,7 @@ static void setup_engine(FlView* self) {
       }
       break;
   }
+  g_object_ref_sink(self->renderer);
   gtk_widget_show(GTK_WIDGET(self->renderer));
   gtk_container_add(GTK_CONTAINER(self->event_box), GTK_WIDGET(self->renderer));
   g_signal_connect_swapped(self->renderer, "realize", G_CALLBACK(realize_cb),

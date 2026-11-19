@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_native_api.h"
@@ -17,6 +18,36 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
+namespace {
+
+/// Posts |response| to |send_port|.
+///
+/// Failure to post is expected if the isolate that owns |send_port| has
+/// exited (and closed the port) before the platform replied. In that case
+/// the response is dropped, mirroring how
+/// |PlatformMessageResponseDart| drops responses for a root isolate whose
+/// |DartState| has been destroyed.
+///
+/// |Dart_PostCObject| also fails if the VM is shutting down or if |response|
+/// can't be serialized. The Dart API doesn't report which, so all failures are
+/// treated the same. Serialization failure shouldn't happen in practice since
+/// responses only contain an int64, a Uint8 typed data and an array, or null.
+void PostResponse(Dart_Port send_port,
+                  Dart_CObject* response,
+                  const std::string& channel) {
+  bool did_send = Dart_PostCObject(send_port, response);
+  if (!did_send) {
+    FML_LOG(WARNING) << "Dropping platform message response on channel \""
+                     << channel
+                     << "\" because it could not be posted to its Dart port. "
+                        "This usually means the isolate that sent the message "
+                        "exited before the reply arrived. Await pending "
+                        "platform channel calls before exiting the isolate if "
+                        "their results are needed.";
+  }
+}
+
+}  // namespace
 
 PlatformMessageResponseDartPort::PlatformMessageResponseDartPort(
     Dart_Port send_port,
@@ -49,8 +80,7 @@ void PlatformMessageResponseDartPort::Complete(
   response.value.as_array.length = response_values.size();
   response.value.as_array.values = response_values.data();
 
-  bool did_send = Dart_PostCObject(send_port_, &response);
-  FML_CHECK(did_send);
+  PostResponse(send_port_, &response, channel_);
 }
 
 void PlatformMessageResponseDartPort::CompleteEmpty() {
@@ -58,8 +88,7 @@ void PlatformMessageResponseDartPort::CompleteEmpty() {
   Dart_CObject response = {
       .type = Dart_CObject_kNull,
   };
-  bool did_send = Dart_PostCObject(send_port_, &response);
-  FML_CHECK(did_send);
+  PostResponse(send_port_, &response, channel_);
 }
 
 }  // namespace flutter

@@ -319,8 +319,7 @@ class Icon extends StatelessWidget {
       package: icon.fontPackage,
       fontFamilyFallback: icon.fontFamilyFallback,
       shadows: iconShadows,
-      height:
-          1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+      height: 1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
       leadingDistribution: TextLeadingDistribution.even,
       foreground: foreground,
     );

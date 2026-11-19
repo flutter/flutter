@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
+import '../../../base/process.dart';
 import '../../../build_info.dart';
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 import 'native_assets_host.dart';
 
 // TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
@@ -16,84 +18,30 @@ const targetMacOSVersion = 13;
 /// Extract the [Architecture] from a [CpuArch].
 Architecture getNativeMacOSArchitecture(CpuArch cpuArch) {
   return switch (cpuArch) {
-    CpuArch.arm64 => Architecture.arm64,
-    CpuArch.x64 => Architecture.x64,
-    CpuArch.armv7 ||
-    CpuArch.x86 ||
-    CpuArch.riscv64 ||
-    CpuArch.unknown => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
+    .arm64 => Architecture.arm64,
+    .x64 => Architecture.x64,
+    _ => throw Exception('Unknown macOS CPU arch: $cpuArch.'),
   };
 }
 
 /// Groups native assets by their target framework path for macOS
 /// multi-architecture bundling.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsMacOS(
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsMacOS(
   List<FlutterCodeAsset> nativeAssets,
-  Uri? absolutePath,
-) {
+  Uri? absolutePath, {
+  required Logger logger,
+}) {
   return fatAssetTargetLocations(
-    nativeAssets,
-    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
-        _targetLocationMacOS(asset, absolutePath, alreadyTakenNames),
+    assetTargetLocationsMacOS(nativeAssets, absolutePath, logger: logger),
   );
 }
 
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsMacOS(
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsMacOS(
   List<FlutterCodeAsset> nativeAssets,
-  Uri? absolutePath,
-) {
-  final alreadyTakenNames = <String>{};
-  final idToPath = <String, KernelAssetPath>{};
-  final result = <FlutterCodeAsset, KernelAsset>{};
-  for (final asset in nativeAssets) {
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ??
-        _targetLocationMacOS(asset, absolutePath, alreadyTakenNames, useInstallName: true).path;
-    idToPath[assetId] = path;
-    result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
-  }
-  return result;
-}
-
-/// [useInstallName] gives the name the asset is loaded with at runtime rather
-/// than the location it is bundled at. The two are different for a framework,
-/// and the native assets manifest needs the former: see [frameworkInstallName].
-KernelAsset _targetLocationMacOS(
-  FlutterCodeAsset asset,
-  Uri? absolutePath,
-  Set<String> alreadyTakenNames, {
-  bool useInstallName = false,
+  Uri? absolutePath, {
+  required Logger logger,
 }) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
-  final KernelAssetPath kernelAssetPath;
-  switch (linkMode) {
-    case DynamicLoadingSystem _:
-      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
-    case LookupInExecutable _:
-      kernelAssetPath = KernelAssetInExecutable();
-    case LookupInProcess _:
-      kernelAssetPath = KernelAssetInProcess();
-    case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
-      Uri uri;
-      if (absolutePath != null) {
-        // Flutter tester needs full host paths.
-        uri = absolutePath.resolve(fileName);
-      } else {
-        // Flutter Desktop needs "absolute" paths inside the app.
-        // "relative" in the context of native assets would be relative to the
-        // kernel or aot snapshot.
-        uri = frameworkUri(fileName, alreadyTakenNames);
-        if (useInstallName) {
-          uri = Uri(path: frameworkInstallName(uri));
-        }
-      }
-      kernelAssetPath = KernelAssetAbsolutePath(uri);
-    default:
-      throw Exception('Unsupported asset link mode $linkMode in asset $asset');
-  }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+  return assetTargetLocationsApple(nativeAssets, absolutePath: absolutePath, logger: logger);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -113,19 +61,20 @@ KernelAsset _targetLocationMacOS(
 /// in macos_assemble.sh.
 Future<List<File>> copyNativeCodeAssetsMacOS(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
@@ -163,11 +112,11 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
         from: resourcesLink.parent.path,
       ),
     );
-    await lipoDylibs(dylibFile, sources);
+    await lipoDylibs(dylibFile, sources, processUtils: processUtils);
     if (buildMode != BuildMode.debug) {
       final dsymPath = '${frameworkDir.path}.dSYM';
-      await dsymutilDylib(dylibFile, dsymPath);
-      await stripDylib(dylibFile);
+      await dsymutilDylib(dylibFile, dsymPath, processUtils: processUtils);
+      await stripDylib(dylibFile, logger: logger, processUtils: processUtils);
       installedFiles.addAll(
         fileSystem.directory(dsymPath).listSync(recursive: true).whereType<File>(),
       );
@@ -181,7 +130,10 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
     );
 
     final String newInstallName = frameworkInstallName(target);
-    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    final Set<String> oldInstallNames = await getInstallNamesDylib(
+      dylibFile,
+      processUtils: processUtils,
+    );
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
@@ -192,12 +144,17 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
   }
 
   for (final (File dylibFile, String newInstallName, Directory frameworkDir) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
+    await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+    );
     // Do not code-sign the libraries here with identity. Code-signing
     // for bundled dylibs is done in `macos_assemble.sh embed` because the
     // "Flutter Assemble" target does not have access to the signing identity.
     if (codesignIdentity != null) {
-      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+      await codesignDylib(codesignIdentity, buildMode, frameworkDir, processUtils: processUtils);
     }
   }
   return installedFiles;
@@ -213,22 +170,41 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
 /// referenced in dependent libraries are updated to match the new install name,
 /// so that the referenced library can be found the dynamic linker.
 ///
+/// A dylib whose header has no room for the new load commands, such as a
+/// prebuilt one linked without `-headerpad_max_install_names`, keeps its own
+/// install name, and [logger] prints a warning. Its dependents and the native
+/// assets manifest still use the absolute path. dyld matches a load against
+/// the path an image was loaded from, so every load of that path gets the same
+/// image. After a later run replaced the file this holds only for a canonical
+/// path, since dyld records an image under its real path, so a dylib keeps its
+/// install name only in a directory without symlinks. The kept install name
+/// also stays visible to dyld for the rest of the process: a later load of
+/// that `@rpath/` name, or of its bare file name, gets this image. App builds
+/// must not keep install names: there the manifest entry is the install name,
+/// which has to match (https://github.com/flutter/flutter/issues/190799).
+///
+/// A dylib without room still fails if changing its references to other code
+/// assets makes its load commands larger, as for a prebuilt that references
+/// them by `@rpath/` names.
+///
 /// Code signing is also done here.
 Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
-  FileSystem fileSystem,
-) async {
+  FileSystem fileSystem, {
+  required Logger logger,
+  required ProcessUtils processUtils,
+}) async {
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final oldToNewInstallNames = <String, String>{};
-  final dylibs = <(File, String)>[];
+  final dylibs =
+      <({File dylibFile, String newInstallName, String assetId, String oldInstallName})>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),
@@ -239,19 +215,50 @@ Future<List<File>> copyNativeCodeAssetsMacOSFlutterTester(
     if (!targetParent.existsSync()) {
       await targetParent.create(recursive: true);
     }
-    await lipoDylibs(dylibFile, sources);
+    await lipoDylibs(dylibFile, sources, processUtils: processUtils);
     installedFiles.add(dylibFile);
     final String newInstallName = dylibFile.path;
-    final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
+    final Set<String> oldInstallNames = await getInstallNamesDylib(
+      dylibFile,
+      processUtils: processUtils,
+    );
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;
     }
-    dylibs.add((dylibFile, newInstallName));
+    dylibs.add((
+      dylibFile: dylibFile,
+      newInstallName: newInstallName,
+      assetId: assetMapping.value.first.codeAsset.id,
+      oldInstallName: oldInstallNames.join(', '),
+    ));
   }
 
-  for (final (File dylibFile, String newInstallName) in dylibs) {
-    await setInstallNamesDylib(dylibFile, newInstallName, oldToNewInstallNames);
-    await codesignDylib(codesignIdentity, buildMode, dylibFile);
+  for (final (:File dylibFile, :String newInstallName, :String assetId, :String oldInstallName)
+      in dylibs) {
+    // Through a symlink, a file replaced under a running tester would load as
+    // a second copy unless its install name is the path it is loaded from.
+    final Directory directory = dylibFile.parent;
+    final canonical = directory.resolveSymbolicLinksSync() == directory.path;
+    final bool installNameSet = await setInstallNamesDylib(
+      dylibFile,
+      newInstallName,
+      oldToNewInstallNames,
+      processUtils: processUtils,
+      keepInstallNameIfItDoesNotFit: canonical,
+    );
+    if (!installNameSet) {
+      // Not fatal: the asset loads correctly, so `--fatal-warnings` should not
+      // fail the run of a package that cannot relink a vendor's dylib. (Under
+      // `-v`, VerboseLogger still counts every warning, `fatal` or not.)
+      logger.printWarning(
+        'Code asset "$assetId" keeps its install name "$oldInstallName", because '
+        'the header of ${dylibFile.basename} has no room for its new install name '
+        'and dependency paths. The asset still loads. Linking the dylib with '
+        '-headerpad_max_install_names avoids this.',
+        fatal: false,
+      );
+    }
+    await codesignDylib(codesignIdentity, buildMode, dylibFile, processUtils: processUtils);
   }
   return installedFiles;
 }

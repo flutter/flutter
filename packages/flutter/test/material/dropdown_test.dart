@@ -2705,9 +2705,9 @@ void main() {
     );
 
     await tester.pumpWidget(buildFormField());
-    final Color defaultBorderColor = Theme.of(
-      tester.element(find.byType(InputDecorator)),
-    ).colorScheme.surfaceContainerHighest;
+    final Color defaultBorderColor = Theme.of(tester.element(find.byType(InputDecorator)))
+        .colorScheme
+        .surfaceContainerHighest;
     expect(
       findInputDecoratorBorderPainter(),
       paints..rrect(style: PaintingStyle.fill, color: defaultBorderColor),
@@ -3248,9 +3248,8 @@ void main() {
     // Scrolling to the top again has removed the one the focus was on from the
     // tree, causing it to lose focus.
     expect(
-      Focus.of(
-        tester.element(find.byKey(const ValueKey<int>(91), skipOffstage: false).last),
-      ).hasPrimaryFocus,
+      Focus.of(tester.element(find.byKey(const ValueKey<int>(91), skipOffstage: false).last))
+          .hasPrimaryFocus,
       isFalse,
     );
   });
@@ -4927,9 +4926,8 @@ void main() {
       ),
     );
 
-    final TextStyle labelStyle = DefaultTextStyle.of(
-      tester.firstElement(find.text(labelText)),
-    ).style;
+    final TextStyle labelStyle = DefaultTextStyle.of(tester.firstElement(find.text(labelText)))
+        .style;
     expect(labelStyle.color, labelColor);
   });
 

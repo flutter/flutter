@@ -2299,10 +2299,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget barrier;
     if (barrierColor != null && barrierColor!.alpha != 0 && !offstage) {
       // changedInternalState is called if barrierColor or offstage updates
-      assert(barrierColor != barrierColor!.withOpacity(0.0));
+      assert(barrierColor != barrierColor!.withValues(alpha: 0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
-          begin: barrierColor!.withOpacity(0.0),
+          begin: barrierColor!.withValues(alpha: 0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
         ).chain(
           CurveTween(curve: barrierCurve),
@@ -2433,6 +2433,26 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
 
+  /// Doubly-linked list of active routes of type [R] on the observed [Navigator].
+  ///
+  /// Uses [Expando] so [RouteObserver] neither retains [Route] instances after
+  /// they are disposed nor invokes getters on mocked [Route] objects in tests.
+  final Expando<R> _routeAbove = Expando<R>();
+  final Expando<R> _routeBelow = Expando<R>();
+
+  void _unlinkRoute(R route) {
+    final R? below = _routeBelow[route];
+    final R? above = _routeAbove[route];
+    if (below != null) {
+      _routeAbove[below] = above;
+    }
+    if (above != null) {
+      _routeBelow[above] = below;
+    }
+    _routeBelow[route] = null;
+    _routeAbove[route] = null;
+  }
+
   /// Whether this observer is managing changes for the specified route.
   ///
   /// If asserts are disabled, this method will throw an exception.
@@ -2448,6 +2468,11 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
   /// Subscribe [routeAware] to be informed about changes to [route].
   ///
+  /// Subscribing immediately calls [RouteAware.didPush] on [routeAware]. If
+  /// another route of type [R] is already on top of [route], it also calls
+  /// [RouteAware.didPushNext]. If [routeAware] is already subscribed to
+  /// [route], this method does nothing.
+  ///
   /// Going forward, [routeAware] will be informed about qualifying changes
   /// to [route], e.g. when [route] is covered by another route or when [route]
   /// is popped off the [Navigator] stack.
@@ -2455,6 +2480,9 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
     final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
+      if (_routeAbove[route] != null) {
+        routeAware.didPushNext();
+      }
     }
   }
 
@@ -2477,6 +2505,9 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is R) {
+      _unlinkRoute(route);
+    }
     if (route is R && previousRoute is R) {
       final List<RouteAware>? previousSubscribers = _listeners[previousRoute]?.toList();
 
@@ -2499,6 +2530,13 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
+      final R? above = _routeAbove[previousRoute];
+      _routeAbove[previousRoute] = route;
+      _routeBelow[route] = previousRoute;
+      _routeAbove[route] = above;
+      if (above != null) {
+        _routeBelow[above] = route;
+      }
       final Set<RouteAware>? previousSubscribers = _listeners[previousRoute];
 
       if (previousSubscribers != null) {
@@ -2506,6 +2544,33 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
           routeAware.didPushNext();
         }
       }
+    }
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is R) {
+      _unlinkRoute(route);
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (oldRoute is R && newRoute is R) {
+      final R? below = _routeBelow[oldRoute];
+      final R? above = _routeAbove[oldRoute];
+      _routeBelow[newRoute] = below;
+      _routeAbove[newRoute] = above;
+      if (below != null) {
+        _routeAbove[below] = newRoute;
+      }
+      if (above != null) {
+        _routeBelow[above] = newRoute;
+      }
+      _routeBelow[oldRoute] = null;
+      _routeAbove[oldRoute] = null;
+    } else if (oldRoute is R) {
+      _unlinkRoute(oldRoute);
     }
   }
 }
@@ -2593,12 +2658,12 @@ abstract mixin class RouteAware {
 class RawDialogRoute<T> extends PopupRoute<T> {
   /// A general dialog route which allows for customization of the dialog popup.
   RawDialogRoute({
-    required RoutePageBuilder pageBuilder,
-    bool barrierDismissible = true,
-    Color? barrierColor = const Color(0x80000000),
-    String? barrierLabel,
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    RouteTransitionsBuilder? transitionBuilder,
+    required this._pageBuilder,
+    this._barrierDismissible = true,
+    this._barrierColor = const Color(0x80000000),
+    this._barrierLabel,
+    this._transitionDuration = const Duration(milliseconds: 200),
+    this._transitionBuilder,
     this.barrierBuilder,
     super.settings,
     super.requestFocus,
@@ -2606,12 +2671,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
-  }) : _pageBuilder = pageBuilder,
-       _barrierDismissible = barrierDismissible,
-       _barrierLabel = barrierLabel,
-       _barrierColor = barrierColor,
-       _transitionDuration = transitionDuration,
-       _transitionBuilder = transitionBuilder;
+  });
 
   final RoutePageBuilder _pageBuilder;
 
@@ -2824,12 +2884,11 @@ Future<T?> showGeneralDialog<T extends Object?>({
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef RoutePageBuilder =
-    Widget Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-    );
+typedef RoutePageBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+);
 
 /// Signature for the function that builds a route's transitions.
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
@@ -2846,13 +2905,12 @@ typedef RoutePageBuilder =
 /// [secondaryAnimation] remains [kAlwaysDismissedAnimation].
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef RouteTransitionsBuilder =
-    Widget Function(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
-    );
+typedef RouteTransitionsBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+);
 
 /// Configuration details for a custom modal barrier.
 ///
@@ -2900,8 +2958,11 @@ class RouteBarrierDetails {
 /// that wraps this `barrier` (for instance, with a [Padding] or a [BackdropFilter]),
 /// rather than replacing it entirely, to preserve the built-in semantics and
 /// gestures.
-typedef RouteBarrierBuilder =
-    Widget Function(BuildContext context, RouteBarrierDetails details, Widget barrier);
+typedef RouteBarrierBuilder = Widget Function(
+  BuildContext context,
+  RouteBarrierDetails details,
+  Widget barrier,
+);
 
 /// A callback type for informing that a navigation pop has been invoked,
 /// whether or not it was handled successfully.

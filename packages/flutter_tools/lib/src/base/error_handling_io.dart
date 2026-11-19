@@ -73,9 +73,8 @@ const int kSystemCodePrivilegeNotHeld = 1314;
 /// example, the tool should generally be able to continue executing even if it
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
-  ErrorHandlingFileSystem({required FileSystem delegate, required Platform platform})
-    : _platform = platform,
-      super(delegate);
+  ErrorHandlingFileSystem({required FileSystem delegate, required this._platform})
+    : super(delegate);
 
   FileSystem get fileSystem => delegate;
 
@@ -96,9 +95,8 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       final T result = operation();
       if (result is Future) {
         return (result.whenComplete(() {
-              ErrorHandlingFileSystem._noExitOnFailure = previousValue;
-            }))
-            as T;
+          ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+        })) as T;
       }
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
       return result;
@@ -218,8 +216,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 }
 
 class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
-  ErrorHandlingFile({required Platform platform, required this.fileSystem, required this.delegate})
-    : _platform = platform;
+  ErrorHandlingFile({required this._platform, required this.fileSystem, required this.delegate});
 
   @override
   final io.File delegate;
@@ -258,7 +255,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   String readAsStringSync({Encoding encoding = utf8}) {
     return _runSync<String>(
-      () => delegate.readAsStringSync(),
+      () => delegate.readAsStringSync(encoding: encoding),
       platform: _platform,
       failureMessage: 'Flutter failed to read a file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
@@ -620,10 +617,10 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
 class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
     with ForwardingDirectory<Directory> {
   ErrorHandlingDirectory({
-    required Platform platform,
+    required this._platform,
     required this.fileSystem,
     required this.delegate,
-  }) : _platform = platform;
+  });
 
   @override
   final io.Directory delegate;
@@ -839,8 +836,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
 }
 
 class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
-  ErrorHandlingLink({required Platform platform, required this.fileSystem, required this.delegate})
-    : _platform = platform;
+  ErrorHandlingLink({required this._platform, required this.fileSystem, required this.delegate});
 
   @override
   final io.Link delegate;
@@ -1183,16 +1179,14 @@ T _runSync<T>(
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
-    required ProcessManager delegate,
-    required Platform platform,
+    required this._delegate,
+    required this._platform,
 
     /// A lazy callback to prevent eager circular dependency cycles during early
     /// bootstrapping of the Flutter CLI (where `Analytics` depends on
     /// `FlutterVersion`, which executes git process commands during construction).
-    required Analytics Function() analytics,
-  }) : _delegate = delegate,
-       _platform = platform,
-       _analytics = analytics;
+    required this._analytics,
+  });
 
   final ProcessManager _delegate;
   final Platform _platform;
@@ -1232,17 +1226,53 @@ class ErrorHandlingProcessManager extends ProcessManager {
     }
 
     // Propagate the unified analytics suppression flag.
-    if (analytics != null) {
-      environmentResult[DashEnvVar.suppressAnalytics.name] = (!analytics.telemetryEnabled)
-          .toString();
+    //
+    // If suppression was requested, either by this process's environment or by
+    // the caller-supplied environment, always propagate it so that sub-tools
+    // never report when a root tool has asked them not to.
+    //
+    // Otherwise (including an inherited or caller-supplied value other than
+    // `true`), suppress sub-tools whenever this tool would not send analytics
+    // itself. Unlike `telemetryEnabled`, `okToSend` is also false until this
+    // tool's consent message has been shown, including for the rest of the
+    // invocation that shows it (a first run, or a consent message version
+    // bump), and when analytics are suppressed for this invocation
+    // (`--suppress-analytics`).
+    //
+    // This matches `areAnalyticsSuppressed` in `package:unified_analytics`
+    // (which uses case-sensitive `bool.parse`) and the `dart` CLI: only the
+    // exact string `true` requests suppression.
+    final String suppressKey = DashEnvVar.suppressAnalytics.name;
+    final bool suppressionRequested =
+        _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
+    if (suppressionRequested) {
+      environmentResult[suppressKey] = 'true';
+    } else if (analytics != null) {
+      environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
-    // Propagate the parent tool identifier down to the spawned process.
-    final String? parentTool = _platform.environment[DashEnvVar.tool.name];
+    // Propagate the root tool identifier down to the spawned process.
+    //
+    // This matches how `package:unified_analytics` resolves the root tool for
+    // this process (`DASH__TOOL` if it names a tool that can be a root tool,
+    // otherwise this tool), so the sub-tool reports the same root tool as this
+    // process. An invalid label or a shared component (for example
+    // `analysis-server`) is never passed on, and a caller-supplied value is
+    // ignored.
     environmentResult[DashEnvVar.tool.name] =
-        parentTool ?? environmentResult[DashEnvVar.tool.name] ?? DashTool.flutterTool.label;
+        _asRootToolLabel(_platform.environment[DashEnvVar.tool.name]) ?? DashTool.flutterTool.label;
 
     return environmentResult;
+  }
+
+  /// Returns [label] if it names a [DashTool] that can be a root tool, or
+  /// `null` otherwise.
+  static String? _asRootToolLabel(String? label) {
+    if (label == null) {
+      return null;
+    }
+    final DashTool? tool = DashTool.values.where((DashTool t) => t.label == label).firstOrNull;
+    return (tool?.canBeRootTool ?? false) ? label : null;
   }
 
   @override
@@ -1369,6 +1399,7 @@ void _handlePosixException(
   const eperm = 1;
   const enoent = 2;
   const eacces = 13;
+  const exdev = 18;
   const enospc = 28;
   const erofs = 30;
   // Catch errors and bail when:
@@ -1378,6 +1409,12 @@ void _handlePosixException(
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
+    exdev =>
+      '${message != null && message.isNotEmpty ? '$message.\n' : ''}'
+          'A file system operation failed across different volumes or mount points.\n'
+          '$e\n'
+          'Ensure that the project, build output, and temporary directories are on the same '
+          'writable volume, or check external volume and security software settings.',
     enospc =>
       '$message. The target device is full.'
           '\n$e\n'
@@ -1461,6 +1498,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kSharingViolation = 32;
   const kLockViolation = 33;
   const kDeviceFull = 112;
+  const kFilenameExcedRange = 206;
   const kDeviceDoesNotExist = 433;
   const kSystemIntegrityPolicyViolation = 454;
   const kFatalDeviceHardwareError = 483;
@@ -1484,6 +1522,11 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
+    kFilenameExcedRange =>
+      '${message != null ? "$message. " : ""}The filename or extension is too long.\n'
+          '$e\n'
+          'Please consider moving the Flutter SDK and/or project to a shorter path, '
+          'or enabling long paths on Windows.',
     kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
       '$message. The file is being used by another program.'
           '\n$e\n'

@@ -89,6 +89,29 @@ class ScrollPhysics {
   /// Creates an object with the default scroll physics.
   const ScrollPhysics({this.parent});
 
+  /// Creates an [AlwaysScrollableScrollPhysics] instance.
+  const factory ScrollPhysics.alwaysScrollable({ScrollPhysics? parent}) =
+      AlwaysScrollableScrollPhysics;
+
+  /// Creates a [BouncingScrollPhysics] instance.
+  ///
+  /// The [decelerationRate] defaults to [ScrollDecelerationRate.normal].
+  const factory ScrollPhysics.bouncing({
+    ScrollPhysics? parent,
+    ScrollDecelerationRate decelerationRate,
+  }) = BouncingScrollPhysics;
+
+  /// Creates a [ClampingScrollPhysics] instance.
+  const factory ScrollPhysics.clamping({ScrollPhysics? parent}) = ClampingScrollPhysics;
+
+  /// Creates a [NeverScrollableScrollPhysics] instance.
+  const factory ScrollPhysics.neverScrollable({ScrollPhysics? parent}) =
+      NeverScrollableScrollPhysics;
+
+  /// Creates a [RangeMaintainingScrollPhysics] instance.
+  const factory ScrollPhysics.rangeMaintaining({ScrollPhysics? parent}) =
+      RangeMaintainingScrollPhysics;
+
   /// If non-null, determines the default behavior for each method.
   ///
   /// If a subclass of [ScrollPhysics] does not override a method, that subclass
@@ -612,6 +635,7 @@ class ScrollPhysics {
 /// if any, and then clamped to the new range.
 class RangeMaintainingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that maintain the scroll position in range.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.rangeMaintaining`.
   const RangeMaintainingScrollPhysics({super.parent});
 
   @override
@@ -723,6 +747,9 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///    of different types to get the desired scroll physics.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
+  ///
+  /// The [decelerationRate] defaults to [ScrollDecelerationRate.normal].
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.bouncing`.
   const BouncingScrollPhysics({
     this.decelerationRate = ScrollDecelerationRate.normal,
     super.parent,
@@ -730,6 +757,47 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   /// Used to determine parameters for friction simulations.
   final ScrollDecelerationRate decelerationRate;
+
+  // Approximation of iOS native rubber band decay rate.
+  static const double _rubberBandHalfLifeSeconds = 0.07;
+
+  // Decay constant (lambda) for rubber band spring simulation.
+  static final double _rubberBandLambda = math.log(2) / _rubberBandHalfLifeSeconds;
+
+  /// Spring used to animate overscroll bounce from a stationary release in iOS
+  /// native style.
+  ///
+  /// Used in [createBallisticSimulation] depending on the conditions.
+  ///
+  /// Research indicates that iOS employs a distinct decay function when a
+  /// scrollable area is released in an overscroll and stationary state (zero
+  /// initial velocity), conforming to an exponential decay model.
+  //
+  // ## Mathematical derivation
+  //
+  // A standard spring-damper system follows the second-order differential equation:
+  // m*x'' + c*x' + k*x = 0
+  //
+  // To force this second-order system to behave like a first-order exponential
+  // decay x(t) = C * e^(-lambda * t), we configure it as an overdamped spring
+  // with two explicitly defined roots (r1 and r2) for its characteristic
+  // equation:
+  //
+  // * r1 = -lambda (the primary root driving the visible exponential decay)
+  // * r2 = -100000 * lambda (an extremely large negative root)
+  //
+  // Because r2 is massive and negative, its corresponding term in the exact
+  // mathematical solution (C2 * e^(r2 * t)) decays to zero almost
+  // instantaneously. The system movement becomes dominated by r1.
+  //
+  // Using Vieta's formulas for the characteristic equation r^2 + (c/m)r + (k/m) = 0:
+  // * r1 + r2 = -c/m => damping (c) = -(r1 + r2) * m
+  // * r1 * r2 = k/m  => stiffness (k) = (r1 * r2) * m
+  static final SpringDescription rubberBandSpring = SpringDescription(
+    mass: 1.0,
+    stiffness: 1e5 * _rubberBandLambda * _rubberBandLambda,
+    damping: (1e5 + 1) * _rubberBandLambda,
+  );
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -810,9 +878,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = toleranceFor(position);
-    if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
+    final bool isStationary = velocity.abs() < tolerance.velocity;
+    final bool isRubberBand = isStationary && position.outOfRange;
+
+    if (!isStationary || position.outOfRange) {
       return BouncingScrollSimulation(
-        spring: spring,
+        spring: isRubberBand ? rubberBandSpring : spring,
         position: position.pixels,
         velocity: velocity,
         leadingExtent: position.minScrollExtent,
@@ -893,6 +964,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.clamping`.
   const ClampingScrollPhysics({super.parent});
 
   @override
@@ -1002,6 +1074,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.alwaysScrollable`.
   const AlwaysScrollableScrollPhysics({super.parent});
 
   @override
@@ -1025,6 +1098,7 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class NeverScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that does not let the user scroll.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.neverScrollable`.
   const NeverScrollableScrollPhysics({super.parent});
 
   @override

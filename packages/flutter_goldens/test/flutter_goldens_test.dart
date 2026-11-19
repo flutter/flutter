@@ -1302,90 +1302,87 @@ void main() {
         expect(log, isEmpty);
       });
 
-      test(
-        'fails and outputs multimodal diff artifacts when exceeding fuzzy tolerance in browser test',
-        () async {
-          final log = <String>[];
-          final fs = MemoryFileSystem();
-          fs.directory(_kFlutterRoot).createSync(recursive: true);
-          final Directory basedir = fs.directory('flutter/test/library/')
-            ..createSync(recursive: true);
-          final fakeSkiaClient = FakeSkiaGoldClient()..isBrowserTestValue = true;
-          final FlutterGoldenFileComparator comparator = FlutterLocalFileComparator(
-            basedir.uri,
-            fakeSkiaClient,
-            fs: fs,
-            platform: FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_ROOT': _kFlutterRoot,
-                'FLUTTER_TEST_BROWSER': 'chrome',
-              },
-              operatingSystem: 'macos',
-            ),
-            log: log.add,
-          );
+      test('fails and outputs multimodal diff artifacts when exceeding fuzzy tolerance in browser test', () async {
+        final log = <String>[];
+        final fs = MemoryFileSystem();
+        fs.directory(_kFlutterRoot).createSync(recursive: true);
+        final Directory basedir = fs.directory('flutter/test/library/')
+          ..createSync(recursive: true);
+        final fakeSkiaClient = FakeSkiaGoldClient()..isBrowserTestValue = true;
+        final FlutterGoldenFileComparator comparator = FlutterLocalFileComparator(
+          basedir.uri,
+          fakeSkiaClient,
+          fs: fs,
+          platform: FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'FLUTTER_TEST_BROWSER': 'chrome',
+            },
+            operatingSystem: 'macos',
+          ),
+          log: log.add,
+        );
 
-          // 4x4 master image: all white
-          final masterRgba = List<int>.filled(4 * 4 * 4, 255);
-          final Uint8List masterBytes = await _createPngFromRgba(masterRgba, 4, 4);
+        // 4x4 master image: all white
+        final masterRgba = List<int>.filled(4 * 4 * 4, 255);
+        final Uint8List masterBytes = await _createPngFromRgba(masterRgba, 4, 4);
 
-          // 4x4 test image: 3 pixels completely black (3/16 = 18.75% > 10%)
-          final testRgba = List<int>.filled(4 * 4 * 4, 255);
-          for (var p = 0; p < 3; p += 1) {
-            testRgba[p * 4] = 0;
-            testRgba[p * 4 + 1] = 0;
-            testRgba[p * 4 + 2] = 0;
-            testRgba[p * 4 + 3] = 255;
-          }
-          final Uint8List testBytes = await _createPngFromRgba(testRgba, 4, 4);
+        // 4x4 test image: 3 pixels completely black (3/16 = 18.75% > 10%)
+        final testRgba = List<int>.filled(4 * 4 * 4, 255);
+        for (var p = 0; p < 3; p += 1) {
+          testRgba[p * 4] = 0;
+          testRgba[p * 4 + 1] = 0;
+          testRgba[p * 4 + 2] = 0;
+          testRgba[p * 4 + 3] = 255;
+        }
+        final Uint8List testBytes = await _createPngFromRgba(testRgba, 4, 4);
 
-          const hash = '55109a4bed52acc780530f7a9aeff6c0';
-          fakeSkiaClient.expectationForTestValues['library.flutter.golden_test.1'] = hash;
-          fakeSkiaClient.imageBytesValues[hash] = masterBytes;
-          fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] =
-              'library.flutter.golden_test.1';
+        const hash = '55109a4bed52acc780530f7a9aeff6c0';
+        fakeSkiaClient.expectationForTestValues['library.flutter.golden_test.1'] = hash;
+        fakeSkiaClient.imageBytesValues[hash] = masterBytes;
+        fakeSkiaClient.cleanTestNameValues['library.flutter.golden_test.1.png'] =
+            'library.flutter.golden_test.1';
 
-          await expectLater(
-            () => comparator.compare(testBytes, Uri.parse('flutter.golden_test.1.png')),
-            throwsA(
-              isA<FlutterError>().having(
-                (FlutterError error) => error.message,
-                'message',
-                allOf(
-                  contains('Golden comparison failed for test "library.flutter.golden_test.1.png"'),
-                  contains('Pixel difference: 18.75% (3 / 16 pixels differed, max allowed: 10.0%)'),
-                  contains(
-                    'actual:   file:///flutter/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/actual.png',
-                  ),
-                  contains(
-                    'expected: file:///flutter/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/expected.png',
-                  ),
-                  contains(
-                    'diff:     file:///flutter/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/diff.png',
-                  ),
+        await expectLater(
+          () => comparator.compare(testBytes, Uri.parse('flutter.golden_test.1.png')),
+          throwsA(
+            isA<FlutterError>().having(
+              (FlutterError error) => error.message,
+              'message',
+              allOf(
+                contains('Golden comparison failed for test "library.flutter.golden_test.1.png"'),
+                contains('Pixel difference: 18.75% (3 / 16 pixels differed, max allowed: 10.0%)'),
+                contains(
+                  'actual:   file:///flutter/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/actual.png',
+                ),
+                contains(
+                  'expected: file:///flutter/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/expected.png',
+                ),
+                contains(
+                  'diff:     file:///flutter/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/diff.png',
                 ),
               ),
             ),
-          );
+          ),
+        );
 
-          final File actual = fs.file(
-            '$_kFlutterRoot/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/actual.png',
-          );
-          final File expected = fs.file(
-            '$_kFlutterRoot/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/expected.png',
-          );
-          final File diff = fs.file(
-            '$_kFlutterRoot/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/diff.png',
-          );
+        final File actual = fs.file(
+          '$_kFlutterRoot/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/actual.png',
+        );
+        final File expected = fs.file(
+          '$_kFlutterRoot/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/expected.png',
+        );
+        final File diff = fs.file(
+          '$_kFlutterRoot/.dart_tool/flutter_goldens_cache/failures/library.flutter.golden_test.1/diff.png',
+        );
 
-          expect(actual.existsSync(), isTrue);
-          expect(expected.existsSync(), isTrue);
-          expect(diff.existsSync(), isTrue);
-          expect(actual.readAsBytesSync(), equals(testBytes));
-          expect(expected.readAsBytesSync(), equals(masterBytes));
-          expect(diff.readAsBytesSync(), isNotEmpty);
-        },
-      );
+        expect(actual.existsSync(), isTrue);
+        expect(expected.existsSync(), isTrue);
+        expect(diff.existsSync(), isTrue);
+        expect(actual.readAsBytesSync(), equals(testBytes));
+        expect(expected.readAsBytesSync(), equals(masterBytes));
+        expect(diff.readAsBytesSync(), isNotEmpty);
+      });
     });
   });
 }

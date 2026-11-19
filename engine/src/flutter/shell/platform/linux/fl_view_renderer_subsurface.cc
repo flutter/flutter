@@ -31,6 +31,13 @@ struct _FlViewRendererSubsurface {
   // Wayland subsurface the frame is rendered into.
   FlSubsurface* subsurface;
 
+  // The surface the subsurface was created on, and its Wayland object ID. Not
+  // owned by this object, they are only used to detect when GTK has replaced
+  // the surface. Both are compared because GTK may allocate the replacement at
+  // the same address.
+  struct wl_surface* parent_surface;
+  uint32_t parent_surface_id;
+
   // Manages the EGL context and surface used to present frames to the
   // subsurface.
   FlSubsurfaceEGL* egl;
@@ -46,6 +53,16 @@ struct _FlViewRendererSubsurface {
 
   // Ensure Flutter and GTK can access the frame stored in the compositor.
   GMutex frame_mutex;
+
+  // TRUE while the subsurface is synchronized with the parent surface, which
+  // is done from the widget being resized until GTK has next painted. See
+  // begin_synchronized_resize().
+  gboolean synchronized;
+
+  // The frame clock being watched for the end of the synchronized resize, and
+  // the handler connected to it. NULL and zero when not synchronized.
+  GdkFrameClock* frame_clock;
+  gulong after_paint_handler;
 };
 
 G_DEFINE_TYPE(FlViewRendererSubsurface,
@@ -95,7 +112,82 @@ static void wait_for_frame(FlViewRendererSubsurface* self,
   }
 }
 
-// Gets the EGL display the engine renders to. The subsurface shares this
+// Gets the Wayland surface of the window this widget is inside, or nullptr if
+// it doesn't have one.
+static struct wl_surface* get_parent_surface(GtkWidget* widget) {
+  GdkWindow* window = gtk_widget_get_window(gtk_widget_get_toplevel(widget));
+  if (window == nullptr || !GDK_IS_WAYLAND_WINDOW(window)) {
+    return nullptr;
+  }
+  return gdk_wayland_window_get_wl_surface(window);
+}
+
+// Gets the Wayland object ID of @surface, or zero if it doesn't exist.
+static uint32_t get_surface_id(struct wl_surface* surface) {
+  return surface == nullptr
+             ? 0
+             : wl_proxy_get_id(reinterpret_cast<struct wl_proxy*>(surface));
+}
+
+// Desynchronize the subsurface from the parent surface again, so frames are
+// shown as soon as they are presented. Any frame held back while synchronized
+// is shown now.
+static void end_synchronized_resize(FlViewRendererSubsurface* self) {
+  if (self->frame_clock != nullptr) {
+    g_signal_handler_disconnect(self->frame_clock, self->after_paint_handler);
+    self->after_paint_handler = 0;
+    g_clear_object(&self->frame_clock);
+  }
+
+  if (self->synchronized && self->subsurface != nullptr) {
+    fl_subsurface_set_desync(self->subsurface);
+  }
+  self->synchronized = FALSE;
+}
+
+// Called after GTK has painted and committed the parent surface, which also
+// applied the frame held back by the subsurface being synchronized.
+static void after_paint_cb(FlViewRendererSubsurface* self) {
+  end_synchronized_resize(self);
+}
+
+// Synchronize the subsurface with the parent surface until GTK has next
+// painted. The frame of the new size presented while synchronized is held back
+// and applied when GTK commits the resized parent surface, so both change size
+// in the same compositor update. The parent surface is only committed when GTK
+// paints, so a redraw is queued to make sure that happens.
+//
+// Outside a resize the subsurface is desynchronized, so frames are shown as
+// soon as the raster thread presents them and the GTK thread doesn't have to
+// redraw the window for each one.
+static void begin_synchronized_resize(FlViewRendererSubsurface* self) {
+  // A view sized to its content keeps the subsurface synchronized, see
+  // create_subsurface().
+  if (self->subsurface == nullptr || self->synchronized ||
+      self->sized_to_content) {
+    return;
+  }
+
+  GtkWidget* widget = GTK_WIDGET(self);
+  GdkFrameClock* frame_clock = gtk_widget_get_frame_clock(widget);
+  if (frame_clock == nullptr) {
+    return;
+  }
+
+  fl_subsurface_set_sync(self->subsurface);
+  self->synchronized = TRUE;
+  self->frame_clock = GDK_FRAME_CLOCK(g_object_ref(frame_clock));
+  // GTK commits the parent surface from its own handler for this signal, so
+  // connect after it to desynchronize once that commit has been made. GTK
+  // skips the commit while the window is waiting for its initial configure
+  // event, but the window isn't visible then so nothing is shown early.
+  self->after_paint_handler = g_signal_connect_data(
+      frame_clock, "after-paint", G_CALLBACK(after_paint_cb), self, nullptr,
+      static_cast<GConnectFlags>(G_CONNECT_AFTER | G_CONNECT_SWAPPED));
+
+  gtk_widget_queue_draw(widget);
+}
+
 // Move the subsurface to match the position of the widget in the toplevel.
 static void update_subsurface_position(FlViewRendererSubsurface* self) {
   if (self->subsurface == nullptr) {
@@ -108,8 +200,86 @@ static void update_subsurface_position(FlViewRendererSubsurface* self) {
   fl_subsurface_set_position(self->subsurface, x, y);
 }
 
-// Redraw the view from the GTK thread.
-static gboolean redraw_cb(gpointer user_data) {
+// Make a subsurface on @parent_surface and an EGL context that presents frames
+// to it. Must be called with the frame mutex held, as the raster thread
+// presents to these objects.
+static void create_subsurface(FlViewRendererSubsurface* self,
+                              struct wl_surface* parent_surface) {
+  GtkWidget* widget = GTK_WIDGET(self);
+
+  FlWaylandDisplay* wayland_display =
+      fl_wayland_display_get_for_display(gtk_widget_get_display(widget));
+  if (wayland_display == nullptr) {
+    return;
+  }
+
+  self->subsurface =
+      fl_wayland_display_create_subsurface(wayland_display, parent_surface);
+  update_subsurface_position(self);
+
+  // A new subsurface is synchronized with its parent, which holds back every
+  // frame until the parent (GTK) surface is redrawn and committed. A view sized
+  // to its content relies on that, as it resizes the window to fit each frame
+  // and redraws the window for each one, see frame_presented_cb(). Otherwise
+  // desynchronize it so frames are shown as soon as they are committed, which
+  // leaves the GTK thread idle while Flutter is animating.
+  if (self->sized_to_content) {
+    fl_subsurface_set_sync(self->subsurface);
+  } else {
+    fl_subsurface_set_desync(self->subsurface);
+  }
+
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
+  self->egl = fl_subsurface_egl_new(
+      fl_engine_get_opengl_manager(self->engine), self->subsurface,
+      allocation.width, allocation.height, gtk_widget_get_scale_factor(widget));
+}
+
+// GTK destroys the window's Wayland surface when it is hidden and makes a new
+// one if it is shown again. The subsurface belongs to the old surface, so it is
+// never shown again and using it is a protocol error. Detect this and move to
+// the new surface.
+static void update_parent_surface(FlViewRendererSubsurface* self) {
+  // Nothing to do before the widget is realized or after it is unrealized.
+  if (self->compositor == nullptr) {
+    return;
+  }
+
+  struct wl_surface* parent_surface = get_parent_surface(GTK_WIDGET(self));
+  uint32_t parent_surface_id = get_surface_id(parent_surface);
+  if (parent_surface == self->parent_surface &&
+      parent_surface_id == self->parent_surface_id) {
+    return;
+  }
+
+  // Drop the old subsurface. The surface it was on may already be destroyed,
+  // in which case there is nothing to replace it with until the window is
+  // shown again.
+  end_synchronized_resize(self);
+  g_mutex_lock(&self->frame_mutex);
+  g_clear_object(&self->egl);
+  g_clear_object(&self->subsurface);
+  self->parent_surface = parent_surface;
+  self->parent_surface_id = parent_surface_id;
+  if (parent_surface != nullptr) {
+    create_subsurface(self, parent_surface);
+  }
+  g_mutex_unlock(&self->frame_mutex);
+
+  if (parent_surface == nullptr) {
+    return;
+  }
+
+  // The new subsurface has nothing in it, so ask for the frame to be rendered
+  // again.
+  fl_engine_schedule_frame(self->engine);
+}
+
+// Handle a presented frame on the GTK thread. The frame was shown by the
+// subsurface when it was presented, so the widget doesn't need redrawing,
+// unless the view is sized to its content.
+static gboolean frame_presented_cb(gpointer user_data) {
   g_autoptr(FlViewRendererSubsurface) self =
       FL_VIEW_RENDERER_SUBSURFACE(user_data);
 
@@ -128,9 +298,11 @@ static gboolean redraw_cb(gpointer user_data) {
                                          frame_height)) {
       return G_SOURCE_REMOVE;
     }
-  }
 
-  gtk_widget_queue_draw(GTK_WIDGET(self));
+    // The subsurface is synchronized, so the frame is shown when the window
+    // is next committed; redraw it to make that happen.
+    gtk_widget_queue_draw(GTK_WIDGET(self));
+  }
 
   return G_SOURCE_REMOVE;
 }
@@ -147,37 +319,23 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
     return;
   }
 
-  FlWaylandDisplay* wayland_display =
-      fl_wayland_display_get_for_display(gdk_display);
-  if (wayland_display == nullptr) {
-    return;
-  }
-
-  // Create a subsurface on the toplevel's surface.
-  GdkWindow* toplevel_window =
-      gtk_widget_get_window(gtk_widget_get_toplevel(widget));
-  self->subsurface = fl_wayland_display_create_subsurface(
-      wayland_display, gdk_wayland_window_get_wl_surface(toplevel_window));
-  update_subsurface_position(self);
-
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(widget, &allocation);
-  gint scale_factor = gtk_widget_get_scale_factor(widget);
-  self->egl = fl_subsurface_egl_new(fl_engine_get_opengl_manager(self->engine),
-                                    self->subsurface, allocation.width,
-                                    allocation.height, scale_factor);
-
   // The subsurface's EGL context shares resources with the engine, so the
   // engine's frame texture is accessed directly without using EGLImage.
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
   self->compositor =
       fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
+
+  // Create a subsurface on the toplevel's surface. This asks for a frame, as
+  // any rendered before this point were dropped.
+  update_parent_surface(self);
 }
 
 // Implements GtkWidget::unrealize.
 static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
+
+  end_synchronized_resize(self);
 
   // Hold frame_mutex while releasing these objects so the raster thread cannot
   // be using them in present_layers concurrently. The unref may run their
@@ -190,9 +348,18 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
   // the engine and is left untouched by FlSubsurfaceEGL.
   g_clear_object(&self->egl);
   g_clear_object(&self->subsurface);
+  self->parent_surface = nullptr;
+  self->parent_surface_id = 0;
   g_mutex_unlock(&self->frame_mutex);
 
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unrealize(widget);
+}
+
+// Implements GtkWidget::map.
+static void fl_view_renderer_subsurface_map(GtkWidget* widget) {
+  GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->map(widget);
+
+  update_parent_surface(FL_VIEW_RENDERER_SUBSURFACE(widget));
 }
 
 // Implements GtkWidget::draw.
@@ -217,18 +384,24 @@ static void fl_view_renderer_subsurface_size_allocate(
 
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
-  if (self->subsurface == nullptr) {
-    return;
-  }
-
-  gint scale_factor = gtk_widget_get_scale_factor(widget);
-  size_t width = allocation->width * scale_factor;
-  size_t height = allocation->height * scale_factor;
-
+  update_parent_surface(self);
   update_subsurface_position(self);
+
+  // Keep the frame of the new size back until GTK has committed the resized
+  // parent surface. This has to be requested before the new window metrics
+  // reach the engine (FlView sends them from its size-allocate handler, which
+  // runs after this), so the frame it renders in response is held back.
+  begin_synchronized_resize(self);
+
+  // Hold frame_mutex while resizing, as the raster thread uses the sizes this
+  // updates when it presents a frame.
+  g_mutex_lock(&self->frame_mutex);
   if (self->egl != nullptr) {
-    fl_subsurface_egl_resize(self->egl, width, height);
+    gint scale_factor = gtk_widget_get_scale_factor(widget);
+    fl_subsurface_egl_resize(self->egl, allocation->width * scale_factor,
+                             allocation->height * scale_factor);
   }
+  g_mutex_unlock(&self->frame_mutex);
 }
 
 // Runs after the size_allocate default handler and, crucially, after FlView has
@@ -275,36 +448,49 @@ static void fl_view_renderer_subsurface_present_layers(
     return;
   }
 
-  if (layers_count == 0) {
-    g_mutex_unlock(&self->frame_mutex);
-    return;
+  size_t width, height;
+  if (layers_count > 0) {
+    width = layers[0]->size.width;
+    height = layers[0]->size.height;
+  } else if (self->framebuffer != nullptr) {
+    // A frame with nothing to rasterize, e.g. everything painted was fully
+    // transparent, has no layers and so no size. Keep the current size and
+    // present the frame, which is cleared when the layers are composited
+    // below, so the previous frame is not left on screen.
+    width = fl_framebuffer_get_width(self->framebuffer);
+    height = fl_framebuffer_get_height(self->framebuffer);
+  } else {
+    // Nothing has been rendered yet, so there is nothing to clear. The GTK
+    // thread is still notified below so the window is shown.
+    width = 0;
+    height = 0;
   }
 
-  size_t width = layers[0]->size.width;
-  size_t height = layers[0]->size.height;
+  if (width > 0 && height > 0) {
+    // Recreate the framebuffer if the frame size has changed. The subsurface's
+    // EGL context shares resources with the engine, so the frame texture is
+    // read directly and doesn't need to be shareable or copied via CPU memory.
+    if (self->framebuffer == nullptr ||
+        fl_framebuffer_get_width(self->framebuffer) != width ||
+        fl_framebuffer_get_height(self->framebuffer) != height) {
+      GLint general_format =
+          fl_compositor_opengl_get_frame_format(layers, layers_count);
+      g_clear_object(&self->framebuffer);
+      self->framebuffer =
+          fl_framebuffer_new(general_format, width, height, FALSE);
+    }
 
-  // Recreate the framebuffer if the frame size has changed. The subsurface's
-  // EGL context shares resources with the engine, so the frame texture is read
-  // directly and doesn't need to be shareable or copied via CPU memory.
-  if (self->framebuffer == nullptr ||
-      fl_framebuffer_get_width(self->framebuffer) != width ||
-      fl_framebuffer_get_height(self->framebuffer) != height) {
-    GLint general_format =
-        fl_compositor_opengl_get_frame_format(layers, layers_count);
-    g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, FALSE);
+    // Bind the target framebuffer so the compositor draws into it.
+    GLint saved_draw_framebuffer_binding;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                      fl_framebuffer_get_id(self->framebuffer));
+
+    fl_compositor_opengl_composite_layers(self->compositor, layers,
+                                          layers_count);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
   }
-
-  // Bind the target framebuffer so the compositor draws into it.
-  GLint saved_draw_framebuffer_binding;
-  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                    fl_framebuffer_get_id(self->framebuffer));
-
-  fl_compositor_opengl_composite_layers(self->compositor, layers, layers_count);
-
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
 
   // The frame is presented below using the subsurface's own OpenGL context.
   // Sharing a texture between contexts requires the rendering to have completed
@@ -322,9 +508,11 @@ static void fl_view_renderer_subsurface_present_layers(
   // Present the composited frame directly to the subsurface using its own EGL
   // context. This reads the engine's frame texture directly, as the subsurface
   // context shares resources with the engine.
-  fl_subsurface_egl_present(self->egl,
-                            fl_framebuffer_get_texture_id(self->framebuffer),
-                            width, height, fence);
+  if (width > 0 && height > 0) {
+    fl_subsurface_egl_present(self->egl,
+                              fl_framebuffer_get_texture_id(self->framebuffer),
+                              width, height, fence);
+  }
 
   g_mutex_unlock(&self->frame_mutex);
 
@@ -333,12 +521,13 @@ static void fl_view_renderer_subsurface_present_layers(
   fl_task_runner_stop_wait(self->task_runner);
 
   // Notify the GTK thread so it can emit the first frame and resize the view.
-  g_idle_add(redraw_cb, g_object_ref(self));
+  g_idle_add(frame_presented_cb, g_object_ref(self));
 }
 
 static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
+  end_synchronized_resize(self);
   g_clear_object(&self->engine);
   g_clear_object(&self->task_runner);
   g_mutex_clear(&self->frame_mutex);
@@ -369,6 +558,7 @@ static void fl_view_renderer_subsurface_class_init(
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_renderer_subsurface_realize;
   widget_class->unrealize = fl_view_renderer_subsurface_unrealize;
+  widget_class->map = fl_view_renderer_subsurface_map;
   widget_class->draw = fl_view_renderer_subsurface_draw;
   widget_class->size_allocate = fl_view_renderer_subsurface_size_allocate;
 

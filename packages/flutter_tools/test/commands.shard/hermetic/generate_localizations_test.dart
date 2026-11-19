@@ -78,9 +78,9 @@ flutter:
   generate: true''');
     final command = GenerateLocalizationsCommand(toolContext: toolContext);
     expect(
-      () => createTestCommandRunner(
-        command,
-      ).run(<String>['gen-l10n', '--header="some header', '--header-file="header.txt"']),
+      () =>
+          createTestCommandRunner(command)
+              .run(<String>['gen-l10n', '--header="some header', '--header-file="header.txt"']),
       throwsToolExit(),
     );
   });
@@ -355,6 +355,7 @@ format: true
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -392,6 +393,7 @@ format: false
     final environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -431,6 +433,31 @@ format: false
     );
   });
 
+  testWithoutContext('use-explicit-plural-values is forwarded from the command line', () async {
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+      ..createSync(recursive: true);
+    arbFile.writeAsStringSync('''
+{
+  "itemCount": "{count,plural, =1{exactly one} one{{count} item} other{{count} items}}",
+  "@itemCount": {
+    "description": "Sample description"
+  }
+}''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    final command = GenerateLocalizationsCommand(toolContext: toolContext);
+    await createTestCommandRunner(command)
+        .run(<String>['gen-l10n', '--use-explicit-plural-values']);
+
+    final File outputFile = fileSystem.file(
+      fileSystem.path.join('lib', 'l10n', 'app_localizations_en.dart'),
+    );
+    expect(outputFile.existsSync(), isTrue);
+    final String content = outputFile.readAsStringSync();
+    expect(content, contains('count == 1'));
+    expect(content, contains(r"one: '$count item',"));
+  });
+
   testWithoutContext('throw when generate: false when run with l10n.yaml', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
@@ -459,8 +486,7 @@ format: false
     expect(
       () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
       throwsToolExit(
-        message:
-            'Attempted to generate localizations code without having the flutter: generate flag turned on.',
+        message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.',
       ),
     );
   });
@@ -492,8 +518,7 @@ format: false
     expect(
       () async => createTestCommandRunner(command).run(<String>['gen-l10n']),
       throwsToolExit(
-        message:
-            'Attempted to generate localizations code without having the flutter: generate flag turned on.',
+        message: 'Attempted to generate localizations code without having the flutter: generate flag turned on.',
       ),
     );
   });

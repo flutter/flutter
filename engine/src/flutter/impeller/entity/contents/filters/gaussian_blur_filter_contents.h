@@ -21,15 +21,15 @@ static_assert(sizeof(GaussianBlurPipeline::FragmentShader::KernelSamples) ==
 
 struct BlurParameters {
   Point blur_uv_offset;
-  Scalar blur_sigma;
-  int blur_radius;
-  int step_size;
-  bool apply_unpremultiply;
+  Scalar blur_sigma = 0.0f;
+  int blur_radius = 0;
+  int step_size = 0;
+  bool apply_unpremultiply = false;
 };
 
 struct KernelSample {
   Vector2 uv_offset;
-  float coefficient;
+  float coefficient = 0.0f;
 };
 
 /// A larger mirror of GaussianBlurPipeline::FragmentShader::KernelSamples.
@@ -39,13 +39,13 @@ struct KernelSample {
 /// hack.
 struct KernelSamples {
   static constexpr int kMaxKernelSize = kGaussianBlurMaxKernelSize * 2;
-  int sample_count;
+  int sample_count = 0;
   KernelSample samples[kMaxKernelSize];
 };
 
 struct LerpHackResult {
   GaussianBlurPipeline::FragmentShader::KernelSamples kernel_samples;
-  int32_t sample_count;
+  int32_t sample_count = 0;
 };
 
 KernelSamples GenerateBlurInfo(BlurParameters parameters);

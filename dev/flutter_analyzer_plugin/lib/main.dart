@@ -5,18 +5,19 @@
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
 
+import 'src/rules/access_debug_members_only_in_asserts.dart';
 import 'src/rules/avoid_future_catch_error.dart';
 import 'src/rules/deprecation_syntax.dart';
 import 'src/rules/golden_test_tags.dart';
 import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/issue_link_syntax.dart';
+import 'src/rules/lazy_initialized_debug_expensive_fields.dart';
 import 'src/rules/no_bad_imports_in_flutter.dart';
 import 'src/rules/no_double_clamp.dart';
 import 'src/rules/no_runtimetype_in_tostring.dart';
 import 'src/rules/no_stopwatches.dart';
 import 'src/rules/no_sync_async_star.dart';
 import 'src/rules/no_test_imports.dart';
-import 'src/rules/null_initialized_debug_expensive_fields.dart';
 import 'src/rules/protect_public_state_subtypes.dart';
 import 'src/rules/render_box_intrinsics.dart';
 import 'src/rules/repository_link_syntax.dart';
@@ -41,11 +42,12 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(SkipTestComments())
       ..registerWarningRule(TabooDocumentation())
       // Package-specific lint rules (opt-in via diagnostics: in analysis_options.yaml).
+      ..registerLintRule(AccessDebugMembersOnlyInAsserts())
       ..registerLintRule(AvoidFutureCatchError())
       ..registerLintRule(NoDoubleClamp())
       ..registerLintRule(NoRuntimeTypeInToString())
       ..registerLintRule(NoStopwatches())
-      ..registerLintRule(NullInitializedDebugExpensiveFields())
+      ..registerLintRule(LazyInitializedDebugExpensiveFields())
       ..registerLintRule(ProtectPublicStateSubtypes())
       ..registerLintRule(RenderBoxIntrinsicCalculationRule());
   }

@@ -201,9 +201,8 @@ void main() {
         },
       );
       return MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(searchBarTheme: overallTheme),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(searchBarTheme: overallTheme),
         home: Scaffold(
           body: Center(
             // If the SearchBarThemeData widget is present, it's used

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:skills_lint/skills_lint.dart';
@@ -59,6 +60,7 @@ void main() {
     final Configuration config = await ConfigParser.loadConfig(
       path: path.join(repoRoot.path, 'dev', 'tools', _configFileName),
     );
+    expect(config.parsingErrors, isEmpty, reason: 'Configuration should load without errors.');
     final bool isValid = await validateSkills(
       skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
       config: config,

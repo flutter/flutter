@@ -59,10 +59,10 @@ void TimerThread::ScheduleAt(
 void TimerThread::TimerThreadMain() {
   std::unique_lock<std::mutex> lock(mutex_);
   while (callback_ != nullptr) {
-    cv_.wait_until(lock, next_fire_time_, [this]() {
-      return std::chrono::high_resolution_clock::now() >= next_fire_time_ ||
-             callback_ == nullptr;
-    });
+    cv_.wait_until(lock, next_fire_time_);
+    if (next_fire_time_ > std::chrono::high_resolution_clock::now()) {
+      continue;
+    }
     auto scheduled_count = schedule_counter_;
     if (callback_) {
       lock.unlock();

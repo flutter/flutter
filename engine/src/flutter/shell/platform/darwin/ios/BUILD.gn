@@ -11,6 +11,7 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_common.gni")
+import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
 import("//flutter/testing/testing.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
@@ -68,6 +69,7 @@ source_set("InternalFlutterSwift") {
     "framework/Source/KeyboardInsetManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
+    "framework/Source/TranslateViewController.swift",
     "framework/Source/UIPressProxy.swift",
     "framework/Source/VSyncClient.swift",
   ]
@@ -117,6 +119,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterOverlayView.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
+    "framework/Source/FlutterPlatformViewLayer.h",
+    "framework/Source/FlutterPlatformViewLayer.m",
     "framework/Source/FlutterPlatformViews.mm",
     "framework/Source/FlutterPlatformViewsController.h",
     "framework/Source/FlutterPlatformViewsController.mm",
@@ -131,6 +135,9 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterSemanticsScrollView.mm",
     "framework/Source/FlutterSharedApplication.h",
     "framework/Source/FlutterSharedApplication.mm",
+    "framework/Source/FlutterShell.h",
+    "framework/Source/FlutterShell.mm",
+    "framework/Source/FlutterShell_Internal.h",
     "framework/Source/FlutterSpellCheckPlugin.h",
     "framework/Source/FlutterSpellCheckPlugin.mm",
     "framework/Source/FlutterTextInputDelegate.h",
@@ -181,6 +188,8 @@ source_set("flutter_framework_source") {
     "platform_message_handler_ios.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
+    "platform_view_layer_conversion.h",
+    "platform_view_layer_conversion.mm",
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
   ]
@@ -311,6 +320,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterSceneDelegateTest.m",
       "framework/Source/FlutterSceneLifeCycleTest.mm",
       "framework/Source/FlutterSharedApplicationTest.mm",
+      "framework/Source/FlutterShellTest.mm",
       "framework/Source/FlutterSpellCheckPluginTest.mm",
       "framework/Source/FlutterTextInputPluginTest.mm",
       "framework/Source/FlutterTextureRegistryRelayTest.mm",
@@ -326,6 +336,7 @@ if (enable_ios_unittests) {
       "framework/Source/availability_version_check_test.mm",
       "platform_message_handler_ios_test.mm",
       "platform_view_ios_test.mm",
+      "platform_view_layer_conversion_test.mm",
     ]
     deps = [
       ":InternalFlutterSwift",
@@ -336,6 +347,7 @@ if (enable_ios_unittests) {
       ":ios_test_flutter_swift",
       "//flutter/common",
       "//flutter/lib/ui",
+      "//flutter/runtime",
       "//flutter/shell/platform/darwin/common:framework_common",
       "//flutter/shell/platform/darwin/common:test_utils_swift",
       "//flutter/shell/platform/embedder:embedder_as_internal_library",
@@ -405,13 +417,20 @@ copy("copy_dylib") {
   deps = [ ":create_flutter_framework_dylib" ]
 }
 
+check_forbidden_native_symbols("check_native_symbols") {
+  visibility = [ ":*" ]
+  deps = [ ":copy_dylib" ]
+  _dylib_outputs = get_target_outputs(":copy_dylib")
+  library = _dylib_outputs[0]
+}
+
 copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
   # TODO(cbracken): https://github.com/flutter/flutter/issues/186668
   # Eliminate clang toolchain hardcoding.
   _libclang_base_path =
-      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/23/lib/darwin/"
+      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/24/lib/darwin/"
 
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"
@@ -510,6 +529,7 @@ shared_library("copy_and_verify_framework_module") {
 group("universal_flutter_framework") {
   visibility = [ ":*" ]
   deps = [
+    ":check_native_symbols",
     ":copy_and_verify_framework_module",
     ":copy_dylib",
     ":copy_framework_icu",

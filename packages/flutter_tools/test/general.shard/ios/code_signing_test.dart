@@ -33,14 +33,16 @@ void main() {
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: FakeProcessManager.empty(),
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: BufferLogger.test(),
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: BufferLogger.test(),
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: FakeProcessManager.empty(),
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
       });
@@ -50,14 +52,16 @@ void main() {
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{'DEVELOPMENT_TEAM': 'abc'},
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: FakeProcessManager.empty(),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: FakeProcessManager.empty(),
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
         expect(
@@ -78,14 +82,16 @@ void main() {
                 'DEVELOPMENT_TEAM': 'abc',
                 'CODE_SIGN_STYLE': 'Manual',
               },
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: FakeProcessManager.empty(),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: FakeProcessManager.empty(),
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
         // Should not log "Automatically signing..." when CODE_SIGN_STYLE is Manual.
@@ -108,14 +114,16 @@ void main() {
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{'PROVISIONING_PROFILE': 'abc'},
-                platform: FakePlatform(operatingSystem: 'macos'),
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-                config: Config.test(),
-                terminal: FakeTerminal(),
-                fileSystem: MemoryFileSystem.test(),
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: Config.test(),
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: MemoryFileSystem.test(),
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: FakeProcessManager.empty(),
+                  terminal: FakeTerminal(),
+                ),
               );
           expect(signingConfigs, isNull);
           expect(logger.errorText, isEmpty);
@@ -138,14 +146,16 @@ void main() {
           await expectLater(
             () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: processManager,
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             ),
             throwsToolExit(
               message:
@@ -193,14 +203,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
         expect(signingConfigs, isNull);
         expect(processManager, hasNoRemainingExpectations);
@@ -215,14 +227,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(),
-              logger: logger,
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(signingConfigs, isNull);
@@ -284,22 +298,23 @@ Or run on an iOS simulator without code signing
           ),
           FakeCommand(
             command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: fileSystem,
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: plistParser,
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(processManager, hasNoRemainingExpectations);
@@ -336,14 +351,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: fileSystem,
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(processManager, hasNoRemainingExpectations);
@@ -389,14 +406,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -442,14 +461,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -458,56 +479,61 @@ Or run on an iOS simulator without code signing
         },
       );
 
-      testWithoutContext('does not use saved provisioning profile if fails to parse plist', () async {
-        final testConfig = Config.test();
-        final fileSystem = MemoryFileSystem.test();
-        final logger = BufferLogger.test();
-        const profileFilePath =
-            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-        fileSystem.file(profileFilePath).createSync(recursive: true);
-        testConfig.setValue('ios-signing-profile', profileFilePath);
-        final File profilePlist = fileSystem.file(
-          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-        );
+      testWithoutContext(
+        'does not use saved provisioning profile if fails to parse plist',
+        () async {
+          final testConfig = Config.test();
+          final fileSystem = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          const profileFilePath =
+              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+          fileSystem.file(profileFilePath).createSync(recursive: true);
+          testConfig.setValue('ios-signing-profile', profileFilePath);
+          final File profilePlist = fileSystem.file(
+            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+          );
 
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['which', 'security']),
-          const FakeCommand(command: <String>['which', 'openssl']),
-          const FakeCommand(
-            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-            stdout: kCertificates,
-          ),
-          FakeCommand(
-            command: <String>[
-              'security',
-              'cms',
-              '-D',
-              '-i',
-              profileFilePath,
-              '-o',
-              profilePlist.path,
-            ],
-            onRun: (List<String> command) => profilePlist.createSync(recursive: true),
-          ),
-        ]);
+          final processManager = FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(command: <String>['which', 'security']),
+            const FakeCommand(command: <String>['which', 'openssl']),
+            const FakeCommand(
+              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+              stdout: kCertificates,
+            ),
+            FakeCommand(
+              command: <String>[
+                'security',
+                'cms',
+                '-D',
+                '-i',
+                profileFilePath,
+                '-o',
+                profilePlist.path,
+              ],
+              onRun: (List<String> command) => profilePlist.createSync(recursive: true),
+            ),
+          ]);
 
-        final Map<String, String>? signingConfigs =
-            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-              buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: fileSystem,
-              fileSystemUtils: FakeFileSystemUtils(),
-              plistParser: FakePlistParser(),
-            );
+          final Map<String, String>? signingConfigs =
+              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+                buildSettings: <String, String>{},
+                plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
+              );
 
-        expect(processManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('Failed to parse provisioning profile'));
-        expect(signingConfigs, isNull);
-      });
+          expect(processManager, hasNoRemainingExpectations);
+          expect(logger.errorText, contains('Failed to parse provisioning profile'));
+          expect(signingConfigs, isNull);
+        },
+      );
 
       testWithoutContext(
         'does not uses saved provisioning profile if openssl fails to read cert',
@@ -569,14 +595,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -644,14 +672,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -716,22 +746,23 @@ Or run on an iOS simulator without code signing
             ),
             FakeCommand(
               command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-              stdout:
-                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+              stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
             ),
           ]);
 
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{},
-                processManager: processManager,
-                platform: FakePlatform(operatingSystem: 'macos'),
-                logger: logger,
-                config: testConfig,
-                terminal: FakeTerminal(),
-                fileSystem: fileSystem,
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: plistParser,
+                toolContext: FakeToolContext(
+                  config: testConfig,
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: fileSystem,
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(processManager, hasNoRemainingExpectations);
@@ -765,8 +796,7 @@ Or run on an iOS simulator without code signing
             FakeCommand(
               command: const <String>['openssl', 'x509', '-subject'],
               stdin: IOSink(controller.sink),
-              stdout:
-                  'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
               completer: completer,
             ),
           ]);
@@ -783,14 +813,16 @@ Or run on an iOS simulator without code signing
           final Map<String, String>? signingConfigs =
               await getCodeSigningIdentityDevelopmentTeamBuildSetting(
                 buildSettings: <String, String>{'bogus': 'bogus'},
-                platform: FakePlatform(operatingSystem: 'macos'),
-                processManager: processManager,
-                logger: logger,
-                config: Config.test(),
-                terminal: FakeTerminal(),
-                fileSystem: MemoryFileSystem.test(),
-                fileSystemUtils: FakeFileSystemUtils(),
                 plistParser: FakePlistParser(),
+                toolContext: FakeToolContext(
+                  config: Config.test(),
+                  fileSystemUtils: FakeFileSystemUtils(),
+                  fs: MemoryFileSystem.test(),
+                  logger: logger,
+                  platform: FakePlatform(operatingSystem: 'macos'),
+                  processManager: processManager,
+                  terminal: FakeTerminal(),
+                ),
               );
 
           expect(logger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
@@ -823,8 +855,7 @@ Or run on an iOS simulator without code signing
             FakeCommand(
               command: const <String>['openssl', 'x509', '-subject'],
               stdin: IOSink(controller.sink),
-              stdout:
-                  'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
               completer: completer,
             ),
           ]);
@@ -879,8 +910,7 @@ Or run on an iOS simulator without code signing
             FakeCommand(
               command: const <String>['openssl', 'x509', '-subject'],
               stdin: IOSink(controller.sink),
-              stdout:
-                  'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
               completer: completer,
             ),
           ]);
@@ -945,8 +975,7 @@ Or run on an iOS simulator without code signing
           ),
           const FakeCommand(
             command: <String>['openssl', 'x509', '-subject'],
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           ),
           const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
@@ -955,8 +984,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1018,8 +1046,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1078,8 +1105,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1094,14 +1120,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         expect(
@@ -1158,8 +1186,7 @@ Or run on an iOS simulator without code signing
           ),
           const FakeCommand(
             command: <String>['openssl', 'x509', '-subject'],
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           ),
           const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
@@ -1168,8 +1195,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1187,14 +1213,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: testTerminal,
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: testConfig,
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: testTerminal,
+              ),
             );
 
         expect(
@@ -1226,14 +1254,16 @@ Or run on an iOS simulator without code signing
         await expectLater(
           () => getCodeSigningIdentityDevelopmentTeamBuildSetting(
             buildSettings: <String, String>{},
-            platform: FakePlatform(operatingSystem: 'macos'),
-            processManager: processManager,
-            logger: BufferLogger.test(),
-            config: Config.test(),
-            terminal: FakeTerminal(),
-            fileSystem: MemoryFileSystem.test(),
-            fileSystemUtils: FakeFileSystemUtils(),
             plistParser: FakePlistParser(),
+            toolContext: FakeToolContext(
+              config: Config.test(),
+              fileSystemUtils: FakeFileSystemUtils(),
+              fs: MemoryFileSystem.test(),
+              logger: BufferLogger.test(),
+              platform: FakePlatform(operatingSystem: 'macos'),
+              processManager: processManager,
+              terminal: FakeTerminal(),
+            ),
           ),
           throwsToolExit(
             message: 'No development certificates available to code sign app for device deployment',
@@ -1285,14 +1315,16 @@ Or run on an iOS simulator without code signing
         final Map<String, String>? signingConfigs =
             await getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: Config.test(),
-              terminal: testTerminal,
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: testTerminal,
+              ),
             );
         expect(signingConfigs, isNull);
         expect(processManager, hasNoRemainingExpectations);
@@ -1320,8 +1352,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(stdinSink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1329,14 +1360,16 @@ Or run on an iOS simulator without code signing
         Future<Map<String, String>?> getCodeSigningIdentities() =>
             getCodeSigningIdentityDevelopmentTeamBuildSetting(
               buildSettings: const <String, String>{'bogus': 'bogus'},
-              platform: FakePlatform(operatingSystem: 'macos'),
-              processManager: processManager,
-              logger: BufferLogger.test(),
-              config: Config.test(),
-              terminal: FakeTerminal(),
-              fileSystem: MemoryFileSystem.test(),
-              fileSystemUtils: FakeFileSystemUtils(),
               plistParser: FakePlistParser(),
+              toolContext: FakeToolContext(
+                config: Config.test(),
+                fileSystemUtils: FakeFileSystemUtils(),
+                fs: MemoryFileSystem.test(),
+                logger: BufferLogger.test(),
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: processManager,
+                terminal: FakeTerminal(),
+              ),
             );
 
         await expectLater(
@@ -1430,8 +1463,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1672,8 +1704,7 @@ Or run on an iOS simulator without code signing
           ),
           const FakeCommand(
             command: <String>['openssl', 'x509', '-subject'],
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           ),
         ]);
 
@@ -1741,8 +1772,7 @@ Or run on an iOS simulator without code signing
           ),
           const FakeCommand(
             command: <String>['openssl', 'x509', '-subject'],
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
           ),
         ]);
 
@@ -1789,8 +1819,7 @@ Or run on an iOS simulator without code signing
           ),
           const FakeCommand(
             command: <String>['openssl', 'x509', '-subject'],
-            stdout:
-                'subject=UID=X, CN=iPhone Developer: Profile 1 (1111AAAA11), OU=TEAM1ID, O=Acme Corp Ltd., C=US',
+            stdout: 'subject=UID=X, CN=iPhone Developer: Profile 1 (1111AAAA11), OU=TEAM1ID, O=Acme Corp Ltd., C=US',
           ),
           const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
@@ -1798,8 +1827,7 @@ Or run on an iOS simulator without code signing
           ),
           const FakeCommand(
             command: <String>['openssl', 'x509', '-subject'],
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=TEAM2ID/O=Example Inc/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=TEAM2ID/O=Example Inc/C=US',
           ),
           const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
@@ -1956,8 +1984,7 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
@@ -2065,8 +2092,7 @@ Or run on an iOS simulator without code signing
                 '-inform',
                 'DER',
               ],
-              stdout:
-                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+              stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
             ),
           ]);
 
@@ -2216,8 +2242,7 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: No matching (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: No matching (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
           FakeCommand(
             command: <String>[
@@ -2229,8 +2254,7 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
           FakeCommand(
             command: <String>[
@@ -2267,8 +2291,7 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: No match (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: No match (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
@@ -2338,8 +2361,7 @@ Or run on an iOS simulator without code signing
       ),
       FakeCommand(
         command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-        stdout:
-            'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+        stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
       ),
     ]);
 

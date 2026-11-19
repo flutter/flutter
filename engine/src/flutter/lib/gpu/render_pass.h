@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -50,7 +51,12 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::PipelineDescriptor& GetPipelineDescriptor();
 
+  /// Ends the command buffer's open pass and starts recording this one.
   bool Begin(flutter::gpu::CommandBuffer& command_buffer);
+
+  /// Ends this pass if it is still the command buffer's open pass. Does
+  /// nothing if a later command already ended it.
+  bool End();
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
@@ -65,6 +71,14 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   /// Set the polygon fill mode for subsequent draws.
   void SetPolygonMode(impeller::PolygonMode mode);
+
+  /// The number of binding set slots a pass can hold at once. Mirrors
+  /// `RenderPass.maxBindingSets` in `gpu/lib/src/render_pass.dart`.
+  static constexpr size_t kMaxBindingSets = 4;
+
+  /// Puts [set] in [slot], replacing whatever was there. Passing a null set
+  /// empties the slot. Out of range slots are ignored.
+  void BindSet(size_t slot, fml::RefPtr<BindingSet> set);
 
   void ClearBindings();
 
@@ -97,6 +111,10 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   TextureUniformMap vertex_texture_bindings;
   BufferUniformMap fragment_uniform_bindings;
   TextureUniformMap fragment_texture_bindings;
+
+  // Binding sets replayed by every draw, in slot order. Individual binds are
+  // replayed after these, so a bind that collides with a set member wins.
+  std::array<fml::RefPtr<BindingSet>, kMaxBindingSets> binding_sets;
 
   // Vertex buffers indexed by binding slot. Mirrors
   // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
@@ -141,6 +159,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   impeller::RenderTarget render_target_;
   std::shared_ptr<impeller::RenderPass> render_pass_;
+  fml::RefPtr<CommandBuffer> command_buffer_;
 
   // Command encoding state.
   fml::RefPtr<RenderPipeline> render_pipeline_;
@@ -201,6 +220,10 @@ FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::CommandBuffer* command_buffer);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_RenderPass_End(
+    flutter::gpu::RenderPass* wrapper);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_BindPipeline(
@@ -266,6 +289,12 @@ extern bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_BindSet(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::BindingSet* binding_set,
+    int slot);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(

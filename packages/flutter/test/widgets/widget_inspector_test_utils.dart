@@ -77,9 +77,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   }
 
   Iterable<Map<Object, Object?>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return dispatchedEvents(
-      'Flutter.ServiceExtensionStateChanged',
-    ).where((Map<Object, Object?> event) => event['extension'] == extensionName);
+    return dispatchedEvents('Flutter.ServiceExtensionStateChanged')
+        .where((Map<Object, Object?> event) => event['extension'] == extensionName);
   }
 
   Future<Object?> testExtension(String name, Map<String, String> arguments) async {
