@@ -2,9 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cstdint>
+#include <unordered_map>
+#include <vector>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/geometry/dl_path_builder.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -357,6 +363,381 @@ TEST(FindFirstLoadableLibraryTest, EmptyReturnsNull) {
   EXPECT_EQ(FindFirstLoadableLibrary(
                 {}, [](const std::string&) -> void* { return nullptr; }),
             nullptr);
+}
+
+namespace {
+
+// Base synthetic address used to mint distinct non-null fake jobject handles in
+// LocalRefTracker without colliding with kFlutterJniObj (0x1001).
+constexpr uintptr_t kInitialFakeRefAddress = 0x5000;
+// Synthetic address representing the FlutterJNI Java instance in JNI tests.
+constexpr uintptr_t kFakeFlutterJniAddress = 0x1001;
+// Synthetic address representing an internal local reference allocated inside
+// ANativeWindow_fromSurface (Android issue 68174).
+constexpr uintptr_t kInternalNativeWindowLocalRefAddress = 0x9999;
+
+struct LocalRefTracker {
+  // Stack of active JNI local reference frames (1 root frame at construction).
+  std::vector<std::unordered_map<jobject, int>> frames{1};
+  uintptr_t next_id = kInitialFakeRefAddress;
+
+  template <typename T>
+  T TrackNew(T ref) {
+    if (ref != nullptr) {
+      ++frames.back()[reinterpret_cast<jobject>(ref)];
+    }
+    return ref;
+  }
+
+  template <typename T>
+  T AllocateNew() {
+    return TrackNew(reinterpret_cast<T>(next_id++));
+  }
+
+  void TrackDelete(jobject ref) {
+    if (ref == nullptr) {
+      return;
+    }
+    for (auto it = frames.rbegin(); it != frames.rend(); ++it) {
+      auto found = it->find(ref);
+      if (found != it->end()) {
+        if (--found->second == 0) {
+          it->erase(found);
+        }
+        return;
+      }
+    }
+    ADD_FAILURE() << "DeleteLocalRef called on untracked or already-deleted "
+                     "local reference: "
+                  << ref;
+  }
+
+  jint PushFrame(jint capacity) {
+    frames.emplace_back();
+    return JNI_OK;
+  }
+
+  jobject PopFrame(jobject result) {
+    EXPECT_GT(frames.size(), 1u);
+    if (frames.size() > 1u) {
+      frames.pop_back();
+    }
+    if (result != nullptr) {
+      TrackNew(result);
+    }
+    return result;
+  }
+
+  size_t ActiveCount() const {
+    size_t total = 0;
+    for (const auto& frame : frames) {
+      for (const auto& [ref, count] : frame) {
+        total += static_cast<size_t>(count);
+      }
+    }
+    return total;
+  }
+
+  void InstallDefaults(MockJNIEnv& mock_env) {
+    EXPECT_CALL(mock_env, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+    EXPECT_CALL(mock_env, NewLocalRef(_))
+        .WillRepeatedly(
+            [this](jobject obj) -> jobject { return TrackNew(obj); });
+    EXPECT_CALL(mock_env, DeleteLocalRef(_))
+        .WillRepeatedly([this](jobject obj) { TrackDelete(obj); });
+    EXPECT_CALL(mock_env, NewWeakGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+    EXPECT_CALL(mock_env, DeleteWeakGlobalRef(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env, PushLocalFrame(_))
+        .WillRepeatedly(
+            [this](jint capacity) -> jint { return PushFrame(capacity); });
+    EXPECT_CALL(mock_env, PopLocalFrame(_))
+        .WillRepeatedly(
+            [this](jobject result) -> jobject { return PopFrame(result); });
+  }
+};
+
+}  // namespace
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       FlutterViewOnDisplayPlatformViewDeletesLocalRefs) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, NewObjectV(_, _, _))
+      .WillOnce([&](jclass, jmethodID, va_list) -> jobject {
+        return tracker.AllocateNew<jobject>();
+      });
+  EXPECT_CALL(mock_env, NewFloatArray(_))
+      .WillRepeatedly([&](jsize) -> jfloatArray {
+        return tracker.AllocateNew<jfloatArray>();
+      });
+  EXPECT_CALL(mock_env, SetFloatArrayRegion(_, _, _, _))
+      .WillRepeatedly(Return());
+
+  int void_calls = 0;
+  EXPECT_CALL(mock_env, CallVoidMethodV(_, _, _))
+      .WillRepeatedly([&](jobject, jmethodID, va_list) { ++void_calls; });
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  // Sample mutator coordinates and corner radii in physical pixels.
+  constexpr DlScalar kTranslateX = 4.0f;
+  constexpr DlScalar kTranslateY = 8.0f;
+  constexpr DlScalar kClipExtent = 50.0f;
+  constexpr DlScalar kRoundedExtent = 20.0f;
+  constexpr DlScalar kCornerRadius = 3.0f;
+  constexpr int kTestViewId = 1;
+  constexpr int kTestDimension = 100;
+  // 4 mutator pushes + 1 final onDisplayPlatformView call.
+  constexpr int kExpectedVoidMethodCalls = 5;
+
+  MutatorsStack stack;
+  stack.PushTransform(DlMatrix::MakeTranslation({kTranslateX, kTranslateY}));
+  stack.PushClipRect(DlRect::MakeLTRB(0.0f, 0.0f, kClipExtent, kClipExtent));
+  stack.PushClipRRect(DlRoundRect::MakeRectRadius(
+      DlRect::MakeLTRB(0, 0, kRoundedExtent, kRoundedExtent), kCornerRadius));
+  stack.PushClipRSE(DlRoundSuperellipse::MakeRectRadius(
+      DlRect::MakeLTRB(0, 0, kRoundedExtent, kRoundedExtent), kCornerRadius));
+
+  android_jni.FlutterViewOnDisplayPlatformView(
+      kTestViewId, 0, 0, kTestDimension, kTestDimension, kTestDimension,
+      kTestDimension, stack);
+
+  EXPECT_EQ(void_calls, kExpectedVoidMethodCalls);
+  EXPECT_EQ(tracker.frames.size(), 1u);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       OnDisplayPlatformView2DeletesMutatorsStackAndPathLocalRefs) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  // 1st NewObjectV: FlutterMutatorsStack; 2nd NewObjectV: android.graphics.Path
+  constexpr int kExpectedNewObjectCalls = 2;
+  EXPECT_CALL(mock_env, NewObjectV(_, _, _))
+      .Times(kExpectedNewObjectCalls)
+      .WillRepeatedly([&](jclass, jmethodID, va_list) -> jobject {
+        return tracker.AllocateNew<jobject>();
+      });
+  EXPECT_CALL(mock_env, GetStaticObjectField(_, _))
+      .WillOnce([&](jclass, jfieldID) -> jobject {
+        return tracker.AllocateNew<jobject>();
+      });
+  EXPECT_CALL(mock_env, NewFloatArray(_))
+      .WillRepeatedly([&](jsize) -> jfloatArray {
+        return tracker.AllocateNew<jfloatArray>();
+      });
+  EXPECT_CALL(mock_env, SetFloatArrayRegion(_, _, _, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, CallVoidMethodV(_, _, _)).WillRepeatedly(Return());
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  // Sample path segment control points, conic weight (cos(45 deg)), and alpha.
+  constexpr DlScalar kUnitRootHalfWeight = 0.707f;
+  constexpr int kOpaqueHalfAlpha = 180;
+  constexpr int32_t kTestViewId = 7;
+  constexpr int32_t kTestDimension = 100;
+  constexpr DlScalar kClipExtent = 40.0f;
+  constexpr DlScalar kRoundedExtent = 20.0f;
+  constexpr DlScalar kCornerRadius = 4.0f;
+
+  DlPathBuilder path_builder;
+  path_builder.SetFillType(DlPathFillType::kOdd)
+      .MoveTo({0.0f, 0.0f})
+      .LineTo({10.0f, 5.0f})
+      .QuadraticCurveTo({15.0f, 0.0f}, {20.0f, 10.0f})
+      .ConicCurveTo({25.0f, 15.0f}, {30.0f, 10.0f}, kUnitRootHalfWeight)
+      .CubicCurveTo({35.0f, 0.0f}, {40.0f, 20.0f}, {50.0f, 10.0f})
+      .Close();
+
+  MutatorsStack stack;
+  stack.PushTransform(DlMatrix::MakeTranslation({2.0f, 3.0f}));
+  stack.PushClipRect(DlRect::MakeLTRB(0.0f, 0.0f, kClipExtent, kClipExtent));
+  stack.PushClipRRect(DlRoundRect::MakeRectRadius(
+      DlRect::MakeLTRB(0, 0, kRoundedExtent, kRoundedExtent), kCornerRadius));
+  stack.PushClipRSE(DlRoundSuperellipse::MakeRectRadius(
+      DlRect::MakeLTRB(0, 0, kRoundedExtent, kRoundedExtent), kCornerRadius));
+  stack.PushOpacity(kOpaqueHalfAlpha);
+  stack.PushClipPath(path_builder.TakePath());
+
+  android_jni.onDisplayPlatformView2(kTestViewId, 0, 0, kTestDimension,
+                                     kTestDimension, kTestDimension,
+                                     kTestDimension, stack);
+
+  EXPECT_EQ(tracker.frames.size(), 1u);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       CreateOverlaySurfaceDeletesLocalRefsAndPopsLocalFrame) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+
+  int from_surface_calls = 0;
+  jobject last_surface_arg = nullptr;
+
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(
+      flutter_jni_ref,
+      [&](JNIEnv* env, jobject surface) -> AndroidNativeWindow::Handle {
+        ++from_surface_calls;
+        last_surface_arg = surface;
+        // Simulate ANativeWindow_fromSurface leaving an internal local ref in
+        // the active frame
+        // (https://code.google.com/p/android/issues/detail?id=68174).
+        env->NewLocalRef(
+            reinterpret_cast<jobject>(kInternalNativeWindowLocalRefAddress));
+        return nullptr;
+      });
+
+  // Exercise both Classic HC (variant 0) and HCPP (variant 1) overlay creation.
+  constexpr int kOverlayMethodVariantCount = 2;
+  constexpr jint kBaseOverlaySurfaceId = 42;
+  constexpr int kExpectedCallObjectCallsPerOverlay = 2;
+
+  for (int variant = 0; variant < kOverlayMethodVariantCount; ++variant) {
+    from_surface_calls = 0;
+    last_surface_arg = nullptr;
+    jobject overlay_obj = nullptr;
+    jobject surface_obj = nullptr;
+
+    EXPECT_CALL(mock_env, CallObjectMethodV(_, _, _))
+        .Times(kExpectedCallObjectCallsPerOverlay)
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+          EXPECT_EQ(obj, kFlutterJniObj);
+          overlay_obj = tracker.AllocateNew<jobject>();
+          return overlay_obj;
+        })
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+          EXPECT_EQ(obj, overlay_obj);
+          surface_obj = tracker.AllocateNew<jobject>();
+          return surface_obj;
+        });
+    EXPECT_CALL(mock_env, CallIntMethodV(_, _, _))
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jint {
+          EXPECT_EQ(obj, overlay_obj);
+          return kBaseOverlaySurfaceId + variant;
+        });
+
+    auto metadata = (variant == 0)
+                        ? android_jni.FlutterViewCreateOverlaySurface()
+                        : android_jni.createOverlaySurface2();
+    ASSERT_NE(metadata, nullptr);
+    EXPECT_EQ(metadata->id, kBaseOverlaySurfaceId + variant);
+    EXPECT_EQ(from_surface_calls, 1);
+    EXPECT_EQ(last_surface_arg, surface_obj);
+    EXPECT_EQ(tracker.frames.size(), 1u);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+  }
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       ComputePlatformResolvedLocaleDeletesLocalRefsAndHandlesNullResult) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+  std::unordered_map<jstring, std::u16string> string_table;
+
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  EXPECT_CALL(mock_env, FindClass(_))
+      .WillRepeatedly(
+          [&](const char*) -> jclass { return tracker.AllocateNew<jclass>(); });
+  EXPECT_CALL(mock_env, NewObjectArray(_, _, _))
+      .WillRepeatedly([&](jsize, jclass, jobject) -> jobjectArray {
+        return tracker.AllocateNew<jobjectArray>();
+      });
+  EXPECT_CALL(mock_env, NewString(_, _))
+      .WillRepeatedly([&](const jchar* chars, jsize len) -> jstring {
+        jstring s = tracker.AllocateNew<jstring>();
+        string_table[s] =
+            std::u16string(reinterpret_cast<const char16_t*>(chars), len);
+        return s;
+      });
+  EXPECT_CALL(mock_env, SetObjectArrayElement(_, _, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, GetStringChars(_, _))
+      .WillRepeatedly([&](jstring s, jboolean*) -> const jchar* {
+        return reinterpret_cast<const char*>(string_table.at(s).data()) !=
+                       nullptr
+                   ? reinterpret_cast<const jchar*>(string_table.at(s).data())
+                   : nullptr;
+      });
+  EXPECT_CALL(mock_env, GetStringLength(_))
+      .WillRepeatedly([&](jstring s) -> jsize {
+        return static_cast<jsize>(string_table.at(s).size());
+      });
+  EXPECT_CALL(mock_env, ReleaseStringChars(_, _)).WillRepeatedly(Return());
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  // Case 1: Non-null 3-element result array (language, country, script) deletes
+  // both the array ref and each element jstring local ref.
+  jobjectArray result_array = nullptr;
+  const std::vector<std::u16string> kResolved = {u"en", u"US", u""};
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFlutterJniObj, _, _))
+      .WillOnce([&](jobject, jmethodID, va_list) -> jobject {
+        result_array = tracker.AllocateNew<jobjectArray>();
+        return result_array;
+      });
+  EXPECT_CALL(mock_env, GetArrayLength(_)).WillOnce([&](jarray arr) -> jsize {
+    EXPECT_EQ(arr, result_array);
+    return static_cast<jsize>(kResolved.size());
+  });
+  EXPECT_CALL(mock_env, GetObjectArrayElement(_, _))
+      .Times(static_cast<int>(kResolved.size()))
+      .WillRepeatedly([&](jobjectArray arr, jsize idx) -> jobject {
+        EXPECT_EQ(arr, result_array);
+        jstring elem = tracker.AllocateNew<jstring>();
+        string_table[elem] = kResolved.at(static_cast<size_t>(idx));
+        return elem;
+      });
+
+  auto resolved = android_jni.FlutterViewComputePlatformResolvedLocale(
+      {"en", "US", "Latn"});
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_THAT(*resolved, ElementsAre("en", "US", ""));
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  // Case 2: Null result array does not call GetArrayLength(nullptr) and leaves
+  // zero leaked local refs.
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFlutterJniObj, _, _))
+      .WillOnce(Return(nullptr));
+  EXPECT_CALL(mock_env, GetArrayLength(_)).Times(0);
+
+  auto empty_resolved =
+      android_jni.FlutterViewComputePlatformResolvedLocale({"en", "US", ""});
+  ASSERT_NE(empty_resolved, nullptr);
+  EXPECT_TRUE(empty_resolved->empty());
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
 }
 
 }  // namespace testing

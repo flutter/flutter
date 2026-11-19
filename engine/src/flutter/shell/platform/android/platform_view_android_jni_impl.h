@@ -36,8 +36,12 @@ void* FindFirstLoadableLibrary(
 ///
 class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  public:
+  using NativeWindowFromSurfaceFn =
+      std::function<AndroidNativeWindow::Handle(JNIEnv*, jobject)>;
+
   explicit PlatformViewAndroidJNIImpl(
-      const fml::jni::JavaObjectWeakGlobalRef& java_object);
+      const fml::jni::JavaObjectWeakGlobalRef& java_object,
+      NativeWindowFromSurfaceFn native_window_from_surface = nullptr);
 
   ~PlatformViewAndroidJNIImpl() override;
 
@@ -160,6 +164,10 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   void MaybeResizeSurfaceView(int32_t width, int32_t height) const override;
 
  private:
+  // Optional test seam replacing ANativeWindow_fromSurface. Placed first to
+  // avoid 16-byte std::function alignment padding after java_object_.
+  NativeWindowFromSurfaceFn native_window_from_surface_;
+
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
 
