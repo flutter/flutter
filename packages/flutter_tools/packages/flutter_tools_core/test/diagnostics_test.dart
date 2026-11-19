@@ -211,12 +211,11 @@ void main() {
         expect(parsed, equals(result));
       });
 
-      test('stores unmodifiable messages list and omits host executionTime from toMap', () {
+      test('stores unmodifiable messages list', () {
         final inputMessages = <ValidationMessage>[const ValidationMessage('Initial')];
         final result = ValidationResult(
           ValidationType.partial,
           inputMessages,
-          executionTime: const Duration(milliseconds: 25),
           statusInfo: 'Some warnings',
         );
 
@@ -226,39 +225,26 @@ void main() {
           () => result.messages.add(const ValidationMessage('Mutated result list')),
           throwsUnsupportedError,
         );
-        expect(result.executionTime, const Duration(milliseconds: 25));
-        expect(result.toMap().containsKey('executionTime'), isFalse);
         expect(
           result.toString(),
           'ValidationResult(type: ValidationType.partial, messages: [Initial], '
-          'statusInfo: Some warnings, executionTime: 0:00:00.025000)',
+          'statusInfo: Some warnings)',
         );
       });
 
-      test('equality and hashCode cover type, messages, statusInfo, and executionTime', () {
-        final baseline = ValidationResult(
-          ValidationType.success,
-          const <ValidationMessage>[
-            ValidationMessage('First', piiStrippedMessage: 'First redacted'),
-            ValidationMessage.hint('Second'),
-          ],
-          statusInfo: 'OK',
-          executionTime: const Duration(milliseconds: 10),
-        );
-        final identicalFields = ValidationResult(
-          ValidationType.success,
-          const <ValidationMessage>[
-            ValidationMessage('First', piiStrippedMessage: 'First redacted'),
-            ValidationMessage.hint('Second'),
-          ],
-          statusInfo: 'OK',
-          executionTime: const Duration(milliseconds: 10),
-        );
+      test('equality and hashCode cover type, messages, and statusInfo', () {
+        final baseline = ValidationResult(ValidationType.success, const <ValidationMessage>[
+          ValidationMessage('First', piiStrippedMessage: 'First redacted'),
+          ValidationMessage.hint('Second'),
+        ], statusInfo: 'OK');
+        final identicalFields = ValidationResult(ValidationType.success, const <ValidationMessage>[
+          ValidationMessage('First', piiStrippedMessage: 'First redacted'),
+          ValidationMessage.hint('Second'),
+        ], statusInfo: 'OK');
         final differentType = ValidationResult(
           ValidationType.partial,
           baseline.messages,
           statusInfo: 'OK',
-          executionTime: const Duration(milliseconds: 10),
         );
         final differentMessages = ValidationResult(
           ValidationType.success,
@@ -267,7 +253,6 @@ void main() {
             ValidationMessage.hint('Second'),
           ],
           statusInfo: 'OK',
-          executionTime: const Duration(milliseconds: 10),
         );
         final reorderedMessages = ValidationResult(
           ValidationType.success,
@@ -276,19 +261,11 @@ void main() {
             ValidationMessage('First', piiStrippedMessage: 'First redacted'),
           ],
           statusInfo: 'OK',
-          executionTime: const Duration(milliseconds: 10),
         );
         final differentStatusInfo = ValidationResult(
           ValidationType.success,
           baseline.messages,
           statusInfo: 'Different',
-          executionTime: const Duration(milliseconds: 10),
-        );
-        final differentExecutionTime = ValidationResult(
-          ValidationType.success,
-          baseline.messages,
-          statusInfo: 'OK',
-          executionTime: const Duration(milliseconds: 20),
         );
 
         expect(baseline, equals(identicalFields));
@@ -298,8 +275,7 @@ void main() {
         expect(baseline, isNot(equals(differentMessages)));
         expect(baseline, isNot(equals(reorderedMessages)));
         expect(baseline, isNot(equals(differentStatusInfo)));
-        expect(baseline, isNot(equals(differentExecutionTime)));
-        expect(baseline.hashCode, isNot(equals(differentExecutionTime.hashCode)));
+        expect(baseline.hashCode, isNot(equals(differentStatusInfo.hashCode)));
       });
 
       test('fromJson throws FormatException when required fields or elements are invalid', () {

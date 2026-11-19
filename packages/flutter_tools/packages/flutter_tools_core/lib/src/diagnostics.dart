@@ -166,12 +166,8 @@ final class ValidationMessage {
 @immutable
 final class ValidationResult {
   /// Creates a [ValidationResult] with status [type] and list of [messages].
-  ValidationResult(
-    this.type,
-    List<ValidationMessage> messages, {
-    this.executionTime,
-    this.statusInfo,
-  }) : messages = List<ValidationMessage>.unmodifiable(messages);
+  ValidationResult(this.type, List<ValidationMessage> messages, {this.statusInfo})
+    : messages = List<ValidationMessage>.unmodifiable(messages);
 
   /// Deserializes a [ValidationResult] from a JSON-serializable map.
   ///
@@ -246,12 +242,6 @@ final class ValidationResult {
   /// Diagnostic messages logged during validation.
   final List<ValidationMessage> messages;
 
-  /// The time taken to perform the validation.
-  ///
-  /// Populated on the host by `DoctorValidator.validate` and omitted from
-  /// [toMap] and [ValidationResult.fromJson].
-  final Duration? executionTime;
-
   /// Serializes the validation result to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     typeKey: type.name,
@@ -261,8 +251,7 @@ final class ValidationResult {
 
   @override
   String toString() =>
-      'ValidationResult(type: $type, messages: $messages, '
-      'statusInfo: $statusInfo, executionTime: $executionTime)';
+      'ValidationResult(type: $type, messages: $messages, statusInfo: $statusInfo)';
 
   @override
   bool operator ==(Object other) {
@@ -270,11 +259,9 @@ final class ValidationResult {
         (other is ValidationResult &&
             other.type == type &&
             other.statusInfo == statusInfo &&
-            other.executionTime == executionTime &&
             _messageListEquality.equals(other.messages, messages));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, statusInfo, executionTime, _messageListEquality.hash(messages));
+  int get hashCode => Object.hash(type, statusInfo, _messageListEquality.hash(messages));
 }

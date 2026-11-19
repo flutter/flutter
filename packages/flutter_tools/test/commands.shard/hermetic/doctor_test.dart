@@ -980,13 +980,30 @@ void main() {
       );
     });
 
-    testWithoutContext('DoctorValidator.validate populates or preserves executionTime', () async {
-      final ValidationResult measuredResult = await _UnmeasuredValidator().validate();
-      expect(measuredResult.executionTime, isNotNull);
+    testWithoutContext(
+      'Doctor.startValidatorTasks populates ValidatorTask.executionTime on completion',
+      () async {
+        final passingStopwatch = FakeStopwatch()..elapsed = const Duration(milliseconds: 42);
+        final doctor = FakeCrashingDoctor(
+          logger,
+          stopwatchFactory: FakeStopwatchFactory(
+            stopwatches: <String, Stopwatch>{'Passing Validator': passingStopwatch},
+          ),
+        );
 
-      final ValidationResult presetResult = await PassingValidator('Preset').validate();
-      expect(presetResult.executionTime, Duration.zero);
-    });
+        final List<ValidatorTask> tasks = await doctor.startValidatorTasks();
+        await tasks[0].result;
+        expect(passingStopwatch.isRunning, isFalse);
+        expect(tasks[0].executionTime, const Duration(milliseconds: 42));
+
+        await tasks[2].result;
+        expect(tasks[2].executionTime, isNull);
+
+        await doctor.diagnose(startedValidatorTasks: tasks, sendEvent: false);
+        expect(logger.statusText, contains('[✓] Passing Validator (with statusInfo) [42ms]\n'));
+        expect(logger.statusText, contains('[☠] Crashing validator (the doctor check crashed)\n'));
+      },
+    );
 
     testWithoutContext(
       'GroupedValidator delegates sub-validator crashes to subValidator.createCrashResult',
@@ -1026,15 +1043,6 @@ class _CustomCrashMessageValidator extends DoctorValidator {
   }
 }
 
-class _UnmeasuredValidator extends DoctorValidator {
-  _UnmeasuredValidator() : super('Unmeasured');
-
-  @override
-  Future<ValidationResult> validateImpl() async {
-    return ValidationResult(ValidationType.success, const <ValidationMessage>[]);
-  }
-}
-
 class PassingValidator extends DoctorValidator {
   PassingValidator(super.title);
 
@@ -1044,11 +1052,7 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return _zeroExecutionTimeValidationResult(
-      ValidationType.success,
-      messages,
-      statusInfo: 'with statusInfo',
-    );
+    return ValidationResult(ValidationType.success, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -1063,7 +1067,7 @@ class PiiValidator extends DoctorValidator {
         piiStrippedMessage: 'Does not contain PII',
       ),
     ];
-    return _zeroExecutionTimeValidationResult(ValidationType.success, messages);
+    return ValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1077,7 +1081,7 @@ class MissingValidator extends DoctorValidator {
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return _zeroExecutionTimeValidationResult(ValidationType.missing, messages);
+    return ValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -1091,7 +1095,7 @@ class NotAvailableValidator extends DoctorValidator {
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return _zeroExecutionTimeValidationResult(ValidationType.notAvailable, messages);
+    return ValidationResult(ValidationType.notAvailable, messages);
   }
 }
 
@@ -1117,7 +1121,7 @@ class PartialValidatorWithErrors extends DoctorValidator {
       ValidationMessage.hint('Maybe a hint will help the user'),
       ValidationMessage('An extra message with some verbose details'),
     ];
-    return _zeroExecutionTimeValidationResult(ValidationType.partial, messages);
+    return ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1130,7 +1134,7 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
       ValidationMessage.hint('There is a hint here'),
       ValidationMessage('But there is no error'),
     ];
-    return _zeroExecutionTimeValidationResult(ValidationType.partial, messages);
+    return ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1167,6 +1171,7 @@ class FakeDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1189,6 +1194,7 @@ class FakePassingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1211,6 +1217,7 @@ class FakeSinglePassingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1227,6 +1234,7 @@ class FakeQuietDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1248,6 +1256,7 @@ class FakePiiDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1261,9 +1270,11 @@ class FakeCrashingDoctor extends Doctor {
     Logger logger, {
     super.analytics = const NoOpAnalytics(),
     super.clock = const SystemClock(),
+    StopwatchFactory? stopwatchFactory,
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: stopwatchFactory ?? FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1286,6 +1297,7 @@ class FakeAsyncStuckDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1309,6 +1321,7 @@ class FakeAsyncCrashingDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1344,7 +1357,7 @@ class PassingGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     const messages = <ValidationMessage>[ValidationMessage('A helpful message')];
-    return _zeroExecutionTimeValidationResult(ValidationType.success, messages);
+    return ValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1354,7 +1367,7 @@ class MissingGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     const messages = <ValidationMessage>[ValidationMessage.error('A useful error message')];
-    return _zeroExecutionTimeValidationResult(ValidationType.missing, messages);
+    return ValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -1366,7 +1379,7 @@ class PartialGroupedValidator extends DoctorValidator {
     const messages = <ValidationMessage>[
       ValidationMessage.error('An error message for partial installation'),
     ];
-    return _zeroExecutionTimeValidationResult(ValidationType.partial, messages);
+    return ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1376,11 +1389,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     const messages = <ValidationMessage>[ValidationMessage('A different message')];
-    return _zeroExecutionTimeValidationResult(
-      ValidationType.success,
-      messages,
-      statusInfo: 'A status message',
-    );
+    return ValidationResult(ValidationType.success, messages, statusInfo: 'A status message');
   }
 }
 
@@ -1393,16 +1402,17 @@ class FakeGroupedDoctor extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
   @override
   late final validators = <DoctorValidator>[
-    FakeGroupedValidator(<DoctorValidator>[
+    GroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('Category 1'),
       PassingGroupedValidator('Category 1'),
     ]),
-    FakeGroupedValidator(<DoctorValidator>[
+    GroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('Category 2'),
       MissingGroupedValidator('Category 2'),
     ]),
@@ -1418,6 +1428,7 @@ class FakeGroupedDoctorWithCrash extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1445,20 +1456,6 @@ class FakeGroupedValidatorWithCrash extends GroupedValidator {
   List<ValidationResult> get subResults => <ValidationResult>[];
 }
 
-class FakeGroupedValidator extends GroupedValidator {
-  FakeGroupedValidator(super.subValidator);
-
-  @override
-  Future<ValidationResult> validateImpl() async {
-    final ValidationResult result = await super.validateImpl();
-    return _zeroExecutionTimeValidationResult(
-      result.type,
-      result.messages,
-      statusInfo: result.statusInfo,
-    );
-  }
-}
-
 class FakeGroupedDoctorWithStatus extends Doctor {
   FakeGroupedDoctorWithStatus(
     Logger logger, {
@@ -1467,12 +1464,13 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
   @override
   late final validators = <DoctorValidator>[
-    FakeGroupedValidator(<DoctorValidator>[
+    GroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('First validator title'),
       PassingGroupedValidatorWithStatus('Second validator title'),
     ]),
@@ -1489,11 +1487,12 @@ class FakeSmallGroupDoctor extends Doctor {
     super.analytics = const NoOpAnalytics(),
     super.clock = const SystemClock(),
   }) : validators = <DoctorValidator>[
-         FakeGroupedValidator(<DoctorValidator>[val1, val2]),
+         GroupedValidator(<DoctorValidator>[val1, val2]),
        ],
        super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
+         stopwatchFactory: FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
@@ -1545,14 +1544,6 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
-}
-
-ValidationResult _zeroExecutionTimeValidationResult(
-  ValidationType type,
-  List<ValidationMessage> messages, {
-  String? statusInfo,
-}) {
-  return ValidationResult(type, messages, executionTime: Duration.zero, statusInfo: statusInfo);
 }
 
 class FakeDiagnoseDoctor extends Fake implements Doctor {

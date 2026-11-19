@@ -11,8 +11,13 @@ import 'base/terminal.dart';
 
 class ValidatorTask {
   ValidatorTask(this.validator, this.result);
+
   final DoctorValidator validator;
   final Future<ValidationResult> result;
+
+  /// The time taken to execute [validator], populated by `Doctor.startValidatorTasks`
+  /// when validation completes without an unhandled error.
+  Duration? executionTime;
 }
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
@@ -46,22 +51,7 @@ abstract class DoctorValidator {
   Duration get slowWarningDuration => _slowWarningDuration;
 
   /// Performs validation by invoking [validateImpl].
-  ///
-  /// Tracks time taken to execute the validation step unless [validateImpl]
-  /// already populated [ValidationResult.executionTime].
-  Future<ValidationResult> validate() async {
-    final stopwatch = Stopwatch()..start();
-    final ValidationResult result = await validateImpl();
-    stopwatch.stop();
-    return result.executionTime != null
-        ? result
-        : ValidationResult(
-            result.type,
-            result.messages,
-            statusInfo: result.statusInfo,
-            executionTime: stopwatch.elapsed,
-          );
-  }
+  Future<ValidationResult> validate() => validateImpl();
 
   /// Validation implementation.
   Future<ValidationResult> validateImpl();
