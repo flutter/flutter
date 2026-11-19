@@ -1447,6 +1447,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
             @"rendering failure. Please ensure your top-level Flutter widget has explicit "
             @"constraints (e.g., using SizedBox or Container)."];
   }
+  // Round to whole physical pixels to match setViewportMetricsSize. The layer tree size is an
+  // integer, so a fractional tight constraint can never be met and every frame is discarded.
+  // See: https://github.com/flutter/flutter/issues/195954
   _viewportMetrics.physical_min_width_constraint =
       std::round(minWidth * _viewportMetrics.device_pixel_ratio);
   _viewportMetrics.physical_max_width_constraint =
@@ -1471,6 +1474,9 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   CGFloat scale = screen.scale;
+  // Round to whole physical pixels. The layer tree size is an integer, so a fractional size here
+  // would fail the size check in the shell and every frame would be discarded.
+  // See: https://github.com/flutter/flutter/issues/195954
   _viewportMetrics.physical_width = std::round(self.view.bounds.size.width * scale);
   _viewportMetrics.physical_height = std::round(self.view.bounds.size.height * scale);
   // TODO(louisehsu): update for https://github.com/flutter/flutter/issues/169147
