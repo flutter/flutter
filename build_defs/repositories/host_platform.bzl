@@ -18,6 +18,9 @@ Linux x64 and arm64, macOS x64 and arm64, Windows x64, as DEPS packages
 them.
 """
 
+load(":engine_packages.bzl", "ENGINE_PACKAGE_CONFIG_FILE")
+load(":repositories.bzl", "checkout_root")
+
 _OSES = {
     "linux": struct(gn = "linux", prebuilts = "linux", buildtools = "linux", platform = "linux", constraint = "@platforms//os:linux", ndk_host = "linux"),
     "mac": struct(gn = "mac", prebuilts = "macos", buildtools = "mac", platform = "macos", constraint = "@platforms//os:macos", ndk_host = "darwin"),
@@ -94,10 +97,24 @@ def host_platform_values(os_name, arch):
 # host's, as they are.
 BIN_CACHE_DART_SDK = "@dart_sdk_bin_cache"
 
+# The engine's Dart package configuration: the file DEPS' pub_get_offline
+# hook writes into the checkout, and its stand-in for a checkout that was
+# never synced (engine_packages.bzl, whose file this names).
+_CHECKOUT_PACKAGE_CONFIG = "engine/src/flutter/.dart_tool/package_config.json"
+_CHECKOUT_PACKAGE_CONFIG_LABEL = "//engine/src/flutter:.dart_tool/package_config.json"
+_FETCHED_PACKAGE_CONFIG_LABEL = "@engine_package_config//:" + ENGINE_PACKAGE_CONFIG_FILE
+
 def _host_platform_impl(rctx):
     values = host_platform_values(rctx.os.name, rctx.os.arch)
     if rctx.attr.prebuilt_engine:
         values["HOST_DART_SDK"] = BIN_CACHE_DART_SDK
+
+    # What this checkout has of `gclient sync`'s, which a BUILD file cannot
+    # ask: the package configuration the engine's Dart rules read
+    # (//engine/src/flutter:package_config).
+    package_config = checkout_root(rctx).get_child(_CHECKOUT_PACKAGE_CONFIG)
+    rctx.watch(package_config)
+    values["ENGINE_PACKAGE_CONFIG"] = _CHECKOUT_PACKAGE_CONFIG_LABEL if package_config.exists else _FETCHED_PACKAGE_CONFIG_LABEL
     rctx.file("BUILD.bazel", "# The host that runs the build (build_defs/repositories/host_platform.bzl).\n")
     rctx.file("host.bzl", "".join([
         "%s = %r\n" % (name, value)

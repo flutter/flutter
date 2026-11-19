@@ -17,6 +17,12 @@ to Bazel:
   files at fetch time (`gn_build_files`), so that a dependency roll that
   changes the GN side (Skia's source lists, say) needs no regeneration.
 
+  A checkout that was never synced has no such directory. The repository
+  then reads what Bazel fetched in its place (`fetched`): a source tree's
+  `fetched_tree` (git_deps.bzl: the revision DEPS pins, laid out as gclient
+  lays it), a tool's `fetched_archive` (fetched_archive.bzl: the CIPD
+  package DEPS names) -- exactly as it reads a synced directory.
+
 * `cipd_package`: a repository populated by downloading a CIPD package over
   HTTPS (the same mechanism Skia uses). It needs no `cipd` client and no
   `gclient sync`; the pins come from `deps.lock.bzl`.
@@ -30,6 +36,8 @@ constants. Skia's and Dart's revisions come from DEPS. The checkout's own
 revision and content hash are fixed words unless the build is stamped
 (`--config=stamp`), which reads them from git at fetch time as `tools/gn` does.
 """
+
+load(":git_deps.bzl", "FETCHED_TREE_DIRECTORY")
 
 _BUILD_FILE_NAMES = ("BUILD", "BUILD.bazel")
 _BOUNDARY_FILE_NAMES = ("MODULE.bazel", "REPO.bazel", "WORKSPACE", "WORKSPACE.bazel")
@@ -96,7 +104,24 @@ def _directories_with_bazel_files(source):
                     found["/".join(parts[:depth])] = True
     fail("synced_repository: %s has more than %d directories; is there a symlink cycle?" % (source, _MAX_DIRECTORIES))
 
-def _link_tree(rctx, source, overlaying, exclude, links, packages = []):
+def _is_within(path, directory):
+    """Whether `path` is `directory` or inside it."""
+    return path == directory or path.startswith(directory + "/")
+
+def _directory_at(source, mounted, relative):
+    """The directory that stands at `relative` in the tree of `source`.
+
+    Returns it and whether it belongs to one of `mounted` (path to the
+    directory put there) rather than to `source` itself.
+    """
+    for path, directory in mounted.items():
+        if relative == path:
+            return directory, True
+        if relative.startswith(path + "/"):
+            return directory.get_child(relative[len(path) + 1:]), True
+    return (source.get_child(relative) if relative else source), False
+
+def _link_tree(rctx, source, overlaying, exclude, links, packages = [], directories = {}):
     """Populates the repository with symlinks to the contents of `source`.
 
     Entries are symlinked whole, with four exceptions, all re-created as real
@@ -133,12 +158,28 @@ def _link_tree(rctx, source, overlaying, exclude, links, packages = []):
     system libraries built at fetch time (toolchains/emscripten/
     lto_libraries.bzl) where emcc's frozen cache looks for them. The label
     names the directory, in a repository whose root holds a BUILD file.
+    `directories` (path to directory) does the same for a directory already
+    at hand: a DEPS entry inside the tree that the checkout lacks, from its
+    fetched_tree. Such a directory is part of the tree like any other: where
+    the rules above would have re-created a directory of the synced one
+    (cpu_features' `src` has upstream Bazel files, which the overlay hides),
+    they re-create it here, from the fetched tree's entries.
     """
     expanded = _directories_with_bazel_files(source) if overlaying else {}
     expanded[""] = True
     excluded = {}
     unwatched = {}
-    for path in exclude + links.keys():
+
+    # The directories of `directories` that are not linked whole: those with
+    # a Bazel file or a package inside.
+    mounted = {}
+    for path, directory in directories.items():
+        inside = _directories_with_bazel_files(directory) if overlaying else {}
+        if inside or [package for package in packages if _is_within(package, path)]:
+            mounted[path] = directory
+            for relative in inside.keys():
+                expanded[_join(path, relative) if relative else path] = True
+    for path in exclude + links.keys() + directories.keys():
         parts = path.split("/")
         for depth in range(len(parts)):
             ancestor = "/".join(parts[:depth])
@@ -154,19 +195,25 @@ def _link_tree(rctx, source, overlaying, exclude, links, packages = []):
         target = Label(label)
         root = rctx.path(target.relative(":BUILD.bazel")).dirname
         rctx.symlink(root.get_child(target.name), path)
+    for path, directory in directories.items():
+        if path not in mounted:
+            rctx.symlink(directory, path)
 
-    pending = [""]
+    # The tree's own entry at such a path is left out (`excluded`); the
+    # directory that stands there is walked in its place.
+    pending = [""] + mounted.keys()
     for _ in range(_MAX_DIRECTORIES):
         if not pending:
             return
         relative = pending.pop()
-        directory = source.get_child(relative) if relative else source
+        directory, fetched = _directory_at(source, mounted, relative)
 
         # readdir() also registers a watch on the directory's entries, so adding
         # or removing one (for example after a roll) refreshes the repository
-        # (except under an excluded entry's ancestors, see above). Changes
-        # inside the entries are tracked like any source file.
-        for child in directory.readdir(watch = "no" if relative in unwatched else "auto"):
+        # (except under an excluded entry's ancestors, see above, and inside
+        # a fetched tree, which does not change). Changes inside the entries
+        # are tracked like any source file.
+        for child in directory.readdir(watch = "no" if fetched or relative in unwatched else "auto"):
             name = child.basename
             if name in _BOUNDARY_FILE_NAMES:
                 continue
@@ -186,11 +233,132 @@ def _link_tree(rctx, source, overlaying, exclude, links, packages = []):
 link_tree = _link_tree
 
 # ---------------------------------------------------------------------------
+# A checkout without the synced trees
+# ---------------------------------------------------------------------------
+
+# Set (to anything but 0, false or no) to take every source tree from its
+# fetched_tree even where the checkout has the directory: what a checkout
+# without `gclient sync` builds, in one that has been synced.
+_FETCH_SOURCES_ENV = "FLUTTER_BAZEL_FETCH_SOURCES"
+
+def in_checkout(rctx, path, marker = "", source_tree = True):
+    """Whether the checkout's directory `path` is what a repository reads.
+
+    False when the checkout has no such directory (no `gclient sync`) -- or
+    has it without `marker` in it --, and for every source tree when
+    FLUTTER_BAZEL_FETCH_SOURCES is set.
+
+    Args:
+      rctx: the repository context.
+      path: a directory DEPS populates, relative to the checkout's root.
+      marker: a file of what DEPS puts there, relative to `path`, without
+        which the directory does not count: for one the repository itself
+        has files in (third_party/ninja's README).
+      source_tree: whether `path` is a source tree, which
+        FLUTTER_BAZEL_FETCH_SOURCES takes from its fetch.
+
+    Returns:
+      True when a repository reads the checkout's directory.
+    """
+    if source_tree and rctx.getenv(_FETCH_SOURCES_ENV, "") not in ("", "0", "false", "no"):
+        return False
+    directory = checkout_root(rctx).get_child(path)
+    if not directory.exists or not directory.is_dir:
+        return False
+    return not marker or directory.get_child(marker).exists
+
+def fetched_tree_directory(rctx, build_file):
+    """The tree of a fetched_tree or fetched_archive, which this fetches if need be.
+
+    Args:
+      rctx: the repository context.
+      build_file: the label of the BUILD file of the fetched repository.
+
+    Returns:
+      The tree's directory.
+    """
+    return rctx.path(build_file).dirname.get_child(FETCHED_TREE_DIRECTORY)
+
+def _within(path, trees):
+    """Whether `path` is one of `trees` (paths) or inside one."""
+    for tree in trees:
+        if path == tree or path.startswith(tree + "/"):
+            return True
+    return False
+
+def checkout_view(rctx, name, trees, directories = [], skip = []):
+    """Lays the directory `name` of the repository out as the checkout, with fetched trees in it.
+
+    What a tool that reads the checkout by its layout sees where the
+    checkout lacks its synced trees: the GN conversion (its GN root is
+    engine/src, and a GN file imports another tree's by path), pub (the
+    engine's pub workspace names its packages by path). Symlinks into the
+    checkout, a directory whole wherever nothing below it differs.
+
+    Args:
+      rctx: the repository context.
+      name: the directory to lay out, relative to the repository; replaced
+        if it exists.
+      trees: directories to put at paths of the checkout (path relative to
+        the checkout's root, to the directory) in place of what the checkout
+        has there: the fetched trees. One inside another is the outer one's
+        own (a fetched tree holds the dependencies nested in it).
+      directories: paths, relative to the checkout's root, made directories
+        of the view with the checkout's entries linked one by one: where the
+        tool writes beside what it reads.
+      skip: names left out of every directory the view lists entry by entry:
+        what the tool writes there itself.
+    """
+    rctx.delete(name)
+    placed = {
+        path: directory
+        for path, directory in trees.items()
+        if not _within(path.rpartition("/")[0], trees)
+    }
+    expanded = {"": True}
+    for path in placed.keys():
+        parts = path.split("/")
+        for depth in range(1, len(parts)):
+            expanded["/".join(parts[:depth])] = True
+    for path in directories:
+        parts = path.split("/")
+        for depth in range(1, len(parts) + 1):
+            expanded["/".join(parts[:depth])] = True
+    for path, directory in placed.items():
+        rctx.symlink(directory, name + "/" + path)
+
+    root = checkout_root(rctx)
+    pending = [""]
+    for _ in range(_MAX_DIRECTORIES):
+        if not pending:
+            return
+        relative = pending.pop()
+        directory = root.get_child(relative) if relative else root
+        if not directory.exists:
+            # A directory only the synced trees make (third_party/pkg).
+            continue
+        for child in directory.readdir(watch = "no"):
+            if child.basename in skip:
+                continue
+            child_relative = _join(relative, child.basename)
+            if child_relative in placed:
+                continue
+            if child_relative in expanded:
+                pending.append(child_relative)
+            else:
+                rctx.symlink(child, name + "/" + child_relative)
+    fail("checkout_view(%s): more than %d directories" % (name, _MAX_DIRECTORIES))
+
+# ---------------------------------------------------------------------------
 # synced_repository
 # ---------------------------------------------------------------------------
 
 _CONVERTER = "engine/src/flutter/tools/gn_to_bazel"
 _GN_ROOT = "engine/src"
+
+# The engine's package configuration, which resolves the converter's own
+# imports: `gclient sync` writes it (DEPS' pub_get_offline hook).
+_ENGINE_PACKAGE_CONFIG = "engine/src/flutter/.dart_tool/package_config.json"
 
 # What populates a synced directory, for the error when it is absent -- and
 # what needs none of them: a checkout without `gclient sync` is a framework
@@ -200,28 +368,16 @@ _MISSING_HINT = (
     "tests need no engine checkout: --config=prebuilt_engine takes the engine `flutter precache` downloads"
 )
 
-def _host_dart(rctx):
-    """The checkout's prebuilt Dart SDK for this host (a DEPS CIPD package)."""
-    os_name = rctx.os.name.lower()
-    if os_name.startswith("linux"):
-        os_part, exe = "linux", "dart"
-    elif os_name.startswith("mac"):
-        os_part, exe = "macos", "dart"
-    elif os_name.startswith("windows"):
-        os_part, exe = "windows", "dart.exe"
-    else:
-        fail("synced_repository: unsupported host OS %r" % rctx.os.name)
-    arch = rctx.os.arch.lower()
-    if arch in ("amd64", "x86_64", "x64"):
-        arch_part = "x64"
-    elif arch in ("aarch64", "arm64"):
-        arch_part = "arm64"
-    else:
-        fail("synced_repository: unsupported host architecture %r" % rctx.os.arch)
-    dart = checkout_root(rctx).get_child("engine/src/flutter/prebuilts/%s-%s/dart-sdk/bin/%s" % (os_part, arch_part, exe))
-    if not dart.exists:
-        fail("synced_repository: %s does not exist; it is populated by `gclient sync`" % dart)
-    return dart
+# The directory of the repository that is the conversion's view of the
+# checkout while the converter runs (checkout_view), where the checkout
+# lacks a tree the conversion reads.
+_GN_VIEW = "gn_checkout_view"
+
+# How the converter names a tree it was told the checkout lacks and finds it
+# needs (tools/gn_to_bazel's --absent-tree), and how many it may name, one
+# run each, before the conversion gives up.
+_ABSENT_TREE_MARKER = "[absent-tree: "
+_MAX_ABSENT_TREES = 32
 
 def _gn_packages(rctx):
     """The directories below the root that `gn_build_files` makes packages.
@@ -238,53 +394,159 @@ def _gn_packages(rctx):
             packages.append(directory[len(prefix):])
     return packages
 
-def _convert_gn(rctx):
+def _gn_directory(path):
+    """The GN directory of a checkout path under the GN root (`//flutter/third_party/zlib`), or None."""
+    prefix = _GN_ROOT + "/"
+    return "//" + path[len(prefix):] if path.startswith(prefix) else None
+
+def _convert_gn(rctx, fetched):
     """Runs tools/gn_to_bazel over `gn_build_files`, writing into the repository.
 
-    The converter is the checkout's own: the prebuilt Dart SDK and `gn` from
-    DEPS. Every GN file it read (the depfile) and the converter's sources are
-    watched, so a roll that changes a `.gni` or an edit to the converter
-    re-runs the conversion on the next build.
+    The converter is the checkout's own, run by DEPS' prebuilt Dart SDK with
+    DEPS' `gn` (the tool repositories, `dart` and `gn`: the checkout's, or
+    the packages where it has none). Every GN file it read (the depfile) and
+    the converter's sources are watched, so a roll that changes a `.gni` or
+    an edit to the converter re-runs the conversion on the next build.
+
+    GN files name each other by path from the GN root, across trees
+    (freetype's reads zlib's and libpng's). Where the checkout lacks a tree
+    the conversion reads -- its own (`fetched`: path relative to the
+    checkout's root, to the fetched tree) or another (`gn_trees`) -- the
+    converter runs on a view of the checkout that has the fetched trees at
+    their paths (checkout_view). A tree that `gn_trees` does not name and a
+    GN file turns out to need is not silently missed: the converter is told
+    which trees are absent, stops at the first path inside one that it
+    cannot find, and the conversion fetches that tree and runs again.
     """
+    checkout = checkout_root(rctx)
 
     # Each package's directory is the repository's own (_link_tree's
     # `packages`): a BUILD file written through a symlink would be one more
-    # file of the synced tree, which GN and git see.
-    checkout = str(checkout_root(rctx).realpath) + "/"
+    # file of the synced tree, which GN and git see (or of a fetched tree,
+    # which other repositories read).
+    foreign = [str(checkout.realpath)] + [str(tree.realpath) for tree in fetched.values()]
     for package in _gn_packages(rctx):
-        if str(rctx.path(package).realpath).startswith(checkout):
-            fail("synced_repository(%s): %s is a symlink into the checkout; its BUILD file would be written there" % (rctx.name, package))
-    root = checkout_root(rctx).get_child(_GN_ROOT)
-    converter = checkout_root(rctx).get_child(_CONVERTER)
+        real = str(rctx.path(package).realpath)
+        for root in foreign:
+            if real.startswith(root + "/"):
+                fail("synced_repository(%s): %s is a symlink out of the repository (into %s); its BUILD file would be written there" % (rctx.name, package, root))
+
+    converter = checkout.get_child(_CONVERTER)
+    packages = checkout.get_child(_ENGINE_PACKAGE_CONFIG)
+    if not packages.exists:
+        # No `gclient sync`, so no pub_get_offline hook: the same
+        # configuration, resolved over the fetched packages.
+        packages = rctx.path(rctx.attr.engine_package_config)
+
+    fetchable = {path: label for label, path in rctx.attr.fetchable.items()}
+    trees = dict(fetched)
+    for path in rctx.attr.gn_trees:
+        if path not in fetchable:
+            fail("synced_repository(%s): gn_trees names %s, which is no git dependency of DEPS" % (rctx.name, path))
+        if not in_checkout(rctx, path):
+            trees[path] = fetched_tree_directory(rctx, fetchable[path])
+
     depfile = rctx.path("gn_to_bazel.d")
-    arguments = [
-        _host_dart(rctx),
-        converter.get_child("bin/gn_to_bazel.dart"),
-        "--root",
-        root,
-        "--gn",
-        root.get_child("flutter/third_party/gn/gn"),
-        "--out-dir",
-        rctx.path(""),
-        "--repository",
-        rctx.attr.gn_repository,
-        "--depfile",
-        depfile,
-        "--buildifier",
-        "none",
-    ] + [
-        checkout_root(rctx).get_child(file)
-        for file in rctx.attr.gn_build_files
-    ]
-    result = rctx.execute(arguments, timeout = 600)
-    if result.return_code != 0:
-        fail("synced_repository(%s): gn_to_bazel failed:\n%s%s" % (rctx.name, result.stdout, result.stderr))
+    view = rctx.path(_GN_VIEW)
+    converted = False
+    for _ in range(_MAX_ABSENT_TREES):
+        if trees:
+            checkout_view(rctx, _GN_VIEW, trees)
+        base = view if trees else checkout
+        absent = [
+            _gn_directory(path)
+            for path in sorted(fetchable.keys())
+            if _gn_directory(path) and not _within(path, trees) and not in_checkout(rctx, path)
+        ]
+        arguments = [
+            rctx.path(rctx.attr.dart),
+            "--packages=%s" % packages,
+            converter.get_child("bin/gn_to_bazel.dart"),
+            "--root",
+            base.get_child(_GN_ROOT),
+            "--gn",
+            rctx.path(rctx.attr.gn),
+            "--out-dir",
+            rctx.path(""),
+            "--repository",
+            rctx.attr.gn_repository,
+            "--depfile",
+            depfile,
+            "--buildifier",
+            "none",
+        ] + [
+            "--absent-tree=" + directory
+            for directory in absent
+        ] + [
+            base.get_child(file)
+            for file in rctx.attr.gn_build_files
+        ]
+        result = rctx.execute(arguments, timeout = 600)
+        if result.return_code == 0:
+            converted = True
+            break
+
+        # A tree the conversion needs and the checkout lacks, which gn_trees
+        # does not name (a roll's new import): fetched, and noted so that
+        # the next conversion need not find it the slow way.
+        needed = result.stderr.partition(_ABSENT_TREE_MARKER)[2].partition("]")[0]
+        path = _GN_ROOT + "/" + needed[2:] if needed.startswith("//") else ""
+        if path not in fetchable or _within(path, trees):
+            fail("synced_repository(%s): gn_to_bazel failed:\n%s%s" % (rctx.name, result.stdout, result.stderr))
+        print("synced_repository(%s): the conversion reads %s, which is not in the checkout and not among its gn_trees (build_defs/repositories/extensions.bzl); fetching it." % (rctx.name, path))  # buildifier: disable=print
+        trees[path] = fetched_tree_directory(rctx, fetchable[path])
+    if not converted:
+        fail("synced_repository(%s): gn_to_bazel asked for more than %d trees the checkout lacks" % (rctx.name, _MAX_ABSENT_TREES))
+
+    prefix = str(view) + "/"
     for line in rctx.read(depfile).splitlines():
-        if line:
-            rctx.watch(line)
+        if not line:
+            continue
+        if line.startswith(prefix):
+            # A file read through the view: the checkout's own (watched
+            # where it is), or a fetched tree's, which does not change.
+            relative = line[len(prefix):]
+            if _within(relative, trees):
+                continue
+            line = str(checkout.get_child(relative))
+        rctx.watch(line)
     rctx.delete(depfile)
+    rctx.delete(_GN_VIEW)
     rctx.watch_tree(converter.get_child("lib"))
     rctx.watch_tree(converter.get_child("bin"))
+
+def _source_tree(rctx):
+    """Where the repository's tree is, in a checkout with or without it.
+
+    Returns the directory `path` stands for; the DEPS entries inside it that
+    the checkout lacks, as directories to put at their paths (relative to
+    `path`); and every tree taken from a fetched_tree, by its path relative
+    to the checkout's root (for the GN conversion's view of the checkout).
+    """
+    members = {relative: label for label, relative in rctx.attr.fetched.items()}
+    path = rctx.attr.path
+    checkout = checkout_root(rctx)
+    if "." in members:
+        # `path` is a dependency of DEPS: the checkout's directory, or the
+        # fetched tree, whole (with what DEPS nests in it).
+        rctx.watch(checkout.get_child(path))
+        if in_checkout(rctx, path, rctx.attr.marker, rctx.attr.source_tree):
+            return checkout.get_child(path), {}, {}
+        tree = fetched_tree_directory(rctx, members["."])
+        return tree, {}, {path: tree}
+
+    # `path` is a directory of the checkout with DEPS entries inside it
+    # (third_party/cpu_features: the engine's BUILD.gn over DEPS' `src`).
+    directories = {}
+    fetched = {}
+    for relative, label in members.items():
+        member = path + "/" + relative
+        rctx.watch(checkout.get_child(member))
+        if not in_checkout(rctx, member, source_tree = rctx.attr.source_tree):
+            tree = fetched_tree_directory(rctx, label)
+            directories[relative] = tree
+            fetched[member] = tree
+    return checkout.get_child(path), directories, fetched
 
 def _synced_repository_impl(rctx):
     if rctx.attr.build_file != None and rctx.attr.build_file_content:
@@ -296,37 +558,20 @@ def _synced_repository_impl(rctx):
         fail("synced_repository(%s): gn_build_files and gn_repository go together" % rctx.name)
     overlaying = converting or rctx.attr.build_file != None or bool(rctx.attr.build_file_content)
 
-    source = checkout_root(rctx).get_child(rctx.attr.path)
+    if rctx.attr.fetched:
+        source, directories, fetched = _source_tree(rctx)
+    else:
+        source, directories, fetched = checkout_root(rctx).get_child(rctx.attr.path), {}, {}
     if not source.exists or not source.is_dir:
-        if rctx.attr.fallback_url and not converting:
-            # A tool of DEPS in a checkout without it (no `gclient sync`: a
-            # framework developer's, a flutter_drone bot's running the tests
-            # on the prebuilt engine): the same package from where DEPS
-            # would have fetched it. Noted, since it is not what the name says.
-            print("synced_repository(%s): %s is not in the checkout; downloading %s instead." % (
-                rctx.name,
-                rctx.attr.path,
-                rctx.attr.fallback_url,
-            ))  # buildifier: disable=print
-            rctx.download_and_extract(
-                url = rctx.attr.fallback_url,
-                type = rctx.attr.fallback_type,
-                sha256 = rctx.attr.fallback_sha256,
-                canonical_id = rctx.attr.fallback_url,
-                stripPrefix = rctx.attr.fallback_strip_prefix,
-            )
-            _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
-            _mark_repository_boundary(rctx)
-            return
         fail(
             "synced_repository(%s): %s does not exist. It is populated by " % (rctx.name, source) +
             (rctx.attr.missing_hint or _MISSING_HINT) + ".",
         )
 
-    _link_tree(rctx, source, overlaying, rctx.attr.exclude, rctx.attr.links, _gn_packages(rctx))
+    _link_tree(rctx, source, overlaying, rctx.attr.exclude, rctx.attr.links, _gn_packages(rctx), directories)
     if converting:
         _link_secondary(rctx)
-        _convert_gn(rctx)
+        _convert_gn(rctx, fetched)
     else:
         _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
     _mark_repository_boundary(rctx)
@@ -392,26 +637,47 @@ synced_repository = repository_rule(
         "missing_hint": attr.string(
             doc = "What populates `path`, for the error when it is absent; `gclient sync` by default.",
         ),
-        "fallback_url": attr.string(
-            doc = "An archive to download and extract in place of `path` when it is absent (a CIPD " +
-                  "package's zip, cipd_download_url; a sysroot's tarball): the tools of DEPS in a " +
-                  "checkout without them. Not with gn_build_files.",
+        "fetched": attr.label_keyed_string_dict(
+            doc = "What Bazel fetches of the dependencies of DEPS that `path` is or holds, read where " +
+                  "the checkout lacks the directory: the BUILD file of each fetched repository " +
+                  "(git_deps.bzl's fetched_tree, fetched_archive.bzl's fetched_archive), to the " +
+                  "dependency's path relative to `path` (`.` for `path` itself).",
         ),
-        "fallback_type": attr.string(
-            default = "zip",
-            doc = "The archive's type, as download_and_extract takes it (`zip`, `tar.xz`).",
+        "gn_trees": attr.string_list(
+            doc = "With gn_build_files: the other dependencies of DEPS whose GN files the conversion " +
+                  "reads (paths relative to the repository root, keys of `fetchable`), fetched for it " +
+                  "where the checkout lacks them.",
         ),
-        "fallback_sha256": attr.string(
-            doc = "The archive's sha256; without it the download is unverified and not shared through " +
-                  "the repository cache.",
+        "fetchable": attr.label_keyed_string_dict(
+            doc = "With gn_build_files: every git dependency of DEPS that has a fetched tree (the BUILD " +
+                  "file of the tree's repository, to the dependency's path relative to the repository " +
+                  "root): what the conversion can fetch, and what it tells the converter is absent.",
         ),
-        "fallback_strip_prefix": attr.string(
-            doc = "A directory of the archive that becomes the repository's root.",
+        "dart": attr.label(
+            doc = "With gn_build_files: the `dart` that runs the converter (DEPS' prebuilt SDK for the host).",
+        ),
+        "gn": attr.label(
+            doc = "With gn_build_files: the `gn` the converter parses GN files with (DEPS').",
+        ),
+        "engine_package_config": attr.label(
+            doc = "With gn_build_files: the engine's package configuration for a checkout that has none " +
+                  "(engine_packages.bzl), which resolves the converter's imports.",
+        ),
+        "marker": attr.string(
+            doc = "A file of what DEPS puts at `path`, relative to it, without which the checkout's " +
+                  "directory does not count as synced and `fetched` is read: for a directory the " +
+                  "repository itself has files in (third_party/ninja, whose README is checked in beside " +
+                  "where DEPS puts the package).",
+        ),
+        "source_tree": attr.bool(
+            doc = "The repository is a source tree, which FLUTTER_BAZEL_FETCH_SOURCES takes from its " +
+                  "fetched trees even where the checkout has the directory.",
         ),
     },
-    # The repository only symlinks into the checkout, so it must be re-created
-    # when the checkout layout changes rather than restored from a cache (a
-    # fallback download comes back from the repository cache).
+    # The repository only symlinks -- into the checkout, or into what Bazel
+    # fetched in its place, which is a repository of its own for this reason
+    # -- so it must be re-created when the checkout layout changes rather
+    # than restored from a cache.
     local = True,
 )
 

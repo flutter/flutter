@@ -29,11 +29,14 @@ filegroup(
 # bin/et, the shell entry point. That script resolves its own location
 # through `realpath`, so from the runfiles tree it reaches the checkout's
 # copy of this package and the prebuilt SDK rather than the staged ones --
-# the one read outside the declared inputs here.
+# the one read outside the declared inputs here. Both are a gclient
+# checkout's: in one that was never synced (//:gclient_config is then
+# empty) the fetch tests find no .gclient and bin/et asks for
+# `gclient sync`, as `et` itself does there.
 dart_package_test(
     name = "tests",
     data = [
-        "//:.gclient",
+        "//:gclient_config",
         "//engine/src/flutter:.ci.yaml",
         "//engine/src/flutter:et_entry_points",
         "//engine/src/flutter/ci:builder_configs",

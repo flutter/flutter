@@ -185,6 +185,20 @@ makes a directory of the repository first: the tree is otherwise symlinked
 directory by directory, and a file written through such a link would land
 in the synced tree.
 
+In a checkout without `gclient sync` the rule runs the same command on a
+view of the checkout that has the trees Bazel fetched at their paths
+(`--root` is the view's `engine/src`; `docs/dependencies.md` of the Bazel
+build), with `--packages` naming the engine's package configuration, which
+such a checkout does not have beside the converter either. The converter
+reads other trees' GN files by path, so the rule also says which trees the
+checkout lacks: `--absent-tree=//flutter/third_party/zlib`, once per tree.
+A file looked for inside one and not found stops the conversion (exit 3,
+`[absent-tree: //flutter/third_party/zlib]` on stderr) instead of passing
+for a file that is not there -- which the dependency resolver takes for a
+dependency that hands its dependents nothing, so the output would differ
+from a synced checkout's without a word. The rule fetches the tree and runs
+the converter again.
+
 ### The oracle
 
 ```sh

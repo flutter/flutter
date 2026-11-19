@@ -23,7 +23,14 @@ import 'package:path/path.dart' as p;
 /// the inputs are laid out as the packages of an external repository (the
 /// fetch-time conversion of build_defs/repositories/repositories.bzl).
 Future<void> main(List<String> arguments) async {
-  exitCode = await run(arguments);
+  try {
+    exitCode = await run(arguments);
+  } on AbsentTreeError catch (e) {
+    // The conversion needs a tree the checkout lacks (--absent-tree): for
+    // the caller to supply, and try again.
+    stderr.writeln('error: $e');
+    exitCode = 3;
+  }
 }
 
 Future<int> run(List<String> arguments) async {
@@ -68,6 +75,14 @@ Future<int> run(List<String> arguments) async {
           'become the packages of the repository, written under --out-dir.',
     )
     ..addOption('depfile', help: 'Write the GN files read, one per line, to this file.')
+    ..addMultiOption(
+      'absent-tree',
+      help:
+          'A GN directory (//flutter/third_party/zlib) this checkout is known not to have: a '
+          'dependency of DEPS without `gclient sync`. A file the conversion looks for inside one '
+          'and does not find stops it (exit 3, `[absent-tree: <directory>]` on stderr) rather '
+          'than passing for a file that is not there.',
+    )
     ..addOption(
       'host',
       help:
@@ -116,7 +131,7 @@ Future<int> run(List<String> arguments) async {
     stderr.writeln('--repository needs --out-dir');
     return 64;
   }
-  final tree = GnSourceTree(root, gnBinary: gn);
+  final tree = GnSourceTree(root, gnBinary: gn, absentTrees: options.multiOption('absent-tree'));
 
   // The inputs: the manifest's checked-in files, or the ones named (which
   // pick up the manifest's skip list, appendix and implicit deps when they

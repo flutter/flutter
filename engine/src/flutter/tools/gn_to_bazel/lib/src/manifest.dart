@@ -241,6 +241,7 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
       '//flutter/lib/gpu:gpu_unittests',
     ],
     appendix: r'''
+load("@host_platform//:host.bzl", "ENGINE_PACKAGE_CONFIG")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/testing:checkout_script_test.bzl", "checkout_script_test")
 load("//build_defs/dist:everything.bzl", "everything_assemble", "everything_contents", "everything_files", "everything_trees")
@@ -268,10 +269,13 @@ cc_library(
 # The engine's Dart package configuration, which `gclient sync` writes (the
 # pub_get_offline hook) and GN's Dart compiles read (--packages). What the
 # frontend server resolves `package:` imports through; the fixtures compiled
-# so far import none, so nothing it points at is declared.
+# so far import none, so nothing it points at is declared. The checkout's
+# .dart_tool/package_config.json, or, in a checkout that was never synced,
+# the same resolution over fetched packages (@host_platform says which:
+# build_defs/repositories/engine_packages.bzl).
 filegroup(
     name = "package_config",
-    srcs = [".dart_tool/package_config.json"],
+    srcs = [ENGINE_PACKAGE_CONFIG],
     visibility = ["//visibility:public"],
 )
 

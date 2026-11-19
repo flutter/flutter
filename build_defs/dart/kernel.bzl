@@ -37,6 +37,27 @@ look it up by that URI through flutter::testing::GetSourceUri.
 
 SOURCE_URI_SCHEME = "org-dartlang-root"
 
+# The engine's package configuration, as the checkout has it: the file
+# `gclient sync` writes (DEPS' pub_get_offline hook), which names every
+# package by a path relative to itself. A checkout without `gclient sync`
+# gets the same file from another repository
+# (build_defs/repositories/engine_packages.bzl), and whatever reads it lays
+# it at this path first (engine_package_config_path).
+ENGINE_PACKAGE_CONFIG_PATH = "engine/src/flutter/.dart_tool/package_config.json"
+
+def engine_package_config_path(package_config):
+    """Where the engine's package configuration belongs in a tree shaped like the checkout.
+
+    Args:
+      package_config: the configuration File.
+
+    Returns:
+      None when the File sits where it belongs (the checkout's own), else
+      the path to lay it at (ENGINE_PACKAGE_CONFIG_PATH): its packages'
+      roots, relative to it, are then the checkout's paths.
+    """
+    return ENGINE_PACKAGE_CONFIG_PATH if package_config.short_path.startswith("../") else None
+
 DartPackageRootInfo = provider(
     doc = "A filesystem root of staged package sources (dart_package_root).",
     fields = {
@@ -95,7 +116,7 @@ PLATFORM_DILLS = {
     "vm": "vm_platform_strong.dill",
 }
 
-def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [], product = False, roots = ["."], extra_inputs = [], target = "flutter"):
+def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [], product = False, roots = ["."], extra_inputs = [], target = "flutter", package_config_path = None):
     """The frontend server's compile of `main` to the kernel `out`, as dart_kernel runs it.
 
     For rules with dart_kernel's tool attributes (KERNEL_TOOL_ATTRS): the
@@ -117,6 +138,9 @@ def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [],
       roots: the filesystem roots (--filesystem-root), the execution root by default.
       extra_inputs: further input Files.
       target: the frontend server's --target: `flutter` or `vm`.
+      package_config_path: the configuration's path under one of `roots`,
+        where that is not its path from the execution root (one staged
+        under a root of its own).
     """
     if target not in PLATFORM_DILLS:
         fail("%s: target must be one of %s, not %s" % (ctx.label, PLATFORM_DILLS.keys(), target))
@@ -131,7 +155,10 @@ def compile_to_kernel(ctx, main, out, srcs, package_config, platform, args = [],
 
     # The package configuration under the virtual scheme, so that the
     # packages' roots resolve against every filesystem root.
-    arguments.add(package_config, format = "--packages=" + SOURCE_URI_SCHEME + ":///%s")
+    if package_config_path:
+        arguments.add("--packages=%s:///%s" % (SOURCE_URI_SCHEME, package_config_path))
+    else:
+        arguments.add(package_config, format = "--packages=" + SOURCE_URI_SCHEME + ":///%s")
     arguments.add("--sdk-root", dill[0].dirname)
     arguments.add("--target=" + target)
     if PLATFORM_DILLS[target] != "platform_strong.dill":
@@ -180,9 +207,21 @@ def _dart_kernel_impl(ctx):
     # here for this target, or shared (package_roots).
     staged = []
     roots = ["."]
+    root_name = ctx.label.name + ".root"
     if ctx.attr.package_trees:
-        root_name = ctx.label.name + ".root"
         staged = _stage_trees(ctx, ctx.attr.package_trees, root_name, ctx.outputs.out)
+
+    # The engine's configuration from another repository (a checkout without
+    # `gclient sync`): under the same root, at the checkout's path, so that
+    # the packages get the URIs they have in a synced checkout -- and the
+    # kernel is the same file.
+    package_config = ctx.file.package_config
+    package_config_path = engine_package_config_path(package_config)
+    if package_config_path:
+        link = ctx.actions.declare_file(root_name + "/" + package_config_path, sibling = ctx.outputs.out)
+        ctx.actions.symlink(output = link, target_file = package_config)
+        package_config = link
+    if ctx.attr.package_trees or package_config_path:
         roots.append(ctx.outputs.out.dirname + "/" + root_name)
     shared = [root[DartPackageRootInfo] for root in ctx.attr.package_roots]
     for info in shared:
@@ -192,11 +231,12 @@ def _dart_kernel_impl(ctx):
         main = ctx.file.main,
         out = ctx.outputs.out,
         srcs = depset(ctx.files.srcs + staged, transitive = [info.files for info in shared]),
-        package_config = ctx.file.package_config,
+        package_config = package_config,
         platform = ctx.files.platform,
         args = ctx.attr.args,
         product = ctx.attr.product,
         roots = roots,
+        package_config_path = package_config_path,
     )
     return [DefaultInfo(files = depset([ctx.outputs.out]))]
 

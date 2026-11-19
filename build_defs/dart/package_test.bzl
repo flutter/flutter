@@ -64,6 +64,7 @@ load(
     "build_directory_variant",
     "checkout_view_prologue",
 )
+load("//build_defs/dart:kernel.bzl", "engine_package_config_path")
 load(
     "//build_defs/testing:checkout_script_test.bzl",
     "script_argument",
@@ -90,7 +91,19 @@ def _external_path(ctx, f):
 
 def _dart_package_test_impl(ctx):
     package_config = ctx.file.package_config
-    workspace = paths.dirname(paths.dirname(package_config.short_path))
+
+    # Where the configuration sits in the tree: its own path in the checkout
+    # -- or, for the one a checkout without `gclient sync` gets (a file of
+    # another repository, build_defs/repositories/engine_packages.bzl), the
+    # path the checkout's would have had. It names every package by a path
+    # relative to itself, so it reads the same from there.
+    symlinks = {}
+    package_config_path = engine_package_config_path(package_config)
+    if package_config_path:
+        symlinks[package_config_path] = package_config
+    else:
+        package_config_path = package_config.short_path
+    workspace = paths.dirname(paths.dirname(package_config_path))
     if paths.dirname(workspace) != ENGINE_SRC:
         fail("%s: the package configuration %s should be the engine's" % (ctx.label, package_config.short_path))
     package = ctx.label.package
@@ -98,7 +111,6 @@ def _dart_package_test_impl(ctx):
         fail("%s: a dart_package_test belongs in a package under %s" % (ctx.label, workspace))
 
     # Other repositories' package trees at the paths the configuration names.
-    symlinks = {}
     for target, virtual_path in ctx.attr.package_trees.items():
         for f in target[DefaultInfo].files.to_list():
             symlinks[paths.join(virtual_path.strip("/"), _external_path(ctx, f))] = f
@@ -139,14 +151,15 @@ def _dart_package_test_impl(ctx):
 exec "$root/{dart}" "--packages=$tree/{package_config}" {entry} "$@"
 """.format(
             dart = dart[0].short_path,
-            package_config = package_config.short_path,
+            package_config = package_config_path,
             entry = entry,
         ),
         is_executable = True,
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.srcs + ctx.files.deps + ctx.files.data + ctx.files._sdk + [package_config] +
+        files = ctx.files.srcs + ctx.files.deps + ctx.files.data + ctx.files._sdk +
+                ([package_config] if package_config_path == package_config.short_path else []) +
                 ([script] if script != None else []),
         symlinks = symlinks,
     )

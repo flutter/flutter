@@ -8,17 +8,24 @@ The pins come from `deps.lock.bzl` (generated from `DEPS`) and, for the Debian
 sysroots, from `build/linux/sysroot_scripts/sysroots.json`. During the
 GN/Bazel transition every dependency is consumed from the directory
 `gclient sync` populated (`synced_repository`), so both build systems see
-identical trees and nothing is fetched twice.
+identical trees and nothing is fetched twice. Where the checkout has no
+such directory (a clone `gclient sync` never ran in), Bazel fetches the
+dependency at the same pin: a source tree with git (git_deps.bzl), a tool
+or a sysroot as its archive (fetched_archive.bzl).
 
-Toolchains (clang, sysroots, gn, ninja, ...) can instead be downloaded by
-Bazel itself by setting `FLUTTER_BAZEL_FETCH_TOOLCHAINS=1` (for example
-through `--repo_env`). The repositories have the same layout either way.
+Toolchains (clang, sysroots, gn, ninja, ...) can also be downloaded by
+Bazel whatever the checkout has, by setting
+`FLUTTER_BAZEL_FETCH_TOOLCHAINS=1` (for example through `--repo_env`). The
+repositories have the same layout either way.
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
-load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
+load(":deps.lock.bzl", "CIPD_DEPS", "GCLIENT_GN_ARGS", "GCLIENT_GN_ARGS_FILE", "GIT_DEPS", "VARS")
+load(":engine_packages.bzl", "ENGINE_PACKAGE_CONFIG_FILE", "engine_package_config")
+load(":fetched_archive.bzl", "fetched_archive")
 load(":flutter_bin_cache.bzl", "PREBUILT_ENGINE_ENV")
+load(":git_deps.bzl", "fetched_tree")
 load(":host_files.bzl", "host_files")
 load(":host_platform.bzl", "BIN_CACHE_DART_SDK", "host_platform", "host_platform_values")
 load(":macos_sdk.bzl", "macos_sdk")
@@ -36,6 +43,9 @@ _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 #                   directory holding the GN file over a synced subdirectory.
 #   exclude:        entries of the tree left out of the repository (paths
 #                   relative to `path`): what another build writes into it.
+#   unfetched:      why a checkout without the tree cannot have Bazel fetch
+#                   it (the error then says so); every other tree is fetched
+#                   where the checkout lacks it (git_deps.bzl).
 #   links:          directories of other repositories put at paths of the
 #                   tree (the emsdk's LTO system libraries).
 _SOURCE_REPOSITORIES = {
@@ -86,6 +96,12 @@ _SOURCE_REPOSITORIES = {
     "emsdk": struct(
         path = "engine/src/flutter/prebuilts/emsdk",
         build_file = _OVERLAYS + ":emsdk/BUILD.emsdk.bazel",
+        # The git dependency is the SDK's installer; the SDK itself is what
+        # DEPS' "Activate Emscripten SDK" hook downloads with it
+        # (tools/activate_emsdk.py), which no fetched tree runs.
+        unfetched = "`gclient sync` with download_emsdk among the .gclient's custom_vars: the Emscripten " +
+                    "SDK is installed by a hook of DEPS, which Bazel does not run, so a checkout without " +
+                    "`gclient sync` has no web engine build",
         exclude = [
             "upstream/emscripten/cache/build",  # system libraries being built
             "upstream/emscripten/cache/cache.lock",
@@ -475,9 +491,73 @@ _SOURCE_REPOSITORIES = {
     ),
 }
 
+# The fetch-time GN conversions that read other trees' GN files (a GN file
+# names another by its path from the GN root: freetype's reads zlib's and
+# libpng's), by repository: the dependencies of DEPS a checkout without them
+# fetches for the conversion, besides the repository's own. Read off the
+# converter's depfiles in a synced checkout. A tree missing here is not
+# missed: the converter stops at the first path inside a tree the checkout
+# lacks, and the conversion fetches it, says so, and runs again
+# (repositories.bzl's _convert_gn) -- one more run of the converter.
+_THIRD_PARTY = "engine/src/flutter/third_party/"
+_VULKAN_DEPS = _THIRD_PARTY + "vulkan-deps/"
+_GN_TREES = {
+    "angle": [
+        "engine/src/third_party/abseil-cpp",
+        # build_overrides/angle.gni imports the file gclient writes its GN
+        # arguments into, which is the Dart tree's.
+        _THIRD_PARTY + "dart",
+        _THIRD_PARTY + "swiftshader",
+        _THIRD_PARTY + "zlib",
+        _VULKAN_DEPS + "spirv-headers/src",
+        _VULKAN_DEPS + "spirv-tools/src",
+        _VULKAN_DEPS + "vulkan-headers/src",
+    ],
+    "freetype2": [_THIRD_PARTY + "libpng", _THIRD_PARTY + "zlib"],
+    "glslang": [_VULKAN_DEPS + "spirv-tools/src"],
+    "harfbuzz": [_THIRD_PARTY + "freetype2", _THIRD_PARTY + "icu"],
+    "libpng": [_THIRD_PARTY + "zlib"],
+    "re2": ["engine/src/third_party/abseil-cpp"],
+    "shaderc": [
+        _VULKAN_DEPS + "glslang/src",
+        _VULKAN_DEPS + "spirv-headers/src",
+        _VULKAN_DEPS + "spirv-tools/src",
+    ],
+    "skia": [_THIRD_PARTY + "freetype2", _THIRD_PARTY + "icu", _THIRD_PARTY + "libpng"],
+    "spirv-tools": [_VULKAN_DEPS + "spirv-headers/src"],
+    "vulkan-loader": [_VULKAN_DEPS + "vulkan-headers/src"],
+    "vulkan-utility-libraries": [_VULKAN_DEPS + "vulkan-headers/src"],
+    "vulkan_memory_allocator": [_VULKAN_DEPS + "vulkan-headers/src"],
+    "vulkan_validation_layers": [
+        _VULKAN_DEPS + "spirv-headers/src",
+        _VULKAN_DEPS + "spirv-tools/src",
+        _VULKAN_DEPS + "vulkan-headers/src",
+        _VULKAN_DEPS + "vulkan-utility-libraries/src",
+    ],
+}
+
+# The hooks of DEPS that run a script of a synced tree to write into that
+# tree, by the tree: what a fetched tree runs once it is fetched
+# (git_deps.bzl), in DEPS' order. DEPS' other hooks write elsewhere: the
+# sysroots (_SYSROOT_REPOSITORIES), the engine's package configuration
+# (engine_packages.bzl), the Emscripten SDK's activation (not fetched: the
+# emsdk's `unfetched`), and what no Linux or macOS build under Bazel reads.
+_FETCHED_TREE_HOOKS = {
+    _THIRD_PARTY + "dart": [
+        # "Generate .dart_tool/package_confg.json" and "Generate sdk/version".
+        "tools/generate_package_config.py",
+        "tools/generate_sdk_version_file.py",
+    ],
+}
+
 # Prebuilt tools from DEPS (CIPD packages), keyed by repository name. These
-# are symlinked from the checkout by default and downloaded from CIPD when
-# FLUTTER_BAZEL_FETCH_TOOLCHAINS is set.
+# are symlinked from the checkout, downloaded from CIPD where the checkout
+# has none (fetched_archive.bzl), and downloaded whatever the checkout has
+# when FLUTTER_BAZEL_FETCH_TOOLCHAINS is set.
+#   marker:     a file of the package, relative to `path`, without which the
+#               checkout's directory is not the package (synced_repository's
+#               `marker`).
+#   mac_subdir: the directory of the package that is the repository on a Mac.
 _TOOL_REPOSITORIES = {
     "clang_linux_x64": struct(
         path = "engine/src/flutter/buildtools/linux-x64/clang",
@@ -573,9 +653,14 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/third_party/gn",
         build_file = _OVERLAYS + ":gn/BUILD.gn_tool.bazel",
     ),
+    # The directory is the repository's own too: its README is checked in
+    # beside where DEPS puts the package, so only the binary says whether
+    # the package is there (`marker`; without it a checkout that was never
+    # synced would pass for one that has ninja).
     "ninja": struct(
         path = "third_party/ninja",
         build_file = _OVERLAYS + ":ninja/BUILD.ninja.bazel",
+        marker = "ninja",
     ),
     # reclient (DEPS: use_rbe; this host's, under buildtools/<host>/: the
     # Linux x64 bots' and a Mac's) and the engine's
@@ -598,7 +683,8 @@ _TOOL_REPOSITORIES = {
 # Debian sysroots, keyed by repository name. They are not DEPS entries: the
 # linux_sysroot_* hooks unpack them with install-sysroot.py, whose pins live
 # in sysroots.json (read below, so there is one source of truth). Like the
-# tools, they are symlinked from the checkout by default and downloaded when
+# tools, they are symlinked from the checkout, downloaded where the checkout
+# has none, and downloaded whatever the checkout has when
 # FLUTTER_BAZEL_FETCH_TOOLCHAINS is set.
 _SYSROOT_REPOSITORIES = {
     "sysroot_linux_x64": struct(
@@ -715,23 +801,128 @@ def _sysroot_repositories(mctx, fetch):
                 build_file = spec.build_file,
             )
         else:
-            # The checkout's, and the same tarball when the checkout has none
-            # (synced_repository's fallback: a bare checkout on the prebuilt
-            # engine).
+            # The checkout's, and the same tarball where the checkout has
+            # none (no `gclient sync`, or one for another target CPU).
+            path = _SYSROOTS_DIR + "/" + entry["SysrootDir"]
+            fetched_archive(
+                name = _FETCHED_PREFIX + name,
+                path = path,
+                url = entry["URL"] + "/" + entry["Sha256Sum"],
+                sha256 = entry["Sha256Sum"],
+                type = "tar.xz",
+            )
             synced_repository(
                 name = name,
-                path = _SYSROOTS_DIR + "/" + entry["SysrootDir"],
+                path = path,
                 build_file = spec.build_file,
-                fallback_url = entry["URL"] + "/" + entry["Sha256Sum"],
-                fallback_sha256 = entry["Sha256Sum"],
-                fallback_type = "tar.xz",
+                fetched = {"@%s%s//:BUILD.bazel" % (_FETCHED_PREFIX, name): "."},
             )
 
+def _gclient_gn_args():
+    """The content of the file gclient writes its `gclient_gn_args` into (GCLIENT_GN_ARGS_FILE)."""
+    lines = ["# Generated from 'DEPS'"]
+    for name in GCLIENT_GN_ARGS:
+        value = VARS[name]
+        if type(value) != "bool":
+            fail("synced_deps: DEPS' gclient_gn_args names %s, which is no boolean: say here how gclient writes it" % name)
+        lines.append("%s = %s" % (name, "true" if value else "false"))
+    return "\n".join(lines)
+
+# What begins the name of every repository that holds what Bazel fetched in
+# place of a directory of the checkout: a git dependency's tree (named after
+# its path), a tool's or a sysroot's archive (after its repository).
+_FETCHED_PREFIX = "fetched_"
+
+def _fetched_name(path):
+    """The name of the repository of the fetched tree of the git dependency at `path`."""
+    return _FETCHED_PREFIX + "".join([c if c.isalnum() else "_" for c in path.elems()])
+
+def _fetched_build_file(path):
+    return "@%s//:BUILD.bazel" % _fetched_name(path)
+
+def _fetched_trees(platform):
+    """A fetched_tree for every git dependency of DEPS; returns {BUILD file label: path}."""
+    names = {}
+    for path, pin in GIT_DEPS.items():
+        name = _fetched_name(path)
+        if name in names:
+            fail("synced_deps: %s and %s would both be the fetched tree %s" % (path, names[name], name))
+        names[name] = path
+        prefix = path + "/"
+        cipd = {}
+        cipd_sha256 = {}
+        for inner, entry in CIPD_DEPS.items():
+            if not inner.startswith(prefix):
+                continue
+            if "condition" in entry or len(entry["packages"]) != 1:
+                fail("synced_deps: %s, a CIPD dependency inside the git dependency %s, has a condition or more than one package: say here what a fetched tree takes of it" % (inner, path))
+            package = entry["packages"][0]["package"].replace("${platform}", platform)
+            version = entry["packages"][0]["version"]
+            cipd[inner[len(prefix):]] = cipd_download_url(package, version)
+            if (package, version) in _CIPD_SHA256:
+                cipd_sha256[inner[len(prefix):]] = _CIPD_SHA256[(package, version)]
+
+        # The dependencies DEPS nests in this one: fetched in place where
+        # the tree runs hooks (all of them), else linked in from their own
+        # fetched trees (those directly inside; what is nested in one of
+        # those comes with it).
+        inside = [inner for inner in GIT_DEPS if inner.startswith(prefix)]
+        hooks = _FETCHED_TREE_HOOKS.get(path, [])
+        fetched_tree(
+            name = name,
+            path = path,
+            url = pin["url"],
+            revision = pin["revision"],
+            nested = {
+                inner[len(prefix):]: "%s@%s" % (GIT_DEPS[inner]["url"], GIT_DEPS[inner]["revision"])
+                for inner in inside
+            } if hooks else {},
+            linked = {} if hooks else {
+                _fetched_build_file(inner): inner[len(prefix):]
+                for inner in inside
+                if not [outer for outer in inside if inner.startswith(outer + "/")]
+            },
+            cipd = cipd,
+            cipd_sha256 = cipd_sha256,
+            files = {GCLIENT_GN_ARGS_FILE[len(prefix):]: _gclient_gn_args()} if GCLIENT_GN_ARGS_FILE.startswith(prefix) else {},
+            hooks = hooks,
+        )
+    return {_fetched_build_file(path): path for path in GIT_DEPS}
+
+def _fetched_members(spec):
+    """The fetched trees a source repository reads where the checkout lacks them.
+
+    The BUILD file of each tree's repository, to the dependency's path
+    relative to the repository's `path` (`.` for `path` itself): `path`'s
+    own tree when it is a dependency of DEPS (what DEPS nests in it comes
+    with it), else those of the dependencies inside it (`synced`).
+    """
+    if getattr(spec, "unfetched", ""):
+        return {}
+    if spec.path in GIT_DEPS:
+        return {_fetched_build_file(spec.path): "."}
+    prefix = spec.path + "/"
+    inside = [path for path in GIT_DEPS if path.startswith(prefix)]
+    return {
+        _fetched_build_file(path): path[len(prefix):]
+        for path in inside
+        if not [outer for outer in inside if path.startswith(outer + "/")]
+    }
+
 def _synced_deps_impl(mctx):
+    platform = _cipd_platform(mctx)
+    host = host_platform_values(mctx.os.name, mctx.os.arch)
+
+    # What a checkout without `gclient sync` reads in place of its synced
+    # trees (git_deps.bzl), none of it fetched where the checkout has them.
+    fetchable = _fetched_trees(platform)
+    engine_package_config(name = "engine_package_config", trees = fetchable)
+
     for name, spec in _SOURCE_REPOSITORIES.items():
         synced = getattr(spec, "synced", spec.path)
         if synced not in GIT_DEPS:
             fail("synced_deps: %s is not a git dependency in DEPS (deps.lock.bzl is stale?)" % synced)
+        converting = bool(getattr(spec, "gn_build_files", []))
         synced_repository(
             name = name,
             path = spec.path,
@@ -741,6 +932,16 @@ def _synced_deps_impl(mctx):
             gn_secondary_dir = getattr(spec, "gn_secondary_dir", ""),
             exclude = getattr(spec, "exclude", []),
             links = getattr(spec, "links", {}),
+            missing_hint = getattr(spec, "unfetched", ""),
+            fetched = _fetched_members(spec),
+            source_tree = True,
+            # The fetch-time GN conversion's tools and, for a checkout
+            # without the trees, what it may fetch.
+            gn_trees = _GN_TREES.get(name, []) if converting else [],
+            fetchable = fetchable if converting else {},
+            dart = host["HOST_DART_SDK"] + "//:bin/dart" if converting else None,
+            gn = "@gn//:gn" if converting else None,
+            engine_package_config = "@engine_package_config//:" + ENGINE_PACKAGE_CONFIG_FILE if converting else None,
         )
 
     # The LTO variants of emscripten's system libraries, which the emsdk
@@ -751,8 +952,6 @@ def _synced_deps_impl(mctx):
     )
 
     fetch = _fetch_toolchains(mctx)
-    platform = _cipd_platform(mctx)
-    host = host_platform_values(mctx.os.name, mctx.os.arch)
     for name, spec in _TOOL_REPOSITORIES.items():
         path = spec.path.format(host_prebuilts = host["HOST_PREBUILTS"], host_buildtools = host["HOST_BUILDTOOLS"])
         pin = _cipd_pin(path)
@@ -763,20 +962,26 @@ def _synced_deps_impl(mctx):
         if fetch:
             _download_cipd_package(name, pin["package"], pin["version"], platform, spec.build_file, strip_prefix = subdir)
         else:
-            # The checkout's copy, and the CIPD package when the checkout has
-            # none (synced_repository's fallback): a checkout without
-            # `gclient sync` running the tests on the prebuilt engine
+            # The checkout's copy, and the CIPD package where the checkout
+            # has none: a checkout without `gclient sync` builds the engine
+            # with them, and one running the tests on the prebuilt engine
             # (--config=prebuilt_engine) still wants cpython3 for the pub
             # repositories and the package configurations, and the desktop
             # shard clang and the sysroots.
             package = pin["package"].replace("${platform}", platform)
+            fetched_archive(
+                name = _FETCHED_PREFIX + name,
+                path = path,
+                url = cipd_download_url(package, pin["version"]),
+                sha256 = _CIPD_SHA256.get((package, pin["version"]), ""),
+                strip_prefix = subdir,
+            )
             synced_repository(
                 name = name,
                 path = path + ("/" + subdir if subdir else ""),
                 build_file = spec.build_file,
-                fallback_url = cipd_download_url(package, pin["version"]),
-                fallback_sha256 = _CIPD_SHA256.get((package, pin["version"]), ""),
-                fallback_strip_prefix = subdir,
+                fetched = {"@%s%s//:BUILD.bazel" % (_FETCHED_PREFIX, name): "."},
+                marker = getattr(spec, "marker", ""),
             )
 
     _sysroot_repositories(mctx, fetch)
@@ -800,23 +1005,37 @@ def _synced_deps_impl(mctx):
 
     # The host itself, as constants (host_platform.bzl).
     host_platform(name = "host_platform", prebuilt_engine = _prebuilt_engine(mctx))
-    return _metadata(mctx)
 
-def _metadata(mctx):
+    # What the engine's module imports: all but the fetched trees, which
+    # only the repositories above read.
+    return _metadata(mctx, direct = sorted(
+        _SOURCE_REPOSITORIES.keys() + _TOOL_REPOSITORIES.keys() + _SYSROOT_REPOSITORIES.keys() + [
+            BIN_CACHE_DART_SDK.lstrip("@"),
+            "emsdk_lto",
+            "engine_package_config",
+            "host_files",
+            "host_platform",
+            "macos_sdk",
+        ],
+    ))
+
+def _metadata(mctx, direct = "all"):
     """The extension's metadata.
 
     Everything the extensions define is derived from checked-in files and
     the host platform, so nothing needs recording in MODULE.bazel.lock
-    (`reproducible`). Every repository is a direct dependency of the
+    (`reproducible`). The repositories are direct dependencies of the
     engine's module, whose use_repo() lists them all (`bazel mod tidy`
-    keeps the list complete); another root module that depends on the
-    engine (the Fuchsia spike's, engine/src/flutter/build/bazel/toolchains/
-    fuchsia) imports the few it uses, and is not held to the full list.
+    keeps the list complete): every one, or `direct` where the extension
+    also defines repositories that only its own repositories read (the
+    fetched trees). Another root module that depends on the engine (the
+    Fuchsia spike's, engine/src/flutter/build/bazel/toolchains/fuchsia)
+    imports the few it uses, and is not held to the full list.
     """
     root = mctx.modules[0] if mctx.modules else None
     if root != None and root.is_root and root.name == "flutter":
         return mctx.extension_metadata(
-            root_module_direct_deps = "all",
+            root_module_direct_deps = direct,
             root_module_direct_dev_deps = [],
             reproducible = True,
         )
