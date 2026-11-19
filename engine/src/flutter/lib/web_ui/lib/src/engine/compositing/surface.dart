@@ -95,6 +95,9 @@ abstract class Surface {
   ///
   /// Calling this more than once has no effect.
   ///
+  /// [onDispose] is invoked and cleared even if [disposeResources] throws, so
+  /// the owning [SurfaceProvider] never keeps tracking a disposed surface.
+  ///
   /// Subclasses must not override this method; implement [disposeResources]
   /// instead.
   void dispose() {
@@ -102,9 +105,13 @@ abstract class Surface {
       return;
     }
     _isDisposed = true;
-    disposeResources();
-    onDispose?.call();
-    onDispose = null;
+    try {
+      disposeResources();
+    } finally {
+      final ui.VoidCallback? callback = onDispose;
+      onDispose = null;
+      callback?.call();
+    }
   }
 
   /// Releases the resources owned by this surface.
