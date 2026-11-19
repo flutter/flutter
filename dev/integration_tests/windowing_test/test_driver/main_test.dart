@@ -328,7 +328,6 @@ void main() {
         }
       },
       timeout: Timeout.none,
-      testOn: 'windows',
     );
   });
 }
