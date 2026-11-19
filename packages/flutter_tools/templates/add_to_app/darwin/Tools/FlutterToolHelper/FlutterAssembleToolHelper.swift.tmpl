@@ -81,6 +81,11 @@ public class FlutterAssembleToolHelper {
       fileManager: fileManager,
       processManager: processManager
     )
+    if appPath == nil {
+      FlutterToolHelper.xcodeNote(
+        message: "Verification complete."
+      )
+    }
   }
 
   /// Verify the Flutter framework build mode, throwing guided error if the build mode is incorrect.
@@ -180,6 +185,9 @@ public class FlutterAssembleToolHelper {
           )
       )
     }
+    FlutterToolHelper.xcodeNote(
+      message: "Verification complete."
+    )
   }
 
   /// Verifies that the Flutter framework has the correct build mode.
@@ -239,10 +247,6 @@ public class FlutterAssembleToolHelper {
       packagePath: packagePath,
       targetBuildMode: targetBuildMode,
       fileManager: fileManager
-    )
-
-    FlutterToolHelper.xcodeNote(
-      message: "Verification complete."
     )
   }
 

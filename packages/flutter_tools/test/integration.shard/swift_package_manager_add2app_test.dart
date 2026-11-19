@@ -327,8 +327,9 @@ void main() {
             );
           }
 
-          // Verify switching from Profile back to Release removes VMService.framework and
-          // relinks the app executable without VMService.framework.
+          // Switching from Profile back to Release defers the symlink update past
+          // CreateBuildDescription so FlutterAssembleTool updates the symlink, removes
+          // VMService.framework, and prompts a re-run if Xcode linked VMService.framework.
           await _buildNativeProject(
             nativeProjectPath: nativeProject.path,
             nativeProjectName: nativeProjectName,
@@ -338,10 +339,30 @@ void main() {
             platform: targetPlatform,
             buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
             codesign: codesign,
+            expectFailure: true,
             expectedOutput: [
+              'Deferring FlutterPluginRegistrant symlink update from ./Profile to ./Release until FlutterAssembleTool runs.',
               'FlutterPluginRegistrant symlink updated to ./Release',
-              'Verification complete.',
+              'was linked against VMService.framework from a previous Profile build',
+              'Please re-run the build so Xcode relinks without VMService.framework.',
             ],
+            unexpectedOutput: ['There is no XCFramework found', 'Verification complete.'],
+          );
+          expect(pluginRegistrantLink.targetSync(), './Release');
+
+          // Re-running after the symlink update resolves Release/Package.swift and relinks
+          // without VMService.framework.
+          await _buildNativeProject(
+            nativeProjectPath: nativeProject.path,
+            nativeProjectName: nativeProjectName,
+            buildDir: nativeBuildDir.path,
+            buildMode: 'Release',
+            sdk: sdk,
+            platform: targetPlatform,
+            buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
+            codesign: codesign,
+            expectedOutput: ['Verification complete.'],
+            unexpectedOutput: ['FlutterPluginRegistrant symlink updated'],
           );
           expect(pluginRegistrantLink.targetSync(), './Release');
         } finally {
