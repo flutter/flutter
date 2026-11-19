@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 
 void main() {
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
@@ -19,6 +20,7 @@ void main() {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
