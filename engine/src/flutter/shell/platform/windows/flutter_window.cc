@@ -994,11 +994,11 @@ void FlutterWindow::OnImeComposition(UINT const message,
 
   // The strings below are only readable while the IME window is active. A
   // string that arrives without WM_IME_STARTCOMPOSITION while the IME window
-  // is active begins a composition implicitly. A string that arrives after the
-  // composition has ended is not readable and is ignored. For example, when
-  // the window loses focus during a composition, the Microsoft Korean IME may
-  // deliver the composing text in a GCS_RESULTSTR after WM_IME_ENDCOMPOSITION
-  // has already committed it.
+  // is active begins a composition implicitly. A string that arrives after
+  // WM_IME_ENDCOMPOSITION has ended the composition is not readable and is
+  // ignored. For example, when the window loses focus during a composition,
+  // the Microsoft Korean IME may deliver the composing text in a GCS_RESULTSTR
+  // after WM_IME_ENDCOMPOSITION has already committed it.
   bool has_composing_text = false;
 
   // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
@@ -1040,8 +1040,12 @@ void FlutterWindow::OnImeComposition(UINT const message,
     EndImeComposition();
   } else if (ime_composing_implicitly_ && !has_composing_text) {
     // Nothing is left to compose in a composition that was begun implicitly.
-    // A WM_IME_ENDCOMPOSITION may never arrive for it, so end it here.
-    EndImeComposition();
+    // A WM_IME_ENDCOMPOSITION may never arrive for it, so end it here. The IME
+    // window is left active, as it was before the composition began, so that
+    // later strings can still be read.
+    ime_composing_ = false;
+    ime_composing_implicitly_ = false;
+    OnComposeEnd();
   }
 }
 
