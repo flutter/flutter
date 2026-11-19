@@ -17,7 +17,6 @@ import 'asset.dart';
 import 'base/command_help.dart';
 import 'base/common.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
@@ -40,6 +39,7 @@ import 'context/tool_context.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart' show FeatureFlags;
 import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -49,6 +49,7 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
+import 'windows/visual_studio.dart';
 
 class FlutterDevice {
   FlutterDevice(
@@ -379,7 +380,7 @@ class FlutterDevice {
     );
 
     final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+    package = await hotRunner.applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: hotRunner.debuggingOptions.buildInfo,
       applicationBinary: hotRunner.applicationBinary,
@@ -433,7 +434,7 @@ class FlutterDevice {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
         _toolContext;
     final TargetPlatform targetPlatform = await device!.targetPlatform;
-    package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+    package = await coldRunner.applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
       buildInfo: coldRunner.debuggingOptions.buildInfo,
       applicationBinary: coldRunner.applicationBinary,
@@ -935,9 +936,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   ResidentRunner(
     this.flutterDevices, {
     required this.analytics,
+    required this.applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
     required this.buildSystem,
     required this.buildTargets,
     required this.debuggingOptions,
+    required this.featureFlags,
     required this.target,
     required this.toolContext,
     required this.xcode,
@@ -954,7 +958,7 @@ abstract class ResidentRunner extends ResidentHandlers {
        artifactDirectory = dillOutputPath == null
            ? toolContext.fs.systemTempDirectory.createTempSync('flutter_tool.')
            : toolContext.fs.file(dillOutputPath).parent,
-       assetBundle = AssetBundleFactory.instance.createBundle(),
+       assetBundle = assetBundleFactory.createBundle(),
        commandHelp = CommandHelp(
          logger: toolContext.logger,
          terminal: toolContext.terminal,
@@ -997,8 +1001,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// The injected dependencies used by this runner.
   final ToolContext toolContext;
   final Analytics analytics;
+  final ApplicationPackageFactory applicationPackageFactory;
   final BuildTargets buildTargets;
   final BuildSystem buildSystem;
+  final FeatureFlags featureFlags;
 
   @override
   final List<FlutterDevice> flutterDevices;
@@ -1030,11 +1036,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     cacheDir: cache.getRoot(),
     engineVersion: flutterVersion.engineRevision,
     fileSystem: fileSystem,
-    flutterRootDir: fileSystem.directory(Cache.flutterRoot),
+    flutterRootDir: fileSystem.directory(cache.flutterRoot),
     outputDir: fileSystem.directory(getBuildDirectory(config, fileSystem)),
     processManager: processManager,
     platform: platform,
     analytics: analytics,
+    androidSdkBuilder: null,
+    featureFlags: featureFlags,
+    projectFactory: toolContext.projectFactory,
+    visualStudio: VisualStudio(toolContext: toolContext),
+    xcode: xcode,
     projectDir: fileSystem.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
@@ -2019,8 +2030,6 @@ String nextPlatform(String currentPlatform) {
 
 /// A launcher for the devtools debugger and analysis tool.
 abstract class DevtoolsLauncher {
-  static DevtoolsLauncher? get instance => context.get<DevtoolsLauncher>();
-
   /// Serve Dart DevTools and return the host and port they are available on.
   ///
   /// This method must return a future that is guaranteed not to fail, because it

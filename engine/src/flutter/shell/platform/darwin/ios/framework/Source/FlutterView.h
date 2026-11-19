@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 
 #include "flutter/shell/common/rasterizer.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+
+@class FlutterPlatformViewsController;
 
 @protocol FlutterViewEngineDelegate <NSObject>
 

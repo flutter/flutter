@@ -17,6 +17,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -27,7 +28,10 @@ import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
+import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -36,6 +40,7 @@ import 'devices.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
+import 'xcodeproj.dart';
 
 const iosSimulatorId = 'apple_ios_simulator';
 
@@ -69,18 +74,32 @@ class IOSSimulators extends PollingDeviceDiscovery {
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
     required this._analytics,
+    required this._cocoaPods,
+    required this._featureFlags,
     required this._plistParser,
+    required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
+    MDnsVmServiceDiscovery? mdnsVmServiceDiscovery,
   }) {
-    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessManager processManager) =
+        _toolContext;
+    _mdnsVmServiceDiscovery =
+        mdnsVmServiceDiscovery ??
+        MDnsVmServiceDiscovery(analytics: _analytics, logger: logger, platform: platform);
     _simControl = SimControl(logger: logger, processManager: processManager, xcode: _xcode);
   }
 
+  late final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   late final SimControl _simControl;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
@@ -89,7 +108,7 @@ class IOSSimulatorUtils {
     }
 
     final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
-    final cpuArch = CpuArch.fromHostPlatform(os.hostPlatform);
+    final CpuArch cpuArch = os.hostPlatform.cpuArch;
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -106,13 +125,18 @@ class IOSSimulatorUtils {
           return IOSSimulator(
             udid,
             analytics: _analytics,
+            cocoaPods: _cocoaPods,
             cpuArch: cpuArch,
+            featureFlags: _featureFlags,
+            mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
             name: name,
             plistParser: _plistParser,
             simControl: _simControl,
             simulatorCategory: device.category,
+            templateRenderer: _templateRenderer,
             toolContext: _toolContext,
             xcode: _xcode,
+            xcodeProjectInterpreter: _xcodeProjectInterpreter,
           );
         })
         .whereType<IOSSimulator>()
@@ -375,13 +399,18 @@ class IOSSimulator extends Device {
   IOSSimulator(
     super.id, {
     required this._analytics,
+    required this._cocoaPods,
     required this._cpuArch,
+    required this._featureFlags,
+    required this._mdnsVmServiceDiscovery,
     required this.name,
     required this._plistParser,
     required this._simControl,
     required this.simulatorCategory,
+    required this._templateRenderer,
     required ToolContext super.toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
   }) : super(
          category: Category.mobile,
          ephemeral: true,
@@ -394,12 +423,17 @@ class IOSSimulator extends Device {
 
   final String simulatorCategory;
 
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   final SimControl _simControl;
 
   final CpuArch _cpuArch;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
   final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -599,18 +633,25 @@ class IOSSimulator extends Device {
     BuildInfo buildInfo,
     String? mainPath,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = toolContext;
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
+      analytics: _analytics,
       app: app,
       buildInfo: buildInfo,
+      featureFlags: _featureFlags,
+      plistParser: _plistParser,
+      templateRenderer: _templateRenderer,
+      toolContext: toolContext,
+      xcodeProjectInterpreter: _xcodeProjectInterpreter,
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
-      toolContext: toolContext,
+      cocoaPods: _cocoaPods,
+      xcode: _xcode,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(
@@ -619,7 +660,9 @@ class IOSSimulator extends Device {
         fileSystem: fs,
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: processUtils,
         project: app.project.parent,
+        xcode: _xcode,
         device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
@@ -719,6 +762,7 @@ class IOSSimulator extends Device {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
+      mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
       // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
       // back to log-based protocol discovery.
       throwOnError: false,
@@ -754,9 +798,9 @@ class IOSSimulator extends Device {
 
   @override
   Future<void> dispose() async {
-    for (final DeviceLogReader logReader in _logReaders.values) {
-      logReader.dispose();
-    }
+    await Future.wait(<Future<void>>[
+      for (final DeviceLogReader logReader in _logReaders.values) logReader.dispose(),
+    ]);
     await _portForwarder?.dispose();
   }
 
@@ -1129,7 +1173,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     _stop();
   }
 

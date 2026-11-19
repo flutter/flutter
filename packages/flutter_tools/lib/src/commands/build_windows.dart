@@ -23,7 +23,7 @@ import 'build.dart';
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required this.buildSystem,
-    required ToolContext super.toolContext,
+    required super.toolContext,
     required super.verboseHelp,
     required this._featureFlags,
     required this._visualStudio,
@@ -36,9 +36,6 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'windows';
@@ -87,6 +84,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       buildInfo,
       targetPlatform,
       analytics: analytics,
+      featureFlags: _featureFlags,
       target: targetFile,
       toolContext: toolContext,
       visualStudioOverride: _visualStudio,
