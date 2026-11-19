@@ -285,7 +285,6 @@ base class ExtensionBuildManager {
     String? buildNumber,
     Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     List<String> extraFrontEndOptions = const <String>[],
@@ -304,7 +303,6 @@ base class ExtensionBuildManager {
       buildNumber: buildNumber,
       buildOptions: buildOptions,
       codeSizeDirectory: codeSizeDirectory,
-      configuration: configuration,
       connectionMap: _buildTargetToConnection,
       dartDefines: dartDefines,
       dartObfuscation: dartObfuscation,
@@ -355,10 +353,8 @@ base class ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-    Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
     Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
@@ -368,18 +364,15 @@ base class ExtensionBuildManager {
     List<String> extraGenSnapshotOptions = const <String>[],
     String? flavor,
     Uri? splitDebugInfo,
-    String? targetDeviceId,
     String? targetPlatform,
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
   }) async {
     await _sendBuildOrAssembleRpc(
       buildDir: buildDir,
-      buildFlags: buildFlags,
       buildMode: buildMode,
       buildName: buildName,
       buildNumber: buildNumber,
-      buildOptions: buildOptions,
       codeSizeDirectory: codeSizeDirectory,
       configuration: configuration,
       connectionMap: _assembleTargetToConnection,
@@ -401,7 +394,6 @@ base class ExtensionBuildManager {
       resolvedArtifacts: resolvedArtifacts,
       rpcMethod: BuildService.assembleMethod,
       splitDebugInfo: splitDebugInfo,
-      targetDeviceId: targetDeviceId,
       targetKind: 'assemble',
       targetName: targetName,
       targetPlatform: targetPlatform,
@@ -488,7 +480,8 @@ base class ExtensionBuildManager {
     }
 
     final Map<String, Object?> resolvedConfiguration =
-        connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)
+        buildDir == null &&
+            connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)
         ? await _resolveExtensionConfiguration(connection)
         : (configuration ?? const <String, Object?>{});
 
@@ -508,40 +501,59 @@ base class ExtensionBuildManager {
       }
     }
 
+    final Map<String, Object?> contextParams = buildDir != null
+        ? ExtensionAssembleContext(
+            buildDir: buildDir,
+            buildMode: buildMode,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            codeSizeDirectory: codeSizeDirectory,
+            configuration: resolvedConfiguration,
+            dartDefines: dartDefines,
+            dartObfuscation: dartObfuscation,
+            extraDefines: extraDefines,
+            extraFrontEndOptions: extraFrontEndOptions,
+            extraGenSnapshotOptions: extraGenSnapshotOptions,
+            flavor: flavor,
+            flutterRoot: flutterRoot,
+            mainPath: mainPath,
+            outputDir: outputDir,
+            projectRoot: projectRoot,
+            resolvedArtifacts: resolvedArtifacts,
+            splitDebugInfo: splitDebugInfo,
+            targetPlatform: resolvedTargetPlatform,
+            trackWidgetCreation: trackWidgetCreation,
+            treeShakeIcons: treeShakeIcons,
+          ).toMap()
+        : ExtensionBuildContext(
+            buildFlags: buildFlags,
+            buildMode: buildMode,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            buildOptions: buildOptions,
+            codeSizeDirectory: codeSizeDirectory,
+            configuration: resolvedConfiguration,
+            dartDefines: dartDefines,
+            dartObfuscation: dartObfuscation,
+            extraFrontEndOptions: extraFrontEndOptions,
+            extraGenSnapshotOptions: extraGenSnapshotOptions,
+            flavor: flavor,
+            flutterRoot: flutterRoot,
+            mainPath: mainPath,
+            outputDir: outputDir,
+            projectRoot: projectRoot,
+            resolvedArtifacts: resolvedArtifacts,
+            splitDebugInfo: splitDebugInfo,
+            targetDeviceId: targetDeviceId,
+            targetPlatform: resolvedTargetPlatform,
+            trackWidgetCreation: trackWidgetCreation,
+            treeShakeIcons: treeShakeIcons,
+          ).toMap();
+
     try {
       final Object? result = await connection.sendRequest(
         rpcMethod,
-        params: <String, Object?>{
-          BuildService.buildDirParam: ?buildDir?.toString(),
-          if (buildFlags.isNotEmpty) BuildService.buildFlagsParam: buildFlags,
-          BuildService.buildModeParam: buildMode.cliName,
-          BuildService.buildNameParam: ?buildName,
-          BuildService.buildNumberParam: ?buildNumber,
-          if (buildOptions.isNotEmpty) BuildService.buildOptionsParam: buildOptions,
-          BuildService.codeSizeDirectoryParam: ?codeSizeDirectory?.toString(),
-          if (resolvedConfiguration.isNotEmpty)
-            BuildService.configurationParam: resolvedConfiguration,
-          if (dartDefines.isNotEmpty) BuildService.dartDefinesParam: dartDefines,
-          BuildService.dartObfuscationParam: dartObfuscation,
-          if (buildDir != null && extraDefines.isNotEmpty)
-            BuildService.extraDefinesParam: extraDefines,
-          if (extraFrontEndOptions.isNotEmpty)
-            BuildService.extraFrontEndOptionsParam: extraFrontEndOptions,
-          if (extraGenSnapshotOptions.isNotEmpty)
-            BuildService.extraGenSnapshotOptionsParam: extraGenSnapshotOptions,
-          BuildService.flavorParam: ?flavor,
-          BuildService.flutterRootParam: flutterRoot.toString(),
-          BuildService.mainPathParam: mainPath,
-          BuildService.outputDirParam: outputDir.toString(),
-          BuildService.projectRootParam: projectRoot.toString(),
-          BuildService.resolvedArtifactsParam: resolvedArtifacts,
-          BuildService.splitDebugInfoParam: ?splitDebugInfo?.toString(),
-          BuildService.targetDeviceIdParam: ?targetDeviceId,
-          BuildService.targetNameParam: targetName,
-          BuildService.targetPlatformParam: ?resolvedTargetPlatform,
-          BuildService.trackWidgetCreationParam: trackWidgetCreation,
-          BuildService.treeShakeIconsParam: treeShakeIcons,
-        },
+        params: <String, Object?>{BuildService.targetNameParam: targetName, ...contextParams},
         // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
         // https://github.com/flutter/flutter/issues/193955.
         timeout: null,

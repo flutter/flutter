@@ -37,11 +37,9 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
 
   int assembleCount = 0;
   Uri? invokedBuildDir;
-  Map<String, bool>? invokedBuildFlags;
   BuildMode? invokedBuildMode;
   String? invokedBuildName;
   String? invokedBuildNumber;
-  Map<String, String>? invokedBuildOptions;
   Uri? invokedCodeSizeDirectory;
   Map<String, Object?>? invokedConfiguration;
   Map<String, String>? invokedDartDefines;
@@ -56,7 +54,6 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   Uri? invokedProjectRoot;
   Map<String, String>? invokedResolvedArtifacts;
   Uri? invokedSplitDebugInfo;
-  String? invokedTargetDeviceId;
   String? invokedTargetName;
   String? invokedTargetPlatform;
   bool? invokedTrackWidgetCreation;
@@ -72,10 +69,8 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-    Map<String, bool> buildFlags = const <String, bool>{},
     String? buildName,
     String? buildNumber,
-    Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
     Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
@@ -85,18 +80,15 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     List<String> extraGenSnapshotOptions = const <String>[],
     String? flavor,
     Uri? splitDebugInfo,
-    String? targetDeviceId,
     String? targetPlatform,
     bool? trackWidgetCreation,
     bool? treeShakeIcons,
   }) async {
     assembleCount += 1;
     invokedBuildDir = buildDir;
-    invokedBuildFlags = buildFlags;
     invokedBuildMode = buildMode;
     invokedBuildName = buildName;
     invokedBuildNumber = buildNumber;
-    invokedBuildOptions = buildOptions;
     invokedCodeSizeDirectory = codeSizeDirectory;
     invokedConfiguration = configuration;
     invokedDartDefines = dartDefines;
@@ -111,7 +103,6 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
     invokedProjectRoot = projectRoot;
     invokedResolvedArtifacts = resolvedArtifacts;
     invokedSplitDebugInfo = splitDebugInfo;
-    invokedTargetDeviceId = targetDeviceId;
     invokedTargetName = targetName;
     invokedTargetPlatform = targetPlatform;
     invokedTrackWidgetCreation = trackWidgetCreation;

@@ -72,7 +72,6 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     String? buildNumber,
     Map<String, String> buildOptions = const <String, String>{},
     Uri? codeSizeDirectory,
-    Map<String, Object?>? configuration,
     Map<String, String> dartDefines = const <String, String>{},
     bool dartObfuscation = false,
     List<String> extraFrontEndOptions = const <String>[],
@@ -91,7 +90,6 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
       'buildNumber': buildNumber,
       'buildOptions': buildOptions,
       'codeSizeDirectory': codeSizeDirectory,
-      'configuration': configuration,
       'dartDefines': dartDefines,
       'dartObfuscation': dartObfuscation,
       'extraFrontEndOptions': extraFrontEndOptions,
@@ -1988,6 +1986,40 @@ void main() {
           const <String, Object?>{'secondary-embedder-sdk': '/secondary/v1'},
         ]),
       );
+
+      // Assemble RPC preserves the hashed Environment configuration (or empty map
+      // when omitted) instead of overwriting it with a live unhashed Config lookup,
+      // whereas BuildTarget.build still resolves live ConfigurationExtension values.
+      config.setValue('custom-embedder-sdk', '/live-unhashed-sdk');
+      capturedAssembleContexts.clear();
+      await buildManager.assemble(
+        buildDir: Uri.directory('/project/.dart_tool/flutter_build/hash1'),
+        buildMode: .debug,
+        configuration: const <String, Object?>{'custom-embedder-sdk': '/hashed-env-sdk'},
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: '/project/lib/main.dart',
+        outputDir: Uri.directory('/out'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{},
+        targetName: 'capturing-assemble',
+      );
+      await buildManager.assemble(
+        buildDir: Uri.directory('/project/.dart_tool/flutter_build/hash2'),
+        buildMode: .debug,
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: '/project/lib/main.dart',
+        outputDir: Uri.directory('/out'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{},
+        targetName: 'capturing-assemble',
+      );
+      await pumpEventQueue();
+      expect(capturedAssembleContexts, hasLength(2));
+      expect(
+        capturedAssembleContexts[0].configuration,
+        equals(const <String, Object?>{'custom-embedder-sdk': '/hashed-env-sdk'}),
+      );
+      expect(capturedAssembleContexts[1].configuration, isEmpty);
 
       await manager.dispose();
     });

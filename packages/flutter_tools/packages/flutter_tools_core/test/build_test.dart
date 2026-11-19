@@ -996,30 +996,73 @@ void main() {
       );
     });
 
-    test('ExtensionAssembleContext serializes, deserializes, and checks equality', () {
-      final context = ExtensionAssembleContext(
-        buildDir: Uri.parse('file:///project/.dart_tool/flutter_build/1234/'),
-        buildMode: .debug,
-        flutterRoot: Uri.parse('file:///flutter/'),
-        mainPath: '/project/lib/main.dart',
-        outputDir: Uri.parse('file:///project/build/'),
-        projectRoot: Uri.parse('file:///project/'),
-        resolvedArtifacts: const <String, String>{},
-        trackWidgetCreation: true,
-        treeShakeIcons: false,
-        configuration: const <String, Object?>{'enable-custom': false, 'custom-opt': 'val'},
-        dartDefines: const <String, String>{'FOO': 'bar'},
-        extraDefines: const <String, String>{'CustomDefine': '42'},
-        flavor: 'dev',
-        targetPlatform: 'linux-x64',
-      );
+    test(
+      'ExtensionAssembleContext is standalone, serializes all 21 fields, and checks equality',
+      () {
+        final context = ExtensionAssembleContext(
+          buildDir: Uri.parse('file:///project/.dart_tool/flutter_build/1234/'),
+          buildMode: .debug,
+          flutterRoot: Uri.parse('file:///flutter/'),
+          mainPath: '/project/lib/main.dart',
+          outputDir: Uri.parse('file:///project/build/'),
+          projectRoot: Uri.parse('file:///project/'),
+          resolvedArtifacts: const <String, String>{'icuData': '/flutter/icudtl.dat'},
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+          buildName: '1.2.3',
+          buildNumber: '45',
+          codeSizeDirectory: Uri.parse('file:///project/build/code_size/'),
+          configuration: const <String, Object?>{'enable-custom': false, 'custom-opt': 'val'},
+          dartDefines: const <String, String>{'FOO': 'bar'},
+          dartObfuscation: true,
+          extraDefines: const <String, String>{'CustomDefine': '42'},
+          extraFrontEndOptions: const <String>['--enable-experiment=test'],
+          extraGenSnapshotOptions: const <String>['--deterministic'],
+          flavor: 'dev',
+          splitDebugInfo: Uri.parse('file:///project/build/symbols/'),
+          targetPlatform: 'linux-x64',
+        );
 
-      final Map<String, Object?> map = context.toMap();
-      final parsed = ExtensionAssembleContext.fromJson(map);
-      expect(parsed, equals(context));
-      expect(parsed.hashCode, equals(context.hashCode));
-      expect(parsed.toString(), contains('ExtensionAssembleContext('));
-      expect(parsed.extraDefines, equals(const <String, String>{'CustomDefine': '42'}));
+        final Map<String, Object?> map = context.toMap();
+        expect(map.containsKey('buildFlags'), isFalse);
+        expect(map.containsKey('buildOptions'), isFalse);
+        expect(map.containsKey('targetDeviceId'), isFalse);
+
+        final parsed = ExtensionAssembleContext.fromJson(map);
+        expect(parsed, equals(context));
+        expect(parsed.hashCode, equals(context.hashCode));
+        expect(parsed.toString(), contains('ExtensionAssembleContext('));
+        expect(parsed.extraDefines, equals(const <String, String>{'CustomDefine': '42'}));
+      },
+    );
+
+    test('ExtensionAssembleContext.fromJson validates buildDir and extraDefines', () {
+      const validBaseMap = <String, Object?>{
+        'buildDir': 'file:///project/.dart_tool/flutter_build/1234/',
+        'buildMode': 'debug',
+        'dartObfuscation': false,
+        'flutterRoot': 'file:///flutter/',
+        'mainPath': '/project/lib/main.dart',
+        'outputDir': 'file:///project/build/',
+        'projectRoot': 'file:///project/',
+        'resolvedArtifacts': <String, Object?>{},
+        'trackWidgetCreation': true,
+        'treeShakeIcons': false,
+      };
+      final invalidOverrides = <Map<String, Object?>>[
+        const <String, Object?>{'buildDir': null},
+        const <String, Object?>{'buildDir': 'relative/build/'},
+        const <String, Object?>{
+          'extraDefines': <String, Object?>{'bad': 123},
+        },
+      ];
+      for (final override in invalidOverrides) {
+        expect(
+          () => ExtensionAssembleContext.fromJson(<String, Object?>{...validBaseMap, ...override}),
+          throwsFormatException,
+          reason: 'Expected FormatException for override: $override',
+        );
+      }
     });
   });
 }
