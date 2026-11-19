@@ -53,13 +53,6 @@ abstract class UnpackMacOS extends UnpackDarwin {
   FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.macos;
 
   @override
-  Future<bool> canSkip(Environment environment) async {
-    // The `build swift-package` command copies the FlutterMacOS.xcframework separately and
-    // therefore does not need it to be done by the build system.
-    return environment.defines[kBuildSwiftPackage] == 'true';
-  }
-
-  @override
   Future<void> build(Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
@@ -225,6 +218,9 @@ class UnpackMacOSVmService extends UnpackDarwin {
 
   @override
   List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<bool> canSkip(Environment environment) async => false;
 
   @override
   Future<void> build(Environment environment) async {

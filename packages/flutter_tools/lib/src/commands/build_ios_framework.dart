@@ -240,22 +240,18 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     String? codesignIdentity,
     BuildMode buildMode,
   ) async {
-    final xcframeworkCommand = <String>[
-      'xcrun',
-      'xcodebuild',
-      '-create-xcframework',
-      for (final Directory framework in frameworks) ...<String>[
-        '-framework',
-        framework.path,
-        ...framework.parent
-            .listSync()
-            .where((FileSystemEntity entity) => entity.basename == '${framework.basename}.dSYM')
-            .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
-            .expand<String>((List<String> parameter) => parameter),
-      ],
+    final xcframeworkCommand = <String>['xcrun', 'xcodebuild', '-create-xcframework'];
+    for (final framework in frameworks) {
+      xcframeworkCommand.addAll(<String>['-framework', framework.path]);
+      final Directory dsym = framework.parent.childDirectory('${framework.basename}.dSYM');
+      if (dsym.existsSync()) {
+        xcframeworkCommand.addAll(<String>['-debug-symbols', dsym.path]);
+      }
+    }
+    xcframeworkCommand.addAll(<String>[
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path,
-    ];
+    ]);
 
     final ProcessResult xcframeworkResult = await processManager.run(xcframeworkCommand);
 
@@ -317,7 +313,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       final String frameworkName = fs.path.basename(frameworkPath);
 
       // Skip Flutter's own frameworks.
-      if (_kFlutterOwnedFrameworks.contains(frameworkName)) {
+      if (frameworkName == 'Flutter.framework' ||
+          frameworkName == 'Flutter.xcframework' ||
+          frameworkName == 'App.framework' ||
+          frameworkName == 'App.xcframework') {
         continue;
       }
 
@@ -358,17 +357,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     }
   }
 }
-
-const _kFlutterOwnedFrameworks = <String>{
-  'Flutter.framework',
-  'Flutter.xcframework',
-  'FlutterMacOS.framework',
-  'FlutterMacOS.xcframework',
-  'App.framework',
-  'App.xcframework',
-  'VMService.framework',
-  'VMService.xcframework',
-};
 
 /// Parses vendored framework paths from a Pods.xcodeproj/project.pbxproj file.
 ///

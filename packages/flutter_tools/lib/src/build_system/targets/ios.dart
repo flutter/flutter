@@ -238,7 +238,6 @@ class DebugUniversalFramework extends Target {
       iosArchNames,
       sdkRoot,
       installName: '@rpath/App.framework/App',
-      buildMode: BuildMode.debug,
     );
   }
 }
@@ -270,13 +269,6 @@ abstract class UnpackIOS extends UnpackDarwin {
 
   @override
   FlutterDarwinPlatform get darwinPlatform => FlutterDarwinPlatform.ios;
-
-  @override
-  Future<bool> canSkip(Environment environment) async {
-    // The `build swift-package` command copies the Flutter.xcframework separately and therefore
-    // does not need it to be done by the build system.
-    return environment.defines[kBuildSwiftPackage] == 'true';
-  }
 
   @override
   Future<void> build(Environment environment) async {
@@ -447,7 +439,6 @@ class UnpackIosVmService extends UnpackDarwin {
         archs.split(' ').toSet(),
         sdkRoot,
         installName: '@rpath/$_kVmServiceFrameworkName/$_kVmServiceExecutableName',
-        buildMode: .profile,
       );
       return;
     }
@@ -1032,7 +1023,6 @@ Future<void> _createStubFramework(
   Set<String>? iosArchNames,
   String sdkRoot, {
   required String installName,
-  required BuildMode buildMode,
 }) async {
   try {
     outputFile.createSync(recursive: true);
@@ -1082,7 +1072,7 @@ Future<void> _createStubFramework(
     }
   }
 
-  await _signFramework(environment, outputFile, buildMode);
+  await _signFramework(environment, outputFile, BuildMode.debug);
 }
 
 Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {

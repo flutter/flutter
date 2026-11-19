@@ -233,24 +233,27 @@ public protocol FlutterProcessRunner {
   ///   - arguments: The arguments to pass to the executable.
   ///   - env: An optional dictionary of environment variables.
   ///   - failOnError: Whether to throw an error if the process fails.
+  /// - Returns: The combined standard output and error of the process.
+  @discardableResult
   func run(
     executableURL: URL,
     arguments: [String],
     env: [String: String]?,
     failOnError: Bool
-  ) throws
+  ) throws -> String
 }
 
 /// A concrete implementation of `FlutterProcessRunner` using `Process`.
 public class FlutterProcessManager: FlutterProcessRunner {
   public init() {}
 
+  @discardableResult
   public func run(
     executableURL: URL,
     arguments: [String],
     env: [String: String]? = nil,
     failOnError: Bool
-  ) throws {
+  ) throws -> String {
     #if os(macOS)
       do {
         let process = Process()
@@ -273,6 +276,7 @@ public class FlutterProcessManager: FlutterProcessRunner {
             "\(executableURL) returned non-zero exit code: \(process.terminationStatus)"
           ])
         }
+        return output
       } catch let error as XcodeErrorAndExit {
         throw error
       } catch {
@@ -280,6 +284,8 @@ public class FlutterProcessManager: FlutterProcessRunner {
           "Failed to run \(executableURL): \(error.localizedDescription)"
         ])
       }
+    #else
+      return ""
     #endif
   }
 }

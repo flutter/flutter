@@ -326,6 +326,24 @@ void main() {
               expectedOutput: ['Verification complete.'],
             );
           }
+
+          // Verify switching from Profile back to Release removes VMService.framework and
+          // relinks the app executable without VMService.framework.
+          await _buildNativeProject(
+            nativeProjectPath: nativeProject.path,
+            nativeProjectName: nativeProjectName,
+            buildDir: nativeBuildDir.path,
+            buildMode: 'Release',
+            sdk: sdk,
+            platform: targetPlatform,
+            buildSettings: [r'ENABLE_USER_SCRIPT_SANDBOXING=NO'],
+            codesign: codesign,
+            expectedOutput: [
+              'FlutterPluginRegistrant symlink updated to ./Release',
+              'Verification complete.',
+            ],
+          );
+          expect(pluginRegistrantLink.targetSync(), './Release');
         } finally {
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         }
@@ -579,6 +597,25 @@ Future<String> _buildNativeProject({
       } else {
         expect(embeddedVmService.childFile('VMService'), exists);
         expect(embeddedVmService.childFile('Info.plist'), exists);
+      }
+    } else {
+      final File appExecutable = platform == .macos
+          ? appBundle
+                .childDirectory('Contents')
+                .childDirectory('MacOS')
+                .childFile(nativeProjectName)
+          : appBundle.childFile(nativeProjectName);
+      expect(appExecutable, exists);
+      final File debugDylib = fileSystem.file('${appExecutable.path}.debug.dylib');
+      for (final candidate in <File>[appExecutable, if (debugDylib.existsSync()) debugDylib]) {
+        final ProcessResult otoolResult = await processManager.run(<String>[
+          'xcrun',
+          'otool',
+          '-L',
+          candidate.path,
+        ]);
+        expect(otoolResult.exitCode, 0, reason: otoolResult.stderr.toString());
+        expect(otoolResult.stdout.toString(), isNot(contains('VMService.framework')));
       }
     }
   }

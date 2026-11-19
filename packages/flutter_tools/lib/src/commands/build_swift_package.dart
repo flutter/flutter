@@ -1207,11 +1207,6 @@ class AppFrameworkAndNativeAssetsDependencies {
           codesignIdentity: codesignIdentity,
           buildMode: buildInfo.mode,
         );
-      } else {
-        ErrorHandlingFileSystem.deleteIfExists(
-          xcframeworkOutput.childDirectory('$_vmServiceBinaryName.xcframework'),
-          recursive: true,
-        );
       }
 
       // Create native assets XCFrameworks

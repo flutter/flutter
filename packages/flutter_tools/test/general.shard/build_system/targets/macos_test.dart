@@ -1021,25 +1021,16 @@ void main() {
     const target = UnpackMacOSVmService();
     const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.darwin.profile';
 
-    testWithoutContext('declares expected inputs, outputs, and does not skip SwiftPM while UnpackMacOS skips SwiftPM', () async {
+    testWithoutContext('declares expected inputs, outputs, and does not skip SwiftPM', () async {
       expect(target.inputs, const <Source>[
         Source.artifact(Artifact.vmserviceFramework, platform: .darwin, mode: .profile),
       ]);
       expect(
         target.resolveOutputs(environment).sources.map((File file) => file.path),
         containsAll(<String>[
+          environment.outputDir.childFile('VMService.framework/Versions/A/VMService').path,
           environment.outputDir
-              .childDirectory('VMService.framework')
-              .childDirectory('Versions')
-              .childDirectory('A')
-              .childFile('VMService')
-              .path,
-          environment.outputDir
-              .childDirectory('VMService.framework')
-              .childDirectory('Versions')
-              .childDirectory('A')
-              .childDirectory('Resources')
-              .childFile('Info.plist')
+              .childFile('VMService.framework/Versions/A/Resources/Info.plist')
               .path,
         ]),
       );
@@ -1055,10 +1046,7 @@ void main() {
         fileSystem: fileSystem,
       );
       expect(await target.canSkip(swiftPmEnvironment), isFalse);
-      expect(await const DebugUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
       expect(await const ProfileUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
-      expect(await const ReleaseUnpackMacOS().canSkip(swiftPmEnvironment), isTrue);
-      expect(await const ProfileUnpackMacOS().canSkip(environment), isFalse);
     });
 
     testWithoutContext('copies, updates permissions, and thins fat framework', () async {

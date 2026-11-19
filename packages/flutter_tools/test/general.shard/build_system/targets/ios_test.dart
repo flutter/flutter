@@ -719,10 +719,6 @@ void main() {
     ]);
   });
 
-  testWithoutContext('DebugIosApplicationBundle depends on UnpackIosVmService', () {
-    expect(const DebugIosApplicationBundle().dependencies, contains(const UnpackIosVmService()));
-  });
-
   testUsingContext(
     'ReleaseIosApplicationBundle sends archive success event',
     () async {
@@ -1511,69 +1507,66 @@ void main() {
     const target = UnpackIosVmService();
     const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.ios.profile';
 
-    testWithoutContext(
-      'declares expected inputs, outputs, skips non-profile modes, and does not skip SwiftPM',
-      () async {
-        expect(target.inputs, const <Source>[
-          Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
-        ]);
-        expect(
-          target.resolveOutputs(environment).sources.map((File file) => file.path),
-          containsAll(<String>[
-            environment.outputDir.childDirectory('VMService.framework').childFile('VMService').path,
-            environment.outputDir
-                .childDirectory('VMService.framework')
-                .childFile('Info.plist')
-                .path,
-          ]),
-        );
+    Environment environmentWithDefines(Map<String, String> defines) {
+      return Environment.test(
+        fileSystem.currentDirectory,
+        defines: defines,
+        artifacts: artifacts,
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+    }
 
-        await expectLater(
-          target.canSkip(environment),
-          throwsA(
-            isA<MissingDefineException>().having(
-              (MissingDefineException e) => e.define,
-              'define',
-              kBuildMode,
-            ),
+    testWithoutContext('declares expected inputs and outputs', () {
+      expect(target.inputs, const <Source>[
+        Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
+      ]);
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          environment.outputDir.childFile('VMService.framework/VMService').path,
+          environment.outputDir.childFile('VMService.framework/Info.plist').path,
+        ]),
+      );
+    });
+
+    testWithoutContext('throws MissingDefineException when BuildMode is missing', () async {
+      await expectLater(
+        target.canSkip(environment),
+        throwsA(
+          isA<MissingDefineException>().having(
+            (MissingDefineException e) => e.define,
+            'define',
+            kBuildMode,
           ),
-        );
+        ),
+      );
+    });
 
-        Environment environmentWithDefines(Map<String, String> defines) {
-          return Environment.test(
-            fileSystem.currentDirectory,
-            defines: defines,
-            artifacts: artifacts,
-            processManager: processManager,
-            logger: logger,
-            fileSystem: fileSystem,
-          );
-        }
+    testWithoutContext('skips non-profile build modes', () async {
+      expect(
+        await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'debug'})),
+        isTrue,
+      );
+      expect(
+        await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'release'})),
+        isTrue,
+      );
+      expect(
+        await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'profile'})),
+        isFalse,
+      );
+    });
 
-        expect(
-          await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'debug'})),
-          isTrue,
-        );
-        expect(
-          await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'release'})),
-          isTrue,
-        );
-        expect(
-          await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'profile'})),
-          isFalse,
-        );
-
-        final Environment swiftPmProfileEnvironment = environmentWithDefines(<String, String>{
-          kBuildMode: 'profile',
-          kBuildSwiftPackage: 'true',
-        });
-        expect(await target.canSkip(swiftPmProfileEnvironment), isFalse);
-        expect(await const DebugUnpackIOS().canSkip(swiftPmProfileEnvironment), isTrue);
-        expect(await const ProfileUnpackIOS().canSkip(swiftPmProfileEnvironment), isTrue);
-        expect(await const ReleaseUnpackIOS().canSkip(swiftPmProfileEnvironment), isTrue);
-        expect(await const ProfileUnpackIOS().canSkip(environment), isFalse);
-      },
-    );
+    testWithoutContext('does not skip SwiftPM profile builds', () async {
+      final Environment swiftPmProfileEnvironment = environmentWithDefines(<String, String>{
+        kBuildMode: 'profile',
+        kBuildSwiftPackage: 'true',
+      });
+      expect(await target.canSkip(swiftPmProfileEnvironment), isFalse);
+      expect(await const ProfileUnpackIOS().canSkip(swiftPmProfileEnvironment), isTrue);
+    });
 
     testWithoutContext(
       'creates simulator stub VMService.framework when sdkRoot is simulator',

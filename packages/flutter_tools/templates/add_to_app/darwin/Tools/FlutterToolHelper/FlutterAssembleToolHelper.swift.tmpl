@@ -65,13 +65,18 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
-      return
+    } else {
+      try verifyBuildModeAndUpdateIfNeeded(
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager,
+        processManager: processManager
+      )
     }
-
-    try verifyBuildModeAndUpdateIfNeeded(
-      packagePath: packagePath,
+    try verifyVmServiceNotLinked(
       targetBuildMode: targetBuildMode,
-      targetPlatform: targetPlatform,
       env: env,
       fileManager: fileManager,
       processManager: processManager
@@ -119,6 +124,18 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager
       )
     } catch XcodeErrorAndExit.error(let errorMessages) {
+      // On iOS Simulator, Debug and Profile both use a debug Flutter.framework, so switching
+      // Profile -> Debug only fails here while the symlink may still point at ./Profile.
+      if errorMessages.contains(where: {
+        $0.contains("Unexpected VMService.framework")
+      }) {
+        try FlutterToolHelper.updateSymlink(
+          targetBuildMode: targetBuildMode,
+          integrationPackagePath: packagePath,
+          fileManager: fileManager
+        )
+        throw XcodeErrorAndExit.error(errorMessages)
+      }
       let mismatchError = errorMessages.contains(where: {
         $0.range(of: "build mode does not match", options: .caseInsensitive)
           != nil
@@ -139,9 +156,21 @@ public class FlutterAssembleToolHelper {
         integrationPackagePath: packagePath,
         fileManager: fileManager
       )
+      var hasStaleVmService = false
+      if targetBuildMode.lowercased() != "profile",
+        let embeddedFrameworks = try? embeddedFrameworksDirectory(env: env)
+      {
+        hasStaleVmService = fileManager.fileExists(
+          atPath: "\(embeddedFrameworks)/VMService.framework"
+        )
+      }
+      let nextStepInstruction =
+        hasStaleVmService
+        ? "Please clean your build folder (Product > Clean Build Folder) and re-run."
+        : "Please re-run."
       throw XcodeErrorAndExit.error(
         [
-          "Please re-run.",
+          nextStepInstruction,
           "To avoid this error when switching build modes, you can set ENABLE_USER_SCRIPT_SANDBOXING=NO.",
           "Or you can complete one of the following actions before building:",
         ]
@@ -234,7 +263,10 @@ public class FlutterAssembleToolHelper {
     let embeddedVmServiceFrameworkPath = "\(embeddedFrameworks)/VMService.framework"
     let hasEmbeddedVmService = fileManager.fileExists(atPath: embeddedVmServiceFrameworkPath)
     let expectsVmService = targetBuildMode.lowercased() == "profile"
-    if expectsVmService && !hasEmbeddedVmService {
+    if expectsVmService == hasEmbeddedVmService {
+      return
+    }
+    if expectsVmService {
       throw XcodeErrorAndExit.error(
         [
           "The Flutter framework's build mode does not match the currently targeted build mode.",
@@ -247,19 +279,9 @@ public class FlutterAssembleToolHelper {
           )
       )
     }
-    if !expectsVmService && hasEmbeddedVmService {
-      throw XcodeErrorAndExit.error(
-        [
-          "The Flutter framework's build mode does not match the currently targeted build mode.",
-          "Unexpected VMService.framework found for \(targetBuildMode) at \(embeddedVmServiceFrameworkPath).",
-          "Please complete one of the following:",
-        ]
-          + pluginInstructions(
-            targetBuildMode: targetBuildMode,
-            packagePath: packagePath
-          )
-      )
-    }
+    throw XcodeErrorAndExit.error([
+      "Unexpected VMService.framework found for \(targetBuildMode) at \(embeddedVmServiceFrameworkPath). Please clean your build folder (Product > Clean Build Folder) and re-run."
+    ])
   }
 
   /// Resolves the embedded frameworks directory (`$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH`).
@@ -515,6 +537,49 @@ public class FlutterAssembleToolHelper {
         env: env,
         fileManager: fileManager
       )
+    }
+  }
+
+  /// Verifies that the built app executable (and any Xcode 16+ `.debug.dylib`) is not linked
+  /// against `VMService.framework` in non-Profile builds.
+  ///
+  /// When switching from Profile to Debug or Release, Xcode resolves SwiftPM package dependencies
+  /// before running build phase scripts, so the app binary may still contain an `LC_LOAD_DYLIB`
+  /// entry for `VMService.framework` even after `VMService.framework` is removed from the app
+  /// bundle.
+  private static func verifyVmServiceNotLinked(
+    targetBuildMode: String,
+    env: [String: String],
+    fileManager: FlutterToolsFileManager,
+    processManager: FlutterProcessRunner
+  ) throws {
+    guard targetBuildMode.lowercased() != "profile",
+      let executablePath = env["EXECUTABLE_PATH"],
+      !executablePath.isEmpty
+    else {
+      return
+    }
+    let targetBuildDir = try FlutterToolHelper.findOrExit(
+      env: env,
+      key: "TARGET_BUILD_DIR"
+    )
+    let binaryPath = "\(targetBuildDir)/\(executablePath)"
+    for candidatePath in [binaryPath, "\(binaryPath).debug.dylib"] {
+      guard fileManager.fileExists(atPath: candidatePath) else {
+        continue
+      }
+      let output = try processManager.run(
+        executableURL: URL(fileURLWithPath: "/usr/bin/otool"),
+        arguments: ["-L", candidatePath],
+        env: nil,
+        failOnError: true
+      )
+      if output.contains("VMService.framework") {
+        throw XcodeErrorAndExit.error([
+          "The app binary at \(candidatePath) was linked against VMService.framework from a previous Profile build.",
+          "Please re-run the build so Xcode relinks without VMService.framework.",
+        ])
+      }
     }
   }
 

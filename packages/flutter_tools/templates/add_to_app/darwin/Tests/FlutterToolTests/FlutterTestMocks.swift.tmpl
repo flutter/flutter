@@ -7,19 +7,32 @@ import Testing
 public class MockFlutterProcessManager: FlutterProcessRunner {
   var expectedProcesses: [MockProcess] = []
   var validateEnvironment: Bool = false
+  private let fileManager: MockFileManager?
 
+  init(fileManager: MockFileManager? = nil) {
+    self.fileManager = fileManager
+  }
+
+  @discardableResult
   public func run(
     executableURL: URL,
     arguments: [String],
     env: [String: String]?,
     failOnError: Bool
-  ) throws {
+  ) throws -> String {
     let expectedProcess = expectedProcesses.remove(at: 0)
     #expect(executableURL.path == expectedProcess.expectedURL)
     #expect(arguments == expectedProcess.expectedArguments)
     if validateEnvironment {
       #expect(env == expectedProcess.expectedEnv)
     }
+    if let fileManager, executableURL.path == "/usr/bin/rsync", arguments.count >= 2 {
+      let sourcePath = arguments[arguments.count - 2]
+      let destinationDir = arguments[arguments.count - 1]
+      let copiedItemName = URL(fileURLWithPath: sourcePath).lastPathComponent
+      fileManager.filesExist["\(destinationDir)/\(copiedItemName)"] = true
+    }
+    return expectedProcess.output
   }
 }
 
@@ -27,11 +40,18 @@ public class MockProcess {
   var expectedURL: String
   var expectedArguments: [String]
   var expectedEnv: [String: String]?
+  var output: String
 
-  init(expectedURL: String, expectedArguments: [String], expectedEnv: [String : String]? = nil) {
+  init(
+    expectedURL: String,
+    expectedArguments: [String],
+    expectedEnv: [String: String]? = nil,
+    output: String = ""
+  ) {
     self.expectedURL = expectedURL
     self.expectedArguments = expectedArguments
     self.expectedEnv = expectedEnv
+    self.output = output
   }
 }
 
@@ -40,11 +60,12 @@ class MockFileManager: FlutterToolsFileManager {
   var filesExist: [String: Bool] = [:]
   var filesRemoved: [String] = []
   var symlinksCreated: [String: String] = [:]
+  var symlinkDestinations: [String: String] = [:]
   var filesInDirectory: [String: [URL]] = [:]
   var fileContents: [String: [Data]] = [:]
 
   func destinationOfSymbolicLink(atPath path: String) throws -> String {
-    return "./Release"
+    return symlinkDestinations[path] ?? "./Release"
   }
 
   func fileExists(atPath path: String) -> Bool {
@@ -57,10 +78,12 @@ class MockFileManager: FlutterToolsFileManager {
 
   func removeItem(at URL: URL) throws {
     filesRemoved.append(URL.path)
+    filesExist[URL.path] = false
   }
 
   func removeItem(atPath path: String) throws {
     filesRemoved.append(path)
+    filesExist[path] = false
   }
 
   func createSymbolicLink(
@@ -68,6 +91,8 @@ class MockFileManager: FlutterToolsFileManager {
     withDestinationPath destPath: String
   ) throws {
     symlinksCreated.updateValue(destPath, forKey: path)
+    symlinkDestinations[path] = destPath
+    filesExist[path] = true
   }
 
   func contentsOfDirectory(
