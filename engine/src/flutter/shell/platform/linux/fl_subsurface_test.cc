@@ -58,14 +58,24 @@ TEST_F(FlSubsurfaceTest, EmptyInputRegion) {
   ASSERT_NE(subsurface, nullptr);
 }
 
-// The subsurface is synchronized with the parent surface, so its contents stay
-// in step with the GTK window.
-TEST_F(FlSubsurfaceTest, Synchronized) {
+TEST_F(FlSubsurfaceTest, SetSync) {
+  g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
+  ASSERT_NE(subsurface, nullptr);
+
   EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
                                WL_SUBSURFACE_SET_SYNC));
 
+  fl_subsurface_set_sync(subsurface);
+}
+
+TEST_F(FlSubsurfaceTest, SetDesync) {
   g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
   ASSERT_NE(subsurface, nullptr);
+
+  EXPECT_CALL(wayland, Request(::testing::StrEq("wl_subsurface"),
+                               WL_SUBSURFACE_SET_DESYNC));
+
+  fl_subsurface_set_desync(subsurface);
 }
 
 TEST_F(FlSubsurfaceTest, SetPosition) {
@@ -78,6 +88,18 @@ TEST_F(FlSubsurfaceTest, SetPosition) {
 
   fl_subsurface_set_position(subsurface, 1, 2);
   fl_subsurface_set_position(subsurface, 3, 4);
+}
+
+// Unmapping destroys the subsurface but leaves the surface it is shown with.
+TEST_F(FlSubsurfaceTest, Unmap) {
+  g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
+  ASSERT_NE(subsurface, nullptr);
+
+  EXPECT_CALL(wayland, DestroyObject(::testing::StrEq("wl_subsurface")));
+  EXPECT_CALL(wayland, DestroyObject(::testing::StrEq("wl_surface"))).Times(0);
+
+  fl_subsurface_unmap(subsurface);
+  ::testing::Mock::VerifyAndClearExpectations(&wayland);
 }
 
 // The Wayland objects are released when the subsurface is destroyed.
