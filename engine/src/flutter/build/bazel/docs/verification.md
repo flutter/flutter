@@ -39,7 +39,15 @@ other configurations besides the default one -- the ASan build
 `//engine/src/flutter/build/bazel/gl_wrap/tests:all` and a suite that loads
 the backends (`shell_unittests` under ASan, `impeller_unittests` under
 ThinLTO): 576, run in the debug configuration alone, left the ASan build
-unable to link the backends' three shared libraries (577).
+unable to link the backends' three shared libraries (577). GN's link flags
+depend on the configuration in ways a comparison of compile commands does
+not show (a sanitizer takes `-z defs` and `--as-needed` off), so a new
+shared library's link line is compared with GN's in those configurations
+too: `ldflags` in the target's ninja file under `out/<dir>/obj/`, written by
+`tools/gn` with the builder's flags and without `--bazel`, against
+`bazel aquery --include_param_files 'mnemonic("CppLink", <target>)'`.
+That comparison found `--as-needed` on SwiftShader's driver in the ASan
+build, where GN's link has none.
 `bazel query 'tests(<suite>)' | wc -l` says what a suite
 holds on this host before a run. Disk: the framework tests' kernels and the
 engine's extra configurations write on the order of a gigabyte a minute at

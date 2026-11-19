@@ -49,7 +49,11 @@ toolchain strips nothing, the flag is nothing),
 `--asan` the asan flag (`//engine/src/flutter/build/bazel:asan`: the
 toolchain's `asan` feature on every compile and link -- which, as in GN,
 then leave `-z defs` out: an instrumented shared library takes the
-sanitizer's runtime from the executable that loads it --, `is_asan` in the
+sanitizer's runtime from the executable that loads it; and `--as-needed`
+off an optimized link, the toolchain's and that of a converted target that
+lists GN's `optimize` config itself (SwiftShader's driver in a debug
+build), since functions a sanitizer interposes can make the linker drop a
+library that is needed --, `is_asan` in the
 wrapped GN builds, and CI's sanitizer environment --
 `testing/sanitizer_suppressions.sh`, leak detection on with its suppression
 lists, the toolchain's `llvm-symbolizer` -- exported by every test launcher,
