@@ -32,6 +32,10 @@ class PipelineLibraryVK final
 
   void DidAcquireSurfaceFrame();
 
+  /// @brief Asynchronously persists the Vulkan pipeline cache to disk if new
+  ///        pipelines have been requested since the last persist.
+  void PersistPipelineCacheToDisk();
+
   const std::shared_ptr<PipelineCacheVK>& GetPSOCache() const;
 
   const std::shared_ptr<fml::ConcurrentTaskRunner>& GetWorkerTaskRunner() const;
@@ -84,8 +88,6 @@ class PipelineLibraryVK final
   std::unique_ptr<ComputePipelineVK> CreateComputePipeline(
       const ComputePipelineDescriptor& desc,
       PipelineKey pipeline_key);
-
-  void PersistPipelineCacheToDisk();
 
   PipelineLibraryVK(const PipelineLibraryVK&) = delete;
 

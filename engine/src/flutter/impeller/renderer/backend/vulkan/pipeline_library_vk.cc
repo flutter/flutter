@@ -281,15 +281,16 @@ void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
 
 void PipelineLibraryVK::DidAcquireSurfaceFrame() {
   if (++frames_acquired_ == 50u) {
-    if (cache_dirty_) {
-      cache_dirty_ = false;
-      PersistPipelineCacheToDisk();
-    }
+    PersistPipelineCacheToDisk();
     frames_acquired_ = 0;
   }
 }
 
 void PipelineLibraryVK::PersistPipelineCacheToDisk() {
+  if (!cache_dirty_) {
+    return;
+  }
+  cache_dirty_ = false;
   worker_task_runner_->PostTask(
       [weak_cache = decltype(pso_cache_)::weak_type(pso_cache_)]() {
         auto cache = weak_cache.lock();
