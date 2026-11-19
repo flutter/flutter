@@ -194,13 +194,28 @@ class LspPreviewDetector {
     FlutterWidgetPreviews? result;
     try {
       await waitForAnalysis();
+      // The analysis server resolves every library in the workspace to answer a request, which
+      // takes longer than the timeout in large projects, and it still answers requests that have
+      // timed out. Accept the first response to any request rather than only the latest one.
+      final firstResponse = Completer<FlutterWidgetPreviews>();
       var retries = 5;
       while (retries > 0) {
         if (_disposed || shutdownHooks.isShuttingDown) {
           break;
         }
+        if (firstResponse.isCompleted) {
+          result = await firstResponse.future;
+          break;
+        }
         try {
-          result = await dtd.getFlutterWidgetPreviews().timeout(const Duration(seconds: 5));
+          final Future<FlutterWidgetPreviews> request = dtd.getFlutterWidgetPreviews();
+          request.then((FlutterWidgetPreviews previews) {
+            if (!firstResponse.isCompleted) {
+              firstResponse.complete(previews);
+            }
+          }).ignore();
+          result = await Future.any(<Future<FlutterWidgetPreviews>>[firstResponse.future, request])
+              .timeout(const Duration(seconds: 5));
           break;
         } catch (e) {
           retries--;
