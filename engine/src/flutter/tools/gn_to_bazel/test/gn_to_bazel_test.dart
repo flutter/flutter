@@ -8718,17 +8718,37 @@ shared_library("so") {
             .allMatches(output),
         hasLength(2),
       );
-      // The link flags on the shared library alone.
+      // The link flags on the shared library alone; --as-needed in a group of
+      // its own, under `!is_asan` as well (common_optimize_on_ldflags leaves
+      // it out under a sanitizer), after the other two as GN orders them.
       expect(
         '''
+    linkopts = select({
         ":when_is_debug_and_is_linux": [
             "-Wl,-O2",  # from //build/config/compiler:optimize
             "-Wl,--gc-sections",  # from //build/config/compiler:optimize
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_debug_and_is_linux_and_not_is_asan": [
             "-Wl,--as-needed",  # from //build/config/compiler:optimize
         ],
+        "//conditions:default": [],
+    }) + select({
 '''
             .allMatches(output),
         hasLength(1),
+      );
+      expect(
+        output,
+        contains(
+          '    name = "when_is_debug_and_is_linux_and_not_is_asan",\n'
+          '    match_all = [\n'
+          '        "//engine/src/flutter/build/bazel:unoptimized",\n'
+          '        "@platforms//os:linux",\n'
+          '        "//engine/src/flutter/build/bazel:asan_disabled",\n'
+          '    ],\n',
+        ),
       );
       expect(
         '"-Wl,-dead_strip",  # from //build/config/compiler:optimize'.allMatches(output),
@@ -9196,11 +9216,38 @@ source_set("lib") {
   }
   sources = [ "a.cc" ]
 }
+shared_library("so") {
+  if (!is_debug) {
+    configs -= [ "//build/config/compiler:default_optimization" ]
+    configs += [ "//build/config/compiler:optimize_max" ]
+  }
+  sources = [ "b.cc" ]
+}
 ''', assumptions: generationAssumptions());
       expect(output, contains('"-O2",  # from //build/config/compiler:optimize_max\n'));
       expect(output, contains('"//engine/src/flutter/build/bazel:optimized"'));
       expect(output, isNot(contains('default_include_dirs')));
       expect(output, isNot(contains('find_bad_constructs')));
+      // The link of a target that links: :optimize's flags, --as-needed
+      // without a sanitizer alone.
+      expect(
+        '''
+    linkopts = select({
+        ":when_not_is_debug_and_is_linux": [
+            "-Wl,-O2",  # from //build/config/compiler:optimize_max
+            "-Wl,--gc-sections",  # from //build/config/compiler:optimize_max
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_not_is_debug_and_is_linux_and_not_is_asan": [
+            "-Wl,--as-needed",  # from //build/config/compiler:optimize_max
+        ],
+        "//conditions:default": [],
+    }) + select({
+'''
+            .allMatches(output),
+        hasLength(1),
+      );
     });
   });
 

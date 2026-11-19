@@ -1171,6 +1171,17 @@ final class ConfigToolchain extends ConfigEffect {
   final List<String> removalCopts;
 }
 
+/// Where GN's optimized links have `-Wl,--as-needed`: Linux, and no
+/// sanitizer (`common_optimize_on_ldflags` in //build/config/compiler adds
+/// it under `!using_sanitizer`: functions a sanitizer interposes can make
+/// the linker drop a library that is needed, crbug.com/234010). The
+/// toolchain's own optimized links follow the same condition
+/// (cc_toolchain_config.bzl's `_OPT_AS_NEEDED_LINK_FLAGS`).
+const Condition _linuxWithoutSanitizer = ConditionAnd(<Condition>[
+  ConditionVariable('is_linux'),
+  ConditionNot(ConditionVariable('is_asan')),
+]);
+
 /// The configs the engine's build files mention, outside their own package.
 const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter:config': ConfigDependency('//engine/src/flutter:config'),
@@ -1295,7 +1306,8 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   // the hosts that build SwiftShader -- -O2 (optimize_for_size is no host
   // builder's), no GCC ident, sections for --gc-sections -- and its link
   // flags there (enable_lto is off in a debug build, which is where a
-  // target lists it).
+  // target lists it), --as-needed among them unless a sanitizer is on
+  // (common_optimize_on_ldflags; [_linuxWithoutSanitizer]).
   '//build/config/compiler:optimize': ConfigCopts(
     <(Condition, List<String>)>[
       (
@@ -1304,7 +1316,8 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
       ),
     ],
     linkopts: <(Condition, List<String>)>[
-      (ConditionVariable('is_linux'), <String>['-Wl,-O2', '-Wl,--gc-sections', '-Wl,--as-needed']),
+      (ConditionVariable('is_linux'), <String>['-Wl,-O2', '-Wl,--gc-sections']),
+      (_linuxWithoutSanitizer, <String>['-Wl,--as-needed']),
       (ConditionVariable('is_mac'), <String>['-Wl,-dead_strip']),
     ],
   ),
@@ -1319,7 +1332,8 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
       ),
     ],
     linkopts: <(Condition, List<String>)>[
-      (ConditionVariable('is_linux'), <String>['-Wl,-O2', '-Wl,--gc-sections', '-Wl,--as-needed']),
+      (ConditionVariable('is_linux'), <String>['-Wl,-O2', '-Wl,--gc-sections']),
+      (_linuxWithoutSanitizer, <String>['-Wl,--as-needed']),
       (ConditionVariable('is_mac'), <String>['-Wl,-dead_strip']),
     ],
   ),
