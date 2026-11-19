@@ -1430,17 +1430,18 @@ class PerfTest {
         DeviceOperatingSystem.androidArm,
         DeviceOperatingSystem.androidArm64,
       }.contains(deviceOperatingSystem);
+      final bool isImpellerEnabled = enableImpeller ?? true;
+      final bool isGlesTracingForced = forceOpenGLES ?? false;
+      final bool shouldTraceVulkanGPU =
+          isAndroidDevice && isImpellerEnabled && enableVulkanGPUTracing && !isGlesTracingForced;
 
       try {
-        if (isAndroidDevice &&
-            (enableImpeller ?? true) &&
-            enableVulkanGPUTracing &&
-            !(forceOpenGLES ?? false)) {
+        if (shouldTraceVulkanGPU) {
           changedManifest = true;
           _addVulkanGPUTracingToManifest(testDirectory);
         }
         if (isAndroidDevice && (enableImpeller ?? false)) {
-          if (forceOpenGLES ?? false) {
+          if (isGlesTracingForced) {
             changedManifest = true;
             _addOpenGLESToManifest(testDirectory);
           }
@@ -1527,10 +1528,11 @@ class PerfTest {
           recordGPU = false;
       }
 
-      final bool recordGPUFrameTime =
-          recordGPU &&
-          (!isAndroidDevice ||
-              ((enableImpeller ?? true) && (enableVulkanGPUTracing || (forceOpenGLES ?? false))));
+      // Tracing on Android requires Impeller combined with either Vulkan or forced GLES.
+      final bool isAndroidGPUTracingActive =
+          isImpellerEnabled && (enableVulkanGPUTracing || isGlesTracingForced);
+
+      final bool recordGPUFrameTime = recordGPU && (!isAndroidDevice || isAndroidGPUTracingActive);
       final isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
