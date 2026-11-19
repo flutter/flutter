@@ -374,13 +374,14 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // True while an IME composition is in progress. A composition begins with
   // WM_IME_STARTCOMPOSITION, or implicitly when the IME sends composition
-  // messages without it, and ends with EndImeComposition().
+  // messages without it.
   bool ime_composing_ = false;
 
   // True if the composition in progress was begun by a WM_IME_COMPOSITION
   // message that arrived without WM_IME_STARTCOMPOSITION. A
   // WM_IME_ENDCOMPOSITION may never arrive for such a composition, so it is
-  // ended as soon as no composing text is left.
+  // ended as soon as no composing text is left, without destroying the IME
+  // window.
   bool ime_composing_implicitly_ = false;
 
   // True if a WM_IME_ENDCOMPOSITION message was received while the

@@ -235,6 +235,39 @@ TEST(MockWindow, OnImeCompositionResultWithoutStartOrEndIsCommitted) {
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
 }
 
+// Ending an implicitly begun composition leaves the IME window active, so the
+// next string that arrives without WM_IME_STARTCOMPOSITION is still read.
+TEST(MockWindow, OnImeCompositionResultAfterImplicitCompositionIsCommitted) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockImmTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(*text_input_manager, ReadImmString(GCS_RESULTSTR))
+      .WillOnce(Return(std::optional<std::u16string>(std::u16string(u"x"))))
+      .WillOnce(Return(std::optional<std::u16string>(std::u16string(u"y"))));
+
+  {
+    InSequence dummy;
+    EXPECT_CALL(window, OnComposeBegin()).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"x"), 1)).Times(1);
+    EXPECT_CALL(window, OnComposeCommit()).Times(1);
+    EXPECT_CALL(window, OnComposeEnd()).Times(1);
+    EXPECT_CALL(window, OnComposeBegin()).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"y"), 1)).Times(1);
+    EXPECT_CALL(window, OnComposeCommit()).Times(1);
+    EXPECT_CALL(window, OnComposeEnd()).Times(1);
+  }
+  EXPECT_CALL(window, OnText(_)).Times(0);
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(2);
+
+  window.InjectWindowMessage(WM_IME_SETCONTEXT, TRUE, 0);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_RESULTSTR);
+}
+
 // Regression test for https://github.com/flutter/flutter/issues/140739.
 TEST(MockWindow, OnImeCompositionDefaultsKoreanCursorToCompositionEnd) {
   auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
