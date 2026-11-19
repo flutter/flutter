@@ -120,13 +120,20 @@ void testMain() {
       expect(baseSurface.skSurface, isNotNull);
       expect(gl.isContextLost(), isFalse);
 
+      final contextLost = Completer<void>();
+      initialCanvas.addEventListener(
+        'webglcontextlost',
+        createDomEventListener((DomEvent _) => contextLost.complete()),
+      );
+
       disposeAndRemoveView(view);
 
       if (!gl.isContextLost()) {
         gl.loseContextExtension.loseContext();
       }
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      // Any engine listener would have run first.
+      await contextLost.future;
 
       expect(
         baseSurface.canvas.strictEquals(initialCanvas).toDart,
@@ -415,6 +422,20 @@ void testMain() {
         expect(baseSurface.glContext, -1);
       },
     );
+
+    test('a disposed view rasterizer is removed from MultiSurfaceRasterizer', () {
+      final EngineFlutterView view = createAndRegisterView();
+      final multiSurfaceRasterizer = renderer.rasterizer as MultiSurfaceRasterizer;
+      final ViewRasterizer viewRasterizer = renderer.rasterizers[view.viewId]!;
+
+      disposeAndRemoveView(view);
+
+      final MultiSurfaceViewRasterizer recreated = multiSurfaceRasterizer.createViewRasterizer(
+        view,
+      );
+      addTearDown(recreated.dispose);
+      expect(recreated, isNot(same(viewRasterizer)));
+    });
   });
 }
 
