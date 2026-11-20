@@ -34,11 +34,11 @@ void testMain() {
         final originalBytes = List<int>.of(backing);
         final fontView = Uint8List.sublistView(backing, offset, offset + fontData.length);
 
-        final collection = SkwasmFontCollection();
+        final backend = SkwasmFontCollection();
+        final collection = EngineFontCollection(backend);
         addTearDown(() {
-          fontCollectionDispose(collection.handle);
-          collection.defaultTextStyle.dispose();
-          collection.registeredTypefaces.clear();
+          fontCollectionDispose(backend.handle);
+          backend.defaultTextStyle.dispose();
         });
 
         expect(await collection.loadFontFromBytes(fontView, fontFamily: 'TestFont'), isTrue);
