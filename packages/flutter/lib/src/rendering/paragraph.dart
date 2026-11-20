@@ -542,6 +542,16 @@ class RenderParagraph extends RenderBox
     return _lastSelectableFragments!.contains(selectable);
   }
 
+  /// Returns the owner and start offset of [selectable] in a fragmented paragraph.
+  @internal
+  static ({RenderParagraph paragraph, int start})? selectableFragmentInfo(Selectable selectable) {
+    if (selectable is _SelectableFragment &&
+        (selectable.paragraph._lastSelectableFragments?.length ?? 0) > 1) {
+      return (paragraph: selectable.paragraph, start: selectable.range.start);
+    }
+    return null;
+  }
+
   void _disposeSelectableFragments() {
     if (_lastSelectableFragments == null) {
       return;
