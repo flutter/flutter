@@ -1502,6 +1502,11 @@ class CarouselScrollPhysics extends ScrollPhysics {
     return CarouselScrollPhysics(parent: buildParent(ancestor));
   }
 
+  // Selection gestures such as dragging to select text must not snap a
+  // CarouselView to an adjacent item, so edge scrolling is disallowed here.
+  @override
+  bool get allowSelectionEdgeScrolling => false;
+
   double _getTargetPixels(_CarouselPosition position, Tolerance tolerance, double velocity) {
     double fraction;
 
