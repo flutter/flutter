@@ -296,10 +296,20 @@ void CommandPoolRecyclerVK::Reclaim(
     VALIDATION_LOG << "Could not reset command pool: " << vk::to_string(result);
   }
 
-  // Move the pool to the recycled list.
-  Lock recycled_lock(recycled_mutex_);
-  recycled_.push_back(
-      RecycledData{.pool = std::move(pool), .buffers = std::move(buffers)});
+  // Move the pool to the recycled list, unless the list is full.
+  {
+    Lock recycled_lock(recycled_mutex_);
+    if (recycled_.size() < kMaxRecycledPools) {
+      recycled_.push_back(
+          RecycledData{.pool = std::move(pool), .buffers = std::move(buffers)});
+      return;
+    }
+  }
+
+  // Otherwise destroy it. The buffers were allocated from the pool, so they
+  // are freed first.
+  buffers.clear();
+  pool.reset();
 }
 
 void CommandPoolRecyclerVK::Dispose() {
