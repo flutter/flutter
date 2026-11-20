@@ -12,6 +12,7 @@
 # dart_test.bzl, a pure-Dart package's test under package:test's runner,
 # precompiled (dart_test, dart_test_runner).
 
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load(":dart_test.bzl", "dart_test_runner")
 load(":pub.bzl", "pub_package_config")
 
@@ -19,12 +20,25 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "extract_archive.py",
+    "gold_expectations.py",
     "package_config.py",
     # Generated from pubspec.lock; tools/bazel_tools' tests check it is current.
     "pub.lock.bzl",
     "snapshot.bzl",
     "test_assets.py",
 ])
+
+# Whether a framework test compares its goldens with what was fetched from
+# Flutter Gold (flutter_test's gold_expectations; build_defs/repositories/
+# gold.bzl). On by default. Off, a comparison compares nothing, as before
+# there was anything to compare with: for the bots, where an image that Gold
+# has not seen is to be sent for triage, not failed (dev/bots/bazel.dart).
+#
+#   bazel test --no//build_defs/dart:golden_comparisons ...
+bool_flag(
+    name = "golden_comparisons",
+    build_setting_default = True,
+)
 
 # package:test's runner as a kernel, for every dart_test (dart_test.bzl):
 # compiled against the closure of package:test alone.

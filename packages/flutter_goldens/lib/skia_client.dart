@@ -7,6 +7,7 @@ library;
 
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
@@ -26,6 +27,175 @@ const String _kImpellerKey = 'FLUTTER_TEST_IMPELLER';
 
 /// Signature of callbacks used to inject [print] replacements.
 typedef LogCallback = void Function(String);
+
+/// Returns the digest by which Flutter Gold identifies the image in
+/// [pngBytes]: the MD5 of its pixels as 8-bit RGBA without premultiplied
+/// alpha, row by row.
+///
+/// This is what `goldctl` computes from the PNG file it uploads, so an image
+/// has the digest here that it would have on the
+/// [Flutter Gold dashboard](https://flutter-gold.skia.org), and can be
+/// checked against the digests Gold holds for a test without sending it.
+///
+/// The PNG is decoded here rather than by the engine: the engine keeps
+/// pixels premultiplied, and converting those back does not always restore
+/// the bytes of a translucent pixel.
+///
+/// Throws a [FormatException] for anything but a non-interlaced PNG with
+/// eight bits per sample, which is what the engine's encoder writes.
+String goldDigest(List<int> pngBytes) {
+  final Uint8List png = pngBytes is Uint8List ? pngBytes : Uint8List.fromList(pngBytes);
+  return md5.convert(_pngToStraightRgba(png)).toString();
+}
+
+const List<int> _kPngSignature = <int>[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
+// PNG color types (the IHDR chunk's), to the number of samples per pixel.
+const int _kPngGray = 0;
+const int _kPngRgb = 2;
+const int _kPngPalette = 3;
+const int _kPngGrayAlpha = 4;
+const int _kPngRgba = 6;
+const Map<int, int> _kPngSamples = <int, int>{
+  _kPngGray: 1,
+  _kPngRgb: 3,
+  _kPngPalette: 1,
+  _kPngGrayAlpha: 2,
+  _kPngRgba: 4,
+};
+
+/// Decodes a PNG into width * height * 4 bytes of RGBA, alpha not
+/// premultiplied.
+Uint8List _pngToStraightRgba(Uint8List png) {
+  if (png.length < _kPngSignature.length) {
+    throw const FormatException('Not a PNG image.');
+  }
+  for (var i = 0; i < _kPngSignature.length; i += 1) {
+    if (png[i] != _kPngSignature[i]) {
+      throw const FormatException('Not a PNG image.');
+    }
+  }
+  final data = ByteData.sublistView(png);
+  final compressed = BytesBuilder(copy: false);
+  int? width;
+  int? height;
+  int? colorType;
+  Uint8List? palette;
+  Uint8List? paletteAlpha;
+  int offset = _kPngSignature.length;
+  // A chunk: its length, its four-letter type, its data, its checksum.
+  while (offset + 12 <= png.length) {
+    final int length = data.getUint32(offset);
+    final type = String.fromCharCodes(png, offset + 4, offset + 8);
+    final int start = offset + 8;
+    if (start + length + 4 > png.length) {
+      throw const FormatException('Truncated PNG image.');
+    }
+    final body = Uint8List.sublistView(png, start, start + length);
+    offset = start + length + 4;
+    switch (type) {
+      case 'IHDR':
+        width = data.getUint32(start);
+        height = data.getUint32(start + 4);
+        colorType = body[9];
+        if (body[8] != 8 || body[12] != 0 || !_kPngSamples.containsKey(colorType)) {
+          throw FormatException(
+            'Unsupported PNG image: ${body[8]} bits per sample, color type $colorType, '
+            'interlace method ${body[12]}.',
+          );
+        }
+      case 'PLTE':
+        palette = body;
+      case 'tRNS':
+        if (colorType != _kPngPalette) {
+          throw const FormatException('Unsupported PNG image: a transparent color key.');
+        }
+        paletteAlpha = body;
+      case 'IDAT':
+        compressed.add(body);
+    }
+  }
+  if (width == null || height == null || colorType == null) {
+    throw const FormatException('Not a PNG image: no header.');
+  }
+
+  final int samples = _kPngSamples[colorType]!;
+  final int stride = width * samples;
+  final List<int> filtered = io.zlib.decode(compressed.takeBytes());
+  if (filtered.length < (stride + 1) * height) {
+    throw const FormatException('Truncated PNG image data.');
+  }
+  // Undo each row's filter: a byte is stored as its difference from a
+  // prediction made of the bytes to its left (a), above it (b) and above
+  // that one's left (c).
+  final pixels = Uint8List(stride * height);
+  var source = 0;
+  for (var y = 0; y < height; y += 1) {
+    final int filter = filtered[source];
+    source += 1;
+    final int row = y * stride;
+    for (var x = 0; x < stride; x += 1) {
+      final int a = x >= samples ? pixels[row + x - samples] : 0;
+      final int b = y > 0 ? pixels[row - stride + x] : 0;
+      final int c = x >= samples && y > 0 ? pixels[row - stride + x - samples] : 0;
+      final int prediction;
+      switch (filter) {
+        case 0:
+          prediction = 0;
+        case 1:
+          prediction = a;
+        case 2:
+          prediction = b;
+        case 3:
+          prediction = (a + b) >> 1;
+        case 4:
+          final int p = a + b - c;
+          final int pa = (p - a).abs();
+          final int pb = (p - b).abs();
+          final int pc = (p - c).abs();
+          prediction = pa <= pb && pa <= pc ? a : (pb <= pc ? b : c);
+        default:
+          throw FormatException('Invalid PNG image: row filter $filter.');
+      }
+      pixels[row + x] = (filtered[source] + prediction) & 0xff;
+      source += 1;
+    }
+  }
+
+  final rgba = Uint8List(width * height * 4);
+  for (var pixel = 0, i = 0, o = 0; pixel < width * height; pixel += 1, i += samples, o += 4) {
+    switch (colorType) {
+      case _kPngRgba:
+        rgba[o] = pixels[i];
+        rgba[o + 1] = pixels[i + 1];
+        rgba[o + 2] = pixels[i + 2];
+        rgba[o + 3] = pixels[i + 3];
+      case _kPngRgb:
+        rgba[o] = pixels[i];
+        rgba[o + 1] = pixels[i + 1];
+        rgba[o + 2] = pixels[i + 2];
+        rgba[o + 3] = 0xff;
+      case _kPngGray:
+        rgba[o] = rgba[o + 1] = rgba[o + 2] = pixels[i];
+        rgba[o + 3] = 0xff;
+      case _kPngGrayAlpha:
+        rgba[o] = rgba[o + 1] = rgba[o + 2] = pixels[i];
+        rgba[o + 3] = pixels[i + 1];
+      case _kPngPalette:
+        final int index = pixels[i];
+        if (palette == null || index * 3 + 2 >= palette.length) {
+          throw const FormatException('Invalid PNG image: a color outside the palette.');
+        }
+        rgba[o] = palette[index * 3];
+        rgba[o + 1] = palette[index * 3 + 1];
+        rgba[o + 2] = palette[index * 3 + 2];
+        rgba[o + 3] = paletteAlpha != null && index < paletteAlpha.length
+            ? paletteAlpha[index]
+            : 0xff;
+    }
+  }
+  return rgba;
+}
 
 /// Exception thrown when an error is returned from the [SkiaGoldClient].
 class SkiaException implements Exception {

@@ -44,6 +44,7 @@ as flutter_tools' do not, and flutter_tester supplies them.
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 load("//build_defs/dart:flutter_assets.bzl", "FlutterTestAssetsInfo")
 load(
     "//build_defs/dart:kernel.bzl",
@@ -438,6 +439,51 @@ def _flutter_test_impl(ctx):
         assets_dir = "$root/" + assets[FlutterTestAssetsInfo].asset_manifest.short_path.rsplit("/", 1)[0]
         assets_flag = "  --flutter-assets-dir=\"%s\" \\\n" % assets_dir
         assets_env = "export UNIT_TEST_ASSETS=\"%s\"\n" % assets_dir
+
+    # The golden comparisons: what Flutter Gold accepts for the tests of
+    # this file's library (gold_library_expectations), which flutter_goldens'
+    # FlutterOfflineFileComparator decides by -- a test has no network to
+    # ask Gold itself. An image that fails lands among the test's outputs.
+    # A file that compares no golden gets no expectations at all: Gold's
+    # answer changes whenever anyone triages an image, and a test that
+    # received it would run again each time, for nothing.
+    # Not for the Impeller runs. The one bot that runs them is a Mac
+    # (.ci.yaml's Mac framework_tests_impeller), so Gold's Impeller images
+    # are macOS renderings: a Linux host has none to match, and every
+    # golden would fail there. On a Mac they could be compared; that has
+    # not been run, so the Impeller runs compare nothing on any host yet.
+    gold_env = ""
+    gold_files = []
+    if ctx.file.gold_expectations != None and not ctx.attr.impeller and ctx.attr._golden_comparisons[BuildSettingInfo].value:
+        expectations = ctx.actions.declare_file(ctx.label.name + ".gold_expectations.json")
+        arguments = ctx.actions.args()
+        arguments.add(compiled.test)
+        arguments.add(ctx.file.gold_expectations)
+        arguments.add(expectations)
+        ctx.actions.run_shell(
+            command = "if grep -q matchesGoldenFile \"$1\"; then cp \"$2\" \"$3\"; else echo '%s' > \"$3\"; fi" % _NO_GOLD_EXPECTATIONS,
+            arguments = [arguments],
+            inputs = [compiled.test, ctx.file.gold_expectations],
+            outputs = [expectations],
+            mnemonic = "GoldExpectations",
+            progress_message = "Gold's expectations for %s" % compiled.test.short_path,
+        )
+
+        # The failures go to the test's outputs. While the test runs that
+        # directory is inside the sandbox; a reader finds it afterwards under
+        # the testlogs link, which is what the comparator's messages are to
+        # name (a sharded run's outputs are in the shard's directory below).
+        gold_env = (
+            "export FLUTTER_GOLD_EXPECTATIONS=\"$root/%s\"\n" % expectations.short_path +
+            "export FLUTTER_GOLD_FAILURES=\"${TEST_UNDECLARED_OUTPUTS_DIR:-$root}/goldens\"\n" +
+            "export FLUTTER_GOLD_FAILURES_LOCATION=\"%s\"\n" % paths.join(
+                _TESTLOGS,
+                ctx.label.package,
+                ctx.label.name,
+                "test.outputs/goldens",
+            )
+        )
+        gold_files = [expectations]
     launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
     ctx.actions.write(
         output = launcher,
@@ -447,7 +493,7 @@ root="$PWD"
 export FLUTTER_TEST=true
 {impeller_env}export FLUTTER_ROOT="$root"
 export APP_NAME="{app_name}"
-{assets_env}export FONTCONFIG_FILE="$root/{fonts_conf}"
+{assets_env}{gold_env}export FONTCONFIG_FILE="$root/{fonts_conf}"
 cd "{package_directory}"
 mkdir -p fontconfig-cache
 exec "$root/{flutter_tester}" \\
@@ -464,6 +510,7 @@ exec "$root/{flutter_tester}" \\
 """.format(
             app_name = ctx.attr.app_name,
             assets_env = assets_env,
+            gold_env = gold_env,
             # `flutter test --enable-vmservice` asks for a port (any); the
             # default disables the service.
             vm_service_flag = "--vm-service-port=0" if ctx.attr.vm_service else "--disable-vm-service",
@@ -499,7 +546,7 @@ exec "$root/{flutter_tester}" \\
     # The tester itself is among the files: a built one brings its runfiles
     # (merged below), a prebuilt one is a plain file (//build_defs/engine).
     runfiles = ctx.runfiles(
-        files = [kernel, fonts_conf, ctx.executable.flutter_tester, ctx.file.icudtl, ctx.file.runtime_package_config, compiled.test, compiled.pubspec] + ctx.files.data,
+        files = [kernel, fonts_conf, ctx.executable.flutter_tester, ctx.file.icudtl, ctx.file.runtime_package_config, compiled.test, compiled.pubspec] + gold_files + ctx.files.data,
         transitive_files = assets[DefaultInfo].files if assets != None else None,
         symlinks = cache,
     ).merge(ctx.attr.flutter_tester[DefaultInfo].default_runfiles)
@@ -566,6 +613,72 @@ flutter_test = rule(
             allow_single_file = True,
             doc = "ICU's data file.",
         ),
+        "gold_expectations": attr.label(
+            allow_single_file = [".json"],
+            doc = "What Flutter Gold accepts for the golden tests of the test's library " +
+                  "(gold_library_expectations), for a test tree whose configuration is " +
+                  "flutter_goldens': a test that compares goldens compares with it " +
+                  "(FLUTTER_GOLD_EXPECTATIONS) unless --no//build_defs/dart:golden_comparisons. " +
+                  "Without it the comparisons compare nothing, Gold being out of reach.",
+        ),
+        "_golden_comparisons": attr.label(default = "//build_defs/dart:golden_comparisons"),
+    },
+)
+
+# Gold's response for no test: what a test file that compares no golden gets.
+_NO_GOLD_EXPECTATIONS = "{\"primary\":{}}"
+
+# Where a test's logs and outputs are found from the repository's root:
+# .bazelrc's --symlink_prefix (engine/src/out/bazel-) with `testlogs`.
+_TESTLOGS = "engine/src/out/bazel-testlogs"
+
+def _gold_library_expectations_impl(ctx):
+    out = ctx.actions.declare_file(ctx.label.name + ".json")
+    arguments = ctx.actions.args()
+    arguments.add(ctx.file._script)
+    arguments.add("--expectations", ctx.file.expectations)
+    arguments.add("--library", ctx.attr.library)
+    arguments.add("--out", out)
+    ctx.actions.run(
+        executable = ctx.executable._python,
+        arguments = [arguments],
+        inputs = depset(
+            [ctx.file._script, ctx.file.expectations],
+            transitive = [ctx.attr._python_runtime[DefaultInfo].files],
+        ),
+        outputs = [out],
+        env = {"PYTHONDONTWRITEBYTECODE": "1"},
+        mnemonic = "GoldLibraryExpectations",
+        progress_message = "Gold's expectations for the %s tests" % ctx.attr.library,
+    )
+    return [DefaultInfo(files = depset([out]))]
+
+gold_library_expectations = rule(
+    implementation = _gold_library_expectations_impl,
+    doc = "What Flutter Gold accepts for the golden tests of one library: Gold's response cut down to " +
+          "the tests whose names begin with the library's (flutter_goldens names a golden " +
+          "`<the test's directory>.<file>`), so that a triage in another library changes nothing here.",
+    attrs = {
+        "expectations": attr.label(
+            allow_single_file = [".json"],
+            mandatory = True,
+            doc = "Gold's response (@gold_expectations//:expectations.json, build_defs/repositories/gold.bzl).",
+        ),
+        "library": attr.string(
+            mandatory = True,
+            doc = "The name of the tests' directory, which begins their goldens' names.",
+        ),
+        "_script": attr.label(
+            default = "//build_defs/dart:gold_expectations.py",
+            allow_single_file = True,
+        ),
+        "_python": attr.label(
+            default = "@cpython3//:bin/python3",
+            executable = True,
+            cfg = "exec",
+            allow_single_file = True,
+        ),
+        "_python_runtime": attr.label(default = "@cpython3//:runtime"),
     },
 )
 
@@ -607,7 +720,7 @@ def nearest_test_config(test, test_configs):
         directory = paths.dirname(directory)
     return None
 
-def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], shards = {}, test_configs = [], impeller = False, suffix = "", **kwargs):
+def flutter_tests(name, tests, size = "medium", tags = [], network = False, flaky = [], large = [], shards = {}, test_configs = [], impeller = False, suffix = "", gold_expectations = None, **kwargs):
     """One flutter_test per test file, and a test_suite of them.
 
     Args:
@@ -632,11 +745,17 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
         Each run reports under bazel-testlogs' `<test>/shard_<i>_of_<n>/`,
         which dev/bots' ResultDB reader follows.
       network: whether the tests may reach the network. Off by default
-        (`block-network`): flutter_goldens then skips the golden
-        comparisons instead of fetching Skia Gold's expectations, as it
-        does wherever Gold is unreachable -- `flutter test` on a developer
-        machine compares against Gold, and one query in 390 files failed
-        with Gold's "Could not complete query" (NEED_DECISION D14, 7).
+        (`block-network`): a golden comparison then cannot ask Skia Gold,
+        as `flutter test` on a developer machine does for every image (one
+        query in 390 files failed with Gold's "Could not complete query").
+        It compares with what was fetched from Gold beforehand where the
+        suite names it (`gold_expectations`), and compares nothing where it
+        does not.
+      gold_expectations: Flutter Gold's expectations
+        (@gold_expectations//:expectations.json), for a test tree whose
+        configuration is flutter_goldens': each test gets the part for its
+        own directory's tests (gold_library_expectations, one per
+        directory).
       test_configs: the test tree's `flutter_test_config.dart` and
         `pubspec.yaml` files (a glob of both), when the configuration
         differs by directory: each test takes the nearest configuration in
@@ -680,6 +799,22 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
             visibility = ["//visibility:private"],
             **{key: value for key, value in compile_attrs.items() if key != "test_config"}
         )
+
+        # Gold's expectations for the test's library, cut once per directory:
+        # flutter_goldens names a golden `<the test's directory>.<file>`.
+        gold = {}
+        if gold_expectations:
+            library = paths.basename(paths.dirname(paths.join(native.package_name(), test)))
+            library_expectations = "gold_expectations_" + library
+            if not native.existing_rule(library_expectations):
+                gold_library_expectations(
+                    name = library_expectations,
+                    expectations = gold_expectations,
+                    library = library,
+                    tags = tags,
+                    visibility = ["//visibility:private"],
+                )
+            gold = {"gold_expectations": ":" + library_expectations}
         for variant_suffix, variant in variants:
             flutter_test(
                 name = test_name + variant_suffix,
@@ -689,7 +824,7 @@ def flutter_tests(name, tests, size = "medium", tags = [], network = False, flak
                 flaky = test in flaky,
                 timeout = "short" if test in flaky else None,
                 shard_count = shards.get(test),
-                **(run_attrs | variant)
+                **(run_attrs | variant | gold)
             )
             targets[variant_suffix].append(":" + test_name + variant_suffix)
     for variant_suffix, _ in variants:

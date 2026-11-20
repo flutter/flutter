@@ -6,19 +6,21 @@ import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
-enum _Comparator { post, pre, skip, local }
+enum _Comparator { offline, post, pre, skip, local }
 
 _Comparator _testRecommendations({
   bool hasFlutterRoot = false,
   bool hasLuci = false,
   bool hasGold = false,
   bool hasTryJob = false,
+  bool hasExpectations = false,
   String branch = 'main',
   String os = 'macos',
 }) {
   final Platform platform = FakePlatform(
     environment: <String, String>{
       if (hasFlutterRoot) 'FLUTTER_ROOT': '/flutter',
+      if (hasExpectations) 'FLUTTER_GOLD_EXPECTATIONS': '/expectations.json',
       if (hasLuci) 'SWARMING_TASK_ID': '8675309',
       if (hasGold) 'GOLDCTL': 'goldctl',
       if (hasTryJob) 'GOLD_TRYJOB': 'git/ref/12345/head',
@@ -26,6 +28,9 @@ _Comparator _testRecommendations({
     },
     operatingSystem: os,
   );
+  if (FlutterOfflineFileComparator.isForEnvironment(platform)) {
+    return _Comparator.offline;
+  }
   if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
     return _Comparator.post;
   }

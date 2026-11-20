@@ -185,6 +185,11 @@ void main() {
       expect(options.contains('--config=rbe'), bazelRbeOptions().isNotEmpty);
       expect(options, contains('--config=prebuilt_engine'));
     });
+
+    test('bazelTestOptions turns the golden comparisons off on a bot alone', () {
+      // A bot's image goes to Flutter Gold for triage; it does not fail here.
+      expect(bazelTestOptions().contains('--no//build_defs/dart:golden_comparisons'), isLuci);
+    });
   });
 
   group('the results of a run', () {

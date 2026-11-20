@@ -31,8 +31,8 @@ shrine_images and cupertino_icons' font) -- the framework's two shaders
 compiled by the Bazel impellerc), the SDK cache's paths tests read (`cache`: the Dart
 SDK, the Material fonts from a pinned repository), `--vm-service-port=0`
 when a tree asks (`vm_service`), Impeller rendering when a tree asks
-(`impeller`), `block-network` by default (Skia Gold comparisons are skipped
-offline, as flutter_goldens does wherever Gold is unreachable). Three macros
+(`impeller`), `block-network` by default (a golden comparison cannot ask
+Skia Gold; "Golden files" below says what it compares with). Three macros
 give a tree in one call: `flutter_tests` (one kernel and one run per file,
 `<test>_impeller` runs too when asked, the nearest `flutter_test_config.dart`
 per file as flutter_tools' `findTestConfigFile` picks it, `flaky` and `large`
@@ -254,6 +254,58 @@ itself (git on the checkout), and what needs the engine in its other
 runtime modes or a device. The compile's defines for
 the SDK version are fixed words (`-DFLUTTER_VERSION=bazel`...), so a kernel
 is the same on every commit and the cache holds across them.
+
+### Golden files: compared with what Flutter Gold accepts
+
+A golden test renders an image and asks whether Flutter Gold holds it as
+correct for the test. Outside Bazel it asks Gold: `flutter test` on a
+developer's machine requests a baseline image for every comparison, and a
+bot uploads every image with `goldctl`, which passes one whose digest is
+among the test's positive digests. A test under Bazel has no network, so
+what Gold accepts is fetched beforehand:
+
+- `@gold_expectations` (`build_defs/repositories/gold.bzl`) is Gold's
+  `/json/v2/expectations`: every test's digests with their triage status,
+  in one request.
+- `flutter_tests`' `gold_expectations` cuts the part for each test
+  directory (`gold_library_expectations`, `gold_expectations.py`:
+  flutter_goldens names a golden `<the test's directory>.<file>`), and
+  `flutter_test` hands it to a test file that calls `matchesGoldenFile` and
+  an empty one to a file that does not -- which keeps every other test's
+  result in the cache when Gold's answer changes.
+- flutter_goldens' `FlutterOfflineFileComparator`, chosen when
+  `FLUTTER_GOLD_EXPECTATIONS` names that file, passes an image whose digest
+  is positive for its test: `goldctl`'s decision, made in the test. A
+  digest is the MD5 of the image's pixels (`goldDigest`), so no image has
+  to be fetched to decide. An image that fails is written to the test's
+  outputs (`engine/src/out/bazel-testlogs/<package>/<test>/test.outputs/goldens/`),
+  and the failure gives that path, the image's digest and a link to an
+  accepted image; it shows no difference between the two. A test Gold does not
+  know is taken for a new one, as `flutter test` takes it: it passes, and
+  its image is written out too.
+
+What Gold accepts is the state of the main branch's head and changes with
+every triage, so there is nothing to pin. The fetch is repeated when HEAD
+moves, when `--repo_env=FLUTTER_GOLD_REFRESH=<another value>` is passed, and
+after `bazel clean --expunge`; without the network it yields no
+expectations, and the comparisons pass with a note.
+
+The comparison is with every image Gold has accepted for the test, whatever
+platform rendered it and however long ago: `goldctl`'s rule in post-submit,
+and more lenient than `flutter test` on a developer's machine, which
+compares pixel by pixel with the latest accepted image of the host's
+platform. An image that matches only another platform's accepted look, or
+an old one, passes here.
+
+Not compared: the Impeller runs (the one bot that runs them is a Mac, so
+Gold's Impeller images are macOS renderings and a Linux host has none to
+match; comparing them on a Mac has not been tried);
+the other test trees whose configuration is flutter_goldens' (the API
+samples, integration_test); and anything on a bot, where
+`dev/bots/test.dart --bazel` passes
+`--no//build_defs/dart:golden_comparisons` -- a bot's part is to send a new
+image to Gold for triage, not to fail it, and the Bazel shards do not
+upload yet.
 
 ### The same tests on the prebuilt engine: `--config=prebuilt_engine`
 

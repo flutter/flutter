@@ -60,6 +60,9 @@ def framework_tests(name, tests, data = [], deps = [], impeller = True, prelude 
         package_config = "//packages/flutter/test:package_config",
         runtime_package_config = "//packages/flutter/test:runtime_package_config",
         test_config = "//packages/flutter/test:flutter_test_config.dart",
+        # The configuration is flutter_goldens': what Flutter Gold accepts,
+        # for the files that compare goldens.
+        gold_expectations = Label("@gold_expectations//:expectations.json"),
         # The test tree's helpers, this directory's among them.
         deps = ["//packages/flutter/test:helpers"] + deps,
         **kwargs
