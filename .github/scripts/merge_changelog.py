@@ -22,17 +22,17 @@ _SEMVER_RE = re.compile(r"^\[?(\d+)\.(\d+)\.(\d+)(?:\]|\s|$)")
 
 
 @dataclass(frozen=True)
-class PatchEntry:
+class _PatchEntry:
     key: str
     version: tuple[int, int, int] | None
     raw: str
 
 
 @dataclass(frozen=True)
-class MinorSection:
+class _MinorSection:
     minor: tuple[int, int]
     header: str
-    patches: tuple[PatchEntry, ...]
+    patches: tuple[_PatchEntry, ...]
     raw: str
 
 
@@ -40,7 +40,7 @@ def _strip_html_comments(text: str) -> str:
     return re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
 
 
-def _parse_changelog(text: str) -> tuple[str, dict[tuple[int, int], MinorSection]]:
+def _parse_changelog(text: str) -> tuple[str, dict[tuple[int, int], _MinorSection]]:
     stray = _STRAY_H2_RE.findall(_strip_html_comments(text))
     if stray:
         raise ValueError(f"Unexpected H2 heading(s) in CHANGELOG.md: {stray}")
@@ -50,7 +50,7 @@ def _parse_changelog(text: str) -> tuple[str, dict[tuple[int, int], MinorSection
         raise ValueError("No '## Flutter X.Y Changes' sections found in CHANGELOG.md.")
 
     preamble = text[: matches[0].start()]
-    sections: dict[tuple[int, int], MinorSection] = {}
+    sections: dict[tuple[int, int], _MinorSection] = {}
 
     for idx, match in enumerate(matches):
         minor = (int(match.group(1)), int(match.group(2)))
@@ -61,7 +61,7 @@ def _parse_changelog(text: str) -> tuple[str, dict[tuple[int, int], MinorSection
 
         h3_matches = list(_H3_RE.finditer(raw))
         header = raw[: h3_matches[0].start()] if h3_matches else raw
-        patches: list[PatchEntry] = []
+        patches: list[_PatchEntry] = []
         for j, h3_match in enumerate(h3_matches):
             p_end = h3_matches[j + 1].start() if j + 1 < len(h3_matches) else len(raw)
             p_raw = raw[h3_match.start() : p_end]
@@ -73,9 +73,9 @@ def _parse_changelog(text: str) -> tuple[str, dict[tuple[int, int], MinorSection
             else:
                 ver = None
                 key = title
-            patches.append(PatchEntry(key=key, version=ver, raw=p_raw))
+            patches.append(_PatchEntry(key=key, version=ver, raw=p_raw))
 
-        sections[minor] = MinorSection(
+        sections[minor] = _MinorSection(
             minor=minor,
             header=header,
             patches=tuple(patches),
@@ -95,8 +95,8 @@ def _extract_semver_list(text: str) -> list[tuple[int, int, int]]:
 
 
 def _merge_minor_section(
-    master_sec: MinorSection,
-    stable_sec: MinorSection,
+    master_sec: _MinorSection,
+    stable_sec: _MinorSection,
     *,
     prefer_stable: bool,
 ) -> str:
@@ -120,7 +120,7 @@ def _merge_minor_section(
         reverse=True,
     )
     seen_non_semver: set[str] = set()
-    other_patches: list[PatchEntry] = []
+    other_patches: list[_PatchEntry] = []
     for p in (*primary.patches, *secondary.patches):
         if p.version is None and p.key not in seen_non_semver:
             seen_non_semver.add(p.key)
@@ -136,6 +136,25 @@ def _merge_minor_section(
 
 
 def merge_changelogs(master_text: str, stable_text: str) -> str:
+    """Merges release sections from stable CHANGELOG.md into master CHANGELOG.md.
+
+    Normalizes CRLF/CR line endings to LF, lets stable win for the active stable
+    minor series, and preserves hotfix entries on older minor release series
+    present on master.
+
+    Args:
+        master_text: Contents of CHANGELOG.md from the master branch.
+        stable_text: Contents of CHANGELOG.md from the stable branch.
+
+    Returns:
+        The merged CHANGELOG.md text using LF line endings.
+
+    Raises:
+        ValueError: If headings are malformed, duplicated, or lost during merge.
+    """
+    master_text = master_text.replace("\r\n", "\n").replace("\r", "\n")
+    stable_text = stable_text.replace("\r\n", "\n").replace("\r", "\n")
+
     preamble, master_minors = _parse_changelog(master_text)
     _, stable_minors = _parse_changelog(stable_text)
 
@@ -181,6 +200,14 @@ def merge_changelogs(master_text: str, stable_text: str) -> str:
 
 
 def main(argv: list[str]) -> int:
+    """CLI entry point that merges stable CHANGELOG.md into master in place.
+
+    Args:
+        argv: Command-line arguments (`[prog, master_path, stable_path]`).
+
+    Returns:
+        Process exit code (`0` on success, `2` on usage error).
+    """
     if len(argv) != 3:
         print(
             "Usage: merge_changelog.py <master_changelog_path> <stable_changelog_path>",
@@ -195,7 +222,7 @@ def main(argv: list[str]) -> int:
         master_path.read_text(encoding="utf-8"),
         stable_path.read_text(encoding="utf-8"),
     )
-    master_path.write_text(merged, encoding="utf-8")
+    master_path.write_text(merged, encoding="utf-8", newline="\n")
     return 0
 
 

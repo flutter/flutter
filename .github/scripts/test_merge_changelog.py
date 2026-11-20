@@ -2,8 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+"""Unit tests for merge_changelog.py."""
+
 import pathlib
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -19,7 +22,10 @@ INTERNAL NOTE
 
 
 class MergeChangelogTest(unittest.TestCase):
+    """Tests section-level merging of master and stable CHANGELOG.md files."""
+
     def test_preserves_older_minor_hotfixes_on_new_minor_release(self) -> None:
+        """Preserves prior minor hotfixes on master when stable promotes a new minor."""
         master = (
             _PREAMBLE
             + """## Flutter 3.47 Changes
@@ -83,6 +89,7 @@ Learn about what's new in 3.50.
         self.assertIn("### [3.47.8]", merged_3502)
 
     def test_merges_disjoint_patches_within_same_minor(self) -> None:
+        """Orders disjoint patches within the same minor section in descending semver order."""
         master = (
             _PREAMBLE
             + """## Flutter 3.47 Changes
@@ -110,10 +117,39 @@ Learn about what's new in 3.50.
         self.assertLess(merged.index("### [3.47.8]"), merged.index("### [3.47.7]"))
 
     def test_rejects_stray_h2_heading(self) -> None:
+        """Raises ValueError if an unexpected H2 heading appears outside comments."""
         bad = _PREAMBLE + "## [3.50.1](https://example.com)\n- Typo H2 instead of H3.\n"
         good = _PREAMBLE + "## Flutter 3.50 Changes\n\n### [3.50.0](https://example.com)\n- Initial.\n"
         with self.assertRaises(ValueError):
             merge_changelog.merge_changelogs(good, bad)
+
+    def test_handles_crlf_line_endings(self) -> None:
+        """Normalizes CRLF inputs and writes LF output without stray CR characters."""
+        master_crlf = (
+            _PREAMBLE
+            + "## Flutter 3.47 Changes\n\n"
+            "### [3.47.9](https://github.com/flutter/flutter/releases/tag/3.47.9)\n"
+            "- Patch 9.\n"
+        ).replace("\n", "\r\n")
+        stable_crlf = (
+            _PREAMBLE
+            + "## Flutter 3.47 Changes\n\n"
+            "### [3.47.8](https://github.com/flutter/flutter/releases/tag/3.47.8)\n"
+            "- Patch 8.\n"
+        ).replace("\n", "\r\n")
+
+        merged = merge_changelog.merge_changelogs(master_crlf, stable_crlf)
+        self.assertNotIn("\r", merged)
+        self.assertLess(merged.index("### [3.47.9]"), merged.index("### [3.47.8]"))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            master_path = pathlib.Path(tmp) / "master.md"
+            stable_path = pathlib.Path(tmp) / "stable.md"
+            master_path.write_bytes(master_crlf.encode("utf-8"))
+            stable_path.write_bytes(stable_crlf.encode("utf-8"))
+            rc = merge_changelog.main(["merge_changelog.py", str(master_path), str(stable_path)])
+            self.assertEqual(rc, 0)
+            self.assertNotIn(b"\r", master_path.read_bytes())
 
 
 if __name__ == "__main__":
