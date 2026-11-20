@@ -3609,6 +3609,23 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
+  ///
+  /// In debug builds, this method is called every time this render object is
+  /// painted, right after [paint], using the same `context` and `offset`. It
+  /// is not called in profile or release builds.
+  ///
+  /// This method runs regardless of whether any debug painting flags are
+  /// enabled, including the "Show debug paint" option in DevTools (which sets
+  /// [debugPaintSizeEnabled]). Implementations that only want to draw when a
+  /// particular flag is set must check that flag themselves. For example,
+  /// [RenderBox.debugPaint] only calls [RenderBox.debugPaintSize] when
+  /// [debugPaintSizeEnabled] is true.
+  ///
+  /// See also:
+  ///
+  ///  * [debugPaintSizeEnabled], [debugPaintBaselinesEnabled], and
+  ///    [debugPaintPointersEnabled], which control the debugging information
+  ///    that [RenderBox] paints.
   void debugPaint(PaintingContext context, Offset offset) {}
 
   /// Paint this render object into the given context at the given offset.
