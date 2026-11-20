@@ -92,16 +92,20 @@ class PointerRouter {
 
   @pragma('vm:notify-debugger-on-exception')
   void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
+    final PointerEvent transformedEvent = event.transformed(transform);
     try {
-      event = event.transformed(transform);
-      route(event);
+      route(transformedEvent);
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {
         collector = () => <DiagnosticsNode>[
           DiagnosticsProperty<PointerRouter>('router', this, level: DiagnosticLevel.debug),
           DiagnosticsProperty<PointerRoute>('route', route, level: DiagnosticLevel.debug),
-          DiagnosticsProperty<PointerEvent>('event', event, level: DiagnosticLevel.debug),
+          DiagnosticsProperty<PointerEvent>(
+            'event',
+            transformedEvent,
+            level: DiagnosticLevel.debug,
+          ),
         ];
         return true;
       }());
