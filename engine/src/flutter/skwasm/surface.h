@@ -91,7 +91,6 @@ class Surface {
   // Context Loss
   uint32_t TriggerContextLoss();
   void OnContextLossTriggered(uint32_t callback_id);
-  void ReportContextLost(uint32_t callback_id);
   void TriggerContextLossOnWorker(uint32_t callback_id);
   void OnContextLost();
 
@@ -102,6 +101,7 @@ class Surface {
       SkwasmObject textureSource);
 
  private:
+  void DestroyContext();
   void Init();
   void ResizeSurface(int width, int height);
   void RecreateSurface();

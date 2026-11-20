@@ -106,7 +106,7 @@ mergeInto(LibraryManager.library, {
             _surface_onContextLossTriggered(data.surface, data.callbackId);
             return;
           case 'reportContextLost':
-            _surface_reportContextLost(data.surface, data.callbackId);
+            _surface_reportContextLost(data.callbackHandler, data.callbackId);
             return;
           case 'renderPictures':
             _surface_renderPicturesOnWorker(
@@ -337,10 +337,10 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, []);
     };
-    _skwasm_reportContextLost = function (surfaceHandle, callbackId) {
+    _skwasm_reportContextLost = function (callbackHandler, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'reportContextLost',
-        surface: surfaceHandle,
+        callbackHandler,
         callbackId,
       }, []);
     };
@@ -363,7 +363,12 @@ mergeInto(LibraryManager.library, {
         failIfMajorPerformanceCaveat: false,
         enableExtensionsByDefault: true,
       };
-      const contextHandle = GL.createContext(canvas, contextAttributes);
+      let contextHandle;
+      try {
+        contextHandle = GL.createContext(canvas, contextAttributes);
+      } catch (_) {
+        return 0;
+      }
       if (!contextHandle) {
         return 0;
       }
@@ -385,6 +390,12 @@ mergeInto(LibraryManager.library, {
       const handler = handleToContextLostHandlerMap.get(contextHandle);
       if (canvas && handler) {
         canvas.removeEventListener('webglcontextlost', handler);
+      }
+      // Removing Emscripten's handle does not release the browser's context.
+      // Release it now so repeated surface creation cannot evict a live one.
+      const context = GL.getContext(contextHandle);
+      if (context && !context.GLctx.isContextLost()) {
+        context.GLctx.getExtension('WEBGL_lose_context')?.loseContext();
       }
       GL.deleteContext(contextHandle);
       handleToCanvasMap.delete(contextHandle);
