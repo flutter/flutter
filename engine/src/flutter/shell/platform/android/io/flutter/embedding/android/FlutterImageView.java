@@ -15,11 +15,15 @@ import android.graphics.PixelFormat;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
@@ -28,27 +32,65 @@ import java.nio.ByteBuffer;
 import java.util.Locale;
 
 /**
- * Paints a Flutter UI provided by an {@link android.media.ImageReader} onto a {@link
- * android.graphics.Canvas}.
+ * Paints a Flutter UI provided by an {@link android.media.ImageReader} or an externally supplied
+ * {@link android.media.Image} onto a {@link android.graphics.Canvas}.
  *
  * <p>A {@code FlutterImageView} is intended for situations where a developer needs to render a
  * Flutter UI, but also needs to render an interactive {@link
  * io.flutter.plugin.platform.PlatformView}.
  *
- * <p>This {@code View} takes an {@link android.media.ImageReader} that provides the Flutter UI in
- * an {@link android.media.Image} and renders it to the {@link android.graphics.Canvas} in {@code
- * onDraw}.
+ * <p>This {@code View} can either own an internal {@link android.media.ImageReader} (for {@link
+ * RenderMode#image}) or operate in display-only mode for Hybrid Composition Frame Packets via
+ * {@link #setImage(Image, Runnable)}.
  */
 public class FlutterImageView extends View implements RenderSurface {
   private static final String TAG = "FlutterImageView";
 
-  @NonNull private ImageReader imageReader;
+  // 1 displayed + 1 retiring + 3 maximum FIFO pipeline draws ahead of a platform latch + 1 scratch.
+  @VisibleForTesting static final int MAX_IMAGES = 6;
+
+  // Minimum valid pixel dimension accepted by Android ImageReader.newInstance.
+  private static final int MIN_IMAGE_DIMENSION_PX = 1;
+
+  private static final class DisplayedImage {
+    @NonNull final Image image;
+    @Nullable final Runnable releaseCallback;
+    boolean commitCallbackRegistered = false;
+    private boolean released = false;
+
+    DisplayedImage(@NonNull Image image, @Nullable Runnable releaseCallback) {
+      this.image = image;
+      this.releaseCallback = releaseCallback;
+    }
+
+    void releaseOnce() {
+      if (released) {
+        return;
+      }
+      released = true;
+      if (releaseCallback != null) {
+        releaseCallback.run();
+      } else {
+        image.close();
+      }
+    }
+  }
+
+  @Nullable private ImageReader imageReader;
   @Nullable private Image currentImage;
+  @Nullable private DisplayedImage currentDisplayedImage;
+  @Nullable private DisplayedImage retiringDisplayedImage;
+  @Nullable private DisplayedImage pendingCommitDisplayedImage;
+  private boolean currentDisplayedImageDrawn = false;
+  private boolean hasUnconsumedAutoAcquiredImage = false;
   @Nullable private Bitmap currentBitmap;
   @Nullable private FlutterRenderer flutterRenderer;
 
+  private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
   private boolean isContentSizingEnabled = false;
 
+  @Nullable
   public ImageReader getImageReader() {
     return imageReader;
   }
@@ -74,8 +116,19 @@ public class FlutterImageView extends View implements RenderSurface {
    */
   private boolean isPaused = false;
 
-  /** Whether {@link #imageReader} has already been closed. */
+  /** Whether {@link #imageReader} has already been closed (or was never allocated). */
   private boolean isImageReaderClosed = false;
+
+  private final ImageReader.OnImageAvailableListener onImageAvailableListener =
+      reader -> {
+        if (isActiveBackgroundSurface() && reader == imageReader && !isImageReaderClosed) {
+          try {
+            acquireLatestImage();
+          } catch (IllegalStateException ex) {
+            Log.w(TAG, "Failed to auto-acquire image in FlutterImageView", ex);
+          }
+        }
+      };
 
   /**
    * Constructs a {@code FlutterImageView} with an {@link android.media.ImageReader} that provides
@@ -86,11 +139,23 @@ public class FlutterImageView extends View implements RenderSurface {
   }
 
   public FlutterImageView(@NonNull Context context) {
-    this(context, 1, 1, SurfaceKind.background);
+    this(context, MIN_IMAGE_DIMENSION_PX, MIN_IMAGE_DIMENSION_PX, SurfaceKind.background);
   }
 
   public FlutterImageView(@NonNull Context context, @NonNull AttributeSet attrs) {
-    this(context, 1, 1, SurfaceKind.background);
+    this(context, MIN_IMAGE_DIMENSION_PX, MIN_IMAGE_DIMENSION_PX, SurfaceKind.background);
+  }
+
+  /**
+   * Constructs a display-only {@code FlutterImageView} that presents {@link Image} buffers supplied
+   * via {@link #setImage(Image, Runnable)} without allocating an internal {@link ImageReader}.
+   */
+  public FlutterImageView(@NonNull Context context, @NonNull SurfaceKind kind) {
+    super(context, null);
+    this.imageReader = null;
+    this.isImageReaderClosed = true;
+    this.kind = kind;
+    init();
   }
 
   @VisibleForTesting
@@ -123,29 +188,33 @@ public class FlutterImageView extends View implements RenderSurface {
   @SuppressLint("WrongConstant") // RGBA_8888 is a valid constant.
   @NonNull
   private static ImageReader createImageReader(int width, int height) {
-    if (width <= 0) {
-      logW("ImageReader width must be greater than 0, but given width=%d, set width=1", width);
-      width = 1;
+    if (width < MIN_IMAGE_DIMENSION_PX) {
+      logW(
+          "ImageReader width must be greater than 0, but given width=%d, set width=%d",
+          width, MIN_IMAGE_DIMENSION_PX);
+      width = MIN_IMAGE_DIMENSION_PX;
     }
-    if (height <= 0) {
-      logW("ImageReader height must be greater than 0, but given height=%d, set height=1", height);
-      height = 1;
+    if (height < MIN_IMAGE_DIMENSION_PX) {
+      logW(
+          "ImageReader height must be greater than 0, but given height=%d, set height=%d",
+          height, MIN_IMAGE_DIMENSION_PX);
+      height = MIN_IMAGE_DIMENSION_PX;
     }
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       return ImageReader.newInstance(
           width,
           height,
           PixelFormat.RGBA_8888,
-          3,
+          MAX_IMAGES,
           HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
     } else {
-      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 3);
+      return ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, MAX_IMAGES);
     }
   }
 
-  @NonNull
+  @Nullable
   public Surface getSurface() {
-    return imageReader.getSurface();
+    return imageReader != null ? imageReader.getSurface() : null;
   }
 
   @Nullable
@@ -162,7 +231,10 @@ public class FlutterImageView extends View implements RenderSurface {
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
     switch (kind) {
       case background:
-        flutterRenderer.swapSurface(imageReader.getSurface());
+        if (imageReader != null && !isImageReaderClosed) {
+          imageReader.setOnImageAvailableListener(onImageAvailableListener, mainHandler);
+          flutterRenderer.swapSurface(imageReader.getSurface());
+        }
         break;
       case overlay:
         // Do nothing since the attachment is done by the handler of
@@ -183,6 +255,9 @@ public class FlutterImageView extends View implements RenderSurface {
     if (!isAttachedToFlutterRenderer) {
       return;
     }
+    if (imageReader != null && !isImageReaderClosed) {
+      imageReader.setOnImageAvailableListener(null, null);
+    }
     setAlpha(0.0f);
     // Drop the latest image as it shouldn't render this image if this view is
     // attached to the renderer again.
@@ -192,6 +267,8 @@ public class FlutterImageView extends View implements RenderSurface {
 
     // Close and clear the current image if any.
     closeCurrentImage();
+    releaseDisplayedImages();
+    hasUnconsumedAutoAcquiredImage = false;
     invalidate();
     isAttachedToFlutterRenderer = false;
     isPaused = false;
@@ -221,7 +298,7 @@ public class FlutterImageView extends View implements RenderSurface {
    * there's an image available in the queue.
    */
   public boolean acquireLatestImage() {
-    if (!isAttachedToFlutterRenderer || isImageReaderClosed) {
+    if (!isAttachedToFlutterRenderer || isImageReaderClosed || imageReader == null) {
       return false;
     }
     // 1. `acquireLatestImage()` may return null if no new image is available.
@@ -235,9 +312,77 @@ public class FlutterImageView extends View implements RenderSurface {
       // Only close current image after acquiring valid new image
       closeCurrentImage();
       currentImage = newImage;
+      hasUnconsumedAutoAcquiredImage = true;
       invalidate();
     }
     return newImage != null;
+  }
+
+  /**
+   * Polls whether a new frame has been acquired (either via {@link #acquireLatestImage()}, the
+   * main-Looper {@link ImageReader.OnImageAvailableListener}, or {@link #setImage(Image,
+   * Runnable)}) since the previous poll.
+   */
+  boolean pollLatestImageViewFrame() {
+    final boolean acquiredNow = acquireLatestImage();
+    final boolean hadUnconsumed = hasUnconsumedAutoAcquiredImage;
+    hasUnconsumedAutoAcquiredImage = false;
+    return acquiredNow || hadUnconsumed;
+  }
+
+  /**
+   * Presents an externally acquired {@link Image} on the next {@link #onDraw(Canvas)} traversal and
+   * invokes {@code releaseCallback} (or {@link Image#close()} when {@code null}) exactly once after
+   * the buffer is superseded and no longer referenced by HWUI.
+   */
+  public void setImage(@NonNull Image image, @Nullable Runnable releaseCallback) {
+    closeCurrentImage();
+    setAlpha(1.0f);
+    hasUnconsumedAutoAcquiredImage = true;
+    if (currentDisplayedImage != null) {
+      if (!currentDisplayedImageDrawn) {
+        currentDisplayedImage.releaseOnce();
+      } else {
+        if (retiringDisplayedImage != null && !retiringDisplayedImage.commitCallbackRegistered) {
+          retiringDisplayedImage.releaseOnce();
+        }
+        retiringDisplayedImage = currentDisplayedImage;
+      }
+    }
+    currentDisplayedImage = new DisplayedImage(image, releaseCallback);
+    currentDisplayedImageDrawn = false;
+    invalidate();
+  }
+
+  /**
+   * Immediately releases any displayed, retiring, or commit-pending {@link Image} instances
+   * supplied via {@link #setImage(Image, Runnable)} and clears the cached bitmap when no
+   * reader-backed image is active.
+   */
+  public void releaseDisplayedImages() {
+    if (pendingCommitDisplayedImage != null) {
+      pendingCommitDisplayedImage.releaseOnce();
+      pendingCommitDisplayedImage = null;
+    }
+    if (retiringDisplayedImage != null) {
+      retiringDisplayedImage.releaseOnce();
+      retiringDisplayedImage = null;
+    }
+    if (currentDisplayedImage != null) {
+      currentDisplayedImage.releaseOnce();
+      currentDisplayedImage = null;
+    }
+    currentDisplayedImageDrawn = false;
+    if (currentImage == null) {
+      currentBitmap = null;
+    }
+    hasUnconsumedAutoAcquiredImage = false;
+  }
+
+  @Override
+  protected void onDetachedFromWindow() {
+    releaseDisplayedImages();
+    super.onDetachedFromWindow();
   }
 
   /**
@@ -245,18 +390,19 @@ public class FlutterImageView extends View implements RenderSurface {
    * reattaching a reused {@code FlutterImageView} to the renderer.
    */
   void drainPendingImages() {
-    if (isImageReaderClosed) {
+    if (isImageReaderClosed || imageReader == null) {
       return;
     }
     final Image droppedImage = imageReader.acquireLatestImage();
     if (droppedImage != null) {
       droppedImage.close();
     }
+    hasUnconsumedAutoAcquiredImage = false;
   }
 
   /** Creates a new image reader with the provided size. */
   public void resizeIfNeeded(int width, int height) {
-    if (flutterRenderer == null) {
+    if (flutterRenderer == null || imageReader == null) {
       return;
     }
     if (!isImageReaderClosed
@@ -272,8 +418,14 @@ public class FlutterImageView extends View implements RenderSurface {
     // return false until the resized ImageReader receives a matching-size frame.
     final ImageReader oldImageReader = imageReader;
     final boolean oldReaderWasClosed = isImageReaderClosed;
+    if (!oldReaderWasClosed) {
+      oldImageReader.setOnImageAvailableListener(null, null);
+    }
     imageReader = createImageReader(width, height);
     isImageReaderClosed = false;
+    if (isAttachedToFlutterRenderer && kind == SurfaceKind.background) {
+      imageReader.setOnImageAvailableListener(onImageAvailableListener, mainHandler);
+    }
     if (isActiveBackgroundSurface()) {
       flutterRenderer.swapSurface(imageReader.getSurface());
     }
@@ -289,6 +441,7 @@ public class FlutterImageView extends View implements RenderSurface {
       }
       oldImageReader.close();
     }
+    hasUnconsumedAutoAcquiredImage = false;
   }
 
   /**
@@ -298,16 +451,76 @@ public class FlutterImageView extends View implements RenderSurface {
    * IllegalStateException}.
    */
   public void closeImageReader() {
-    if (!isImageReaderClosed) {
+    if (imageReader != null && !isImageReaderClosed) {
+      imageReader.setOnImageAvailableListener(null, null);
       imageReader.close();
       isImageReaderClosed = true;
     }
+    hasUnconsumedAutoAcquiredImage = false;
+  }
+
+  @RequiresApi(API_LEVELS.API_29)
+  @VisibleForTesting
+  boolean registerFrameCommitCallback(@NonNull Runnable callback) {
+    if (!isAttachedToWindow() || getWindowVisibility() != View.VISIBLE) {
+      return false;
+    }
+    final View rootView = getRootView();
+    final ViewTreeObserver vto = rootView != null ? rootView.getViewTreeObserver() : null;
+    if (vto == null || !vto.isAlive()) {
+      return false;
+    }
+    vto.registerFrameCommitCallback(callback);
+    return true;
   }
 
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    if (currentImage != null) {
+    if (currentDisplayedImage != null) {
+      if (!currentDisplayedImageDrawn) {
+        updateBitmapFromImage(currentDisplayedImage.image);
+        currentDisplayedImageDrawn = true;
+      }
+      if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+        if (retiringDisplayedImage != null && !retiringDisplayedImage.commitCallbackRegistered) {
+          final DisplayedImage retiringAtDraw = this.retiringDisplayedImage;
+          retiringAtDraw.commitCallbackRegistered = true;
+          if (pendingCommitDisplayedImage != null
+              && pendingCommitDisplayedImage != retiringAtDraw) {
+            pendingCommitDisplayedImage.releaseOnce();
+          }
+          pendingCommitDisplayedImage = retiringAtDraw;
+          final Runnable releaseRetiringCallback =
+              () -> {
+                retiringAtDraw.releaseOnce();
+                if (this.pendingCommitDisplayedImage == retiringAtDraw) {
+                  this.pendingCommitDisplayedImage = null;
+                }
+                if (this.retiringDisplayedImage == retiringAtDraw) {
+                  this.retiringDisplayedImage = null;
+                }
+              };
+          if (!registerFrameCommitCallback(releaseRetiringCallback)) {
+            releaseRetiringCallback.run();
+          }
+        }
+      } else {
+        // Below API 29, updateBitmapFromImage copies the plane buffer into a software Bitmap,
+        // so neither retiringDisplayedImage nor currentDisplayedImage is referenced by Canvas.
+        if (pendingCommitDisplayedImage != null) {
+          pendingCommitDisplayedImage.releaseOnce();
+          pendingCommitDisplayedImage = null;
+        }
+        if (retiringDisplayedImage != null) {
+          retiringDisplayedImage.releaseOnce();
+          retiringDisplayedImage = null;
+        }
+        currentDisplayedImage.releaseOnce();
+        currentDisplayedImage = null;
+        currentDisplayedImageDrawn = false;
+      }
+    } else if (currentImage != null) {
       updateCurrentBitmap();
     }
     if (currentBitmap != null) {
@@ -327,8 +540,12 @@ public class FlutterImageView extends View implements RenderSurface {
     if (currentImage == null) {
       return;
     }
+    updateBitmapFromImage(currentImage);
+  }
+
+  private void updateBitmapFromImage(@NonNull Image image) {
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      final HardwareBuffer buffer = currentImage.getHardwareBuffer();
+      final HardwareBuffer buffer = image.getHardwareBuffer();
       if (buffer == null) {
         return;
       }
@@ -338,14 +555,14 @@ public class FlutterImageView extends View implements RenderSurface {
         buffer.close();
       }
     } else {
-      final Image.Plane[] imagePlanes = currentImage.getPlanes();
+      final Image.Plane[] imagePlanes = image.getPlanes();
       if (imagePlanes == null || imagePlanes.length != 1) {
         return;
       }
 
       final Image.Plane imagePlane = imagePlanes[0];
       final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
-      final int desiredHeight = currentImage.getHeight();
+      final int desiredHeight = image.getHeight();
 
       if (currentBitmap == null
           || currentBitmap.getWidth() != desiredWidth
@@ -360,8 +577,27 @@ public class FlutterImageView extends View implements RenderSurface {
     }
   }
 
+  @VisibleForTesting
+  @Nullable
+  Bitmap getCurrentBitmapForTest() {
+    return currentBitmap;
+  }
+
+  @VisibleForTesting
+  boolean hasCurrentDisplayedImageForTest() {
+    return currentDisplayedImage != null;
+  }
+
+  @VisibleForTesting
+  boolean hasRetiringDisplayedImageForTest() {
+    return retiringDisplayedImage != null;
+  }
+
   @Override
   protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+    if (imageReader == null) {
+      return;
+    }
     if (!isImageReaderClosed
         && width == imageReader.getWidth()
         && height == imageReader.getHeight()) {

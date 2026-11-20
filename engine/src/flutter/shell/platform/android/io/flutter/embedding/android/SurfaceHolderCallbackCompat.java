@@ -92,8 +92,12 @@ public class SurfaceHolderCallbackCompat implements SurfaceHolder.Callback2 {
         @Override
         public void onFlutterUiDisplayed() {
           Log.v(TAG, "onFlutterUiDisplayed()");
-          // Now that a frame is ready to display, take this SurfaceView from transparent to opaque.
-          flutterSurfaceView.setAlpha(1.0f);
+          // Now that a frame is ready to display, take this SurfaceView from transparent to opaque
+          // unless Hybrid Composition is currently hiding the root SurfaceView behind
+          // hcBackgroundImageView.
+          if (!flutterSurfaceView.isHiddenForHybridComposition()) {
+            flutterSurfaceView.setAlpha(1.0f);
+          }
 
           if (flutterRenderer != null) {
             flutterRenderer.removeIsDisplayingFlutterUiListener(this);

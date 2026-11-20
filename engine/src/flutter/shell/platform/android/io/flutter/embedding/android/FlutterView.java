@@ -14,6 +14,7 @@ import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
+import android.media.Image;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,6 +33,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
+import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -117,6 +119,10 @@ public class FlutterView extends FrameLayout
   // Maximum size allowed for a content sized view.
   @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
 
+  // Fully transparent and fully opaque View alpha constants for root surface visibility toggling.
+  private static final float TRANSPARENT_ALPHA = 0.0f;
+  private static final float OPAQUE_ALPHA = 1.0f;
+
   // Flag to enable content sizing.
   @VisibleForTesting boolean isContentSizingEnabled = false;
 
@@ -124,6 +130,10 @@ public class FlutterView extends FrameLayout
   @Nullable private FlutterSurfaceView flutterSurfaceView;
   @Nullable private FlutterTextureView flutterTextureView;
   @Nullable private FlutterImageView flutterImageView;
+  @Nullable private FlutterImageView hcBackgroundImageView;
+  private long hcBackgroundRemovalGeneration = 0;
+  private boolean hcBackgroundRemovalPending = false;
+  private boolean hcSurfaceZOrderOverridden = false;
 
   @Nullable @VisibleForTesting /* package */ RenderSurface renderSurface;
   @Nullable private RenderSurface previousRenderSurface;
@@ -584,12 +594,23 @@ public class FlutterView extends FrameLayout
    */
   @Override
   protected void onDetachedFromWindow() {
+    if (hcBackgroundRemovalPending) {
+      hideHybridCompositionBackgroundForSurfaceDestroy();
+    }
     if (windowInfoRepo != null && windowInfoListener != null) {
       windowInfoRepo.removeWindowLayoutInfoListener(windowInfoListener);
     }
     windowInfoListener = null;
     this.windowInfoRepo = null;
     super.onDetachedFromWindow();
+  }
+
+  @Override
+  protected void onWindowVisibilityChanged(int visibility) {
+    super.onWindowVisibilityChanged(visibility);
+    if (visibility != View.VISIBLE && hcBackgroundRemovalPending) {
+      removeHybridCompositionBackgroundNow();
+    }
   }
 
   /**
@@ -1352,6 +1373,7 @@ public class FlutterView extends FrameLayout
     // Detach platform views only after stopRenderingToSurface() has drained in-flight raster work.
     flutterEngine.getPlatformViewsController().detachFromView();
     flutterEngine.getPlatformViewsController2().detachFromView();
+    removeHybridCompositionBackgroundNow();
 
     // Revert the image view to previous surface
     if (previousRenderSurface != null && renderSurface == flutterImageView) {
@@ -1374,6 +1396,205 @@ public class FlutterView extends FrameLayout
       // FlutterActivity/FlutterFragment share one engine.
       removeView(flutterImageView);
       flutterImageView = null;
+    }
+  }
+
+  /**
+   * Returns whether the root surface is a {@link FlutterSurfaceView} configured to render
+   * transparently ({@code setZOrderOnTop(true)}).
+   */
+  public boolean isRootSurfaceTransparent() {
+    return flutterSurfaceView != null && flutterSurfaceView.isRenderTransparently();
+  }
+
+  @VisibleForTesting
+  @NonNull
+  public FlutterImageView createHcBackgroundImageView() {
+    return new FlutterImageView(getContext(), FlutterImageView.SurfaceKind.background);
+  }
+
+  @VisibleForTesting
+  @Nullable
+  public FlutterImageView getHybridCompositionBackgroundImageView() {
+    return hcBackgroundImageView;
+  }
+
+  private int computeHcBackgroundInsertionIndex() {
+    int baseIndex = -1;
+    if (renderSurface instanceof View) {
+      baseIndex = Math.max(baseIndex, indexOfChild((View) renderSurface));
+    }
+    if (previousRenderSurface instanceof View) {
+      baseIndex = Math.max(baseIndex, indexOfChild((View) previousRenderSurface));
+    }
+    final int desiredIndex = baseIndex + 1;
+    return Math.max(0, Math.min(desiredIndex, getChildCount()));
+  }
+
+  private void hideRootSurfaceForHybridComposition() {
+    if (flutterSurfaceView != null) {
+      flutterSurfaceView.setHiddenForHybridComposition(true);
+      flutterSurfaceView.setAlpha(TRANSPARENT_ALPHA);
+      if (flutterSurfaceView.isRenderTransparently()
+          && Build.VERSION.SDK_INT >= API_LEVELS.API_30
+          && getContext().getApplicationInfo() != null
+          && getContext().getApplicationInfo().targetSdkVersion >= API_LEVELS.API_30) {
+        flutterSurfaceView.setZOrderOnTop(false);
+        hcSurfaceZOrderOverridden = true;
+      }
+    }
+    if (flutterTextureView != null) {
+      flutterTextureView.setAlpha(TRANSPARENT_ALPHA);
+    }
+    if (renderSurface instanceof View
+        && renderSurface != flutterSurfaceView
+        && renderSurface != flutterTextureView
+        && renderSurface != hcBackgroundImageView) {
+      ((View) renderSurface).setAlpha(TRANSPARENT_ALPHA);
+    }
+  }
+
+  private void restoreRootSurfaceAfterHybridComposition() {
+    if (flutterSurfaceView != null) {
+      flutterSurfaceView.setHiddenForHybridComposition(false);
+      if (hcSurfaceZOrderOverridden) {
+        hcSurfaceZOrderOverridden = false;
+        if (flutterSurfaceView.isRenderTransparently()
+            && Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
+          flutterSurfaceView.setZOrderOnTop(true);
+        }
+      }
+      flutterSurfaceView.setAlpha(OPAQUE_ALPHA);
+    }
+    if (flutterTextureView != null) {
+      flutterTextureView.setAlpha(OPAQUE_ALPHA);
+    }
+    if (renderSurface instanceof View
+        && renderSurface != flutterSurfaceView
+        && renderSurface != flutterTextureView
+        && renderSurface != hcBackgroundImageView) {
+      ((View) renderSurface).setAlpha(OPAQUE_ALPHA);
+    }
+  }
+
+  /**
+   * Displays a synchronized Hybrid Composition background {@link Image} immediately above {@link
+   * #renderSurface} without pausing or detaching the root {@link RenderSurface}.
+   */
+  public void showHybridCompositionBackgroundImage(
+      @NonNull Image image, @Nullable Runnable releaseCallback) {
+    ++hcBackgroundRemovalGeneration;
+    hcBackgroundRemovalPending = false;
+    if (hcBackgroundImageView == null) {
+      hcBackgroundImageView = createHcBackgroundImageView();
+    }
+    hcBackgroundImageView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+    if (hcBackgroundImageView.getParent() != this) {
+      if (hcBackgroundImageView.getParent() instanceof ViewGroup) {
+        ((ViewGroup) hcBackgroundImageView.getParent()).removeView(hcBackgroundImageView);
+      }
+      addView(
+          hcBackgroundImageView,
+          computeHcBackgroundInsertionIndex(),
+          new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    }
+    hcBackgroundImageView.setVisibility(View.VISIBLE);
+    hideRootSurfaceForHybridComposition();
+    hcBackgroundImageView.setImage(image, releaseCallback);
+  }
+
+  @RequiresApi(API_LEVELS.API_29)
+  @VisibleForTesting
+  boolean registerHcFrameCommitCallback(@NonNull Runnable callback) {
+    if (!isAttachedToWindow() || getWindowVisibility() != View.VISIBLE) {
+      return false;
+    }
+    final View rootView = getRootView();
+    final ViewTreeObserver vto = rootView != null ? rootView.getViewTreeObserver() : null;
+    if (vto == null || !vto.isAlive()) {
+      return false;
+    }
+    vto.registerFrameCommitCallback(callback);
+    return true;
+  }
+
+  /**
+   * Schedules removal of the Hybrid Composition background {@link FlutterImageView} and restoration
+   * of {@link #renderSurface} after the current exit traversal commits.
+   */
+  public void scheduleHybridCompositionBackgroundRemoval() {
+    if (hcBackgroundImageView == null) {
+      ++hcBackgroundRemovalGeneration;
+      hcBackgroundRemovalPending = false;
+      restoreRootSurfaceAfterHybridComposition();
+      return;
+    }
+    if (hcBackgroundRemovalPending) {
+      return;
+    }
+    final long generation = ++hcBackgroundRemovalGeneration;
+    hcBackgroundRemovalPending = true;
+    final Runnable commitRemoval =
+        () -> {
+          if (hcBackgroundRemovalGeneration != generation || !hcBackgroundRemovalPending) {
+            return;
+          }
+          removeHybridCompositionBackgroundNow();
+        };
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+      hcBackgroundImageView.invalidate();
+      invalidate();
+      if (!registerHcFrameCommitCallback(commitRemoval)) {
+        commitRemoval.run();
+      }
+    } else if (isAttachedToWindow() && getWindowVisibility() == View.VISIBLE) {
+      post(commitRemoval);
+    } else {
+      commitRemoval.run();
+    }
+  }
+
+  /**
+   * Releases displayed Hybrid Composition background images and hides the background view safely
+   * during {@code onSurfaceDestroyed()} without mutating {@code FlutterView}'s child array
+   * synchronously inside {@code ViewGroup.dispatchDetachedFromWindow()} (see #97679).
+   */
+  public void hideHybridCompositionBackgroundForSurfaceDestroy() {
+    final long generation = ++hcBackgroundRemovalGeneration;
+    hcBackgroundRemovalPending = false;
+    restoreRootSurfaceAfterHybridComposition();
+    if (hcBackgroundImageView == null) {
+      return;
+    }
+    hcBackgroundImageView.releaseDisplayedImages();
+    hcBackgroundImageView.setVisibility(View.GONE);
+    final FlutterImageView viewToRemove = hcBackgroundImageView;
+    new Handler(Looper.getMainLooper())
+        .post(
+            () -> {
+              if (hcBackgroundRemovalGeneration == generation
+                  && hcBackgroundImageView == viewToRemove
+                  && viewToRemove.getVisibility() == View.GONE) {
+                if (viewToRemove.getParent() == FlutterView.this) {
+                  removeView(viewToRemove);
+                }
+                hcBackgroundImageView = null;
+              }
+            });
+  }
+
+  /** Immediately releases and removes the Hybrid Composition background view if present. */
+  public void removeHybridCompositionBackgroundNow() {
+    ++hcBackgroundRemovalGeneration;
+    hcBackgroundRemovalPending = false;
+    restoreRootSurfaceAfterHybridComposition();
+    if (hcBackgroundImageView != null) {
+      hcBackgroundImageView.releaseDisplayedImages();
+      hcBackgroundImageView.setVisibility(View.GONE);
+      if (hcBackgroundImageView.getParent() == this) {
+        removeView(hcBackgroundImageView);
+      }
+      hcBackgroundImageView = null;
     }
   }
 
@@ -1406,9 +1627,17 @@ public class FlutterView extends FrameLayout
     }
     renderSurface.pause();
 
+    final boolean hcBackgroundVisible =
+        hcBackgroundImageView != null
+            && hcBackgroundImageView.getParent() == this
+            && hcBackgroundImageView.getVisibility() == View.VISIBLE;
     if (flutterImageView == null) {
       flutterImageView = createImageView();
-      addView(flutterImageView);
+      if (hcBackgroundVisible) {
+        addView(flutterImageView, indexOfChild(hcBackgroundImageView));
+      } else {
+        addView(flutterImageView);
+      }
     } else {
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
       flutterImageView.drainPendingImages();
@@ -1418,6 +1647,9 @@ public class FlutterView extends FrameLayout
     renderSurface = flutterImageView;
     if (flutterEngine != null) {
       renderSurface.attachToRenderer(flutterEngine.getRenderer());
+    }
+    if (hcBackgroundVisible) {
+      flutterImageView.setAlpha(TRANSPARENT_ALPHA);
     }
   }
 
@@ -1516,8 +1748,13 @@ public class FlutterView extends FrameLayout
   }
 
   public boolean acquireLatestImageViewFrame() {
+    if (hcBackgroundImageView != null
+        && hcBackgroundImageView.getParent() == this
+        && hcBackgroundImageView.getVisibility() == View.VISIBLE) {
+      return hcBackgroundImageView.pollLatestImageViewFrame();
+    }
     if (flutterImageView != null) {
-      return flutterImageView.acquireLatestImage();
+      return flutterImageView.pollLatestImageViewFrame();
     }
     return false;
   }

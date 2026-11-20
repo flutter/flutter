@@ -24,6 +24,17 @@ public class PlatformOverlayView extends FlutterImageView {
     this.accessibilityDelegate = accessibilityDelegate;
   }
 
+  /**
+   * Constructs a display-only {@code PlatformOverlayView} that presents {@link android.media.Image}
+   * buffers supplied via {@link #setImage(android.media.Image, Runnable)} without allocating its
+   * own {@link android.media.ImageReader}.
+   */
+  public PlatformOverlayView(
+      @NonNull Context context, @Nullable AccessibilityEventsDelegate accessibilityDelegate) {
+    super(context, FlutterImageView.SurfaceKind.overlay);
+    this.accessibilityDelegate = accessibilityDelegate;
+  }
+
   public PlatformOverlayView(@NonNull Context context) {
     this(context, 1, 1, null);
   }

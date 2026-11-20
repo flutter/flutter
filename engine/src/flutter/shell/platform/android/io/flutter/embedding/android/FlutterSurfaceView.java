@@ -38,6 +38,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
   private final boolean renderTransparently;
   private boolean isSurfaceAvailableForRendering = false;
   private boolean isPaused = false;
+  private boolean hiddenForHybridComposition = false;
   @Nullable private FlutterRenderer flutterRenderer;
 
   private boolean isContentSizingEnabled = false;
@@ -142,7 +143,7 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
   // See https://github.com/flutter/flutter/issues/73413 for context.
   @Override
   public boolean gatherTransparentRegion(Region region) {
-    if (getAlpha() < 1.0f) {
+    if (hiddenForHybridComposition || getAlpha() < 1.0f) {
       return false;
     }
     final int[] location = new int[2];
@@ -154,6 +155,18 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
         location[1] + getBottom() - getTop(),
         Region.Op.DIFFERENCE);
     return true;
+  }
+
+  /* package */ boolean isRenderTransparently() {
+    return renderTransparently;
+  }
+
+  /* package */ boolean isHiddenForHybridComposition() {
+    return hiddenForHybridComposition;
+  }
+
+  /* package */ void setHiddenForHybridComposition(boolean hidden) {
+    this.hiddenForHybridComposition = hidden;
   }
 
   @Nullable
