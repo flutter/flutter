@@ -11,6 +11,7 @@
 #include <optional>
 
 #include "flutter/flow/frame_timings.h"
+#include "flutter/flow/layers/container_layer.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/thread_host.h"
@@ -95,6 +96,11 @@ class MockSurface : public Surface {
 
 class MockExternalViewEmbedder : public ExternalViewEmbedder {
  public:
+  MockExternalViewEmbedder() {
+    ON_CALL(*this, SupportsPartialRepaint()).WillByDefault(Return(false));
+    ON_CALL(*this, DidLastSubmitSucceed()).WillByDefault(Return(true));
+  }
+
   MOCK_METHOD(DlCanvas*, GetRootCanvas, (), (override));
   MOCK_METHOD(void, CancelFrame, (), (override));
   MOCK_METHOD(
@@ -131,6 +137,8 @@ class MockExternalViewEmbedder : public ExternalViewEmbedder {
        const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger),
       (override));
   MOCK_METHOD(bool, SupportsDynamicThreadMerging, (), (override));
+  MOCK_METHOD(bool, SupportsPartialRepaint, (), (const, override));
+  MOCK_METHOD(bool, DidLastSubmitSucceed, (), (const, override));
 };
 
 #if IMPELLER_SUPPORTS_RENDERING
@@ -1446,6 +1454,189 @@ TEST(RasterizerTest,
   EXPECT_EQ(make_current_calls, 2);
 }
 #endif  // !SLIMPELLER
+
+TEST(RasterizerTest,
+     FailedEmbedderSubmitKeepsNextFrameCallbackArmedUntilSubsequentSuccess) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, ShouldDiscardLayerTree).WillByDefault(Return(false));
+
+  // Two-frame pipeline depth for exercising cold-start failure then retry.
+  constexpr uint32_t kTestPipelineDepth = 4;
+  constexpr int kTestFrameExtentPx = 400;
+  const DlISize frame_size(kTestFrameExtentPx, kTestFrameExtentPx);
+
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  ON_CALL(*surface, AcquireFrame(frame_size)).WillByDefault([frame_size] {
+    SurfaceFrame::FramebufferInfo framebuffer_info;
+    framebuffer_info.supports_readback = true;
+    return std::make_unique<SurfaceFrame>(
+        /*surface=*/nullptr, framebuffer_info,
+        /*encode_callback=*/[](const SurfaceFrame&, DlCanvas*) { return true; },
+        /*submit_callback=*/[](const SurfaceFrame&) { return true; },
+        frame_size);
+  });
+
+  auto embedder = std::make_shared<NiceMock<MockExternalViewEmbedder>>();
+  EXPECT_CALL(*embedder, SupportsDynamicThreadMerging())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(*embedder, DidLastSubmitSucceed())
+      .WillOnce(Return(false))
+      .WillOnce(Return(true));
+
+  int next_frame_callback_fires = 0;
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto rasterizer = std::make_unique<Rasterizer>(delegate);
+    rasterizer->SetExternalViewEmbedder(embedder);
+    rasterizer->Setup(std::move(surface));
+    rasterizer->SetNextFrameCallback([&] { ++next_frame_callback_fires; });
+
+    auto pipeline = std::make_shared<FramePipeline>(kTestPipelineDepth);
+
+    // Frame 1: embedder reports DidLastSubmitSucceed() == false -> callback
+    // must remain armed without firing prematurely.
+    auto tree1 = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                             /*frame_size=*/frame_size);
+    auto item1 = std::make_unique<FrameItem>(
+        SingleLayerTreeList(kImplicitViewId, std::move(tree1),
+                            kDevicePixelRatio),
+        CreateFinishedBuildRecorder());
+    EXPECT_TRUE(pipeline->Produce().Complete(std::move(item1)).success);
+    rasterizer->Draw(pipeline);
+    EXPECT_EQ(next_frame_callback_fires, 0);
+
+    // Frame 2: embedder reports DidLastSubmitSucceed() == true -> callback
+    // fires exactly once.
+    auto tree2 = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                             /*frame_size=*/frame_size);
+    auto item2 = std::make_unique<FrameItem>(
+        SingleLayerTreeList(kImplicitViewId, std::move(tree2),
+                            kDevicePixelRatio),
+        CreateFinishedBuildRecorder());
+    EXPECT_TRUE(pipeline->Produce().Complete(std::move(item2)).success);
+    rasterizer->Draw(pipeline);
+    EXPECT_EQ(next_frame_callback_fires, 1);
+
+    rasterizer->Teardown();
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(RasterizerTest,
+     ExternalViewEmbedderSupportsPartialRepaintPreservesBufferDamage) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  ON_CALL(delegate, GetTaskRunners()).WillByDefault(ReturnRef(task_runners));
+  ON_CALL(delegate, ShouldDiscardLayerTree).WillByDefault(Return(false));
+
+  // Two-frame pipeline depth for seeding last_successful_task then diffing.
+  constexpr uint32_t kTestPipelineDepth = 4;
+  constexpr int kFrameWidthPx = 400;
+  constexpr int kFrameHeightPx = 400;
+  constexpr int kExistingDamageExtentPx = 50;
+  const DlISize frame_size(kFrameWidthPx, kFrameHeightPx);
+  const DlIRect existing_damage_rect =
+      DlIRect::MakeXYWH(0, 0, kExistingDamageExtentPx, kExistingDamageExtentPx);
+
+  auto surface = std::make_unique<NiceMock<MockSurface>>();
+  EXPECT_CALL(*surface, AllowsDrawingWhenGpuDisabled())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillRepeatedly([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  ON_CALL(*surface, AcquireFrame(frame_size))
+      .WillByDefault([frame_size, existing_damage_rect] {
+        SurfaceFrame::FramebufferInfo framebuffer_info;
+        framebuffer_info.supports_readback = true;
+        framebuffer_info.supports_partial_repaint = true;
+        framebuffer_info.existing_damage = existing_damage_rect;
+        return std::make_unique<SurfaceFrame>(
+            /*surface=*/SkSurfaces::Null(kFrameWidthPx, kFrameHeightPx),
+            framebuffer_info,
+            /*encode_callback=*/
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            /*submit_callback=*/[](const SurfaceFrame&) { return true; },
+            frame_size);
+      });
+
+  auto embedder = std::make_shared<NiceMock<MockExternalViewEmbedder>>();
+  EXPECT_CALL(*embedder, SupportsDynamicThreadMerging())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(*embedder, SupportsPartialRepaint()).WillRepeatedly(Return(true));
+
+  std::vector<std::optional<DlIRect>> submitted_buffer_damages;
+  ON_CALL(*embedder, SubmitFlutterView(kImplicitViewId, _, _, _))
+      .WillByDefault([&](int64_t, GrDirectContext*,
+                         const std::shared_ptr<impeller::AiksContext>&,
+                         std::unique_ptr<SurfaceFrame> submitted_frame) {
+        submitted_buffer_damages.push_back(
+            submitted_frame->submit_info().buffer_damage);
+        submitted_frame->Submit();
+      });
+
+  fml::AutoResetWaitableEvent latch;
+  thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
+    auto rasterizer = std::make_unique<Rasterizer>(delegate);
+    rasterizer->SetExternalViewEmbedder(embedder);
+    rasterizer->Setup(std::move(surface));
+
+    auto pipeline = std::make_shared<FramePipeline>(kTestPipelineDepth);
+    for (int i = 0; i < 2; ++i) {
+      auto root = std::make_shared<ContainerLayer>();
+      auto tree = std::make_unique<LayerTree>(root, frame_size);
+      auto item = std::make_unique<FrameItem>(
+          SingleLayerTreeList(kImplicitViewId, std::move(tree),
+                              kDevicePixelRatio),
+          CreateFinishedBuildRecorder());
+      EXPECT_TRUE(pipeline->Produce().Complete(std::move(item)).success);
+      rasterizer->Draw(pipeline);
+    }
+
+    rasterizer->Teardown();
+    latch.Signal();
+  });
+  latch.Wait();
+
+  ASSERT_EQ(submitted_buffer_damages.size(), 2u);
+  // Second frame has an unchanged LayerTree and SupportsPartialRepaint() ==
+  // true, so buffer_damage equals existing_damage rather than the full 400x400
+  // frame.
+  EXPECT_EQ(submitted_buffer_damages[1],
+            std::optional<DlIRect>(existing_damage_rect));
+}
 
 TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
   GTEST_SKIP() << "eglPresentationTime is disabled due to "

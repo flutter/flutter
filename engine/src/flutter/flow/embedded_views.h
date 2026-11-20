@@ -520,6 +520,15 @@ class ExternalViewEmbedder {
   // |RasterThreadMerger| instance.
   virtual bool SupportsDynamicThreadMerging();
 
+  // Whether the embedder allows the rasterizer to compute and submit partial
+  // frame/buffer damage when `SubmitFlutterView` is active.
+  virtual bool SupportsPartialRepaint() const { return false; }
+
+  // Whether the most recent `SubmitFlutterView` invocation succeeded. Returning
+  // `false` causes the rasterizer to treat the view draw as failed so
+  // `next_frame_callback_` remains armed until a subsequent frame succeeds.
+  virtual bool DidLastSubmitSucceed() const { return true; }
+
   // Called when the rasterizer is being torn down.
   // This method provides a way to release resources associated with the current
   // embedder.

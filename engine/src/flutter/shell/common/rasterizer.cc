@@ -718,6 +718,8 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
 
   // Second traverse: draw all layer trees.
+  const bool had_tasks = !tasks.empty();
+  bool any_draw_succeeded = false;
   std::vector<std::unique_ptr<LayerTreeTask>> resubmitted_tasks;
   for (std::unique_ptr<LayerTreeTask>& task : tasks) {
     int64_t view_id = task->view_id;
@@ -731,6 +733,7 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
     auto& view_record = EnsureViewRecord(task->view_id);
     view_record.last_draw_status = status;
     if (status == DrawSurfaceStatus::kSuccess) {
+      any_draw_succeeded = true;
       view_record.last_successful_task = std::make_unique<LayerTreeTask>(
           view_id, std::move(layer_tree), device_pixel_ratio);
     } else if (status == DrawSurfaceStatus::kRetry) {
@@ -743,7 +746,9 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   frame_timings_recorder.RecordRasterEnd(
       NOT_SLIMPELLER(&compositor_context_->raster_cache()));
 
-  FireNextFrameCallbackIfPresent();
+  if (!had_tasks || any_draw_succeeded) {
+    FireNextFrameCallbackIfPresent();
+  }
 
 #if !SLIMPELLER
   if (surface_->GetContext()) {
@@ -818,13 +823,14 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
     // when leaf layer tracing is enabled we wish to repaint the whole frame
     // for accurate performance metrics.
     if (frame->framebuffer_info().supports_partial_repaint) {
-      // Disable partial repaint if external_view_embedder_ SubmitFlutterView is
-      // involved - ExternalViewEmbedder unconditionally clears the entire
-      // surface and also partial repaint with platform view present is
-      // something that still need to be figured out.
+      // Disable partial repaint when `ExternalViewEmbedder::SubmitFlutterView`
+      // is active unless the embedder explicitly reports that the current frame
+      // can safely use partial repaint (for example, Android non-HCPP frames
+      // outside an active or pending Hybrid Composition session).
       bool force_full_repaint =
           external_view_embedder_ &&
-          (!raster_thread_merger_ || raster_thread_merger_->IsMerged());
+          (!raster_thread_merger_ || raster_thread_merger_->IsMerged()) &&
+          !external_view_embedder_->SupportsPartialRepaint();
 
       damage = std::make_unique<FrameDamage>();
       auto existing_damage = frame->framebuffer_info().existing_damage;
@@ -860,12 +866,15 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 
     frame->set_submit_info(submit_info);
 
+    bool embedder_submit_succeeded = true;
     if (external_view_embedder_ &&
         (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
       FML_DCHECK(!frame->IsSubmitted());
       external_view_embedder_->SubmitFlutterView(
           view_id, surface_->GetContext(), surface_->GetAiksContext(),
           std::move(frame));
+      embedder_submit_succeeded =
+          external_view_embedder_->DidLastSubmitSucceed();
     } else {
       frame->Submit();
     }
@@ -873,10 +882,14 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 #if !SLIMPELLER
     // Do not update raster cache metrics for kResubmit because that status
     // indicates that the frame was not actually painted.
-    if (frame_status != RasterStatus::kResubmit) {
+    if (frame_status != RasterStatus::kResubmit && embedder_submit_succeeded) {
       compositor_context_->raster_cache().EndFrame();
     }
 #endif  //  !SLIMPELLER
+
+    if (!embedder_submit_succeeded) {
+      return DrawSurfaceStatus::kFailed;
+    }
 
     if (frame_status == RasterStatus::kResubmit) {
       return DrawSurfaceStatus::kRetry;
