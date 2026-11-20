@@ -13,6 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'list_tile_tester.dart';
+import 'semantics_tester.dart';
 
 class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({super.parent});
@@ -3589,6 +3590,199 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(NestedScrollView)), Size.zero);
+  });
+
+  group('semantic scroll actions', () {
+    const scrollActions = <SemanticsAction>[
+      SemanticsAction.scrollUp,
+      SemanticsAction.scrollDown,
+      SemanticsAction.scrollToOffset,
+    ];
+
+    Widget buildNestedScrollView({
+      required GlobalKey<NestedScrollViewState> key,
+      required int itemCount,
+      required double itemExtent,
+      ScrollPhysics? physics,
+      bool floatHeaderSlivers = false,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: NestedScrollView(
+            key: key,
+            physics: physics,
+            floatHeaderSlivers: floatHeaderSlivers,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                if (floatHeaderSlivers)
+                  const SliverPersistentHeader(
+                    floating: true,
+                    delegate: TestHeader(minExtent: 200.0, maxExtent: 200.0),
+                  )
+                else
+                  const SliverToBoxAdapter(child: SizedBox(height: 200.0, child: Text('Header'))),
+              ];
+            },
+            body: ListView.builder(
+              physics: physics,
+              itemCount: itemCount,
+              itemExtent: itemExtent,
+              itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('scroll up moves the inner position after the header collapses', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(buildNestedScrollView(key: key, itemCount: 50, itemExtent: 50.0));
+
+      final ScrollController outerController = key.currentState!.outerController;
+      final ScrollController innerController = key.currentState!.innerController;
+      expect(outerController.offset, 0.0);
+      expect(innerController.offset, 0.0);
+
+      // Only the outer scrollable handles the semantic scroll actions.
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics
+            .nodesWith(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
+            )
+            .single
+            .id,
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      // The 480.0 scroll collapses the header, then scrolls the body.
+      expect(outerController.offset, 200.0);
+      expect(innerController.offset, 280.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('scroll down moves the inner position after a floating header expands', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(
+        buildNestedScrollView(key: key, itemCount: 50, itemExtent: 50.0, floatHeaderSlivers: true),
+      );
+
+      final ScrollController outerController = key.currentState!.outerController;
+      final ScrollController innerController = key.currentState!.innerController;
+
+      // Collapse the header and scroll the body.
+      await tester.drag(find.byType(NestedScrollView), const Offset(0.0, -500.0));
+      await tester.pumpAndSettle();
+      expect(outerController.offset, 200.0);
+      expect(innerController.offset, 300.0);
+
+      // Float most of the header back in.
+      await tester.drag(find.byType(NestedScrollView), const Offset(0.0, 190.0));
+      await tester.pumpAndSettle();
+      expect(outerController.offset, 10.0);
+      expect(innerController.offset, 300.0);
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics.nodesWith(actions: scrollActions).single.id,
+        SemanticsAction.scrollDown,
+      );
+      await tester.pumpAndSettle();
+
+      expect(outerController.offset, 0.0);
+      expect(innerController.offset, 0.0);
+
+      semantics.dispose();
+    });
+
+    testWidgets('scroll up near the max extent does not overscroll with BouncingScrollPhysics', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(
+        buildNestedScrollView(
+          key: key,
+          itemCount: 16,
+          itemExtent: 40.0,
+          physics: const BouncingScrollPhysics(),
+        ),
+      );
+
+      final ScrollController outerController = key.currentState!.outerController;
+      final ScrollController innerController = key.currentState!.innerController;
+
+      outerController.jumpTo(190.0);
+      await tester.pump();
+      expect(innerController.position.maxScrollExtent, 50.0);
+
+      var innerWasOutOfRange = false;
+      innerController.addListener(() {
+        if (innerController.position.outOfRange) {
+          innerWasOutOfRange = true;
+        }
+      });
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics.nodesWith(actions: scrollActions).single.id,
+        SemanticsAction.scrollUp,
+      );
+      await tester.pumpAndSettle();
+
+      expect(outerController.offset, 200.0);
+      expect(innerController.offset, 40.0);
+      expect(innerWasOutOfRange, isFalse);
+
+      semantics.dispose();
+    });
+
+    testWidgets('scroll down near the min extent does not overscroll with BouncingScrollPhysics', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(
+        buildNestedScrollView(
+          key: key,
+          itemCount: 20,
+          itemExtent: 40.0,
+          physics: const BouncingScrollPhysics(),
+        ),
+      );
+
+      final ScrollController outerController = key.currentState!.outerController;
+      final ScrollController innerController = key.currentState!.innerController;
+
+      outerController.jumpTo(10.0);
+      await tester.pump();
+
+      double minInnerObserved = innerController.offset;
+      innerController.addListener(() {
+        if (innerController.offset < minInnerObserved) {
+          minInnerObserved = innerController.offset;
+        }
+      });
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        semantics.nodesWith(actions: scrollActions).single.id,
+        SemanticsAction.scrollDown,
+      );
+      await tester.pumpAndSettle();
+
+      expect(outerController.offset, 0.0);
+      expect(innerController.offset, 0.0);
+      expect(minInnerObserved, 0.0);
+
+      semantics.dispose();
+    });
   });
 }
 
