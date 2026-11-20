@@ -51,8 +51,11 @@ jobs:
           # Base the branch on upstream's master to avoid issues if the fork's master is out of date
           git checkout -b "$PR_BRANCH" upstream/master
 
-          # Retrieve the file from stable directly into the working directory
-          git show stable:CHANGELOG.md > CHANGELOG.md
+          # Merge release sections from stable without deleting older minor hotfixes on master
+          python3 -B -m unittest discover -s .github/scripts -p 'test_*.py'
+          STABLE_CHANGELOG="$RUNNER_TEMP/stable_CHANGELOG.md"
+          git show stable:CHANGELOG.md > "$STABLE_CHANGELOG"
+          python3 -B .github/scripts/merge_changelog.py CHANGELOG.md "$STABLE_CHANGELOG"
 
           # Stop if no changes are detected
           if git diff --quiet CHANGELOG.md; then
