@@ -80,6 +80,14 @@ G_DEFINE_TYPE_WITH_CODE(
                               fl_view_plugin_registry_iface_init))
 
 #if FLUTTER_LINUX_GTK4
+static void schedule_native_texture_retry(FlView* self) {
+  if (self->native_texture_retry_source_id == 0) {
+    self->native_texture_retry_source_id =
+        g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
+                           g_object_ref(self), g_object_unref);
+  }
+}
+
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
   TRACE_EVENT0("flutter", "GTK4UpdateTexture");
@@ -108,11 +116,7 @@ static gboolean redraw_cb(gpointer user_data) {
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
                                 logical_frame_width, logical_frame_height);
-    if (self->native_texture_retry_source_id == 0) {
-      self->native_texture_retry_source_id =
-          g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
-                             g_object_ref(self), g_object_unref);
-    }
+    schedule_native_texture_retry(self);
     // A popover is its own native surface. Resizing its content must not
     // resize the parent window returned by gtk_widget_get_root().
     GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->render_area));
@@ -130,11 +134,7 @@ static gboolean redraw_cb(gpointer user_data) {
   }
 
   if (width == 0 || height == 0) {
-    if (self->native_texture_retry_source_id == 0) {
-      self->native_texture_retry_source_id =
-          g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
-                             g_object_ref(self), g_object_unref);
-    }
+    schedule_native_texture_retry(self);
     return G_SOURCE_REMOVE;
   }
 
@@ -177,11 +177,8 @@ static gboolean redraw_cb(gpointer user_data) {
         g_source_remove(self->native_texture_retry_source_id);
         self->native_texture_retry_source_id = 0;
       }
-    } else if (!self->native_texture_ready &&
-               self->native_texture_retry_source_id == 0) {
-      self->native_texture_retry_source_id =
-          g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
-                             g_object_ref(self), g_object_unref);
+    } else if (!self->native_texture_ready) {
+      schedule_native_texture_retry(self);
     }
   }
 
