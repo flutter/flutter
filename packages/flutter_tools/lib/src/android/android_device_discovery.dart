@@ -5,7 +5,6 @@
 import 'package:process/process.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -74,7 +73,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
-    String text;
+    final String text;
     try {
       text = (await _processUtils.run(<String>[
         _androidSdk!.adbPath!,
@@ -82,11 +81,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
         '-l',
       ], throwOnError: true)).stdout.trim();
     } on ProcessException catch (exception) {
-      throwToolExit(
-        'Unable to run "adb", check your Android SDK installation and '
-        '$kAndroidHome environment variable: ${exception.executable}\n'
-        'Error details: ${exception.message}',
-      );
+      _logger.printTrace(_adbDiagnosticMessage(exception));
+      return <AndroidDevice>[];
     }
     final devices = <AndroidDevice>[];
     _parseADBDeviceOutput(text, devices: devices);
@@ -99,18 +95,25 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return <String>[];
     }
 
-    final RunResult result = await _processUtils.run(<String>[
-      _androidSdk!.adbPath!,
-      'devices',
-      '-l',
-    ]);
-    if (result.exitCode != 0) {
-      return <String>[];
+    final RunResult result;
+    try {
+      result = await _processUtils.run(<String>[
+        _androidSdk!.adbPath!,
+        'devices',
+        '-l',
+      ], throwOnError: true);
+    } on ProcessException catch (exception) {
+      return <String>[_adbDiagnosticMessage(exception)];
     }
     final diagnostics = <String>[];
     _parseADBDeviceOutput(result.stdout, diagnostics: diagnostics);
     return diagnostics;
   }
+
+  String _adbDiagnosticMessage(ProcessException exception) =>
+      'Unable to run "adb", check your Android SDK installation and '
+      '$kAndroidHome environment variable: ${exception.executable}\n'
+      'Error details: ${exception.message}';
 
   bool _doesNotHaveAdb() {
     return _androidSdk == null ||
