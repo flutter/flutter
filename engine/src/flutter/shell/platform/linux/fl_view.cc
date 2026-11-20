@@ -497,11 +497,7 @@ static void fl_view_dispose(GObject* object) {
 #if !FLUTTER_LINUX_GTK4
   g_clear_object(&self->view_accessible);
 #else
-  g_mutex_lock(&self->subsurface_mutex);
-  self->subsurface_enabled = FALSE;
-  g_clear_object(&self->subsurface_egl);
-  g_clear_object(&self->subsurface);
-  g_mutex_unlock(&self->subsurface_mutex);
+  fl_view_gtk4_clear_subsurface(self);
   fl_view_gtk4_accessibility_dispose(self->accessibility_backend);
   self->accessibility_backend = nullptr;
   fl_view_gtk4_cancel_native_texture_retry(self);

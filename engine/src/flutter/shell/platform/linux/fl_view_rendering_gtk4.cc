@@ -15,13 +15,14 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
+#include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_wayland_display.h"
 
 static gboolean gtk4_subsurface_enabled() {
   return g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") == 0;
 }
 
-void fl_view_gtk4_setup_subsurface(FlView* view) {
+static void setup_subsurface(FlView* view) {
   if (view->engine == nullptr || !gtk4_subsurface_enabled() ||
       fl_engine_get_renderer_type(view->engine) != kOpenGL ||
       view->view_id != flutter::kFlutterImplicitViewId) {
@@ -44,30 +45,29 @@ void fl_view_gtk4_setup_subsurface(FlView* view) {
     return;
   }
 
-  FlWaylandDisplay* display =
-      fl_wayland_display_get_for_display(gtk_widget_get_display(toplevel));
-  if (display == nullptr) {
-    return;
-  }
-  FlSubsurface* subsurface = fl_wayland_display_create_subsurface(
-      display, gdk_wayland_surface_get_wl_surface(surface));
-  if (subsurface == nullptr) {
-    return;
-  }
-
   const int width = gtk_widget_get_width(view->render_area);
   const int height = gtk_widget_get_height(view->render_area);
   if (width <= 0 || height <= 0) {
     return;
   }
+
+  FlWaylandDisplay* display =
+      fl_wayland_display_get_for_display(gtk_widget_get_display(toplevel));
+  if (display == nullptr) {
+    return;
+  }
+  g_autoptr(FlSubsurface) subsurface = fl_wayland_display_create_subsurface(
+      display, gdk_wayland_surface_get_wl_surface(surface));
+  if (subsurface == nullptr) {
+    return;
+  }
+
   const int scale =
       static_cast<int>(MAX(fl_gtk_widget_get_scale(view->render_area), 1.0));
-  FlSubsurfaceEGL* subsurface_egl =
+  g_autoptr(FlSubsurfaceEGL) subsurface_egl =
       fl_subsurface_egl_new(fl_engine_get_opengl_manager(view->engine),
                             subsurface, width, height, scale);
   if (!fl_subsurface_egl_is_ready(subsurface_egl)) {
-    g_object_unref(subsurface_egl);
-    g_object_unref(subsurface);
     return;
   }
 
@@ -80,23 +80,26 @@ void fl_view_gtk4_setup_subsurface(FlView* view) {
   }
 
   g_mutex_lock(&view->subsurface_mutex);
-  view->subsurface = subsurface;
-  view->subsurface_egl = subsurface_egl;
-  view->subsurface_enabled = TRUE;
+  g_set_object(&view->subsurface_egl, subsurface_egl);
   view->subsurface_scale = scale;
+  g_mutex_unlock(&view->subsurface_mutex);
+}
+
+void fl_view_gtk4_clear_subsurface(FlView* view) {
+  g_mutex_lock(&view->subsurface_mutex);
+  g_clear_object(&view->subsurface_egl);
   g_mutex_unlock(&view->subsurface_mutex);
 }
 
 void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
   g_mutex_lock(&view->subsurface_mutex);
   const double surface_scale = fl_gtk_widget_get_scale(view->render_area);
-  if (view->subsurface_enabled && surface_scale != view->subsurface_scale) {
-    view->subsurface_enabled = FALSE;
+  if (view->subsurface_egl != nullptr &&
+      surface_scale != view->subsurface_scale) {
     g_clear_object(&view->subsurface_egl);
-    g_clear_object(&view->subsurface);
   }
-  const gboolean subsurface_enabled = view->subsurface_enabled;
-  if (view->subsurface_enabled && view->subsurface_egl != nullptr) {
+  const gboolean subsurface_enabled = view->subsurface_egl != nullptr;
+  if (subsurface_enabled) {
     const int scale =
         static_cast<int>(MAX(fl_gtk_widget_get_scale(view->render_area), 1.0));
     fl_subsurface_egl_resize(view->subsurface_egl, width * scale,
@@ -105,7 +108,7 @@ void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
   g_mutex_unlock(&view->subsurface_mutex);
 
   if (!subsurface_enabled && width > 0 && height > 0) {
-    fl_view_gtk4_setup_subsurface(view);
+    setup_subsurface(view);
   }
 }
 
@@ -159,14 +162,14 @@ void fl_view_gtk4_setup_rendering(FlView* self) {
       break;
   }
 
-  fl_view_gtk4_setup_subsurface(self);
+  setup_subsurface(self);
 }
 
 // Called on the raster thread after compositing the frame.
 static void present_subsurface(FlView* self) {
   g_autoptr(FlSubsurfaceEGL) subsurface_egl = nullptr;
   g_mutex_lock(&self->subsurface_mutex);
-  if (self->subsurface_enabled && self->subsurface_egl != nullptr) {
+  if (self->subsurface_egl != nullptr) {
     subsurface_egl = FL_SUBSURFACE_EGL(g_object_ref(self->subsurface_egl));
   }
   g_mutex_unlock(&self->subsurface_mutex);
@@ -243,7 +246,7 @@ static gboolean redraw_cb(gpointer user_data) {
   }
 
   g_mutex_lock(&self->subsurface_mutex);
-  const gboolean subsurface_enabled = self->subsurface_enabled;
+  const gboolean subsurface_enabled = self->subsurface_egl != nullptr;
   g_mutex_unlock(&self->subsurface_mutex);
   if (subsurface_enabled) {
     return G_SOURCE_REMOVE;

@@ -13,7 +13,6 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 #if FLUTTER_LINUX_GTK4
-#include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_subsurface_egl.h"
 #include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 #endif
@@ -62,9 +61,7 @@ struct _FlView {
   guint native_texture_retry_source_id;
   FlViewGtk4Accessibility* accessibility_backend;
   GMutex subsurface_mutex;
-  FlSubsurface* subsurface;
   FlSubsurfaceEGL* subsurface_egl;
-  gboolean subsurface_enabled;
   int subsurface_scale;
 #endif
   GCancellable* cancellable;
@@ -91,7 +88,7 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event);
 void fl_view_gtk4_setup(FlView* view);
 void fl_view_gtk4_update_accessible_name(FlView* view);
 void fl_view_gtk4_update_accessible_tree(FlView* view);
-void fl_view_gtk4_setup_subsurface(FlView* view);
+void fl_view_gtk4_clear_subsurface(FlView* view);
 void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height);
 void fl_view_gtk4_setup_rendering(FlView* view);
 void fl_view_notify_first_frame(FlView* view);
