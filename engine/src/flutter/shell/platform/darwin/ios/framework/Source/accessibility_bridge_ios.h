@@ -13,6 +13,7 @@
 
 @class UIView;
 @class FlutterPlatformViewsController;
+@class SemanticsObject;
 
 namespace flutter {
 
@@ -47,6 +48,28 @@ class AccessibilityBridgeIos {
   virtual void AccessibilityObjectDidLoseFocus(int32_t id) = 0;
   virtual NSString* GetDefaultLocale() = 0;
   virtual FlutterPlatformViewsController* GetPlatformViewsController() const = 0;
+  /**
+   * The semantics object that a Full Keyboard Access Tab or Shift+Tab
+   * should move focus to, or nil if there is none.
+   *
+   * The iOS focus engine only considers items that are roughly on screen, so
+   * with Tab it skips offscreen items in a scrollable and wraps around before
+   * reaching the end of the list. To correct this,
+   * -[SemanticsObject shouldUpdateFocusInContext:] rejects a Tab move that
+   * disagrees with the semantics traversal order and redirects focus to the
+   * correct item in two steps:
+   *
+   * 1. It calls `SetPendingFocusTarget` with the correct item and schedules a
+   *    focus update for the next run loop turn, after the focus engine has
+   *    finished rejecting the current update.
+   * 2. The scheduled focus update is requested from the root SemanticsObject,
+   *    because the focus engine ignores requests from an environment that does
+   *    not contain the focused item. The root's `preferredFocusEnvironments`
+   *    returns `GetPendingFocusTarget()`, which steers the update to the
+   *    target. The target is then cleared.
+   */
+  virtual SemanticsObject* GetPendingFocusTarget() const = 0;
+  virtual void SetPendingFocusTarget(SemanticsObject* target) = 0;
 };
 
 }  // namespace flutter

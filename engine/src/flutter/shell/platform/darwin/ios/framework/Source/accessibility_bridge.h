@@ -89,6 +89,11 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
     return platform_views_controller_;
   };
 
+  // See AccessibilityBridgeIos::GetPendingFocusTarget.
+  SemanticsObject* GetPendingFocusTarget() const override { return pending_focus_target_; }
+
+  void SetPendingFocusTarget(SemanticsObject* target) override { pending_focus_target_ = target; }
+
   void clearState();
 
  private:
@@ -116,6 +121,10 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   // (i.e. the status bar or keyboard)
   static constexpr int32_t kSemanticObjectIdInvalid = -1;
   int32_t last_focused_semantics_object_id_ = kSemanticObjectIdInvalid;
+  // The target of an in-progress Full Keyboard Access Tab redirect. Weak so it
+  // never keeps a removed SemanticsObject alive. See
+  // AccessibilityBridgeIos::GetPendingFocusTarget.
+  __weak SemanticsObject* pending_focus_target_;
 
   NSMutableDictionary<NSNumber*, SemanticsObject*>* objects_;
   FlutterBasicMessageChannel* accessibility_channel_;
