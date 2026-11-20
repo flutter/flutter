@@ -71,79 +71,182 @@ void main() {
     ]);
   }, skip: !io.Platform.isLinux); // [intended] See comments above.
 
-  test('an accepted exit code is not a failure', () async {
-    final List<Object?> log = <String>[];
-    final PrintCallback oldPrint = print;
-    print = log.add;
-    try {
-      final CommandResult result = await runCommand(
-        '/usr/bin/sh',
-        <String>['-c', 'exit $kNoTestsRanExitCode'],
-        acceptedExitCodes: const <int>{kNoTestsRanExitCode},
-      );
-      expect(result.exitCode, kNoTestsRanExitCode);
-      expect(hasError, isFalse);
-      expect(log, <Object>[
-        startsWith('RUNNING:'),
-        'workingDirectory: null, executable: /usr/bin/sh, arguments: [-c, exit $kNoTestsRanExitCode]',
-        startsWith('ELAPSED TIME:'),
-      ]);
-      await runCommand(
-        '/usr/bin/sh',
-        <String>['-c', 'exit 1'],
-        acceptedExitCodes: const <int>{kNoTestsRanExitCode},
-      );
-      expect(hasError, isTrue);
-    } finally {
-      print = oldPrint;
-      resetErrorStatus();
-    }
-  }, skip: !io.Platform.isLinux); // [intended] See comments above.
+  test('ExpectedExit.zero succeeds on 0 and records error on non-zero', () async {
+    final String passingScript = writeDartScript("stdout.writeln('ok');");
+    final CommandResult zeroResult = await runCommand(io.Platform.resolvedExecutable, <String>[
+      passingScript,
+    ], outputMode: OutputMode.capture);
+    expect(zeroResult.exitCode, 0, reason: log.join('\n'));
+    expect(zeroResult.flattenedStdout, 'ok');
+    expect(hasError, isFalse);
 
-  test('checkExitCode: false skips foundError on non-zero and zero exits', () async {
+    log.clear();
+    final String failingScript = writeDartScript('''
+stdout.writeln('captured out');
+stderr.writeln('captured err');
+exitCode = 7;''');
+    final CommandResult nonZeroResult = await runCommand(io.Platform.resolvedExecutable, <String>[
+      failingScript,
+    ], outputMode: OutputMode.capture);
+    expect(nonZeroResult.exitCode, 7);
+    expect(hasError, isTrue);
+    expect(
+      log,
+      containsAllInOrder(<Object>[
+        'captured out',
+        'captured err',
+        '║ Command exited with exit code 7 but expected zero exit code.',
+      ]),
+    );
+  });
+
+  test('ExpectedExit.nonZero succeeds on non-zero and records error on 0', () async {
+    final String failingScript = writeDartScript('exitCode = 7;');
+    final CommandResult nonZeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[failingScript],
+      expectedExit: ExpectedExit.nonZero,
+      outputMode: OutputMode.capture,
+    );
+    expect(nonZeroResult.exitCode, 7, reason: log.join('\n'));
+    expect(hasError, isFalse);
+
+    log.clear();
+    final String passingScript = writeDartScript("stdout.writeln('unexpected success');");
+    final CommandResult zeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[passingScript],
+      expectedExit: ExpectedExit.nonZero,
+      outputMode: OutputMode.capture,
+    );
+    expect(zeroResult.exitCode, 0);
+    expect(hasError, isTrue);
+    expect(log, contains('║ Command exited with exit code 0 but expected non-zero exit code.'));
+  });
+
+  test('ExpectedExit.code succeeds only on the specified exit code', () async {
+    final String script7 = writeDartScript('exitCode = 7;');
+    final CommandResult matchingResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[script7],
+      expectedExit: const ExpectedExit.code(7),
+      outputMode: OutputMode.capture,
+    );
+    expect(matchingResult.exitCode, 7, reason: log.join('\n'));
+    expect(hasError, isFalse);
+
+    log.clear();
+    final String script0 = writeDartScript('');
+    final CommandResult zeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[script0],
+      expectedExit: const ExpectedExit.code(7),
+      outputMode: OutputMode.capture,
+    );
+    expect(zeroResult.exitCode, 0);
+    expect(hasError, isTrue);
+    expect(log, contains('║ Command exited with exit code 0 but expected 7 exit code.'));
+
+    resetErrorStatus();
+    log.clear();
+    final String script3 = writeDartScript('exitCode = 3;');
+    final CommandResult otherNonZeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[script3],
+      expectedExit: const ExpectedExit.code(7),
+      outputMode: OutputMode.capture,
+    );
+    expect(otherNonZeroResult.exitCode, 3);
+    expect(hasError, isTrue);
+    expect(log, contains('║ Command exited with exit code 3 but expected 7 exit code.'));
+  });
+
+  test('ExpectedExit.anyOf succeeds only on one of the specified exit codes', () async {
+    const zeroOrNoTestsRan = ExpectedExit.anyOf(<int>{0, kNoTestsRanExitCode});
+    final String noTestsRanScript = writeDartScript('exitCode = $kNoTestsRanExitCode;');
+    final CommandResult noTestsRanResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[noTestsRanScript],
+      expectedExit: zeroOrNoTestsRan,
+      outputMode: OutputMode.capture,
+    );
+    expect(noTestsRanResult.exitCode, kNoTestsRanExitCode, reason: log.join('\n'));
+    expect(hasError, isFalse);
+
+    final String script0 = writeDartScript('');
+    final CommandResult zeroResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[script0],
+      expectedExit: zeroOrNoTestsRan,
+      outputMode: OutputMode.capture,
+    );
+    expect(zeroResult.exitCode, 0, reason: log.join('\n'));
+    expect(hasError, isFalse);
+
+    log.clear();
+    final String script1 = writeDartScript('exitCode = 1;');
+    final CommandResult otherResult = await runCommand(
+      io.Platform.resolvedExecutable,
+      <String>[script1],
+      expectedExit: zeroOrNoTestsRan,
+      outputMode: OutputMode.capture,
+    );
+    expect(otherResult.exitCode, 1);
+    expect(hasError, isTrue);
+    expect(log, contains('║ Command exited with exit code 1 but expected zero or 79 exit code.'));
+
+    expect(zeroOrNoTestsRan.description, 'zero or 79');
+    expect(zeroOrNoTestsRan.matches(0), isTrue);
+    expect(zeroOrNoTestsRan.matches(kNoTestsRanExitCode), isTrue);
+    expect(zeroOrNoTestsRan.matches(1), isFalse);
+  });
+
+  test('ExpectedExit.any skips foundError on non-zero and zero exits', () async {
     final String failingScript = writeDartScript('''
 stdout.writeln('probe output');
 exitCode = 7;''');
     final CommandResult nonZeroResult = await runCommand(
       io.Platform.resolvedExecutable,
       <String>[failingScript],
-      checkExitCode: false,
+      expectedExit: ExpectedExit.any,
       outputMode: OutputMode.capture,
     );
     expect(nonZeroResult.exitCode, 7, reason: log.join('\n'));
     expect(nonZeroResult.flattenedStdout, 'probe output');
     expect(nonZeroResult.flattenedStderr, isEmpty);
+    expect(log, isNot(contains('probe output')));
     expect(hasError, isFalse);
 
     final String passingScript = writeDartScript("stdout.writeln('ok');");
     final CommandResult zeroResult = await runCommand(
       io.Platform.resolvedExecutable,
       <String>[passingScript],
-      checkExitCode: false,
+      expectedExit: ExpectedExit.any,
       outputMode: OutputMode.capture,
     );
     expect(zeroResult.exitCode, 0, reason: log.join('\n'));
     expect(zeroResult.flattenedStdout, 'ok');
     expect(hasError, isFalse);
+  });
 
-    await expectLater(
-      runCommand(
-        io.Platform.resolvedExecutable,
-        <String>[passingScript],
-        checkExitCode: false,
-        expectNonZeroExit: true,
-      ),
-      throwsA(isA<AssertionError>()),
-    );
-    await expectLater(
-      runCommand(
-        io.Platform.resolvedExecutable,
-        <String>[passingScript],
-        checkExitCode: false,
-        expectedExitCode: 7,
-      ),
-      throwsA(isA<AssertionError>()),
-    );
+  test('ExpectedExit matches and description reflect each variant', () {
+    expect(ExpectedExit.zero.description, 'zero');
+    expect(ExpectedExit.zero.matches(0), isTrue);
+    expect(ExpectedExit.zero.matches(1), isFalse);
+
+    expect(ExpectedExit.nonZero.description, 'non-zero');
+    expect(ExpectedExit.nonZero.matches(0), isFalse);
+    expect(ExpectedExit.nonZero.matches(1), isTrue);
+
+    const exit7 = ExpectedExit.code(7);
+    expect(exit7.description, '7');
+    expect(exit7.matches(7), isTrue);
+    expect(exit7.matches(0), isFalse);
+    expect(exit7.matches(1), isFalse);
+
+    expect(ExpectedExit.any.description, 'any');
+    expect(ExpectedExit.any.matches(0), isTrue);
+    expect(ExpectedExit.any.matches(7), isTrue);
   });
 
   test('decodes malformed UTF-8 bytes on stdout and stderr without FormatException', () async {
@@ -202,7 +305,7 @@ Timer(const Duration(minutes: 1), () {});''');
     final CommandResult result = await runCommand(
       io.Platform.resolvedExecutable,
       <String>[script],
-      checkExitCode: false,
+      expectedExit: ExpectedExit.any,
       outputMode: OutputMode.capture,
       stderrListener: (String line, io.Process process) {
         if (!killedFromStderr && line.contains('hang-sentinel')) {

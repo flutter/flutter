@@ -162,8 +162,9 @@ final class TestRun {
 /// `gtest_parallel` -- which puts the binary through the same runner with
 /// the same flags: a process per test, every test twice (`--repeat=2`), a
 /// worker per core. The Impeller suites are not here: their builder
-/// (`--type impeller` on macOS, host_debug_unopt_impeller_tests on Linux)
-/// runs the binaries whole. GN labels, `//dir:name`.
+/// (`--type impeller` on macOS; on Linux host_debug_unopt_impeller_tests
+/// and, since flutter/flutter#196282, host_profile_test and
+/// host_release_test) runs the binaries whole. GN labels, `//dir:name`.
 const Set<String> gtestParallelSuites = <String>{
   '//flutter/assets:assets_unittests',
   '//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests',
@@ -224,16 +225,18 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
     data: <String>[],
   ),
   // run_tests.py (macOS) runs impeller_unittests without the OpenGLES
-  // variants ("covered in the golden tests") and with Vulkan validation,
-  // under the Metal validation environment (flutter_display_test sets it
-  // on a Mac) -- through gtest-parallel there, where a Linux host runs the
-  // binary whole: the Bazel test runs it whole on both for now (the
-  // per-process isolation and --repeat=2 of the Mac's run are a
-  // divergence on record, research/20 §12). The second, interactive run of
-  // the ColorWheel test under --enable_playground is not a Bazel test yet.
+  // variants ("covered by the golden tests") and, since
+  // flutter/flutter#196282, without the Vulkan ones (SwiftShader there,
+  // which a Linux host's run already covers), under the Metal validation
+  // environment (flutter_display_test sets it on a Mac) -- through
+  // gtest-parallel there, where a Linux host runs the binary whole: the
+  // Bazel test runs it whole on both for now (the per-process isolation and
+  // --repeat=2 of the Mac's run are a divergence on record, research/20
+  // §12). The second, interactive run of the ColorWheel test under
+  // --enable_playground is not a Bazel test yet.
   '//flutter/impeller:impeller_unittests': TestRun(
     args: <String>[],
-    macArgs: <String>['--gtest_filter=-*OpenGLES:*OpenGLESSDF', '--enable_vulkan_validation'],
+    macArgs: <String>['--gtest_filter=-*OpenGLES:*OpenGLESSDF:*Vulkan*'],
     data: <String>[],
   ),
   // The embedder suite's JIT snapshot tests read the core snapshot's four
@@ -249,9 +252,10 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
       '//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin',
     ],
   ),
-  // run_tests.py --type impeller (Linux CI's host_debug_unopt_impeller_tests)
-  // runs impeller_unittests whole and with no arguments of its own: the
-  // Vulkan validation layer comes from the environment
+  // run_tests.py --type impeller (Linux CI's host_debug_unopt_impeller_tests
+  // and, since flutter/flutter#196282, host_profile_test and
+  // host_release_test) runs impeller_unittests whole and with no arguments
+  // of its own: the Vulkan validation layer comes from the environment
   // (vulkan_validation_env), which flutter_display_test sets. The ColorWheel
   // playground run (--enable_playground, flutter/flutter#134852) is macOS's.
   //

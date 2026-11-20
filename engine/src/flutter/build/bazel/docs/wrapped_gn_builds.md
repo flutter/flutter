@@ -266,7 +266,8 @@ prerequisite for these suites, as it is for `run_tests.py`; the arguments
 are `run_tests.py`'s (`testRuns`), which on Linux keep
 `impeller_dart_unittests` to its Metal variants, all skipped, and run
 `impeller_unittests` whole (`run_tests.py --type impeller`, the
-`host_debug_unopt_impeller_tests` builder: no arguments of its own). That
+`host_debug_unopt_impeller_tests` builder and, since flutter/flutter#196282,
+`host_profile_test` and `host_release_test`: no arguments of its own). That
 suite is 4,795 tests and ~35 minutes serial under Bazel; `run_tests.py`
 runs it through gtest-parallel, and Bazel's form of that is `shard_count`
 (`testShardCounts` in bazel_mapping.dart: sixteen shards), which works because

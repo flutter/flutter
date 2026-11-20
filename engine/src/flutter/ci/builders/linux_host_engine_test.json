@@ -70,6 +70,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--thin-lto",
+                "--use-glfw-swiftshader",
                 "--no-rbe",
                 "--bazel"
             ],
@@ -135,6 +136,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--thin-lto",
+                "--use-glfw-swiftshader",
                 "--no-rbe",
                 "--bazel"
             ],

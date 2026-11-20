@@ -443,6 +443,9 @@ String get shuffleSeed {
 /// platform does not run (`@TestOn('browser')` under the VM).
 const int kNoTestsRanExitCode = 79;
 
+/// [runCommand]'s expectation for a test run that may find no test to run.
+const ExpectedExit _successOrNoTestsRan = ExpectedExit.anyOf(<int>{0, kNoTestsRanExitCode});
+
 Future<void> runDartTest(
   String workingDirectory, {
   List<String>? testPaths,
@@ -506,7 +509,7 @@ Future<void> runDartTest(
     args,
     workingDirectory: workingDirectory,
     environment: environment,
-    acceptedExitCodes: allowNoTests ? const <int>{kNoTestsRanExitCode} : const <int>{},
+    expectedExit: allowNoTests ? _successOrNoTestsRan : ExpectedExit.zero,
     removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
   );
 
@@ -614,8 +617,9 @@ Future<void> runFlutterTest(
     flutter,
     args,
     workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    acceptedExitCodes: allowNoTests ? const <int>{kNoTestsRanExitCode} : const <int>{},
+    expectedExit: expectFailure
+        ? ExpectedExit.nonZero
+        : (allowNoTests ? _successOrNoTestsRan : ExpectedExit.zero),
     outputMode: outputMode,
     environment: environment,
   );

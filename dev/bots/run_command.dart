@@ -204,11 +204,6 @@ String? _discoverBestNdkPath() {
 /// retry loops or readiness probes) can inspect [CommandResult.exitCode]
 /// directly.
 ///
-/// `acceptedExitCodes` are exit codes that are not failures whatever
-/// `expectNonZeroExit` and `expectedExitCode` say: package:test's 79 ("no
-/// tests ran") for a run of test files the platform skips whole, see
-/// [runFlutterTest]'s `allowNoTests`.
-///
 /// `outputListener` is called for every line of standard output from the
 /// process, and `stderrListener` is called for every line of standard error.
 /// Both are given the [io.Process] object, which can be used to interrupt an
@@ -224,10 +219,7 @@ Future<CommandResult> runCommand(
   List<String> arguments, {
   String? workingDirectory,
   Map<String, String>? environment,
-  bool checkExitCode = true,
-  bool expectNonZeroExit = false,
-  int? expectedExitCode,
-  Set<int> acceptedExitCodes = const <int>{},
+  ExpectedExit expectedExit = ExpectedExit.zero,
   String? failureMessage,
   OutputMode outputMode = OutputMode.print,
   bool Function(String)? removeLine,
@@ -265,12 +257,7 @@ Future<CommandResult> runCommand(
     await command._savedStderr,
   );
 
-  final bool unexpected =
-      checkExitCode &&
-      !acceptedExitCodes.contains(result.exitCode) &&
-      ((result.exitCode == 0) == expectNonZeroExit ||
-          (expectedExitCode != null && result.exitCode != expectedExitCode));
-  if (unexpected) {
+  if (!expectedExit.matches(result.exitCode)) {
     // Print the output when we get unexpected results (unless output was
     // printed already).
     switch (outputMode) {
@@ -326,6 +313,14 @@ sealed class ExpectedExit {
   /// Any other exit code records a shard failure via [foundError].
   const factory ExpectedExit.code(int exitCode) = _ExpectedExitCode;
 
+  /// Expects the process to exit with one of [exitCodes].
+  ///
+  /// Any other exit code records a shard failure via [foundError]. For a
+  /// command with more than one successful exit code: package:test's 79 ("no
+  /// tests ran") beside `0` for a run of test files the platform skips whole,
+  /// see [runFlutterTest]'s `allowNoTests`.
+  const factory ExpectedExit.anyOf(Set<int> exitCodes) = _ExpectedAnyOfExit;
+
   /// Expects exit code `0` (the default for [runCommand]).
   ///
   /// Any non-zero exit code records a shard failure via [foundError].
@@ -359,6 +354,19 @@ final class _ExpectedExitCode extends ExpectedExit {
 
   @override
   bool matches(int actualExitCode) => actualExitCode == exitCode;
+}
+
+final class _ExpectedAnyOfExit extends ExpectedExit {
+  const _ExpectedAnyOfExit(this.exitCodes);
+
+  final Set<int> exitCodes;
+
+  @override
+  String get description =>
+      exitCodes.map((int exitCode) => exitCode == 0 ? 'zero' : '$exitCode').join(' or ');
+
+  @override
+  bool matches(int actualExitCode) => exitCodes.contains(actualExitCode);
 }
 
 final class _ExpectedNonZeroExit extends ExpectedExit {

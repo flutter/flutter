@@ -15,10 +15,10 @@ cc_library(
     hdrs = ["android_context.h"],
     copts = FLUTTER_COPTS + select({
         "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/skia
+            "-Wno-unguarded-availability",  # from //flutter/impeller/entity
         ],
         "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/skia
+            "-Wno-unguarded-availability",  # from //flutter/impeller/entity
         ],
         "//conditions:default": [],
     }) + select({
@@ -33,6 +33,7 @@ cc_library(
         "//engine/src/flutter:config",
         "//engine/src/flutter/common",
         "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/entity",
         "//engine/src/flutter/impeller/renderer",
         "//engine/src/flutter/shell/platform/android:rendering_selector",
         "@skia",

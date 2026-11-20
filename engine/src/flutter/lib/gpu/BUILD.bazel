@@ -22,8 +22,10 @@ cc_library(
         "device_buffer.cc",  # !is_fuchsia
         "export.cc",  # !is_fuchsia
         "formats.cc",  # !is_fuchsia
+        "recording.cc",  # !is_fuchsia
         "render_pass.cc",  # !is_fuchsia
         "render_pipeline.cc",  # !is_fuchsia
+        "replay.cc",  # !is_fuchsia
         "shader.cc",  # !is_fuchsia
         "shader_library.cc",  # !is_fuchsia
         "surface.cc",  # !is_fuchsia
@@ -38,8 +40,10 @@ cc_library(
         "device_buffer.h",  # !is_fuchsia
         "export.h",  # !is_fuchsia
         "formats.h",  # !is_fuchsia
+        "recording.h",  # !is_fuchsia
         "render_pass.h",  # !is_fuchsia
         "render_pipeline.h",  # !is_fuchsia
+        "replay.h",  # !is_fuchsia
         "shader.h",  # !is_fuchsia
         "shader_library.h",  # !is_fuchsia
         "surface.h",  # !is_fuchsia
@@ -96,6 +100,7 @@ cc_library(
         "//engine/src/flutter/lib/ui",
         "//engine/src/flutter/third_party/tonic",
         "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",

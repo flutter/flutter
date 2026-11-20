@@ -1154,6 +1154,7 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--thin-lto",
+          "--use-glfw-swiftshader",
           "--no-rbe",
           "--bazel"
         ],
@@ -1172,6 +1173,9 @@
         "tests": {
           "suite": "//engine/src/flutter/ci/builders:host_profile_test_tests",
           "types": {
+            "impeller": [
+              "//engine/src/flutter/impeller:impeller_unittests"
+            ],
             "dart": [
               "//engine/src/flutter/testing/dart:dart",
               "//engine/src/flutter/testing/dart/vm_service:vm_service",
@@ -1226,6 +1230,7 @@
           "--prebuilt-dart-sdk",
           "--build-embedder-examples",
           "--thin-lto",
+          "--use-glfw-swiftshader",
           "--no-rbe",
           "--bazel"
         ],
@@ -1261,6 +1266,9 @@
         "tests": {
           "suite": "//engine/src/flutter/ci/builders:host_release_test_tests",
           "types": {
+            "impeller": [
+              "//engine/src/flutter/impeller:impeller_unittests"
+            ],
             "dart": [
               "//engine/src/flutter/testing/dart:dart",
               "//engine/src/flutter/testing/dart/vm_service:vm_service",
@@ -1895,31 +1903,6 @@
         "unsupported": [],
         "install": null,
         "ninja_targets": [],
-        "ninja_targets_not_built": [],
-        "ninja_targets_tested": [],
-        "tests": {
-          "suite": null,
-          "types": {},
-          "binaries": [],
-          "scripts": [],
-          "missing": []
-        }
-      },
-      {
-        "file": "local_engine.json",
-        "name": "linux/wasm_release",
-        "gn": [
-          "--web",
-          "--runtime-mode=release",
-          "--no-rbe"
-        ],
-        "build_directory": null,
-        "config": "wasm_release",
-        "unsupported": [],
-        "install": "//engine/src/flutter/ci/builders:wasm_release",
-        "ninja_targets": [
-          "flutter/web_sdk:flutter_web_sdk_archive"
-        ],
         "ninja_targets_not_built": [],
         "ninja_targets_tested": [],
         "tests": {

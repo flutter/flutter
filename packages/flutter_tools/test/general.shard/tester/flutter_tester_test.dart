@@ -234,6 +234,7 @@ Hello!
       );
       device = FlutterTesterDevice(
         'flutter-tester',
+        featureFlags: TestFeatureFlags(),
         toolContext: FakeToolContext(
           artifacts: artifacts,
           cache: Cache.test(processManager: fakeProcessManager),

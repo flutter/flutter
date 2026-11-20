@@ -25,21 +25,21 @@ VARS = {
     "clang_version": "git_revision:07d67299a15ce03b053736e2d31a668ee0576987",
     "dart_ai_rev": "9c96bfe5f091c9451eff5b59c9bffeb2e806b875",
     "dart_binaryen_rev": "a631c1445ced72a905b3303b26f148fc706647dd",
-    "dart_boringssl_rev": "fd0ed4d0a1273570612a08a31bace08e4dd73c81",
-    "dart_core_rev": "36f57a994965785d641e436b7dd3aa8a18a26f62",
+    "dart_boringssl_rev": "26584e7a10cc0ffa4df14f4eb7f90e5b44b37ffe",
+    "dart_core_rev": "00d420fd98c19d3278107a8ac51d65b4eb68c16b",
     "dart_devtools_rev": "84fb7cc7cba29c54f94164275eff81c717bdc7cf",
-    "dart_ecosystem_rev": "54e16739d9c15ef0b77e050242c16226ad9235f9",
+    "dart_ecosystem_rev": "1d2b5ff862c6b93cd86dd06eadac4c9f4d5d6c20",
     "dart_git": "https://dart.googlesource.com",
-    "dart_http_rev": "4646fe66ca78423f28333ca7f46c543dc902daf8",
+    "dart_http_rev": "e940128bb28f6d8ed5b95f17933b926e30667ec0",
     "dart_i18n_rev": "7475ce643ed6210e5e787b310bb5bc24de9a2158",
     "dart_perfetto_rev": "13ce0c9e13b0940d2476cd0cff2301708a9a2e2b",
     "dart_protobuf_rev": "19191c8c5881d4a63db804bbed26fa1dcdd17ed0",
     "dart_pub_rev": "9df389a76385f82c1165c7cf93b78807b5ea8890",
-    "dart_revision": "69567bd3c427fa874c01eab9b9d50c7c25472f19",
+    "dart_revision": "b803c3ec01de57a23ed54a3a2621e126f7422d31",
     "dart_sync_http_rev": "6666fff944221891182e1f80bf56569338164d72",
-    "dart_tools_rev": "727fd9c2fac0efe5eb60d23ef8a24ef90b1326d0",
+    "dart_tools_rev": "a0b6e88b43443e9e35e08af81c7ea5d93121dbaf",
     "dart_vector_math_rev": "cf3b5db7340d317dd3489e5a35434b408020a852",
-    "dart_web_rev": "4e60e61e55e1e2111f0fec9d19efff577c0dc671",
+    "dart_web_rev": "f388bf5a1f8ce55f7e519110945c05e638bf0104",
     "dart_webdriver_rev": "8e5c611ea242efdc9f597a8a37c38a9c586120ee",
     "dart_webkit_inspection_protocol_rev": "2c255f2a153239d009385774f12eb57e1c3056eb",
     "download_android_deps": "host_os == \"mac\" or (host_os == \"linux\" and host_cpu == \"x64\")",
@@ -64,7 +64,7 @@ VARS = {
     "run_fuchsia_emu": False,
     "setup_githooks": True,
     "skia_git": "https://skia.googlesource.com",
-    "skia_revision": "3b71ec08218f9c884b025fb738251d528385becc",
+    "skia_revision": "12610b69511d842ef7c55c859a4d7e88f5c3efbe",
     "upstream_VulkanMemoryAllocator": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git",
     "upstream_abseil-cpp": "https://github.com/abseil/abseil-cpp.git",
     "upstream_angle": "https://github.com/google/angle.git",
@@ -146,7 +146,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/boringssl/src": {
         "url": "https://boringssl.googlesource.com/boringssl.git",
-        "revision": "fd0ed4d0a1273570612a08a31bace08e4dd73c81",
+        "revision": "26584e7a10cc0ffa4df14f4eb7f90e5b44b37ffe",
     },
     "engine/src/flutter/third_party/brotli": {
         "url": "https://skia.googlesource.com/external/github.com/google/brotli.git",
@@ -158,7 +158,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart": {
         "url": "https://dart.googlesource.com/sdk.git",
-        "revision": "69567bd3c427fa874c01eab9b9d50c7c25472f19",
+        "revision": "b803c3ec01de57a23ed54a3a2621e126f7422d31",
     },
     "engine/src/flutter/third_party/dart/third_party/binaryen/src": {
         "url": "https://chromium.googlesource.com/external/github.com/WebAssembly/binaryen.git",
@@ -170,7 +170,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/core": {
         "url": "https://dart.googlesource.com/core.git",
-        "revision": "36f57a994965785d641e436b7dd3aa8a18a26f62",
+        "revision": "00d420fd98c19d3278107a8ac51d65b4eb68c16b",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/dart_style": {
         "url": "https://dart.googlesource.com/dart_style.git",
@@ -178,15 +178,15 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/dartdoc": {
         "url": "https://dart.googlesource.com/dartdoc.git",
-        "revision": "03ec6df6228ac8257a737261d17e746c665b1e13",
+        "revision": "1224e35c11467fc181b1a51c60fc198ced44d181",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/ecosystem": {
         "url": "https://dart.googlesource.com/ecosystem.git",
-        "revision": "54e16739d9c15ef0b77e050242c16226ad9235f9",
+        "revision": "1d2b5ff862c6b93cd86dd06eadac4c9f4d5d6c20",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/http": {
         "url": "https://dart.googlesource.com/http.git",
-        "revision": "4646fe66ca78423f28333ca7f46c543dc902daf8",
+        "revision": "e940128bb28f6d8ed5b95f17933b926e30667ec0",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/i18n": {
         "url": "https://dart.googlesource.com/i18n.git",
@@ -198,7 +198,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/native": {
         "url": "https://dart.googlesource.com/native.git",
-        "revision": "6287745caa4c742a975a7958387fa07b909e9957",
+        "revision": "5bc02a7976aca4cb1c4e5149ee0b110bddc097a4",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/protobuf": {
         "url": "https://dart.googlesource.com/protobuf.git",
@@ -210,7 +210,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/shelf": {
         "url": "https://dart.googlesource.com/shelf.git",
-        "revision": "9946de555f1eb3abd8ae5054848b9c3c2bd36e4d",
+        "revision": "2856b69e67726aa646dc786fa3d6d6dbf42877f4",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/sync_http": {
         "url": "https://dart.googlesource.com/sync_http.git",
@@ -222,11 +222,11 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/test": {
         "url": "https://dart.googlesource.com/test.git",
-        "revision": "2a9e01756f42123102a34faf2964130ba7e0f77a",
+        "revision": "b0f8b061901484b791b1a2c5efcc8ef00db03f33",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/tools": {
         "url": "https://dart.googlesource.com/tools.git",
-        "revision": "727fd9c2fac0efe5eb60d23ef8a24ef90b1326d0",
+        "revision": "a0b6e88b43443e9e35e08af81c7ea5d93121dbaf",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/vector_math": {
         "url": "https://dart.googlesource.com/external/github.com/google/vector_math.dart.git",
@@ -234,7 +234,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/web": {
         "url": "https://dart.googlesource.com/web.git",
-        "revision": "4e60e61e55e1e2111f0fec9d19efff577c0dc671",
+        "revision": "f388bf5a1f8ce55f7e519110945c05e638bf0104",
     },
     "engine/src/flutter/third_party/dart/third_party/pkg/webdriver": {
         "url": "https://dart.googlesource.com/external/github.com/google/webdriver.dart.git",
@@ -278,7 +278,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/icu": {
         "url": "https://chromium.googlesource.com/chromium/deps/icu.git",
-        "revision": "b09986242cfb165b9111ade98be6b042ef973b86",
+        "revision": "d3c612f4414600bd06a68db89944df130b5bc248",
     },
     "engine/src/flutter/third_party/imgui": {
         "url": "https://flutter.googlesource.com/third_party/imgui.git",
@@ -382,7 +382,7 @@ GIT_DEPS = {
     },
     "engine/src/flutter/third_party/skia": {
         "url": "https://skia.googlesource.com/skia.git",
-        "revision": "3b71ec08218f9c884b025fb738251d528385becc",
+        "revision": "12610b69511d842ef7c55c859a4d7e88f5c3efbe",
     },
     "engine/src/flutter/third_party/sqlite": {
         "url": "https://flutter.googlesource.com/third_party/sqlite",
@@ -572,7 +572,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/linux-arm64",
-                "version": "git_revision:69567bd3c427fa874c01eab9b9d50c7c25472f19",
+                "version": "git_revision:b803c3ec01de57a23ed54a3a2621e126f7422d31",
             },
         ],
         "condition": "host_os == \"linux\" and download_dart_sdk",
@@ -581,7 +581,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/linux-amd64",
-                "version": "git_revision:69567bd3c427fa874c01eab9b9d50c7c25472f19",
+                "version": "git_revision:b803c3ec01de57a23ed54a3a2621e126f7422d31",
             },
         ],
         "condition": "host_os == \"linux\" and download_dart_sdk",
@@ -599,7 +599,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/mac-arm64",
-                "version": "git_revision:69567bd3c427fa874c01eab9b9d50c7c25472f19",
+                "version": "git_revision:b803c3ec01de57a23ed54a3a2621e126f7422d31",
             },
         ],
         "condition": "host_os == \"mac\" and download_dart_sdk",
@@ -617,7 +617,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/mac-amd64",
-                "version": "git_revision:69567bd3c427fa874c01eab9b9d50c7c25472f19",
+                "version": "git_revision:b803c3ec01de57a23ed54a3a2621e126f7422d31",
             },
         ],
         "condition": "host_os == \"mac\" and download_dart_sdk",
@@ -635,7 +635,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/windows-arm64",
-                "version": "git_revision:69567bd3c427fa874c01eab9b9d50c7c25472f19",
+                "version": "git_revision:b803c3ec01de57a23ed54a3a2621e126f7422d31",
             },
         ],
         "condition": "host_os == \"win\" and download_dart_sdk",
@@ -644,7 +644,7 @@ CIPD_DEPS = {
         "packages": [
             {
                 "package": "flutter/dart-sdk/windows-amd64",
-                "version": "git_revision:69567bd3c427fa874c01eab9b9d50c7c25472f19",
+                "version": "git_revision:b803c3ec01de57a23ed54a3a2621e126f7422d31",
             },
         ],
         "condition": "host_os == \"win\" and download_dart_sdk",
