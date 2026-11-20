@@ -31,7 +31,8 @@ import 'shortcuts.dart';
 /// same value type.
 ///
 /// Using this widget also provides keyboard navigation and semantics for the
-/// radio buttons that matches [APG](https://www.w3.org/WAI/ARIA/apg/patterns/radio/).
+/// radio buttons, based on the [APG](https://www.w3.org/WAI/ARIA/apg/patterns/radio/)
+/// radio pattern.
 ///
 /// The keyboard behaviors are:
 /// * Tab and Shift+Tab: moves focus into and out of radio group. When focus
@@ -39,10 +40,19 @@ import 'shortcuts.dart';
 ///   selected button. Otherwise, it focus the first radio button in reading
 ///   order.
 /// * Space: toggle the selection on the focused radio button.
-/// * Right and down arrow key: move selection to next radio button in the group
-///   in reading order.
-/// * Left and up arrow key: move selection to previous radio button in the
-///   group in reading order.
+/// * Down arrow key: move selection to next radio button in the group in
+///   reading order.
+/// * Up arrow key: move selection to previous radio button in the group in
+///   reading order.
+/// * Right arrow key: move selection to the next radio button in reading order.
+/// * Left arrow key: move selection to the previous radio button in reading
+///   order.
+///
+/// When the focused radio button and all the enabled radio buttons have a
+/// right-to-left [Directionality], the right arrow key moves selection to the
+/// previous radio button and the left arrow key to the next one, so that in a
+/// right-to-left row they select the radio button on that side. This rule also
+/// applies in a column.
 ///
 /// Arrow keys will wrap around if it reach the first or last radio in the
 /// group.
@@ -94,8 +104,8 @@ class RadioGroup<T> extends StatefulWidget {
 
 class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegistry<T> {
   late final Map<ShortcutActivator, Intent> _radioGroupShortcuts = <ShortcutActivator, Intent>{
-    const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(_selectPreviousRadio),
-    const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(_selectNextRadio),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(_selectLeftRadio),
+    const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(_selectRightRadio),
     const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(_selectNextRadio),
     const SingleActivator(LogicalKeyboardKey.arrowUp): VoidCallbackIntent(_selectPreviousRadio),
     const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(_toggleFocusedRadio),
@@ -173,24 +183,52 @@ class _RadioGroupState<T> extends State<RadioGroup<T>> implements RadioGroupRegi
 
   void _selectPreviousRadio() => _selectRadioInDirection(false);
 
-  void _selectRadioInDirection(bool forward) {
+  void _selectLeftRadio() => _selectRadioInDirection(false, horizontal: true);
+
+  void _selectRightRadio() => _selectRadioInDirection(true, horizontal: true);
+
+  static bool _isRightToLeft(FocusNode node) {
+    return node.context?.getInheritedWidgetOfExactType<Directionality>()?.textDirection ==
+        TextDirection.rtl;
+  }
+
+  void _selectRadioInDirection(bool forward, {bool horizontal = false}) {
     if (_radios.length < 2) {
       return;
     }
-    final FocusNode? currentFocus = _radios
-        .firstWhereOrNull((RadioClient<T> radio) => radio.focusNode.hasFocus)
-        ?.focusNode;
-    if (currentFocus == null) {
+    final RadioClient<T>? currentRadio = _radios.firstWhereOrNull(
+      (RadioClient<T> radio) => radio.focusNode.hasFocus,
+    );
+    if (currentRadio == null) {
       // The focused node is either a non interactive radio or other controls.
       return;
     }
-    final List<FocusNode> sorted = ReadingOrderTraversalPolicy.sort(
-      _radios
-          .where((RadioClient<T> radio) => radio.enabled)
-          .map<FocusNode>((RadioClient<T> radio) => radio.focusNode),
-    ).toList();
-    assert(sorted.isNotEmpty);
-    final Iterable<FocusNode> nodesInEffectiveOrder = forward ? sorted : sorted.reversed;
+    final FocusNode currentFocus = currentRadio.focusNode;
+    final nodes = <FocusNode>[
+      for (final radio in _radios)
+        if (radio.enabled) radio.focusNode,
+    ];
+    if (nodes.isEmpty) {
+      return;
+    }
+    // If the text directions of the focused radio and the enabled radios
+    // differ, reading order can run both ways within a row.
+    final bool rightToLeft = _isRightToLeft(currentFocus);
+    final bool sameDirection = nodes.every((FocusNode node) => _isRightToLeft(node) == rightToLeft);
+    if (sameDirection && !currentRadio.enabled) {
+      // A disabled radio can hold focus in directional navigation. Keep its
+      // position so the arrow keys can find the adjacent enabled radio. With
+      // mixed directions, its own direction could reorder the others.
+      nodes.add(currentFocus);
+    }
+    // In right-to-left text, reading order runs from right to left, so the left
+    // arrow key selects the next radio and the right arrow key the previous
+    // one. With mixed directions, the left and right arrow keys keep their
+    // left-to-right mapping.
+    final bool reverseHorizontal = horizontal && rightToLeft && sameDirection;
+    final List<FocusNode> sorted = ReadingOrderTraversalPolicy.sort(nodes).toList();
+    final bool moveForward = reverseHorizontal ? !forward : forward;
+    final Iterable<FocusNode> nodesInEffectiveOrder = moveForward ? sorted : sorted.reversed;
 
     final Iterator<FocusNode> iterator = nodesInEffectiveOrder.iterator;
     FocusNode? nextFocus;

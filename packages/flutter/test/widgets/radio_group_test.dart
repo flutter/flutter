@@ -179,6 +179,129 @@ void main() {
     expect(state.groupValue, 1);
   });
 
+  for (final (
+        String layout,
+        TextDirection groupDirection,
+        TextDirection radioDirection,
+        Axis axis,
+        int right,
+        int left,
+      )
+      in <(String, TextDirection, TextDirection, Axis, int, int)>[
+        ('an RTL row', TextDirection.rtl, TextDirection.rtl, Axis.horizontal, 0, 2),
+        ('an RTL row in an LTR group', TextDirection.ltr, TextDirection.rtl, Axis.horizontal, 0, 2),
+        ('an LTR row in an RTL group', TextDirection.rtl, TextDirection.ltr, Axis.horizontal, 2, 0),
+        ('an RTL column', TextDirection.rtl, TextDirection.rtl, Axis.vertical, 0, 2),
+      ]) {
+    testWidgets('Radio group left and right arrow keys follow the text direction of $layout', (
+      WidgetTester tester,
+    ) async {
+      final nodes = <FocusNode>[FocusNode(), FocusNode(), FocusNode()];
+      for (final node in nodes) {
+        addTearDown(node.dispose);
+      }
+      Widget buildGroup(TextDirection radioDirection) {
+        return TestWidgetsApp(
+          home: Directionality(
+            textDirection: groupDirection,
+            child: TestRadioGroup<int>(
+              child: Directionality(
+                textDirection: radioDirection,
+                child: Flex(
+                  direction: axis,
+                  children: <Widget>[
+                    for (var i = 0; i < 3; i++) TestRadio<int>(value: i, focusNode: nodes[i]),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Focus the middle radio in the other text direction, then switch, to
+      // check that the arrow keys read the direction when they are pressed.
+      await tester.pumpWidget(
+        buildGroup(radioDirection == TextDirection.rtl ? TextDirection.ltr : TextDirection.rtl),
+      );
+      nodes[1].requestFocus();
+      await tester.pump();
+      await tester.pumpWidget(buildGroup(radioDirection));
+      expect(nodes[1].hasPrimaryFocus, isTrue);
+
+      final TestRadioGroupState<int> state = tester.state<TestRadioGroupState<int>>(
+        find.byType(TestRadioGroup<int>),
+      );
+      Future<void> press(LogicalKeyboardKey key, int expected) async {
+        await tester.sendKeyEvent(key);
+        await tester.pump();
+        expect(state.groupValue, expected);
+        expect(nodes[expected].hasPrimaryFocus, isTrue);
+      }
+
+      await press(LogicalKeyboardKey.arrowRight, right);
+      await press(LogicalKeyboardKey.arrowLeft, 1);
+      await press(LogicalKeyboardKey.arrowLeft, left);
+      // Both keys wrap around.
+      await press(LogicalKeyboardKey.arrowLeft, right);
+      await press(LogicalKeyboardKey.arrowRight, left);
+      // Down selects the next radio and Up the previous one, in either direction.
+      nodes[1].requestFocus();
+      await tester.pump();
+      await press(LogicalKeyboardKey.arrowDown, 2);
+      await press(LogicalKeyboardKey.arrowUp, 1);
+    });
+  }
+
+  testWidgets(
+    'Radio group left and right arrow keys keep their mapping when text directions differ',
+    (WidgetTester tester) async {
+      final nodes = <FocusNode>[FocusNode(), FocusNode(), FocusNode()];
+      for (final node in nodes) {
+        addTearDown(node.dispose);
+      }
+      int? selected;
+      // A right-to-left row whose first two radios are each in left-to-right
+      // text, shown as 2, 1, 0 from left to right. Starts from radio 2, on the
+      // left, focused and selected.
+      Future<void> pressFromRadio2(LogicalKeyboardKey key, int expected) async {
+        selected = null;
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: Directionality(
+              textDirection: TextDirection.rtl,
+              child: RadioGroup<int>(
+                groupValue: 2,
+                onChanged: (int? value) => selected = value,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    for (var i = 0; i < 2; i++)
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: TestRadio<int>(value: i, focusNode: nodes[i]),
+                      ),
+                    TestRadio<int>(value: 2, focusNode: nodes[2]),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        nodes[2].requestFocus();
+        await tester.pump();
+        await tester.sendKeyEvent(key);
+        await tester.pump();
+        expect(selected, expected);
+        expect(nodes[expected].hasPrimaryFocus, isTrue);
+      }
+
+      // Right selects the adjacent radio 1, and Left wraps around to radio 0.
+      await pressFromRadio2(LogicalKeyboardKey.arrowRight, 1);
+      await pressFromRadio2(LogicalKeyboardKey.arrowLeft, 0);
+    },
+  );
+
   testWidgets('Radio group arrow key skips disabled radio', (WidgetTester tester) async {
     final key0 = UniqueKey();
     final key1 = UniqueKey();
