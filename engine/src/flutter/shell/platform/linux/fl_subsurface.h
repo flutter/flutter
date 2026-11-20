@@ -57,6 +57,25 @@ struct wl_surface* fl_subsurface_get_surface(FlSubsurface* subsurface);
  */
 void fl_subsurface_set_position(FlSubsurface* subsurface, gint x, gint y);
 
+/**
+ * fl_subsurface_set_sync:
+ * @subsurface: an #FlSubsurface.
+ *
+ * Synchronizes the subsurface with its parent surface, so frames committed to
+ * it are held back until the parent surface is next committed.
+ */
+void fl_subsurface_set_sync(FlSubsurface* subsurface);
+
+/**
+ * fl_subsurface_set_desync:
+ * @subsurface: an #FlSubsurface.
+ *
+ * Desynchronizes the subsurface from its parent surface, so frames committed
+ * to it are shown as soon as they are committed. A frame that was held back
+ * while synchronized is shown now.
+ */
+void fl_subsurface_set_desync(FlSubsurface* subsurface);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_SUBSURFACE_H_
