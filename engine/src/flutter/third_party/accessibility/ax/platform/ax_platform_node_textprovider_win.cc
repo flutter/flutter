@@ -121,6 +121,10 @@ HRESULT AXPlatformNodeTextProviderWin::GetVisibleRanges(
     SAFEARRAY** visible_ranges) {
   UIA_VALIDATE_TEXTPROVIDER_CALL();
 
+  // The line walk below measures this node's text at every step, which is
+  // quadratic in the number of lines without this cache.
+  ScopedAXPositionTextLengthCache text_length_cache;
+
   const AXPlatformNodeDelegate* delegate = owner()->GetDelegate();
 
   // Get the Clipped Frame Bounds of the current node, not from the root,

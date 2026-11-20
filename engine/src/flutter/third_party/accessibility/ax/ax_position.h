@@ -13,6 +13,7 @@
 #include <stack>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -113,6 +114,40 @@ class AX_EXPORT ScopedAXEmbeddedObjectBehaviorSetter {
 
  private:
   AXEmbeddedObjectBehavior prev_behavior_;
+};
+
+// While alive, remembers text lengths of anchors on this thread. Nothing that
+// affects them, e.g. the tree, may change meanwhile: keep it to one API call.
+class ScopedAXPositionTextLengthCache {
+ public:
+  ScopedAXPositionTextLengthCache()
+      : previous_(current_),
+        embedded_object_behavior_(g_ax_embedded_object_behavior) {
+    current_ = this;
+  }
+  ~ScopedAXPositionTextLengthCache() { current_ = previous_; }
+  ScopedAXPositionTextLengthCache(const ScopedAXPositionTextLengthCache&) =
+      delete;
+  ScopedAXPositionTextLengthCache& operator=(
+      const ScopedAXPositionTextLengthCache&) = delete;
+
+  static ScopedAXPositionTextLengthCache* current() {
+    // The cached lengths depend on the embedded object behavior.
+    BASE_DCHECK(!current_ || current_->embedded_object_behavior_ ==
+                                 g_ax_embedded_object_behavior);
+    return current_;
+  }
+
+  // Anchor to its MaxTextOffset().
+  std::unordered_map<const void*, int> max_text_offsets;
+  // Anchor to the text offset of each of its children, followed by the total.
+  std::unordered_map<const void*, std::vector<int>> child_text_offsets;
+
+ private:
+  static inline thread_local ScopedAXPositionTextLengthCache* current_ =
+      nullptr;
+  ScopedAXPositionTextLengthCache* const previous_;
+  const AXEmbeddedObjectBehavior embedded_object_behavior_;
 };
 
 // Forward declarations.
@@ -1309,6 +1344,28 @@ class AXPosition {
     AXPositionInstance text_position = AsTextPosition();
     int adjusted_offset = text_position->text_offset_;
     do {
+      if (const std::vector<int>* offsets =
+              text_position->GetCachedChildTextOffsets()) {
+        // Binary search for the child that the loop below would choose. It
+        // relies on child text offsets never decreasing.
+        int low = 0;
+        int high = text_position->AnchorChildCount() - 1;
+        while (low < high) {
+          const int mid = low + (high - low) / 2;
+          if (adjusted_offset > (*offsets)[mid] &&
+              (adjusted_offset > (*offsets)[mid + 1] ||
+               (adjusted_offset == (*offsets)[mid + 1] &&
+                affinity_ != ax::mojom::TextAffinity::kUpstream))) {
+            low = mid + 1;
+          } else {
+            high = mid;
+          }
+        }
+        adjusted_offset -= (*offsets)[low];
+        text_position = text_position->CreateChildPositionAt(low);
+        continue;
+      }
+
       AXPositionInstance child_position =
           text_position->CreateChildPositionAt(0);
       BASE_DCHECK(child_position);
@@ -3242,6 +3299,13 @@ class AXPosition {
     if (parent_position->IsNullPosition())
       return 0;
 
+    const int child_index = parent_position->child_index();
+    if (const std::vector<int>* offsets =
+            parent_position->GetCachedChildTextOffsets()) {
+      if (child_index >= 0 && child_index < static_cast<int>(offsets->size()))
+        return (*offsets)[child_index];
+    }
+
     int offset_in_parent = 0;
     for (int i = 0; i < parent_position->child_index(); ++i) {
       AXPositionInstance child = parent_position->CreateChildPositionAt(i);
@@ -3249,6 +3313,26 @@ class AXPosition {
       offset_in_parent += child->MaxTextOffsetInParent();
     }
     return offset_in_parent;
+  }
+
+  // The text offset of each child in our anchor followed by the total, or
+  // nullptr when no ScopedAXPositionTextLengthCache is alive.
+  const std::vector<int>* GetCachedChildTextOffsets() const {
+    ScopedAXPositionTextLengthCache* cache =
+        ScopedAXPositionTextLengthCache::current();
+    if (!cache || IsNullPosition())
+      return nullptr;
+
+    auto [it, inserted] = cache->child_text_offsets.try_emplace(GetAnchor());
+    if (inserted) {
+      int offset = 0;
+      it->second.push_back(offset);
+      for (int i = 0; i < AnchorChildCount(); ++i) {
+        offset += CreateChildPositionAt(i)->MaxTextOffsetInParent();
+        it->second.push_back(offset);
+      }
+    }
+    return &it->second;
   }
 
   void Initialize(AXPositionKind kind,

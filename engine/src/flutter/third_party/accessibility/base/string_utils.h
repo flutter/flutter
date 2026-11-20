@@ -25,6 +25,9 @@ std::string StringPrintf(const std::string& format, Args... args) {
 
 std::u16string ASCIIToUTF16(std::string src);
 std::u16string UTF8ToUTF16(std::string src);
+// The length of UTF8ToUTF16(src) for valid UTF-8, computed without
+// converting |src|.
+size_t UTF16LengthOfUTF8(const std::string& src);
 std::string UTF16ToUTF8(std::u16string src);
 
 std::u16string NumberToString16(unsigned int number);

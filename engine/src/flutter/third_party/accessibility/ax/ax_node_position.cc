@@ -250,6 +250,21 @@ bool AXNodePosition::IsInWhiteSpace() const {
 // strings first and then taking their length, especially when the process
 // is recursive.
 int AXNodePosition::MaxTextOffset() const {
+  ScopedAXPositionTextLengthCache* cache =
+      ScopedAXPositionTextLengthCache::current();
+  if (!cache || IsNullPosition())
+    return ComputeMaxTextOffset();
+
+  const AXNode* anchor = GetAnchor();
+  auto iter = cache->max_text_offsets.find(anchor);
+  if (iter != cache->max_text_offsets.end())
+    return iter->second;
+  const int max_text_offset = ComputeMaxTextOffset();
+  cache->max_text_offsets.emplace(anchor, max_text_offset);
+  return max_text_offset;
+}
+
+int AXNodePosition::ComputeMaxTextOffset() const {
   if (IsNullPosition())
     return INVALID_OFFSET;
 
@@ -258,19 +273,20 @@ int AXNodePosition::MaxTextOffset() const {
 
   const AXNode* anchor = GetAnchor();
   BASE_DCHECK(anchor);
+  // Text boundary walks call this at every step, so the text is measured
+  // without converting it to UTF-16.
   // TODO(nektar): Replace with PlatformChildCount when AXNodePosition and
   // BrowserAccessibilityPosition will make one.
   if (!AnchorChildCount()) {
-    std::u16string value =
-        anchor->data().GetString16Attribute(ax::mojom::StringAttribute::kValue);
-    if (!value.empty())
-      return value.length();
+    const size_t value_length = base::UTF16LengthOfUTF8(
+        anchor->data().GetStringAttribute(ax::mojom::StringAttribute::kValue));
+    if (value_length > 0)
+      return value_length;
   }
 
   if (anchor->IsText()) {
-    return anchor->data()
-        .GetString16Attribute(ax::mojom::StringAttribute::kName)
-        .length();
+    return base::UTF16LengthOfUTF8(
+        anchor->data().GetStringAttribute(ax::mojom::StringAttribute::kName));
   }
 
   int text_length = 0;
