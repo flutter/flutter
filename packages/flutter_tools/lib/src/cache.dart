@@ -1420,12 +1420,18 @@ class ArtifactUpdater {
     }
     final int contentLength = response.contentLength;
     final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
-    await response.forEach((List<int> chunk) {
-      inputSink?.add(chunk);
-      randomAccessFile.writeFromSync(chunk);
-      display.onChunk(chunk.length, contentLength);
-    });
-    randomAccessFile.closeSync();
+    try {
+      await response.forEach((List<int> chunk) {
+        inputSink?.add(chunk);
+        randomAccessFile.writeFromSync(chunk);
+        display.onChunk(chunk.length, contentLength);
+      });
+    } finally {
+      // Always release the handle, even if the connection drops mid-download.
+      // On Windows an open handle prevents the file from being deleted before
+      // the download is retried.
+      randomAccessFile.closeSync();
+    }
     if (inputSink != null) {
       inputSink.close();
       final Digest digest = await digests.stream.last;
