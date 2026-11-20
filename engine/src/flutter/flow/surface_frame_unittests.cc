@@ -62,4 +62,31 @@ TEST(FlowTest, SurfaceFrameDoesNotPrepareRtree) {
   EXPECT_FALSE(surface_frame->BuildDisplayList()->has_rtree());
 }
 
+TEST(FlowTest, SurfaceFrameClearExistingDamageResetsDamageToNullopt) {
+  // Sample viewport dimensions and non-empty partial damage region in pixels.
+  constexpr int kFrameWidthPx = 800;
+  constexpr int kFrameHeightPx = 600;
+  constexpr int kDamageOriginPx = 10;
+  constexpr int kDamageExtentPx = 120;
+
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_partial_repaint = true;
+  framebuffer_info.existing_damage = DlIRect::MakeXYWH(
+      kDamageOriginPx, kDamageOriginPx, kDamageExtentPx, kDamageExtentPx);
+
+  SurfaceFrame frame(
+      /*surface=*/nullptr,
+      /*framebuffer_info=*/framebuffer_info,
+      /*encode_callback=*/[](const SurfaceFrame&, DlCanvas*) { return true; },
+      /*submit_callback=*/[](const SurfaceFrame&) { return true; },
+      /*frame_size=*/DlISize(kFrameWidthPx, kFrameHeightPx),
+      /*context_result=*/nullptr,
+      /*display_list_fallback=*/true);
+
+  ASSERT_TRUE(frame.framebuffer_info().existing_damage.has_value());
+  frame.ClearExistingDamage();
+  EXPECT_FALSE(frame.framebuffer_info().existing_damage.has_value());
+  EXPECT_TRUE(frame.framebuffer_info().supports_partial_repaint);
+}
+
 }  // namespace flutter

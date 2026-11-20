@@ -119,6 +119,10 @@ class SurfaceFrame {
 
   const FramebufferInfo& framebuffer_info() const { return framebuffer_info_; }
 
+  void ClearExistingDamage() {
+    framebuffer_info_.existing_damage = std::nullopt;
+  }
+
   void set_submit_info(const SubmitInfo& submit_info) {
     submit_info_ = submit_info;
   }
