@@ -758,6 +758,7 @@ class RenderEditable extends RenderBox
   void systemFontsDidChange() {
     super.systemFontsDidChange();
     _textPainter.markNeedsLayout();
+    _textIntrinsicsCache?.markNeedsLayout();
   }
 
   /// Returns a plain text version of the text in [TextPainter].

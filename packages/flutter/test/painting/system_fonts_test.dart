@@ -4,12 +4,15 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/platform.dart';
 
 Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(
   WidgetTester tester,
@@ -34,6 +37,24 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(
   expect(renderObject.debugNeedsLayout, isFalse);
   await tester.pump();
   expect(await animation.future, isTrue);
+}
+
+// Registers Ahem as `family`, as an app does when it loads a font at runtime.
+// Text in `family` falls back to the test font until then. Ahem's ascent is
+// 0.8 em and the test font's is 0.75 em, so the alphabetic baseline of text with
+// a font size of 20 moves from 15 to 16 once Ahem loads.
+Future<void> loadAhemAs(String family) async {
+  const FileSystem fs = LocalFileSystem();
+  const Platform platform = LocalPlatform();
+  final Directory flutterRoot = fs.directory(platform.environment['FLUTTER_ROOT']);
+
+  final File font = flutterRoot.childFile(
+    fs.path.join('packages', 'flutter_tools', 'static', 'Ahem.ttf'),
+  );
+
+  final bytes = Future<ByteData>.value(font.readAsBytesSync().buffer.asByteData());
+
+  await (FontLoader(family)..addFont(bytes)).load();
 }
 
 void main() {
@@ -69,6 +90,78 @@ void main() {
     final EditableTextState state = tester.state(find.byType(EditableText));
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, state.renderEditable);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/195134.
+  testWidgets(
+    'RenderParagraph dry baseline uses a font registered after the first layout',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Text(
+              'text widget',
+              style: TextStyle(fontFamily: 'AhemForParagraph', fontSize: 20),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject(find.text('text widget'));
+      const constraints = BoxConstraints(maxWidth: 300);
+      expect(paragraph.getDryBaseline(constraints, TextBaseline.alphabetic), 15.0);
+
+      await tester.runAsync(() => loadAhemAs('AhemForParagraph'));
+      await tester.pump();
+
+      expect(
+        paragraph.getDryBaseline(constraints, TextBaseline.alphabetic),
+        moreOrLessEquals(16.0, epsilon: 0.001),
+      );
+    },
+    skip: isBrowser, // Loads a font file from the Flutter SDK.
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/195134.
+  testWidgets(
+    'RenderEditable dry baseline uses a font registered after the first layout',
+    (WidgetTester tester) async {
+      final controller = TextEditingController(text: 'text widget');
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 300,
+              child: EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(fontFamily: 'AhemForEditable', fontSize: 20),
+                cursorColor: const Color(0xFF000000),
+                backgroundCursorColor: const Color(0xFF000000),
+              ),
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      final RenderEditable editable = state.renderEditable;
+      const constraints = BoxConstraints(maxWidth: 300);
+      expect(editable.getDryBaseline(constraints, TextBaseline.alphabetic), 15.0);
+
+      await tester.runAsync(() => loadAhemAs('AhemForEditable'));
+      await tester.pump();
+
+      expect(
+        editable.getDryBaseline(constraints, TextBaseline.alphabetic),
+        moreOrLessEquals(16.0, epsilon: 0.001),
+      );
+    },
+    skip: isBrowser, // Loads a font file from the Flutter SDK.
+  );
 
   testWidgets('Banner repaint upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
