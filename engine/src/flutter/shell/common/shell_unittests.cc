@@ -3838,6 +3838,43 @@ TEST_F(ShellTest, PrefetchDefaultFontManager) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, ReloadSystemFonts) {
+  auto settings = CreateSettingsForFixture();
+  settings.prefetched_default_font_manager = true;
+  auto shell = CreateShell(settings);
+
+  auto get_font_manager_count = [&] {
+    fml::AutoResetWaitableEvent latch;
+    size_t font_manager_count = 0;
+    fml::TaskRunner::RunNowOrPostTask(
+        shell->GetTaskRunners().GetUITaskRunner(),
+        [this, &shell, &latch, &font_manager_count]() {
+          font_manager_count =
+              GetFontCollection(shell.get())->GetFontManagersCount();
+          latch.Signal();
+        });
+    latch.Wait();
+    return font_manager_count;
+  };
+
+  const size_t initial_font_manager_count = get_font_manager_count();
+  EXPECT_GT(initial_font_manager_count, 0u);
+
+  fml::AutoResetWaitableEvent reload_latch;
+  bool reload_result = false;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &reload_result, &reload_latch]() {
+        reload_result = shell->ReloadSystemFonts();
+        reload_latch.Signal();
+      });
+  reload_latch.Wait();
+  EXPECT_TRUE(reload_result);
+  EXPECT_EQ(get_font_manager_count(), initial_font_manager_count + 1);
+
+  DestroyShell(std::move(shell));
+}
+
 TEST_F(ShellTest, OnPlatformViewCreatedWhenUIThreadIsBusy) {
   // This test will deadlock if the threading logic in
   // Shell::OnCreatePlatformView is wrong.
