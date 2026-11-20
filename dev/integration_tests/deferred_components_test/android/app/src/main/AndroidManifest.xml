@@ -9,7 +9,7 @@ found in the LICENSE file. -->
          additional functionality it is fine to subclass or reimplement
          Application and put your custom class here. -->
     <application
-        android:name="io.flutter.embedding.android.FlutterPlayStoreSplitApplication"
+        android:name="io.flutter.integration.deferred_components_test.MainApplication"
         android:label="deferred_components_test"
         android:extractNativeLibs="false">
         <activity
