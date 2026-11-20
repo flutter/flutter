@@ -4880,6 +4880,100 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertTrue(CGRectEqualToRect(rectInFlutterView, CGRectMake(10, 10, 100, 100)));
 }
 
+- (void)testSubmitFrameRecompositesViewAbsentFromPreviousFrame {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+
+  // compositeLayer: resets the interceptor's alpha to 1.
+  // Set it to a different value so we can detect whether the view was recomposited below.
+  touchInterceptor.alpha = 0.5;
+
+  // Submit a frame without the view.
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
+  [flutterPlatformViewsController submitFrame:CreateTestSurfaceFrame()
+                               withIosContext:std::make_shared<FakeIOSContext>()];
+  // Verify the view was removed from the Flutter view and was not recomposited.
+  XCTAssertNil(touchInterceptor.superview.superview);
+  XCTAssertEqual(touchInterceptor.alpha, 0.5);
+
+  // Verify the view is recomposited when it is next in a frame, even when the params are identical.
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+}
+
+- (void)testSubmitFrameRecompositesViewsWhenFlutterViewChanges {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  FlutterTouchInterceptingView* touchInterceptor = FindTouchInterceptingView(gMockPlatformView);
+  XCTAssertNotNil(touchInterceptor);
+
+  // compositeLayer: resets the interceptor's alpha to 1.
+  // Set it to a different value so we can detect whether the view was recomposited below.
+  touchInterceptor.alpha = 0.5;
+
+  // Verify the view is recomposited after the Flutter view changes, even when the params are
+  // identical.
+  UIView* otherFlutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = otherFlutterView;
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  XCTAssertEqual(touchInterceptor.alpha, 1.0);
+}
+
 - (void)testSubmitFrameConvertsToPointsUsingDevicePixelRatioOfFrame {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);

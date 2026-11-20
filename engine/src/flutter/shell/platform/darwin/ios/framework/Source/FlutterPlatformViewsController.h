@@ -35,7 +35,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
-/// The flutter view.
+/// The view that displays the Flutter content, to which platform views are added as subviews.
+///
+/// `FlutterViewController` sets this when its surface appears, and sets it to nil when the surface
+/// is destroyed.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
 
 /// @brief The flutter view controller.
@@ -136,7 +139,8 @@ NS_ASSUME_NONNULL_BEGIN
 //
 // This method converts `params` to a `FlutterPlatformViewLayer` with the main screen's scale and
 // composites the view from it.
-// `performSubmit:` composites views with the device pixel ratio of their frame.
+//
+// `presentFrame:` composites views with the device pixel ratio of their frame.
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params;
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
