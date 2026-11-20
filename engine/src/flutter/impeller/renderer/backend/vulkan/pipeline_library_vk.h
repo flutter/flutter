@@ -36,13 +36,12 @@ class PipelineLibraryVK final
   void DidAcquireSurfaceFrame();
 
   /// @brief Asynchronously persists the Vulkan pipeline cache to disk if
-  ///        pipelines have been created since the last persist.
+  ///        pipelines have been created since the last persist was posted.
   ///
-  ///        Safe to call from any thread. It is called from
-  ///        `DidAcquireSurfaceFrame` and `SurfaceContextVK::TeardownSwapchain`,
-  ///        which run on the raster thread in Flutter. The persist itself runs
-  ///        on the context's concurrent worker threads (see
-  ///        `PipelineCacheVK::PersistCacheToDisk`).
+  ///        Called from `DidAcquireSurfaceFrame` and
+  ///        `SurfaceContextVK::TeardownSwapchain` (on the raster thread in
+  ///        Flutter). The persist itself is posted to the context's concurrent
+  ///        worker threads (see `PipelineCacheVK::PersistCacheToDisk`).
   void PersistPipelineCacheToDisk();
 
   const std::shared_ptr<PipelineCacheVK>& GetPSOCache() const;

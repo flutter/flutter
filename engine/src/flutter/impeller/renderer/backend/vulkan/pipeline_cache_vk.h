@@ -35,7 +35,7 @@ class PipelineCacheVK {
   /// @brief Writes the contents of the pipeline cache to the cache directory,
   ///        if one was provided.
   ///
-  ///        Runs on the context's concurrent worker threads, posted by
+  ///        Posted to the context's concurrent worker threads by
   ///        `PipelineLibraryVK::PersistPipelineCacheToDisk`. Calls are
   ///        serialized so that concurrent calls do not write to the cache file
   ///        at the same time.
