@@ -718,7 +718,6 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   frame_timings_recorder.RecordRasterStart(fml::TimePoint::Now());
 
   // Second traverse: draw all layer trees.
-  const bool had_tasks = !tasks.empty();
   bool any_draw_succeeded = false;
   std::vector<std::unique_ptr<LayerTreeTask>> resubmitted_tasks;
   for (std::unique_ptr<LayerTreeTask>& task : tasks) {
@@ -746,7 +745,7 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   frame_timings_recorder.RecordRasterEnd(
       NOT_SLIMPELLER(&compositor_context_->raster_cache()));
 
-  if (!had_tasks || any_draw_succeeded) {
+  if (any_draw_succeeded) {
     FireNextFrameCallbackIfPresent();
   }
 

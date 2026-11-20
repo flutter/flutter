@@ -420,10 +420,12 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
   std::vector<ImageLayer*> unacquired_submitted_layers;
 
   if (sync_bg_live) {
-    // On HC entry with a transparent root SurfaceView (`setZOrderOnTop(true)`),
-    // clear `inner_` once sequentially to transparent so it cannot occlude
-    // Hybrid Composition views across any Android API level.
-    if (!active && root_transparent) {
+    // When first synchronizing Hybrid Composition onto `hcBackgroundImageView`
+    // (either on initial HC entry or when `synchronizeToNativeViewHierarchy`
+    // switches `false -> true` mid-session) with a transparent root
+    // `FlutterSurfaceView` (`setZOrderOnTop(true)`), clear `inner_` once
+    // sequentially to transparent so stale root pixels cannot occlude HC views.
+    if (!hc_background_synchronized_ && root_transparent) {
       if (DeferredRootSurface* deferred_root = GetDeferredRootSurface()) {
         if (std::unique_ptr<SurfaceFrame> clear_frame =
                 deferred_root->AcquireInnerFrame(frame_size_)) {
