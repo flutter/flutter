@@ -1332,6 +1332,63 @@ void main() {
     expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
+  testWidgets('RadioGroup keeps one Tab stop when the selected RadioListTile is disabled', (
+    WidgetTester tester,
+  ) async {
+    final before = FocusNode();
+    addTearDown(before.dispose);
+    final tileA = FocusNode();
+    addTearDown(tileA.dispose);
+    final after = FocusNode();
+    addTearDown(after.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              TextButton(focusNode: before, onPressed: () {}, child: const Text('Before')),
+              RadioGroup<String>(
+                groupValue: 'B',
+                onChanged: (String? value) => fail('Tab traversal changed the selection to $value'),
+                child: Column(
+                  children: <Widget>[
+                    RadioListTile<String>(value: 'A', focusNode: tileA, title: const Text('A')),
+                    const RadioListTile<String>(value: 'B', enabled: false, title: Text('B')),
+                    const RadioListTile<String>(value: 'C', title: Text('C')),
+                  ],
+                ),
+              ),
+              TextButton(focusNode: after, onPressed: () {}, child: const Text('After')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // The selected tile is disabled and can't take focus, so focus moves to
+    // the first enabled tile instead of skipping the group.
+    before.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(tileA.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(after.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(tileA.hasPrimaryFocus, isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+    expect(before.hasPrimaryFocus, isTrue);
+  });
+
   testWidgets('RadioListTile.adaptive shows the correct radio platform widget', (
     WidgetTester tester,
   ) async {
