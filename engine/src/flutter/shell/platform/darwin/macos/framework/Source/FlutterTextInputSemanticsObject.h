@@ -98,6 +98,9 @@ class FlutterTextPlatformNode : public ui::AXPlatformNodeBase {
 /**
  * Makes the field editor (plugin) current editor for this TextField, meaning
  * that the text field will start getting editing events.
+ *
+ * Does nothing while the field editor has marked text, since taking it over ends the
+ * input method's composition.
  */
 - (void)startEditing;
 
