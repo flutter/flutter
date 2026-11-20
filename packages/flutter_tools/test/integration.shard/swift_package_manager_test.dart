@@ -26,21 +26,17 @@ void main() {
         );
         final String workingDirectoryPath = workingDirectory.path;
 
-        addTearDown(() async {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
+        addTearDown(() {
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         });
 
         // Create and build an app using the CocoaPods version of
         // integration_test.
-        await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
         final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
           flutterBin,
           workingDirectoryPath,
           platform: platformName,
+          swiftPackageManagerEnabled: false,
           options: <String>['--platforms=$platformName'],
         );
         SwiftPackageManagerUtils.addDependency(
@@ -83,6 +79,7 @@ void main() {
               flutterBin,
               workingDirectoryPath,
               platform: platformName,
+              swiftPackageManagerEnabled: false,
             );
         SwiftPackageManagerUtils.convertToLegacyCocoaPodsPlugin(
           createdCocoaPodsPlugin,
@@ -91,7 +88,7 @@ void main() {
 
         // Rebuild app with Swift Package Manager enabled, migrating the app and using the Swift Package Manager version of
         // integration_test.
-        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        SwiftPackageManagerUtils.setSwiftPackageManagerEnabled(appDirectoryPath, enabled: true);
 
         // Create a SwiftPM plugin that depends on native code from another SwiftPM plugin
         final SwiftPackageManagerPlugin createdSwiftPMPlugin =
@@ -99,6 +96,7 @@ void main() {
               flutterBin,
               workingDirectoryPath,
               platform: platformName,
+              swiftPackageManagerEnabled: true,
               usesSwiftPackageManager: true,
             );
         final File swiftPMPluginPackageManifest = fileSystem
@@ -236,33 +234,10 @@ void main() {
         );
         expect(generatedSwiftPackage, exists);
 
-        // Build app again but with Swift Package Manager disabled by config.
+        // Build app again but with Swift Package Manager disabled by its pubspec.
         // App will now use CocoaPods version of integration_test plugin.
-        await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        SwiftPackageManagerUtils.setSwiftPackageManagerEnabled(appDirectoryPath, enabled: false);
         await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
-        await SwiftPackageManagerUtils.buildApp(
-          flutterBin,
-          appDirectoryPath,
-          options: <String>[platformName, '--debug', '-v'],
-          expectedLines: SwiftPackageManagerUtils.expectedLines(
-            platform: platformName,
-            appDirectoryPath: appDirectoryPath,
-            cocoaPodsPlugin: integrationTestPlugin,
-          ),
-          unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
-            platform: platformName,
-            appDirectoryPath: appDirectoryPath,
-            cocoaPodsPlugin: integrationTestPlugin,
-          ),
-        );
-
-        // Build app again but with Swift Package Manager disabled by pubspec.
-        // App will still use CocoaPods version of integration_test plugin.
-        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-        await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
-        SwiftPackageManagerUtils.disableSwiftPackageManagerByPubspec(
-          appDirectoryPath: appDirectoryPath,
-        );
         await SwiftPackageManagerUtils.buildApp(
           flutterBin,
           appDirectoryPath,
@@ -288,19 +263,17 @@ void main() {
       );
       final String workingDirectoryPath = workingDirectory.path;
 
-      addTearDown(() async {
-        await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      addTearDown(() {
         ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
       });
 
       // Create and build an app using the Swift Package Manager version of
       // integration_test.
-      await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
       final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
         flutterBin,
         workingDirectoryPath,
         platform: platformName,
+        swiftPackageManagerEnabled: true,
         usesSwiftPackageManager: true,
         options: <String>['--platforms=$platformName'],
       );
@@ -362,22 +335,17 @@ void main() {
         );
         final String workingDirectoryPath = workingDirectory.path;
 
-        addTearDown(() async {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
+        addTearDown(() {
           ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
         });
 
         // Create and build an app using the Swift Package Manager version of
         // integration_test.
-        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
         final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
           flutterBin,
           workingDirectoryPath,
           platform: platformName,
+          swiftPackageManagerEnabled: true,
           usesSwiftPackageManager: true,
           options: <String>['--platforms=$platformName'],
         );
@@ -424,19 +392,17 @@ void main() {
     );
     final String workingDirectoryPath = workingDirectory.path;
 
-    addTearDown(() async {
-      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    addTearDown(() {
       ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
     });
 
     // Create and build module and framework using the CocoaPods version of
     // integration_test even though Swift Package Manager is enabled.
-    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
       platform: 'ios',
+      swiftPackageManagerEnabled: true,
       usesSwiftPackageManager: true,
       options: <String>['--template=module'],
     );
@@ -515,19 +481,17 @@ void main() {
     );
     final String workingDirectoryPath = workingDirectory.path;
 
-    addTearDown(() async {
-      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    addTearDown(() {
       ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
     });
 
     // Create and build a regular app and framework using the CocoaPods version of
     // integration_test even though Swift Package Manager is enabled.
-    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
       platform: 'ios',
+      swiftPackageManagerEnabled: true,
       usesSwiftPackageManager: true,
       options: <String>[],
     );
@@ -607,16 +571,15 @@ void main() {
     );
     final String workingDirectoryPath = workingDirectory.path;
 
-    addTearDown(() async {
-      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    addTearDown(() {
       ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
     });
 
-    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
       platform: 'ios',
+      swiftPackageManagerEnabled: true,
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
     );
@@ -671,16 +634,15 @@ void main() {
     );
     final String workingDirectoryPath = workingDirectory.path;
 
-    addTearDown(() async {
-      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    addTearDown(() {
       ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
     });
 
-    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
       platform: 'macos',
+      swiftPackageManagerEnabled: true,
       usesSwiftPackageManager: true,
       options: <String>['--platforms=macos'],
     );
@@ -735,18 +697,16 @@ void main() {
     );
     final String workingDirectoryPath = workingDirectory.path;
 
-    addTearDown(() async {
-      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    addTearDown(() {
       ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
     });
-
-    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
 
     // Create an app with a plugin.
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
       platform: 'ios',
+      swiftPackageManagerEnabled: true,
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
     );
@@ -819,18 +779,16 @@ void main() {
     );
     final String workingDirectoryPath = workingDirectory.path;
 
-    addTearDown(() async {
-      await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    addTearDown(() {
       ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
     });
-
-    await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
 
     // Create an app with a plugin and Swift Package Manager integration.
     final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
       flutterBin,
       workingDirectoryPath,
       platform: 'ios',
+      swiftPackageManagerEnabled: true,
       usesSwiftPackageManager: true,
       options: <String>['--platforms=ios'],
     );
@@ -891,7 +849,7 @@ void main() {
 
     // Disable Swift Package Manager and do a clean re-build of the app.
     // The build should succeed.
-    await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+    SwiftPackageManagerUtils.setSwiftPackageManagerEnabled(appDirectoryPath, enabled: false);
 
     await SwiftPackageManagerUtils.cleanApp(flutterBin, appDirectoryPath);
 
