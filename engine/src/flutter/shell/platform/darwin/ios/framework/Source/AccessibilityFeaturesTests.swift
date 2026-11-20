@@ -17,6 +17,7 @@ class MockAccessibilityFeatures: AccessibilityFeatures {
     var mockBoldTextEnabled = false
     var mockReduceMotionEnabled = false
     var mockDarkerSystemColorsEnabled = false
+    var mockReduceTransparencyEnabled = false
     var mockOnOffSwitchLabelsEnabled = false
     var mockAnimatedImagesAutoPlayEnabled = true
     var mockVideosAutoPlayEnabled = true
@@ -44,6 +45,10 @@ class MockAccessibilityFeatures: AccessibilityFeatures {
 
     override func isDarkerSystemColorsEnabled() -> Bool {
         return mockDarkerSystemColorsEnabled
+    }
+
+    override func isReduceTransparencyEnabled() -> Bool {
+        return mockReduceTransparencyEnabled
     }
 
     override func isOnOffSwitchLabelsEnabled() -> Bool {
@@ -76,6 +81,7 @@ struct AccessibilityFeaturesTests {
         #expect(AccessibilityFeatureFlag.noAutoPlayAnimatedImages.rawValue == 1 << 8)
         #expect(AccessibilityFeatureFlag.noAutoPlayVideos.rawValue == 1 << 9)
         #expect(AccessibilityFeatureFlag.deterministicCursor.rawValue == 1 << 10)
+        #expect(AccessibilityFeatureFlag.reduceTransparency.rawValue == 1 << 11)
     }
 
     @MainActor
@@ -108,8 +114,13 @@ struct AccessibilityFeaturesTests {
         features.mockReduceMotionEnabled = false
 
         features.mockDarkerSystemColorsEnabled = true
-        #expect(AccessibilityFeatureFlag(rawValue: features.flags).contains(.highContrast))
+        #expect(features.flags == AccessibilityFeatureFlag.highContrast.rawValue)
+        features.mockReduceTransparencyEnabled = true
+        #expect(features.flags == AccessibilityFeatureFlag([.highContrast, .reduceTransparency]).rawValue)
         features.mockDarkerSystemColorsEnabled = false
+        #expect(features.flags == AccessibilityFeatureFlag.reduceTransparency.rawValue)
+        features.mockReduceTransparencyEnabled = false
+        #expect(features.flags == 0)
 
         features.mockOnOffSwitchLabelsEnabled = true
         #expect(AccessibilityFeatureFlag(rawValue: features.flags).contains(.onOffSwitchLabels))
@@ -153,6 +164,7 @@ struct AccessibilityFeaturesTests {
             names.contains(UIAccessibility.darkerSystemColorsStatusDidChangeNotification.rawValue)
         )
         #expect(names.contains(UIAccessibility.onOffSwitchLabelsDidChangeNotification.rawValue))
+        #expect(names.contains(UIAccessibility.reduceTransparencyStatusDidChangeNotification.rawValue))
         #expect(names.contains(UIAccessibility.videoAutoplayStatusDidChangeNotification.rawValue))
 
         if #available(iOS 18.0, *) {
@@ -164,9 +176,9 @@ struct AccessibilityFeaturesTests {
                     AccessibilitySettings.prefersNonBlinkingTextInsertionIndicatorDidChangeNotification.rawValue
                 )
             )
-            #expect(names.count == 11, "Should be 11 notifications on iOS 18+")
+            #expect(names.count == 12, "Should be 12 notifications on iOS 18+")
         } else {
-            #expect(names.count == 9, "Should be 9 notifications before iOS 18")
+            #expect(names.count == 10, "Should be 10 notifications before iOS 18")
         }
     }
 }

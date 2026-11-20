@@ -120,6 +120,7 @@ abstract class AccessibilityFeatures {
   bool get autoPlayAnimatedImages;
   bool get autoPlayVideos;
   bool get deterministicCursor;
+  bool get reduceTransparency;
 }
 
 enum Brightness { dark, light }

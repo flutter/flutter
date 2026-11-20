@@ -380,6 +380,20 @@ void _testEngineAccessibilityBuilder() {
     expect(features.highContrast, isTrue);
   });
 
+  test('reduce transparency is independent of high contrast', () {
+    const EngineAccessibilityFeatures defaults = EngineAccessibilityFeatures.defaultFeatures;
+    expect(defaults.reduceTransparency, isFalse);
+    final EngineAccessibilityFeatures reduced = defaults.copyWith(reduceTransparency: true);
+    expect(reduced.reduceTransparency, isTrue);
+    expect(reduced.highContrast, isFalse);
+    final EngineAccessibilityFeatures contrasted = reduced.copyWith(
+      highContrast: true,
+      reduceTransparency: false,
+    );
+    expect(contrasted.reduceTransparency, isFalse);
+    expect(contrasted.highContrast, isTrue);
+  });
+
   test('invert colors', () {
     expect(features.invertColors, isFalse);
     builder.invertColors = true;

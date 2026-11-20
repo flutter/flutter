@@ -24,6 +24,7 @@ struct AccessibilityFeatureFlag: OptionSet {
     static let noAutoPlayAnimatedImages = AccessibilityFeatureFlag(rawValue: 1 << 8)
     static let noAutoPlayVideos = AccessibilityFeatureFlag(rawValue: 1 << 9)
     static let deterministicCursor = AccessibilityFeatureFlag(rawValue: 1 << 10)
+    static let reduceTransparency = AccessibilityFeatureFlag(rawValue: 1 << 11)
 }
 
 /// A wrapper for native iOS accessibility settings.
@@ -47,6 +48,9 @@ class AccessibilityFeatures: NSObject {
         }
         if self.isDarkerSystemColorsEnabled() {
             flags.insert(.highContrast)
+        }
+        if self.isReduceTransparencyEnabled() {
+            flags.insert(.reduceTransparency)
         }
         if self.isOnOffSwitchLabelsEnabled() {
             flags.insert(.onOffSwitchLabels)
@@ -75,6 +79,7 @@ class AccessibilityFeatures: NSObject {
             AccessibilityFeatures.reduceMotionStatusDidChangeNotification,
             AccessibilityFeatures.boldTextStatusDidChangeNotification,
             AccessibilityFeatures.darkerSystemColorsStatusDidChangeNotification,
+            UIAccessibility.reduceTransparencyStatusDidChangeNotification.rawValue,
             AccessibilityFeatures.onOffSwitchLabelsDidChangeNotification,
             AccessibilityFeatures.videosAutoPlayStatusDidChangeNotification,
         ]
@@ -157,6 +162,11 @@ class AccessibilityFeatures: NSObject {
     /// Whether `Increase Contrast` setting is enabled.
     @objc func isDarkerSystemColorsEnabled() -> Bool {
         return UIAccessibility.isDarkerSystemColorsEnabled
+    }
+
+    /// Whether the Reduce Transparency accessibility setting is enabled.
+    @objc func isReduceTransparencyEnabled() -> Bool {
+        return UIAccessibility.isReduceTransparencyEnabled
     }
     
     /// Notification name for changes to `On/Off Labels` setting.

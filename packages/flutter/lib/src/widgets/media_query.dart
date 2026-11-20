@@ -95,6 +95,9 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.highContrast].
   highContrast,
 
+  /// Specifies the aspect corresponding to [MediaQueryData.reduceTransparency].
+  reduceTransparency,
+
   /// Specifies the aspect corresponding to [MediaQueryData.onOffSwitchLabels].
   onOffSwitchLabels,
 
@@ -228,6 +231,7 @@ class MediaQueryData {
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.highContrast = false,
+    this.reduceTransparency = false,
     this.onOffSwitchLabels = false,
     this.disableAnimations = false,
     this.reduceMotion = false,
@@ -350,6 +354,9 @@ class MediaQueryData {
           view.platformDispatcher.accessibilityFeatures.supportsAnnounce,
       highContrast =
           platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
+      reduceTransparency =
+          platformData?.reduceTransparency ??
+          view.platformDispatcher.accessibilityFeatures.reduceTransparency,
       onOffSwitchLabels =
           platformData?.onOffSwitchLabels ??
           view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
@@ -675,6 +682,16 @@ class MediaQueryData {
   /// and Android devices running API 34+.
   final bool highContrast;
 
+  /// Whether the platform requests more opaque backgrounds to improve legibility.
+  ///
+  /// On iOS, this reflects the Reduce Transparency accessibility setting.
+  /// Widgets can use this flag to replace translucent backgrounds with opaque ones.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.reduceTransparencyOf], which reads this value from a context.
+  final bool reduceTransparency;
+
   /// Whether the user requested to show on/off labels inside switches on iOS,
   /// via Settings -> Accessibility -> Display & Text Size -> On/Off Labels.
   ///
@@ -897,6 +914,7 @@ class MediaQueryData {
     EdgeInsets? systemGestureInsets,
     bool? alwaysUse24HourFormat,
     bool? highContrast,
+    bool? reduceTransparency,
     bool? onOffSwitchLabels,
     bool? disableAnimations,
     bool? reduceMotion,
@@ -925,6 +943,7 @@ class MediaQueryData {
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
+      reduceTransparency: reduceTransparency ?? this.reduceTransparency,
       onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       reduceMotion: reduceMotion ?? this.reduceMotion,
@@ -974,6 +993,7 @@ class MediaQueryData {
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       invertColors: invertColors,
       highContrast: highContrast,
+      reduceTransparency: reduceTransparency,
       onOffSwitchLabels: onOffSwitchLabels,
       disableAnimations: disableAnimations,
       reduceMotion: reduceMotion,
@@ -1010,6 +1030,7 @@ class MediaQueryData {
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       invertColors: invertColors,
       highContrast: highContrast,
+      reduceTransparency: reduceTransparency,
       onOffSwitchLabels: onOffSwitchLabels,
       disableAnimations: disableAnimations,
       reduceMotion: reduceMotion,
@@ -1214,6 +1235,7 @@ class MediaQueryData {
         other.systemGestureInsets == systemGestureInsets &&
         other.alwaysUse24HourFormat == alwaysUse24HourFormat &&
         other.highContrast == highContrast &&
+        other.reduceTransparency == reduceTransparency &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
         other.disableAnimations == disableAnimations &&
         other.reduceMotion == reduceMotion &&
@@ -1259,6 +1281,7 @@ class MediaQueryData {
       wordSpacingOverride,
       paragraphSpacingOverride,
       displayCornerRadii,
+      reduceTransparency,
     ),
   );
 
@@ -1276,6 +1299,7 @@ class MediaQueryData {
       'alwaysUse24HourFormat: $alwaysUse24HourFormat',
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
+      'reduceTransparency: $reduceTransparency',
       'onOffSwitchLabels: $onOffSwitchLabels',
       'disableAnimations: $disableAnimations',
       'reduceMotion: $reduceMotion',
@@ -2027,6 +2051,24 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeHighContrastOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
 
+  /// Returns [MediaQueryData.reduceTransparency] for the nearest [MediaQuery]
+  /// ancestor, or false if no such ancestor exists.
+  ///
+  /// The given [context] will rebuild when this property changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool reduceTransparencyOf(BuildContext context) =>
+      maybeReduceTransparencyOf(context) ?? false;
+
+  /// Returns [MediaQueryData.reduceTransparency] for the nearest [MediaQuery]
+  /// ancestor, or null if no such ancestor exists.
+  ///
+  /// The given [context] will rebuild when this property changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybeReduceTransparencyOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.reduceTransparency)?.reduceTransparency;
+
   /// Returns [MediaQueryData.onOffSwitchLabels] for the nearest [MediaQuery]
   /// ancestor or false, if no such ancestor exists.
   ///
@@ -2336,6 +2378,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             _MediaQueryAspect.viewPadding => data.viewPadding != oldWidget.data.viewPadding,
             _MediaQueryAspect.invertColors => data.invertColors != oldWidget.data.invertColors,
             _MediaQueryAspect.highContrast => data.highContrast != oldWidget.data.highContrast,
+            _MediaQueryAspect.reduceTransparency =>
+              data.reduceTransparency != oldWidget.data.reduceTransparency,
             _MediaQueryAspect.onOffSwitchLabels =>
               data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels,
             _MediaQueryAspect.disableAnimations =>
