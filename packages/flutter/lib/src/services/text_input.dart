@@ -1994,6 +1994,7 @@ class TextInput {
   TextInput._() {
     _channel = SystemChannels.textInput;
     _channel.setMethodCallHandler(_loudlyHandleTextInputInvocation);
+    SystemChannels.contentInsertion.setMethodCallHandler(_handleContentInsertionInvocation);
   }
 
   /// Set the [MethodChannel] used to communicate with the system's text input
@@ -2183,6 +2184,43 @@ class TextInput {
     }
   }
 
+  Future<void> _handleContentInsertionInvocation(MethodCall methodCall) async {
+    if (methodCall.method != 'ContentInsertion.commitContent') {
+      throw MissingPluginException();
+    }
+    final TextInputConnection? connection = _currentConnection;
+    final args = methodCall.arguments as List<Object?>;
+    if (connection == null || !_isCurrentClient(args[0]! as int)) {
+      return;
+    }
+    final content = args[1]! as Map<Object?, Object?>;
+    connection._client.insertContent(
+      KeyboardInsertedContent(
+        mimeType: content['mimeType']! as String,
+        uri: content['uri']! as String,
+        data: content['data'] as Uint8List?,
+      ),
+    );
+  }
+
+  // Whether a message addressed to `client` is meant for the current connection.
+  bool _isCurrentClient(int client) {
+    if (client == _currentConnection!._id) {
+      return true;
+    }
+    var debugAllowAnyway = false;
+    assert(() {
+      // In debug builds we allow "-1" as a magical client ID that ignores
+      // this verification step so that tests can always get through, even
+      // when they are not mocking the engine side of text input.
+      if (client == -1) {
+        debugAllowAnyway = true;
+      }
+      return true;
+    }());
+    return debugAllowAnyway;
+  }
+
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
     switch (method) {
@@ -2264,23 +2302,10 @@ class TextInput {
       return;
     }
 
-    final client = args[0] as int;
-    if (client != _currentConnection!._id) {
-      // If the client IDs don't match, the incoming message was for a different
-      // client.
-      var debugAllowAnyway = false;
-      assert(() {
-        // In debug builds we allow "-1" as a magical client ID that ignores
-        // this verification step so that tests can always get through, even
-        // when they are not mocking the engine side of text input.
-        if (client == -1) {
-          debugAllowAnyway = true;
-        }
-        return true;
-      }());
-      if (!debugAllowAnyway) {
-        return;
-      }
+    // If the client IDs don't match, the incoming message was for a different
+    // client.
+    if (!_isCurrentClient(args[0] as int)) {
+      return;
     }
 
     switch (method) {
