@@ -193,6 +193,17 @@ static void cleanup_shader(FlCompositorOpenGL* self) {
   }
 }
 
+static void blit_layer(const FlutterLayer* layer, GLint height) {
+  // Flutter layer offsets have the origin at the top-left, OpenGL has
+  // the origin at the bottom-left.
+  GLint x0 = layer->offset.x;
+  GLint y0 = height - (layer->offset.y + layer->size.height);
+  GLint layer_width = layer->size.width;
+  GLint layer_height = layer->size.height;
+  glBlitFramebuffer(0, 0, layer_width, layer_height, x0, y0, x0 + layer_width,
+                    y0 + layer_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+}
+
 static void composite_layer(FlCompositorOpenGL* self,
                             FlFramebuffer* framebuffer,
                             double x,
@@ -374,6 +385,15 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                     fl_framebuffer_get_id(self->framebuffer));
+  // A shifted first layer leaves part of the retained frame uncovered.
+  if (layers[0]->offset.x != 0 || layers[0]->offset.y != 0) {
+    GLfloat clear_color[4];
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, clear_color);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(clear_color[0], clear_color[1], clear_color[2],
+                 clear_color[3]);
+  }
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
@@ -387,11 +407,7 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
         // The first layer can use a fast framebuffer blit when available;
         // otherwise composite it with the shader like subsequent layers.
         if (first_layer && self->can_blit) {
-          glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
-                            layer->size.height, layer->offset.x,
-                            layer->offset.y, layer->size.width,
-                            layer->size.height, GL_COLOR_BUFFER_BIT,
-                            GL_NEAREST);
+          blit_layer(layer, height);
           first_layer = FALSE;
         } else {
           composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
@@ -521,15 +537,7 @@ static gboolean fl_compositor_opengl_present_layers_gtk3(
         if (first_layer && self->can_blit) {
           glBindFramebuffer(GL_READ_FRAMEBUFFER,
                             fl_framebuffer_get_id(layer_framebuffer));
-          // Flutter layer offsets have the origin at the top-left, OpenGL has
-          // the origin at the bottom-left.
-          GLint x0 = layer->offset.x;
-          GLint y0 = height - (layer->offset.y + layer->size.height);
-          GLint layer_width = layer->size.width;
-          GLint layer_height = layer->size.height;
-          glBlitFramebuffer(0, 0, layer_width, layer_height, x0, y0,
-                            x0 + layer_width, y0 + layer_height,
-                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+          blit_layer(layer, height);
         } else {
           composite_layer(self, layer_framebuffer, layer->offset.x,
                           layer->offset.y, width, height);

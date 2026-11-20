@@ -718,6 +718,24 @@ shared_library("flutter_linux_gtk") {
   public_configs = [ "//flutter:config" ]
 }
 
+# Uses the real EGL driver for pixel readback, outside the mocked unit suite.
+executable("flutter_linux_gtk4_compositor_pixel_test") {
+  testonly = true
+  sources = [ "fl_compositor_opengl_pixel_test.cc" ]
+  defines = [
+    "FLUTTER_LINUX_COMPILATION",
+    "FLUTTER_LINUX_GTK4",
+  ]
+  configs += [
+    "//flutter/shell/platform/linux/config:epoxy",
+    "//flutter/shell/platform/linux/config:gtk4",
+  ]
+  deps = [
+    ":flutter_linux_sources_gtk4",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
+  ]
+}
+
 shared_library("flutter_linux_gtk4") {
   deps = [
     ":flutter_linux_sources_gtk4",
