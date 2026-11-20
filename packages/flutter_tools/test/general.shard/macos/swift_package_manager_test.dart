@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
+import 'package:flutter_tools/src/macos/swift_packages.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -464,6 +465,8 @@ let package = Package(
                 .createSync(recursive: true);
 
             final processManager = FakeProcessManager.list([
+              _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
+              _dumpPackageCommand('${validPlugin3.path}/${platform.name}/valid_plugin_3'),
               FakeCommand(
                 command: [
                   'rsync',
@@ -500,6 +503,7 @@ let package = Package(
                 config: FakeConfig(),
                 fs: fs,
                 logger: logger,
+                processManager: processManager,
                 processUtils: ProcessUtils(processManager: processManager, logger: logger),
               ),
             );
@@ -678,6 +682,608 @@ let package = Package(
 )
 ''');
             expect(processManager, hasNoRemainingExpectations);
+          });
+
+          group('minimum deployment override', () {
+            final buildSourcePackagesPath = '/build/${platform.name}/SourcePackages';
+            final lowVersion = platform == FlutterDarwinPlatform.ios ? '13.0' : '10.15';
+            final midVersion = platform == FlutterDarwinPlatform.ios ? '16.0' : '13.0';
+            final highVersion = platform == FlutterDarwinPlatform.ios ? '17.0' : '14.0';
+            final platformDisplayName = platform == FlutterDarwinPlatform.ios ? '.iOS' : '.macOS';
+
+            testWithoutContext('copies plugin and overrides platforms with highest plugin dependency deployment target', () async {
+              final fs = MemoryFileSystem();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              const plugin1ManifestContents = '''
+let package = Package(
+    name: "valid_plugin_1",
+    dependencies: [
+        .package(name: "valid_plugin_2", path: "../valid_plugin_2"),
+        .package(name: "valid_plugin_3", path: "../valid_plugin_3")
+    ]
+)
+''';
+              fs.file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync(plugin1ManifestContents);
+
+              final validPlugin2 = FakePlugin(
+                name: 'valid_plugin_2',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final validPlugin3 = FakePlugin(
+                name: 'valid_plugin_3',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin3.path}/${platform.name}/${validPlugin3.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final File plugin1CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1/Package.swift',
+              );
+              final File plugin2CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
+              );
+              final File plugin3CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_3-1.0.0/${platform.name}/valid_plugin_3/Package.swift',
+              );
+
+              final processManager = FakeProcessManager.list([
+                // The highest deployment target is not the last dependency processed.
+                _dumpPackageCommand(
+                  '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+                  stdout: _platformsJson(platform, highVersion),
+                ),
+                _dumpPackageCommand(
+                  '${validPlugin3.path}/${platform.name}/valid_plugin_3',
+                  stdout: _platformsJson(platform, midVersion),
+                ),
+                _dumpPackageCommand(
+                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+                  stdout: _platformsJson(platform, lowVersion),
+                ),
+                _rsyncCommand(
+                  source: validPlugin1.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
+                  copiedManifest: plugin1CopiedManifest,
+                ),
+                _rsyncCommand(
+                  source: validPlugin2.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
+                  copiedManifest: plugin2CopiedManifest,
+                ),
+                _rsyncCommand(
+                  source: validPlugin3.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_3-1.0.0',
+                  copiedManifest: plugin3CopiedManifest,
+                ),
+              ]);
+
+              final spm = SwiftPackageManager(
+                templateRenderer: const MustacheTemplateRenderer(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processManager: processManager,
+                ),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1, validPlugin2, validPlugin3],
+                platform,
+                project,
+              );
+
+              expect(
+                plugin1CopiedManifest.readAsStringSync(),
+                '$plugin1ManifestContents\n\n'
+                '// Overriding platform to match minimum of dependencies.\n'
+                'package.platforms = [$platformDisplayName("$highVersion")]\n\n'
+                '// Basename of original plugin: valid_plugin_1-1.0.0',
+              );
+              // valid_plugin_1 is copied for the deployment override, but is still symlinked by
+              // basename since it isn't a dependency of another plugin.
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'),
+                isNot(exists),
+              );
+
+              // Plugin dependencies without dependencies of their own are not overridden.
+              expect(
+                plugin2CopiedManifest.readAsStringSync(),
+                isNot(contains('package.platforms')),
+              );
+              expect(
+                plugin3CopiedManifest.readAsStringSync(),
+                isNot(contains('package.platforms')),
+              );
+              expect(logger.errorText, isEmpty);
+              expect(processManager, hasNoRemainingExpectations);
+            });
+
+            testWithoutContext('does not add platforms override when manifest does not declare a Package', () async {
+              final fs = MemoryFileSystem();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              const plugin1ManifestContents =
+                  '.package(name: "valid_plugin_2", path: "../valid_plugin_2")';
+              fs.file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync(plugin1ManifestContents);
+
+              final validPlugin2 = FakePlugin(
+                name: 'valid_plugin_2',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final File plugin1CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1/Package.swift',
+              );
+              final File plugin2CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
+              );
+
+              final processManager = FakeProcessManager.list([
+                _dumpPackageCommand(
+                  '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+                  stdout: _platformsJson(platform, highVersion),
+                ),
+                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
+                _rsyncCommand(
+                  source: validPlugin1.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
+                  copiedManifest: plugin1CopiedManifest,
+                ),
+                _rsyncCommand(
+                  source: validPlugin2.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
+                  copiedManifest: plugin2CopiedManifest,
+                ),
+              ]);
+
+              final spm = SwiftPackageManager(
+                templateRenderer: const MustacheTemplateRenderer(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processManager: processManager,
+                ),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1, validPlugin2],
+                platform,
+                project,
+              );
+
+              expect(
+                plugin1CopiedManifest.readAsStringSync(),
+                '$plugin1ManifestContents\n\n'
+                '// Basename of original plugin: valid_plugin_1-1.0.0',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(processManager, hasNoRemainingExpectations);
+            });
+
+            testWithoutContext('logs error and does not override platforms when manifest fails to parse', () async {
+              final fs = MemoryFileSystem();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs.file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('.package(name: "valid_plugin_2", path: "../valid_plugin_2")');
+
+              final validPlugin2 = FakePlugin(
+                name: 'valid_plugin_2',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final File plugin2CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
+              );
+
+              final processManager = FakeProcessManager.list([
+                _dumpPackageCommand(
+                  '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+                  stdout: _platformsJson(platform, highVersion),
+                ),
+                _dumpPackageCommand(
+                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+                  stdout: 'not json',
+                ),
+                _rsyncCommand(
+                  source: validPlugin2.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
+                  copiedManifest: plugin2CopiedManifest,
+                ),
+              ]);
+
+              final spm = SwiftPackageManager(
+                templateRenderer: const MustacheTemplateRenderer(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processManager: processManager,
+                ),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1, validPlugin2],
+                platform,
+                project,
+              );
+
+              expect(
+                logger.errorText,
+                contains(
+                  'Failed to decode ${validPlugin1.path}/${platform.name}/valid_plugin_1/Package.swift. '
+                  '$kFileAnIssue',
+                ),
+              );
+
+              // valid_plugin_1 is not copied since no deployment override was found.
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+              );
+              // valid_plugin_2 is still copied since it's a dependency of another plugin.
+              expect(project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2'), exists);
+              expect(processManager, hasNoRemainingExpectations);
+            });
+
+            testWithoutContext('does not copy plugin when plugin dependencies do not require a higher deployment target', () async {
+              final fs = MemoryFileSystem();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs.file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('''
+let package = Package(
+    name: "valid_plugin_1",
+    dependencies: [
+        .package(name: "valid_plugin_2", path: "../valid_plugin_2"),
+        .package(name: "valid_plugin_3", path: "../valid_plugin_3")
+    ]
+)
+''');
+
+              final validPlugin2 = FakePlugin(
+                name: 'valid_plugin_2',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final validPlugin3 = FakePlugin(
+                name: 'valid_plugin_3',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin3.path}/${platform.name}/${validPlugin3.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final File plugin2CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
+              );
+              final File plugin3CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_3-1.0.0/${platform.name}/valid_plugin_3/Package.swift',
+              );
+
+              final processManager = FakeProcessManager.list([
+                // Equal to valid_plugin_1's deployment target.
+                _dumpPackageCommand(
+                  '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+                  stdout: _platformsJson(platform, midVersion),
+                ),
+                // Lower than valid_plugin_1's deployment target.
+                _dumpPackageCommand(
+                  '${validPlugin3.path}/${platform.name}/valid_plugin_3',
+                  stdout: _platformsJson(platform, lowVersion),
+                ),
+                _dumpPackageCommand(
+                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+                  stdout: _platformsJson(platform, midVersion),
+                ),
+                _rsyncCommand(
+                  source: validPlugin2.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
+                  copiedManifest: plugin2CopiedManifest,
+                ),
+                _rsyncCommand(
+                  source: validPlugin3.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_3-1.0.0',
+                  copiedManifest: plugin3CopiedManifest,
+                ),
+              ]);
+
+              final spm = SwiftPackageManager(
+                templateRenderer: const MustacheTemplateRenderer(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processManager: processManager,
+                ),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1, validPlugin2, validPlugin3],
+                platform,
+                project,
+              );
+
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1'),
+                isNot(exists),
+              );
+              expect(logger.errorText, isEmpty);
+              expect(processManager, hasNoRemainingExpectations);
+            });
+
+            testWithoutContext('overrides platforms when plugin does not declare a deployment target', () async {
+              final fs = MemoryFileSystem();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              // A `var` declaration with irregular spacing should still be matched.
+              const plugin1ManifestContents = '''
+var package=Package (
+    name: "valid_plugin_1",
+    dependencies: [
+        .package(name: "valid_plugin_2", path: "../valid_plugin_2")
+    ]
+)
+''';
+              fs.file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync(plugin1ManifestContents);
+
+              final validPlugin2 = FakePlugin(
+                name: 'valid_plugin_2',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final File plugin1CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_1-1.0.0/${platform.name}/valid_plugin_1/Package.swift',
+              );
+              final File plugin2CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
+              );
+
+              final processManager = FakeProcessManager.list([
+                _dumpPackageCommand(
+                  '${validPlugin2.path}/${platform.name}/valid_plugin_2',
+                  stdout: _platformsJson(platform, lowVersion),
+                ),
+                _dumpPackageCommand('${validPlugin1.path}/${platform.name}/valid_plugin_1'),
+                _rsyncCommand(
+                  source: validPlugin1.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
+                  copiedManifest: plugin1CopiedManifest,
+                ),
+                _rsyncCommand(
+                  source: validPlugin2.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
+                  copiedManifest: plugin2CopiedManifest,
+                ),
+              ]);
+
+              final spm = SwiftPackageManager(
+                templateRenderer: const MustacheTemplateRenderer(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processManager: processManager,
+                ),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1, validPlugin2],
+                platform,
+                project,
+              );
+
+              expect(
+                plugin1CopiedManifest.readAsStringSync(),
+                '$plugin1ManifestContents\n\n'
+                '// Overriding platform to match minimum of dependencies.\n'
+                'package.platforms = [$platformDisplayName("$lowVersion")]\n\n'
+                '// Basename of original plugin: valid_plugin_1-1.0.0',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(processManager, hasNoRemainingExpectations);
+            });
+
+            testWithoutContext('symlinks by plugin name and overrides platforms when plugin is a dependency and needs an override', () async {
+              final fs = MemoryFileSystem();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              // valid_plugin_1 -> valid_plugin_2 -> valid_plugin_3
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs.file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('.package(name: "valid_plugin_2", path: "../valid_plugin_2")');
+
+              final validPlugin2 = FakePlugin(
+                name: 'valid_plugin_2',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              const plugin2ManifestContents = '''
+let package = Package(
+    name: "valid_plugin_2",
+    dependencies: [
+        .package(name: "valid_plugin_3", path: "../valid_plugin_3")
+    ]
+)
+''';
+              fs.file('${validPlugin2.path}/${platform.name}/${validPlugin2.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync(plugin2ManifestContents);
+
+              final validPlugin3 = FakePlugin(
+                name: 'valid_plugin_3',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin3.path}/${platform.name}/${validPlugin3.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              final File plugin2CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2/Package.swift',
+              );
+              final File plugin3CopiedManifest = fs.file(
+                '$buildSourcePackagesPath/valid_plugin_3-1.0.0/${platform.name}/valid_plugin_3/Package.swift',
+              );
+
+              final processManager = FakeProcessManager.list([
+                // valid_plugin_1's dependencies. valid_plugin_1's manifest is not parsed since
+                // none of its dependencies declare a deployment target.
+                _dumpPackageCommand('${validPlugin2.path}/${platform.name}/valid_plugin_2'),
+                // valid_plugin_2's dependencies.
+                _dumpPackageCommand(
+                  '${validPlugin3.path}/${platform.name}/valid_plugin_3',
+                  stdout: _platformsJson(platform, highVersion),
+                ),
+                // valid_plugin_2's own manifest is not parsed again since the result is cached.
+                _rsyncCommand(
+                  source: validPlugin2.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_2-1.0.0',
+                  copiedManifest: plugin2CopiedManifest,
+                ),
+                _rsyncCommand(
+                  source: validPlugin3.path,
+                  destination: '$buildSourcePackagesPath/valid_plugin_3-1.0.0',
+                  copiedManifest: plugin3CopiedManifest,
+                ),
+              ]);
+
+              final spm = SwiftPackageManager(
+                templateRenderer: const MustacheTemplateRenderer(),
+                toolContext: FakeToolContext(
+                  config: FakeConfig(),
+                  fs: fs,
+                  logger: logger,
+                  processManager: processManager,
+                ),
+              );
+              await spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1, validPlugin2, validPlugin3],
+                platform,
+                project,
+              );
+
+              // valid_plugin_1 is neither a dependency nor needs an override.
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+              );
+
+              // valid_plugin_2 is a dependency of valid_plugin_1 and needs an override.
+              expect(
+                plugin2CopiedManifest.readAsStringSync(),
+                '$plugin2ManifestContents\n\n'
+                '// Overriding platform to match minimum of dependencies.\n'
+                'package.platforms = [$platformDisplayName("$highVersion")]\n\n'
+                '// Basename of original plugin: valid_plugin_2-1.0.0',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2').targetSync(),
+                '$buildSourcePackagesPath/valid_plugin_2-1.0.0/${platform.name}/valid_plugin_2',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_2-1.0.0'),
+                isNot(exists),
+              );
+
+              // valid_plugin_3 is a dependency of valid_plugin_2 and doesn't need an override.
+              expect(
+                plugin3CopiedManifest.readAsStringSync(),
+                '\n\n// Basename of original plugin: valid_plugin_3-1.0.0',
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_3').targetSync(),
+                '$buildSourcePackagesPath/valid_plugin_3-1.0.0/${platform.name}/valid_plugin_3',
+              );
+              expect(logger.errorText, isEmpty);
+              expect(processManager, hasNoRemainingExpectations);
+            });
           });
 
           group('robust symlink creation', () {
@@ -869,6 +1475,59 @@ let package = Package(
           });
         });
 
+        group('parseSwiftPackageSupportedPlatform', () {
+          final FlutterDarwinPlatform otherPlatform = platform == FlutterDarwinPlatform.ios
+              ? FlutterDarwinPlatform.macos
+              : FlutterDarwinPlatform.ios;
+
+          testWithoutContext('returns platform matching target platform', () {
+            final SwiftPackageSupportedPlatform? supportedPlatform =
+                SwiftPackageManager.parseSwiftPackageSupportedPlatform(<String, Object?>{
+                  'platforms': <Object?>[
+                    <String, Object?>{'platformName': 'tvos', 'version': '1.0'},
+                    <String, Object?>{'platformName': otherPlatform.name, 'version': '1.0'},
+                    'invalid',
+                    <String, Object?>{'platformName': platform.name, 'version': '99.0'},
+                  ],
+                }, platform);
+
+            expect(supportedPlatform, isNotNull);
+            expect(supportedPlatform!.platform, platform.swiftPackagePlatform);
+            expect(supportedPlatform.version.toString(), '99.0');
+          });
+
+          testWithoutContext('returns null when platforms is missing', () {
+            expect(
+              SwiftPackageManager.parseSwiftPackageSupportedPlatform(<String, Object?>{
+                'name': 'plugin',
+              }, platform),
+              isNull,
+            );
+          });
+
+          testWithoutContext('returns null when target platform is not listed', () {
+            expect(
+              SwiftPackageManager.parseSwiftPackageSupportedPlatform(<String, Object?>{
+                'platforms': <Object?>[
+                  <String, Object?>{'platformName': otherPlatform.name, 'version': '1.0'},
+                ],
+              }, platform),
+              isNull,
+            );
+          });
+
+          testWithoutContext('returns null when version is invalid', () {
+            expect(
+              SwiftPackageManager.parseSwiftPackageSupportedPlatform(<String, Object?>{
+                'platforms': <Object?>[
+                  <String, Object?>{'platformName': platform.name, 'version': 'invalid'},
+                ],
+              }, platform),
+              isNull,
+            );
+          });
+        });
+
         group('concurrency and optimization', () {
           late MemoryFileSystem fs;
           late LockTrackingFileSystem trackingFs;
@@ -1037,6 +1696,43 @@ let package = Package(
       });
     }
   });
+}
+
+FakeCommand _dumpPackageCommand(String workingDirectory, {String stdout = '{}'}) {
+  return FakeCommand(
+    command: const <String>['swift', 'package', 'dump-package'],
+    workingDirectory: workingDirectory,
+    stdout: stdout,
+  );
+}
+
+String _platformsJson(FlutterDarwinPlatform platform, String version) {
+  return json.encode(<String, Object?>{
+    'platforms': <Map<String, String>>[
+      <String, String>{'platformName': platform.name, 'version': version},
+    ],
+  });
+}
+
+FakeCommand _rsyncCommand({
+  required String source,
+  required String destination,
+  required File copiedManifest,
+}) {
+  return FakeCommand(
+    command: <String>[
+      'rsync',
+      '-8',
+      '-av',
+      '--delete',
+      '--exclude=/example/',
+      '$source/',
+      destination,
+    ],
+    onRun: (_) {
+      copiedManifest.createSync(recursive: true);
+    },
+  );
 }
 
 class FakeXcodeProject extends Fake implements IosProject {
