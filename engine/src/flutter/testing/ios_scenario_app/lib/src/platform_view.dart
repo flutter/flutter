@@ -1644,6 +1644,104 @@ class PlatformViewForTouchIOSScenario extends Scenario with _BasePlatformViewSce
   }
 }
 
+/// Scenario for verifying that tapping Flutter UI outside of a share sheet dismisses the sheet,
+/// without delivering the touch to Flutter, when a platform view is underneath the Flutter UI.
+///
+/// This is the same behavior as when there is no platform view underneath the Flutter UI.
+/// See: https://github.com/flutter/flutter/issues/196236.
+///
+/// Renders a full-screen platform view, covered by Flutter UI. Once the platform view is rendered,
+/// asks the iOS side to present a share sheet over it via the `present_share_sheet` channel.
+/// Every pointer event received by Flutter is reported via the `display_data` channel.
+class PlatformViewShareSheetDismissScenario extends Scenario with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformViewShareSheetDismissScenario.
+  PlatformViewShareSheetDismissScenario(super.view, {required this.id});
+
+  /// The platform view identifier.
+  final int id;
+
+  bool _requestedShareSheet = false;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final Size size = view.physicalSize;
+    final builder = SceneBuilder();
+    addPlatformView(
+      id,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+      width: size.width,
+      height: size.height,
+    );
+    // Flutter UI covering the whole platform view.
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0x80ABCDEF));
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+
+  @override
+  void onDrawFrame() {
+    super.onDrawFrame();
+    if (!_requestedShareSheet &&
+        _createdPlatformViews.containsKey('scenarios/textPlatformView-$id')) {
+      // The platform view has been rendered, present the share sheet.
+      _requestedShareSheet = true;
+      view.platformDispatcher.sendPlatformMessage('present_share_sheet', null, null);
+    }
+  }
+
+  @override
+  void onPointerDataPacket(PointerDataPacket packet) {
+    for (final PointerData datum in packet.data) {
+      view.platformDispatcher.sendPlatformMessage(
+        'display_data',
+        utf8
+            .encode(
+              const JsonCodec().encode(<String, dynamic>{
+                'data': 'flutter_pointer:${datum.change}',
+              }),
+            )
+            .buffer
+            .asByteData(),
+        null,
+      );
+    }
+    if (packet.data.first.change == PointerChange.add) {
+      // The Flutter UI absorbs the touch, so reject the gesture for the platform view, like the
+      // framework does.
+      const valueString = 7;
+      const valueInt32 = 3;
+      const valueMap = 13;
+      final message = Uint8List.fromList(<int>[
+        valueString,
+        ..._encodeString('rejectGesture'),
+        valueMap,
+        1,
+        valueString,
+        ..._encodeString('id'),
+        valueInt32,
+        ..._to32(id),
+      ]);
+      view.platformDispatcher.sendPlatformMessage(
+        'flutter/platform_views',
+        message.buffer.asByteData(),
+        (ByteData? response) {},
+      );
+    }
+  }
+
+  @override
+  HitTestResponse onHitTest(HitTestRequest request) {
+    // The Flutter UI covers the whole platform view.
+    return HitTestResponse(hasPlatformView: false);
+  }
+}
+
 /// Scenario for verifying overlapping platform views can accept touch gesture.
 /// See: https://github.com/flutter/flutter/issues/118366.
 ///
