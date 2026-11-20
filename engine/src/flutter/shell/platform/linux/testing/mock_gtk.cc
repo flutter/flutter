@@ -159,8 +159,11 @@ void gdk_gl_context_realize(GdkGLContext* context) {
   check_thread();
 }
 
-void gdk_gl_context_clear_current(GdkGLContext* context) {
+void gdk_gl_context_clear_current() {
   check_thread();
+  if (mock != nullptr) {
+    mock->gdk_gl_context_clear_current();
+  }
 }
 
 void gdk_gl_context_make_current(GdkGLContext* context) {
