@@ -30,6 +30,10 @@ __weak static MockPlatformView* gMockPlatformView = nil;
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event;
 @end
 
+@interface SemanticsObjectContainer (Test)
+- (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event;
+@end
+
 @interface MockPlatformView : UIView
 @end
 @implementation MockPlatformView
@@ -169,6 +173,129 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
 @end
 
 @implementation AccessibilityBridgeTest
+
+- (void)testPartialScrollableTypeChangesPreserveTouchHitTesting {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:0];
+}
+
+- (void)testPartialScrollableTypeChangesPreserveDifferentHitTestOrder {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:1];
+}
+
+- (void)testPartialScrollableTypeChangesLeaveAbsentHitTestChildUntouched {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:2];
+}
+
+- (void)testPartialScrollableTypeChangesLeaveNilHitTestOrderUntouched {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:3];
+}
+
+- (void)testPartialScrollableTypeChangesClearRetainedOldObjectChildren {
+  [self checkPartialScrollableTypeChangesWithHitTestOrder:4];
+}
+
+- (void)checkPartialScrollableTypeChangesWithHitTestOrder:(NSInteger)mode {
+  flutter::MockDelegate mock_delegate;
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  auto runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  flutter::TaskRunners runners(self.name.UTF8String, runner, runner, runner, runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      mock_delegate, nil, runners, std::make_shared<fml::SyncSwitch>());
+  id engine = OCMClassMock([FlutterEngine class]);
+  id viewController = OCMClassMock([FlutterViewController class]);
+  FlutterView* view = [[FlutterView alloc] initWithDelegate:engine opaque:YES enableWideGamut:NO];
+  view.frame = CGRectMake(0, 0, 440, 956);
+  UIWindow* window = [[UIWindow alloc] initWithFrame:view.frame];
+  [window addSubview:view];
+  StubLoadedView(viewController, view);
+  auto bridge = std::make_unique<flutter::AccessibilityBridge>(
+      viewController, platform_view.get(), nil, std::make_unique<flutter::MockIosDelegate>());
+  CGFloat scale = window.screen.scale;
+  flutter::SemanticsNode root;
+  root.id = 0;
+  root.rect = SkRect::MakeWH(440 * scale, 956 * scale);
+  root.childrenInTraversalOrder = {1};
+  root.childrenInHitTestOrder = {1};
+  flutter::SemanticsNode parent;
+  parent.id = 1;
+  parent.rect = SkRect::MakeWH(440, 858);
+  parent.transform = SkM44::Translate(0, 98 * scale, 0) * SkM44::Scale(scale, scale, 1);
+  parent.childrenInTraversalOrder = {2, 4};
+  parent.childrenInHitTestOrder =
+      mode == 1 ? std::vector<int32_t>{4, 2} : std::vector<int32_t>{2, 4};
+  flutter::SemanticsNode list;
+  list.id = 2;
+  list.rect = SkRect::MakeWH(440, 858);
+  list.scrollPosition = 0;
+  list.scrollExtentMax = 1000;
+  list.actions = flutter::kVerticalScrollSemanticsActions;
+  list.childrenInTraversalOrder = {3};
+  list.childrenInHitTestOrder = {3};
+  flutter::SemanticsNode leaf;
+  leaf.id = 3;
+  leaf.rect = SkRect::MakeXYWH(8, 400, 424, 200);
+  leaf.label = "list item";
+  flutter::SemanticsNode sibling;
+  sibling.id = 4;
+  sibling.rect = SkRect::MakeXYWH(8, 0, 424, 40);
+  sibling.label = "sibling";
+  flutter::CustomAccessibilityActionUpdates actions;
+  SemanticsObjectContainer* rootContainer;
+  SemanticsObject* parentObject;
+  SemanticsObject* item;
+  @autoreleasepool {
+    bridge->UpdateSemantics({{0, root}, {1, parent}, {2, list}, {3, leaf}, {4, sibling}}, actions);
+    rootContainer = view.accessibilityElements[0];
+    parentObject = rootContainer.semanticsObject.children[0];
+    item = parentObject.children[0].children[0];
+  }
+  CGPoint point = CGPointMake(220, 610);
+  XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
+  SemanticsObject* siblingObject;
+  @autoreleasepool {
+    siblingObject = parentObject.children[1];
+  }
+  if (mode == 2) {
+    parentObject.childrenInHitTestOrder = @[ siblingObject ];
+  } else if (mode == 3) {
+    parentObject.childrenInHitTestOrder = nil;
+  }
+  for (bool scrollable : {true, false, true}) {
+    @autoreleasepool {
+      list.flags.hasImplicitScrolling = scrollable;
+      @autoreleasepool {
+        SemanticsObject* retainedOldList = mode == 4 ? parentObject.children[0] : nil;
+        // The parent is unchanged and is intentionally absent from this partial update.
+        bridge->UpdateSemantics({{2, list}}, actions);
+        if (mode == 4) {
+          XCTAssertNotNil(retainedOldList);
+          XCTAssertEqual(retainedOldList.children.count, 0u);
+          XCTAssertEqual(retainedOldList.childrenInHitTestOrder.count, 0u);
+          XCTAssertNil(retainedOldList.parent);
+          XCTAssertNotEqual([retainedOldList _accessibilityHitTest:point withEvent:nil], item);
+          XCTAssertEqual(item.parent, parentObject.children[0]);
+        }
+      }
+      SemanticsObject* newList = parentObject.children[0];
+      if (mode < 2 || mode == 4) {
+        XCTAssertEqualObjects(
+            parentObject.childrenInHitTestOrder,
+            mode == 1 ? (@[ siblingObject, newList ]) : (@[ newList, siblingObject ]));
+      } else if (mode == 2) {
+        XCTAssertEqualObjects(parentObject.childrenInHitTestOrder, @[ siblingObject ]);
+      } else {
+        XCTAssertNil(parentObject.childrenInHitTestOrder);
+      }
+      XCTAssertEqual(newList.parent, parentObject);
+      XCTAssertEqual(item.parent, newList);
+      XCTAssertEqual([newList isKindOfClass:[FlutterScrollableSemanticsObject class]], scrollable);
+      if (mode < 2 || mode == 4) {
+        XCTAssertEqual([rootContainer _accessibilityHitTest:point withEvent:nil], item);
+      }
+    }
+  }
+  bridge->clearState();
+}
 
 - (void)testCreate {
   flutter::MockDelegate mock_delegate;

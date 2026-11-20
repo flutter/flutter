@@ -66,7 +66,9 @@ std::shared_ptr<Surface::TextureRecord> Surface::CreateTextureRecord() const {
     return nullptr;
   }
 
-  auto image = impeller::DlImageImpeller::Make(texture);
+  // Written on the raster thread; see Texture::AsImage.
+  auto image = impeller::DlImageImpeller::Make(
+      texture, flutter::DlImage::OwningContext::kRaster);
   if (!image) {
     FML_LOG(ERROR) << "Failed to create Flutter GPU surface image.";
     return nullptr;
