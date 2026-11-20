@@ -80,7 +80,7 @@ class _ProfileViewRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> canvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) {

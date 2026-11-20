@@ -35,13 +35,14 @@ class TestRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
     if (rasterizeCompleter != null) {
       await rasterizeCompleter!.future;
     }
+    getDisplayCanvases();
   }
 }
 
@@ -308,5 +309,44 @@ void testMain() {
     await drawFuture;
 
     expect(warnings, contains(contains('Cannot render platform views: 124')));
+  });
+
+  test('adds platform views to the DOM only once the frame is rasterized', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final displayFactory = DisplayCanvasFactory<DisplayCanvas>(
+      createCanvas: () => FakeDisplayCanvas(),
+    );
+    final rasterizer = TestRasterizer(view, displayFactory);
+
+    const platformViewId = 125;
+    ui_web.platformViewRegistry.registerViewFactory('test-type-3', (int id) {
+      return domDocument.createElement('div');
+    });
+    await createPlatformView(platformViewId, 'test-type-3');
+
+    final sb = ui.SceneBuilder();
+    sb.addPlatformView(platformViewId, width: 100, height: 100);
+    final ui.Scene scene = sb.build();
+
+    rasterizer.rasterizeCompleter = Completer<void>();
+
+    final Future<void> drawFuture = rasterizer.draw(
+      (scene as LayerScene).layerTree,
+      view.physicalSize,
+      null,
+    );
+
+    // Wait a bit to ensure we are in the rasterize gap.
+    await Future<void>.delayed(Duration.zero);
+
+    // The previous frame is still on screen, so the DOM must not change yet.
+    expect(rasterizer.sceneElement.querySelector('flt-platform-view-slot'), isNull);
+
+    rasterizer.rasterizeCompleter!.complete();
+    await drawFuture;
+
+    expect(rasterizer.sceneElement.querySelector('flt-platform-view-slot'), isNotNull);
+
+    await disposePlatformView(platformViewId);
   });
 }

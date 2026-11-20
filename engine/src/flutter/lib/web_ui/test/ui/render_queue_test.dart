@@ -42,7 +42,7 @@ class HoldingRasterizer extends ViewRasterizer {
 
   @override
   Future<void> rasterize(
-    List<DisplayCanvas> displayCanvases,
+    List<DisplayCanvas> Function() getDisplayCanvases,
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   ) async {
@@ -56,6 +56,7 @@ class HoldingRasterizer extends ViewRasterizer {
     if (rasterizeCompleter != null) {
       await rasterizeCompleter!.future;
     }
+    getDisplayCanvases();
     recorder?.recordRasterFinish();
   }
 }
