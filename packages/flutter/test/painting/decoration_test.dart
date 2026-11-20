@@ -24,13 +24,14 @@ class TestCanvas implements Canvas {
 }
 
 class SynchronousTestImageProvider extends ImageProvider<int> {
-  const SynchronousTestImageProvider(this.image);
+  const SynchronousTestImageProvider(this.image, {this.cacheKey = 1});
 
   final ui.Image image;
+  final int cacheKey;
 
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<int>(1);
+    return SynchronousFuture<int>(cacheKey);
   }
 
   @override
@@ -122,6 +123,17 @@ class MultiImageCompleter extends ImageStreamCompleter {
     setImage(info);
   }
 }
+
+ui.Image _lastDrawnImage(TestCanvas canvas) {
+  final Invocation call = canvas.invocations.lastWhere(
+    (Invocation call) => call.memberName == #drawImageRect,
+  );
+  return call.positionalArguments[0] as ui.Image;
+}
+
+Matcher isSameSizeAs(ui.Image image) => isA<ui.Image>()
+    .having((ui.Image drawn) => drawn.width, 'width', image.width)
+    .having((ui.Image drawn) => drawn.height, 'height', image.height);
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -394,7 +406,7 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n',
     );
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87364
+  });
 
   test('DecorationImage - error listener', () async {
     late String exception;
@@ -771,6 +783,105 @@ void main() {
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
   });
 
+  test('DecorationImage paints the placeholder until the image is available', () async {
+    final ui.Image placeholder = await createTestImage(width: 10, height: 10);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final delayedProvider = DelayedImageProvider(image);
+    final backgroundImage = DecorationImage(
+      image: delayedProvider,
+      placeholder: SynchronousTestImageProvider(placeholder, cacheKey: 3),
+    );
+
+    var onChangedCallCount = 0;
+    final DecorationImagePainter painter = backgroundImage.createPainter(() {
+      onChangedCallCount += 1;
+    });
+    addTearDown(painter.dispose);
+
+    var canvas = TestCanvas();
+    painter.paint(
+      canvas,
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+      null,
+      ImageConfiguration.empty,
+    );
+    expect(_lastDrawnImage(canvas), isSameSizeAs(placeholder));
+
+    await delayedProvider.complete();
+    await null;
+    expect(onChangedCallCount, 1);
+
+    canvas = TestCanvas();
+    painter.paint(
+      canvas,
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+      null,
+      ImageConfiguration.empty,
+    );
+    expect(_lastDrawnImage(canvas), isSameSizeAs(image));
+  });
+
+  test('DecorationImage does not paint the placeholder when the image is available', () async {
+    final ui.Image placeholder = await createTestImage(width: 10, height: 10);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final backgroundImage = DecorationImage(
+      image: SynchronousTestImageProvider(image, cacheKey: 4),
+      placeholder: SynchronousTestImageProvider(placeholder, cacheKey: 5),
+    );
+
+    final DecorationImagePainter painter = backgroundImage.createPainter(() {
+      assert(false);
+    });
+    addTearDown(painter.dispose);
+
+    final canvas = TestCanvas();
+    painter.paint(
+      canvas,
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+      null,
+      ImageConfiguration.empty,
+    );
+    expect(_lastDrawnImage(canvas), isSameSizeAs(image));
+  });
+
+  test('DecorationImagePainter releases the placeholder once the image loads', () async {
+    final ui.Image placeholder = await createTestImage(width: 10, height: 10);
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final delayedProvider = DelayedImageProvider(image);
+    final DecorationImagePainter painter = DecorationImage(
+      image: delayedProvider,
+      placeholder: SynchronousTestImageProvider(placeholder, cacheKey: 7),
+    ).createPainter(() {});
+    addTearDown(painter.dispose);
+
+    painter.paint(
+      TestCanvas(),
+      const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+      null,
+      ImageConfiguration.empty,
+    );
+    final int handleCountWithPlaceholder = placeholder.debugGetOpenHandleStackTraces()!.length;
+
+    await delayedProvider.complete();
+    await null;
+    expect(placeholder.debugGetOpenHandleStackTraces()!.length, handleCountWithPlaceholder - 1);
+  });
+
+  test('DecorationImage placeholder is included in equality and toString', () async {
+    final ui.Image image = await createTestImage(width: 100, height: 100);
+    final ImageProvider provider = SynchronousTestImageProvider(image);
+    final ImageProvider placeholder = SynchronousTestImageProvider(image, cacheKey: 6);
+
+    expect(
+      DecorationImage(image: provider, placeholder: placeholder),
+      isNot(DecorationImage(image: provider)),
+    );
+    expect(
+      DecorationImage(image: provider, placeholder: placeholder).toString(),
+      contains('placeholder: SynchronousTestImageProvider()'),
+    );
+  });
+
   test('DecorationImagePainter disposes of image when disposed', () async {
     final ImageProvider provider = MemoryImage(Uint8List.fromList(kTransparentImage));
 
@@ -796,7 +907,7 @@ void main() {
     expect(info.image.debugGetOpenHandleStackTraces()!.length, baselineRefCount);
 
     info.dispose();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+  });
 
   test('BoxShadow.copyWith', () {
     expect(const BoxShadow(), isNot(const BoxShadow(color: Color(0xFF112233))));

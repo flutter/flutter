@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show RootIsolateToken;
+
 import 'binding.dart';
 
 /// Stand-in for non-web platforms' [BackgroundIsolateBinaryMessenger].

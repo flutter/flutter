@@ -14,6 +14,7 @@ import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
 // Examples can assume:
+// // ignore_for_file: deprecated_member_use
 // import 'package:flutter_localizations/flutter_localizations.dart';
 // import 'package:flutter/cupertino.dart';
 
@@ -54,33 +55,32 @@ import 'widgets_localizations.dart';
 ///
 ///  * [DefaultCupertinoLocalizations], which provides US English localizations
 ///    for Cupertino widgets.
+@Deprecated(
+  'Use GlobalCupertinoLocalizations from package:cupertino_ui/cupertino_ui.dart instead. '
+  'This feature was deprecated after v3.47.0-0.0.pre.',
+)
 abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// Initializes an object that defines the Cupertino widgets' localized
   /// strings for the given `localeName`.
   ///
   /// The remaining '*Format' arguments uses the intl package to provide
   /// [DateFormat] configurations for the `localeName`.
+  @Deprecated(
+    'Use GlobalCupertinoLocalizations from package:cupertino_ui/cupertino_ui.dart instead. '
+    'This feature was deprecated after v3.47.0-0.0.pre.',
+  )
   const GlobalCupertinoLocalizations({
-    required String localeName,
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat dayFormat,
-    required intl.DateFormat weekdayFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat singleDigitHourFormat,
-    required intl.DateFormat singleDigitMinuteFormat,
-    required intl.DateFormat doubleDigitMinuteFormat,
-    required intl.DateFormat singleDigitSecondFormat,
-    required intl.NumberFormat decimalFormat,
-  }) : _localeName = localeName,
-       _fullYearFormat = fullYearFormat,
-       _dayFormat = dayFormat,
-       _weekdayFormat = weekdayFormat,
-       _mediumDateFormat = mediumDateFormat,
-       _singleDigitHourFormat = singleDigitHourFormat,
-       _singleDigitMinuteFormat = singleDigitMinuteFormat,
-       _doubleDigitMinuteFormat = doubleDigitMinuteFormat,
-       _singleDigitSecondFormat = singleDigitSecondFormat,
-       _decimalFormat = decimalFormat;
+    required this._localeName,
+    required this._fullYearFormat,
+    required this._dayFormat,
+    required this._weekdayFormat,
+    required this._mediumDateFormat,
+    required this._singleDigitHourFormat,
+    required this._singleDigitMinuteFormat,
+    required this._doubleDigitMinuteFormat,
+    required this._singleDigitSecondFormat,
+    required this._decimalFormat,
+  });
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;

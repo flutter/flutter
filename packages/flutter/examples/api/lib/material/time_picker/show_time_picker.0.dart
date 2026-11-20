@@ -209,9 +209,8 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                           // rarely necessary, because the default values are
                           // usually used as-is.
                           return Theme(
-                            data: Theme.of(
-                              context,
-                            ).copyWith(materialTapTargetSize: tapTargetSize),
+                            data: Theme.of(context)
+                                .copyWith(materialTapTargetSize: tapTargetSize),
                             child: Directionality(
                               textDirection: textDirection,
                               child: MediaQuery(

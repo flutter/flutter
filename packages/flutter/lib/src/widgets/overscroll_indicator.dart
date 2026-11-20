@@ -325,9 +325,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 enum _GlowState { idle, absorb, pull, recede }
 
 class _GlowController extends ChangeNotifier {
-  _GlowController({required TickerProvider vsync, required Color color, required Axis axis})
-    : _color = color,
-      _axis = axis {
+  _GlowController({required TickerProvider vsync, required this._color, required this._axis}) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }

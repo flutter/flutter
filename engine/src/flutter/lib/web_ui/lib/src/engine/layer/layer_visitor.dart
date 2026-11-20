@@ -430,9 +430,8 @@ class MeasureVisitor extends LayerVisitor<void> {
 
     // Get the picture bounds using the measuring canvas.
     final localTransform = Float32List.fromList(measuringCanvas.getTransform());
-    ui.Rect transformedBounds = Matrix4.fromFloat32List(
-      localTransform,
-    ).transformRect(picture.picture.cullRect);
+    ui.Rect transformedBounds = Matrix4.fromFloat32List(localTransform)
+        .transformRect(picture.picture.cullRect);
     // Modify the bounds with the image filters.
     for (final EngineImageFilter imageFilter in imageFilterStack.reversed) {
       transformedBounds = imageFilter.filterBounds(transformedBounds);

@@ -294,7 +294,7 @@ enum BlendMode {
 enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer }
 
 abstract class Paint {
-  factory Paint() => engine.renderer.createPaint();
+  factory Paint() => engine.EnginePaint();
 
   factory Paint.from(Paint other) {
     final paint = Paint();
@@ -645,9 +645,13 @@ class ImageFilter {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     TileMode? tileMode,
-    // ignore: avoid_unused_constructor_parameters
     Rect? bounds,
-  }) => engine.EngineImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }) => engine.EngineImageFilter.blur(
+    sigmaX: sigmaX,
+    sigmaY: sigmaY,
+    tileMode: tileMode,
+    bounds: bounds,
+  );
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
       engine.EngineImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
@@ -763,7 +767,6 @@ Future<Codec> instantiateImageCodecWithSize(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
-        allowUpscaling: false,
       );
     }
   } finally {
@@ -1081,12 +1084,7 @@ class ImageDescriptor {
       throw StateError('Object is disposed');
     }
     if (_width == null) {
-      return instantiateImageCodec(
-        _data!,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        allowUpscaling: false,
-      );
+      return instantiateImageCodec(_data!, targetWidth: targetWidth, targetHeight: targetHeight);
     }
 
     return createBmp(_data!, width, height, _rowBytes ?? width, _format!);
@@ -1183,6 +1181,11 @@ abstract class ImageSamplerSlot {
 }
 
 abstract class FragmentShader implements Shader {
+  @Deprecated(
+    'Use getUniformFloat, getUniformVec2, getUniformVec3, getUniformVec4, or a related method '
+    'to set uniforms by name instead. '
+    'This feature was deprecated after v3.51.0-0.1.pre.',
+  )
   void setFloat(int index, double value);
 
   void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none});

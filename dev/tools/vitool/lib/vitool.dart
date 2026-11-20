@@ -149,7 +149,7 @@ class PathCommandAnimation {
 
   /// A matrix with the command's points in different frames.
   ///
-  /// points[i][j] is the i-th point of the command at frame j.
+  /// `points[i][j]` is the i-th point of the command at frame j.
   final List<List<Point<double>>> points;
 
   @override
@@ -556,10 +556,8 @@ bool _hasAttr(XmlElement element, String name) {
 
 XmlElement _extractSvgElement(XmlDocument document) {
   return document.children.singleWhere(
-        (XmlNode node) =>
-            node.nodeType == XmlNodeType.ELEMENT && _asElement(node).name.local == 'svg',
-      )
-      as XmlElement;
+    (XmlNode node) => node.nodeType == XmlNodeType.ELEMENT && _asElement(node).name.local == 'svg',
+  ) as XmlElement;
 }
 
 XmlElement _asElement(XmlNode node) => node as XmlElement;

@@ -1162,42 +1162,29 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderSlider({
     required double value,
     required double? secondaryTrackValue,
-    required int? divisions,
-    required String? label,
-    required SliderThemeData sliderTheme,
-    required double textScaleFactor,
-    required Size screenSize,
-    required TargetPlatform platform,
-    required ValueChanged<double>? onChanged,
-    required SemanticFormatterCallback? semanticFormatterCallback,
+    required this._divisions,
+    required this._label,
+    required this._sliderTheme,
+    required this._textScaleFactor,
+    required this._screenSize,
+    required this._platform,
+    required this._onChanged,
+    required this._semanticFormatterCallback,
     required this.onDidGainAccessibilityFocus,
     required this.onChangeStart,
     required this.onChangeEnd,
-    required _SliderState state,
-    required TextDirection textDirection,
-    required bool hasFocus,
-    required bool hovering,
+    required this._state,
+    required this._textDirection,
+    required this._hasFocus,
+    required this._hovering,
     required DeviceGestureSettings gestureSettings,
-    required SliderInteraction allowedInteraction,
+    required this._allowedInteraction,
   }) : assert(value >= 0.0 && value <= 1.0),
        assert(
          secondaryTrackValue == null || (secondaryTrackValue >= 0.0 && secondaryTrackValue <= 1.0),
        ),
-       _platform = platform,
-       _semanticFormatterCallback = semanticFormatterCallback,
-       _label = label,
        _value = value,
-       _secondaryTrackValue = secondaryTrackValue,
-       _divisions = divisions,
-       _sliderTheme = sliderTheme,
-       _textScaleFactor = textScaleFactor,
-       _screenSize = screenSize,
-       _onChanged = onChanged,
-       _state = state,
-       _textDirection = textDirection,
-       _hasFocus = hasFocus,
-       _hovering = hovering,
-       _allowedInteraction = allowedInteraction {
+       _secondaryTrackValue = secondaryTrackValue {
     _updateLabelPainter();
     final team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -2073,7 +2060,7 @@ class _ValueIndicatorRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
-  _RenderValueIndicator({required _SliderState state}) : _state = state {
+  _RenderValueIndicator({required this._state}) {
     _valueIndicatorAnimation = CurvedAnimation(
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,

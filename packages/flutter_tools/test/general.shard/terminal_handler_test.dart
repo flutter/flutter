@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -51,6 +52,15 @@ final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{
     'views': <Object>[fakeFlutterView.toJson()],
+  },
+);
+
+final fakeFlutterViewWithoutIsolate = FlutterView(id: 'a', uiIsolate: null);
+
+final listViewsWithoutIsolate = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[fakeFlutterViewWithoutIsolate.toJson()],
   },
 );
 
@@ -413,6 +423,87 @@ void main() {
       );
       await terminalHandler.processTerminalInput('f');
     });
+
+    testWithoutContext('debugDump* with null vmService does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(
+        <FakeVmServiceRequest>[],
+        nullVmService: true,
+      );
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('debugDump* with null uiIsolate does not crash', () async {
+      final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+        for (var i = 0; i < 6; i++) listViewsWithoutIsolate,
+      ]);
+      expect(await terminalHandler.residentRunner.debugDumpApp(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+      expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+        isFalse,
+      );
+      expect(
+        await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+        isFalse,
+      );
+    });
+
+    testWithoutContext(
+      'debugDump* in profile mode dumps supported trees and skips debug-only trees',
+      () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpApp',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'WIDGET DATA'},
+          ),
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpRenderTree',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'RENDER DATA'},
+          ),
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpSemanticsTreeInTraversalOrder',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'SEMANTICS DATA 1'},
+          ),
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder',
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'data': 'SEMANTICS DATA 2'},
+          ),
+        ], buildMode: BuildMode.profile);
+        expect(await terminalHandler.residentRunner.debugDumpApp(), isTrue);
+        expect(await terminalHandler.residentRunner.debugDumpRenderTree(), isTrue);
+        expect(
+          await terminalHandler.residentRunner.debugDumpSemanticsTreeInTraversalOrder(),
+          isTrue,
+        );
+        expect(
+          await terminalHandler.residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder(),
+          isTrue,
+        );
+        expect(await terminalHandler.residentRunner.debugDumpLayerTree(), isFalse);
+        expect(await terminalHandler.residentRunner.debugDumpFocusTree(), isFalse);
+      },
+    );
 
     testWithoutContext('o,O - debugTogglePlatform', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
@@ -1182,77 +1273,68 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    's, does not take a screenshot on a device that does not support screenshot or the service protocol',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        logger: logger,
-        supportsServiceProtocol: false,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, does not take a screenshot on a device that does not support screenshot or the service protocol', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsServiceProtocol: false,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.statusText, '\n');
-      expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-    },
-  );
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
 
-  testWithoutContext(
-    's, does not take a screenshot on a web device that does not support screenshot or the service protocol',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        logger: logger,
-        supportsServiceProtocol: false,
-        web: true,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, does not take a screenshot on a web device that does not support screenshot or the service protocol', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsServiceProtocol: false,
+      web: true,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.statusText, '\n');
-      expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-    },
-  );
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
 
-  testWithoutContext(
-    's, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[
-          listViews,
-          FakeVmServiceRequest(
-            method: 'ext.flutter.debugAllowBanner',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'false'},
-          ),
-          FakeVmServiceRequest(
-            method: 'ext.dwds.screenshot',
-            // Failed response,
-            error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
-          ),
-          FakeVmServiceRequest(
-            method: 'ext.flutter.debugAllowBanner',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'true'},
-          ),
-        ],
-        logger: logger,
-        web: true,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'false'},
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.dwds.screenshot',
+          // Failed response,
+          error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'true'},
+        ),
+      ],
+      logger: logger,
+      web: true,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.errorText, contains('Error'));
-    },
-  );
+    expect(logger.errorText, contains('Error'));
+  });
 
   testWithoutContext(
     's, bails taking screenshot on debug device if debugAllowBanner during second request',
@@ -1293,6 +1375,12 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: testLogger,
+          processInfo: processInfo,
+        ),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
@@ -1666,6 +1754,12 @@ TerminalHandler setUpTerminalHandler(
   final processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
+    toolContext: FakeToolContext(
+      artifacts: Artifacts.test(),
+      fs: localFileSystem,
+      logger: testLogger,
+      processInfo: processInfo,
+    ),
     buildInfo: BuildInfo(
       buildMode,
       '',

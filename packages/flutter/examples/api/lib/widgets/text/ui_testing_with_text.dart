@@ -28,12 +28,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final TextStyle? bodyStyle = Theme.of(context).textTheme.bodyLarge;
-    final TextStyle customStyle1 = Theme.of(
-      context,
-    ).textTheme.bodyMedium!.copyWith(color: Colors.blue);
-    final TextStyle customStyle2 = Theme.of(
-      context,
-    ).textTheme.labelMedium!.copyWith(color: Colors.green);
+    final TextStyle customStyle1 = Theme.of(context).textTheme.bodyMedium!
+        .copyWith(color: Colors.blue);
+    final TextStyle customStyle2 = Theme.of(context).textTheme.labelMedium!
+        .copyWith(color: Colors.green);
     return MaterialApp(
       title: 'UI Testing with Text and RichText',
       home: Scaffold(
@@ -61,8 +59,7 @@ class _MyAppState extends State<MyApp> {
                   const Text(
                     'This text has a custom label and an identifier. In Android, the label is used as the content-desc, and the identifier is used as the resource-id.',
                     semanticsLabel: 'This is a custom label',
-                    semanticsIdentifier:
-                        'This is a custom identifier that only the automation tools are able to see',
+                    semanticsIdentifier: 'This is a custom identifier that only the automation tools are able to see',
                   ),
                   buildDivider(),
                   Text('Text.rich Example:', style: bodyStyle),
@@ -83,8 +80,7 @@ class _MyAppState extends State<MyApp> {
                           semanticsIdentifier: 'Hello to the automation tool',
                         ),
                         TextSpan(
-                          text:
-                              ' this text contains neither identifier nor label.',
+                          text: ' this text contains neither identifier nor label.',
                           style: customStyle2,
                         ),
                       ],

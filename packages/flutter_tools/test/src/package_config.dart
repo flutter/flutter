@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 
 /// Writes a `.dart_tool/package_config.json` file at [directory].
 ///
 /// Also writes a `.dart_tool/package_graph.json` file.
-///
-/// If directory is not specified, it will be `globals.fs.currentDirectory`;
 ///
 /// `package_config.json` will contain a package entry for [mainLibName] with `rootUri` at
 /// [directory].

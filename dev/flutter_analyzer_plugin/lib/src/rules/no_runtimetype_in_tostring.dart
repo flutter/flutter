@@ -9,8 +9,10 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 /// An analysis rule that verifies that runtimeType is not used in toString methods.
-class NoRuntimeTypeInToString extends AnalysisRule {
+class NoRuntimeTypeInToString extends FlutterAnalysisRule {
   NoRuntimeTypeInToString()
     : super(name: code.name, description: 'Verify that we do not use runtimeType in toString.');
 
@@ -25,7 +27,7 @@ class NoRuntimeTypeInToString extends AnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addMethodDeclaration(this, visitor);
   }

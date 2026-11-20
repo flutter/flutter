@@ -11,8 +11,10 @@
 
 part of ui;
 
-typedef DrainChannelCallback =
-    Future<void> Function(ByteData? data, PlatformMessageResponseCallback callback);
+typedef DrainChannelCallback = Future<void> Function(
+  ByteData? data,
+  PlatformMessageResponseCallback callback,
+);
 
 typedef ChannelCallback = void Function(ByteData? data, PlatformMessageResponseCallback callback);
 
@@ -162,7 +164,7 @@ class ChannelBuffers {
 
   Future<void> drain(String name, DrainChannelCallback callback) async {
     final _Channel? channel = _channels[name];
-    while (channel != null && !channel._queue.isEmpty) {
+    while (channel != null && channel._queue.isNotEmpty) {
       final _StoredMessage message = channel.pop();
       await callback(message.data, message.invoke);
     }

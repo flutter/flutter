@@ -277,9 +277,8 @@ void main() {
         ).add(const EdgeInsets.only(right: 2.0)),
         0.5,
       ),
-      const EdgeInsetsDirectional.only(
-        start: 0.5,
-      ).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)),
+      const EdgeInsetsDirectional.only(start: 0.5)
+          .add(const EdgeInsets.only(right: 1.0, bottom: 1.0)),
     );
     expect(
       EdgeInsetsGeometry.lerp(
@@ -290,9 +289,8 @@ void main() {
         ).add(const EdgeInsets.only(right: 2.0)),
         0.5,
       ),
-      const EdgeInsetsDirectional.only(
-        end: 0.5,
-      ).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)),
+      const EdgeInsetsDirectional.only(end: 0.5)
+          .add(const EdgeInsets.only(right: 1.0, bottom: 1.0)),
     );
   });
 

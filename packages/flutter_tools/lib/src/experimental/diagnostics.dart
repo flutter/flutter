@@ -12,9 +12,8 @@ import 'extension_discovery.dart';
 /// A host [DoctorValidator] adapter that delegates diagnostic checks to a single tool extension.
 class ExtensionDoctorValidator extends DoctorValidator {
   /// Creates an [ExtensionDoctorValidator] for the given diagnostic [extension].
-  ExtensionDoctorValidator({required this.extension, required Logger logger})
-    : _logger = logger,
-      super(extension.title);
+  ExtensionDoctorValidator({required this.extension, required this._logger})
+    : super(extension.title);
 
   /// The active extension service executing diagnostic checks.
   final DiagnosticsExtension extension;
@@ -66,14 +65,13 @@ class ExtensionDoctorValidator extends DoctorValidator {
 }
 
 /// A host-side [DiagnosticsExtension] client adapter that delegates RPC queries to an [ExtensionConnection].
-class DiagnosticsExtensionClient extends DiagnosticsExtension {
+final class DiagnosticsExtensionClient extends DiagnosticsExtension {
   /// Creates a [DiagnosticsExtensionClient] wrapping the host [connection].
   DiagnosticsExtensionClient(
     this.connection, {
-    required Logger logger,
-    String defaultTitle = 'Tool Extension Diagnostics',
-  }) : _defaultTitle = defaultTitle,
-       _logger = logger;
+    required this._logger,
+    this._defaultTitle = 'Tool Extension Diagnostics',
+  });
 
   /// The active extension isolate connection.
   final ExtensionConnection connection;
@@ -99,6 +97,8 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
       } else {
         _logger.printTrace('DiagnosticsExtensionClient received invalid title response: $response');
       }
+    } on ToolExtensionException catch (err) {
+      _logger.printWarning('Extension "${connection.extensionName}": ${err.message}');
     } on Object catch (err, stack) {
       _logger.printTrace('DiagnosticsExtensionClient failed to fetch title: $err\n$stack');
     }
@@ -129,6 +129,12 @@ class DiagnosticsExtensionClient extends DiagnosticsExtension {
       _logger.printTrace(
         'DiagnosticsExtensionClient received invalid diagnostics response: $response',
       );
+    } on ToolExtensionException catch (err) {
+      return <ValidationResult>[
+        ValidationResult(ValidationType.missing, <ValidationMessage>[
+          ValidationMessage.error(err.message),
+        ]),
+      ];
     } on Object catch (err, stack) {
       _logger.printTrace('DiagnosticsExtensionClient failed to run diagnostics: $err\n$stack');
     }

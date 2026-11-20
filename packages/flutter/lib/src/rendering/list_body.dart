@@ -32,8 +32,7 @@ class RenderListBody extends RenderBox
   /// given axis.
   ///
   /// By default, children are arranged along the vertical axis.
-  RenderListBody({List<RenderBox>? children, AxisDirection axisDirection = AxisDirection.down})
-    : _axisDirection = axisDirection {
+  RenderListBody({List<RenderBox>? children, this._axisDirection = AxisDirection.down}) {
     addAll(children);
   }
 

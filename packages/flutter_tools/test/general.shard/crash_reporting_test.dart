@@ -83,7 +83,11 @@ void main() {
     final crashReporter = CrashReporter(
       fileSystem: fs,
       logger: logger,
-      flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      flutterProjectFactory: FlutterProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+        config: FakeConfig(),
+      ),
     );
 
     final File file = fs.file('flutter_00.log');
@@ -150,6 +154,30 @@ void main() {
       );
 
       await verifyCrashReportSent(requestInfo);
+    });
+
+    testWithoutContext('should send crash reports with custom typeId', () async {
+      final requestInfo = RequestInfo();
+
+      final crashReportSender = CrashReportSender(
+        client: FakeCrashReportSender(requestInfo),
+        platform: platform,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
+      );
+
+      await crashReportSender.sendReport(
+        error: StateError('Test bad state error'),
+        stackTrace: stackTrace,
+        getFlutterVersion: () => 'test-version',
+        command: 'crash',
+        typeId: 'XcodeBuildError',
+      );
+
+      expect(requestInfo.fields?['type'], 'XcodeBuildError');
+      expect(logger.traceText, contains('Sending crash report to Google.'));
+      expect(logger.traceText, contains('Crash report sent (report ID: test-report-id)'));
     });
 
     testWithoutContext(

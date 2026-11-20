@@ -61,6 +61,15 @@ class MockVulkanContextBuilder {
   MockVulkanContextBuilder();
 
   //------------------------------------------------------------------------------
+  /// @brief      Initialize a mocked Vulkan instance and select a physical
+  ///             device without creating the logical device or full context.
+  ///
+  /// @return     A `ContextVK::DeviceSelection` if a physical device can be
+  ///             selected.
+  ///
+  absl::StatusOr<ContextVK::DeviceSelection> SelectDevice();
+
+  //------------------------------------------------------------------------------
   /// @brief      Create a Vulkan context with Vulkan functions mocked. The
   ///             caller is given a chance to tinker on the settings right
   ///             before a context is created.
@@ -146,6 +155,8 @@ class MockVulkanContextBuilder {
   }
 
  private:
+  ContextVK::Settings PrepareSettings();
+
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
   std::vector<std::string> instance_layers_;
@@ -174,6 +185,15 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
 /// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
 ///        given command buffer, in call order.
 const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
+
+/// @brief Returns the pipeline stages passed to `vkCmdWriteTimestamp` calls on
+///        the given command buffer, in call order.
+const std::vector<VkPipelineStageFlagBits>& GetRecordedTimestamps(
+    VkCommandBuffer buffer);
+
+/// @brief Returns the `queryCount` values passed to `vkGetQueryPoolResults`
+///        calls on the given device, in call order.
+std::vector<uint32_t> GetQueryPoolResultCounts(VkDevice device);
 
 }  // namespace testing
 }  // namespace impeller

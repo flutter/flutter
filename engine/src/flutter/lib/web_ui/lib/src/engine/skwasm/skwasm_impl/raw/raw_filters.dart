@@ -21,11 +21,16 @@ final class RawMaskFilter extends Opaque {}
 
 typedef MaskFilterHandle = Pointer<RawMaskFilter>;
 
-@Native<ImageFilterHandle Function(Float, Float, Int)>(
+@Native<ImageFilterHandle Function(Float, Float, Int, RawRect)>(
   symbol: 'imageFilter_createBlur',
   isLeaf: true,
 )
-external ImageFilterHandle imageFilterCreateBlur(double sigmaX, double sigmaY, int tileMode);
+external ImageFilterHandle imageFilterCreateBlur(
+  double sigmaX,
+  double sigmaY,
+  int tileMode,
+  RawRect bounds,
+);
 
 @Native<ImageFilterHandle Function(Float, Float)>(symbol: 'imageFilter_createDilate', isLeaf: true)
 external ImageFilterHandle imageFilterCreateDilate(double radiusX, double radiusY);
@@ -43,7 +48,7 @@ external ImageFilterHandle imageFilterCreateMatrix(Pointer<Float> matrix33, int 
   symbol: 'imageFilter_createFromColorFilter',
   isLeaf: true,
 )
-external ImageFilterHandle imageFilterCreateFromColorFilter(ColorFilterHandle colorFilte);
+external ImageFilterHandle imageFilterCreateFromColorFilter(ColorFilterHandle colorFilter);
 
 @Native<ImageFilterHandle Function(ImageFilterHandle, ImageFilterHandle)>(
   symbol: 'imageFilter_compose',

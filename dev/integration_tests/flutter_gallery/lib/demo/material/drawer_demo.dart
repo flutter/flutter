@@ -68,9 +68,8 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
 
   void _showNotImplementedMessage() {
     Navigator.pop(context); // Dismiss the drawer.
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("The drawer's items don't do anything")));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("The drawer's items don't do anything")));
   }
 
   @override

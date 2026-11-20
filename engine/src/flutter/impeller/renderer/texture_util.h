@@ -5,10 +5,10 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_TEXTURE_UTIL_H_
 #define FLUTTER_IMPELLER_RENDERER_TEXTURE_UTIL_H_
 
-#include "flutter/fml/status.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -19,7 +19,7 @@ std::shared_ptr<Texture> CreateTexture(
     std::string_view debug_label);
 
 /// Adds a blit command to the render pass.
-[[nodiscard]] fml::Status AddMipmapGeneration(
+[[nodiscard]] absl::Status AddMipmapGeneration(
     const std::shared_ptr<CommandBuffer>& command_buffer,
     const std::shared_ptr<Context>& context,
     const std::shared_ptr<Texture>& texture);

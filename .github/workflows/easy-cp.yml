@@ -2,14 +2,43 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Privileged half of the cherry-pick automation.
+#
+# The `cherrypick_to_release` job runs after `cp-trigger.yml` completes. The
+# artifact produced by that workflow is UNTRUSTED (a pull request can modify the
+# trigger workflow), so it only carries the PR number and channel. The PR number
+# is bound to the triggering run's head commit, and the channel is checked
+# against the PR's labels. Everything else (merged state, merge commit, release
+# branch) is read from trusted sources here.
+#
+# It can also be run manually (`workflow_dispatch`) by anyone with write access,
+# e.g. for PRs merged before `cp-trigger.yml` existed, whose merge commits don't
+# contain the trigger workflow:
+#
+#   gh workflow run easy-cp.yml -R flutter/flutter -f pr_number=12345 -f channel=beta
+
 name: Cherry-pick Labeled PR to Release Branch
 
 on:
-  # Safe because we only checkout the trusted 'master' branch from the flutteractionsbot/flutter repository
-  # and run cherry-picks on merged commits from the upstream master branch. It does not execute arbitrary user-controlled code.
-  pull_request_target: # zizmor: ignore[dangerous-triggers]
-    branches: [master]
-    types: [labeled]
+  # Safe because this only consumes an artifact from the triggering run as
+  # untrusted data (validated and bound to the PR's head SHA); no PR code is
+  # checked out or executed.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: [Cherry-pick Trigger]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Number of the merged pull request to cherry-pick'
+        required: true
+        type: number
+      channel:
+        description: 'Release channel to cherry-pick to'
+        required: true
+        type: choice
+        options:
+          - beta
+          - stable
   issues:
     types: [labeled]
 
@@ -17,22 +46,6 @@ permissions:
   contents: read
 
 jobs:
-  cherrypick_not_merged_remove_label:
-    name: cherrypick_not_merged_remove_label
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request_target' &&
-      (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')) &&
-      (github.event.pull_request.merged == false)
-    steps:
-      - name: Leave Comment and Remove Label
-        run: |
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label "cp: beta"
-          gh pr edit ${{ github.event.pull_request.number }} --remove-label "cp: stable"
-          gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "Only merged pull requests can be cherrypicked."
-        env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-
   remove_label_from_issues:
     name: remove_label_from_issues
     runs-on: ubuntu-latest
@@ -42,8 +55,8 @@ jobs:
     steps:
       - name: Remove Label and Leave Comment
         run: |
-          gh issue edit $ISSUE_NUMBER -R flutter/flutter --remove-label "$LABEL_NAME"
-          gh issue comment $ISSUE_NUMBER -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
+          gh issue edit "$ISSUE_NUMBER" -R flutter/flutter --remove-label "$LABEL_NAME"
+          gh issue comment "$ISSUE_NUMBER" -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           LABEL_NAME: ${{ github.event.label.name }}
@@ -52,30 +65,118 @@ jobs:
   cherrypick_to_release:
     name: cherrypick_to_release
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request_target' &&
-      (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')) &&
-      (github.event.pull_request.merged == true)
+    # Runs where every job was skipped (i.e. a non-cp label) conclude as
+    # `skipped`, so this check avoids allocating a runner for them.
+    if: >-
+      github.repository == 'flutter/flutter' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.path == '.github/workflows/cp-trigger.yml'))
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
     steps:
-      - name: Get Release Channel
-        id: get-channel
-        env:
-          LABEL_NAME: ${{ github.event.label.name }}
-        run: echo "channel=$(echo $LABEL_NAME | cut -d ':' -f 2 | xargs)" >> "$GITHUB_OUTPUT"
+      - name: Download cherry-pick metadata
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: cp-metadata
+          path: ${{ runner.temp }}/cp-metadata
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
-      - name: Export Release Candidate Branch
-        id: get-branch
+      - name: Validate cherry-pick request
+        id: validate
         env:
-          CHANNEL: ${{ steps.get-channel.outputs.channel }}
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+          INPUT_CHANNEL: ${{ inputs.channel }}
+          INPUT_PR_NUMBER: ${{ inputs.pr_number }}
+          REPO: ${{ github.repository }}
+          RUN_HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          branch=$(curl -f -s "https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version" | tr -d '\n')
-          if [ -z "$branch" ]; then
-            echo "Error: Failed to fetch release candidate branch for channel $CHANNEL" >&2
+          set -euo pipefail
+          METADATA="$RUNNER_TEMP/cp-metadata/metadata.json"
+          WORK="$RUNNER_TEMP/cp"
+          mkdir -p "$WORK"
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PR_NUMBER="$INPUT_PR_NUMBER"
+            CHANNEL="$INPUT_CHANNEL"
+          else
+            PR_NUMBER=$(jq -r '.pr_number // empty' "$METADATA")
+            CHANNEL=$(jq -r '.channel // empty' "$METADATA")
+          fi
+          if ! [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::Invalid PR number."
             exit 1
           fi
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if [ "$CHANNEL" != "beta" ] && [ "$CHANNEL" != "stable" ]; then
+            echo "::error::Invalid channel."
+            exit 1
+          fi
+
+          gh api "repos/$REPO/pulls/$PR_NUMBER" > "$WORK/pr.json"
+
+          # A manual dispatch is itself the cherry-pick request. Otherwise, bind
+          # the artifact to the pull request that actually triggered the run, and
+          # ignore stale requests (e.g. re-runs after the label was removed).
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            if [ "$(jq -r '.head.sha' "$WORK/pr.json")" != "$RUN_HEAD_SHA" ] ||
+               [ "$(jq -r '.head.repo.full_name // empty' "$WORK/pr.json")" != "$RUN_HEAD_REPO" ]; then
+              echo "::error::PR #$PR_NUMBER does not match the triggering workflow run."
+              exit 1
+            fi
+
+            if ! jq -e --arg label "cp: $CHANNEL" '.labels | any(.name == $label)' "$WORK/pr.json" > /dev/null; then
+              echo "::notice::PR #$PR_NUMBER no longer has the 'cp: $CHANNEL' label; nothing to do."
+              echo "action=none" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "channel=$CHANNEL" >> "$GITHUB_OUTPUT"
+
+          if [ "$(jq -r '.merged' "$WORK/pr.json")" != "true" ]; then
+            echo "action=not_merged" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          MERGE_COMMIT_SHA=$(jq -r '.merge_commit_sha' "$WORK/pr.json")
+          if ! [[ "$MERGE_COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::PR #$PR_NUMBER has an invalid merge commit."
+            exit 1
+          fi
+
+          RELEASE_BRANCH=$(curl -f -s "https://raw.githubusercontent.com/flutter/flutter/$CHANNEL/bin/internal/release-candidate-branch.version" | tr -d '\n' || true)
+          if ! [[ "$RELEASE_BRANCH" =~ ^flutter-[0-9]+\.[0-9]+-candidate\.[0-9]+$ ]]; then
+            echo "::error::Failed to fetch a valid release candidate branch for channel $CHANNEL"
+            exit 1
+          fi
+
+          echo "merge_commit_sha=$MERGE_COMMIT_SHA" >> "$GITHUB_OUTPUT"
+          echo "release_branch=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
+          # Free-form display text. Written to a file so it is never evaluated.
+          jq -r '.title' "$WORK/pr.json" > "$WORK/title.txt"
+          echo "action=cherrypick" >> "$GITHUB_OUTPUT"
+
+      - name: Leave Comment and Remove Label
+        if: steps.validate.outputs.action == 'not_merged'
+        run: |
+          gh pr edit "$PR_NUMBER" -R flutter/flutter --remove-label "cp: beta"
+          gh pr edit "$PR_NUMBER" -R flutter/flutter --remove-label "cp: stable"
+          gh pr comment "$PR_NUMBER" -R flutter/flutter -b "Only merged pull requests can be cherrypicked."
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
 
       - name: Checkout Flutter Repo
+        if: steps.validate.outputs.action == 'cherrypick'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: flutteractionsbot/flutter
@@ -87,6 +188,7 @@ jobs:
           persist-credentials: false
 
       - name: Configure Git
+        if: steps.validate.outputs.action == 'cherrypick'
         run: |
           gh auth setup-git
           git config --global user.name "flutteractionsbot"
@@ -96,6 +198,7 @@ jobs:
 
       # use same name when checking out branch, since the marketplace action does a hard reset.
       - name: Attempt CP
+        if: steps.validate.outputs.action == 'cherrypick'
         id: attempt-cp
         working-directory: ./flutter
         run: |
@@ -105,9 +208,9 @@ jobs:
           git checkout -b "cp-${CHANNEL}-${MERGE_COMMIT_SHA}" --track "upstream/$RELEASE_BRANCH"
           git cherry-pick "$MERGE_COMMIT_SHA"
         env:
-          CHANNEL: ${{ steps.get-channel.outputs.channel }}
-          RELEASE_BRANCH: ${{ steps.get-branch.outputs.branch }}
-          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          CHANNEL: ${{ steps.validate.outputs.channel }}
+          RELEASE_BRANCH: ${{ steps.validate.outputs.release_branch }}
+          MERGE_COMMIT_SHA: ${{ steps.validate.outputs.merge_commit_sha }}
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
 
       - name: Create PR on CP success
@@ -115,15 +218,18 @@ jobs:
         working-directory: ./flutter
         id: create-pr
         run: |
+          PR_TITLE=$(cat "$RUNNER_TEMP/cp/title.txt")
+          git show upstream/master:.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md \
+            | sed "s/<ORIGINAL_PR_NUMBER>/${PR_NUMBER}/g" > "$RUNNER_TEMP/cp/body.md"
           git push origin "cp-${CHANNEL}-${MERGE_COMMIT_SHA}"
-          pr_url=$(gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file ".github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}")
+          pr_url=$(gh pr create --title "[CP-${CHANNEL}]${PR_TITLE}" --body-file "$RUNNER_TEMP/cp/body.md" --base "${RELEASE_BRANCH}" --label "cp: review" --repo flutter/flutter --head "flutteractionsbot:cp-${CHANNEL}-${MERGE_COMMIT_SHA}")
           echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
         env:
-          CHANNEL: ${{ steps.get-channel.outputs.channel }}
-          RELEASE_BRANCH: ${{ steps.get-branch.outputs.branch }}
-          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          CHANNEL: ${{ steps.validate.outputs.channel }}
+          RELEASE_BRANCH: ${{ steps.validate.outputs.release_branch }}
+          MERGE_COMMIT_SHA: ${{ steps.validate.outputs.merge_commit_sha }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
 
       - name: Leave Comment on CP success
         if: ${{ steps.create-pr.conclusion == 'success' }}
@@ -134,7 +240,9 @@ jobs:
           gh pr comment "$NEW_PR_NUMBER" -R flutter/flutter -b "${SUCCESS_MSG}"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          ACTOR: ${{ github.actor }}
+          # The user who applied the label (the actor of the triggering run), or
+          # the user who dispatched this workflow manually.
+          ACTOR: ${{ github.event_name == 'workflow_dispatch' && github.actor || github.event.workflow_run.actor.login }}
           PR_URL: ${{ steps.create-pr.outputs.pr_url }}
 
       - name: Leave Comment on CP failure
@@ -142,6 +250,7 @@ jobs:
         run: |
           FAILURE_MSG="Failed to create CP due to merge conflicts.<br>"
           FAILURE_MSG+="You will need to create the PR manually. See [the cherrypick wiki](https://github.com/flutter/flutter/blob/main/docs/releases/Flutter-Cherrypick-Process.md) for more info."
-          gh pr comment ${{ github.event.pull_request.number }} -R flutter/flutter -b "${FAILURE_MSG}"
+          gh pr comment "$PR_NUMBER" -R flutter/flutter -b "${FAILURE_MSG}"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          PR_NUMBER: ${{ steps.validate.outputs.pr_number }}

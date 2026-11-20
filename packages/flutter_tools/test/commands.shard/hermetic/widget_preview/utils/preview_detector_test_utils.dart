@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -71,7 +72,7 @@ void testPreviewDetector(
     },
     overrides: {
       FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test()),
+          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test(), config: FakeConfig()),
     },
   );
 }
@@ -81,9 +82,16 @@ PreviewDetector createTestPreviewDetector() {
     throw StateError('$initializeTestPreviewDetectorState was not called!');
   }
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
-  final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
+  final FlutterProject project = FlutterProject.fromDirectory(
+    _projectRoot!,
+    logger: BufferLogger.test(),
+  );
+
+  final String sdkPath = _fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk');
+  final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
 
   return PreviewDetector(
+    artifacts: artifacts,
     platform: FakePlatform(),
     previewAnalytics: WidgetPreviewAnalytics(
       analytics: getInitializedFakeAnalyticsInstance(
@@ -108,7 +116,7 @@ PreviewManifest createPreviewManifest() {
   }
   return PreviewManifest(
     logger: BufferLogger.test(),
-    rootProject: FlutterProject.fromDirectory(_projectRoot!),
+    rootProject: FlutterProject.fromDirectory(_projectRoot!, logger: BufferLogger.test()),
     fs: _fs,
     cache: Cache.test(processManager: FakeProcessManager.any()),
   );
@@ -166,6 +174,10 @@ Future<String> waitForPubspecChangeDetected({
     }
     completer.complete(path);
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   return completer.future;
 }
@@ -181,6 +193,10 @@ Future<String> waitForPackageConfigChangeDetected({
     }
     completer.complete(path);
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   return completer.future;
 }
@@ -200,6 +216,10 @@ Future<void> waitForChangeDetected({
     onChangeDetected(updated);
     completer.complete();
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   await completer.future;
 }
@@ -220,6 +240,10 @@ Future<void> waitForNChangesDetected({
       completer.complete();
     }
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   await completer.future;
 }

@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart' show immutable;
 import 'package:path/path.dart' as path;
@@ -101,7 +102,7 @@ Future<String> _tryCached(
   } catch (exception) {
     print('Error writing GitHub cache. Details: $exception');
   } finally {
-    sink?.close();
+    await sink?.close();
   }
   return result;
 }
