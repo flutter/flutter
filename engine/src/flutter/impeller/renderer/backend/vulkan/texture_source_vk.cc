@@ -89,4 +89,8 @@ FramebufferAndRenderPass TextureSourceVK::GetCachedFrameData(
   return {};
 }
 
+void TextureSourceVK::ClearCachedFrameData() {
+  frame_data_.clear();
+}
+
 }  // namespace impeller

@@ -32,7 +32,7 @@ ExternalSemaphoreVK::ExternalSemaphoreVK(
 
   context_vk.SetDebugName(semaphore.get(), "ExternalSemaphoreSyncFD");
 
-  semaphore_ = MakeSharedVK(std::move(semaphore));
+  semaphore_ = MakeSharedVK(std::move(semaphore), context_vk.GetDeviceHolder());
 }
 
 ExternalSemaphoreVK::~ExternalSemaphoreVK() = default;
