@@ -310,28 +310,10 @@ class Doctor {
         // Future returned by the asyncGuard() is not awaited, we pass an
         // onError callback to it and translate errors into ValidationResults.
         asyncGuard<ValidationResult>(
-          () {
-            final timeoutCompleter = Completer<ValidationResult>();
-            final timer = Timer(doctorDuration, () {
-              timeoutCompleter.completeError(
-                Exception(
-                  '${validator.title} exceeded maximum allowed duration of $doctorDuration',
-                ),
-              );
-            });
-            final Stopwatch stopwatch = _stopwatchFactory.createStopwatch(validator.title)..start();
-            final Future<ValidationResult> validatorFuture = validator.validate();
-            return Future.any<ValidationResult>(<Future<ValidationResult>>[
-              validatorFuture,
-              // This future can only complete with an error
-              timeoutCompleter.future,
-            ]).then((ValidationResult result) {
-              timer.cancel();
-              stopwatch.stop();
-              task.executionTime = stopwatch.elapsed;
-              return result;
-            });
-          },
+          () => _runValidator(
+            validator,
+            onComplete: (Duration elapsed) => task.executionTime = elapsed,
+          ),
           onError: (Object exception, StackTrace stackTrace) {
             return validator.createCrashResult(exception, stackTrace);
           },
@@ -340,6 +322,32 @@ class Doctor {
       tasks.add(task);
     }
     return tasks;
+  }
+
+  Future<ValidationResult> _runValidator(
+    DoctorValidator validator, {
+    required void Function(Duration) onComplete,
+  }) async {
+    final timeoutCompleter = Completer<ValidationResult>();
+    final timer = Timer(doctorDuration, () {
+      timeoutCompleter.completeError(
+        Exception('${validator.title} exceeded maximum allowed duration of $doctorDuration'),
+      );
+    });
+    final Stopwatch stopwatch = _stopwatchFactory.createStopwatch(validator.title)..start();
+    final ValidationResult result;
+    try {
+      result = await Future.any<ValidationResult>(<Future<ValidationResult>>[
+        validator.validate(),
+        // This future can only complete with an error
+        timeoutCompleter.future,
+      ]);
+    } finally {
+      timer.cancel();
+      stopwatch.stop();
+    }
+    onComplete(stopwatch.elapsed);
+    return result;
   }
 
   List<Workflow> get workflows => _validatorsProvider.workflows;

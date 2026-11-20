@@ -1006,6 +1006,59 @@ void main() {
     );
 
     testWithoutContext(
+      'Doctor.startValidatorTasks cancels timer and stops stopwatch on error and timeout',
+      () {
+        FakeAsync().run((FakeAsync fakeAsync) {
+          final crashingStopwatch = FakeStopwatch()..elapsed = const Duration(milliseconds: 17);
+          final crashingDoctor = FakeCrashingDoctor(
+            logger,
+            stopwatchFactory: FakeStopwatchFactory(
+              stopwatches: <String, Stopwatch>{'Crashing validator': crashingStopwatch},
+            ),
+          );
+
+          late List<ValidatorTask> crashingTasks;
+          unawaited(
+            crashingDoctor.startValidatorTasks().then(
+              (List<ValidatorTask> result) => crashingTasks = result,
+            ),
+          );
+          fakeAsync.flushMicrotasks();
+
+          expect(crashingStopwatch.isRunning, isFalse);
+          expect(crashingTasks[2].executionTime, isNull);
+          expect(fakeAsync.pendingTimers, isEmpty);
+
+          final stuckStopwatch = FakeStopwatch();
+          final stuckDoctor = FakeAsyncStuckDoctor(
+            logger,
+            stopwatchFactory: FakeStopwatchFactory(
+              stopwatches: <String, Stopwatch>{
+                'Stuck validator that never completes': stuckStopwatch,
+              },
+            ),
+          );
+
+          late List<ValidatorTask> stuckTasks;
+          unawaited(
+            stuckDoctor.startValidatorTasks().then(
+              (List<ValidatorTask> result) => stuckTasks = result,
+            ),
+          );
+          fakeAsync.flushMicrotasks();
+          expect(stuckStopwatch.isRunning, isTrue);
+          expect(fakeAsync.pendingTimers, hasLength(1));
+
+          fakeAsync.elapse(Doctor.doctorDuration);
+          fakeAsync.flushMicrotasks();
+          expect(stuckStopwatch.isRunning, isFalse);
+          expect(stuckTasks[2].executionTime, isNull);
+          expect(fakeAsync.pendingTimers, isEmpty);
+        });
+      },
+    );
+
+    testWithoutContext(
       'GroupedValidator delegates sub-validator crashes to subValidator.createCrashResult',
       () async {
         final grouped = GroupedValidator(<DoctorValidator>[
@@ -1294,10 +1347,11 @@ class FakeAsyncStuckDoctor extends Doctor {
     Logger logger, {
     super.analytics = const NoOpAnalytics(),
     super.clock = const SystemClock(),
+    StopwatchFactory? stopwatchFactory,
   }) : super(
          cache: Cache.test(processManager: FakeProcessManager.any()),
          logger: logger,
-         stopwatchFactory: FakeStopwatchFactory(),
+         stopwatchFactory: stopwatchFactory ?? FakeStopwatchFactory(),
          validatorsProviderBuilder: _fakeValidatorsProviderBuilder,
        );
 
