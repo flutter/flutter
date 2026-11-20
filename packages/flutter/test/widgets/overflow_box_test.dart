@@ -65,6 +65,66 @@ void main() {
       }
     });
 
+    testWidgets(
+      'dry layout and dry baseline match layout when min or max overrides the incoming constraints',
+      (WidgetTester tester) async {
+        // Layout checks the dry size, and paint checks the dry baselines,
+        // against the laid-out ones while debugCheckIntrinsicSizes is on.
+        final bool checkIntrinsicSizes = debugCheckIntrinsicSizes;
+        debugCheckIntrinsicSizes = true;
+        addTearDown(() => debugCheckIntrinsicSizes = checkIntrinsicSizes);
+        final cases = <({BoxConstraints incoming, OverflowBox box})>[
+          (
+            incoming: const BoxConstraints(maxWidth: 400, maxHeight: 400),
+            box: const OverflowBox(
+              fit: OverflowBoxFit.deferToChild,
+              minWidth: 200,
+              minHeight: 100,
+              child: Text('Hi', textDirection: TextDirection.ltr),
+            ),
+          ),
+          (
+            incoming: const BoxConstraints(maxWidth: 400, maxHeight: 400),
+            box: const OverflowBox(
+              fit: OverflowBoxFit.deferToChild,
+              maxWidth: 100,
+              child: SizedBox.expand(),
+            ),
+          ),
+          (
+            incoming: const BoxConstraints(minWidth: 300, maxWidth: 300, maxHeight: 400),
+            box: const OverflowBox(
+              fit: OverflowBoxFit.deferToChild,
+              minWidth: 0,
+              maxWidth: 100,
+              minHeight: 120,
+              child: SizedBox(width: 50, height: 50),
+            ),
+          ),
+          (
+            incoming: const BoxConstraints(maxWidth: 100, maxHeight: 100),
+            box: const OverflowBox(
+              fit: OverflowBoxFit.deferToChild,
+              maxWidth: 500,
+              maxHeight: 500,
+              child: SizedBox(width: 300, height: 30),
+            ),
+          ),
+        ];
+        for (final testCase in cases) {
+          await tester.pumpWidget(
+            Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(constraints: testCase.incoming, child: testCase.box),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          final RenderBox box = tester.renderObject(find.byType(OverflowBox));
+          expect(box.getDryLayout(testCase.incoming), box.size);
+        }
+      },
+    );
+
     testWidgets('no child', (WidgetTester tester) async {
       final GlobalKey<State<StatefulWidget>> key = GlobalKey();
 
