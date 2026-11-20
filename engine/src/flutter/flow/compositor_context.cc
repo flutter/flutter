@@ -76,13 +76,10 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     const DlMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
-    fml::RefPtr<fml::RasterThreadMerger>
-        raster_thread_merger,  // NOLINT(performance-unnecessary-value-param)
     impeller::AiksContext* aiks_context) {
   return std::make_unique<ScopedFrame>(
       *this, gr_context, canvas, view_embedder, root_surface_transformation,
-      instrumentation_enabled, surface_supports_readback, raster_thread_merger,
-      aiks_context);
+      instrumentation_enabled, surface_supports_readback, aiks_context);
 }
 
 CompositorContext::ScopedFrame::ScopedFrame(
@@ -93,7 +90,6 @@ CompositorContext::ScopedFrame::ScopedFrame(
     const DlMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
     impeller::AiksContext* aiks_context)
     : context_(context),
       gr_context_(gr_context),
@@ -102,8 +98,7 @@ CompositorContext::ScopedFrame::ScopedFrame(
       view_embedder_(view_embedder),
       root_surface_transformation_(root_surface_transformation),
       instrumentation_enabled_(instrumentation_enabled),
-      surface_supports_readback_(surface_supports_readback),
-      raster_thread_merger_(std::move(raster_thread_merger)) {
+      surface_supports_readback_(surface_supports_readback) {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
 
@@ -111,10 +106,9 @@ CompositorContext::ScopedFrame::~ScopedFrame() {
   context_.EndFrame(*this, instrumentation_enabled_);
 }
 
-RasterStatus CompositorContext::ScopedFrame::Raster(
-    flutter::LayerTree& layer_tree,
-    bool ignore_raster_cache,
-    FrameDamage* frame_damage) {
+void CompositorContext::ScopedFrame::Raster(flutter::LayerTree& layer_tree,
+                                            bool ignore_raster_cache,
+                                            FrameDamage* frame_damage) {
   TRACE_EVENT0("flutter", "CompositorContext::ScopedFrame::Raster");
 
   std::optional<DlRect> clip_rect;
@@ -132,18 +126,6 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
   bool root_needs_readback = layer_tree.Preroll(
       *this, ignore_raster_cache, clip_rect ? *clip_rect : kGiantRect);
   bool needs_save_layer = root_needs_readback && !surface_supports_readback();
-  PostPrerollResult post_preroll_result = PostPrerollResult::kSuccess;
-  if (view_embedder_ && raster_thread_merger_) {
-    post_preroll_result =
-        view_embedder_->PostPrerollAction(raster_thread_merger_);
-  }
-
-  if (post_preroll_result == PostPrerollResult::kResubmitFrame) {
-    return RasterStatus::kResubmit;
-  }
-  if (post_preroll_result == PostPrerollResult::kSkipAndRetryFrame) {
-    return RasterStatus::kSkipAndRetry;
-  }
 
   if (aiks_context_) {
     PaintLayerTreeImpeller(layer_tree, clip_rect, ignore_raster_cache);
@@ -151,7 +133,6 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     PaintLayerTreeSkia(layer_tree, clip_rect, needs_save_layer,
                        ignore_raster_cache);
   }
-  return RasterStatus::kSuccess;
 }
 
 void CompositorContext::ScopedFrame::PaintLayerTreeSkia(

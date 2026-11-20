@@ -55,17 +55,10 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
       std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
-      override;
-
-  // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,
@@ -75,12 +68,7 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override;
-
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override;
+  void EndFrame() override;
 
   // |ExternalViewEmbedder|
   void Teardown() override;
@@ -92,13 +80,6 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
       const std::unordered_map<int64_t, EmbeddedViewParams>& view_params);
 
  private:
-  // The number of frames the rasterizer task runner will continue
-  // to run on the platform thread after no platform view is rendered.
-  //
-  // Note: this is an arbitrary number that attempts to account for cases
-  // where the platform view might be momentarily off the screen.
-  static const int kDefaultMergedLeaseDuration = 10;
-
   // Provides metadata to the Android surfaces.
   const AndroidContext& android_context_;
 

@@ -36,8 +36,12 @@ void* FindFirstLoadableLibrary(
 ///
 class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  public:
+  using NativeWindowFromSurfaceFn =
+      std::function<AndroidNativeWindow::Handle(JNIEnv*, jobject)>;
+
   explicit PlatformViewAndroidJNIImpl(
-      const fml::jni::JavaObjectWeakGlobalRef& java_object);
+      const fml::jni::JavaObjectWeakGlobalRef& java_object,
+      NativeWindowFromSurfaceFn native_window_from_surface = nullptr);
 
   ~PlatformViewAndroidJNIImpl() override;
 
@@ -106,7 +110,13 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   void FlutterViewEndFrame() override;
 
   std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>
-  FlutterViewCreateOverlaySurface() override;
+  FlutterViewCreateOverlaySurface(int32_t width, int32_t height) override;
+
+  void FlutterViewDestroyOverlaySurfacesByIds(
+      const std::vector<int32_t>& ids) override;
+
+  void FlutterViewDrainAbortedFrame(
+      const std::vector<int32_t>& overlay_ids) override;
 
   void FlutterViewDestroyOverlaySurfaces() override;
 
@@ -162,6 +172,9 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  private:
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
+
+  // Optional test seam replacing ANativeWindow_fromSurface.
+  NativeWindowFromSurfaceFn native_window_from_surface_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroidJNIImpl);
 };

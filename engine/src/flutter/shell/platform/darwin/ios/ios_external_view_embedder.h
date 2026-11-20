@@ -30,9 +30,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,
@@ -52,9 +50,6 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
       GrDirectContext* context,
       const std::shared_ptr<impeller::AiksContext>& aiks_context,
       std::unique_ptr<SurfaceFrame> frame) override;
-
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override;
 
   // |ExternalViewEmbedder|
   void PushFilterToVisitedPlatformViews(

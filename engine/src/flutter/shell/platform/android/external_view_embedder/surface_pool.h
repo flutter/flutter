@@ -5,7 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
 
+#include <cstdint>
 #include <mutex>
+#include <vector>
 
 #include "flutter/flow/surface.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -49,10 +51,13 @@ class SurfacePool {
 
   ~SurfacePool();
 
-  // Gets a layer from the pool if available, or allocates a new one. If
-  // |TakeLayers| left stale Java overlay surfaces pending destruction, flushes
-  // them first via `jni_facade` (requiring the platform thread whenever
-  // |HasPendingDestroy| is true or a new/resized HC layer must be created).
+  // Gets a layer from the pool if available, or allocates a new one. For
+  // Hybrid Composition (!use_new_surface_methods_), if |requested_frame_size_|
+  // differs from |current_frame_size_|, old layers are retired into
+  // |retired_layer_ids_| without calling into JNI; callers must drain
+  // |TakeRetiredLayerIds| and destroy them via
+  // |FlutterViewDestroyOverlaySurfacesByIds|. Returns nullptr if allocation or
+  // GPU surface creation fails.
   // Finally, it marks the layer as used. That is, it increments
   // `available_layer_index_`.
   std::shared_ptr<OverlayLayer> GetLayer(
@@ -68,24 +73,28 @@ class SurfacePool {
   // Marks the layers in the pool as available for reuse.
   void RecycleLayers();
 
-  // Destroys all the layers in the pool and any taken layers still awaiting
-  // destruction on the platform thread. Must be called on the platform thread
-  // when |HasLayers| or |HasPendingDestroy| is true.
+  // Destroys all the layers in the pool and any taken/retired layers still
+  // awaiting destruction on the platform thread. Must be called on the platform
+  // thread when |HasLayers| or |HasPendingDestroy| is true.
   void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   // Destroys any Java overlay surfaces whose layers were removed by
-  // |TakeLayers| if they have not already been destroyed. Must be called on the
-  // platform thread.
+  // |TakeLayers| or retired on resize if they have not already been
+  // destroyed. Must be called on the platform thread.
   void DestroyPendingLayers(
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   // Removes all the layers from the pool and returns them without calling into
-  // Java, marking their Java overlay surfaces as pending destruction on the
-  // platform thread (via |DestroyPendingLayers|, |GetLayer|, or
-  // |DestroyLayers|).
+  // Java, recording their IDs as retired (for !use_new_surface_methods_) or
+  // pending destruction (for use_new_surface_methods_).
   std::vector<std::shared_ptr<OverlayLayer>> TakeLayers();
 
-  // Returns true if |TakeLayers| removed layers whose Java overlay surfaces
+  // Drains and returns overlay layer IDs retired by frame-size changes or
+  // |TakeLayers| (for !use_new_surface_methods_) so they can be destroyed on
+  // the platform thread via |FlutterViewDestroyOverlaySurfacesByIds|.
+  std::vector<int32_t> TakeRetiredLayerIds();
+
+  // Returns true if removed or retired layers have Java overlay surfaces that
   // have not yet been destroyed on the platform thread.
   bool HasPendingDestroy();
 
@@ -130,7 +139,14 @@ class SurfacePool {
   std::mutex mutex_;
   bool use_new_surface_methods_ = false;
   bool pending_java_destroy_ = false;
+  std::vector<int32_t> retired_layer_ids_;
 
+  bool AddLayerLocked(
+      GrDirectContext* gr_context,
+      const AndroidContext& android_context,
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+      const std::shared_ptr<AndroidSurfaceFactory>& surface_factory,
+      intptr_t gr_context_key);
   void DestroyLayersLocked(
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
   void DestroyJavaLayersLocked(

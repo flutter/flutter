@@ -106,9 +106,7 @@ class TesterExternalViewEmbedder : public ExternalViewEmbedder {
   void CancelFrame() override {}
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override {}
+  void BeginFrame(GrDirectContext* context) override {}
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,
