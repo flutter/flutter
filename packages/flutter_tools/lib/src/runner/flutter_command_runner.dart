@@ -537,7 +537,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     // Running the "upgrade" command is already checking, don't check twice.
-    if (topLevelResults.command?.name == 'upgrade') {
+    // The "daemon" command is a non-interactive JSON-RPC server and should not
+    // run git version checks unless explicitly requested.
+    if (topLevelResults.command?.name case 'upgrade' || 'daemon') {
       return false;
     }
 

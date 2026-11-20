@@ -667,7 +667,7 @@ class Cache {
   Directory getDownloadDir() => getCacheDir('downloads');
 
   /// Return the top-level mutable directory in the cache; this is `bin/cache/artifacts`.
-  Directory getCacheArtifacts() => getCacheDir('artifacts');
+  Directory getCacheArtifacts() => getCacheDir('artifacts', shouldCreate: false);
 
   /// Location of LICENSE file.
   File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
@@ -986,6 +986,8 @@ abstract class CachedArtifact extends ArtifactSet {
   }) async {
     if (!location.existsSync()) {
       try {
+        // Ensure bin/cache/artifacts exists with 755 permissions before creating location.
+        cache.getCacheDir('artifacts');
         location.createSync(recursive: true);
       } on FileSystemException catch (err) {
         logger.printError(err.toString());
@@ -1052,7 +1054,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   bool isUpToDateInner(FileSystem fileSystem) {
-    final Directory pkgDir = cache.getCacheDir('pkg');
+    final Directory pkgDir = cache.getCacheDir('pkg', shouldCreate: false);
     for (final String pkgName in getPackageDirs()) {
       final String pkgPath = fileSystem.path.join(pkgDir.path, pkgName);
       if (!fileSystem.directory(pkgPath).existsSync()) {

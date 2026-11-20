@@ -208,6 +208,48 @@ void main() {
         },
       );
 
+      testWithoutContext(
+        'does not check that Flutter installation is up-to-date for daemon command by default',
+        () async {
+          final version = FakeFlutterVersion();
+          final toolContext = FakeToolContext(
+            botDetector: const FakeBotDetector(false),
+            flutterVersion: version,
+            fs: fileSystem,
+            platform: platform,
+          );
+          final FlutterCommand command = DummyFlutterCommand(
+            name: 'daemon',
+            toolContext: toolContext,
+          );
+          final runner =
+              createTestCommandRunner(command, null, toolContext) as FlutterCommandRunner;
+
+          await runner.run(<String>['daemon']);
+
+          expect(version.didCheckFlutterVersionFreshness, false);
+        },
+      );
+
+      testWithoutContext('checks that Flutter installation is up-to-date for daemon command when explicit --version-check', () async {
+        final version = FakeFlutterVersion();
+        final toolContext = FakeToolContext(
+          botDetector: const FakeBotDetector(false),
+          flutterVersion: version,
+          fs: fileSystem,
+          platform: platform,
+        );
+        final FlutterCommand command = DummyFlutterCommand(
+          name: 'daemon',
+          toolContext: toolContext,
+        );
+        final runner = createTestCommandRunner(command, null, toolContext) as FlutterCommandRunner;
+
+        await runner.run(<String>['daemon', '--version-check']);
+
+        expect(version.didCheckFlutterVersionFreshness, true);
+      });
+
       testWithoutContext('Fetches tags when --version is used', () async {
         final os = FakeOperatingSystemUtils();
         final version = FakeFlutterVersion();
