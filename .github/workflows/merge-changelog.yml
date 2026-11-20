@@ -51,14 +51,8 @@ jobs:
           # Base the branch on upstream's master to avoid issues if the fork's master is out of date
           git checkout -b "$PR_BRANCH" upstream/master
 
-          # Merge release sections from stable without deleting older minor hotfixes on master.
-          # Pin to stable's published engine.version so ./bin/dart downloads only dart-sdk
-          # without needing full history or waiting on an in-flight master engine build.
-          STABLE_CHANGELOG="$RUNNER_TEMP/stable_CHANGELOG.md"
-          git show stable:CHANGELOG.md > "$STABLE_CHANGELOG"
-          STABLE_ENGINE="$(git show stable:bin/internal/engine.version | tr -d '[:space:]')"
-          FLUTTER_PREBUILT_ENGINE_VERSION="$STABLE_ENGINE" \
-            ./bin/dart --enable-asserts dev/tools/bin/merge_changelog.dart CHANGELOG.md "$STABLE_CHANGELOG"
+          # Retrieve the file from stable directly into the working directory
+          git show stable:CHANGELOG.md > CHANGELOG.md
 
           # Stop if no changes are detected
           if git diff --quiet CHANGELOG.md; then
