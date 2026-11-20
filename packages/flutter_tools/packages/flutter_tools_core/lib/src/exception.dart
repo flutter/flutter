@@ -5,6 +5,8 @@
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
+const _kRpcRequestDataKey = 'request';
+
 /// An exception thrown by a tool extension or host handler to report an
 /// intentional, user-actionable operational failure over JSON-RPC 2.0 without
 /// triggering a crash report.
@@ -33,6 +35,32 @@ class ToolExtensionException implements Exception {
   /// JSON-RPC 2.0 error code returned when an optional capability is not
   /// supported by the extension.
   static const int unsupportedCapabilityErrorCode = -32002;
+
+  /// Translates a JSON-RPC 2.0 error with [code], [message], and optional
+  /// [data] into a [ToolExtensionException] when [code] represents a domain
+  /// error (`-32001`) or unsupported optional capability (`-32002`), or returns
+  /// `null` for other JSON-RPC error codes.
+  static ToolExtensionException? tryFromRpcError({
+    required int code,
+    required String message,
+    Object? data,
+  }) {
+    if (code == domainErrorCode || code == unsupportedCapabilityErrorCode) {
+      return ToolExtensionException(message, code: code, data: _extractRpcErrorData(data));
+    }
+    return null;
+  }
+
+  static Map<String, Object?>? _extractRpcErrorData(Object? rawData) {
+    if (rawData is! Map) {
+      return null;
+    }
+    final extracted = <String, Object?>{
+      for (final MapEntry(:Object? key, :Object? value) in rawData.entries)
+        if (key is String && key != _kRpcRequestDataKey) key: value,
+    };
+    return extracted.isEmpty ? null : extracted;
+  }
 
   /// JSON-RPC 2.0 error code associated with this exception.
   final int code;

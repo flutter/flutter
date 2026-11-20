@@ -29,6 +29,7 @@ void main() {
         'FeatureFlag(name: enable-linux-custom-prototype, help: Enable custom Linux prototype, '
         'environmentOverride: FLUTTER_LINUX_PROTOTYPE, enabledByDefault: true)',
       );
+      expect(FeatureFlag.listFromJson(<Object?>[map]), <FeatureFlag>[flag]);
     });
 
     test(
@@ -58,6 +59,7 @@ void main() {
           'environmentOverride: FLUTTER_LINUX_GTK_VERSION, value: 3, '
           'aliases: [gtk-version, legacy-gtk-version])',
         );
+        expect(ConfigOption.listFromJson(<Object?>[map]), <ConfigOption>[config]);
       },
     );
 
@@ -91,35 +93,76 @@ void main() {
       expect(list, <ConfigAction>[action]);
     });
 
-    test('FeatureFlag.fromJson, ConfigOption.fromJson, and ConfigAction.fromJson throw FormatException on invalid types', () {
+    test('FeatureFlag.fromJson, ConfigOption.fromJson, and ConfigAction.fromJson throw FormatException on missing or invalid fields', () {
       expect(
-        () => FeatureFlag.fromJson(const <String, Object?>{FeatureFlag.nameKey: 123}),
+        () => FeatureFlag.fromJson(const <String, Object?>{
+          FeatureFlag.helpKey: 'Help',
+          FeatureFlag.enabledByDefaultKey: false,
+        }),
         throwsFormatException,
       );
       expect(
-        () =>
-            FeatureFlag.fromJson(const <String, Object?>{FeatureFlag.enabledByDefaultKey: 'true'}),
+        () => FeatureFlag.fromJson(const <String, Object?>{
+          FeatureFlag.nameKey: '',
+          FeatureFlag.helpKey: 'Help',
+          FeatureFlag.enabledByDefaultKey: false,
+        }),
         throwsFormatException,
       );
       expect(
-        () => FeatureFlag.fromJson(const <String, Object?>{FeatureFlag.environmentOverrideKey: 42}),
+        () => FeatureFlag.fromJson(const <String, Object?>{
+          FeatureFlag.nameKey: 'enable-flag',
+          FeatureFlag.helpKey: 'Help',
+          FeatureFlag.enabledByDefaultKey: 'true',
+        }),
         throwsFormatException,
       );
       expect(
-        () => ConfigOption.fromJson(const <String, Object?>{ConfigOption.valueKey: 42}),
+        () => FeatureFlag.fromJson(const <String, Object?>{
+          FeatureFlag.nameKey: 'enable-flag',
+          FeatureFlag.helpKey: 'Help',
+          FeatureFlag.enabledByDefaultKey: false,
+          FeatureFlag.environmentOverrideKey: 42,
+        }),
         throwsFormatException,
       );
+      expect(() => FeatureFlag.listFromJson(const <Object?>['not-a-map']), throwsFormatException);
       expect(
-        () =>
-            ConfigOption.fromJson(const <String, Object?>{ConfigOption.environmentOverrideKey: 42}),
+        () => ConfigOption.fromJson(const <String, Object?>{ConfigOption.helpKey: 'Help'}),
         throwsFormatException,
       );
       expect(
         () => ConfigOption.fromJson(const <String, Object?>{
+          ConfigOption.nameKey: '',
+          ConfigOption.helpKey: 'Help',
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ConfigOption.fromJson(const <String, Object?>{
+          ConfigOption.nameKey: 'sdk-path',
+          ConfigOption.helpKey: 'Help',
+          ConfigOption.valueKey: 42,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ConfigOption.fromJson(const <String, Object?>{
+          ConfigOption.nameKey: 'sdk-path',
+          ConfigOption.helpKey: 'Help',
+          ConfigOption.environmentOverrideKey: 42,
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => ConfigOption.fromJson(const <String, Object?>{
+          ConfigOption.nameKey: 'sdk-path',
+          ConfigOption.helpKey: 'Help',
           ConfigOption.aliasesKey: <Object?>[123],
         }),
         throwsFormatException,
       );
+      expect(() => ConfigOption.listFromJson(const <Object?>['not-a-map']), throwsFormatException);
       expect(
         () => ConfigAction.fromJson(const <String, Object?>{ConfigAction.helpKey: 'Missing name'}),
         throwsFormatException,

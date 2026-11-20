@@ -13,11 +13,12 @@ import '../base/config.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
+import '../context/tool_context.dart';
 import 'extension_discovery.dart';
 
 /// Represents a group of configuration settings provided by a specific extension.
 class ExtensionSettingsGroup {
-  const ExtensionSettingsGroup({
+  ExtensionSettingsGroup({
     required this.configOptions,
     required this.extension,
     required this.extensionName,
@@ -52,36 +53,23 @@ class ExtensionSettingsGroup {
 
   /// Settings keys declared by [configActions] that do not already correspond to
   /// a [FeatureFlag] or [ConfigOption] in this group.
-  List<String> get actionOnlySettingsKeys {
-    final declaredKeys = <String>{
+  late final List<String> actionOnlySettingsKeys = () {
+    final seen = <String>{
       for (final FeatureFlag(:settingName) in featureFlags) settingName,
       for (final ConfigOption(:name) in configOptions) name,
     };
-    final actionKeys = <String>[];
-    final seen = <String>{};
-    for (final ConfigAction(:settingsKeys) in configActions) {
-      for (final key in settingsKeys) {
-        if (!declaredKeys.contains(key) && seen.add(key)) {
-          actionKeys.add(key);
-        }
-      }
-    }
-    return actionKeys;
-  }
+    return List<String>.unmodifiable(<String>[
+      for (final ConfigAction(:settingsKeys) in configActions)
+        for (final String key in settingsKeys)
+          if (seen.add(key)) key,
+    ]);
+  }();
 
   /// Whether this group contains any settings that should be displayed in
   /// `flutter config --list` ([featureFlags], [configOptions], or
   /// [ConfigAction.settingsKeys]).
   bool get hasDisplayableSettings =>
       featureFlags.isNotEmpty || configOptions.isNotEmpty || actionOnlySettingsKeys.isNotEmpty;
-
-  /// Whether this group contains any feature flags, configuration options, or
-  /// configuration actions.
-  bool get isNotEmpty =>
-      featureFlags.isNotEmpty || configOptions.isNotEmpty || configActions.isNotEmpty;
-
-  /// Whether this group is empty.
-  bool get isEmpty => !isNotEmpty;
 }
 
 /// A host-side configuration manager that delegates feature flag, option, and action queries to extensions.
@@ -196,8 +184,8 @@ class ExtensionConfiguration {
   static bool resolveFeatureFlagValue(
     Config config,
     FeatureFlag flag, {
+    required Map<String, String> environment,
     required String extensionName,
-    Map<String, String> environment = const <String, String>{},
   }) {
     if (flag.environmentOverride case final String envVar when envVar.isNotEmpty) {
       switch (environment[envVar]?.trim().toLowerCase()) {
@@ -226,8 +214,8 @@ class ExtensionConfiguration {
   static String? resolveConfigOptionValue(
     Config config,
     ConfigOption option, {
+    required Map<String, String> environment,
     required String extensionName,
-    Map<String, String> environment = const <String, String>{},
   }) {
     if (option.environmentOverride case final String envVar when envVar.isNotEmpty) {
       final String? envValue = environment[envVar];
@@ -277,20 +265,11 @@ class ExtensionConfiguration {
     return const <String, Map<String, Object?>>{};
   }
 
-  /// Collects the persisted setting values scoped to [group]'s declared
-  /// [ConfigOption.name] and [ConfigAction.settingsKeys] (excluding feature
-  /// flags unless explicitly listed in [ConfigAction.settingsKeys]), normalized
-  /// to `String?` for passing to [ConfigurationExtension.runConfigAction].
-  static Map<String, String?> collectActionSettings(Config config, ExtensionSettingsGroup group) {
-    return _collectScopedActionSettings(
-      config,
-      configActions: group.configActions,
-      configOptions: group.configOptions,
-      extensionName: group.extensionName,
-    );
-  }
-
-  static Map<String, String?> _collectScopedActionSettings(
+  /// Collects the persisted setting values scoped to [configOptions] and
+  /// [configActions]'s [ConfigAction.settingsKeys] (excluding feature flags
+  /// unless explicitly listed in [ConfigAction.settingsKeys]), normalized to
+  /// `String?` for passing to [ConfigurationExtension.runConfigAction].
+  static Map<String, String?> collectActionSettings(
     Config config, {
     required List<ConfigAction> configActions,
     required List<ConfigOption> configOptions,
@@ -336,15 +315,15 @@ class ExtensionConfiguration {
   /// omitting unset keys).
   static Future<Map<String, Object?>> resolveConfigurationValues({
     required Config config,
+    required Map<String, String> environment,
     required ConfigurationExtension extension,
     required String extensionName,
-    Map<String, String> environment = const <String, String>{},
   }) async {
     final List<FeatureFlag> flags = await extension.getFeatureFlags();
     final List<ConfigOption> options = await extension.getConfigurations();
     final List<ConfigAction> actions = await extension.getConfigActions();
     final values = <String, Object?>{
-      ..._collectScopedActionSettings(
+      ...collectActionSettings(
         config,
         configActions: actions,
         configOptions: options,
@@ -428,7 +407,7 @@ class ExtensionConfiguration {
   /// Executes [action] on [group]'s extension with [currentSettings] and
   /// validates that every returned setting key belongs to the extension's
   /// declared [ConfigOption] names or [ConfigAction.settingsKeys].
-  Future<Map<String, String?>> runConfigAction({
+  static Future<Map<String, String?>> runConfigAction({
     required ConfigAction action,
     required Map<String, String?> currentSettings,
     required ExtensionSettingsGroup group,
@@ -493,12 +472,14 @@ class ExtensionConfiguration {
 /// Handles host-side interactive terminal prompt RPCs (`terminal.promptForOption`
 /// and `terminal.promptForInput`) for tool extensions.
 class ExtensionTerminalPrompter {
-  ExtensionTerminalPrompter({required this._logger, required this._terminal, this._stdio});
+  ExtensionTerminalPrompter({required this._toolContext});
 
-  final Logger _logger;
-  final Terminal _terminal;
-  final Stdio? _stdio;
+  final ToolContext _toolContext;
   bool _isMachineMode = false;
+
+  Logger get _logger => _toolContext.logger;
+  Stdio get _stdio => _toolContext.stdio;
+  Terminal get _terminal => _toolContext.terminal;
 
   /// Marks the current CLI invocation as running in `--machine` mode so
   /// interactive terminal prompt RPCs fail fast with
@@ -536,9 +517,18 @@ class ExtensionTerminalPrompter {
     final int? defaultChoiceIndex;
     try {
       message = params.requiredField<String>(ToolExtensionService.promptMessageParam);
-      // Ensure `options` is present and a JSON list before parsing its string elements.
-      params.requiredField<List<Object?>>(ToolExtensionService.promptOptionsParam);
-      options = params.stringIterable(ToolExtensionService.promptOptionsParam).toList();
+      options = <String>[
+        for (final Object? item in params.requiredField<List<Object?>>(
+          ToolExtensionService.promptOptionsParam,
+        ))
+          switch (item) {
+            final String option => option,
+            _ => throw FormatException(
+              'Invalid "${ToolExtensionService.promptOptionsParam}" element: '
+              'expected String, got ${item.runtimeType}.',
+            ),
+          },
+      ];
       defaultChoiceIndex = params.nullableField<int>(
         ToolExtensionService.promptDefaultChoiceIndexParam,
       );
@@ -562,30 +552,6 @@ class ExtensionTerminalPrompter {
       _logger.printStatus('[${i + 1}] ${options[i]}$defaultSuffix');
     }
     final promptText = '$message (or "q" to quit)';
-
-    if (count <= 9) {
-      _terminal.usesTerminalUi = true;
-      final String choice;
-      try {
-        choice = await _terminal.promptForCharInput(
-          List<String>.generate(count, (int number) => '${number + 1}')..add('q'),
-          prompt: promptText,
-          defaultChoiceIndex: defaultChoiceIndex,
-          logger: _logger,
-          displayAcceptedCharacters: false,
-        );
-      } on StateError {
-        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
-      }
-      if (choice == 'q') {
-        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
-      }
-      final int? selectedNumber = int.tryParse(choice);
-      if (selectedNumber != null && selectedNumber >= 1 && selectedNumber <= count) {
-        return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: selectedNumber - 1};
-      }
-      return <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null};
-    }
 
     while (true) {
       _logger.printStatus('$promptText: ', emphasis: true, newline: false);
@@ -626,24 +592,24 @@ class ExtensionTerminalPrompter {
         : '$message: ';
     _logger.printStatus(formattedPrompt, emphasis: true, newline: false);
 
-    final Stdin? rawStdin = switch (_stdio?.stdin) {
-      final Stdin stdin => stdin,
-      _ => null,
-    };
+    Stdin? rawStdin;
     bool? previousEchoMode;
-    if (!echo && rawStdin != null) {
-      try {
-        previousEchoMode = rawStdin.echoMode;
-        rawStdin.echoMode = false;
-      } on StdinException {
-        // Ignore if stdin does not support changing echoMode.
+    if (!echo) {
+      if (_stdio.stdin case final Stdin stdin) {
+        try {
+          previousEchoMode = stdin.echoMode;
+          stdin.echoMode = false;
+          rawStdin = stdin;
+        } on StdinException {
+          // Ignore if stdin does not support changing echoMode.
+        }
       }
     }
     String? line;
     try {
       line = await _readStdinLine();
     } finally {
-      if (!echo && rawStdin != null && previousEchoMode != null) {
+      if (rawStdin != null && previousEchoMode != null) {
         try {
           rawStdin.echoMode = previousEchoMode;
         } on StdinException {
@@ -709,26 +675,28 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
   Future<List<T>?> _fetchList<T>(
     String method,
     String entityName,
-    T Function(Map<String, Object?>) fromJson,
+    List<T> Function(List<Object?>) listFromJson,
   ) async {
     _logger.printTrace('ConfigurationExtensionClient fetching $entityName via RPC ("$method")...');
     try {
       final Object? rawResult = await connection.sendRequest(method);
       if (rawResult case final List<Object?> list) {
-        final results = <T>[
-          for (final Object? element in list)
-            if (element case final Map<String, Object?> map) fromJson(map),
-        ];
+        final results = List<T>.unmodifiable(listFromJson(list));
         _logger.printTrace(
           'ConfigurationExtensionClient received ${results.length} $entityName via RPC.',
         );
-        return List<T>.unmodifiable(results);
+        return results;
       }
-      _logger.printTrace(
-        'ConfigurationExtensionClient received invalid or null $entityName response: $rawResult',
+      _logger.printWarning(
+        'Extension "${connection.extensionName}" returned an invalid $entityName response for "$method": '
+        'expected List, got ${rawResult.runtimeType}.',
       );
     } on ToolExtensionException {
       rethrow;
+    } on FormatException catch (err) {
+      _logger.printWarning(
+        'Extension "${connection.extensionName}" returned malformed $entityName for "$method": ${err.message}',
+      );
     } on Object catch (err, stack) {
       _logger.printTrace('ConfigurationExtensionClient failed to get $entityName: $err\n$stack');
     }
@@ -743,7 +711,7 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
     final List<FeatureFlag>? flags = await _fetchList(
       ConfigurationExtension.getFeatureFlagsMethod,
       'feature flag(s)',
-      FeatureFlag.fromJson,
+      FeatureFlag.listFromJson,
     );
     return flags != null ? (_featureFlagsCache = flags) : const <FeatureFlag>[];
   }
@@ -756,7 +724,7 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
     final List<ConfigOption>? options = await _fetchList(
       ConfigurationExtension.getConfigurationsMethod,
       'config option(s)',
-      ConfigOption.fromJson,
+      ConfigOption.listFromJson,
     );
     return options != null ? (_configurationsCache = options) : const <ConfigOption>[];
   }
@@ -769,7 +737,7 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
     final List<ConfigAction>? actions = await _fetchList(
       ConfigurationExtension.getConfigActionsMethod,
       'config action(s)',
-      ConfigAction.fromJson,
+      ConfigAction.listFromJson,
     );
     return actions != null ? (_configActionsCache = actions) : const <ConfigAction>[];
   }
@@ -796,7 +764,14 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
       );
     }
     return <String, String?>{
-      for (final MapEntry(:key, :value) in rawResult.entries) key: value?.toString(),
+      for (final MapEntry(:String key, :Object? value) in rawResult.entries)
+        key: switch (value) {
+          final String? stringValue => stringValue,
+          _ => throw ToolExtensionException(
+            'Extension "${connection.extensionName}" returned a non-string value for setting "$key" '
+            'from "${ConfigurationExtension.runConfigActionMethod}".',
+          ),
+        },
     };
   }
 }

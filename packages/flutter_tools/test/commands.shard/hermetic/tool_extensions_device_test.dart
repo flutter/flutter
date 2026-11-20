@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -242,8 +241,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -271,8 +269,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -376,8 +373,7 @@ flutter:
 
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -419,8 +415,7 @@ flutter:
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -492,8 +487,7 @@ flutter:
           logsExtensionManager = ExtensionManager(
             entryPoints: <ExtensionEntryPoint>[_customLogStreamingExtensionEntryPoint],
             featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-            hostPlatform: HostPlatform.linux_x64,
-            logger: testLogger,
+            toolContext: FakeToolContext(logger: testLogger),
           );
           return TestDeviceManager(
             discoverers: <DeviceDiscovery>[
@@ -521,8 +515,7 @@ flutter:
         fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[_fakeAppLaunchExtensionEntryPoint],
           featureFlags: featureFlags,
         );

@@ -16,10 +16,6 @@ typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> pa
 /// service to the host tool.
 typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
 
-/// Callback signature for sending a JSON-RPC 2.0 request from an extension
-/// service to the host tool and awaiting its response.
-typedef ExtensionRequestSender = Future<Object?> Function(String method, [Object? parameters]);
-
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
 /// Extension authors extend this class (via specific service base classes) to
@@ -69,7 +65,7 @@ abstract base class ToolExtensionService {
   /// Wired by `ToolExtensionEntryPoint.run` to `peer.sendRequest` before the
   /// extension peer begins listening for RPC requests.
   @internal
-  ExtensionRequestSender? requestSender;
+  Future<Object?> Function(String method, [Object? parameters])? requestSender;
 
   /// The namespace string of the service (e.g. `'diagnostics'`).
   String get namespace;
@@ -94,8 +90,15 @@ abstract base class ToolExtensionService {
     sender(method, params);
   }
 
-  Future<Object?> _sendHostRequest(String method, [Map<String, Object?>? params]) async {
-    final ExtensionRequestSender? sender = requestSender;
+  /// Sends a JSON-RPC 2.0 request to the host tool over the bidirectional
+  /// `Peer` and returns the decoded result payload.
+  ///
+  /// Throws a [StateError] if called before this service has been attached to
+  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  @protected
+  @nonVirtual
+  Future<Object?> sendHostRequest(String method, Map<String, Object?> params) async {
+    final Future<Object?> Function(String method, [Object? parameters])? sender = requestSender;
     if (sender == null) {
       throw StateError(
         'Cannot send request "$method": service "$namespace" is not attached to an active peer.',
@@ -104,9 +107,13 @@ abstract base class ToolExtensionService {
     try {
       return await sender(method, params);
     } on json_rpc.RpcException catch (error) {
-      if (error.code == ToolExtensionException.domainErrorCode ||
-          error.code == ToolExtensionException.unsupportedCapabilityErrorCode) {
-        throw ToolExtensionException(error.message, code: error.code);
+      if (ToolExtensionException.tryFromRpcError(
+            code: error.code,
+            message: error.message,
+            data: error.data,
+          )
+          case final ToolExtensionException translated) {
+        throw translated;
       }
       rethrow;
     }
@@ -122,7 +129,7 @@ abstract base class ToolExtensionService {
   /// and falls back to any `ConfigOption.aliases` and default values.
   @nonVirtual
   Future<Map<String, Object?>> getConfigurationValues() async {
-    final Object? rawResult = await _sendHostRequest(
+    final Object? rawResult = await sendHostRequest(
       getConfigurationValuesMethod,
       const <String, Object?>{},
     );
@@ -150,7 +157,7 @@ abstract base class ToolExtensionService {
     required List<String> options,
     int? defaultChoiceIndex,
   }) async {
-    final Object? rawResult = await _sendHostRequest(promptForOptionMethod, <String, Object?>{
+    final Object? rawResult = await sendHostRequest(promptForOptionMethod, <String, Object?>{
       promptMessageParam: message,
       promptOptionsParam: options,
       promptDefaultChoiceIndexParam: ?defaultChoiceIndex,
@@ -179,7 +186,7 @@ abstract base class ToolExtensionService {
     String? defaultValue,
     bool echo = true,
   }) async {
-    final Object? rawResult = await _sendHostRequest(promptForInputMethod, <String, Object?>{
+    final Object? rawResult = await sendHostRequest(promptForInputMethod, <String, Object?>{
       promptMessageParam: message,
       promptDefaultValueParam: ?defaultValue,
       promptEchoParam: echo,
@@ -199,8 +206,8 @@ abstract base class ToolExtensionService {
   /// Invoked by `ToolExtensionEntryPoint.run` when the host tool sends an
   /// `extension.shutdown` RPC on CLI exit or connection disposal. Runs
   /// concurrently across all registered services in the isolate via
-  /// `Future.wait`, with a bounded grace period of approximately 2 seconds on
-  /// the host before the extension isolate is terminated.
+  /// `Future.wait`, with a short bounded grace period before the
+  /// extension isolate is terminated.
   Future<void> shutdown() async {}
 }
 

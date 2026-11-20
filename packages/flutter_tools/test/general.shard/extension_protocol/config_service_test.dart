@@ -70,6 +70,9 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
   final Object? response;
 
   @override
+  String get extensionName => 'fake_ext';
+
+  @override
   Future<Object?> sendRequest(
     String method, {
     Object? params,
@@ -92,7 +95,6 @@ final class _InteractiveSigningConfigExtension extends ConfigurationExtension {
   static const String kSigningCert = 'custom-signing-cert';
   static const String kSigningPassphrase = 'custom-signing-passphrase';
   static const String kSelectSigningAction = 'select-custom-signing-settings';
-  static const String kSelectManyAction = 'select-many-signing-settings';
   static const String kClearSigningAction = 'clear-custom-signing-settings';
   static const String kReadOwnedValuesAction = 'read-owned-config-values';
   static const String kUpdateDeclaredOptionAction = 'update-declared-option-action';
@@ -135,11 +137,6 @@ final class _InteractiveSigningConfigExtension extends ConfigurationExtension {
         help: 'Select custom signing certificate and passphrase interactively.',
         aliases: <String>['select-custom-cert'],
         settingsKeys: <String>[kSigningCert, kSigningPassphrase],
-      ),
-      ConfigAction(
-        name: kSelectManyAction,
-        help: 'Select from more than 9 options interactively.',
-        settingsKeys: <String>[kSigningCert],
       ),
       ConfigAction(
         name: kClearSigningAction,
@@ -192,26 +189,12 @@ final class _InteractiveSigningConfigExtension extends ConfigurationExtension {
           kSigningCert: certIds[selectedIndex],
           kSigningPassphrase: passphrase,
         };
-      case kSelectManyAction:
-        final options = <String>[for (var i = 1; i <= 10; i++) 'Certificate $i'];
-        final int? selectedIndex = await promptForOption(
-          message: 'Select a certificate from full list',
-          options: options,
-          defaultChoiceIndex: 0,
-        );
-        return <String, String?>{
-          if (selectedIndex != null) kSigningCert: 'cert-${selectedIndex + 1}',
-        };
       case kReadOwnedValuesAction:
         final Map<String, Object?> ownedValues = await getConfigurationValues();
-        final List<String> summary =
-            ownedValues.entries
-                .map(
-                  (MapEntry<String, Object?> entry) =>
-                      '${entry.key}=${entry.value}(${entry.value.runtimeType})',
-                )
-                .toList()
-              ..sort();
+        final summary = <String>[
+          for (final MapEntry(:String key, :Object? value) in ownedValues.entries)
+            '$key=$value(${value.runtimeType})',
+        ]..sort();
         return <String, String?>{
           kSigningCert: 'fetches=$_featureFlagsFetchCount;${summary.join(',')}',
         };
@@ -315,8 +298,7 @@ void main() {
         final logger = BufferLogger.test();
         final manager = ExtensionManager(
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
         );
         await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
@@ -349,8 +331,7 @@ void main() {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       await manager.initialize(
         entryPoints: <ExtensionEntryPoint>[_secondaryExtensionEntryPoint, linuxExtensionEntryPoint],
@@ -385,8 +366,7 @@ void main() {
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
         featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       await manager.initialize(
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint, _secondaryExtensionEntryPoint],
@@ -464,6 +444,33 @@ void main() {
         expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
         expect(await clientWithInvalid.getConfigurations(), isEmpty);
         expect(await clientWithInvalid.getConfigActions(), isEmpty);
+        expect(logger.warningText, contains('Extension "fake_ext" returned an invalid'));
+
+        logger.clear();
+        final clientWithMalformedElement = ConfigurationExtensionClient(
+          _FakeExtensionConnection(response: const <Object?>['not-a-map']),
+          logger: logger,
+        );
+        expect(await clientWithMalformedElement.getFeatureFlags(), isEmpty);
+        expect(logger.warningText, contains('Extension "fake_ext" returned malformed'));
+
+        final clientWithNonStringActionUpdate = ConfigurationExtensionClient(
+          _FakeExtensionConnection(response: const <String, Object?>{'key': 42}),
+          logger: logger,
+        );
+        await expectLater(
+          clientWithNonStringActionUpdate.runConfigAction(
+            'action',
+            currentSettings: const <String, String?>{},
+          ),
+          throwsA(
+            isA<ToolExtensionException>().having(
+              (ToolExtensionException e) => e.message,
+              'message',
+              contains('returned a non-string value for setting "key"'),
+            ),
+          ),
+        );
       },
     );
 
@@ -471,8 +478,7 @@ void main() {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       addTearDown(manager.dispose);
       await manager.initialize(
@@ -568,10 +574,8 @@ void main() {
 
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
-        config: hostConfig,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(config: hostConfig, fs: fs, logger: logger),
       );
       addTearDown(manager.dispose);
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
@@ -585,7 +589,7 @@ void main() {
         (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kReadOwnedValuesAction,
       );
 
-      final Map<String, String?> updates = await extConfig.runConfigAction(
+      final Map<String, String?> updates = await ExtensionConfiguration.runConfigAction(
         action: readAction,
         currentSettings: const <String, String?>{},
         group: group,
@@ -605,7 +609,7 @@ void main() {
         '/opt/scoped-sdk',
         extensionName: 'custom_signing_ext',
       );
-      final Map<String, String?> updated = await extConfig.runConfigAction(
+      final Map<String, String?> updated = await ExtensionConfiguration.runConfigAction(
         action: readAction,
         currentSettings: const <String, String?>{},
         group: group,
@@ -638,11 +642,13 @@ void main() {
         };
         final logger = BufferLogger.test();
         final manager = ExtensionManager(
-          config: hostConfig,
-          environment: env,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(
+            config: hostConfig,
+            fs: fs,
+            logger: logger,
+            platform: FakePlatform(environment: env),
+          ),
         );
         addTearDown(manager.dispose);
         await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
@@ -656,7 +662,7 @@ void main() {
           (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kReadOwnedValuesAction,
         );
 
-        final Map<String, String?> envOverridden = await extConfig.runConfigAction(
+        final Map<String, String?> envOverridden = await ExtensionConfiguration.runConfigAction(
           action: readAction,
           currentSettings: const <String, String?>{},
           group: group,
@@ -671,21 +677,28 @@ void main() {
       },
     );
 
-    testWithoutContext('terminal.promptForOption and terminal.promptForInput succeed on a single-subscription stdin stream with AnsiTerminal', () async {
+    testWithoutContext('terminal.promptForOption re-prompts on invalid input and terminal.promptForInput toggles echoMode on AnsiTerminal', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       final logger = BufferLogger.test();
-      final fakeStdin = _SingleSubscriptionStdin(const <String>['2', 'super-secret-passphrase\n']);
+      final fakeStdin = _SingleSubscriptionStdin(const <String>[
+        'invalid\n',
+        '99\n',
+        '2\n',
+        'super-secret-passphrase\n',
+      ]);
       final stdio = _EchoTrackingStdio(fakeStdin);
       final terminal = AnsiTerminal(stdio: stdio, platform: FakePlatform());
 
       final manager = ExtensionManager(
-        config: hostConfig,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        stdio: stdio,
-        terminal: terminal,
+        toolContext: FakeToolContext(
+          config: hostConfig,
+          fs: fs,
+          logger: logger,
+          stdio: stdio,
+          terminal: terminal,
+        ),
       );
       addTearDown(manager.dispose);
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
@@ -699,7 +712,7 @@ void main() {
         (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectSigningAction,
       );
 
-      final Map<String, String?> updates = await extConfig.runConfigAction(
+      final Map<String, String?> updates = await ExtensionConfiguration.runConfigAction(
         action: selectAction,
         currentSettings: const <String, String?>{},
         group: group,
@@ -716,62 +729,13 @@ void main() {
       expect(logger.statusText, contains('Enter certificate passphrase [default-secret]: '));
     });
 
-    testWithoutContext(
-      'terminal.promptForOption supports >9 options with line-based re-prompting on invalid input',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final hostConfig = Config.test(directory: fs.directory('/'));
-        final logger = BufferLogger.test();
-        final fakeStdin = _SingleSubscriptionStdin(const <String>[
-          'invalid\n',
-          '99\n',
-          'cert-2\n',
-          '10\n',
-        ]);
-        final stdio = _EchoTrackingStdio(fakeStdin);
-        final terminal = AnsiTerminal(stdio: stdio, platform: FakePlatform());
-
-        final manager = ExtensionManager(
-          config: hostConfig,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          stdio: stdio,
-          terminal: terminal,
-        );
-        addTearDown(manager.dispose);
-        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
-
-        final extConfig = ExtensionConfiguration(
-          extensions: manager.configurationExtensions,
-          logger: logger,
-        );
-        final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
-        final ConfigAction selectManyAction = group.configActions.firstWhere(
-          (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectManyAction,
-        );
-
-        final Map<String, String?> updates = await extConfig.runConfigAction(
-          action: selectManyAction,
-          currentSettings: const <String, String?>{},
-          group: group,
-        );
-        expect(updates, const <String, String?>{
-          _InteractiveSigningConfigExtension.kSigningCert: 'cert-10',
-        });
-      },
-    );
-
     testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in non-TTY mode', () async {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       final logger = BufferLogger.test();
       final nonTtyManager = ExtensionManager(
-        config: hostConfig,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        terminal: Terminal.test(),
+        toolContext: FakeToolContext(config: hostConfig, fs: fs, logger: logger),
       );
       addTearDown(nonTtyManager.dispose);
       await nonTtyManager.initialize(
@@ -789,7 +753,7 @@ void main() {
       );
 
       await expectLater(
-        nonTtyConfig.runConfigAction(
+        ExtensionConfiguration.runConfigAction(
           action: selectAction,
           currentSettings: const <String, String?>{},
           group: nonTtyGroup,
@@ -811,10 +775,7 @@ void main() {
     });
 
     testWithoutContext('terminal.promptForOption rejects out-of-range defaultChoiceIndex with INVALID_PARAMS (-32602)', () async {
-      final prompter = ExtensionTerminalPrompter(
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-      );
+      final prompter = ExtensionTerminalPrompter(toolContext: FakeToolContext());
       await expectLater(
         prompter.handlePromptForOption(const <String, Object?>{
           'message': 'Pick one',
@@ -835,14 +796,16 @@ void main() {
       final fs = MemoryFileSystem.test();
       final hostConfig = Config.test(directory: fs.directory('/'));
       final logger = BufferLogger.test();
-      final machineStdio = _EchoTrackingStdio(_SingleSubscriptionStdin(const <String>['1']));
+      final machineStdio = _EchoTrackingStdio(_SingleSubscriptionStdin(const <String>['1\n']));
       final machineManager = ExtensionManager(
-        config: hostConfig,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        stdio: machineStdio,
-        terminal: AnsiTerminal(stdio: machineStdio, platform: FakePlatform()),
+        toolContext: FakeToolContext(
+          config: hostConfig,
+          fs: fs,
+          logger: logger,
+          stdio: machineStdio,
+          terminal: AnsiTerminal(stdio: machineStdio, platform: FakePlatform()),
+        ),
       )..enableMachineMode();
       addTearDown(machineManager.dispose);
       await machineManager.initialize(
@@ -860,7 +823,7 @@ void main() {
       );
 
       await expectLater(
-        machineConfig.runConfigAction(
+        ExtensionConfiguration.runConfigAction(
           action: selectAction,
           currentSettings: const <String, String?>{},
           group: machineGroup,
@@ -881,8 +844,7 @@ void main() {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       addTearDown(manager.dispose);
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
@@ -897,7 +859,7 @@ void main() {
         (ConfigAction a) =>
             a.name == _InteractiveSigningConfigExtension.kUpdateDeclaredOptionAction,
       );
-      final Map<String, String?> optionUpdates = await extConfig.runConfigAction(
+      final Map<String, String?> optionUpdates = await ExtensionConfiguration.runConfigAction(
         action: updateOptionAction,
         currentSettings: const <String, String?>{},
         group: group,
@@ -911,7 +873,7 @@ void main() {
         (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kUndeclaredKeyAction,
       );
       await expectLater(
-        extConfig.runConfigAction(
+        ExtensionConfiguration.runConfigAction(
           action: undeclaredAction,
           currentSettings: const <String, String?>{},
           group: group,

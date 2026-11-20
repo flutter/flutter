@@ -743,28 +743,6 @@ void main() {
       );
     });
 
-    test(
-      'extractRpcErrorData strips injected request metadata and maps non-Map or empty data to null',
-      () {
-        expect(extractRpcErrorData(null), isNull);
-        expect(extractRpcErrorData('not-a-map'), isNull);
-        expect(
-          extractRpcErrorData(<Object?, Object?>{
-            'request': <String, Object?>{'id': 1, 'method': 'test'},
-          }),
-          isNull,
-        );
-        expect(
-          extractRpcErrorData(<Object?, Object?>{
-            'sdkPath': '/opt/custom_sdk',
-            'request': <String, Object?>{'id': 1, 'method': 'test'},
-            42: 'ignored-non-string-key',
-          }),
-          const <String, Object?>{'sdkPath': '/opt/custom_sdk'},
-        );
-      },
-    );
-
     test('IOOverrides exit guard intercepts exit() inside extension RPC handler without killing host process', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(

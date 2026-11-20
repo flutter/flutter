@@ -11,20 +11,37 @@ import 'json_utils.dart';
 @immutable
 class FeatureFlag {
   const FeatureFlag({
-    required this.name,
     required this.help,
-    this.environmentOverride,
+    required this.name,
     this.enabledByDefault = false,
+    this.environmentOverride,
   });
 
   /// Deserializes a [FeatureFlag] from a JSON-serializable map.
   factory FeatureFlag.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Field "$nameKey" must not be empty.');
+    }
     return FeatureFlag(
-      name: json.optionalField<String>(nameKey, defaultValue: ''),
-      help: json.optionalField<String>(helpKey, defaultValue: ''),
+      name: name,
+      help: json.requiredField<String>(helpKey),
       environmentOverride: json.nullableField<String>(environmentOverrideKey),
-      enabledByDefault: json.optionalField<bool>(enabledByDefaultKey, defaultValue: false),
+      enabledByDefault: json.requiredField<bool>(enabledByDefaultKey),
     );
+  }
+
+  /// Deserializes a list of [FeatureFlag]s from a JSON list.
+  static List<FeatureFlag> listFromJson(List<Object?> jsonList) {
+    return <FeatureFlag>[
+      for (final Object? element in jsonList)
+        switch (element) {
+          final Map<String, Object?> map => FeatureFlag.fromJson(map),
+          _ => throw FormatException(
+            'Invalid FeatureFlag element: expected Map<String, Object?>, got ${element.runtimeType}.',
+          ),
+        },
+    ];
   }
 
   /// Map key for [enabledByDefault].
@@ -85,22 +102,39 @@ class FeatureFlag {
 @immutable
 class ConfigOption {
   const ConfigOption({
-    required this.name,
     required this.help,
+    required this.name,
+    this.aliases = const <String>[],
     this.environmentOverride,
     this.value,
-    this.aliases = const <String>[],
   });
 
   /// Deserializes a [ConfigOption] from a JSON-serializable map.
   factory ConfigOption.fromJson(Map<String, Object?> json) {
+    final String name = json.requiredField<String>(nameKey);
+    if (name.isEmpty) {
+      throw const FormatException('Field "$nameKey" must not be empty.');
+    }
     return ConfigOption(
-      name: json.optionalField<String>(nameKey, defaultValue: ''),
-      help: json.optionalField<String>(helpKey, defaultValue: ''),
+      name: name,
+      help: json.requiredField<String>(helpKey),
       environmentOverride: json.nullableField<String>(environmentOverrideKey),
       value: json.nullableField<String>(valueKey),
       aliases: List<String>.unmodifiable(json.stringIterable(aliasesKey)),
     );
+  }
+
+  /// Deserializes a list of [ConfigOption]s from a JSON list.
+  static List<ConfigOption> listFromJson(List<Object?> jsonList) {
+    return <ConfigOption>[
+      for (final Object? element in jsonList)
+        switch (element) {
+          final Map<String, Object?> map => ConfigOption.fromJson(map),
+          _ => throw FormatException(
+            'Invalid ConfigOption element: expected Map<String, Object?>, got ${element.runtimeType}.',
+          ),
+        },
+    ];
   }
 
   /// Map key for [aliases].
@@ -174,8 +208,8 @@ class ConfigOption {
 class ConfigAction {
   /// Creates a configuration action definition for `flutter config`.
   const ConfigAction({
-    required this.name,
     required this.help,
+    required this.name,
     this.aliases = const <String>[],
     this.settingsKeys = const <String>[],
   });

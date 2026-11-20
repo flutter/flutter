@@ -9,9 +9,9 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/terminal.dart';
+import '../base/platform.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
 import 'config.dart';
 import 'diagnostics.dart';
@@ -20,36 +20,28 @@ import 'extension_discovery.dart';
 
 /// Manages active tool extension isolate connections and exposes capability proxies.
 class ExtensionManager {
-  /// Creates an [ExtensionManager] targeting the active [hostPlatform].
+  /// Creates an [ExtensionManager] backed by [_toolContext].
   ExtensionManager({
     required this._featureFlags,
-    required this.hostPlatform,
-    required Logger logger,
-    this._config,
-    this._entryPoints = const <ExtensionEntryPoint>[],
+    required this._toolContext,
     ExtensionDiscovery? discovery,
-    this._environment = const <String, String>{},
-    Stdio? stdio,
-    Terminal? terminal,
-  }) : _logger = logger,
-       _discovery = discovery ?? ExtensionDiscovery(logger: logger),
-       _prompter = terminal != null
-           ? ExtensionTerminalPrompter(logger: logger, stdio: stdio, terminal: terminal)
-           : null;
+    this._entryPoints = const <ExtensionEntryPoint>[],
+  }) : _discovery = discovery ?? ExtensionDiscovery(logger: _toolContext.logger),
+       _prompter = ExtensionTerminalPrompter(toolContext: _toolContext);
 
-  /// The active [HostPlatform].
-  final HostPlatform hostPlatform;
-  final Config? _config;
-  final Map<String, String> _environment;
-  final Logger _logger;
+  final ToolContext _toolContext;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
-  final ExtensionTerminalPrompter? _prompter;
+  final ExtensionTerminalPrompter _prompter;
+
+  /// The active [HostPlatform].
+  HostPlatform get hostPlatform => _toolContext.os.hostPlatform;
+
+  Logger get _logger => _toolContext.logger;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
   bool _isDisabled = false;
-  bool _isMachineMode = false;
   bool get _isDisposed => _disposeFuture != null;
   Future<void>? _initFuture;
   Future<void>? _disposeFuture;
@@ -62,8 +54,7 @@ class ExtensionManager {
   /// `terminal.promptForInput`) fail fast with
   /// [ToolExtensionException.domainErrorCode].
   void enableMachineMode() {
-    _isMachineMode = true;
-    _prompter?.enableMachineMode();
+    _prompter.enableMachineMode();
   }
 
   /// Disables tool extension initialization for the current CLI invocation
@@ -170,14 +161,6 @@ class ExtensionManager {
     _isInitialized = true;
   }
 
-  Never _throwUnsupportedPrompt(Map<String, Object?> _) {
-    throw ToolExtensionException(
-      _isMachineMode
-          ? 'Cannot prompt for user input when "--machine" is enabled.'
-          : 'Cannot prompt for user input in a non-interactive terminal.',
-    );
-  }
-
   void _registerHostRpcHandlers(
     ExtensionConnection connection, {
     ConfigurationExtensionClient? configClient,
@@ -185,24 +168,24 @@ class ExtensionManager {
     connection.registerRequestHandler(ToolExtensionService.getConfigurationValuesMethod, (
       Map<String, Object?> _,
     ) async {
-      final Config? config = _config;
-      if (config == null || configClient == null) {
-        return const <String, Object?>{};
+      if (configClient == null) {
+        return <String, Object?>{};
       }
+      final ToolContext(:Config config, :Platform platform) = _toolContext;
       return ExtensionConfiguration.resolveConfigurationValues(
         config: config,
-        environment: _environment,
+        environment: platform.environment,
         extension: configClient,
         extensionName: connection.extensionName,
       );
     });
     connection.registerRequestHandler(
       ToolExtensionService.promptForOptionMethod,
-      _prompter?.handlePromptForOption ?? _throwUnsupportedPrompt,
+      _prompter.handlePromptForOption,
     );
     connection.registerRequestHandler(
       ToolExtensionService.promptForInputMethod,
-      _prompter?.handlePromptForInput ?? _throwUnsupportedPrompt,
+      _prompter.handlePromptForInput,
     );
   }
 

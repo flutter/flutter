@@ -91,9 +91,8 @@ void main() {
     testWithoutContext('ExtensionManager loads extension compatible with hostPlatform', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
       );
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[_dummyExtensionEntryPoint]);
 
@@ -107,9 +106,11 @@ void main() {
       () async {
         final logger = BufferLogger.test();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.darwin_arm64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(
+            logger: logger,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+          ),
         );
         await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
 
@@ -125,9 +126,8 @@ void main() {
         var spawned = false;
 
         final disabledManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(),
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[
             (SendPort sendPort) {
               spawned = true;
@@ -148,9 +148,8 @@ void main() {
       () async {
         final logger = BufferLogger.test();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
         );
         await manager.ensureInitialized();
         expect(() => manager.disable(), throwsA(isA<AssertionError>()));
@@ -208,25 +207,31 @@ void main() {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         expect(
           ExtensionManager(
-            hostPlatform: HostPlatform.darwin_arm64,
-            logger: logger,
             featureFlags: featureFlags,
+            toolContext: FakeToolContext(
+              logger: logger,
+              os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+            ),
           ).hostPlatformName,
           'macos',
         );
         expect(
           ExtensionManager(
-            hostPlatform: HostPlatform('darwin', .riscv64),
-            logger: logger,
             featureFlags: featureFlags,
+            toolContext: FakeToolContext(
+              logger: logger,
+              os: FakeOperatingSystemUtils(hostPlatform: HostPlatform('darwin', .riscv64)),
+            ),
           ).hostPlatformName,
           'macos',
         );
         expect(
           ExtensionManager(
-            hostPlatform: HostPlatform('freebsd', .x64),
-            logger: logger,
             featureFlags: featureFlags,
+            toolContext: FakeToolContext(
+              logger: logger,
+              os: FakeOperatingSystemUtils(hostPlatform: HostPlatform('freebsd', .x64)),
+            ),
           ).hostPlatformName,
           'freebsd',
         );
@@ -251,9 +256,8 @@ void main() {
       });
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[
           (SendPort sendPort) {
             unawaited(
@@ -327,9 +331,8 @@ void main() {
         }
 
         final preDisposedManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
         );
 
@@ -342,9 +345,8 @@ void main() {
         expect(preDisposedManager.deviceExtensions, isEmpty);
 
         final initializedManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
         );
 
@@ -398,9 +400,8 @@ void main() {
       });
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[
           (SendPort sendPort) {
             unawaited(
@@ -468,9 +469,8 @@ void main() {
       final SendPort firstShutdownStartedSendPort = firstShutdownStartedPort.sendPort;
 
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
       );
 
       final Future<void> initFuture = manager.initialize(

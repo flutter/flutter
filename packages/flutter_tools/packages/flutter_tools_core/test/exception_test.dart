@@ -46,5 +46,43 @@ void main() {
       expect(exception.hashCode, equals(equalCopy.hashCode));
       expect(exception, isNot(equals(differentData)));
     });
+
+    test('tryFromRpcError parses domain and unsupported-capability errors and strips request', () {
+      final ToolExtensionException? domainError = ToolExtensionException.tryFromRpcError(
+        code: ToolExtensionException.domainErrorCode,
+        message: 'Non-interactive terminal.',
+        data: const <Object?, Object?>{
+          'request': <String, Object?>{'method': 'terminal.promptForOption'},
+          42: 'ignored',
+          'reason': 'non-interactive',
+        },
+      );
+      expect(domainError?.code, ToolExtensionException.domainErrorCode);
+      expect(domainError?.message, 'Non-interactive terminal.');
+      expect(domainError?.data, const <String, Object?>{'reason': 'non-interactive'});
+
+      final ToolExtensionException? unsupportedError = ToolExtensionException.tryFromRpcError(
+        code: ToolExtensionException.unsupportedCapabilityErrorCode,
+        message: 'Capability not implemented.',
+        data: const <String, Object?>{
+          'request': <String, Object?>{'method': 'device.createEmulator'},
+        },
+      );
+      expect(unsupportedError?.code, ToolExtensionException.unsupportedCapabilityErrorCode);
+      expect(unsupportedError?.data, isNull);
+
+      expect(
+        ToolExtensionException.tryFromRpcError(
+          code: ToolExtensionException.domainErrorCode,
+          message: 'Plain error.',
+          data: 'not-a-map',
+        )?.data,
+        isNull,
+      );
+      expect(
+        ToolExtensionException.tryFromRpcError(code: -32603, message: 'Internal error'),
+        isNull,
+      );
+    });
   });
 }

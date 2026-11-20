@@ -280,6 +280,27 @@ void main() {
       featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
     });
 
+    ExtensionManager createManager({
+      List<ExtensionEntryPoint> entryPoints = const <ExtensionEntryPoint>[_signingConfigEntryPoint],
+      Stdio? stdio,
+      AnsiTerminal? terminal,
+    }) {
+      final manager = ExtensionManager(
+        entryPoints: entryPoints,
+        featureFlags: featureFlags,
+        toolContext: FakeToolContext(
+          config: hostConfig,
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          stdio: stdio,
+          terminal: terminal,
+        ),
+      );
+      addTearDown(manager.dispose);
+      return manager;
+    }
+
     CommandRunner<void> createScopedRunner({
       ExtensionManager? activeManager,
       Stdio? stdio,
@@ -304,17 +325,12 @@ void main() {
     testWithoutContext(
       'sorts extensions lexicographically and groups --help under <title> (package:<name>)',
       () async {
-        final manager = ExtensionManager(
-          config: hostConfig,
+        final ExtensionManager manager = createManager(
           entryPoints: const <ExtensionEntryPoint>[
             _zetaCollidingConfigEntryPoint,
             _signingConfigEntryPoint,
           ],
-          featureFlags: featureFlags,
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
         );
-        addTearDown(manager.dispose);
 
         final command = ConfigCommand(
           androidContext: FakeAndroidContext(),
@@ -354,17 +370,12 @@ void main() {
     );
 
     testWithoutContext('logs warnings naming both packages and skips colliding extension flags, options, actions, and aliases', () async {
-      final manager = ExtensionManager(
-        config: hostConfig,
+      final ExtensionManager manager = createManager(
         entryPoints: const <ExtensionEntryPoint>[
           _zetaCollidingConfigEntryPoint,
           _signingConfigEntryPoint,
         ],
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
       );
-      addTearDown(manager.dispose);
 
       final command = ConfigCommand(
         androidContext: FakeAndroidContext(),
@@ -438,15 +449,7 @@ void main() {
     });
 
     testWithoutContext('persists extension flags and options under nested "extensions" map and removes legacy alias keys', () async {
-      final manager = ExtensionManager(
-        config: hostConfig,
-        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-        environment: env,
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-      );
-      addTearDown(manager.dispose);
+      final ExtensionManager manager = createManager();
 
       hostConfig.setValue(_TestSigningConfigExtension.kLegacySdkAlias, '/opt/stale-legacy-sdk');
 
@@ -468,19 +471,9 @@ void main() {
     });
 
     testWithoutContext('executes interactive ConfigAction via alias flag on AnsiTerminal and formats flutter config --list', () async {
-      final stdio = _InteractiveStdio(_SingleSubscriptionStdin(const <String>['2', '\n']));
+      final stdio = _InteractiveStdio(_SingleSubscriptionStdin(const <String>['2\n', '\n']));
       final terminal = AnsiTerminal(stdio: stdio, platform: platform);
-      final manager = ExtensionManager(
-        config: hostConfig,
-        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-        environment: env,
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        stdio: stdio,
-        terminal: terminal,
-      );
-      addTearDown(manager.dispose);
+      final ExtensionManager manager = createManager(stdio: stdio, terminal: terminal);
 
       await createScopedRunner(
         activeManager: manager,
@@ -510,54 +503,49 @@ void main() {
       expect(logger.statusText, contains('    custom-signing-profile: /profiles/default.profile'));
     });
 
-    testWithoutContext('persists empty string and declared ConfigOption updates from ConfigAction and clears null keys', () async {
-      final manager = ExtensionManager(
-        config: hostConfig,
-        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-        environment: env,
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-      );
-      addTearDown(manager.dispose);
+    testWithoutContext(
+      'persists declared ConfigOption updates from ConfigAction and clears empty or null keys',
+      () async {
+        final ExtensionManager manager = createManager();
 
-      hostConfig.setValue(_TestSigningConfigExtension.kLegacySdkAlias, '/opt/stale-alias');
-      await createScopedRunner(activeManager: manager)
-          .run(<String>['config', '--${_TestSigningConfigExtension.kEmptyAndOptionUpdateAction}']);
+        hostConfig.setValue(_TestSigningConfigExtension.kLegacySdkAlias, '/opt/stale-alias');
+        hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
+          'custom_signing_ext': <String, Object?>{
+            _TestSigningConfigExtension.kSigningCert: 'cert-1',
+            _TestSigningConfigExtension.kSigningProfile: '/profiles/old.profile',
+          },
+        });
+        await createScopedRunner(
+          activeManager: manager,
+        ).run(<String>['config', '--${_TestSigningConfigExtension.kEmptyAndOptionUpdateAction}']);
 
-      final afterAction =
-          (hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
-                  as Map<String, Object?>)['custom_signing_ext']!
-              as Map<String, Object?>;
-      expect(afterAction['custom-sdk-path'], '/opt/action-sdk');
-      expect(hostConfig.containsKey(_TestSigningConfigExtension.kLegacySdkAlias), isFalse);
-      expect(afterAction['custom-signing-profile'], '');
+        final afterAction =
+            (hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
+                    as Map<String, Object?>)['custom_signing_ext']!
+                as Map<String, Object?>;
+        expect(afterAction['custom-sdk-path'], '/opt/action-sdk');
+        expect(hostConfig.containsKey(_TestSigningConfigExtension.kLegacySdkAlias), isFalse);
+        expect(afterAction['custom-signing-cert'], 'cert-1');
+        expect(afterAction.containsKey('custom-signing-profile'), isFalse);
 
-      await createScopedRunner(activeManager: manager)
-          .run(<String>['config', '--${_TestSigningConfigExtension.kClearSigningAction}']);
-      final afterClear =
-          (hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
-                  as Map<String, Object?>)['custom_signing_ext']!
-              as Map<String, Object?>;
-      expect(afterClear.containsKey('custom-signing-cert'), isFalse);
-      expect(afterClear.containsKey('custom-signing-profile'), isFalse);
+        await createScopedRunner(activeManager: manager)
+            .run(<String>['config', '--${_TestSigningConfigExtension.kClearSigningAction}']);
+        final afterClear =
+            (hostConfig.getValue(ExtensionConfiguration.extensionsSettingsKey)!
+                    as Map<String, Object?>)['custom_signing_ext']!
+                as Map<String, Object?>;
+        expect(afterClear.containsKey('custom-signing-cert'), isFalse);
+        expect(afterClear.containsKey('custom-signing-profile'), isFalse);
 
-      logger.clear();
-      await createScopedRunner(activeManager: manager).run(<String>['config', '--list']);
-      expect(logger.statusText, contains('    custom-signing-cert: (Not set)'));
-      expect(logger.statusText, contains('    custom-signing-profile: (Not set)'));
-    });
+        logger.clear();
+        await createScopedRunner(activeManager: manager).run(<String>['config', '--list']);
+        expect(logger.statusText, contains('    custom-signing-cert: (Not set)'));
+        expect(logger.statusText, contains('    custom-signing-profile: (Not set)'));
+      },
+    );
 
     testWithoutContext('resolves environmentOverride ahead of persisted "extensions" settings in flutter config --list', () async {
-      final manager = ExtensionManager(
-        config: hostConfig,
-        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-        environment: env,
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-      );
-      addTearDown(manager.dispose);
+      final ExtensionManager manager = createManager();
 
       hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
         'custom_signing_ext': <String, Object?>{
@@ -574,15 +562,7 @@ void main() {
     });
 
     testWithoutContext('displays inactive saved extension settings in flutter config --list inside and outside projects', () async {
-      final manager = ExtensionManager(
-        config: hostConfig,
-        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-        environment: env,
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-      );
-      addTearDown(manager.dispose);
+      final ExtensionManager manager = createManager();
 
       hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
         'custom_signing_ext': <String, Object?>{
@@ -611,15 +591,7 @@ void main() {
     testWithoutContext(
       'fails with ToolExit when interactive ConfigAction runs without a terminal',
       () async {
-        final manager = ExtensionManager(
-          config: hostConfig,
-          entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-          featureFlags: featureFlags,
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          terminal: Terminal.test(),
-        );
-        addTearDown(manager.dispose);
+        final ExtensionManager manager = createManager();
 
         await expectLater(
           createScopedRunner(activeManager: manager)
@@ -630,20 +602,43 @@ void main() {
     );
 
     testWithoutContext('fails with ToolExit when ConfigAction returns an undeclared key', () async {
-      final manager = ExtensionManager(
-        config: hostConfig,
-        entryPoints: const <ExtensionEntryPoint>[_signingConfigEntryPoint],
-        featureFlags: featureFlags,
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        terminal: Terminal.test(),
-      );
-      addTearDown(manager.dispose);
+      final ExtensionManager manager = createManager();
 
       await expectLater(
         createScopedRunner(activeManager: manager)
             .run(<String>['config', '--${_TestSigningConfigExtension.kInvalidKeyAction}']),
         throwsToolExit(message: 'returned undeclared setting key "undeclared-key"'),
+      );
+    });
+
+    testWithoutContext('appends project-extension hint on unknown flutter config option when tool extensions are enabled', () async {
+      await expectLater(
+        createScopedRunner().run(<String>['config', '--tizen-sdk=/opt/tizen']),
+        throwsA(
+          isA<UsageException>().having(
+            (UsageException e) => e.message,
+            'message',
+            allOf(
+              contains('Could not find an option named "--tizen-sdk".'),
+              contains('Extension configuration flags are provided by project extensions.'),
+            ),
+          ),
+        ),
+      );
+
+      featureFlags = TestFeatureFlags();
+      await expectLater(
+        createScopedRunner().run(<String>['config', '--tizen-sdk=/opt/tizen']),
+        throwsA(
+          isA<UsageException>().having(
+            (UsageException e) => e.message,
+            'message',
+            allOf(
+              contains('Could not find an option named "--tizen-sdk".'),
+              isNot(contains('Extension configuration flags are provided by project extensions.')),
+            ),
+          ),
+        ),
       );
     });
   });

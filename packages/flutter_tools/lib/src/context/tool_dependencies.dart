@@ -807,14 +807,9 @@ class ToolDependencies {
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
     final extensionManager = ExtensionManager(
-      config: finalConfig,
       entryPoints: extensionEntryPoints,
-      environment: finalPlatform.environment,
       featureFlags: finalFeatureFlags,
-      hostPlatform: finalOS.hostPlatform,
-      logger: finalLogger,
-      stdio: finalStdio,
-      terminal: finalTerminal,
+      toolContext: finalToolContext,
     );
     finalShutdownHooks.addShutdownHook(extensionManager.dispose);
 

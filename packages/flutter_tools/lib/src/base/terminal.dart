@@ -357,33 +357,20 @@ class AnsiTerminal implements Terminal {
   @override
   bool get stdinHasTerminal => _stdio.stdinHasTerminal;
 
-  Stream<List<int>>? _broadcastStdIn;
-
-  Stream<List<int>> get _stdinBroadcastStream {
-    return _broadcastStdIn ??= _stdio.stdin.asBroadcastStream(
-      onListen: (StreamSubscription<List<int>> subscription) => subscription.resume(),
-      onCancel: (StreamSubscription<List<int>> subscription) => subscription.pause(),
-    );
-  }
-
   Stream<String>? _broadcastStdInString;
 
   @override
   Stream<String> get keystrokes {
-    // Map directly over `_stdinBroadcastStream` rather than wrapping in a
-    // second `asBroadcastStream(onCancel: sub.pause)` so cancelling the last
-    // `keystrokes` listener pauses `_stdio.stdin` between `promptForOption` and
-    // `promptForInput` RPCs while keeping `keystrokes` cached as a broadcast stream.
-    return _broadcastStdInString ??= _stdinBroadcastStream.map<String>(
-      const AsciiDecoder(allowInvalid: true).convert,
-    );
+    return _broadcastStdInString ??= _stdio.stdin
+        .transform<String>(const AsciiDecoder(allowInvalid: true))
+        .asBroadcastStream();
   }
 
   Stream<String>? _broadcastStdInLines;
 
   @override
   Future<String> readLine() {
-    return (_broadcastStdInLines ??= _stdinBroadcastStream
+    return (_broadcastStdInLines ??= _stdio.stdin
             .transform<String>(utf8AllowMalformedLineDecoder)
             .asBroadcastStream(
               onListen: (StreamSubscription<String> subscription) => subscription.resume(),

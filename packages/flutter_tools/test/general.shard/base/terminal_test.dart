@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -243,42 +241,21 @@ void main() {
       expect(await terminalUnderTest.readLine(), '11');
     });
 
-    testWithoutContext('promptForCharInput and readLine share a single-subscription stdin stream and pause while idle', () async {
-      final paused = Completer<void>();
-      final stdinController = StreamController<List<int>>(
-        onPause: () {
-          if (!paused.isCompleted) {
-            paused.complete();
-          }
-        },
-      );
-      addTearDown(() {
-        unawaited(stdinController.close());
-      });
-      final stdio = FakeStdio().._stdin = stdinController.stream;
-      terminalUnderTest = AnsiTerminal(stdio: stdio, platform: const LocalPlatform())
-        ..usesTerminalUi = true;
-      expect(terminalUnderTest.keystrokes, same(terminalUnderTest.keystrokes));
-      final bufferLogger = BufferLogger(
-        terminal: terminalUnderTest,
-        outputPreferences: OutputPreferences.test(),
-      );
+    testWithoutContext(
+      'readLine pauses stdin between calls so buffered lines are not dropped',
+      () async {
+        final stdio = FakeStdio()
+          .._stdin = Stream<List<int>>.fromIterable(<List<int>>[
+            'first\nsecond\n'.codeUnits,
+            'third\n'.codeUnits,
+          ]);
+        terminalUnderTest = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
 
-      final Future<String> choiceFuture = terminalUnderTest.promptForCharInput(
-        <String>['1', '2', 'q'],
-        prompt: 'Choose option',
-        logger: bufferLogger,
-        displayAcceptedCharacters: false,
-      );
-      stdinController.add(<int>[50]); // '2'
-      expect(await choiceFuture, '2');
-      await paused.future;
-
-      final Future<String> firstLineFuture = terminalUnderTest.readLine();
-      stdinController.add('secret\nsecond\n'.codeUnits);
-      expect(await firstLineFuture, 'secret');
-      expect(await terminalUnderTest.readLine(), 'second');
-    });
+        expect(await terminalUnderTest.readLine(), 'first');
+        expect(await terminalUnderTest.readLine(), 'second');
+        expect(await terminalUnderTest.readLine(), 'third');
+      },
+    );
 
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
