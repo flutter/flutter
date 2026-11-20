@@ -144,6 +144,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
     );
   });
@@ -347,6 +348,7 @@ void main() {
         fileSystem.currentDirectory,
         artifacts: modeAssertingArtifacts,
         defines: <String, String>{kBuildMode: BuildMode.release.cliName},
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -445,6 +447,7 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
     );
     var writeDepfile = true;
@@ -513,6 +516,7 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
       );
       final buildManager = FakeExtensionBuildManager(
