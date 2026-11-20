@@ -31,6 +31,12 @@ void main() {
     );
   }
 
+  RenderBox getSegmentedButtonBox(WidgetTester tester) {
+    return tester.allRenderObjects.firstWhere(
+      (RenderObject object) => object.runtimeType.toString().startsWith('_RenderSegmentedButton'),
+    ) as RenderBox;
+  }
+
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
     final RichText iconRichText = tester.widget<RichText>(
       find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
@@ -1633,6 +1639,126 @@ void main() {
 
       expect(segmentBox.size.width, screenWidth);
     }
+  });
+
+  Widget verticalSegmentedButton(int count) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SegmentedButton<int>(
+            direction: Axis.vertical,
+            segments: <ButtonSegment<int>>[
+              for (int i = 0; i < count; i++)
+                ButtonSegment<int>(value: i, label: const Text('Choice')),
+            ],
+            selected: const <int>{0},
+            onSelectionChanged: (Set<int> selection) {},
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Regression test for vertical SegmentedButtons reporting horizontal
+  // intrinsic sizes (width multiplied by the number of segments, height not).
+  testWidgets('Vertical SegmentedButton intrinsics follow its direction', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(verticalSegmentedButton(1));
+    final RenderBox one = getSegmentedButtonBox(tester);
+    final double width1 = one.getMaxIntrinsicWidth(double.infinity);
+    final double minWidth1 = one.getMinIntrinsicWidth(double.infinity);
+    final double height1 = one.getMaxIntrinsicHeight(width1);
+    final double minHeight1 = one.getMinIntrinsicHeight(width1);
+
+    await tester.pumpWidget(verticalSegmentedButton(3));
+    final RenderBox three = getSegmentedButtonBox(tester);
+    final double width3 = three.getMaxIntrinsicWidth(double.infinity);
+    final double minWidth3 = three.getMinIntrinsicWidth(double.infinity);
+    final double height3 = three.getMaxIntrinsicHeight(width3);
+    final double minHeight3 = three.getMinIntrinsicHeight(width3);
+
+    // Segments are stacked vertically: width is the widest segment, not the sum.
+    expect(width3, closeTo(width1, 0.01));
+    expect(minWidth3, closeTo(minWidth1, 0.01));
+    expect(width3, closeTo(three.size.width, 0.01));
+
+    // Height is the sum of the segment heights, matching the laid-out size.
+    expect(height3, closeTo(height1 * 3, 0.01));
+    expect(minHeight3, closeTo(minHeight1 * 3, 0.01));
+    expect(height3, closeTo(three.size.height, 0.01));
+    expect(height3, greaterThanOrEqualTo(three.size.height - 0.01));
+  });
+
+  testWidgets('IntrinsicWidth uses the widest segment for a vertical SegmentedButton', (
+    WidgetTester tester,
+  ) async {
+    Widget buttonContent(int count) {
+      return Center(
+        child: IntrinsicWidth(
+          child: SegmentedButton<int>(
+            direction: Axis.vertical,
+            segments: <ButtonSegment<int>>[
+              for (int i = 0; i < count; i++)
+                ButtonSegment<int>(value: i, label: const Text('Choice')),
+            ],
+            selected: const <int>{0},
+            onSelectionChanged: (Set<int> selection) {},
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: buttonContent(1))));
+    final double width1 = tester.getSize(find.byType(SegmentedButton<int>)).width;
+
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: buttonContent(3))));
+    final double width3 = tester.getSize(find.byType(SegmentedButton<int>)).width;
+
+    expect(width1, greaterThan(0));
+    expect(width3, closeTo(width1, 0.01));
+    expect(width3, lessThan(width1 * 2));
+  });
+
+  testWidgets('Horizontal SegmentedButton intrinsics are unchanged', (
+    WidgetTester tester,
+  ) async {
+    Widget button(int count) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: <ButtonSegment<int>>[
+                for (int i = 0; i < count; i++)
+                  ButtonSegment<int>(value: i, label: const Text('Choice')),
+              ],
+              selected: const <int>{0},
+              onSelectionChanged: (Set<int> selection) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(button(1));
+    final RenderBox one = getSegmentedButtonBox(tester);
+    final double width1 = one.getMaxIntrinsicWidth(double.infinity);
+    final double minWidth1 = one.getMinIntrinsicWidth(double.infinity);
+    final double height1 = one.getMaxIntrinsicHeight(width1);
+    final double minHeight1 = one.getMinIntrinsicHeight(width1);
+
+    await tester.pumpWidget(button(3));
+    final RenderBox three = getSegmentedButtonBox(tester);
+    final double width3 = three.getMaxIntrinsicWidth(double.infinity);
+    final double minWidth3 = three.getMinIntrinsicWidth(double.infinity);
+    final double height3 = three.getMaxIntrinsicHeight(width3);
+    final double minHeight3 = three.getMinIntrinsicHeight(width3);
+
+    // Segments are laid out side by side: width is the sum, height is a single segment.
+    expect(width3, closeTo(width1 * 3, 0.01));
+    expect(minWidth3, closeTo(minWidth1 * 3, 0.01));
+    expect(height3, closeTo(height1, 0.01));
+    expect(minHeight3, closeTo(minHeight1, 0.01));
   });
 }
 
