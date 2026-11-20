@@ -1159,6 +1159,10 @@ void FirstPassDispatcher::transformReset() {
 void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
                                    DlScalar x,
                                    DlScalar y) {
+  if (cull_rect_state_.back().IsEmpty()) {
+    return;
+  }
+
   GlyphProperties properties;
   auto text_frame = text->GetTextFrame();
   if (text_frame == nullptr) {

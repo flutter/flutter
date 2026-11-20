@@ -1891,5 +1891,39 @@ TEST_P(DisplayListTest,
   EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 1000, 1000));
 }
 
+TEST_P(DisplayListTest, FirstPassDispatcherSkipsClippedOutText) {
+  auto lazy_glyph_atlas = GetContentContext().GetLazyGlyphAtlas();
+  lazy_glyph_atlas->ResetTextFrames();
+
+  flutter::DisplayListBuilder builder;
+  // Text 1: clipped out completely (outside initial cull rect 0, 0, 1000, 1000)
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(-200, -200, -50, -50));
+  builder.DrawText(flutter::DlTextImpeller::MakeFromBlob(
+                       SkTextBlob::MakeFromString("Hidden", CreateTestFont())),
+                   -150, -100, flutter::DlPaint(flutter::DlColor::kBlue()));
+  builder.Restore();
+
+  // Text 2: visible inside cull rect
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(0, 0, 500, 500));
+  builder.DrawText(flutter::DlTextImpeller::MakeFromBlob(
+                       SkTextBlob::MakeFromString("A", CreateTestFont())),
+                   100, 100, flutter::DlPaint(flutter::DlColor::kBlue()));
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto atlas = lazy_glyph_atlas->CreateOrGetGlyphAtlas(
+      *GetContext(), GetContentContext().GetTransientsDataBuffer(),
+      GlyphAtlas::Type::kAlphaBitmap);
+  ASSERT_NE(atlas, nullptr);
+  EXPECT_EQ(atlas->GetGlyphCount(), 1u);
+  lazy_glyph_atlas->ResetTextFrames();
+}
+
 }  // namespace testing
 }  // namespace impeller
