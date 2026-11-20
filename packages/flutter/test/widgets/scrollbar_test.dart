@@ -806,10 +806,8 @@ void main() {
     );
 
     // Hover over scrollbar with mouse to bring opacity back up
-    final TestGesture mouseGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await mouseGesture.addPointer();
+    final TestGesture mouseGesture = await tester.startHoverAt(const Offset(794.0, 5.0));
     addTearDown(mouseGesture.removePointer);
-    await mouseGesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
     // Scrollbar should be visible
     expect(
@@ -838,10 +836,8 @@ void main() {
 
     // Hover over scrollbar with mouse. Even though we have not scrolled, the
     // ScrollMetricsNotification will have informed the Scrollbar's hit testing.
-    final TestGesture mouseGesture = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
-    await mouseGesture.addPointer();
+    final TestGesture mouseGesture = await tester.startHoverAt(const Offset(794.0, 5.0));
     addTearDown(mouseGesture.removePointer);
-    await mouseGesture.moveTo(const Offset(794.0, 5.0));
     await tester.pumpAndSettle();
     // Scrollbar should have appeared in response to hover event.
     expect(
