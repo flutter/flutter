@@ -128,12 +128,11 @@ class Pipeline {
     FML_DISALLOW_COPY_AND_ASSIGN(ProducerContinuation);
   };
 
-  explicit Pipeline(uint32_t depth)
-      : empty_(depth), available_(0), inflight_(0) {}
+  explicit Pipeline(uint32_t depth) : empty_(depth), inflight_(0) {}
 
   ~Pipeline() = default;
 
-  bool IsValid() const { return empty_.IsValid() && available_.IsValid(); }
+  bool IsValid() const { return empty_.IsValid(); }
 
   /// Creates a `ProducerContinuation` that a producer can use to add a
   /// resource to the queue.
@@ -185,16 +184,15 @@ class Pipeline {
       return PipelineConsumeResult::NoneAvailable;
     }
 
-    if (!available_.TryWait()) {
-      return PipelineConsumeResult::NoneAvailable;
-    }
-
     ResourcePtr resource;
     size_t trace_id = 0;
     size_t items_count = 0;
 
     {
       std::scoped_lock lock(queue_mutex_);
+      if (queue_.empty()) {
+        return PipelineConsumeResult::NoneAvailable;
+      }
       std::tie(resource, trace_id) = std::move(queue_.front());
       queue_.pop_front();
       items_count = queue_.size();
@@ -214,13 +212,11 @@ class Pipeline {
 
  private:
   fml::Semaphore empty_;
-  fml::Semaphore available_;
   std::atomic<int> inflight_;
   std::mutex queue_mutex_;
   std::deque<std::pair<ResourcePtr, size_t>> queue_;
 
-  /// Commits a produced resource to the queue and signals the consumer that a
-  /// resource is available.
+  /// Commits a produced resource to the queue.
   PipelineProduceResult ProducerCommit(ResourcePtr resource, size_t trace_id) {
     bool is_first_item = false;
     {
@@ -229,8 +225,6 @@ class Pipeline {
       queue_.emplace_back(std::move(resource), trace_id);
     }
 
-    // Ensure the queue mutex is not held as that would be a pessimization.
-    available_.Signal();
     return {.success = true, .is_first_item = is_first_item};
   }
 
@@ -247,8 +241,6 @@ class Pipeline {
       queue_.emplace_back(std::move(resource), trace_id);
     }
 
-    // Ensure the queue mutex is not held as that would be a pessimization.
-    available_.Signal();
     return {.success = true, .is_first_item = true};
   }
 
