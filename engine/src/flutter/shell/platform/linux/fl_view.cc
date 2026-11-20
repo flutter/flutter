@@ -618,6 +618,8 @@ static void fl_view_init(FlView* self) {
   self->background_color = gdk_rgba_copy(&default_background);
 
 #if FLUTTER_LINUX_GTK4
+  self->subsurface_requested =
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") == 0;
   g_mutex_init(&self->subsurface_mutex);
   self->render_area = fl_render_texture_gtk4_new();
   fl_view_gtk4_update_accessible_name(self);

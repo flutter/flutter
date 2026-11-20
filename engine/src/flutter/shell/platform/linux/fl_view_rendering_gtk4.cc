@@ -18,12 +18,8 @@
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_wayland_display.h"
 
-static gboolean gtk4_subsurface_enabled() {
-  return g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") == 0;
-}
-
 static void setup_subsurface(FlView* view) {
-  if (view->engine == nullptr || !gtk4_subsurface_enabled() ||
+  if (view->engine == nullptr ||
       fl_engine_get_renderer_type(view->engine) != kOpenGL ||
       view->view_id != flutter::kFlutterImplicitViewId) {
     return;
@@ -92,6 +88,9 @@ void fl_view_gtk4_clear_subsurface(FlView* view) {
 }
 
 void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
+  if (!view->subsurface_requested) {
+    return;
+  }
   g_mutex_lock(&view->subsurface_mutex);
   const double surface_scale = fl_gtk_widget_get_scale(view->render_area);
   if (view->subsurface_egl != nullptr &&
@@ -162,7 +161,9 @@ void fl_view_gtk4_setup_rendering(FlView* self) {
       break;
   }
 
-  setup_subsurface(self);
+  if (self->subsurface_requested) {
+    setup_subsurface(self);
+  }
 }
 
 // Called on the raster thread after compositing the frame.
@@ -245,11 +246,13 @@ static gboolean redraw_cb(gpointer user_data) {
     return G_SOURCE_REMOVE;
   }
 
-  g_mutex_lock(&self->subsurface_mutex);
-  const gboolean subsurface_enabled = self->subsurface_egl != nullptr;
-  g_mutex_unlock(&self->subsurface_mutex);
-  if (subsurface_enabled) {
-    return G_SOURCE_REMOVE;
+  if (self->subsurface_requested) {
+    g_mutex_lock(&self->subsurface_mutex);
+    const gboolean subsurface_enabled = self->subsurface_egl != nullptr;
+    g_mutex_unlock(&self->subsurface_mutex);
+    if (subsurface_enabled) {
+      return G_SOURCE_REMOVE;
+    }
   }
 
   g_autoptr(GdkTexture) texture = nullptr;
@@ -310,7 +313,9 @@ void fl_view_gtk4_present_layers(FlView* self,
 
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
-  present_subsurface(self);
+  if (self->subsurface_requested) {
+    present_subsurface(self);
+  }
 
   // Perform the redraw in the GTK thread.
   g_idle_add(redraw_cb, g_object_ref(self));

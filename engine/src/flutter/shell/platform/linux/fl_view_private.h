@@ -60,6 +60,8 @@ struct _FlView {
   gboolean native_texture_ready;
   guint native_texture_retry_source_id;
   FlViewGtk4Accessibility* accessibility_backend;
+  // Fixed at construction. A requested presenter can become ready after resize.
+  gboolean subsurface_requested;
   GMutex subsurface_mutex;
   FlSubsurfaceEGL* subsurface_egl;
   int subsurface_scale;
