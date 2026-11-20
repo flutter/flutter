@@ -381,8 +381,11 @@ abstract class AotSnapshotBase extends Target {
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     // TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
     // See: https://github.com/flutter/flutter/issues/190897
+    final windowsX64Elf = environment.defines[kWindowsAotFormat] == 'elf';
+    final bool buildingWindowsPeCoff =
+        targetPlatform == TargetPlatform.windows_x64 && !windowsX64Elf;
     final String? windowsLinkerPath;
-    if (targetPlatform == TargetPlatform.windows_x64) {
+    if (buildingWindowsPeCoff) {
       final VisualStudio? visualStudio = environment.visualStudio;
       if (visualStudio == null) {
         throw StateError('VisualStudio is required to build Windows AOT snapshots.');
@@ -421,20 +424,24 @@ abstract class AotSnapshotBase extends Target {
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
+      windowsX64Elf: windowsX64Elf,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
     }
-  }
-}
 
-List<Source> _aotOutputsForTarget(TargetPlatform targetPlatform) {
-  return <Source>[
-    const Source.pattern('{BUILD_DIR}/app.so'),
-    if (targetPlatform == TargetPlatform.windows_x64) ...const <Source>[
-      Source.pattern('{BUILD_DIR}/app.o'),
-    ],
-  ];
+    environment.depFileService.writeToFile(
+      Depfile(<File>[], <File>[if (buildingWindowsPeCoff) environment.buildDir.childFile('app.o')]),
+      environment.buildDir.childFile('flutter_$name.d'),
+      writeEmpty: true,
+    );
+  }
+
+  @override
+  List<String> get depfiles => <String>['flutter_$name.d'];
+
+  @override
+  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];
 }
 
 /// Generate a native AOT binary from a dart kernel file in profile mode.
@@ -454,9 +461,6 @@ class AotSnapshotProfile extends AotSnapshotBase {
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot, platform: targetPlatform, mode: BuildMode.profile),
   ];
-
-  @override
-  List<Source> get outputs => _aotOutputsForTarget(targetPlatform);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
@@ -482,9 +486,6 @@ class AotSnapshotRelease extends AotSnapshotBase {
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot, platform: targetPlatform, mode: BuildMode.release),
   ];
-
-  @override
-  List<Source> get outputs => _aotOutputsForTarget(targetPlatform);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];

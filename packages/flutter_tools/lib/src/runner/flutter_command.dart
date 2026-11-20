@@ -664,6 +664,10 @@ abstract class FlutterCommand extends Command<void> {
 
     final String? splitDebugInfoPath = getValue(BuildInfoOptions.splitDebugInfo);
 
+    final String? windowsAotFormat = hasOption(BuildInfoOptions.windowsAotFormat)
+        ? getValue(BuildInfoOptions.windowsAotFormat)
+        : null;
+
     final bool androidGradleDaemon =
         !hasOption(BuildInfoOptions.androidGradleDaemon) ||
         getValue(BuildInfoOptions.androidGradleDaemon);
@@ -748,6 +752,7 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packagesPath ?? packageConfigFile.path,
       codeSizeDirectory: codeSizeDirectory,
+      windowsAotFormat: windowsAotFormat,
       androidGradleConfig: AndroidGradleConfig(
         gradleDaemon: androidGradleDaemon,
         skipBuildDependencyValidation: androidSkipBuildDependencyValidation,
