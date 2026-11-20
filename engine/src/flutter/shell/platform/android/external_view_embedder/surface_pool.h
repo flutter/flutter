@@ -130,6 +130,7 @@ class SurfacePool {
   std::mutex mutex_;
   bool use_new_surface_methods_ = false;
   bool pending_java_destroy_ = false;
+  bool has_allocated_java_layers_ = false;
 
   void DestroyLayersLocked(
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);

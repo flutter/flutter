@@ -314,7 +314,7 @@ void AndroidExternalViewEmbedder2::Teardown() {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder2::DestroySurfaces() {
-  if (!surface_pool_->HasLayers()) {
+  if (!surface_pool_->HasLayers() && !surface_pool_->HasPendingDestroy()) {
     return;
   }
   fml::AutoResetWaitableEvent latch;

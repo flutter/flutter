@@ -1767,6 +1767,9 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
   fml::jni::ScopedJavaLocalRef<jobject> mutatorsStack(
       env, env->NewObject(g_mutators_stack_class->obj(),
                           g_mutators_stack_init_method));
+  if (!fml::jni::CheckException(env) || mutatorsStack.is_null()) {
+    return;
+  }
 
   // Row-major 3x3 affine transformation matrix element count for
   // android.graphics.Matrix.
@@ -1787,12 +1790,21 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         };
         fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
             env, env->NewFloatArray(kAndroidMatrixElementCount));
+        if (!fml::jni::CheckException(env) || transformMatrix.is_null()) {
+          return;
+        }
 
         env->SetFloatArrayRegion(transformMatrix.obj(), 0,
                                  kAndroidMatrixElementCount, matrix_array);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_transform_method,
                             transformMatrix.obj());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipRect: {
@@ -1803,6 +1815,9 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
                             rect.GetTop(),    //
                             rect.GetRight(),  //
                             rect.GetBottom());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipRRect: {
@@ -1817,8 +1832,14 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         };
         fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
             env, env->NewFloatArray(kRoundRectRadiiCount));
+        if (!fml::jni::CheckException(env) || radiisArray.is_null()) {
+          return;
+        }
         env->SetFloatArrayRegion(radiisArray.obj(), 0, kRoundRectRadiiCount,
                                  radiis);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_cliprrect_method,
                             rect.GetLeft(),    //
@@ -1826,6 +1847,9 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
                             rect.GetRight(),   //
                             rect.GetBottom(),  //
                             radiisArray.obj());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipRSE: {
@@ -1840,8 +1864,14 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
         };
         fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
             env, env->NewFloatArray(kRoundRectRadiiCount));
+        if (!fml::jni::CheckException(env) || radiisArray.is_null()) {
+          return;
+        }
         env->SetFloatArrayRegion(radiisArray.obj(), 0, kRoundRectRadiiCount,
                                  radiis);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_cliprrect_method,
                             rect.GetLeft(),    //
@@ -1849,6 +1879,9 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
                             rect.GetRight(),   //
                             rect.GetBottom(),  //
                             radiisArray.obj());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       // TODO(cyanglaz): Implement other mutators.
@@ -1868,8 +1901,7 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view_method,
                       view_id, x, y, width, height, viewWidth, viewHeight,
                       mutatorsStack.obj());
-
-  FML_CHECK(fml::jni::CheckException(env));
+  fml::jni::CheckException(env);
 }
 
 void PlatformViewAndroidJNIImpl::FlutterViewDisplayOverlaySurface(
@@ -1932,22 +1964,23 @@ std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> CreateOverlaySurface(
 
   fml::jni::ScopedJavaLocalRef<jobject> overlay(
       env, env->CallObjectMethod(java_object.obj(), create_overlay_method));
-  FML_CHECK(fml::jni::CheckException(env));
-
-  if (overlay.is_null()) {
-    return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(0,
-                                                                     nullptr);
+  if (!fml::jni::CheckException(env) || overlay.is_null()) {
+    return nullptr;
   }
 
   jint overlay_id =
       env->CallIntMethod(overlay.obj(), g_overlay_surface_id_method);
-  FML_CHECK(fml::jni::CheckException(env));
+  if (!fml::jni::CheckException(env)) {
+    // |overlay| was already allocated on the Java side; return metadata with a
+    // null window so |SurfacePool| destroys the orphaned Java overlay surface.
+    return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(0,
+                                                                     nullptr);
+  }
 
   fml::jni::ScopedJavaLocalRef<jobject> overlay_surface(
       env,
       env->CallObjectMethod(overlay.obj(), g_overlay_surface_surface_method));
-  FML_CHECK(fml::jni::CheckException(env));
-  if (overlay_surface.is_null()) {
+  if (!fml::jni::CheckException(env) || overlay_surface.is_null()) {
     return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(overlay_id,
                                                                      nullptr);
   }
@@ -1959,10 +1992,15 @@ std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> CreateOverlaySurface(
   fml::RefPtr<AndroidNativeWindow> overlay_window;
   {
     fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
-    overlay_window = fml::MakeRefCounted<AndroidNativeWindow>(
+    AndroidNativeWindow::Handle window_handle =
         native_window_from_surface
             ? native_window_from_surface(env, overlay_surface.obj())
-            : ANativeWindow_fromSurface(env, overlay_surface.obj()));
+            : ANativeWindow_fromSurface(env, overlay_surface.obj());
+    if (!fml::jni::CheckException(env) || window_handle == nullptr) {
+      return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
+          overlay_id, nullptr);
+    }
+    overlay_window = fml::MakeRefCounted<AndroidNativeWindow>(window_handle);
   }
 
   return std::make_unique<PlatformViewAndroidJNI::OverlayMetadata>(
@@ -2003,12 +2041,16 @@ PlatformViewAndroidJNIImpl::FlutterViewComputePlatformResolvedLocale(
   }
   fml::jni::ScopedJavaLocalRef<jobjectArray> j_locales_data =
       fml::jni::VectorToStringArray(env, supported_locales_data);
+  if (!fml::jni::CheckException(env) || j_locales_data.is_null()) {
+    return std::make_unique<std::vector<std::string>>();
+  }
   fml::jni::ScopedJavaLocalRef<jobjectArray> result(
       env, static_cast<jobjectArray>(env->CallObjectMethod(
                java_object.obj(), g_compute_platform_resolved_locale_method,
                j_locales_data.obj())));
-
-  FML_CHECK(fml::jni::CheckException(env));
+  if (!fml::jni::CheckException(env) || result.is_null()) {
+    return std::make_unique<std::vector<std::string>>();
+  }
 
   return std::make_unique<std::vector<std::string>>(
       fml::jni::StringArrayToVector(env, result.obj()));
@@ -2219,9 +2261,18 @@ class AndroidPathReceiver final : public DlPathReceiver {
   explicit AndroidPathReceiver(JNIEnv* env)
       : env_(env),
         android_path_(env,
-                      env->NewObject(path_class->obj(), path_constructor)) {}
+                      env->NewObject(path_class->obj(), path_constructor)) {
+    if (!fml::jni::CheckException(env_) || android_path_.is_null()) {
+      failed_ = true;
+    }
+  }
+
+  bool IsValid() const { return !failed_ && !android_path_.is_null(); }
 
   void SetFillType(DlPathFillType type) {
+    if (!IsValid()) {
+      return;
+    }
     jfieldID fill_type_field_id;
     switch (type) {
       case DlPathFillType::kOdd:
@@ -2241,41 +2292,81 @@ class AndroidPathReceiver final : public DlPathReceiver {
     fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum(
         env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
                                          fill_type_field_id));
-    FML_CHECK(fml::jni::CheckException(env_));
-    FML_CHECK(!fill_type_enum.is_null());
+    if (!fml::jni::CheckException(env_) || fill_type_enum.is_null()) {
+      failed_ = true;
+      return;
+    }
 
     // Call Path.setFillType(Path.FillType)
     env_->CallVoidMethod(android_path_.obj(), path_set_fill_type_method,
                          fill_type_enum.obj());
-    FML_CHECK(fml::jni::CheckException(env_));
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
   }
 
   void MoveTo(const DlPoint& p2, bool will_be_closed) override {
+    if (!IsValid()) {
+      return;
+    }
     env_->CallVoidMethod(android_path_.obj(), path_move_to_method, p2.x, p2.y);
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
   }
   void LineTo(const DlPoint& p2) override {
+    if (!IsValid()) {
+      return;
+    }
     env_->CallVoidMethod(android_path_.obj(), path_line_to_method, p2.x, p2.y);
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
   }
   void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    if (!IsValid()) {
+      return;
+    }
     env_->CallVoidMethod(android_path_.obj(), path_quad_to_method,  //
                          cp.x, cp.y, p2.x, p2.y);
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
   }
   bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    if (!IsValid()) {
+      return true;
+    }
     if (!path_conic_to_method) {
       return false;
     }
     env_->CallVoidMethod(android_path_.obj(), path_conic_to_method,  //
                          cp.x, cp.y, p2.x, p2.y, weight);
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
     return true;
   }
   void CubicTo(const DlPoint& cp1,
                const DlPoint& cp2,
                const DlPoint& p2) override {
+    if (!IsValid()) {
+      return;
+    }
     env_->CallVoidMethod(android_path_.obj(), path_cubic_to_method,  //
                          cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
   }
   void Close() override {
+    if (!IsValid()) {
+      return;
+    }
     env_->CallVoidMethod(android_path_.obj(), path_close_method);
+    if (!fml::jni::CheckException(env_)) {
+      failed_ = true;
+    }
   }
 
   jobject Path() const { return android_path_.obj(); }
@@ -2283,6 +2374,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
  private:
   JNIEnv* env_;
   fml::jni::ScopedJavaLocalRef<jobject> android_path_;
+  bool failed_ = false;
 };
 }  // namespace
 
@@ -2304,6 +2396,9 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
   fml::jni::ScopedJavaLocalRef<jobject> mutatorsStack(
       env, env->NewObject(g_mutators_stack_class->obj(),
                           g_mutators_stack_init_method));
+  if (!fml::jni::CheckException(env) || mutatorsStack.is_null()) {
+    return;
+  }
 
   // Row-major 3x3 affine transformation matrix element count for
   // android.graphics.Matrix.
@@ -2324,12 +2419,21 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         };
         fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
             env, env->NewFloatArray(kAndroidMatrixElementCount));
+        if (!fml::jni::CheckException(env) || transformMatrix.is_null()) {
+          return;
+        }
 
         env->SetFloatArrayRegion(transformMatrix.obj(), 0,
                                  kAndroidMatrixElementCount, matrix_array);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_transform_method,
                             transformMatrix.obj());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipRect: {
@@ -2340,6 +2444,9 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                             rect.GetTop(),    //
                             rect.GetRight(),  //
                             rect.GetBottom());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipRRect: {
@@ -2354,8 +2461,14 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         };
         fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
             env, env->NewFloatArray(kRoundRectRadiiCount));
+        if (!fml::jni::CheckException(env) || radiisArray.is_null()) {
+          return;
+        }
         env->SetFloatArrayRegion(radiisArray.obj(), 0, kRoundRectRadiiCount,
                                  radiis);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_cliprrect_method,
                             rect.GetLeft(),    //
@@ -2363,6 +2476,9 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                             rect.GetRight(),   //
                             rect.GetBottom(),  //
                             radiisArray.obj());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipRSE: {
@@ -2377,8 +2493,14 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         };
         fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
             env, env->NewFloatArray(kRoundRectRadiiCount));
+        if (!fml::jni::CheckException(env) || radiisArray.is_null()) {
+          return;
+        }
         env->SetFloatArrayRegion(radiisArray.obj(), 0, kRoundRectRadiiCount,
                                  radiis);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_cliprrect_method,
                             rect.GetLeft(),    //
@@ -2386,12 +2508,18 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                             rect.GetRight(),   //
                             rect.GetBottom(),  //
                             radiisArray.obj());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kOpacity: {
         float opacity = (*iter)->GetAlphaFloat();
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_opacity_method, opacity);
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       case MutatorType::kClipPath: {
@@ -2406,16 +2534,25 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
 
         // Define and populate an Android Path with data from the DlPath
         AndroidPathReceiver receiver(env);
+        if (!receiver.IsValid()) {
+          return;
+        }
         receiver.SetFillType(dlPath.GetFillType());
 
         // TODO(flar): https://github.com/flutter/flutter/issues/164808
         // Need to convert the fill type to the Android enum and
         // call setFillType on the path...
         dlPath.Dispatch(receiver);
+        if (!receiver.IsValid()) {
+          return;
+        }
 
         env->CallVoidMethod(mutatorsStack.obj(),
                             g_mutators_stack_push_clippath_method,
                             receiver.Path());
+        if (!fml::jni::CheckException(env)) {
+          return;
+        }
         break;
       }
       // TODO(cyanglaz): Implement other mutators.
@@ -2433,8 +2570,7 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view2_method,
                       view_id, x, y, width, height, viewWidth, viewHeight,
                       mutatorsStack.obj());
-
-  FML_CHECK(fml::jni::CheckException(env));
+  fml::jni::CheckException(env);
 }
 
 void PlatformViewAndroidJNIImpl::hidePlatformView2(int32_t view_id) {

@@ -1093,6 +1093,8 @@ TEST(AndroidExternalViewEmbedder, Teardown) {
 
         auto android_surface_mock = std::make_unique<AndroidSurfaceMock>();
         EXPECT_CALL(*android_surface_mock, IsValid()).WillOnce(Return(true));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _))
+            .WillOnce(Return(true));
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 

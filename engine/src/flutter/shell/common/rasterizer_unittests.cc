@@ -1404,7 +1404,8 @@ TEST(RasterizerTest,
   });
 
   // 1st call: Rasterizer::Setup; 2nd call: post-submit deferred Skia cleanup;
-  // 3rd call: simulates failed context switch on second Draw() without crash.
+  // 3rd call: simulates failed context switch on second Draw() without crash;
+  // 4th call: Rasterizer::Teardown.
   EXPECT_CALL(*raw_surface, MakeRenderContextCurrent())
       .WillOnce([] { return std::make_unique<GLContextDefaultResult>(true); })
       .WillOnce([&] {
@@ -1415,7 +1416,8 @@ TEST(RasterizerTest,
       .WillOnce([&] {
         ++make_current_calls;
         return std::make_unique<GLContextDefaultResult>(false);
-      });
+      })
+      .WillOnce([] { return std::make_unique<GLContextDefaultResult>(true); });
 
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {

@@ -30,11 +30,13 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<AndroidSurfaceFactory>& surface_factory) {
   std::lock_guard lock(mutex_);
-  if (pending_java_destroy_) {
+  if (pending_java_destroy_ ||
+      (layers_.empty() && has_allocated_java_layers_)) {
     // Flush any Java overlay surfaces orphaned by an earlier |TakeLayers| call
-    // before allocating a new overlay surface. During a dynamic thread merge,
-    // an earlier-queued raster task can run on the platform thread ahead of the
-    // cleanup task posted by |ReleaseOverlayLayers|.
+    // or failed layer allocation before allocating a new overlay surface.
+    // During a dynamic thread merge, an earlier-queued raster task can run on
+    // the platform thread ahead of the cleanup task posted by
+    // |ReleaseOverlayLayers|.
     DestroyJavaLayersLocked(jni_facade);
   }
   if (requested_frame_size_ != current_frame_size_) {
@@ -66,9 +68,17 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
         use_new_surface_methods_
             ? jni_facade->createOverlaySurface2()
             : jni_facade->FlutterViewCreateOverlaySurface();
-    if (!java_metadata || !java_metadata->window) {
-      FML_LOG(ERROR)
-          << "Could not create Java overlay surface or native window.";
+    if (!java_metadata) {
+      FML_LOG(ERROR) << "Could not create Java overlay surface.";
+      return nullptr;
+    }
+    has_allocated_java_layers_ = true;
+    if (!java_metadata->window) {
+      FML_LOG(ERROR) << "Could not acquire native window for overlay layer "
+                     << java_metadata->id << ".";
+      if (layers_.empty()) {
+        DestroyJavaLayersLocked(jni_facade);
+      }
       return nullptr;
     }
 
@@ -79,6 +89,9 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     if (!android_surface->SetNativeWindow(java_metadata->window, jni_facade)) {
       FML_LOG(ERROR) << "Could not bind native window for overlay layer "
                      << java_metadata->id << ".";
+      if (layers_.empty()) {
+        DestroyJavaLayersLocked(jni_facade);
+      }
       return nullptr;
     }
 
@@ -87,6 +100,9 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     if (!surface) {
       FML_LOG(ERROR) << "Could not create GPU surface for overlay layer "
                      << java_metadata->id << ".";
+      if (layers_.empty()) {
+        DestroyJavaLayersLocked(jni_facade);
+      }
       return nullptr;
     }
 
@@ -109,6 +125,9 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
         layer->android_surface->CreateGPUSurface(gr_context);
     if (!surface) {
       layers_.erase(layers_.begin() + available_layer_index_);
+      if (layers_.empty() && has_allocated_java_layers_) {
+        pending_java_destroy_ = true;
+      }
       FML_LOG(ERROR) << "Could not recreate GPU surface for overlay layer "
                      << layer->id << ".";
       return nullptr;
@@ -140,7 +159,8 @@ void SurfacePool::DestroyLayers(
 void SurfacePool::DestroyPendingLayers(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
   std::lock_guard lock(mutex_);
-  if (!pending_java_destroy_) {
+  if (!pending_java_destroy_ &&
+      !(layers_.empty() && has_allocated_java_layers_)) {
     return;
   }
   DestroyJavaLayersLocked(jni_facade);
@@ -151,7 +171,7 @@ std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::TakeLayers() {
   std::vector<std::shared_ptr<OverlayLayer>> layers;
   layers.swap(layers_);
   available_layer_index_ = 0;
-  if (!layers.empty()) {
+  if (!layers.empty() || has_allocated_java_layers_) {
     pending_java_destroy_ = true;
   }
   return layers;
@@ -159,12 +179,14 @@ std::vector<std::shared_ptr<OverlayLayer>> SurfacePool::TakeLayers() {
 
 bool SurfacePool::HasPendingDestroy() {
   std::lock_guard lock(mutex_);
-  return pending_java_destroy_;
+  return pending_java_destroy_ ||
+         (layers_.empty() && has_allocated_java_layers_);
 }
 
 void SurfacePool::DestroyLayersLocked(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
-  if (layers_.empty() && !pending_java_destroy_) {
+  if (layers_.empty() && !pending_java_destroy_ &&
+      !has_allocated_java_layers_) {
     return;
   }
   DestroyJavaLayersLocked(jni_facade);
@@ -175,6 +197,7 @@ void SurfacePool::DestroyLayersLocked(
 void SurfacePool::DestroyJavaLayersLocked(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
   pending_java_destroy_ = false;
+  has_allocated_java_layers_ = false;
   if (use_new_surface_methods_) {
     jni_facade->destroyOverlaySurface2();
   } else {

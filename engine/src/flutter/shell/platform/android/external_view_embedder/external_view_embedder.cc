@@ -317,7 +317,7 @@ void AndroidExternalViewEmbedder::DestroySurfaces() {
 void AndroidExternalViewEmbedder::ReleaseOverlayLayers() {
   std::vector<std::shared_ptr<OverlayLayer>> layers =
       surface_pool_->TakeLayers();
-  if (layers.empty()) {
+  if (layers.empty() && !surface_pool_->HasPendingDestroy()) {
     return;
   }
   // Release the rendering surfaces on the thread that renders into them.

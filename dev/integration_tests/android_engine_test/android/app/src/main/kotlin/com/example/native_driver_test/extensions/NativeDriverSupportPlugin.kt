@@ -40,6 +40,23 @@ class NativeDriverSupportPlugin :
     private var flutterRenderer: FlutterRenderer? = null
     private var isFlutterUiDisplayed = false
     private val pendingDisplayResults = mutableListOf<MethodChannel.Result>()
+    private var pendingResize: PendingResize? = null
+
+    private class PendingResize(
+        val view: FlutterView,
+        val listener: View.OnLayoutChangeListener,
+        val result: MethodChannel.Result
+    )
+
+    private fun cancelPendingResize(
+        errorCode: String,
+        errorMessage: String
+    ) {
+        val pending = pendingResize ?: return
+        pendingResize = null
+        pending.view.removeOnLayoutChangeListener(pending.listener)
+        pending.result.error(errorCode, errorMessage, null)
+    }
 
     private val displayListener =
         object : FlutterUiDisplayListener {
@@ -75,6 +92,7 @@ class NativeDriverSupportPlugin :
             result.error("DETACHED", "Engine detached before frame was displayed", null)
         }
         pendingDisplayResults.clear()
+        cancelPendingResize("DETACHED", "Engine detached before FlutterView resize completed")
     }
 
     override fun onMethodCall(
@@ -162,6 +180,10 @@ class NativeDriverSupportPlugin :
                     result.error("FLUTTER_VIEW_NOT_FOUND", "Could not locate FlutterView", null)
                     return
                 }
+                cancelPendingResize(
+                    "SUPERSEDED",
+                    "Resize request superseded by a newer resize_flutter_view call"
+                )
                 val requestedHeight = call.argument<Int>("height")
                 val targetHeight =
                     if (requestedHeight == null || requestedHeight <= 0) {
@@ -186,7 +208,13 @@ class NativeDriverSupportPlugin :
                 }
                 params.height = targetHeight
                 flutterView.layoutParams = params
-                var completed = false
+                if (!flutterView.isAttachedToWindow) {
+                    result.success(
+                        mapOf("width" to flutterView.width, "height" to flutterView.height)
+                    )
+                    return
+                }
+                lateinit var trackedResize: PendingResize
                 val listener =
                     object : View.OnLayoutChangeListener {
                         override fun onLayoutChange(
@@ -200,14 +228,17 @@ class NativeDriverSupportPlugin :
                             oldRight: Int,
                             oldBottom: Int
                         ) {
-                            if (completed) {
+                            if (pendingResize !== trackedResize) {
+                                v.removeOnLayoutChangeListener(this)
                                 return
                             }
-                            completed = true
+                            pendingResize = null
                             v.removeOnLayoutChangeListener(this)
                             result.success(mapOf("width" to v.width, "height" to v.height))
                         }
                     }
+                trackedResize = PendingResize(flutterView, listener, result)
+                pendingResize = trackedResize
                 flutterView.addOnLayoutChangeListener(listener)
                 flutterView.requestLayout()
             }
@@ -294,6 +325,10 @@ class NativeDriverSupportPlugin :
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        cancelPendingResize(
+            "DETACHED",
+            "Activity detached for configuration change before FlutterView resize completed"
+        )
         activity = null
     }
 
@@ -302,6 +337,7 @@ class NativeDriverSupportPlugin :
     }
 
     override fun onDetachedFromActivity() {
+        cancelPendingResize("DETACHED", "Activity detached before FlutterView resize completed")
         activity = null
     }
 }

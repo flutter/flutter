@@ -34,13 +34,17 @@ const double _kPlatformViewExtentLogical = 240.0;
 const double _kOverlayWidthLogical = 140.0;
 const double _kOverlayHeightLogical = 80.0;
 
+/// Translucent alpha (`85%`) allowing both the Flutter overlay box and the
+/// underlying Hybrid Composition platform view to remain visible.
+const double _kOverlayFillAlpha = 0.85;
+
 /// Theme definitions encapsulating all colors and typography used by the
 /// lifecycle test app (avoiding inlined widget colors or styles).
 final ThemeData _kPrimaryLifecycleTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.teal,
     surface: Colors.teal,
-    secondaryContainer: Colors.orange.withValues(alpha: 0.85),
+    secondaryContainer: Colors.orange.withValues(alpha: _kOverlayFillAlpha),
     onSecondaryContainer: Colors.black,
   ),
 );
@@ -49,7 +53,7 @@ final ThemeData _kAlternateLifecycleTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.indigo,
     surface: Colors.indigo,
-    secondaryContainer: Colors.amber.withValues(alpha: 0.85),
+    secondaryContainer: Colors.amber.withValues(alpha: _kOverlayFillAlpha),
     onSecondaryContainer: Colors.black,
   ),
 );
@@ -122,7 +126,7 @@ Future<void> _pumpFrames(int count) async {
   }
 }
 
-final class _LifecycleViewModel extends ChangeNotifier {
+final class _LifecycleViewModel {
   final ValueNotifier<bool> showPlatformView = ValueNotifier<bool>(true);
   final ValueNotifier<bool> alternateOverlayColor = ValueNotifier<bool>(false);
 
@@ -131,19 +135,15 @@ final class _LifecycleViewModel extends ChangeNotifier {
       return;
     }
     showPlatformView.value = value;
-    notifyListeners();
   }
 
   void toggleOverlayColor() {
     alternateOverlayColor.value = !alternateOverlayColor.value;
-    notifyListeners();
   }
 
-  @override
   void dispose() {
     showPlatformView.dispose();
     alternateOverlayColor.dispose();
-    super.dispose();
   }
 }
 

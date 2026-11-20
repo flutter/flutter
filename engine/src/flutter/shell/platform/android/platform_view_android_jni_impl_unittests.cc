@@ -375,11 +375,20 @@ constexpr uintptr_t kFakeFlutterJniAddress = 0x1001;
 // Synthetic address representing an internal local reference allocated inside
 // ANativeWindow_fromSurface (Android issue 68174).
 constexpr uintptr_t kInternalNativeWindowLocalRefAddress = 0x9999;
+// Placeholder jmethodID assigned to all FlutterJNI/MutatorsStack/Path methods
+// during PlatformViewAndroid::Register in SetUpJVM.
+constexpr uintptr_t kRegisteredMethodIdAddress = 300;
+// Distinct jmethodID returned for java.lang.Throwable / PrintStream /
+// ByteArrayOutputStream methods inside fml::jni::GetJavaExceptionInfo so
+// exception-formatting JNI calls do not collide with method expectations under
+// test.
+constexpr uintptr_t kExceptionHelperMethodIdAddress = 0x400;
 
 struct LocalRefTracker {
   // Stack of active JNI local reference frames (1 root frame at construction).
   std::vector<std::unordered_map<jobject, int>> frames{1};
   uintptr_t next_id = kInitialFakeRefAddress;
+  bool pending_exception = false;
 
   template <typename T>
   T TrackNew(T ref) {
@@ -454,6 +463,37 @@ struct LocalRefTracker {
     EXPECT_CALL(mock_env, PopLocalFrame(_))
         .WillRepeatedly(
             [this](jobject result) -> jobject { return PopFrame(result); });
+  }
+
+  void InstallExceptionSupport(MockJNIEnv& mock_env) {
+    const jmethodID kExceptionHelperMethod =
+        reinterpret_cast<jmethodID>(kExceptionHelperMethodIdAddress);
+    EXPECT_CALL(mock_env, ExceptionCheck())
+        .WillRepeatedly([this]() -> jboolean {
+          return pending_exception ? JNI_TRUE : JNI_FALSE;
+        });
+    EXPECT_CALL(mock_env, ExceptionOccurred())
+        .WillRepeatedly([this]() -> jthrowable {
+          EXPECT_TRUE(pending_exception);
+          return AllocateNew<jthrowable>();
+        });
+    EXPECT_CALL(mock_env, ExceptionClear()).WillRepeatedly([this]() {
+      pending_exception = false;
+    });
+    EXPECT_CALL(mock_env, ExceptionDescribe()).WillRepeatedly(Return());
+    EXPECT_CALL(mock_env, FindClass(_))
+        .WillRepeatedly(
+            [this](const char*) -> jclass { return AllocateNew<jclass>(); });
+    EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+        .WillRepeatedly(Return(kExceptionHelperMethod));
+    EXPECT_CALL(mock_env, NewObjectV(_, kExceptionHelperMethod, _))
+        .WillRepeatedly([this](jclass, jmethodID, va_list) -> jobject {
+          return AllocateNew<jobject>();
+        });
+    EXPECT_CALL(mock_env, CallVoidMethodV(_, kExceptionHelperMethod, _))
+        .WillRepeatedly(Return());
+    EXPECT_CALL(mock_env, CallObjectMethodV(_, kExceptionHelperMethod, _))
+        .WillRepeatedly(Return(nullptr));
   }
 };
 
@@ -648,6 +688,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
                         : android_jni.createOverlaySurface2();
     ASSERT_NE(metadata, nullptr);
     EXPECT_EQ(metadata->id, kBaseOverlaySurfaceId + variant);
+    EXPECT_EQ(metadata->window.get(), nullptr);
     EXPECT_EQ(from_surface_calls, 1);
     EXPECT_EQ(last_surface_arg, surface_obj);
     EXPECT_EQ(tracker.frames.size(), 1u);
@@ -737,6 +778,277 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       android_jni.FlutterViewComputePlatformResolvedLocale({"en", "US", ""});
   ASSERT_NE(empty_resolved, nullptr);
   EXPECT_TRUE(empty_resolved->empty());
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       CreateOverlaySurfaceClearsExceptionsAndReturnsSafeMetadata) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+  tracker.InstallExceptionSupport(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+  const jmethodID kRegisteredMethod =
+      reinterpret_cast<jmethodID>(kRegisteredMethodIdAddress);
+
+  int from_surface_calls = 0;
+  bool throw_in_from_surface = false;
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(
+      flutter_jni_ref,
+      [&](JNIEnv* env, jobject) -> AndroidNativeWindow::Handle {
+        ++from_surface_calls;
+        env->NewLocalRef(
+            reinterpret_cast<jobject>(kInternalNativeWindowLocalRefAddress));
+        if (throw_in_from_surface) {
+          tracker.pending_exception = true;
+        }
+        return nullptr;
+      });
+
+  // Exercise both Classic HC (variant 0) and HCPP (variant 1).
+  constexpr int kOverlayMethodVariantCount = 2;
+  constexpr jint kTestOverlayId = 17;
+  // Subcase 3 & 4 each invoke createOverlaySurface[2] + overlay.getSurface().
+  constexpr int kExpectedObjectCallsWhenOverlayCreated = 2;
+
+  for (int variant = 0; variant < kOverlayMethodVariantCount; ++variant) {
+    auto call_create = [&]() {
+      return (variant == 0) ? android_jni.FlutterViewCreateOverlaySurface()
+                            : android_jni.createOverlaySurface2();
+    };
+
+    // Subcase 1: createOverlaySurface[2] throws -> clears exception, skips
+    // getId / getSurface / ANativeWindow_fromSurface, returns nullptr.
+    from_surface_calls = 0;
+    EXPECT_CALL(mock_env, CallObjectMethodV(_, kRegisteredMethod, _))
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+          EXPECT_EQ(obj, kFlutterJniObj);
+          tracker.pending_exception = true;
+          return nullptr;
+        });
+    EXPECT_CALL(mock_env, CallIntMethodV(_, kRegisteredMethod, _)).Times(0);
+
+    EXPECT_EQ(call_create(), nullptr);
+    EXPECT_FALSE(tracker.pending_exception);
+    EXPECT_EQ(from_surface_calls, 0);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+    // Subcase 2: overlay.getId() throws after Java created the overlay ->
+    // clears exception, skips getSurface / ANativeWindow_fromSurface, returns
+    // OverlayMetadata with window == nullptr (never wrapping nullptr inside a
+    // non-null invalid AndroidNativeWindow).
+    jobject overlay_obj = nullptr;
+    EXPECT_CALL(mock_env, CallObjectMethodV(_, kRegisteredMethod, _))
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+          EXPECT_EQ(obj, kFlutterJniObj);
+          overlay_obj = tracker.AllocateNew<jobject>();
+          return overlay_obj;
+        });
+    EXPECT_CALL(mock_env, CallIntMethodV(_, kRegisteredMethod, _))
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jint {
+          EXPECT_EQ(obj, overlay_obj);
+          tracker.pending_exception = true;
+          return 0;
+        });
+
+    auto get_id_fail = call_create();
+    ASSERT_NE(get_id_fail, nullptr);
+    EXPECT_EQ(get_id_fail->id, 0);
+    EXPECT_EQ(get_id_fail->window.get(), nullptr);
+    EXPECT_FALSE(tracker.pending_exception);
+    EXPECT_EQ(from_surface_calls, 0);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+    // Subcase 3: overlay.getSurface() throws -> clears exception, skips
+    // ANativeWindow_fromSurface, returns OverlayMetadata(id, nullptr).
+    EXPECT_CALL(mock_env, CallObjectMethodV(_, kRegisteredMethod, _))
+        .Times(kExpectedObjectCallsWhenOverlayCreated)
+        .WillOnce([&](jobject, jmethodID, va_list) -> jobject {
+          overlay_obj = tracker.AllocateNew<jobject>();
+          return overlay_obj;
+        })
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+          EXPECT_EQ(obj, overlay_obj);
+          tracker.pending_exception = true;
+          return nullptr;
+        });
+    EXPECT_CALL(mock_env, CallIntMethodV(_, kRegisteredMethod, _))
+        .WillOnce(Return(kTestOverlayId));
+
+    auto get_surface_fail = call_create();
+    ASSERT_NE(get_surface_fail, nullptr);
+    EXPECT_EQ(get_surface_fail->id, kTestOverlayId);
+    EXPECT_EQ(get_surface_fail->window.get(), nullptr);
+    EXPECT_FALSE(tracker.pending_exception);
+    EXPECT_EQ(from_surface_calls, 0);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+    // Subcase 4: ANativeWindow_fromSurface leaves an exception pending ->
+    // clears exception, pops local frame, returns OverlayMetadata(id, nullptr).
+    throw_in_from_surface = true;
+    EXPECT_CALL(mock_env, CallObjectMethodV(_, kRegisteredMethod, _))
+        .Times(kExpectedObjectCallsWhenOverlayCreated)
+        .WillOnce([&](jobject, jmethodID, va_list) -> jobject {
+          overlay_obj = tracker.AllocateNew<jobject>();
+          return overlay_obj;
+        })
+        .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+          EXPECT_EQ(obj, overlay_obj);
+          return tracker.AllocateNew<jobject>();
+        });
+    EXPECT_CALL(mock_env, CallIntMethodV(_, kRegisteredMethod, _))
+        .WillOnce(Return(kTestOverlayId));
+
+    auto from_surface_fail = call_create();
+    throw_in_from_surface = false;
+    ASSERT_NE(from_surface_fail, nullptr);
+    EXPECT_EQ(from_surface_fail->id, kTestOverlayId);
+    EXPECT_EQ(from_surface_fail->window.get(), nullptr);
+    EXPECT_FALSE(tracker.pending_exception);
+    EXPECT_EQ(from_surface_calls, 1);
+    EXPECT_EQ(tracker.frames.size(), 1u);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+  }
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       OnDisplayPlatformViewBailsOutOnExceptionWithoutFurtherJniCalls) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+  tracker.InstallExceptionSupport(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+  const jmethodID kRegisteredMethod =
+      reinterpret_cast<jmethodID>(kRegisteredMethodIdAddress);
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  constexpr DlScalar kTranslateOffset = 5.0f;
+  constexpr DlScalar kClipExtent = 30.0f;
+  constexpr int kTestViewId = 3;
+  constexpr int kTestDimension = 80;
+
+  // Subcase 1: FlutterViewOnDisplayPlatformView bails out immediately when
+  // NewFloatArray throws (zero SetFloatArrayRegion or CallVoidMethod calls).
+  {
+    MutatorsStack stack;
+    stack.PushTransform(
+        DlMatrix::MakeTranslation({kTranslateOffset, kTranslateOffset}));
+    stack.PushClipRect(DlRect::MakeLTRB(0.0f, 0.0f, kClipExtent, kClipExtent));
+
+    EXPECT_CALL(mock_env, NewObjectV(_, kRegisteredMethod, _))
+        .WillOnce([&](jclass, jmethodID, va_list) -> jobject {
+          return tracker.AllocateNew<jobject>();
+        });
+    EXPECT_CALL(mock_env, NewFloatArray(_)).WillOnce([&](jsize) -> jfloatArray {
+      tracker.pending_exception = true;
+      return nullptr;
+    });
+    EXPECT_CALL(mock_env, SetFloatArrayRegion(_, _, _, _)).Times(0);
+    EXPECT_CALL(mock_env, CallVoidMethodV(_, kRegisteredMethod, _)).Times(0);
+
+    android_jni.FlutterViewOnDisplayPlatformView(
+        kTestViewId, 0, 0, kTestDimension, kTestDimension, kTestDimension,
+        kTestDimension, stack);
+
+    EXPECT_FALSE(tracker.pending_exception);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+  }
+
+  // Subcase 2: onDisplayPlatformView2 + AndroidPathReceiver bails out mid-path
+  // when MoveTo throws, skipping remaining path verbs, pushClipPath, and final
+  // onDisplayPlatformView2.
+  {
+    DlPathBuilder path_builder;
+    path_builder.SetFillType(DlPathFillType::kOdd)
+        .MoveTo({0.0f, 0.0f})
+        .LineTo({10.0f, 5.0f})
+        .Close();
+    MutatorsStack stack;
+    stack.PushClipPath(path_builder.TakePath());
+    stack.PushClipRect(DlRect::MakeLTRB(0.0f, 0.0f, kClipExtent, kClipExtent));
+
+    // 1st NewObjectV: FlutterMutatorsStack; 2nd NewObjectV: Path.
+    constexpr int kExpectedNewObjectCalls = 2;
+    // 1st CallVoidMethodV: Path.setFillType; 2nd CallVoidMethodV: Path.moveTo
+    // (which throws, halting LineTo, Close, pushClipPath, pushClipRect, and
+    // onDisplayPlatformView2).
+    constexpr int kExpectedVoidCallsBeforeAbort = 2;
+
+    EXPECT_CALL(mock_env, NewObjectV(_, kRegisteredMethod, _))
+        .Times(kExpectedNewObjectCalls)
+        .WillRepeatedly([&](jclass, jmethodID, va_list) -> jobject {
+          return tracker.AllocateNew<jobject>();
+        });
+    EXPECT_CALL(mock_env, GetStaticObjectField(_, _))
+        .WillOnce([&](jclass, jfieldID) -> jobject {
+          return tracker.AllocateNew<jobject>();
+        });
+
+    int void_call_index = 0;
+    EXPECT_CALL(mock_env, CallVoidMethodV(_, kRegisteredMethod, _))
+        .Times(kExpectedVoidCallsBeforeAbort)
+        .WillRepeatedly([&](jobject, jmethodID, va_list) {
+          if (++void_call_index == kExpectedVoidCallsBeforeAbort) {
+            tracker.pending_exception = true;
+          }
+        });
+
+    android_jni.onDisplayPlatformView2(kTestViewId, 0, 0, kTestDimension,
+                                       kTestDimension, kTestDimension,
+                                       kTestDimension, stack);
+
+    EXPECT_FALSE(tracker.pending_exception);
+    EXPECT_EQ(tracker.ActiveCount(), 0u);
+  }
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       ComputePlatformResolvedLocaleClearsExceptionAndReturnsEmptyVector) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+  tracker.InstallExceptionSupport(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+  const jmethodID kRegisteredMethod =
+      reinterpret_cast<jmethodID>(kRegisteredMethodIdAddress);
+
+  EXPECT_CALL(mock_env, NewObjectArray(_, _, _))
+      .WillOnce([&](jsize, jclass, jobject) -> jobjectArray {
+        return tracker.AllocateNew<jobjectArray>();
+      });
+  EXPECT_CALL(mock_env, NewString(_, _))
+      .WillRepeatedly([&](const jchar*, jsize) -> jstring {
+        return tracker.AllocateNew<jstring>();
+      });
+  EXPECT_CALL(mock_env, SetObjectArrayElement(_, _, _))
+      .WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFlutterJniObj, kRegisteredMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list) -> jobject {
+        tracker.pending_exception = true;
+        return nullptr;
+      });
+  EXPECT_CALL(mock_env, GetArrayLength(_)).Times(0);
+
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(flutter_jni_ref);
+
+  auto resolved = android_jni.FlutterViewComputePlatformResolvedLocale(
+      {"en", "US", "Latn"});
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_TRUE(resolved->empty());
+  EXPECT_FALSE(tracker.pending_exception);
   EXPECT_EQ(tracker.ActiveCount(), 0u);
 }
 
