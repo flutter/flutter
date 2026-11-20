@@ -1449,5 +1449,34 @@ TEST(EntityGeometryTest, RotatedStrokedCircleGeometryCoverage) {
       << "  circle bounds: " << circle_bounds;
 }
 
+TEST(EntityGeometryTest, FillPathGeometryRoundSuperellipseIsNormalMode) {
+  const flutter::DlRect bounds =
+      flutter::DlRect::MakeXYWH(0.0f, 0.0f, 25.6f, 25.6f);
+  const Scalar max_radius = 12.8f;
+  for (int col = 0; col < 40; ++col) {
+    const Scalar radius = (max_radius / 40.0f) * static_cast<Scalar>(col);
+    const auto rse =
+        flutter::DlRoundSuperellipse::MakeRectRadius(bounds, radius);
+    const flutter::DlPath rse_path =
+        flutter::DlPath::MakeRoundSuperellipse(rse);
+    FillPathGeometry geom(rse_path);
+    EXPECT_EQ(geom.GetResultMode(), GeometryResult::Mode::kNormal)
+        << "Expected kNormal for RSuperellipse col=" << col
+        << " (radius=" << radius << ")";
+  }
+
+  // Verify a genuinely concave L-shaped path still uses stencil-then-cover.
+  flutter::DlPathBuilder concave_builder;
+  concave_builder.MoveTo({0, 0});
+  concave_builder.LineTo({100, 0});
+  concave_builder.LineTo({100, 40});
+  concave_builder.LineTo({40, 40});
+  concave_builder.LineTo({40, 100});
+  concave_builder.LineTo({0, 100});
+  concave_builder.Close();
+  FillPathGeometry concave_geom(concave_builder.TakePath());
+  EXPECT_EQ(concave_geom.GetResultMode(), GeometryResult::Mode::kNonZero);
+}
+
 }  // namespace testing
 }  // namespace impeller
