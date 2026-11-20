@@ -18,6 +18,7 @@ DartMessageHandler::DartMessageHandler()
       isolate_exited_(false),
       isolate_had_uncaught_exception_error_(false),
       isolate_had_fatal_error_(false),
+      paused_on_start_unhandled_messages_(0),
       isolate_last_error_(kNoError),
       task_dispatcher_(nullptr) {}
 
@@ -85,20 +86,40 @@ void DartMessageHandler::OnHandleMessage(DartState* dart_state) {
   if (Dart_IsPausedOnStart()) {
     // We are paused on isolate start. Only handle service messages until we are
     // requested to resume.
-    if (Dart_HasServiceMessages()) {
-      bool resume = Dart_HandleServiceMessages();
-      if (!resume) {
-        return;
+    bool resume = false;
+    const bool had_service_messages = Dart_HasServiceMessages();
+    if (had_service_messages) {
+      resume = Dart_HandleServiceMessages();
+    }
+    // An OOB `resume` service message may have already been processed by
+    // `Thread::HandleInterrupts()` during an embedder `Dart_Invoke` call before
+    // this message loop task ran, clearing `Dart_ShouldPauseOnStart()`.
+    if (!resume && Dart_ShouldPauseOnStart()) {
+      // Only count notifications that did not process OOB service messages as
+      // deferred normal-message wakeups. Over-counting (e.g. if an earlier task
+      // drained multiple coalesced OOB messages) is benign because calling
+      // `Dart_HandleMessage()` on an empty queue is a no-op.
+      if (!had_service_messages) {
+        ++paused_on_start_unhandled_messages_;
       }
-      Dart_SetPausedOnStart(false);
-      // We've resumed, handle normal messages that are in the queue.
-      result = Dart_HandleMessage();
-      error = CheckAndHandleError(result);
-      dart_state->MessageEpilogue(result);
-      if (!Dart_CurrentIsolate()) {
-        isolate_exited_ = true;
-        return;
-      }
+      return;
+    }
+    Dart_SetPausedOnStart(false);
+    // We've resumed, handle normal messages that are in the queue.
+    const size_t remaining_messages =
+        paused_on_start_unhandled_messages_ > 0
+            ? paused_on_start_unhandled_messages_ - 1
+            : 0;
+    paused_on_start_unhandled_messages_ = 0;
+    result = Dart_HandleMessage();
+    error = CheckAndHandleError(result);
+    dart_state->MessageEpilogue(result);
+    if (!Dart_CurrentIsolate()) {
+      isolate_exited_ = true;
+      return;
+    }
+    for (size_t i = 0; i < remaining_messages; ++i) {
+      OnMessage(dart_state);
     }
   } else if (Dart_IsPausedOnExit()) {
     // We are paused on isolate exit. Only handle service messages until we are

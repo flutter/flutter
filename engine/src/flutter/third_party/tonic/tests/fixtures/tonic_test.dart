@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:ffi';
+import 'dart:io';
+import 'dart:isolate';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
 
@@ -183,5 +187,72 @@ void callMyTestMethod() {
   final myNative = MyNativeClass(1234);
   if (myNative.myTestMethod(43) == 1277) {
     signalDone();
+  }
+}
+
+// Test helpers for DartMessageHandler pause-on-start resumption.
+
+@pragma('vm:external-name', 'SignalResumeCompleted')
+external void signalResumeCompleted();
+
+@pragma('vm:external-name', 'SignalAllMessagesReceived')
+external void signalAllMessagesReceived(int sum);
+
+RawReceivePort? _pausedTestPort;
+final _receivedWhilePaused = <int>[];
+
+@pragma('vm:entry-point')
+void pauseOnStartMain() {
+  signalDone();
+}
+
+@pragma('vm:entry-point')
+void pauseOnStartThrowMain() {
+  signalDone();
+  throw StateError('Non-fatal uncaught error in main');
+}
+
+@pragma('vm:entry-point')
+void embedderCallback() {}
+
+@pragma('vm:entry-point')
+SendPort openPausedTestPort() {
+  _receivedWhilePaused.clear();
+  final port = RawReceivePort((Object? message) {
+    if (message is int) {
+      _receivedWhilePaused.add(message);
+      if (_receivedWhilePaused.length == 3) {
+        final int sum = _receivedWhilePaused.fold<int>(0, (int a, int b) => a + b);
+        _pausedTestPort?.close();
+        _pausedTestPort = null;
+        signalAllMessagesReceived(sum);
+      }
+    }
+  });
+  _pausedTestPort = port;
+  return port.sendPort;
+}
+
+@pragma('vm:entry-point')
+Future<void> resumePausedIsolateViaVmService(List<String> args) async {
+  final String targetIsolateId = args.first;
+  final client = HttpClient();
+  try {
+    Uri? baseUri;
+    while (baseUri == null) {
+      final ServiceProtocolInfo info = await Service.getInfo();
+      baseUri = info.serverUri;
+      if (baseUri == null) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+    }
+    final Uri url = baseUri.resolve(
+      'resume?isolateId=${Uri.encodeQueryComponent(targetIsolateId)}',
+    );
+    final HttpClientRequest resReq = await client.getUrl(url);
+    await utf8.decoder.bind(await resReq.close()).drain<void>();
+    signalResumeCompleted();
+  } finally {
+    client.close(force: true);
   }
 }
