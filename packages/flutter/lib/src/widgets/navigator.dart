@@ -2567,6 +2567,11 @@ class Navigator extends StatefulWidget {
   ///
   /// The removed route is removed and completed with a `null` value.
   ///
+  /// The `oldRoute` must be the same [Route] object that is already installed
+  /// in this [Navigator]. For example, obtain the route with [ModalRoute.of]
+  /// from a [BuildContext] inside that route's subtree. Creating a new route
+  /// with the same [RouteSettings] will not identify the route to replace.
+  ///
   /// The new route, the route below the new route (if any), and the route above
   /// the new route, are all notified (see [Route.didReplace],
   /// [Route.didChangeNext], and [Route.didChangePrevious]). If the [Navigator]
@@ -2628,7 +2633,7 @@ class Navigator extends StatefulWidget {
   /// given `anchorRoute`.
   ///
   /// {@template flutter.widgets.navigator.replaceRouteBelow}
-  /// The old route must not be current visible, as this method skips the
+  /// The old route must not be currently visible, as this method skips the
   /// animations and therefore the removal would be jarring if it was visible.
   /// To replace the top-most route, consider [pushReplacement] instead, which
   /// _does_ animate the new route, and delays removing the old route until the
@@ -5373,7 +5378,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   void replace<T extends Object?>({required Route<dynamic> oldRoute, required Route<T> newRoute}) {
     assert(!_debugLocked);
-    assert(oldRoute._isInstalledIn(this));
+    assert(
+      oldRoute._isInstalledIn(this),
+      'The oldRoute must be a route that is currently installed in this Navigator. '
+      'This usually means passing the same Route object that was passed to a push call '
+      'or obtained from ModalRoute.of(context), not a newly created Route with the same settings.',
+    );
     _replaceEntry(
       _RouteEntry(newRoute, pageBased: false, initialState: _RouteLifecycle.replace),
       oldRoute,
@@ -5395,7 +5405,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     required RestorableRouteBuilder<T> newRouteBuilder,
     Object? arguments,
   }) {
-    assert(oldRoute._isInstalledIn(this));
+    assert(
+      oldRoute._isInstalledIn(this),
+      'The oldRoute must be a route that is currently installed in this Navigator. '
+      'This usually means passing the same Route object that was passed to a push call '
+      'or obtained from ModalRoute.of(context), not a newly created Route with the same settings.',
+    );
     assert(
       _debugIsStaticCallback(newRouteBuilder),
       'The provided routeBuilder must be a static function.',
