@@ -96,6 +96,11 @@ void main() {
                               label: 'Item 3',
                               textDirection: TextDirection.ltr,
                             ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 4',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
                         ),
                       ],
@@ -163,6 +168,11 @@ void main() {
                               label: 'Item 4',
                               textDirection: TextDirection.ltr,
                             ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 5',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
                         ),
                       ],
@@ -222,6 +232,11 @@ void main() {
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'Item 3',
+                              textDirection: TextDirection.ltr,
+                            ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 4',
                               textDirection: TextDirection.ltr,
                             ),
                           ],
@@ -475,6 +490,11 @@ void main() {
                                 label: 'Item 5',
                                 textDirection: TextDirection.ltr,
                               ),
+                              TestSemantics(
+                                flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                                label: 'Item 6',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
                           ),
                         ],
@@ -584,6 +604,11 @@ void main() {
                               label: 'Item 5',
                               textDirection: TextDirection.ltr,
                             ),
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 6',
+                              textDirection: TextDirection.ltr,
+                            ),
                           ],
                         ),
                       ],
@@ -660,6 +685,11 @@ void main() {
                               SemanticsAction.scrollToOffset,
                             ],
                             children: <TestSemantics>[
+                              TestSemantics(
+                                flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                                label: 'Item 6',
+                                textDirection: TextDirection.ltr,
+                              ),
                               TestSemantics(
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Item 5',
@@ -770,6 +800,11 @@ void main() {
                             SemanticsAction.scrollToOffset,
                           ],
                           children: <TestSemantics>[
+                            TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                              label: 'Item 6',
+                              textDirection: TextDirection.ltr,
+                            ),
                             TestSemantics(
                               flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                               label: 'Item 5',
@@ -894,7 +929,10 @@ void main() {
                       TestSemantics(
                         children: <TestSemantics>[
                           TestSemantics(
-                            tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
+                            tags: <SemanticsTag>[
+                              RenderViewport.excludeFromScrolling,
+                              RenderViewport.useTwoPaneSemantics,
+                            ],
                             children: <TestSemantics>[
                               TestSemantics(
                                 flags: <SemanticsFlag>[
@@ -915,30 +953,48 @@ void main() {
                             flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                             children: <TestSemantics>[
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                                flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                                label: 'Backward Item 0',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Forward Item 0',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 label: 'Forward Item 1',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 label: 'Forward Item 2',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 label: 'Forward Item 3',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Forward Item 4',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Forward Item 5',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                                flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                                label: 'Forward Item 6',
                                 textDirection: TextDirection.ltr,
                               ),
                             ],
@@ -982,36 +1038,57 @@ void main() {
                             ],
                             children: <TestSemantics>[
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                                flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                                label: 'Backward Item 6',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Backward Item 5',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Backward Item 4',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 label: 'Backward Item 3',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 label: 'Backward Item 2',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 label: 'Backward Item 1',
                                 textDirection: TextDirection.ltr,
                               ),
                               TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
                                 flags: <SemanticsFlag>[SemanticsFlag.isHidden],
                                 label: 'Backward Item 0',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
+                                flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                                label: 'Forward Item 0',
                                 textDirection: TextDirection.ltr,
                               ),
                             ],
                           ),
                           TestSemantics(
-                            tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
+                            tags: <SemanticsTag>[
+                              RenderViewport.excludeFromScrolling,
+                              RenderViewport.useTwoPaneSemantics,
+                            ],
                             children: <TestSemantics>[
                               TestSemantics(
                                 flags: <SemanticsFlag>[
