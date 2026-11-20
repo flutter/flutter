@@ -236,6 +236,46 @@ class ExtensionConnection {
     );
   }
 
+  static void _handleLogNotification(
+    json_rpc.Parameters params, {
+    required String extensionName,
+    required Logger logger,
+  }) {
+    final Object? rawValue = params.value;
+    if (rawValue is! Map<String, Object?>) {
+      logger.printWarning(
+        'Extension "$extensionName" sent malformed "${ToolExtensionEntryPoint.logNotificationMethod}" notification: expected Map<String, Object?>.',
+      );
+      return;
+    }
+    final ExtensionLogMessage logMessage;
+    try {
+      logMessage = ExtensionLogMessage.fromJson(rawValue);
+    } on FormatException catch (error) {
+      logger.printWarning(
+        'Extension "$extensionName" sent malformed "${ToolExtensionEntryPoint.logNotificationMethod}" notification: $error',
+      );
+      return;
+    }
+    String message = logMessage.message;
+    if (!logger.supportsColor) {
+      message = message.replaceAll(_ansiSgrPattern, '');
+    } else if (message.contains(_ansiCsiPrefix)) {
+      message = '$message${AnsiTerminal.resetAll}';
+    }
+    final formatted = '[$extensionName] $message';
+    switch (logMessage.level) {
+      case .trace:
+        logger.printTrace(formatted);
+      case .info:
+        logger.printStatus(formatted);
+      case .warning:
+        logger.printWarning(formatted);
+      case .error:
+        logger.printError(formatted);
+    }
+  }
+
   static void _validateCapabilitiesMatchConfig(
     ToolExtensionCapabilities capabilities,
     ExtensionPackageConfig expectedConfig, {
@@ -316,45 +356,14 @@ class ExtensionConnection {
       final channel = IsolateChannel<Object?>.connectReceive(receivePort);
       final peer = json_rpc.Peer.withoutJson(channel);
 
-      peer.registerMethod(ToolExtensionEntryPoint.logNotificationMethod, (
-        json_rpc.Parameters params,
-      ) {
-        final String currentExtensionName =
-            connection?.extensionName ?? extensionName ?? defaultExtensionName;
-        final Object? rawValue = params.value;
-        if (rawValue is! Map<String, Object?>) {
-          logger.printWarning(
-            'Extension "$currentExtensionName" sent malformed "${ToolExtensionEntryPoint.logNotificationMethod}" notification: expected Map<String, Object?>.',
-          );
-          return;
-        }
-        final ExtensionLogMessage logMessage;
-        try {
-          logMessage = ExtensionLogMessage.fromJson(rawValue);
-        } on FormatException catch (error) {
-          logger.printWarning(
-            'Extension "$currentExtensionName" sent malformed "${ToolExtensionEntryPoint.logNotificationMethod}" notification: $error',
-          );
-          return;
-        }
-        String message = logMessage.message;
-        if (!logger.supportsColor) {
-          message = message.replaceAll(_ansiSgrPattern, '');
-        } else if (message.contains(_ansiCsiPrefix)) {
-          message = '$message${AnsiTerminal.resetAll}';
-        }
-        final formatted = '[$currentExtensionName] $message';
-        switch (logMessage.level) {
-          case .trace:
-            logger.printTrace(formatted);
-          case .info:
-            logger.printStatus(formatted);
-          case .warning:
-            logger.printWarning(formatted);
-          case .error:
-            logger.printError(formatted);
-        }
-      });
+      peer.registerMethod(
+        ToolExtensionEntryPoint.logNotificationMethod,
+        (json_rpc.Parameters params) => _handleLogNotification(
+          params,
+          extensionName: connection?.extensionName ?? extensionName ?? defaultExtensionName,
+          logger: logger,
+        ),
+      );
 
       unawaited(peer.listen());
 
