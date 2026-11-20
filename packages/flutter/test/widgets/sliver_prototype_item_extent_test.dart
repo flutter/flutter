@@ -223,4 +223,31 @@ void main() {
 
     expect(prototype.getTransformTo(scrollView), Matrix4.zero());
   });
+
+  testWidgets('SliverPrototypeExtentList with spacing positions children correctly', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverPrototypeExtentList.builder(
+              itemBuilder: (BuildContext context, int index) => TestItem(item: index),
+              prototypeItem: const TestItem(item: -1, height: 100.0),
+              itemCount: 10,
+              spacing: 20.0,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Each item is 100 high, with 20 spacing: stride is 120.
+    for (var i = 0; i < 5; i += 1) {
+      final Finder item = find.widgetWithText(Container, 'Item $i');
+      expect(item, findsOneWidget);
+      expect(tester.getTopLeft(item).dy, i * 120.0);
+      expect(tester.getSize(item).height, 100.0);
+    }
+  });
 }

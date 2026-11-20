@@ -30,6 +30,7 @@ import 'src/heavy_grid_view.dart';
 import 'src/large_image_changer.dart';
 import 'src/large_images.dart';
 import 'src/list_text_layout.dart';
+import 'src/listview_spacing.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/opacity_peephole.dart';
 import 'src/path_tessellation.dart';
@@ -120,6 +121,14 @@ class MacrobenchmarksApp extends StatelessWidget {
         kDrawArcsAllStrokeStylesPageRouteName: (BuildContext context) =>
             const DrawArcsPage(paintStyle: PaintingStyle.stroke),
         kTextShadowPerfRouteName: (BuildContext context) => const TextShadowPerfPage(),
+        kListViewSpacingRouteName: (BuildContext context) =>
+            const ListViewSpacingPage(mode: ListViewSpacingMode.spacing),
+        kListViewSeparatedRouteName: (BuildContext context) =>
+            const ListViewSpacingPage(mode: ListViewSpacingMode.separated),
+        kListViewSpacingVariedExtentRouteName: (BuildContext context) =>
+            const ListViewSpacingPage(mode: ListViewSpacingMode.spacingVariedExtent),
+        kListViewSeparatedVariedExtentRouteName: (BuildContext context) =>
+            const ListViewSpacingPage(mode: ListViewSpacingMode.separatedVariedExtent),
       },
     );
   }
@@ -436,6 +445,34 @@ class HomePage extends StatelessWidget {
             child: const Text('Text Shadow Performance'),
             onPressed: () {
               Navigator.pushNamed(context, kTextShadowPerfRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kListViewSpacingRouteName),
+            child: const Text('ListView Spacing'),
+            onPressed: () {
+              Navigator.pushNamed(context, kListViewSpacingRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kListViewSeparatedRouteName),
+            child: const Text('ListView Separated'),
+            onPressed: () {
+              Navigator.pushNamed(context, kListViewSeparatedRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kListViewSpacingVariedExtentRouteName),
+            child: const Text('ListView Spacing Varied Extent'),
+            onPressed: () {
+              Navigator.pushNamed(context, kListViewSpacingVariedExtentRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kListViewSeparatedVariedExtentRouteName),
+            child: const Text('ListView Separated Varied Extent'),
+            onPressed: () {
+              Navigator.pushNamed(context, kListViewSeparatedVariedExtentRouteName);
             },
           ),
         ],

@@ -46,6 +46,11 @@ const String kAnimatedAdvancedBlend = '/animated_advanced_blend';
 const String kRRectBlurRouteName = '/rrect_blur';
 const String kRSuperellipseBlurRouteName = '/rsuperellipse_blur';
 const String kTextShadowPerfRouteName = '/text_shadow_perf';
+const String kListViewSpacingRouteName = '/listview_spacing';
+const String kListViewSeparatedRouteName = '/listview_separated';
+const String kListViewSpacingVariedExtentRouteName = '/listview_spacing_varied_extent';
+const String kListViewSeparatedVariedExtentRouteName = '/listview_separated_varied_extent';
+const String kListViewSpacingScrollableKey = 'listview_spacing_scrollable';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName =

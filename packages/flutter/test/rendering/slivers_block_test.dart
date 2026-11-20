@@ -14,8 +14,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   late RenderSliverList _renderObject;
   List<RenderBox> children;
 
-  RenderSliverList createRenderObject() {
-    _renderObject = RenderSliverList(childManager: this);
+  RenderSliverList createRenderObject({double spacing = 0.0}) {
+    _renderObject = RenderSliverList(childManager: this, spacing: spacing);
     return _renderObject;
   }
 
@@ -323,6 +323,97 @@ void main() {
 
     expect(spy.corrected, false);
   });
+
+  test('RenderSliverList with spacing basic test - down and up with dead reckoning', () {
+    RenderBox a, b, c, d, e;
+    final childManager = TestRenderSliverBoxChildManager(
+      children: <RenderBox>[
+        a = RenderSizedBox(const Size(100.0, 400.0)),
+        b = RenderSizedBox(const Size(100.0, 400.0)),
+        c = RenderSizedBox(const Size(100.0, 400.0)),
+        d = RenderSizedBox(const Size(100.0, 400.0)),
+        e = RenderSizedBox(const Size(100.0, 400.0)),
+      ],
+    );
+    final root = RenderViewport(
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 0.0,
+      children: <RenderSliver>[childManager.createRenderObject(spacing: 50.0)],
+    );
+    layout(root);
+
+    expect(root.size.width, equals(800.0));
+    expect(root.size.height, equals(600.0));
+
+    // At offset 0.0:
+    // a starts at 0.0, height 400.0
+    // b starts at 400 + 50 = 450.0
+    expect(a.localToGlobal(Offset.zero), Offset.zero);
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 450.0));
+    expect(c.attached, false);
+    expect(d.attached, false);
+    expect(e.attached, false);
+
+    // Scroll into the gap between child a and child b (offset 420.0)
+    root.offset = ViewportOffset.fixed(420.0);
+    pumpFrame();
+    expect(a.attached, false); // a ended at 400.0, collected as garbage
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 30.0)); // 450.0 - 420.0 = 30.0
+    expect(c.attached, true);
+    expect(c.localToGlobal(Offset.zero), const Offset(0.0, 480.0)); // 900.0 - 420.0 = 480.0
+    expect(d.attached, false);
+
+    // Scroll to offset 900.0
+    // b starts at 450.0, ends at 850.0.
+    // c starts at 850.0 + 50.0 = 900.0.
+    // d starts at 900.0 + 400.0 + 50.0 = 1350.0.
+    root.offset = ViewportOffset.fixed(900.0);
+    pumpFrame();
+    expect(a.attached, false);
+    expect(b.attached, false);
+    expect(c.localToGlobal(Offset.zero), Offset.zero); // 900.0 - 900.0 = 0.0
+    expect(d.localToGlobal(Offset.zero), const Offset(0.0, 450.0)); // 1350.0 - 900.0 = 450.0
+    expect(e.attached, false);
+
+    // Now scroll back up to offset 0.0 (tests reverse dead reckoning calculation with spacing)
+    root.offset = ViewportOffset.fixed(0.0);
+    pumpFrame();
+    expect(a.attached, true);
+    expect(a.localToGlobal(Offset.zero), Offset.zero);
+    expect(b.localToGlobal(Offset.zero), const Offset(0.0, 450.0));
+    expect(c.attached, false);
+    expect(d.attached, false);
+    expect(e.attached, false);
+  });
+
+  test(
+    'RenderSliverList with variable heights and spacing calculates layout offsets correctly',
+    () {
+      final RenderBox a = RenderSizedBox(const Size(100.0, 50.0));
+      final RenderBox b = RenderSizedBox(const Size(100.0, 120.0));
+      final RenderBox c = RenderSizedBox(const Size(100.0, 80.0));
+      final childManager = TestRenderSliverBoxChildManager(children: <RenderBox>[a, b, c]);
+      final RenderSliverList sliver = childManager.createRenderObject(spacing: 20.0);
+      final root = RenderViewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: ViewportOffset.zero(),
+        cacheExtent: 0.0,
+        children: <RenderSliver>[sliver],
+      );
+      layout(root);
+
+      // a starts at 0.0
+      // b starts at 50.0 + 20.0 = 70.0
+      // c starts at 70.0 + 120.0 + 20.0 = 210.0
+      // Total extent: 210.0 + 80.0 = 290.0
+      expect(sliver.childScrollOffset(a), 0.0);
+      expect(sliver.childScrollOffset(b), 70.0);
+      expect(sliver.childScrollOffset(c), 210.0);
+      expect(sliver.geometry!.scrollExtent, 290.0);
+      expect(sliver.geometry!.maxPaintExtent, 290.0);
+    },
+  );
 
   test('SliverMultiBoxAdaptorParentData.toString', () {
     final candidate = SliverMultiBoxAdaptorParentData();
