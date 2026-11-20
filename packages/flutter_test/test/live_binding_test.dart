@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -312,6 +313,37 @@ void main() {
     // Verify that root layer has been replaced
     expect(binding.renderView.debugLayer, isNot(same(currentRootLayer)));
   });
+
+  testWidgets(
+    'pump does not hang after starting between a skipped begin frame and its draw frame',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox());
+
+      final FrameCallback originalOnBeginFrame = binding.platformDispatcher.onBeginFrame!;
+      addTearDown(() {
+        binding.platformDispatcher.onBeginFrame = originalOnBeginFrame;
+      });
+
+      final skippedBeginFrame = Completer<void>();
+      binding.platformDispatcher.onBeginFrame = (Duration timeStamp) {
+        originalOnBeginFrame(timeStamp);
+        if (binding.schedulerPhase == SchedulerPhase.idle && !skippedBeginFrame.isCompleted) {
+          binding.platformDispatcher.onBeginFrame = originalOnBeginFrame;
+          scheduleMicrotask(skippedBeginFrame.complete);
+        }
+      };
+      binding.scheduleFrame();
+
+      await skippedBeginFrame.future;
+
+      var frames = 0;
+      binding.addPostFrameCallback((Duration _) => frames += 1);
+      await tester.pump();
+      expect(frames, 1);
+      await tester.pump();
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
 }
 
 /// A widget that shows the number of times it has been tapped.
