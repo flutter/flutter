@@ -173,6 +173,21 @@ void main() {
     },
   );
 
+  testWidgets('Text passes a StrutStyle with a package font family to RichText', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Text(
+        'Hello',
+        textDirection: TextDirection.ltr,
+        strutStyle: StrutStyle(fontFamily: 'Inter', package: 'my_fonts'),
+      ),
+    );
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text.strutStyle?.fontFamily, 'packages/my_fonts/Inter');
+  });
+
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery.withClampedTextScaling(
