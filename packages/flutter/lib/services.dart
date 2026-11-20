@@ -33,6 +33,7 @@ export 'src/services/message_codec.dart';
 export 'src/services/message_codecs.dart';
 export 'src/services/mouse_cursor.dart';
 export 'src/services/mouse_tracking.dart';
+export 'src/services/password_rules.dart';
 export 'src/services/platform_channel.dart';
 export 'src/services/platform_views.dart';
 export 'src/services/predictive_back_event.dart';

@@ -103,6 +103,7 @@ void main() {
         autofillHints: <String>['client1'],
         currentEditingValue: TextEditingValue.empty,
         hintText: 'hint',
+        passwordRules: const PasswordRules(minLength: 12),
       );
       // ignore: prefer_const_constructors
       fakeAutoFillConfiguration2 = AutofillConfiguration(
@@ -111,6 +112,7 @@ void main() {
         autofillHints: <String>['client1'],
         currentEditingValue: TextEditingValue.empty,
         hintText: 'hint',
+        passwordRules: const PasswordRules(minLength: 12),
       );
     });
 
@@ -130,6 +132,21 @@ void main() {
         equals(fakeAutoFillConfiguration2.currentEditingValue),
       );
       expect(fakeAutoFillConfiguration.hintText, equals(fakeAutoFillConfiguration2.hintText));
+      expect(
+        fakeAutoFillConfiguration.passwordRules,
+        equals(fakeAutoFillConfiguration2.passwordRules),
+      );
+    });
+
+    test('equality operator accounts for passwordRules', () {
+      const differentRules = AutofillConfiguration(
+        uniqueIdentifier: 'id1',
+        autofillHints: <String>['client1'],
+        currentEditingValue: TextEditingValue.empty,
+        hintText: 'hint',
+        passwordRules: PasswordRules(minLength: 20),
+      );
+      expect(fakeAutoFillConfiguration, isNot(equals(differentRules)));
     });
 
     test('hashCode works correctly', () {
@@ -153,6 +170,30 @@ void main() {
       expect(
         fakeAutoFillConfiguration.hintText.hashCode,
         equals(fakeAutoFillConfiguration2.hintText.hashCode),
+      );
+      expect(
+        fakeAutoFillConfiguration.passwordRules.hashCode,
+        equals(fakeAutoFillConfiguration2.passwordRules.hashCode),
+      );
+    });
+
+    test('toJson includes passwordRules only when non-null', () {
+      expect(fakeAutoFillConfiguration.toJson()!['passwordRules'], <String, Object>{
+        'minLength': 12,
+      });
+
+      const withoutRules = AutofillConfiguration(
+        uniqueIdentifier: 'id1',
+        autofillHints: <String>[AutofillHints.newPassword],
+        currentEditingValue: TextEditingValue.empty,
+      );
+      expect(withoutRules.toJson()!.containsKey('passwordRules'), isFalse);
+    });
+
+    test('toString includes passwordRules', () {
+      expect(
+        fakeAutoFillConfiguration.toString(),
+        contains('passwordRules: PasswordRules(minLength: 12)'),
       );
     });
   });
