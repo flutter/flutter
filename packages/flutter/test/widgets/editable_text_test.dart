@@ -8,6 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:async';
 import 'dart:convert' show jsonDecode;
 import 'dart:math' as math;
 import 'dart:ui';
@@ -16445,6 +16446,66 @@ void main() {
       expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 0);
     });
 
+    testWidgets('Spell check results do not invalidate the text layout between frames', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191881.
+      const suggestionSpans = <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 0, end: 4), <String>['test']),
+      ];
+      final spellCheckService = _CompleterSpellCheckService();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: spellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isTrue);
+
+      // A user edit starts a check.
+      state.userUpdateTextEditingValue(
+        const TextEditingValue(text: 'tset', selection: TextSelection.collapsed(offset: 4)),
+        SelectionChangedCause.keyboard,
+      );
+      await tester.pump();
+      expect(spellCheckService.pending, isNotNull);
+
+      // The service answers between frames, as a platform channel reply would.
+      spellCheckService.pending!.complete(suggestionSpans);
+      await tester.idle();
+      expect(state.renderEditable.debugNeedsLayout, isFalse);
+
+      // A pointer event before the next frame hit tests the text.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.addPointer(location: Offset.zero);
+      await gesture.moveTo(tester.getCenter(find.byType(EditableText)));
+      expect(tester.takeException(), isNull);
+
+      // The results are applied on the next frame.
+      await tester.pump();
+      expect(state.spellCheckResults, const SpellCheckResults('tset', suggestionSpans));
+      expect(state.renderEditable.text!.toPlainText(), 'tset');
+      expect(
+        (state.renderEditable.text! as TextSpan).children!.whereType<TextSpan>().any(
+          (TextSpan span) =>
+              span.text == 'tset' && span.style?.decoration == TextDecoration.underline,
+        ),
+        isTrue,
+      );
+    });
+
     testWidgets(
       'Spell check disabled when spell check configuration specified but no default spell check service available',
       (WidgetTester tester) async {
@@ -19667,6 +19728,15 @@ class FakeSpellCheckService extends DefaultSpellCheckService {
     return suggestionSpansByText.containsKey(text)
         ? suggestionSpansByText[text]
         : const <SuggestionSpan>[];
+  }
+}
+
+class _CompleterSpellCheckService extends DefaultSpellCheckService {
+  Completer<List<SuggestionSpan>?>? pending;
+
+  @override
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(Locale locale, String text) {
+    return (pending = Completer<List<SuggestionSpan>?>()).future;
   }
 }
 
