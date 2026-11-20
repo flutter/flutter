@@ -4,9 +4,11 @@
 
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 
+#include <cmath>
 #include <cstring>
 #include <unordered_set>
 
+#include "flutter/fml/logging.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -16,7 +18,17 @@ namespace {
 
 constexpr int64_t kImplicitViewId = 0;
 
-}
+#ifdef FML_DCHECK_IS_ON
+// The checks that fail in unoptimized builds when a pointer data has a
+// non-finite position, or a pan/zoom update has a non-finite pan, scale, or
+// rotation.
+constexpr char kNonFinitePositionCheck[] =
+    "std::isfinite\\(pointer_data.physical_x\\)";
+constexpr char kNonFinitePanZoomCheck[] =
+    "std::isfinite\\(pointer_data.pan_x\\)";
+#endif  // FML_DCHECK_IS_ON
+
+}  // namespace
 
 class TestDelegate : public PointerDataPacketConverter::Delegate {
  public:
@@ -879,6 +891,447 @@ TEST(PointerDataPacketConverterTest, CanConvertViewId) {
   ASSERT_EQ(result.size(), (size_t)2);
   ASSERT_EQ(result[0].view_id, 100);
   ASSERT_EQ(result[1].view_id, 200);
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFinitePositions) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(6);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 1.0, 1.0, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 1.0, 1.0, 1);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, NAN, NAN, 1);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(3, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, INFINITY,
+                             INFINITY, 0);
+  packet->SetPointerData(4, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, INFINITY,
+                             INFINITY, 0);
+  packet->SetPointerData(5, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite move is dropped, and the non-finite up and remove use the
+  // last position of the pointer, so no hover is synthesized.
+  ASSERT_EQ(result.size(), 5u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].change, PointerData::Change::kDown);
+
+  EXPECT_EQ(result[2].change, PointerData::Change::kMove);
+  EXPECT_EQ(result[2].physical_x, 3.0);
+  EXPECT_EQ(result[2].physical_y, 4.0);
+  EXPECT_EQ(result[2].physical_delta_x, 2.0);
+  EXPECT_EQ(result[2].physical_delta_y, 3.0);
+
+  EXPECT_EQ(result[3].change, PointerData::Change::kUp);
+  EXPECT_EQ(result[3].synthesized, 0);
+  EXPECT_EQ(result[3].physical_x, 3.0);
+  EXPECT_EQ(result[3].physical_y, 4.0);
+
+  EXPECT_EQ(result[4].change, PointerData::Change::kRemove);
+  EXPECT_EQ(result[4].synthesized, 0);
+  EXPECT_EQ(result[4].physical_x, 3.0);
+  EXPECT_EQ(result[4].physical_y, 4.0);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresGestureWithNonFiniteDown) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, NAN, NAN, 1);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(3, data);
+  // Android sends a remove right after the up of a touch.
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(4, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Without a down, the rest of the gesture is dropped too.
+  EXPECT_EQ(result.size(), 0u);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresTrackpadGestureWithNonFinitePanZoomStart) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(3);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, NAN, NAN, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 3.0, 4.0, 1.0, 1.0, 1.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     3.0, 4.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(2, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Without a pan/zoom start, the rest of the gesture is dropped too.
+  EXPECT_EQ(result.size(), 0u);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresGestureWithNonFiniteDownForKnownPointer) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  // Android doesn't remove a touch pointer after a cancel, so the next touch
+  // starts with a known pointer that isn't down.
+  auto packet = std::make_unique<PointerDataPacket>(7);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 1.0, 1.0, 1);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 1.0, 1.0,
+                             0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, NAN, NAN, 1);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 3.0, 4.0, 1);
+  packet->SetPointerData(3, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 3.0, 4.0, 0);
+  packet->SetPointerData(4, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kCancel, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(5, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kRemove, 0, 3.0, 4.0,
+                             0);
+  packet->SetPointerData(6, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // Only the first gesture and the remove get through. As for any remove at a
+  // new position, a hover is synthesized before it.
+  ASSERT_EQ(result.size(), 5u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[0].synthesized, 1);
+  EXPECT_EQ(result[1].change, PointerData::Change::kDown);
+  EXPECT_EQ(result[2].change, PointerData::Change::kCancel);
+  EXPECT_EQ(result[3].change, PointerData::Change::kHover);
+  EXPECT_EQ(result[3].synthesized, 1);
+  EXPECT_EQ(result[4].change, PointerData::Change::kRemove);
+  EXPECT_EQ(result[4].synthesized, 0);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest,
+     IgnoresTrackpadGestureWithNonFinitePanZoomStartForKnownPointer) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, NAN, NAN, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 3.0, 4.0, 1.0, 1.0, 1.0, 0.0);
+  packet->SetPointerData(3, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     3.0, 4.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(4, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The second gesture doesn't start at the stale position of the first one;
+  // it is dropped.
+  ASSERT_EQ(result.size(), 3u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[0].synthesized, 1);
+  EXPECT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  EXPECT_EQ(result[2].change, PointerData::Change::kPanZoomEnd);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFinitePanZoomUpdate) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(5);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 1.0, 1.0, 2.0, 2.0, 1.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 1.0, 1.0, NAN, NAN, 1.0, 0.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, 1.0, 1.0, 5.0, 5.0, 1.0, 0.0);
+  packet->SetPointerData(3, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(4, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet), kNonFinitePanZoomCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite update is dropped, so the next update's pan delta is
+  // computed from the last valid pan.
+  ASSERT_EQ(result.size(), 5u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  EXPECT_EQ(result[2].change, PointerData::Change::kPanZoomUpdate);
+  EXPECT_EQ(result[2].pan_delta_x, 2.0);
+  EXPECT_EQ(result[2].pan_delta_y, 2.0);
+  EXPECT_EQ(result[3].change, PointerData::Change::kPanZoomUpdate);
+  EXPECT_EQ(result[3].pan_x, 5.0);
+  EXPECT_EQ(result[3].pan_y, 5.0);
+  EXPECT_EQ(result[3].pan_delta_x, 3.0);
+  EXPECT_EQ(result[3].pan_delta_y, 3.0);
+  EXPECT_EQ(result[4].change, PointerData::Change::kPanZoomEnd);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFiniteHover) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(3);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 1.0, 1.0, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kHover, 0, NAN, NAN, 0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kHover, 0, 3.0, 4.0, 0);
+  packet->SetPointerData(2, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite hover is dropped, so the next hover's delta is computed
+  // from the position of the add.
+  ASSERT_EQ(result.size(), 2u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].change, PointerData::Change::kHover);
+  EXPECT_EQ(result[1].synthesized, 0);
+  EXPECT_EQ(result[1].physical_x, 3.0);
+  EXPECT_EQ(result[1].physical_y, 4.0);
+  EXPECT_EQ(result[1].physical_delta_x, 2.0);
+  EXPECT_EQ(result[1].physical_delta_y, 3.0);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest, IgnoresNonFiniteAdd) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(2);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, NAN, NAN, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 1.0, 1.0, 0);
+  packet->SetPointerData(1, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite add is dropped without adding the pointer, so no remove is
+  // synthesized before the next add.
+  ASSERT_EQ(result.size(), 1u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[0].synthesized, 0);
+  EXPECT_EQ(result[0].physical_x, 1.0);
+  EXPECT_EQ(result[0].physical_y, 1.0);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest,
+     UsesLastPositionForNonFiniteAddOfKnownPointer) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(2);
+  PointerData data{};
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 1.0, 1.0, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, INFINITY,
+                             INFINITY, 0);
+  packet->SetPointerData(1, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite add uses the last position of the pointer. As for any add
+  // of a known pointer, a remove is synthesized before it.
+  ASSERT_EQ(result.size(), 3u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].change, PointerData::Change::kRemove);
+  EXPECT_EQ(result[1].synthesized, 1);
+  EXPECT_EQ(result[1].physical_x, 1.0);
+  EXPECT_EQ(result[1].physical_y, 1.0);
+  EXPECT_EQ(result[2].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[2].synthesized, 0);
+  EXPECT_EQ(result[2].physical_x, 1.0);
+  EXPECT_EQ(result[2].physical_y, 1.0);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest, UsesLastPositionForNonFiniteScrollSignal) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(2);
+  PointerData data{};
+  CreateSimulatedMousePointerData(data, PointerData::Change::kAdd,
+                                  PointerData::SignalKind::kNone, 0, 1.0, 1.0,
+                                  0.0, 0.0, 0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedMousePointerData(data, PointerData::Change::kHover,
+                                  PointerData::SignalKind::kScroll, 0, NAN, NAN,
+                                  30.0, 0.0, 0);
+  packet->SetPointerData(1, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The non-finite scroll uses the last position of the pointer, so no hover
+  // is synthesized.
+  ASSERT_EQ(result.size(), 2u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[1].signal_kind, PointerData::SignalKind::kScroll);
+  EXPECT_EQ(result[1].synthesized, 0);
+  EXPECT_EQ(result[1].physical_x, 1.0);
+  EXPECT_EQ(result[1].physical_y, 1.0);
+  EXPECT_EQ(result[1].scroll_delta_x, 30.0);
+  EXPECT_EQ(result[1].scroll_delta_y, 0.0);
+#endif  // FML_DCHECK_IS_ON
+}
+
+TEST(PointerDataPacketConverterTest,
+     UsesLastPositionForPanZoomUpdateWithNonFinitePosition) {
+  TestDelegate delegate;
+  delegate.AddView(kImplicitViewId);
+  PointerDataPacketConverter converter(delegate);
+  auto packet = std::make_unique<PointerDataPacket>(3);
+  PointerData data{};
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomStart,
+                                     0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomUpdate,
+                                     0, NAN, NAN, 2.0, 2.0, 1.0, 0.0);
+  packet->SetPointerData(1, data);
+  CreateSimulatedTrackpadGestureData(data, PointerData::Change::kPanZoomEnd, 0,
+                                     1.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+  packet->SetPointerData(2, data);
+
+#ifdef FML_DCHECK_IS_ON
+  EXPECT_DEATH_IF_SUPPORTED(converter.Convert(*packet),
+                            kNonFinitePositionCheck);
+#else
+  auto converted_packet = converter.Convert(*packet);
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  // The update keeps its finite pan and uses the last position of the
+  // pointer.
+  ASSERT_EQ(result.size(), 4u);
+  EXPECT_EQ(result[0].change, PointerData::Change::kAdd);
+  EXPECT_EQ(result[0].synthesized, 1);
+  EXPECT_EQ(result[1].change, PointerData::Change::kPanZoomStart);
+  EXPECT_EQ(result[2].change, PointerData::Change::kPanZoomUpdate);
+  EXPECT_EQ(result[2].synthesized, 0);
+  EXPECT_EQ(result[2].physical_x, 1.0);
+  EXPECT_EQ(result[2].physical_y, 1.0);
+  EXPECT_EQ(result[2].physical_delta_x, 0.0);
+  EXPECT_EQ(result[2].physical_delta_y, 0.0);
+  EXPECT_EQ(result[2].pan_delta_x, 2.0);
+  EXPECT_EQ(result[2].pan_delta_y, 2.0);
+  EXPECT_EQ(result[3].change, PointerData::Change::kPanZoomEnd);
+#endif  // FML_DCHECK_IS_ON
 }
 
 }  // namespace testing
