@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
+import android.media.Image;
 import android.os.Build;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -36,6 +37,7 @@ import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
+import io.flutter.plugin.platform.HybridImageReader;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.util.Preconditions;
@@ -439,6 +441,9 @@ public class FlutterJNI {
     } finally {
       shellHolderLock.writeLock().unlock();
     }
+    if (platformViewsController != null && isAttached()) {
+      platformViewsController.syncHybridCompositionState();
+    }
   }
 
   @VisibleForTesting
@@ -686,6 +691,9 @@ public class FlutterJNI {
     ensureAttachedToNative();
     onRenderingStopped();
     nativeSurfaceDestroyed(nativeShellHolderId);
+    if (platformViewsController != null) {
+      platformViewsController.teardownHybridCompositionViews(false);
+    }
   }
 
   private native void nativeSurfaceDestroyed(long nativeShellHolderId);
@@ -809,7 +817,40 @@ public class FlutterJNI {
   public void setPlatformViewsController(@NonNull PlatformViewsController platformViewsController) {
     ensureRunningOnMainThread();
     this.platformViewsController = platformViewsController;
+    if (platformViewsController != null && isAttached()) {
+      platformViewsController.syncHybridCompositionState();
+    }
   }
+
+  @UiThread
+  public void updateHybridCompositionState(
+      boolean hcViewsAlive,
+      boolean synchronizeToNativeViewHierarchy,
+      boolean rootSurfaceTransparent) {
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      updateHybridCompositionStateInNative(
+          hcViewsAlive, synchronizeToNativeViewHierarchy, rootSurfaceTransparent);
+    }
+  }
+
+  @VisibleForTesting
+  public void updateHybridCompositionStateInNative(
+      boolean hcViewsAlive,
+      boolean synchronizeToNativeViewHierarchy,
+      boolean rootSurfaceTransparent) {
+    nativeUpdateHybridCompositionState(
+        nativeShellHolderId,
+        hcViewsAlive,
+        synchronizeToNativeViewHierarchy,
+        rootSurfaceTransparent);
+  }
+
+  private native void nativeUpdateHybridCompositionState(
+      long nativeShellHolderId,
+      boolean hcViewsAlive,
+      boolean synchronizeToNativeViewHierarchy,
+      boolean rootSurfaceTransparent);
 
   @UiThread
   public void setPlatformViewsController2(
@@ -1342,6 +1383,84 @@ public class FlutterJNI {
     ensureRunningOnMainThread();
     if (platformViewsController != null) {
       platformViewsController.destroyOverlaySurfaces();
+    }
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onBeginHybridFrame(
+      @Nullable Image backgroundImage, @Nullable HybridImageReader backgroundReader) {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      if (backgroundImage != null) {
+        if (backgroundReader != null) {
+          backgroundReader.releaseImage(backgroundImage);
+        } else {
+          backgroundImage.close();
+        }
+      }
+      return;
+    }
+    platformViewsController.onBeginHybridFrame(backgroundImage, backgroundReader);
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onDisplayHybridPlatformView(
+      int viewId,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight,
+      @NonNull FlutterMutatorsStack mutatorsStack) {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      return;
+    }
+    platformViewsController.onDisplayHybridPlatformView(
+        viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onDisplayHybridOverlaySurface(
+      int id,
+      int x,
+      int y,
+      int width,
+      int height,
+      @NonNull Image overlayImage,
+      @Nullable HybridImageReader overlayReader) {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      if (overlayReader != null) {
+        overlayReader.releaseImage(overlayImage);
+      } else {
+        overlayImage.close();
+      }
+      return;
+    }
+    platformViewsController.onDisplayHybridOverlaySurface(
+        id, x, y, width, height, overlayImage, overlayReader);
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onEndHybridFrame(boolean isExitFrame, boolean removeBackgroundAfterTraversal) {
+    ensureRunningOnMainThread();
+    if (platformViewsController != null) {
+      platformViewsController.onEndHybridFrame(isExitFrame, removeBackgroundAfterTraversal);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void teardownHybridComposition() {
+    ensureRunningOnMainThread();
+    if (platformViewsController != null) {
+      platformViewsController.teardownHybridCompositionViews(false);
     }
   }
 

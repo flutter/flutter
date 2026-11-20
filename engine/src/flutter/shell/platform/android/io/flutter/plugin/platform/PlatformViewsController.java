@@ -10,7 +10,10 @@ import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.MutableContextWrapper;
+import android.media.Image;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -123,6 +126,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Map of unique IDs to views that render overlay layers.
   private final SparseArray<PlatformOverlayView> overlayLayerViews;
 
+  // Map of overlay layer IDs to display-only overlay views presented via Hybrid Composition Frame
+  // Packets.
+  private final SparseArray<PlatformOverlayView> hybridOverlayViews;
+
   // The platform view wrappers that are appended to FlutterView.
   //
   // These platform views use a TextureLayer in the framework. This is different than
@@ -145,12 +152,21 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Overlay layer IDs that were displayed since the start of the current frame.
   private final HashSet<Integer> currentFrameUsedOverlayLayerIds;
 
+  // Frame-Packet overlay layer IDs that were displayed since the start of the current hybrid frame.
+  private final HashSet<Integer> currentFrameUsedHybridOverlayIds;
+
   // Overlay layer IDs whose ImageReaders were closed by destroyOverlaySurfaces() and can be
   // pruned from overlayLayerViews once removed from flutterView outside dispatchDetachedFromWindow.
   private final HashSet<Integer> destroyedOverlayLayerIds;
 
   // Platform view IDs that were displayed since the start of the current frame.
   private final HashSet<Integer> currentFrameUsedPlatformViewIds;
+
+  // Platform view IDs currently configured for Classic Hybrid Composition.
+  private final HashSet<Integer> hybridCompositionViewIds;
+
+  // Monotonic generation token guarding deferred View.GONE hybrid overlay removals.
+  private long hybridTeardownGeneration = 0;
 
   // Used to acquire the original motion events using the motionEventIds.
   private final MotionEventTracker motionEventTracker;
@@ -309,6 +325,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               mutatorViewParent.removeView(parentView);
             }
             platformViewParent.remove(viewId);
+          }
+          if (hybridCompositionViewIds.remove(viewId)) {
+            syncHybridCompositionState();
           }
         }
 
@@ -493,6 +512,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         @Override
         public void synchronizeToNativeViewHierarchy(boolean yes) {
           synchronizeToNativeViewHierarchy = yes;
+          syncHybridCompositionState();
         }
 
         @Override
@@ -581,11 +601,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       @NonNull PlatformView platformView, @NonNull PlatformViewCreationRequest request) {
     Log.i(TAG, "Using hybrid composition for platform view: " + request.viewId);
     throwIfHCPPEnabled();
+    hybridCompositionViewIds.add(request.viewId);
+    syncHybridCompositionState();
   }
 
   // Throws an exception if HC++ is enabled, as HC mode can not work in combination with HC++.
   private void throwIfHCPPEnabled() {
-    if (flutterJNI.IsSurfaceControlEnabled()) {
+    if (flutterJNI != null && flutterJNI.IsSurfaceControlEnabled()) {
       throw new IllegalStateException(
           "Trying to create a Hybrid Composition view with HC++ enabled.");
     }
@@ -807,9 +829,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     contextToEmbeddedView = new HashMap<>();
     overlayLayerViews = new SparseArray<>();
+    hybridOverlayViews = new SparseArray<>();
     currentFrameUsedOverlayLayerIds = new HashSet<>();
+    currentFrameUsedHybridOverlayIds = new HashSet<>();
     destroyedOverlayLayerIds = new HashSet<>();
     currentFrameUsedPlatformViewIds = new HashSet<>();
+    hybridCompositionViewIds = new HashSet<>();
     viewWrappers = new SparseArray<>();
     platformViews = new SparseArray<>();
     platformViewParent = new SparseArray<>();
@@ -870,6 +895,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       platformViewsChannel.setPlatformViewsHandler(null);
     }
     destroyOverlaySurfaces();
+    teardownHybridCompositionViews(true);
     platformViewsChannel = null;
     context = null;
     textureRegistry = null;
@@ -898,6 +924,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       final PlatformView view = platformViews.valueAt(index);
       view.onFlutterViewAttached(flutterView);
     }
+    syncHybridCompositionState();
   }
 
   /**
@@ -921,8 +948,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     destroyOverlaySurfaces();
     removeOverlaySurfaces();
+    teardownHybridCompositionViews(true);
     flutterView = null;
     flutterViewConvertedToImageView = false;
+    syncHybridCompositionState();
 
     // Notify that the platform view have been detached from FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
@@ -1000,10 +1029,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
    * PlatformViewsController} detaches from JNI.
    */
   public void onDetachedFromJNI() {
+    teardownHybridCompositionViews(true);
     disposeAllViews();
   }
 
   public void onPreEngineRestart() {
+    teardownHybridCompositionViews(true);
     disposeAllViews();
   }
 
@@ -1024,6 +1055,20 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   public void setFlutterJNI(FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
+    syncHybridCompositionState();
+  }
+
+  /** Synchronizes Java Hybrid Composition configuration flags to native C++ state if attached. */
+  @UiThread
+  public void syncHybridCompositionState() {
+    if (flutterJNI == null || !flutterJNI.isAttached()) {
+      return;
+    }
+    final boolean hcViewsAlive = !hybridCompositionViewIds.isEmpty();
+    final boolean rootSurfaceTransparent =
+        flutterView != null && flutterView.isRootSurfaceTransparent();
+    flutterJNI.updateHybridCompositionState(
+        hcViewsAlive, synchronizeToNativeViewHierarchy, rootSurfaceTransparent);
   }
 
   @Override
@@ -1142,6 +1187,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
       channelHandler.dispose(viewId);
+    }
+    if (!hybridCompositionViewIds.isEmpty()) {
+      hybridCompositionViewIds.clear();
+      syncHybridCompositionState();
     }
   }
 
@@ -1472,5 +1521,231 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   @VisibleForTesting
   public SparseArray<PlatformOverlayView> getOverlayLayerViews() {
     return overlayLayerViews;
+  }
+
+  @VisibleForTesting
+  @NonNull
+  public SparseArray<PlatformOverlayView> getHybridOverlayViews() {
+    return hybridOverlayViews;
+  }
+
+  private static void releaseImageFromReader(
+      @NonNull Image image, @Nullable HybridImageReader reader) {
+    if (reader != null) {
+      reader.releaseImage(image);
+    } else {
+      image.close();
+    }
+  }
+
+  /**
+   * Begins presenting an immutable Hybrid Composition Frame Packet on the Android UI thread.
+   *
+   * <p>If {@code flutterView} is detached, any supplied {@code backgroundImage} is released
+   * immediately.
+   */
+  @UiThread
+  public void onBeginHybridFrame(
+      @Nullable Image backgroundImage, @Nullable HybridImageReader backgroundReader) {
+    ++hybridTeardownGeneration;
+    currentFrameUsedHybridOverlayIds.clear();
+    currentFrameUsedPlatformViewIds.clear();
+    if (backgroundImage == null) {
+      return;
+    }
+    final Runnable releaseCallback =
+        () -> releaseImageFromReader(backgroundImage, backgroundReader);
+    if (flutterView == null) {
+      releaseCallback.run();
+      return;
+    }
+    flutterView.showHybridCompositionBackgroundImage(backgroundImage, releaseCallback);
+  }
+
+  /** Positions and displays a Hybrid Composition platform view for the current Frame Packet. */
+  @UiThread
+  public void onDisplayHybridPlatformView(
+      int viewId,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight,
+      @NonNull FlutterMutatorsStack mutatorsStack) {
+    if (flutterView == null) {
+      return;
+    }
+    if (!initializePlatformViewIfNeeded(viewId)) {
+      return;
+    }
+
+    final FlutterMutatorView parentView = platformViewParent.get(viewId);
+    parentView.readyToDisplay(mutatorsStack, x, y, width, height);
+    parentView.setVisibility(View.VISIBLE);
+    parentView.bringToFront();
+
+    final View view = platformViews.get(viewId).getView();
+    if (view != null) {
+      final ViewGroup.LayoutParams existingParams = view.getLayoutParams();
+      if (existingParams instanceof FrameLayout.LayoutParams
+          && existingParams.width == viewWidth
+          && existingParams.height == viewHeight) {
+        view.bringToFront();
+      } else {
+        view.setLayoutParams(new FrameLayout.LayoutParams(viewWidth, viewHeight));
+        view.bringToFront();
+      }
+    }
+    currentFrameUsedPlatformViewIds.add(viewId);
+  }
+
+  /**
+   * Positions and presents a display-only overlay {@link PlatformOverlayView} for the current Frame
+   * Packet.
+   *
+   * <p>If {@code flutterView} is detached, {@code overlayImage} is released immediately.
+   */
+  @UiThread
+  public void onDisplayHybridOverlaySurface(
+      int id,
+      int x,
+      int y,
+      int width,
+      int height,
+      @NonNull Image overlayImage,
+      @Nullable HybridImageReader overlayReader) {
+    final Runnable releaseCallback = () -> releaseImageFromReader(overlayImage, overlayReader);
+    if (flutterView == null) {
+      releaseCallback.run();
+      return;
+    }
+
+    PlatformOverlayView overlayView = hybridOverlayViews.get(id);
+    if (overlayView == null) {
+      overlayView = new PlatformOverlayView(flutterView.getContext(), accessibilityEventsDelegate);
+      hybridOverlayViews.put(id, overlayView);
+    }
+    if (overlayView.getParent() != flutterView) {
+      if (overlayView.getParent() instanceof ViewGroup) {
+        ((ViewGroup) overlayView.getParent()).removeView(overlayView);
+      }
+      flutterView.addView(overlayView);
+    }
+
+    final FrameLayout.LayoutParams layoutParams =
+        (overlayView.getLayoutParams() instanceof FrameLayout.LayoutParams)
+            ? (FrameLayout.LayoutParams) overlayView.getLayoutParams()
+            : new FrameLayout.LayoutParams(width, height);
+    if (layoutParams.width != width
+        || layoutParams.height != height
+        || layoutParams.leftMargin != x
+        || layoutParams.topMargin != y
+        || overlayView.getLayoutParams() != layoutParams) {
+      layoutParams.width = width;
+      layoutParams.height = height;
+      layoutParams.leftMargin = x;
+      layoutParams.topMargin = y;
+      overlayView.setLayoutParams(layoutParams);
+    }
+    overlayView.setVisibility(View.VISIBLE);
+    overlayView.bringToFront();
+    overlayView.setImage(overlayImage, releaseCallback);
+    currentFrameUsedHybridOverlayIds.add(id);
+  }
+
+  /**
+   * Completes presenting a Hybrid Composition Frame Packet on the Android UI thread, pruning unused
+   * overlay views and scheduling background removal on exit or mid-session synchronization toggle.
+   */
+  @UiThread
+  public void onEndHybridFrame(boolean isExitFrame, boolean removeBackgroundAfterTraversal) {
+    for (int i = 0; i < hybridOverlayViews.size(); i++) {
+      final int overlayId = hybridOverlayViews.keyAt(i);
+      if (!isExitFrame && currentFrameUsedHybridOverlayIds.contains(overlayId)) {
+        continue;
+      }
+      final PlatformOverlayView overlayView = hybridOverlayViews.valueAt(i);
+      overlayView.releaseDisplayedImages();
+      overlayView.setVisibility(View.GONE);
+      if (flutterView != null && overlayView.getParent() == flutterView) {
+        flutterView.removeView(overlayView);
+      }
+      hybridOverlayViews.removeAt(i);
+      i--;
+    }
+
+    for (int i = 0; i < platformViewParent.size(); i++) {
+      final int viewId = platformViewParent.keyAt(i);
+      final View parentView = platformViewParent.valueAt(i);
+      if (!isExitFrame && currentFrameUsedPlatformViewIds.contains(viewId)) {
+        parentView.setVisibility(View.VISIBLE);
+      } else {
+        parentView.setVisibility(View.GONE);
+      }
+    }
+
+    if (flutterView != null && (isExitFrame || removeBackgroundAfterTraversal)) {
+      flutterView.scheduleHybridCompositionBackgroundRemoval();
+    }
+  }
+
+  /**
+   * Releases all displayed Hybrid Composition images and hides or removes Hybrid Composition views.
+   *
+   * <p>When {@code allowImmediateRemoveView} is {@code false} (for example during {@code
+   * FlutterJNI.onSurfaceDestroyed()}, which may execute inside {@code
+   * ViewGroup.dispatchDetachedFromWindow()}; see #97679), child removal from {@code flutterView} is
+   * deferred to the main Looper while {@code DisplayedImage} buffers are released synchronously.
+   */
+  @UiThread
+  public void teardownHybridCompositionViews(boolean allowImmediateRemoveView) {
+    final long generation = ++hybridTeardownGeneration;
+    currentFrameUsedHybridOverlayIds.clear();
+    currentFrameUsedPlatformViewIds.clear();
+
+    for (int i = 0; i < hybridOverlayViews.size(); i++) {
+      final PlatformOverlayView overlayView = hybridOverlayViews.valueAt(i);
+      overlayView.releaseDisplayedImages();
+      overlayView.setVisibility(View.GONE);
+      if (allowImmediateRemoveView
+          && flutterView != null
+          && overlayView.getParent() == flutterView) {
+        flutterView.removeView(overlayView);
+      }
+    }
+    if (allowImmediateRemoveView) {
+      hybridOverlayViews.clear();
+    } else if (hybridOverlayViews.size() > 0) {
+      new Handler(Looper.getMainLooper())
+          .post(
+              () -> {
+                if (hybridTeardownGeneration != generation) {
+                  return;
+                }
+                for (int i = 0; i < hybridOverlayViews.size(); i++) {
+                  final PlatformOverlayView overlayView = hybridOverlayViews.valueAt(i);
+                  if (overlayView.getVisibility() == View.GONE) {
+                    if (flutterView != null && overlayView.getParent() == flutterView) {
+                      flutterView.removeView(overlayView);
+                    }
+                    hybridOverlayViews.removeAt(i);
+                    i--;
+                  }
+                }
+              });
+    }
+
+    for (int i = 0; i < platformViewParent.size(); i++) {
+      platformViewParent.valueAt(i).setVisibility(View.GONE);
+    }
+
+    if (flutterView != null) {
+      if (allowImmediateRemoveView) {
+        flutterView.removeHybridCompositionBackgroundNow();
+      } else {
+        flutterView.hideHybridCompositionBackgroundForSurfaceDestroy();
+      }
+    }
   }
 }

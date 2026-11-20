@@ -132,6 +132,17 @@ class PlatformViewAndroid final : public PlatformView {
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
+  /// @brief Updates the cross-thread Hybrid Composition configuration flags
+  ///        pushed from Java `PlatformViewsController`.
+  void UpdateHybridCompositionState(bool hc_views_alive,
+                                    bool synchronize_to_native_view_hierarchy,
+                                    bool root_surface_transparent);
+
+  const std::shared_ptr<HybridCompositionState>& GetHybridCompositionState()
+      const {
+    return hc_state_;
+  }
+
   // |PlatformView|
   void SetupImpellerContext() override;
 
@@ -150,6 +161,8 @@ class PlatformViewAndroid final : public PlatformView {
   // outlive this object.
   const std::shared_ptr<std::atomic<uint64_t>> surface_generation_ =
       std::make_shared<std::atomic<uint64_t>>(0);
+  const std::shared_ptr<HybridCompositionState> hc_state_ =
+      std::make_shared<HybridCompositionState>();
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|

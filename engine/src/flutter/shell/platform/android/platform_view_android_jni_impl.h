@@ -114,6 +114,46 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void FlutterViewDestroyOverlaySurfaces() override;
 
+  std::unique_ptr<PlatformViewAndroidJNI::HybridImageReaderMetadata>
+  CreateHybridImageReader(int32_t width, int32_t height) override;
+
+  HybridJavaGlobalRef AcquireLatestHybridImage(
+      const HybridJavaGlobalRef& reader) override;
+
+  void ReleaseHybridImage(const HybridJavaGlobalRef& reader,
+                          HybridJavaGlobalRef image) override;
+
+  void RetireHybridImageReader(HybridJavaGlobalRef reader) override;
+
+  void FlutterViewBeginHybridFrame(
+      HybridJavaGlobalRef background_image,
+      const HybridJavaGlobalRef& background_reader) override;
+
+  void FlutterViewOnDisplayHybridPlatformView(
+      int view_id,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight,
+      MutatorsStack mutators_stack) override;
+
+  void FlutterViewDisplayHybridOverlaySurface(
+      int surface_id,
+      int x,
+      int y,
+      int width,
+      int height,
+      HybridJavaGlobalRef image,
+      const HybridJavaGlobalRef& reader) override;
+
+  void FlutterViewEndHybridFrame(
+      bool is_exit_frame,
+      bool remove_background_after_traversal) override;
+
+  void FlutterViewTeardownHybridComposition() override;
+
   std::unique_ptr<std::vector<std::string>>
   FlutterViewComputePlatformResolvedLocale(
       std::vector<std::string> supported_locales_data) override;

@@ -612,6 +612,17 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
              .GetShouldEnableSurfaceControlSwapchain();
 }
 
+void PlatformViewAndroid::UpdateHybridCompositionState(
+    bool hc_views_alive,
+    bool synchronize_to_native_view_hierarchy,
+    bool root_surface_transparent) {
+  hc_state_->synchronize_to_native_view_hierarchy.store(
+      synchronize_to_native_view_hierarchy, std::memory_order_release);
+  hc_state_->root_surface_transparent.store(root_surface_transparent,
+                                            std::memory_order_release);
+  hc_state_->hc_views_alive.store(hc_views_alive, std::memory_order_release);
+}
+
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
   android_surface_->SetupImpellerSurface();
