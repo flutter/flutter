@@ -186,9 +186,102 @@ void main() {
       expect(options, contains('--config=prebuilt_engine'));
     });
 
-    test('bazelTestOptions turns the golden comparisons off on a bot alone', () {
-      // A bot's image goes to Flutter Gold for triage; it does not fail here.
-      expect(bazelTestOptions().contains('--no//build_defs/dart:golden_comparisons'), isLuci);
+    test('bazelTestOptions compares goldens off a bot, and in a presubmit that can reach Gold', () {
+      final String? changelist = isLuci ? goldTryjobChangelist() : null;
+      final List<String> options = bazelTestOptions();
+      expect(
+        options.contains('--no//build_defs/dart:golden_comparisons'),
+        isLuci && changelist == null,
+      );
+      expect(
+        options.where((String option) => option.startsWith('--repo_env=FLUTTER_GOLD_CHANGELIST=')),
+        changelist == null ? isEmpty : <String>['--repo_env=FLUTTER_GOLD_CHANGELIST=$changelist'],
+      );
+    });
+  });
+
+  group('golden images for Flutter Gold', () {
+    test('goldTryjobChangelist is the pull request of a presubmit that can reach Gold', () {
+      const tryjob = <String, String>{
+        'SWARMING_TASK_ID': '4ae997b50dfd4d11',
+        'GOLDCTL': '/cache/goldctl',
+        'GOLD_TRYJOB': 'refs/pull/196005/head',
+        'GIT_BRANCH': 'master',
+      };
+      expect(goldTryjobChangelist(tryjob), '196005');
+      expect(goldTryjobChangelist(<String, String>{...tryjob, 'GIT_BRANCH': 'main'}), '196005');
+      // Off a bot; a bot without goldctl; post-submit; no branch.
+      for (final String missing in tryjob.keys) {
+        expect(
+          goldTryjobChangelist(<String, String>{...tryjob}..remove(missing)),
+          isNull,
+          reason: 'without $missing',
+        );
+      }
+      // A release branch's pull request; a ref that is no pull request's.
+      expect(
+        goldTryjobChangelist(<String, String>{...tryjob, 'GIT_BRANCH': 'flutter-3.44-candidate.0'}),
+        isNull,
+      );
+      expect(
+        goldTryjobChangelist(<String, String>{...tryjob, 'GOLD_TRYJOB': 'refs/heads/master'}),
+        isNull,
+      );
+      expect(goldTryjobChangelist(<String, String>{}), isNull);
+    });
+
+    test('bazelGoldenImageDirectories are the directories of images a target left', () {
+      final Directory logs = Directory.systemTemp.createTempSync('bazel_test.');
+      try {
+        String goldens(String target, [String? shard]) => path.joinAll(<String>[
+          logs.path,
+          'packages',
+          'flutter',
+          'test',
+          'widgets',
+          target,
+          ?shard,
+          'test.outputs',
+          'goldens',
+        ]);
+        List<String> directories(String target) => <String>[
+          for (final Directory directory in bazelGoldenImageDirectories(
+            logs.path,
+            '//packages/flutter/test/widgets:$target',
+          ))
+            directory.path,
+        ];
+
+        // A target that did not run, one that left its results alone, and one
+        // whose directory holds no image.
+        expect(directories('absent_test'), isEmpty);
+        File(path.join(path.dirname(goldens('passing_test')), 'test_results.json'))
+            .createSync(recursive: true);
+        expect(directories('passing_test'), isEmpty);
+        File(path.join(goldens('other_test'), 'notes.txt')).createSync(recursive: true);
+        expect(directories('other_test'), isEmpty);
+
+        // A target that failed an image, and one that left one under a
+        // directory of the golden's name.
+        File(path.join(goldens('failing_test'), 'widgets.a.png')).createSync(recursive: true);
+        expect(directories('failing_test'), <String>[goldens('failing_test')]);
+        File(path.join(goldens('nested_test'), 'widgets.b', 'c.png')).createSync(recursive: true);
+        expect(directories('nested_test'), <String>[goldens('nested_test')]);
+
+        // A sharded target: the shards that left an image, in shard order, of
+        // the latest shard count.
+        for (final shard in <String>['shard_3_of_3', 'shard_1_of_3', 'shard_1_of_2']) {
+          File(path.join(goldens('sharded_test', shard), 'widgets.d.png'))
+              .createSync(recursive: true);
+        }
+        Directory(goldens('sharded_test', 'shard_2_of_3')).createSync(recursive: true);
+        expect(directories('sharded_test'), <String>[
+          goldens('sharded_test', 'shard_1_of_3'),
+          goldens('sharded_test', 'shard_3_of_3'),
+        ]);
+      } finally {
+        logs.deleteSync(recursive: true);
+      }
     });
   });
 

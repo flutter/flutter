@@ -542,6 +542,44 @@ class SkiaGoldClient {
     return result.exitCode == 0 ? null : resultStdout;
   }
 
+  /// Sends every PNG file under [images] to Flutter Gold as a result of the
+  /// pull request's tryjob, a file's path under [images] being its golden's
+  /// name, as [tryjobAdd] takes it.
+  ///
+  /// This is for a runner whose tests have no network and so cannot send
+  /// their images themselves: the tests leave the images that are to go to
+  /// Gold in a directory (the offline comparator's `FLUTTER_GOLD_FAILURES`:
+  /// the images Gold does not accept, and those of tests Gold does not
+  /// know), and the runner sends them once the tests are over. Gold then
+  /// shows them on the pull request's page, to be triaged.
+  ///
+  /// Authorizes and initializes the tryjob first ([auth], [tryjobInit]) if
+  /// there is an image to send.
+  ///
+  /// Returns, by golden name without its extension, what [tryjobAdd] returned
+  /// for each image: Gold's message for an image it holds as untriaged or
+  /// negative, null for one it accepts.
+  Future<Map<String, String?>> tryjobAddDirectory(Directory images) async {
+    final List<File> files =
+        images
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((File file) => path.extension(file.path) == '.png')
+            .toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path));
+    final results = <String, String?>{};
+    if (files.isEmpty) {
+      return results;
+    }
+    await auth();
+    await tryjobInit();
+    for (final file in files) {
+      final String golden = fs.path.relative(file.path, from: images.path);
+      results[cleanTestName(golden)] = await tryjobAdd(golden, file);
+    }
+    return results;
+  }
+
   /// Returns the latest positive digest for the given test known to Flutter
   /// Gold at head.
   Future<String?> getExpectationForTest(String testName) async {

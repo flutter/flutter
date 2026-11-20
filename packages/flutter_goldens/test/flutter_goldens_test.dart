@@ -749,6 +749,146 @@ void main() {
       );
     });
 
+    group('tryjobAddDirectory', () {
+      late MemoryFileSystem fs;
+      late FakeProcessManager process;
+      late SkiaGoldClient skiaClient;
+      late Directory images;
+
+      setUp(() {
+        fs = MemoryFileSystem();
+        process = FakeProcessManager();
+        fs.directory(_kFlutterRoot).createSync(recursive: true);
+        skiaClient = SkiaGoldClient(
+          fs.directory('/workDirectory')..createSync(recursive: true),
+          fs: fs,
+          process: process,
+          platform: FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'GOLDCTL': 'goldctl',
+              'SWARMING_TASK_ID': '4ae997b50dfd4d11',
+              'LOGDOG_STREAM_PREFIX': 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+              'GOLD_TRYJOB': 'refs/pull/49815/head',
+            },
+            operatingSystem: 'linux',
+          ),
+          httpClient: FakeHttpClient(),
+          log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+        );
+        images = fs.directory('/outputs/goldens')..createSync(recursive: true);
+      });
+
+      test('sends every image under the directory, named by its path', () async {
+        // What a run left: two images, one under a directory of its name, and
+        // a file that is no image.
+        images.childFile('widgets.changed.png').writeAsBytesSync(_kTestPngBytes);
+        images.childDirectory('material').childFile('new.png')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(_kTestPngBytes);
+        images.childFile('notes.txt').writeAsStringSync('');
+
+        RunInvocation add(String name, String file) => RunInvocation(<String>[
+          'goldctl',
+          'imgtest',
+          'add',
+          '--work-dir',
+          '/workDirectory/temp',
+          '--test-name',
+          name,
+          '--png-file',
+          file,
+        ], null);
+        const untriaged =
+            'Untriaged or negative image: https://flutter-gold.skia.org/detail?test=widgets.changed';
+        process.processResults = <RunInvocation, ProcessResult>{
+          const RunInvocation(<String>[
+            'goldctl',
+            'auth',
+            '--work-dir',
+            '/workDirectory/temp',
+            '--luci',
+          ], null): ProcessResult(
+            1,
+            0,
+            '',
+            '',
+          ),
+          const RunInvocation(<String>['git', 'rev-parse', 'HEAD'], '/flutter'): ProcessResult(
+            1234,
+            0,
+            '1234',
+            '',
+          ),
+          const RunInvocation(<String>[
+            'goldctl',
+            'imgtest',
+            'init',
+            '--instance',
+            'flutter',
+            '--work-dir',
+            '/workDirectory/temp',
+            '--commit',
+            '1234',
+            '--keys-file',
+            '/workDirectory/keys.json',
+            '--failure-file',
+            '/workDirectory/failures.json',
+            '--passfail',
+            '--crs',
+            'github',
+            '--patchset_id',
+            '1234',
+            '--changelist',
+            '49815',
+            '--cis',
+            'buildbucket',
+            '--jobid',
+            '8885996262141582672',
+          ], null): ProcessResult(
+            5678,
+            0,
+            '5678',
+            '',
+          ),
+          add('material/new', '/outputs/goldens/material/new.png'): ProcessResult(2, 0, '', ''),
+          add('widgets.changed', '/outputs/goldens/widgets.changed.png'): ProcessResult(
+            3,
+            1,
+            untriaged,
+            '',
+          ),
+        };
+
+        expect(await skiaClient.tryjobAddDirectory(images), <String, String?>{
+          'material/new': null,
+          'widgets.changed': untriaged,
+        });
+        // The keys `flutter test` uploads a Linux image with.
+        expect(
+          json.decode(fs.file('/workDirectory/keys.json').readAsStringSync()),
+          <String, Object?>{'Platform': 'linux', 'CI': 'luci'},
+        );
+      });
+
+      test('runs nothing for a directory without an image', () async {
+        images.childFile('notes.txt').writeAsStringSync('');
+        // No process has a result: a call would fail the test.
+        expect(await skiaClient.tryjobAddDirectory(images), isEmpty);
+      });
+
+      test('throws when an image cannot be sent', () {
+        images.childFile('widgets.changed.png').writeAsBytesSync(_kTestPngBytes);
+        process.fallbackProcessResult = ProcessResult(
+          123,
+          1,
+          'Fallback failure',
+          'Fallback failure',
+        );
+        expect(skiaClient.tryjobAddDirectory(images), throwsA(isA<SkiaException>()));
+      });
+    });
+
     group('Request Handling', () {
       test('image bytes are processed properly', () async {
         const expectation = '55109a4bed52acc780530f7a9aeff6c0';

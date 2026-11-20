@@ -29,6 +29,12 @@ it to pin. So the fetch is not reproducible, and is made again
 - when FLUTTER_GOLD_REFRESH (`--repo_env`) changes, to any other value;
 - after `bazel clean --expunge` or `bazel fetch --force`.
 
+For a pull request's run, FLUTTER_GOLD_CHANGELIST (`--repo_env`) is the pull
+request's number: Gold then answers with the main branch's expectations and
+the triage done on that pull request, so that an image accepted there passes
+when the run is made again. dev/bots/bazel.dart sets it in a LUCI presubmit,
+where the images a run fails are sent to Gold for that triage.
+
 Without the network the file holds no test, and a comparison then passes
 with a note, which is what the tests did under Bazel before there was this.
 """
@@ -58,14 +64,20 @@ def _watch_head(rctx):
 def _gold_expectations_impl(rctx):
     rctx.getenv("FLUTTER_GOLD_REFRESH")
     _watch_head(rctx)
+    url = rctx.attr.url
+    changelist = rctx.getenv("FLUTTER_GOLD_CHANGELIST")
+    if changelist:
+        if not changelist.isdigit():
+            fail("FLUTTER_GOLD_CHANGELIST is a pull request's number, not %r" % changelist)
+        url = "%s?issue=%s&crs=github" % (url, changelist)
     result = rctx.download(
-        url = rctx.attr.url,
+        url = url,
         output = _EXPECTATIONS,
         allow_fail = True,
     )
     if not result.success:
         # Noted, since the golden comparisons then compare nothing.
-        print("gold_expectations: %s could not be fetched; the golden tests will compare nothing." % rctx.attr.url)  # buildifier: disable=print
+        print("gold_expectations: %s could not be fetched; the golden tests will compare nothing." % url)  # buildifier: disable=print
         rctx.file(_EXPECTATIONS, _NO_EXPECTATIONS)
     rctx.file("BUILD.bazel", """\
 # What Flutter Gold accepts for each golden test, as fetched

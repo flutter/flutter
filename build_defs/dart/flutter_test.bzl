@@ -443,7 +443,9 @@ def _flutter_test_impl(ctx):
     # The golden comparisons: what Flutter Gold accepts for the tests of
     # this file's library (gold_library_expectations), which flutter_goldens'
     # FlutterOfflineFileComparator decides by -- a test has no network to
-    # ask Gold itself. An image that fails lands among the test's outputs.
+    # ask Gold itself. An image that fails lands among the test's outputs,
+    # from where a pull request's presubmit sends it to Gold
+    # (dev/bots/bazel.dart).
     # A file that compares no golden gets no expectations at all: Gold's
     # answer changes whenever anyone triages an image, and a test that
     # received it would run again each time, for nothing.
