@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -261,5 +262,71 @@ void main() {
     await tester.pump();
 
     expect(tester.testTextInput.log.single, _matchesCommit);
+  });
+
+  testWidgets('AutofillGroup sends the autofillHintText of all its clients', (
+    WidgetTester tester,
+  ) async {
+    final usernameController = TextEditingController();
+    addTearDown(usernameController.dispose);
+    final usernameFocusNode = FocusNode();
+    addTearDown(usernameFocusNode.dispose);
+    final passwordController = TextEditingController();
+    addTearDown(passwordController.dispose);
+    final passwordFocusNode = FocusNode();
+    addTearDown(passwordFocusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: AutofillGroup(
+          child: Column(
+            children: <Widget>[
+              EditableText(
+                key: const Key('username'),
+                controller: usernameController,
+                focusNode: usernameFocusNode,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFFFF0000),
+                backgroundCursorColor: const Color(0xFF000000),
+                autofillHintText: 'Username',
+              ),
+              EditableText(
+                controller: passwordController,
+                focusNode: passwordFocusNode,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFFFF0000),
+                backgroundCursorColor: const Color(0xFF000000),
+                autofillHintText: 'Password',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final AutofillGroupState scopeState = tester.state<AutofillGroupState>(
+      find.byType(AutofillGroup),
+    );
+
+    expect(
+      scopeState.autofillClients.map(
+        (AutofillClient client) => client.textInputConfiguration.autofillConfiguration.hintText,
+      ),
+      unorderedEquals(<String>['Username', 'Password']),
+    );
+
+    // Focusing a field attaches it through the AutofillGroup, which sends the
+    // configuration of every client in the group to the platform.
+    await tester.tap(find.byKey(const Key('username')));
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs?['autofill'], containsPair('hintText', 'Username'));
+    expect(
+      tester.testTextInput.setClientArgs?['fields'],
+      unorderedEquals(<Matcher>[
+        containsPair('autofill', containsPair('hintText', 'Username')),
+        containsPair('autofill', containsPair('hintText', 'Password')),
+      ]),
+    );
   });
 }
