@@ -40,6 +40,7 @@ Future<void> buildWindows(
   BuildInfo buildInfo,
   TargetPlatform targetPlatform, {
   required Analytics analytics,
+  required FeatureFlags featureFlags,
   required ToolContext toolContext,
   String? target,
   VisualStudio? visualStudioOverride,
@@ -310,9 +311,10 @@ void _writeGeneratedFlutterConfig(
   String? target, {
   required ToolContext toolContext,
 }) {
-  final ToolContext(:Artifacts artifacts, :FileSystem fs, :Logger logger) = toolContext;
+  final ToolContext(:Artifacts artifacts, :Cache cache, :FileSystem fs, :Logger logger) =
+      toolContext;
   final environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot!,
+    'FLUTTER_ROOT': cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.parent.directory.path,
     'FLUTTER_TARGET': ?target,
@@ -326,7 +328,7 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment, logger);
+  writeGeneratedCmakeConfig(cache.flutterRoot, windowsProject, buildInfo, environment, logger);
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

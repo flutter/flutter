@@ -411,14 +411,14 @@ class CustomDeviceAppSession {
     return result;
   }
 
-  void dispose() {
+  Future<void> dispose() async {
     if (_process != null) {
       _maybeUnforwardPort();
       _processManager.killPid(_process!.pid);
       _process = null;
     }
 
-    unawaited(logReader.dispose());
+    await logReader.dispose();
   }
 }
 
@@ -431,6 +431,7 @@ class CustomDevice extends Device {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
+    required this._featureFlags,
     required ToolContext super.toolContext,
   }) : _globalLogReader = CustomDeviceLogReader(_config.label),
        super(
@@ -445,6 +446,7 @@ class CustomDevice extends Device {
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
   Process? _globalLogReaderProcess;
@@ -624,9 +626,10 @@ class CustomDevice extends Device {
 
   @override
   Future<void> dispose() async {
-    _sessions
-      ..forEach((_, CustomDeviceAppSession session) => session.dispose())
-      ..clear();
+    await Future.wait(<Future<void>>[
+      for (final CustomDeviceAppSession session in _sessions.values) session.dispose(),
+    ]);
+    _sessions.clear();
     _globalLogReaderProcess?.kill();
     _globalLogReaderProcess = null;
   }
@@ -753,6 +756,7 @@ class CustomDevice extends Device {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
+        featureFlags: _featureFlags,
         toolContext: toolContext,
       );
 
@@ -837,13 +841,15 @@ class CustomDevices extends PollingDeviceDiscovery {
     required this._buildSystem,
     required this._buildTargets,
     required ToolContext super.toolContext,
-  }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
+  }) : _featureFlags = featureFlags,
+       _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
        super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
 
   @override
   bool get supportsPlatform => true;
@@ -861,6 +867,7 @@ class CustomDevices extends PollingDeviceDiscovery {
             analytics: _analytics,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
+            featureFlags: _featureFlags,
             toolContext: toolContext,
           ),
         )

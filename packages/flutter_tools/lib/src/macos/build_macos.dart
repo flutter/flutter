@@ -14,6 +14,7 @@ import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -33,6 +34,7 @@ import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
+import '../reporting/crash_reporting.dart';
 import 'application_package.dart';
 import 'cocoapod_utils.dart';
 import 'cocoapods.dart';
@@ -92,6 +94,7 @@ Future<void> buildMacOS({
   required BuildInfo buildInfo,
   required FeatureFlags featureFlags,
   required FlutterProject flutterProject,
+  required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
   required bool verboseLogging,
   bool configOnly = false,
@@ -149,8 +152,15 @@ Future<void> buildMacOS({
       darwinPlatform,
       buildInfo,
       analytics: analytics,
+      crashReportSenderFactory: botDetector.isRunningOnBot
+          ? null
+          : () => CrashReportSender(
+              platform: platform,
+              logger: logger,
+              operatingSystemUtils: os,
+              analytics: analytics,
+            ),
       plistParser: plistParser,
-      reportCrashes: !(await botDetector.isRunningOnBot),
       toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
@@ -207,6 +217,8 @@ Future<void> buildMacOS({
       ) ??
       <String, String>{};
 
+  final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
+
   // Write configuration to an xconfig file in a standard location.
   await updateGeneratedXcodeProperties(
     project: flutterProject,
@@ -214,10 +226,10 @@ Future<void> buildMacOS({
     toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: true,
+    macOSDeploymentTarget: macOSDeploymentTarget,
   );
 
   if (flutterProject.macos.usesSwiftPackageManager) {
-    final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
         platform: darwinPlatform,
@@ -231,8 +243,9 @@ Future<void> buildMacOS({
     flutterProject.macos,
     buildDirectoryPath,
     buildInfo.mode,
-    cocoaPods: globals.cocoaPods,
-    templateRenderer: globals.templateRenderer,
+    cocoaPods: cocoaPods,
+    featureFlags: featureFlags,
+    templateRenderer: templateRenderer,
     toolContext: toolContext,
   );
   // If the xcfilelists do not exist, create empty version.
@@ -386,6 +399,7 @@ Future<void> buildMacOS({
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
     flutterProject.macos,
+    plistParser: plistParser,
     toolContext: toolContext,
   ).applicationBundle(buildInfo);
   if (applicationBundle != null) {

@@ -30,6 +30,7 @@ Future<void> updateGeneratedXcodeProperties({
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
+  String? macOSDeploymentTarget,
   bool printWarnings = false,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
@@ -40,6 +41,7 @@ Future<void> updateGeneratedXcodeProperties({
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
     configurationBuildDir: configurationBuildDir,
+    macOSDeploymentTarget: macOSDeploymentTarget,
     printWarnings: printWarnings,
   );
 
@@ -163,18 +165,24 @@ String? parsedBuildNumber({
 Future<List<String>> _xcodeBuildSettingsLines({
   required FlutterProject project,
   required BuildInfo buildInfo,
+  required bool printWarnings,
   required ToolContext toolContext,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
-  required bool printWarnings,
+  String? macOSDeploymentTarget,
 }) async {
-  final ToolContext(:Artifacts artifacts, :Config config, :FileSystem fs, :Logger logger) =
-      toolContext;
+  final ToolContext(
+    :Artifacts artifacts,
+    :Cache cache,
+    :Config config,
+    :FileSystem fs,
+    :Logger logger,
+  ) = toolContext;
   final xcodeBuildSettings = <String>[];
 
-  final String flutterRoot = fs.path.normalize(Cache.flutterRoot!);
+  final String flutterRoot = fs.path.normalize(cache.flutterRoot);
   xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
@@ -212,6 +220,12 @@ Future<List<String>> _xcodeBuildSettingsLines({
   // bundle to launch.
   if (configurationBuildDir != null) {
     xcodeBuildSettings.add('CONFIGURATION_BUILD_DIR=$configurationBuildDir');
+  }
+
+  // The Flutter Assemble aggregate target cannot read the app target's
+  // MACOSX_DEPLOYMENT_TARGET, so the app's resolved value is forwarded here.
+  if (macOSDeploymentTarget != null && macOSDeploymentTarget.isNotEmpty) {
+    xcodeBuildSettings.add('FLUTTER_MACOS_DEPLOYMENT_TARGET=$macOSDeploymentTarget');
   }
 
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;

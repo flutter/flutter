@@ -11,6 +11,7 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
 
+import '../application_package.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -20,7 +21,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -61,6 +61,7 @@ FlutterPlatform installHook({
   required String flutterTesterBinPath,
   required TemplateRenderer templateRenderer,
   required ToolContext toolContext,
+  ApplicationPackageFactory? applicationPackageFactory,
   bool enableVmService = false,
   FlutterProject? flutterProject,
   String? icudtlPath,
@@ -96,6 +97,7 @@ FlutterPlatform installHook({
     flutterTesterBinPath: flutterTesterBinPath,
     templateRenderer: templateRenderer,
     toolContext: toolContext,
+    applicationPackageFactory: applicationPackageFactory,
     enableVmService: enableVmService,
     flutterProject: flutterProject,
     host: _kHosts[serverType],
@@ -307,6 +309,7 @@ class FlutterPlatform extends PlatformPlugin {
     required this.flutterTesterBinPath,
     required this._templateRenderer,
     required this._toolContext,
+    this._applicationPackageFactory,
     this.enableVmService,
     this.flutterProject,
     this.host,
@@ -338,6 +341,7 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
@@ -485,6 +489,7 @@ class FlutterPlatform extends PlatformPlugin {
   TestDevice _createTestDevice(int ourTestCount) {
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
+        applicationPackageFactory: _applicationPackageFactory!,
         id: ourTestCount,
         device: integrationTestDevice!,
         debuggingOptions: debuggingOptions,
@@ -848,7 +853,7 @@ class FlutterPlatform extends PlatformPlugin {
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
       packageConfig[flutterProject!.manifest.appName],
-      Cache.flutterRoot!,
+      _toolContext.cache.flutterRoot,
     );
     return generateTestBootstrap(
       testUrl: testUrl,

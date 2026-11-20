@@ -48,6 +48,7 @@ void main() {
       expect(
         await WindowsDevices(
           analytics: const NoOpAnalytics(),
+          featureFlags: TestFeatureFlags(),
           windowsWorkflow: WindowsWorkflow(
             featureFlags: TestFeatureFlags(),
             platform: FakePlatform(operatingSystem: 'windows'),
@@ -68,6 +69,7 @@ void main() {
     expect(
       await WindowsDevices(
         analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         windowsWorkflow: WindowsWorkflow(
           featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           platform: FakePlatform(operatingSystem: 'windows'),
@@ -132,7 +134,6 @@ void main() {
     testUsingContext(
       'sends timing events to analytics',
       () async {
-        Cache.flutterRoot = r'C:\flutter';
         fileSystem.file('pubspec.yaml').createSync();
         writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
         fileSystem
@@ -195,7 +196,9 @@ void main() {
         ]);
         final device = WindowsDevice(
           analytics: fakeAnalytics,
+          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: r'C:\flutter'),
             fs: fileSystem,
             logger: BufferLogger.test(),
             os: FakeOperatingSystemUtils(),
@@ -242,6 +245,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    config: FakeConfig(),
   );
   return flutterProjectFactory.fromDirectory(directory);
 }
@@ -253,6 +257,7 @@ WindowsDevice setUpWindowsDevice({
 }) {
   return WindowsDevice(
     analytics: const NoOpAnalytics(),
+    featureFlags: TestFeatureFlags(isWindowsEnabled: true),
     toolContext: FakeToolContext(
       fs: fileSystem ?? MemoryFileSystem.test(),
       logger: logger ?? BufferLogger.test(),
