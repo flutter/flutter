@@ -107,6 +107,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     mediaQueries.detachAll();
     _disconnectTypographySettingsObserver();
     _removeLocaleChangedListener();
+    domDocument.removeEventListener('click', _navigationFocusListener, true.toJS);
     _appLifecycleState.removeListener(_setAppLifecycleState);
     _viewFocusBinding.dispose();
     _onViewDisposedListener.cancel();
@@ -1631,8 +1632,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   static const double _minTabIndex = 0;
 
+  late final DomEventListener _navigationFocusListener;
+
   void _addNavigationFocusHandler() {
-    final DomEventListener navigationFocusListener = createDomEventListener((DomEvent event) {
+    _navigationFocusListener = createDomEventListener((DomEvent event) {
       if (!_isLikelyAssistiveTechnologyActivation(event)) {
         return;
       }
@@ -1644,7 +1647,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       }
     });
 
-    domDocument.addEventListener('click', navigationFocusListener, true.toJS);
+    domDocument.addEventListener('click', _navigationFocusListener, true.toJS);
   }
 
   /// Finds the navigation target by traversing up the DOM tree
