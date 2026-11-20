@@ -100,18 +100,18 @@ abstract class Renderer {
     final RenderRequest? next = rasterizer.queue.next;
     if (next != null) {
       rasterizer.queue.next = null;
-      _releaseScene(next.scene);
+      _unpinScene(next.scene);
       next.completer.complete();
     }
     rasterizer.dispose();
   }
 
-  void _retainScene(ui.Scene scene) {
-    (scene as LayerScene).retain();
+  void _pinScene(ui.Scene scene) {
+    (scene as LayerScene).layerTree.rootLayer.pinForRender();
   }
 
-  void _releaseScene(ui.Scene scene) {
-    (scene as LayerScene).release();
+  void _unpinScene(ui.Scene scene) {
+    (scene as LayerScene).layerTree.rootLayer.unpinForRender();
   }
 
   /// Creates a native paint for a single draw call from [paint].
@@ -392,17 +392,17 @@ abstract class Renderer {
     // [renderQueue.next]; recording build finish now ensures queue waiting time
     // is not mistakenly counted as build time.
     recorder?.recordBuildFinish();
-    // Retain the scene while it is queued or being rasterized.
+    // Pin the scene while it is queued or being rasterized.
     // The framework typically calls scene.dispose() immediately after submitting
-    // to window.render(), so this retention protects child picture layers from
-    // being disposed prematurely before rasterization completes.
-    _retainScene(scene);
+    // to window.render(), so this protects child picture layers from being
+    // disposed prematurely before rasterization completes.
+    _pinScene(scene);
     if (renderQueue.current != null) {
       // If a scene is already queued up, drop it and queue this one up instead
       // so that the scene view always displays the most recently requested scene.
       final RenderRequest? dropped = renderQueue.next;
       if (dropped != null) {
-        _releaseScene(dropped.scene);
+        _unpinScene(dropped.scene);
         dropped.completer.complete();
       }
       final completer = Completer<void>();
@@ -424,7 +424,7 @@ abstract class Renderer {
     } catch (error, stackTrace) {
       current.completer.completeError(error, stackTrace);
     } finally {
-      _releaseScene(current.scene);
+      _unpinScene(current.scene);
     }
     renderQueue.current = renderQueue.next;
     renderQueue.next = null;

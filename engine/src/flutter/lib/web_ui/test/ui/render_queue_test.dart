@@ -105,6 +105,35 @@ ui.Picture createTestPicture() {
   return recorder.endRecording();
 }
 
+/// Renders a one-picture frame and waits until [rasterizer] holds it in
+/// `rasterize`. Call `release` to let it finish.
+Future<({ui.Scene scene, Future<void> done, void Function() release})> renderHeldFrame(
+  HoldingRasterizer rasterizer,
+  EngineFlutterView view,
+) async {
+  final started = Completer<void>();
+  final hold = Completer<void>();
+  rasterizer.rasterizeStarted = started;
+  rasterizer.rasterizeCompleter = hold;
+
+  final builder = ui.SceneBuilder();
+  builder.addPicture(ui.Offset.zero, createTestPicture());
+  final ui.Scene scene = builder.build();
+  addTearDown(scene.dispose);
+  final Future<void> done = renderer.renderScene(scene, view, size: view.physicalSize);
+  await started.future;
+
+  return (
+    scene: scene,
+    done: done,
+    release: () {
+      rasterizer.rasterizeStarted = null;
+      rasterizer.rasterizeCompleter = null;
+      hold.complete();
+    },
+  );
+}
+
 void testMain() {
   setUpUnitTests(withImplicitView: true);
 
@@ -499,24 +528,31 @@ void testMain() {
     expect(timing.buildDuration, lessThan(engineWork));
   });
 
+  test('disposed engine layer under an undisposed parent disposes its pictures', () {
+    final builder = ui.SceneBuilder();
+    // Like OffsetLayer.toImage, which never disposes this.
+    builder.pushTransform(Matrix4.identity().toFloat64());
+    final ui.OffsetEngineLayer offsetLayer = builder.pushOffset(0, 0);
+    builder.addPicture(ui.Offset.zero, createTestPicture());
+    builder.pop();
+    builder.pop();
+    final scene = builder.build() as LayerScene;
+    final transformLayer = scene.layerTree.rootLayer.children.single as ContainerLayer;
+    final offsetContainer = transformLayer.children.single as ContainerLayer;
+    final pictureLayer = offsetContainer.children.single as PictureLayer;
+
+    scene.dispose();
+    offsetLayer.dispose();
+
+    expect(pictureLayer.picture.isDisposed, isTrue);
+  });
+
   test('queued scene with root picture retains picture after caller calls scene.dispose() immediately after render', () async {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-    final frame1Started = Completer<void>();
-    final frame1Hold = Completer<void>();
-    holdingRasterizer.rasterizeStarted = frame1Started;
-    holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-    // Frame 1
-    final builder1 = ui.SceneBuilder();
-    builder1.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene1 = builder1.build();
-    addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-    // Wait until Frame 1 is holding in rasterize.
-    await frame1Started.future;
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
 
     // Frame 2 is submitted while Frame 1 is in-flight, and disposed immediately.
     final builder2 = ui.SceneBuilder();
@@ -525,34 +561,20 @@ void testMain() {
     final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
     scene2.dispose();
 
-    // Release Frame 1, and ensure Frame 2 does not hold.
-    holdingRasterizer.rasterizeCompleter = null;
-    holdingRasterizer.rasterizeStarted = null;
-    frame1Hold.complete();
-
+    release();
     await Future.wait([frame1Done, frame2Done]);
 
     expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    final RootLayer rootLayer = (scene2 as LayerScene).layerTree.rootLayer;
+    expect((rootLayer.children.single as PictureLayer).picture.isDisposed, isTrue);
   });
 
   test('queued scene with nested OffsetEngineLayer retains picture after layer.dispose() before raster', () async {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-    final frame1Started = Completer<void>();
-    final frame1Hold = Completer<void>();
-    holdingRasterizer.rasterizeStarted = frame1Started;
-    holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-    // Frame 1
-    final builder1 = ui.SceneBuilder();
-    builder1.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene1 = builder1.build();
-    addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-    // Wait until Frame 1 is holding in rasterize.
-    await frame1Started.future;
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
 
     // Frame 2 has a nested OffsetEngineLayer which is disposed before raster.
     final builder2 = ui.SceneBuilder();
@@ -562,16 +584,46 @@ void testMain() {
     final ui.Scene scene2 = builder2.build();
     final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
     offsetLayer.dispose();
-    addTearDown(scene2.dispose);
+    scene2.dispose();
 
-    // Release Frame 1, and ensure Frame 2 does not hold.
-    holdingRasterizer.rasterizeCompleter = null;
-    holdingRasterizer.rasterizeStarted = null;
-    frame1Hold.complete();
-
+    release();
     await Future.wait([frame1Done, frame2Done]);
 
     expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    final offsetContainer = offsetLayer as ContainerLayer;
+    expect((offsetContainer.children.single as PictureLayer).picture.isDisposed, isTrue);
+  });
+
+  test('queued scene with undisposed parent layer retains picture until rasterization and disposes it afterward', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
+
+    // Frame 2 pushes a TransformEngineLayer whose handle is discarded, and an
+    // OffsetEngineLayer whose handle is disposed while Frame 2 is still queued.
+    final builder2 = ui.SceneBuilder();
+    builder2.pushTransform(Matrix4.identity().toFloat64());
+    final ui.OffsetEngineLayer offsetLayer = builder2.pushOffset(10, 10);
+    builder2.addPicture(ui.Offset.zero, createTestPicture());
+    builder2.pop();
+    builder2.pop();
+    final ui.Scene scene2 = builder2.build();
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
+
+    scene2.dispose();
+    offsetLayer.dispose();
+
+    final offsetContainer = offsetLayer as ContainerLayer;
+    final pictureLayer = offsetContainer.children.single as PictureLayer;
+    expect(pictureLayer.picture.isDisposed, isFalse);
+
+    release();
+    await Future.wait([frame1Done, frame2Done]);
+
+    expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    expect(pictureLayer.picture.isDisposed, isTrue);
   });
 
   test(
@@ -604,7 +656,7 @@ void testMain() {
 
       scene1.dispose();
       offsetLayer.dispose();
-      addTearDown(scene2.dispose);
+      scene2.dispose();
 
       // Release Frame 1, and ensure Frame 2 does not hold.
       holdingRasterizer.rasterizeCompleter = null;
@@ -614,8 +666,51 @@ void testMain() {
       await Future.wait([frame1Done, frame2Done]);
 
       expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+      final offsetContainer = offsetLayer as ContainerLayer;
+      expect((offsetContainer.children.single as PictureLayer).picture.isDisposed, isTrue);
     },
   );
+
+  test('diamond DAG via SceneBuilder.addRetained pins and unpins shared subtree cleanly', () async {
+    final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
+    final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
+
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
+
+    // Build a shared OffsetEngineLayer first.
+    final seedBuilder = ui.SceneBuilder();
+    final ui.OffsetEngineLayer sharedLayer = seedBuilder.pushOffset(5, 5);
+    seedBuilder.addPicture(ui.Offset.zero, createTestPicture());
+    seedBuilder.pop();
+    seedBuilder.build().dispose();
+
+    // Frame 2 retains sharedLayer along two sibling branches (diamond DAG).
+    final builder2 = ui.SceneBuilder();
+    final ui.OffsetEngineLayer leftBranch = builder2.pushOffset(0, 0);
+    builder2.addRetained(sharedLayer);
+    builder2.pop();
+    final ui.OffsetEngineLayer rightBranch = builder2.pushOffset(20, 0);
+    builder2.addRetained(sharedLayer);
+    builder2.pop();
+    final ui.Scene scene2 = builder2.build();
+    final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
+
+    scene2.dispose();
+    leftBranch.dispose();
+    rightBranch.dispose();
+    sharedLayer.dispose();
+
+    final LayerPicture sharedPicture =
+        ((sharedLayer as ContainerLayer).children.single as PictureLayer).picture;
+    expect(sharedPicture.isDisposed, isFalse);
+
+    release();
+    await Future.wait([frame1Done, frame2Done]);
+
+    expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    expect(sharedPicture.isDisposed, isTrue);
+  });
 
   test(
     'redundant and re-entrant scene.dispose calls are idempotent on queued and rendered scenes',
@@ -623,19 +718,8 @@ void testMain() {
       final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
       final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-      final frame1Started = Completer<void>();
-      final frame1Hold = Completer<void>();
-      holdingRasterizer.rasterizeStarted = frame1Started;
-      holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-      // Frame 1
-      final builder1 = ui.SceneBuilder();
-      builder1.addPicture(ui.Offset.zero, createTestPicture());
-      final ui.Scene scene1 = builder1.build();
-      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-      // Wait until Frame 1 is holding in rasterize.
-      await frame1Started.future;
+      final (scene: ui.Scene scene1, done: Future<void> frame1Done, :void Function() release) =
+          await renderHeldFrame(holdingRasterizer, view);
 
       // Frame 2 queued behind Frame 1.
       final builder2 = ui.SceneBuilder();
@@ -649,11 +733,7 @@ void testMain() {
         expect(scene2.dispose, returnsNormally);
       }
 
-      // Release Frame 1, and let both frames complete.
-      holdingRasterizer.rasterizeCompleter = null;
-      holdingRasterizer.rasterizeStarted = null;
-      frame1Hold.complete();
-
+      release();
       await Future.wait([frame1Done, frame2Done]);
 
       // Redundant disposals after presentation/rasterization is fully completed.
@@ -663,6 +743,18 @@ void testMain() {
       }
 
       expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+      expect(
+        ((scene1 as LayerScene).layerTree.rootLayer.children.single as PictureLayer)
+            .picture
+            .isDisposed,
+        isTrue,
+      );
+      expect(
+        ((scene2 as LayerScene).layerTree.rootLayer.children.single as PictureLayer)
+            .picture
+            .isDisposed,
+        isTrue,
+      );
     },
   );
 
@@ -670,19 +762,8 @@ void testMain() {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-    final frame1Started = Completer<void>();
-    final frame1Hold = Completer<void>();
-    holdingRasterizer.rasterizeStarted = frame1Started;
-    holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-    // Frame 1 in-flight
-    final builder1 = ui.SceneBuilder();
-    builder1.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene1 = builder1.build();
-    addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-    await frame1Started.future;
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
 
     // Frame 2 with multiple EngineLayers
     final builder2 = ui.SceneBuilder();
@@ -710,11 +791,7 @@ void testMain() {
       expect(offsetLayer.dispose, returnsNormally);
     }
 
-    // Release Frame 1
-    holdingRasterizer.rasterizeCompleter = null;
-    holdingRasterizer.rasterizeStarted = null;
-    frame1Hold.complete();
-
+    release();
     await Future.wait([frame1Done, frame2Done]);
 
     // Redundant dispose after rasterization
@@ -726,25 +803,18 @@ void testMain() {
     }
 
     expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    expect(
+      ((opacityLayer as ContainerLayer).children.single as PictureLayer).picture.isDisposed,
+      isTrue,
+    );
   });
 
   test('multiple consecutive queued overwrites complete dropped frame futures and retain surviving frame pictures', () async {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-    final frame1Started = Completer<void>();
-    final frame1Hold = Completer<void>();
-    holdingRasterizer.rasterizeStarted = frame1Started;
-    holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-    // Frame 1
-    final builder1 = ui.SceneBuilder();
-    builder1.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene1 = builder1.build();
-    addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-    await frame1Started.future;
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
 
     // Frame 2 queued
     final builder2 = ui.SceneBuilder();
@@ -767,38 +837,41 @@ void testMain() {
     final Future<void> frame4Done = renderer.renderScene(scene4, view, size: view.physicalSize);
     scene4.dispose();
 
-    // Dropped frames 2 and 3 complete their completers upon being overwritten.
+    // Dropped frames 2 and 3 complete their completers and dispose their pictures immediately upon overwrite.
     await frame2Done;
     await frame3Done;
+    expect(
+      ((scene2 as LayerScene).layerTree.rootLayer.children.single as PictureLayer)
+          .picture
+          .isDisposed,
+      isTrue,
+    );
+    expect(
+      ((scene3 as LayerScene).layerTree.rootLayer.children.single as PictureLayer)
+          .picture
+          .isDisposed,
+      isTrue,
+    );
 
-    // Release Frame 1
-    holdingRasterizer.rasterizeCompleter = null;
-    holdingRasterizer.rasterizeStarted = null;
-    frame1Hold.complete();
-
+    release();
     await Future.wait([frame1Done, frame4Done]);
 
     // Frames 1 and 4 rasterize completely, frames 2 and 3 were dropped cleanly.
     expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    expect(
+      ((scene4 as LayerScene).layerTree.rootLayer.children.single as PictureLayer)
+          .picture
+          .isDisposed,
+      isTrue,
+    );
   });
 
   test('deeply nested ContainerLayer DAG retains pictures when intermediate layers are disposed out-of-order', () async {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-    final frame1Started = Completer<void>();
-    final frame1Hold = Completer<void>();
-    holdingRasterizer.rasterizeStarted = frame1Started;
-    holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-    // Frame 1
-    final builder1 = ui.SceneBuilder();
-    builder1.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene1 = builder1.build();
-    addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-    await frame1Started.future;
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
 
     // Frame 2: pushOffset -> pushClipRect -> pushOpacity -> pushColorFilter -> addPicture
     final builder2 = ui.SceneBuilder();
@@ -826,14 +899,14 @@ void testMain() {
     offsetLayer.dispose();
     opacityLayer.dispose();
 
-    // Release Frame 1
-    holdingRasterizer.rasterizeCompleter = null;
-    holdingRasterizer.rasterizeStarted = null;
-    frame1Hold.complete();
-
+    release();
     await Future.wait([frame1Done, frame2Done]);
 
     expect(holdingRasterizer.rasterizedPictureCounts, <int>[1, 1]);
+    expect(
+      ((colorFilterLayer as ContainerLayer).children.single as PictureLayer).picture.isDisposed,
+      isTrue,
+    );
   });
 
   test(
@@ -842,19 +915,8 @@ void testMain() {
       final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
       final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-      final frame1Started = Completer<void>();
-      final frame1Hold = Completer<void>();
-      holdingRasterizer.rasterizeStarted = frame1Started;
-      holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-      // Frame 1
-      final builder1 = ui.SceneBuilder();
-      builder1.addPicture(ui.Offset.zero, createTestPicture());
-      final ui.Scene scene1 = builder1.build();
-      addTearDown(scene1.dispose);
-      final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-      await frame1Started.future;
+      final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+          await renderHeldFrame(holdingRasterizer, view);
 
       // Frame 2: empty scene (no pictures, no child layers)
       final builder2 = ui.SceneBuilder();
@@ -865,11 +927,7 @@ void testMain() {
       scene2.dispose();
       scene2.dispose();
 
-      // Release Frame 1
-      holdingRasterizer.rasterizeCompleter = null;
-      holdingRasterizer.rasterizeStarted = null;
-      frame1Hold.complete();
-
+      release();
       await Future.wait([frame1Done, frame2Done]);
 
       // Frame 1 has 1 picture, Frame 2 has 0 pictures
@@ -881,36 +939,25 @@ void testMain() {
     final EngineFlutterView view = EnginePlatformDispatcher.instance.implicitView!;
     final HoldingRasterizer holdingRasterizer = createAndInstallHoldingRasterizer(view);
 
-    final frame1Started = Completer<void>();
-    final frame1Hold = Completer<void>();
-    holdingRasterizer.rasterizeStarted = frame1Started;
-    holdingRasterizer.rasterizeCompleter = frame1Hold;
-
-    final builder1 = ui.SceneBuilder();
-    builder1.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene1 = builder1.build();
-    addTearDown(scene1.dispose);
-    final Future<void> frame1Done = renderer.renderScene(scene1, view, size: view.physicalSize);
-
-    await frame1Started.future;
+    final (:ui.Scene scene, done: Future<void> frame1Done, :void Function() release) =
+        await renderHeldFrame(holdingRasterizer, view);
 
     final builder2 = ui.SceneBuilder();
     builder2.addPicture(ui.Offset.zero, createTestPicture());
-    final ui.Scene scene2 = builder2.build();
-    addTearDown(scene2.dispose);
+    final scene2 = builder2.build() as LayerScene;
     final Future<void> frame2Done = renderer.renderScene(scene2, view, size: view.physicalSize);
+    scene2.dispose();
+    final pictureLayer = scene2.layerTree.rootLayer.children.single as PictureLayer;
+    expect(pictureLayer.picture.isDisposed, isFalse);
 
     // Call debugClear() while Frame 1 is holding and Frame 2 is in renderQueue.next.
     renderer.debugClear();
 
-    // Frame 2 was dropped by teardown; its completer must complete.
+    // Frame 2 was dropped by teardown; its completer must complete and its picture must be disposed.
     await expectLater(frame2Done, completes);
+    expect(pictureLayer.picture.isDisposed, isTrue);
 
-    // Release Frame 1.
-    holdingRasterizer.rasterizeCompleter = null;
-    holdingRasterizer.rasterizeStarted = null;
-    frame1Hold.complete();
-
+    release();
     await frame1Done;
   });
 }

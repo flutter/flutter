@@ -11,29 +11,13 @@ import 'package:ui/ui.dart' as ui;
 bool _webPerfOverlayWarned = false;
 
 class LayerScene implements ui.Scene {
-  LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer) {
-    layerTree.rootLayer.retain();
-  }
+  LayerScene(RootLayer rootLayer) : layerTree = LayerTree(rootLayer);
 
   final LayerTree layerTree;
 
-  /// The root layer of this scene's layer tree.
-  RootLayer get rootLayer => layerTree.rootLayer;
-
-  bool _isSceneDisposed = false;
-
-  /// Retains the scene's layer tree, preventing child pictures from being disposed.
-  void retain() => layerTree.rootLayer.retain();
-
-  /// Releases the scene's layer tree.
-  void release() => layerTree.rootLayer.release();
-
   @override
   void dispose() {
-    if (!_isSceneDisposed) {
-      _isSceneDisposed = true;
-      release();
-    }
+    layerTree.rootLayer.dispose();
   }
 
   @override

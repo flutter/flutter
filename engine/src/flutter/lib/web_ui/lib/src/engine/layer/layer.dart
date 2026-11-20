@@ -25,51 +25,10 @@ abstract class Layer implements ui.EngineLayer {
 
 /// A layer that contains child layers.
 abstract class ContainerLayer extends Layer {
-  /// Creates a [ContainerLayer].
-  ///
-  /// If [isEngineLayer] is true, this layer is initially retained on behalf of
-  /// the caller's [ui.EngineLayer] handle. Calling [dispose] releases that handle.
-  ContainerLayer({bool isEngineLayer = false}) {
-    if (isEngineLayer) {
-      retain();
-    }
-  }
-
-  int _refCount = 0;
-  bool _isDisposed = false;
-  bool _isHandleDisposed = false;
-
-  /// Increments the reference count of this container layer, preventing it
-  /// and its child layers from being disposed prematurely.
-  void retain() {
-    assert(!_isDisposed, 'Cannot retain a disposed ContainerLayer');
-    _refCount++;
-  }
-
-  /// Decrements the reference count of this container layer.
-  ///
-  /// When the reference count reaches zero, this layer is marked disposed and
-  /// recursively releases child [ContainerLayer]s and disposes child [PictureLayer]s.
-  ///
-  /// The [children] list itself is left intact so that the layer tree's
-  /// structure and preroll results (such as [paintBounds]) can still be
-  /// inspected after the native resources have been released.
-  void release() {
-    assert(_refCount > 0, 'Cannot release a ContainerLayer with refCount == 0');
-    _refCount--;
-    if (_refCount == 0) {
-      _isDisposed = true;
-      for (final Layer child in children) {
-        if (child is ContainerLayer) {
-          child.release();
-        } else if (child is PictureLayer) {
-          child.dispose();
-        }
-      }
-    }
-  }
-
   final List<Layer> children = <Layer>[];
+
+  int _pendingRenderCount = 0;
+  bool _isHandleDisposed = false;
 
   /// The list of child layers.
   ///
@@ -78,17 +37,56 @@ abstract class ContainerLayer extends Layer {
 
   /// Register [child] as a child of this layer.
   void add(Layer child) {
-    if (child is ContainerLayer) {
-      child.retain();
-    }
     children.add(child);
+  }
+
+  /// Marks this layer and its descendant [ContainerLayer]s as pending render so
+  /// child [PictureLayer]s are not disposed before rasterization completes.
+  void pinForRender() {
+    if (_pendingRenderCount++ == 0) {
+      for (final Layer child in children) {
+        if (child is ContainerLayer) {
+          child.pinForRender();
+        }
+      }
+    }
+  }
+
+  /// Unmarks a pending render on this layer and its descendant [ContainerLayer]s,
+  /// disposing owned [PictureLayer]s once no renders remain and the layer handle
+  /// has been disposed.
+  void unpinForRender() {
+    assert(_pendingRenderCount > 0, 'Cannot unpin a ContainerLayer with _pendingRenderCount == 0');
+    if (--_pendingRenderCount == 0) {
+      for (final Layer child in children) {
+        if (child is ContainerLayer) {
+          child.unpinForRender();
+        }
+      }
+      _maybeDisposePictures();
+    }
   }
 
   @override
   void dispose() {
-    if (!_isHandleDisposed) {
-      _isHandleDisposed = true;
-      release();
+    if (_isHandleDisposed) {
+      return;
+    }
+    _isHandleDisposed = true;
+    _maybeDisposePictures();
+  }
+
+  void _maybeDisposePictures() {
+    if (!_isHandleDisposed || _pendingRenderCount > 0) {
+      return;
+    }
+    // Dispose of any picture layers that we own. Picture layers cannot be
+    // retained between frames so this ContainerLayer is the only owner.
+    // Therefore, we dispose of them here.
+    for (final Layer child in children) {
+      if (child is PictureLayer) {
+        child.dispose();
+      }
     }
   }
 }
@@ -98,14 +96,6 @@ abstract class ContainerLayer extends Layer {
 /// This layer does not draw anything. It's only used so we can add leaf layers
 /// to [LayerSceneBuilder] without requiring a [ContainerLayer].
 class RootLayer extends ContainerLayer {
-  RootLayer() : super(isEngineLayer: false);
-
-  @override
-  void dispose() {
-    // RootLayer is not an external EngineLayer handle. Its lifecycle is managed
-    // exclusively by LayerScene and Renderer via retain() and release().
-  }
-
   @override
   R accept<R>(LayerVisitor<R> visitor) {
     return visitor.visitRoot(this);
@@ -113,7 +103,7 @@ class RootLayer extends ContainerLayer {
 }
 
 class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFilterEngineLayer {
-  BackdropFilterEngineLayer(this.filter, this.blendMode) : super(isEngineLayer: true);
+  BackdropFilterEngineLayer(this.filter, this.blendMode);
 
   final ui.ImageFilter filter;
   final ui.BlendMode blendMode;
@@ -129,9 +119,7 @@ class BackdropFilterEngineLayer extends ContainerLayer implements ui.BackdropFil
 
 /// A layer that clips its child layers by a given [Path].
 class ClipPathEngineLayer extends ContainerLayer implements ui.ClipPathEngineLayer {
-  ClipPathEngineLayer(this.clipPath, this.clipBehavior)
-    : assert(clipBehavior != ui.Clip.none),
-      super(isEngineLayer: true);
+  ClipPathEngineLayer(this.clipPath, this.clipBehavior) : assert(clipBehavior != ui.Clip.none);
 
   /// The path used to clip child layers.
   final EnginePath clipPath;
@@ -145,9 +133,7 @@ class ClipPathEngineLayer extends ContainerLayer implements ui.ClipPathEngineLay
 
 /// A layer that clips its child layers by a given [Rect].
 class ClipRectEngineLayer extends ContainerLayer implements ui.ClipRectEngineLayer {
-  ClipRectEngineLayer(this.clipRect, this.clipBehavior)
-    : assert(clipBehavior != ui.Clip.none),
-      super(isEngineLayer: true);
+  ClipRectEngineLayer(this.clipRect, this.clipBehavior) : assert(clipBehavior != ui.Clip.none);
 
   /// The rectangle used to clip child layers.
   final ui.Rect clipRect;
@@ -161,9 +147,7 @@ class ClipRectEngineLayer extends ContainerLayer implements ui.ClipRectEngineLay
 
 /// A layer that clips its child layers by a given [RRect].
 class ClipRRectEngineLayer extends ContainerLayer implements ui.ClipRRectEngineLayer {
-  ClipRRectEngineLayer(this.clipRRect, this.clipBehavior)
-    : assert(clipBehavior != ui.Clip.none),
-      super(isEngineLayer: true);
+  ClipRRectEngineLayer(this.clipRRect, this.clipBehavior) : assert(clipBehavior != ui.Clip.none);
 
   /// The rounded rectangle used to clip child layers.
   final ui.RRect clipRRect;
@@ -179,8 +163,7 @@ class ClipRRectEngineLayer extends ContainerLayer implements ui.ClipRRectEngineL
 class ClipRSuperellipseEngineLayer extends ContainerLayer
     implements ui.ClipRSuperellipseEngineLayer {
   ClipRSuperellipseEngineLayer(this.clipRSuperellipse, this.clipBehavior)
-    : assert(clipBehavior != ui.Clip.none),
-      super(isEngineLayer: true);
+    : assert(clipBehavior != ui.Clip.none);
 
   /// The rounded superellipse used to clip child layers.
   final ui.RSuperellipse clipRSuperellipse;
@@ -194,7 +177,7 @@ class ClipRSuperellipseEngineLayer extends ContainerLayer
 
 /// A layer that paints its children with the given opacity.
 class OpacityEngineLayer extends ContainerLayer implements ui.OpacityEngineLayer {
-  OpacityEngineLayer(this.alpha, this.offset) : super(isEngineLayer: true);
+  OpacityEngineLayer(this.alpha, this.offset);
 
   final int alpha;
   final ui.Offset offset;
@@ -207,7 +190,7 @@ class OpacityEngineLayer extends ContainerLayer implements ui.OpacityEngineLayer
 
 /// A layer that transforms its child layers by the given transform matrix.
 class TransformEngineLayer extends ContainerLayer implements ui.TransformEngineLayer {
-  TransformEngineLayer(this.transform) : super(isEngineLayer: true);
+  TransformEngineLayer(this.transform);
 
   /// The matrix with which to transform the child layers.
   final Matrix4 transform;
@@ -234,7 +217,7 @@ class OffsetEngineLayer extends TransformEngineLayer implements ui.OffsetEngineL
 
 /// A layer that applies an [ui.ImageFilter] to its children.
 class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEngineLayer {
-  ImageFilterEngineLayer(this.filter, this.offset) : super(isEngineLayer: true);
+  ImageFilterEngineLayer(this.filter, this.offset);
 
   final ui.Offset offset;
   final ui.ImageFilter filter;
@@ -249,8 +232,7 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
 }
 
 class ShaderMaskEngineLayer extends ContainerLayer implements ui.ShaderMaskEngineLayer {
-  ShaderMaskEngineLayer(this.shader, this.maskRect, this.blendMode, this.filterQuality)
-    : super(isEngineLayer: true);
+  ShaderMaskEngineLayer(this.shader, this.maskRect, this.blendMode, this.filterQuality);
 
   final ui.Shader shader;
   final ui.Rect maskRect;
@@ -305,7 +287,7 @@ class PictureLayer extends Layer {
 
 /// A layer which contains a [ui.ColorFilter].
 class ColorFilterEngineLayer extends ContainerLayer implements ui.ColorFilterEngineLayer {
-  ColorFilterEngineLayer(this.filter) : super(isEngineLayer: true);
+  ColorFilterEngineLayer(this.filter);
 
   final ui.ColorFilter filter;
 
