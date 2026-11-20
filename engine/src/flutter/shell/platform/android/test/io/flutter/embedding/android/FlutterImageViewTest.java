@@ -11,9 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,20 +67,34 @@ public class FlutterImageViewTest {
     return image;
   }
 
+  private static Canvas createHardwareCanvasMock() {
+    final Canvas canvas = mock(Canvas.class);
+    when(canvas.isHardwareAccelerated()).thenReturn(true);
+    return canvas;
+  }
+
   @Test
   @SuppressLint("WrongCall")
   @Config(sdk = API_LEVELS.API_33)
-  public void setImage_capturedRetiringImageSurvivesNextSetImageBeforeFrameCommitCallbackFires() {
-    final Deque<Runnable> pendingCommitCallbacks = new ArrayDeque<>();
+  public void setImage_preDrawCapturedCommitCallbackAndClippedOutRearmAndThreeFramePipeline() {
+    // Models AOSP ViewRootImpl.performDraw(): captureFrameCommitCallbacks() drains
+    // mOnFrameCommitListeners into inFlightRenderThreadCallbacks BEFORE View.onDraw(Canvas) runs.
+    final Deque<Runnable> vtoPendingListeners = new ArrayDeque<>();
+    final Deque<Runnable> inFlightRenderThreadCallbacks = new ArrayDeque<>();
     final FlutterImageView view =
-        spy(new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background));
-    doAnswer(
-            invocation -> {
-              pendingCommitCallbacks.addLast(invocation.getArgument(0));
-              return true;
-            })
-        .when(view)
-        .registerFrameCommitCallback(any());
+        new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background) {
+          @Override
+          boolean registerFrameCommitCallback(Runnable callback) {
+            vtoPendingListeners.addLast(callback);
+            return true;
+          }
+        };
+    final Runnable captureFrameCommitCallbacks =
+        () -> {
+          while (!vtoPendingListeners.isEmpty()) {
+            inFlightRenderThreadCallbacks.addLast(vtoPendingListeners.removeFirst());
+          }
+        };
 
     final AtomicInteger img1Releases = new AtomicInteger(0);
     final AtomicInteger img2Releases = new AtomicInteger(0);
@@ -90,42 +102,61 @@ public class FlutterImageViewTest {
     final Image img1 = createMockApi29Image();
     final Image img2 = createMockApi29Image();
     final Image img3 = createMockApi29Image();
-    final Canvas canvas = mock(Canvas.class);
+    final Canvas hwCanvas = createHardwareCanvasMock();
 
-    // T1: setImage(img1) -> onDraw records img1.
+    // T1: setImage(img1) -> captureFrameCommitCallbacks() -> onDraw(hwCanvas).
     view.setImage(img1, img1Releases::incrementAndGet);
     assertEquals(1.0f, view.getAlpha(), 0.0f);
-    view.onDraw(canvas);
-    assertEquals(0, pendingCommitCallbacks.size());
+    assertEquals(0, vtoPendingListeners.size());
+    captureFrameCommitCallbacks.run();
+    view.onDraw(hwCanvas);
+    assertEquals(0, inFlightRenderThreadCallbacks.size());
     assertEquals(0, img1Releases.get());
 
-    // setImage(img2) -> T2 onDraw records img2 and arms CB_T2 for img1.
+    // setImage(img2) MUST arm CB for img1 BEFORE T2 begins so captureFrameCommitCallbacks()
+    // captures it ahead of onDraw.
     view.setImage(img2, img2Releases::incrementAndGet);
+    assertEquals(1, vtoPendingListeners.size());
     assertEquals(0, img1Releases.get());
-    view.onDraw(canvas);
-    assertEquals(1, pendingCommitCallbacks.size());
+
+    // Clipped-out traversal T_clipped: ViewRootImpl captures callbacks, skips view.onDraw(), and
+    // commits. Firing the callback must NOT release img1 (still in RenderNode) and must re-arm it.
+    captureFrameCommitCallbacks.run();
+    assertEquals(1, inFlightRenderThreadCallbacks.size());
+    inFlightRenderThreadCallbacks.removeFirst().run();
+    assertEquals(0, img1Releases.get());
+    assertTrue(view.hasRetiringDisplayedImageForTest());
+    assertEquals(1, vtoPendingListeners.size());
+
+    // T2: captureFrameCommitCallbacks() runs BEFORE view.onDraw(hwCanvas) draws img2.
+    captureFrameCommitCallbacks.run();
+    assertEquals(0, vtoPendingListeners.size());
+    assertEquals(1, inFlightRenderThreadCallbacks.size());
+    view.onDraw(hwCanvas);
     assertEquals(0, img1Releases.get());
     assertEquals(0, img2Releases.get());
 
-    // Before CB_T2 fires, setImage(img3) arrives on main, moving img2 into retiringDisplayedImage.
+    // Before CB_T2 fires, setImage(img3) arrives on main, moving img2 into retiringDisplayedImage
+    // and arming CB_T3 in vtoPendingListeners.
     view.setImage(img3, img3Releases::incrementAndGet);
+    assertEquals(1, vtoPendingListeners.size());
     assertEquals(0, img1Releases.get());
     assertEquals(0, img2Releases.get());
     assertEquals(0, img3Releases.get());
 
-    // CB_T2 fires before T3 onDraw: must release img1 ONLY and preserve img2 in retiring slot!
-    pendingCommitCallbacks.removeFirst().run();
+    // CB_T2 fires before T3 onDraw: releases img1 ONLY and preserves img2 in retiring slot.
+    inFlightRenderThreadCallbacks.removeFirst().run();
     assertEquals(1, img1Releases.get());
     assertEquals(0, img2Releases.get());
     assertEquals(0, img3Releases.get());
     assertTrue(view.hasRetiringDisplayedImageForTest());
     assertTrue(view.hasCurrentDisplayedImageForTest());
 
-    // T3 onDraw arms CB_T3 for img2; firing CB_T3 releases img2 while keeping img3 displayed.
-    view.onDraw(canvas);
-    assertEquals(1, pendingCommitCallbacks.size());
-    assertEquals(0, img2Releases.get());
-    pendingCommitCallbacks.removeFirst().run();
+    // T3 -> idle: captureFrameCommitCallbacks() -> view.onDraw(hwCanvas) -> CB_T3 fires with NO T4!
+    captureFrameCommitCallbacks.run();
+    view.onDraw(hwCanvas);
+    assertEquals(1, inFlightRenderThreadCallbacks.size());
+    inFlightRenderThreadCallbacks.removeFirst().run();
     assertEquals(1, img1Releases.get());
     assertEquals(1, img2Releases.get());
     assertEquals(0, img3Releases.get());
@@ -143,20 +174,19 @@ public class FlutterImageViewTest {
   public void setImage_hundredScreenOffUpdatesReleaseUndrawnImagesImmediately() {
     final Deque<Runnable> pendingCommitCallbacks = new ArrayDeque<>();
     final FlutterImageView view =
-        spy(new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background));
-    doAnswer(
-            invocation -> {
-              pendingCommitCallbacks.addLast(invocation.getArgument(0));
-              return true;
-            })
-        .when(view)
-        .registerFrameCommitCallback(any());
+        new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background) {
+          @Override
+          boolean registerFrameCommitCallback(Runnable callback) {
+            pendingCommitCallbacks.addLast(callback);
+            return true;
+          }
+        };
 
     final AtomicInteger liveImages = new AtomicInteger(0);
     final Image initialDrawnImage = createMockApi29Image();
     liveImages.incrementAndGet();
     view.setImage(initialDrawnImage, liveImages::decrementAndGet);
-    view.onDraw(mock(Canvas.class));
+    view.onDraw(createHardwareCanvasMock());
     assertEquals(1, liveImages.get());
 
     // Simulate 100 frames arriving while the screen is off (no further onDraw traversals).
@@ -169,11 +199,96 @@ public class FlutterImageViewTest {
           liveImages.get() <= MAX_CONCURRENT_VIEW_HELD_IMAGES);
     }
 
-    // Only the drawn image (retiring) + the most recent undrawn image (current) remain held.
+    // Only the drawn image (retiring) + the most recent undrawn image (current) remain held, and
+    // only 1 FrameCommitCallback was registered across the entire burst.
     assertEquals(2, liveImages.get());
+    assertEquals(1, pendingCommitCallbacks.size());
 
     view.releaseDisplayedImages();
     assertEquals(0, liveImages.get());
+  }
+
+  @Test
+  @SuppressLint("WrongCall")
+  @Config(sdk = API_LEVELS.API_33)
+  public void onDraw_api29NullHardwareBufferClearsStaleBitmapAndSoftwareCanvasReleasesImages() {
+    final android.graphics.Bitmap softwareCopyBitmap =
+        android.graphics.Bitmap.createBitmap(
+            TEST_DIMENSION_PX, TEST_DIMENSION_PX, android.graphics.Bitmap.Config.ARGB_8888);
+    final android.graphics.Bitmap mockHardwareBitmap = mock(android.graphics.Bitmap.class);
+    when(mockHardwareBitmap.getConfig()).thenReturn(android.graphics.Bitmap.Config.HARDWARE);
+    when(mockHardwareBitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, false))
+        .thenReturn(softwareCopyBitmap);
+
+    final FlutterImageView view =
+        new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background) {
+          @Override
+          public boolean isAttachedToWindow() {
+            return true;
+          }
+
+          @Override
+          public boolean isHardwareAccelerated() {
+            return false;
+          }
+
+          @Override
+          android.graphics.Bitmap wrapHardwareBuffer(HardwareBuffer buffer) {
+            return mockHardwareBitmap;
+          }
+        };
+
+    // Non-hardware-accelerated window on API 29+: registerFrameCommitCallback returns false, and
+    // onDraw onto a real software Canvas copies to ARGB_8888 without throwing and immediately
+    // releases DisplayedImages while keeping softwareCopyBitmap for redraws.
+    assertFalse(view.registerFrameCommitCallback(() -> {}));
+    final AtomicInteger swReleases = new AtomicInteger(0);
+    final android.graphics.Bitmap targetBitmap =
+        android.graphics.Bitmap.createBitmap(
+            TEST_DIMENSION_PX, TEST_DIMENSION_PX, android.graphics.Bitmap.Config.ARGB_8888);
+    final Canvas softwareCanvas = new Canvas(targetBitmap);
+    assertFalse(softwareCanvas.isHardwareAccelerated());
+
+    view.setImage(createMockApi29Image(), swReleases::incrementAndGet);
+    view.onDraw(softwareCanvas);
+    assertEquals(1, swReleases.get());
+    assertEquals(softwareCopyBitmap, view.getCurrentBitmapForTest());
+    assertFalse(view.hasCurrentDisplayedImageForTest());
+    assertFalse(view.hasRetiringDisplayedImageForTest());
+
+    // Now test getHardwareBuffer() == null on a hardware-accelerated view: clears stale
+    // currentBitmap so retiringDisplayedImage is never drawn after release, and drawing onto a
+    // one-off software Canvas copies HARDWARE -> ARGB_8888 while keeping currentBitmap HARDWARE.
+    final Deque<Runnable> vtoQueue = new ArrayDeque<>();
+    final FlutterImageView hwView =
+        new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background) {
+          @Override
+          boolean registerFrameCommitCallback(Runnable callback) {
+            vtoQueue.addLast(callback);
+            return true;
+          }
+
+          @Override
+          android.graphics.Bitmap wrapHardwareBuffer(HardwareBuffer buffer) {
+            return mockHardwareBitmap;
+          }
+        };
+    final Canvas hwCanvas = createHardwareCanvasMock();
+    hwView.setImage(createMockApi29Image(), null);
+    hwView.onDraw(hwCanvas);
+    assertEquals(mockHardwareBitmap, hwView.getCurrentBitmapForTest());
+
+    final Canvas oneOffSoftwareCanvas = mock(Canvas.class);
+    when(oneOffSoftwareCanvas.isHardwareAccelerated()).thenReturn(false);
+    hwView.onDraw(oneOffSoftwareCanvas);
+    verify(oneOffSoftwareCanvas, times(1)).drawBitmap(softwareCopyBitmap, 0, 0, null);
+    assertEquals(mockHardwareBitmap, hwView.getCurrentBitmapForTest());
+
+    final Image nullBufferImage = mock(Image.class);
+    when(nullBufferImage.getHardwareBuffer()).thenReturn(null);
+    hwView.setImage(nullBufferImage, null);
+    hwView.onDraw(hwCanvas);
+    assertNull(hwView.getCurrentBitmapForTest());
   }
 
   @Test

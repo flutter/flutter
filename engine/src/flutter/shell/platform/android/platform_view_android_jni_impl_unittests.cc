@@ -1066,8 +1066,13 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       reinterpret_cast<jmethodID>(kRegisteredMethodIdAddress);
 
   std::unordered_map<jobject, int> global_refs;
+  bool fail_new_global_ref_with_exception = false;
   EXPECT_CALL(mock_env, NewGlobalRef(_))
       .WillRepeatedly([&](jobject obj) -> jobject {
+        if (fail_new_global_ref_with_exception) {
+          tracker.pending_exception = true;
+          return nullptr;
+        }
         if (obj != nullptr) {
           ++global_refs[obj];
         }
@@ -1162,6 +1167,62 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_TRUE(reader_retired);
   EXPECT_TRUE(global_refs.empty());
   EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  // Subcase 3: When NewGlobalRef fails with a pending JNI exception (e.g.
+  // OutOfMemoryError), HybridJavaGlobalRef clears the exception BEFORE
+  // CreateHybridImageReader or AcquireLatestHybridImage calls cleanup
+  // CallVoidMethod (preventing an ART CheckJNI fatal abort).
+  const jobject kOomTestReaderObj = reinterpret_cast<jobject>(0x7102);
+  HybridJavaGlobalRef oom_test_reader_ref(&mock_env, kOomTestReaderObj);
+  fail_new_global_ref_with_exception = true;
+
+  jobject oom_local_reader = nullptr;
+  EXPECT_CALL(mock_env, NewObjectV(_, kRegisteredMethod, _))
+      .WillOnce([&](jclass, jmethodID, va_list) -> jobject {
+        oom_local_reader = tracker.AllocateNew<jobject>();
+        return oom_local_reader;
+      });
+  bool oom_reader_retired_without_pending_exc = false;
+  EXPECT_CALL(mock_env, CallVoidMethodV(_, kRegisteredMethod, _))
+      .WillOnce([&](jobject obj, jmethodID, va_list) {
+        EXPECT_FALSE(tracker.pending_exception);
+        EXPECT_EQ(obj, oom_local_reader);
+        oom_reader_retired_without_pending_exc = true;
+      });
+  EXPECT_EQ(
+      android_jni.CreateHybridImageReader(kTestReaderDimPx, kTestReaderDimPx),
+      nullptr);
+  EXPECT_TRUE(oom_reader_retired_without_pending_exc);
+  EXPECT_FALSE(tracker.pending_exception);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  jobject oom_local_image = nullptr;
+  EXPECT_CALL(mock_env,
+              CallObjectMethodV(kOomTestReaderObj, kRegisteredMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list) -> jobject {
+        oom_local_image = tracker.AllocateNew<jobject>();
+        return oom_local_image;
+      });
+  bool oom_image_released_without_pending_exc = false;
+  EXPECT_CALL(mock_env,
+              CallVoidMethodV(kOomTestReaderObj, kRegisteredMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list args) {
+        EXPECT_FALSE(tracker.pending_exception);
+        EXPECT_EQ(va_arg(args, jobject), oom_local_image);
+        oom_image_released_without_pending_exc = true;
+      });
+  EXPECT_TRUE(
+      android_jni.AcquireLatestHybridImage(oom_test_reader_ref).is_null());
+  EXPECT_TRUE(oom_image_released_without_pending_exc);
+  EXPECT_FALSE(tracker.pending_exception);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  fail_new_global_ref_with_exception = false;
+  EXPECT_CALL(mock_env,
+              CallVoidMethodV(kOomTestReaderObj, kRegisteredMethod, _))
+      .WillOnce(Return());
+  android_jni.RetireHybridImageReader(std::move(oom_test_reader_ref));
+  EXPECT_TRUE(global_refs.empty());
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,

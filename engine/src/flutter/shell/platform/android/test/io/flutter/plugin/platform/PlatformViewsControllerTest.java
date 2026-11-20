@@ -2811,6 +2811,30 @@ public class PlatformViewsControllerTest {
     assertEquals(2, controller.getHybridOverlayViews().size());
     assertEquals(3, hybridReader.getOpenImageCount());
 
+    // Under RTL layout direction, tight-bound hybrid overlays must still position at physical
+    // top-left (x, y) via Gravity.LEFT | Gravity.TOP rather than snapping to the right edge.
+    final int parentSizePx = 200;
+    final int rtlOverlayX = 25;
+    final int rtlOverlayY = 35;
+    final int rtlOverlayW = 50;
+    final int rtlOverlayH = 60;
+    flutterView.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+    final Image rtlOvImg = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(rtlOvImg);
+    assertSame(rtlOvImg, hybridReader.acquireLatestImage());
+    controller.onDisplayHybridOverlaySurface(
+        overlayId0, rtlOverlayX, rtlOverlayY, rtlOverlayW, rtlOverlayH, rtlOvImg, hybridReader);
+    final PlatformOverlayView overlay0View = controller.getHybridOverlayViews().get(overlayId0);
+    assertEquals(
+        android.view.Gravity.LEFT | android.view.Gravity.TOP,
+        ((FrameLayout.LayoutParams) overlay0View.getLayoutParams()).gravity);
+    flutterView.measure(
+        View.MeasureSpec.makeMeasureSpec(parentSizePx, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(parentSizePx, View.MeasureSpec.EXACTLY));
+    flutterView.layout(0, 0, parentSizePx, parentSizePx);
+    assertEquals(rtlOverlayX, overlay0View.getLeft());
+    assertEquals(rtlOverlayY, overlay0View.getTop());
+
     // Frame 2: only overlay 0 used -> overlay 1 is immediately pruned and its Image released.
     final Image bgImg2 = mock(Image.class);
     final Image ov0Img2 = mock(Image.class);
