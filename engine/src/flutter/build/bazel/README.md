@@ -156,8 +156,11 @@ sandbox contribute.
 - No Windows, Fuchsia or riscv64 Linux build.
 - Without `gclient sync` there is no web engine build (the Emscripten SDK
   is installed by a hook of `DEPS`), and a Mac has not been tried.
-- Tests run with the network blocked, so golden images are neither compared
-  nor uploaded under Bazel.
+- Golden images are compared off a bot only, with what was fetched from
+  Flutter Gold beforehand (`docs/framework_tests.md`, "Golden files"): the
+  tests run with the network blocked. On a bot they are neither compared
+  nor uploaded under Bazel yet, and the Impeller runs compare nothing yet
+  (Gold's Impeller images come from a Mac bot alone).
 - The Dart SDK is a GN build wrapped as a single Bazel action, as are the
   GPU test backends on a Mac (ANGLE, SwiftShader, the Vulkan loader and the
   validation layer, which Linux builds from converted GN files). An edit

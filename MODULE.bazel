@@ -157,6 +157,12 @@ use_repo(
 flutter_bin_cache = use_extension("//build_defs/repositories:flutter_bin_cache.bzl", "flutter_bin_cache_extension")
 use_repo(flutter_bin_cache, "flutter_bin_cache")
 
+# What Flutter Gold accepts for each golden test, fetched for the framework's
+# tests to compare with: a test has no network to ask Gold itself
+# (build_defs/repositories/gold.bzl).
+gold = use_extension("//build_defs/repositories:gold.bzl", "gold")
+use_repo(gold, "gold_expectations")
+
 # The browsers the web tests drive, at the versions the web engine's
 # lib/web_ui/dev/package_lock.yaml pins (build_defs/repositories/browsers.bzl):
 # Chrome for Testing, and Firefox for the web engine's Firefox suites.

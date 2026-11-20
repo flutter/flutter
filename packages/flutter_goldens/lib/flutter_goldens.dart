@@ -9,6 +9,7 @@
 library;
 
 import 'dart:async' show Completer, FutureOr;
+import 'dart:convert' show json;
 import 'dart:io' as io show HttpClient, OSError, SocketException;
 import 'dart:ui' as ui;
 
@@ -33,6 +34,9 @@ export 'skia_client.dart';
 // TODO(ianh): sort the parameters and arguments in this file so they use a consistent order throughout.
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
+const String _kGoldExpectationsKey = 'FLUTTER_GOLD_EXPECTATIONS';
+const String _kGoldFailuresKey = 'FLUTTER_GOLD_FAILURES';
+const String _kGoldFailuresLocationKey = 'FLUTTER_GOLD_FAILURES_LOCATION';
 
 bool _isMainBranch(String? branch) {
   return branch == 'main' || branch == 'master';
@@ -70,7 +74,17 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   const FileSystem fs = LocalFileSystem();
   const ProcessManager process = LocalProcessManager();
   final httpClient = io.HttpClient();
-  if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
+  if (FlutterOfflineFileComparator.isForEnvironment(platform)) {
+    goldenFileComparator = FlutterOfflineFileComparator.fromLocalFileComparator(
+      localFileComparator: goldenFileComparator as LocalFileComparator,
+      platform: platform,
+      namePrefix: namePrefix,
+      log: print,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
+  } else if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
       platform: platform,
@@ -118,7 +132,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
 /// Abstract base class golden file comparator specific to the `flutter/flutter`
 /// repository.
 ///
-/// Golden file testing for the `flutter/flutter` repository is handled by three
+/// Golden file testing for the `flutter/flutter` repository is handled by
 /// different [FlutterGoldenFileComparator]s, depending on the current testing
 /// environment.
 ///
@@ -142,6 +156,11 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
 ///     generate failure output illustrating the found difference. If a baseline
 ///     is not found for a given test image, it will consider it a new test and
 ///     output the new image for verification.
+///
+///   * The [FlutterOfflineFileComparator] is used where a test has no network
+///     and the runner has fetched Flutter Gold's expectations beforehand. This
+///     comparator decides as Gold does, by the image's digest, without
+///     reaching it.
 ///
 ///  The [FlutterSkippingFileComparator] is utilized to skip tests outside
 ///  of the appropriate environments described above. Currently, some Luci
@@ -539,6 +558,181 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
   /// for which failures cannot be resolved in a CI environment.
   static bool isForEnvironment(Platform platform) {
     return platform.environment.containsKey('SWARMING_TASK_ID');
+  }
+}
+
+/// A [FlutterGoldenFileComparator] that decides as Flutter Gold does, without
+/// reaching it.
+///
+/// An image passes when its digest ([goldDigest]) is one of those Gold holds
+/// as positive for the test, which is how `goldctl` passes or fails an image
+/// in post-submit. The digests are read from a file: the response of
+/// `https://flutter-gold.skia.org/json/v2/expectations`, or any part of its
+/// tests, named by the `FLUTTER_GOLD_EXPECTATIONS` environment variable.
+///
+/// This comparator is for runners that give a test no network and fetch what
+/// it needs beforehand, such as a build system that runs tests in a sandbox.
+/// Nothing is uploaded: an image Gold has not seen fails here, where the
+/// [FlutterPreSubmitFileComparator] would have sent it for triage.
+///
+/// A test without an entry in the file is taken for a new one, as the
+/// [FlutterLocalFileComparator] takes a test Gold has no baseline for: its
+/// image is written out and the comparison passes.
+///
+/// The images that fail, and those of new tests, are written to the directory
+/// named by the `FLUTTER_GOLD_FAILURES` environment variable, or to
+/// `failures` under [basedir] without it. A runner that moves that directory
+/// once the test is over (one that collects a test's outputs) says where it
+/// will be found in `FLUTTER_GOLD_FAILURES_LOCATION`, which is then the place
+/// the messages name.
+///
+/// See also:
+///
+///  * [GoldenFileComparator], the abstract class that
+///    [FlutterGoldenFileComparator] implements.
+///  * [FlutterLocalFileComparator], another
+///    [FlutterGoldenFileComparator] that asks Gold for a baseline image as each
+///    test runs, and compares pixels.
+///  * [FlutterPostSubmitFileComparator], another
+///    [FlutterGoldenFileComparator] that uploads tests to the Skia Gold
+///    dashboard.
+class FlutterOfflineFileComparator extends FlutterGoldenFileComparator {
+  /// Creates a [FlutterOfflineFileComparator] that will test golden file
+  /// images against [expectations].
+  ///
+  /// The [fs] parameter is useful in tests, where the default
+  /// file system can be replaced by mock instances.
+  FlutterOfflineFileComparator(
+    super.basedir,
+    super.skiaClient,
+    this.expectations, {
+    this.failures,
+    this.failuresLocation,
+    super.namePrefix,
+    required super.fs,
+    required super.platform,
+    required super.log,
+  });
+
+  /// The digests Flutter Gold holds as positive for each test, by the test's
+  /// name.
+  final Map<String, Set<String>> expectations;
+
+  /// The directory that images are written to when they fail or belong to a
+  /// new test, if not `failures` under [basedir].
+  final Directory? failures;
+
+  /// Where the reader of a message will find [failures], if not where it is
+  /// while the test runs.
+  final String? failuresLocation;
+
+  /// Creates a new [FlutterOfflineFileComparator] that mirrors the
+  /// relative path resolution of the given [localFileComparator], with the
+  /// expectations and the directory for failures that the environment names.
+  static FlutterOfflineFileComparator fromLocalFileComparator({
+    required LocalFileComparator localFileComparator,
+    required Platform platform,
+    String? namePrefix,
+    required LogCallback log,
+    required FileSystem fs,
+    required ProcessManager process,
+    required io.HttpClient httpClient,
+  }) {
+    final Uri basedir = localFileComparator.basedir;
+    final skiaClient = SkiaGoldClient(
+      fs.directory(basedir),
+      platform: platform,
+      log: log,
+      fs: fs,
+      process: process,
+      httpClient: httpClient,
+    );
+    final String? failures = platform.environment[_kGoldFailuresKey];
+    final String? failuresLocation = platform.environment[_kGoldFailuresLocationKey];
+    return FlutterOfflineFileComparator(
+      basedir,
+      skiaClient,
+      readExpectations(fs.file(platform.environment[_kGoldExpectationsKey])),
+      failures: failures == null || failures.isEmpty ? null : fs.directory(failures),
+      failuresLocation: failuresLocation == null || failuresLocation.isEmpty
+          ? null
+          : failuresLocation,
+      namePrefix: namePrefix,
+      platform: platform,
+      log: log,
+      fs: fs,
+    );
+  }
+
+  /// Reads the positive digests of each test from [file], which holds the
+  /// response of Flutter Gold's `/json/v2/expectations` or one with fewer
+  /// tests: `{"primary": {"<test>": {"<digest>": "positive", ...}, ...}}`.
+  ///
+  /// Throws a [FormatException] if the file holds anything else.
+  static Map<String, Set<String>> readExpectations(File file) {
+    final Object? response = json.decode(file.readAsStringSync());
+    final Object? tests = response is Map<String, Object?> ? response['primary'] : null;
+    if (tests is! Map<String, Object?>) {
+      throw FormatException('${file.path} does not hold the expectations of Flutter Gold.');
+    }
+    return <String, Set<String>>{
+      for (final MapEntry<String, Object?> test in tests.entries)
+        if (test.value case final Map<String, Object?> digests)
+          test.key: <String>{
+            for (final MapEntry<String, Object?> digest in digests.entries)
+              if (digest.value == 'positive') digest.key,
+          },
+    };
+  }
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    golden = _addPrefix(golden);
+    final String testName = skiaClient.cleanTestName(golden.path);
+    final Set<String>? positives = expectations[testName];
+
+    if (positives == null || positives.isEmpty) {
+      final String image = await _writeImage(golden, imageBytes);
+      log(
+        'No expectations of Flutter Gold were given to this run for test: $golden. '
+        'This may be a new test. If this is an unexpected result, check '
+        'https://flutter-gold.skia.org.\n'
+        'Validate image output found at $image',
+      );
+      return true;
+    }
+
+    final String digest = goldDigest(imageBytes);
+    if (positives.contains(digest)) {
+      return true;
+    }
+
+    final String image = await _writeImage(golden, imageBytes);
+    throw FlutterError(
+      'Golden "$golden": the image is not one that Flutter Gold accepts for this test.\n'
+      'Its digest is $digest; Gold holds ${positives.length} positive '
+      '${positives.length == 1 ? 'digest' : 'digests'} for the test, for example '
+      'https://flutter-gold.skia.org/img/images/${positives.first}.png\n'
+      'The image was written to $image',
+    );
+  }
+
+  /// Decides, based on the current environment, if this comparator should be
+  /// used: when the environment names a file of expectations.
+  static bool isForEnvironment(Platform platform) {
+    return platform.environment[_kGoldExpectationsKey]?.isNotEmpty ?? false;
+  }
+
+  /// Writes the image out, and returns its path as a message should give it.
+  Future<String> _writeImage(Uri golden, Uint8List imageBytes) async {
+    final Directory directory = failures ?? fs.directory(basedir).childDirectory('failures');
+    final File image = directory.childFile(golden.path);
+    await image.parent.create(recursive: true);
+    await image.writeAsBytes(imageBytes, flush: true);
+    return switch (failuresLocation) {
+      final String location => fs.path.join(location, golden.path),
+      null => image.path,
+    };
   }
 }
 

@@ -116,9 +116,15 @@ Map<String, String> bazelEnvironment() {
 /// run whatever fails, failures' output only; the targets of another host
 /// skipped rather than refused (the tool's apple shard is declared on every
 /// host); the bots' .bazelrc config, remote execution and sandbox location.
+///
+/// On a bot the golden comparisons compare nothing: off a bot a test fails an
+/// image that is none of those Flutter Gold accepts
+/// (`//build_defs/dart:golden_comparisons`), but a bot's part is to send such
+/// an image to Gold for triage, which the Bazel shards do not do yet.
 List<String> bazelTestOptions() {
   return <String>[
     if (isLuci) '--config=ci',
+    if (isLuci) '--no//build_defs/dart:golden_comparisons',
     '--config=prebuilt_engine',
     '--keep_going',
     '--test_output=errors',
