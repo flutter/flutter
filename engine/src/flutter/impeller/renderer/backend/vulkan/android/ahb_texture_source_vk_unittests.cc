@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <android/hardware_buffer.h>
 #include <memory>
 
@@ -10,8 +11,10 @@
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 
@@ -206,13 +209,23 @@ TEST(AndroidVulkanTest, TextureSourceDeleteAfterContextDelete) {
       /*mip_level=*/0,
       /*slice=*/0);
 
+  auto called = GetMockVulkanFunctions(context->GetDevice());
+
   // Delete the context and its VkDevice.
   context->Shutdown();
   context.reset();
 
+  EXPECT_NE(std::find(called->begin(), called->end(), "vkDestroyDevice"),
+            called->end());
+
   // Delete the AHBTextureSourceVK and verify that the destructor does not call
   // Vulkan APIs on a VkDevice that is no longer valid.
   texture.reset();
+
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyFramebuffer"),
+            called->end());
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyRenderPass"),
+            called->end());
 }
 
 }  // namespace impeller::android::testing

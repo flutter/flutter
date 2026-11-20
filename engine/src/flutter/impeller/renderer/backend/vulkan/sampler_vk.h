@@ -20,7 +20,7 @@ class YUVConversionVK;
 
 class SamplerVK final : public Sampler, public BackendCast<SamplerVK, Sampler> {
  public:
-  SamplerVK(std::weak_ptr<DeviceHolderVK> device_holder,
+  SamplerVK(const std::shared_ptr<DeviceHolderVK>& device_holder,
             const SamplerDescriptor&,
             std::shared_ptr<YUVConversionVK> yuv_conversion = {});
 

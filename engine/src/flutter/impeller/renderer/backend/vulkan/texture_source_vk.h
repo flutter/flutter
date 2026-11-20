@@ -179,6 +179,9 @@ class TextureSourceVK {
 
   /// Clear cached framebuffers and render passes before subclass members
   /// release their DeviceHolderVK references.
+  ///
+  /// Must only be called from subclass destructors, as `frame_data_` is not
+  /// synchronized.
   void ClearCachedFrameData();
 
  private:
