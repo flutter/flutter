@@ -851,6 +851,9 @@ class RenderListWheelViewport extends RenderBox
   @override
   bool paintsChild(RenderBox child) {
     assert(child.parent == this);
+    if (!hasSize) {
+      return false;
+    }
     final childParentData = child.parentData! as ListWheelParentData;
     // This render object is a repaint boundary, so it is always painted at
     // Offset.zero.

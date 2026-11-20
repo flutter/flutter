@@ -321,7 +321,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   @override
   bool paintsChild(RenderBox child) {
     assert(child.parent == this);
-    return !size.isEmpty;
+    return hasSize && !size.isEmpty;
   }
 
   @override

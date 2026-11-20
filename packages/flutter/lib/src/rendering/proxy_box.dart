@@ -2730,6 +2730,9 @@ class RenderTransform extends RenderProxyBox {
   @override
   bool paintsChild(RenderBox child) {
     assert(child.parent == this);
+    if (!hasSize) {
+      return false;
+    }
     if (filterQuality != null) {
       return true;
     }
