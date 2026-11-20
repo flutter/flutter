@@ -155,6 +155,8 @@ Future<void> main(List<String> args) async {
       'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
       'customer_testing': customerTestingRunner,
+      'customer_testing_devtools': customerTestingDevtoolsRunner,
+      'customer_testing_flame': customerTestingFlameRunner,
       'analyze': analyzeRunner,
       'fuchsia_precache': fuchsiaPrecacheRunner,
       'snippets': _runSnippetsTests,
@@ -348,7 +350,12 @@ Future<void> runForbiddenFromReleaseTests() async {
     '--forbidden-type',
     'package:flutter/src/widgets/framework.dart::Widget',
   ];
-  await runCommand(dart, smokeTestArgs, workingDirectory: flutterRoot, expectNonZeroExit: true);
+  await runCommand(
+    dart,
+    smokeTestArgs,
+    workingDirectory: flutterRoot,
+    expectedExit: ExpectedExit.nonZero,
+  );
 
   // Actual test.
   final args = <String>[
@@ -385,6 +392,10 @@ Future<void> _runBuildTests() async {
           .cast<Directory>()
           .toList()
         ..add(Directory(path.join(flutterRoot, 'packages', 'integration_test', 'example')))
+        // Depends on the google_mobile_ads plugin, so its Android and iOS builds
+        // exercise native plugin integration that would otherwise only be built
+        // by post-submit devicelab benchmarks. See flutter/flutter#185538.
+        ..add(Directory(path.join(flutterRoot, 'dev', 'benchmarks', 'platform_views_layout')))
         ..add(
           Directory(
             path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'),
@@ -684,17 +695,12 @@ bool _allTargetsCached(File performanceFile) {
   return targets.every((Map<String, Object?> element) => element['skipped'] == true);
 }
 
-Future<void> _flutterBuildDart2js(
-  String relativePathToApplication,
-  String target, {
-  bool expectNonZeroExit = false,
-}) async {
+Future<void> _flutterBuildDart2js(String relativePathToApplication, String target) async {
   printProgress('${green}Testing Dart2JS build$reset for $cyan$relativePathToApplication$reset...');
   await runCommand(
     flutter,
     <String>['build', 'web', '-v', '--target=$target'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: expectNonZeroExit,
     environment: <String, String>{'FLUTTER_WEB': 'true'},
   );
 }

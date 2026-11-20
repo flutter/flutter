@@ -197,9 +197,6 @@ class AnalyzeCommand extends FlutterCommand {
   final bool _suppressAnalytics;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   String get name => 'analyze';
 
   @override

@@ -24,6 +24,7 @@ import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -45,6 +46,7 @@ class BuildCommand extends FlutterCommand {
     required AppleContext appleContext,
     required BuildSystem buildSystem,
     required FeatureFlags featureFlags,
+    required TemplatePathProvider templatePathProvider,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     AndroidBuilder? androidBuilder,
@@ -58,7 +60,7 @@ class BuildCommand extends FlutterCommand {
       appleContext: appleContext,
       toolContext: toolContext,
     );
-    final AndroidBuilder effectiveAndroidBuilder =
+    final AndroidBuilder resolvedAndroidBuilder =
         androidBuilder ??
         AndroidGradleBuilder.fromContexts(
           analytics: analytics,
@@ -67,7 +69,7 @@ class BuildCommand extends FlutterCommand {
         );
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -76,7 +78,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -85,9 +87,10 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: resolvedAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -129,6 +132,7 @@ class BuildCommand extends FlutterCommand {
         cocoaPods: appleContext.cocoaPods,
         codesign: codesign,
         featureFlags: featureFlags,
+        templatePathProvider: templatePathProvider,
         templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
@@ -147,6 +151,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildBundleCommand(
+        androidContext: androidContext,
         buildSystem: buildSystem,
         featureFlags: featureFlags,
         toolContext: toolContext,
@@ -225,9 +230,6 @@ class BuildCommand extends FlutterCommand {
   }
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final String name = 'build';
 
   @override
@@ -251,7 +253,7 @@ abstract class BuildSubCommand extends FlutterCommand {
     required this.logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
+    required super.toolContext,
   }) {
     requiresPubspecYaml();
     CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
@@ -269,13 +271,9 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
     required this.target,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const BuildModeOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.target,
@@ -287,9 +285,6 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   /// The custom build target definition provided by the tool extension.
   final ExtensionBuildTarget target;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => target.name;
