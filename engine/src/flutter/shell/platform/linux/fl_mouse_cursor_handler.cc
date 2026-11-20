@@ -126,7 +126,9 @@ static void fl_mouse_cursor_handler_class_init(
 }
 
 static void fl_mouse_cursor_handler_init(FlMouseCursorHandler* self) {
-  self->cursor_name = g_strdup("");
+  // Start with a valid cursor name: FlView applies the cursor before the
+  // framework activates one, and GDK warns when asked to load an empty name.
+  self->cursor_name = g_strdup(kFallbackCursor);
 }
 
 static FlMouseCursorChannelVTable mouse_cursor_vtable = {

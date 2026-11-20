@@ -31,13 +31,15 @@ static gboolean activate_system_cursor(FlMockBinaryMessenger* messenger,
   return called;
 }
 
-// A newly created handler has no cursor set.
+// A newly created handler uses the GTK "default" cursor, so the view never
+// asks GDK to load a cursor with an empty name.
+// Regression test for https://github.com/flutter/flutter/issues/196636.
 TEST(FlMouseCursorHandlerTest, InitialCursorName) {
   g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
   g_autoptr(FlMouseCursorHandler) handler =
       fl_mouse_cursor_handler_new(FL_BINARY_MESSENGER(messenger));
 
-  EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "");
+  EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "default");
 }
 
 // Activating a known cursor kind maps it to the matching GTK cursor name.
@@ -139,7 +141,7 @@ TEST(FlMouseCursorHandlerTest, BadArguments) {
   EXPECT_TRUE(called);
 
   // The cursor is unchanged.
-  EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "");
+  EXPECT_STREQ(fl_mouse_cursor_handler_get_cursor_name(handler), "default");
 }
 
 // An unknown method returns a not-implemented response.
