@@ -53,7 +53,11 @@ void main() {
       log.single,
       isMethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
-        arguments: <String, dynamic>{'label': '', 'primaryColor': 4278255360},
+        arguments: <String, dynamic>{
+          'label': '',
+          'primaryColor': 4278255360,
+          'viewId': tester.view.viewId,
+        },
       ),
     );
   });
@@ -88,7 +92,11 @@ void main() {
         log.single,
         isMethodCall(
           'SystemChrome.setApplicationSwitcherDescription',
-          arguments: <String, dynamic>{'label': '', 'primaryColor': 4278255360},
+          arguments: <String, dynamic>{
+            'label': '',
+            'primaryColor': 4278255360,
+            'viewId': tester.view.viewId,
+          },
         ),
       );
     },
@@ -126,14 +134,22 @@ void main() {
         log.first,
         isMethodCall(
           'SystemChrome.setApplicationSwitcherDescription',
-          arguments: <String, dynamic>{'label': 'title', 'primaryColor': 4278255360},
+          arguments: <String, dynamic>{
+            'label': 'title',
+            'primaryColor': 4278255360,
+            'viewId': tester.view.viewId,
+          },
         ),
       );
       expect(
         log.last,
         isMethodCall(
           'SystemChrome.setApplicationSwitcherDescription',
-          arguments: <String, dynamic>{'label': 'title2', 'primaryColor': 4278255362},
+          arguments: <String, dynamic>{
+            'label': 'title2',
+            'primaryColor': 4278255362,
+            'viewId': tester.view.viewId,
+          },
         ),
       );
     },

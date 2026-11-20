@@ -556,12 +556,20 @@ abstract final class SystemChrome {
   ///
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
+  ///
+  /// If `viewId` is provided, embedders that support multiple windows apply the
+  /// description to the window showing that view.
   static Future<void> setApplicationSwitcherDescription(
-    ApplicationSwitcherDescription description,
-  ) async {
+    ApplicationSwitcherDescription description, {
+    int? viewId,
+  }) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
-      <String, dynamic>{'label': description.label, 'primaryColor': description.primaryColor},
+      <String, dynamic>{
+        'label': description.label,
+        'primaryColor': description.primaryColor,
+        'viewId': ?viewId,
+      },
     );
   }
 
