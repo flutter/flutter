@@ -633,7 +633,9 @@ mixin _Gtk4PopoverWindowControllerLinux on BaseWindowControllerLinux {
     // Flutter manages focus internally, so the GtkRoot can have no focused
     // widget. GtkPopover's focus traversal assumes one exists when autohide
     // is enabled; use the parent view as its native focus fallback.
-    _parentView!.grabFocus();
+    _parentView!
+      ..setFocusable(true)
+      ..grabFocus();
     _popover.popup();
   }
 
@@ -808,6 +810,16 @@ class DialogWindowControllerLinux extends DialogWindowController
     _GtkWindow? parentWindow;
     if (parent != null) {
       parentWindow = owner.registrar._windowForViewId(parent.rootView.viewId);
+      if (_LinuxWindowing.gtkMajorVersion >= 4) {
+        // Popovers have views but no GtkWindow to use as a transient parent.
+        for (
+          BaseWindowController? ancestor = _parentOf(parent);
+          parentWindow == null && ancestor != null;
+          ancestor = _parentOf(ancestor)
+        ) {
+          parentWindow = owner.registrar._windowForViewId(ancestor.rootView.viewId);
+        }
+      }
       if (parentWindow == null) {
         throw Exception('Failed to find dialog parent window');
       }
@@ -850,7 +862,8 @@ class DialogWindowControllerLinux extends DialogWindowController
     // PopupWindowControllerLinux._hasOpenDialog.
     for (var ancestor = parent; ancestor != null; ancestor = _parentOf(ancestor)) {
       if (ancestor is PopupWindowControllerLinux) {
-        ancestor._dialogDescendants.add(this);
+        _ancestorPopups.add(ancestor);
+        ancestor._dialogOpened(this);
       }
     }
   }
@@ -858,6 +871,7 @@ class DialogWindowControllerLinux extends DialogWindowController
   @override
   final WindowingOwnerLinux _owner;
   final DialogWindowControllerDelegate _delegate;
+  final List<PopupWindowControllerLinux> _ancestorPopups = <PopupWindowControllerLinux>[];
   @override
   late final _GtkWindow _window;
   final BaseWindowController? _parent;
@@ -872,6 +886,10 @@ class DialogWindowControllerLinux extends DialogWindowController
 
   @override
   void _onWindowDestroyed() {
+    for (final PopupWindowControllerLinux popup in _ancestorPopups.reversed) {
+      popup._dialogClosed(this);
+    }
+    _ancestorPopups.clear();
     _delegate.onWindowDestroyed();
   }
 
@@ -1340,8 +1358,44 @@ class PopupWindowControllerLinux extends PopupWindowController
     );
   }
 
+  void _dialogOpened(DialogWindowControllerLinux dialog) {
+    final bool hadDialog = _hasOpenDialog;
+    _dialogDescendants.add(dialog);
+    if (_LinuxWindowing.gtkMajorVersion >= 4 && !hadDialog && !_destroyed) {
+      // Release the popover's native grab before the modal dialog is presented.
+      // Keep the Flutter view mounted so the popup can resume after the dialog.
+      _popover.popdown();
+    }
+  }
+
+  void _dialogClosed(DialogWindowControllerLinux dialog) {
+    _dialogDescendants.remove(dialog);
+    if (_LinuxWindowing.gtkMajorVersion >= 4 && !_destroyed && !_hasOpenDialog) {
+      // Let GTK finish destroying and deactivating the dialog before remapping.
+      scheduleMicrotask(() {
+        if (!_destroyed && !_parent.isDestroyed) {
+          _showPopover();
+        }
+      });
+    }
+  }
+
+  @override
+  void _showPopover() {
+    if (!_hasOpenDialog) {
+      super._showPopover();
+    }
+  }
+
   void _handlePopoverClosed() {
-    _disposePopover();
+    if (!_hasOpenDialog) {
+      // GTK still accesses the popover after emitting the closed signal.
+      scheduleMicrotask(() {
+        if (!_hasOpenDialog) {
+          _disposePopover();
+        }
+      });
+    }
   }
 
   void _disposePopover() {
@@ -1803,6 +1857,15 @@ class _GtkWidget extends _GObject {
   bool grabFocus() {
     return _gtkWidgetGrabFocus(instance);
   }
+
+  void setFocusable(bool focusable) {
+    _gtkWidgetSetFocusable(instance, focusable ? 1 : 0);
+  }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int)>(
+    symbol: 'gtk_widget_set_focusable',
+  )
+  external static void _gtkWidgetSetFocusable(ffi.Pointer<ffi.NativeType> widget, int focusable);
 
   /// Sets [parent] as this widget's parent.
   void setParent(_GtkWidget parent) {
