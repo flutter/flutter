@@ -186,6 +186,15 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
 ///        given command buffer, in call order.
 const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
 
+/// @brief Returns the pipeline stages passed to `vkCmdWriteTimestamp` calls on
+///        the given command buffer, in call order.
+const std::vector<VkPipelineStageFlagBits>& GetRecordedTimestamps(
+    VkCommandBuffer buffer);
+
+/// @brief Returns the `queryCount` values passed to `vkGetQueryPoolResults`
+///        calls on the given device, in call order.
+std::vector<uint32_t> GetQueryPoolResultCounts(VkDevice device);
+
 }  // namespace testing
 }  // namespace impeller
 

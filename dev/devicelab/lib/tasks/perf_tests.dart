@@ -32,6 +32,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool badScroll = false,
   bool? enableImpeller,
   bool forceOpenGLES = false,
+  bool enableFixedPerformanceMode = true,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -40,6 +41,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
+    enableFixedPerformanceMode: enableFixedPerformanceMode,
   ).run;
 }
 
@@ -1247,6 +1249,7 @@ class PerfTest {
     this.enableMergedPlatformThread = false,
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
+    this.enableFixedPerformanceMode = true,
     this.createPlatforms = const <String>[],
   });
 
@@ -1270,6 +1273,7 @@ class PerfTest {
     this.enableMergedPlatformThread = false,
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
+    this.enableFixedPerformanceMode = true,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
        timelineFileName = null;
@@ -1331,6 +1335,14 @@ class PerfTest {
   /// Whether to defer construction of all PSO objects in the Impeller backend.
   final bool enableLazyShaderMode;
 
+  /// Whether to enable Android's fixed-performance mode while running the test.
+  ///
+  /// Defaults to `true` to pin CPU clocks and reduce benchmark noise. When set
+  /// to `false`, fixed-performance mode is explicitly disabled before running
+  /// the benchmark so that performance is measured under the normal OS CPU
+  /// governor.
+  final bool enableFixedPerformanceMode;
+
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
 
@@ -1373,7 +1385,6 @@ class PerfTest {
       late Device selectedDevice;
       selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
-      await selectedDevice.toggleFixedPerformanceMode(true);
 
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
@@ -1416,6 +1427,7 @@ class PerfTest {
         }
       }
 
+      await selectedDevice.toggleFixedPerformanceMode(enableFixedPerformanceMode);
       try {
         if (enableImpeller ?? false) {
           changedManifest = true;
@@ -1472,7 +1484,9 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
-        await selectedDevice.toggleFixedPerformanceMode(false);
+        if (enableFixedPerformanceMode) {
+          await selectedDevice.toggleFixedPerformanceMode(false);
+        }
       }
 
       final data = json.decode(
