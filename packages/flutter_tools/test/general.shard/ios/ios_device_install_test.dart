@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -372,6 +373,7 @@ IOSDevice setUpIOSDevice({
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: FakeXcode(),
     sdkVersion: '13.3',
@@ -396,6 +398,11 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+      analytics: const NoOpAnalytics(),
+      logger: logger,
+      platform: platform,
+    ),
     templateRenderer: FakeTemplateRenderer(),
   );
 }

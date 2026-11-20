@@ -1069,6 +1069,7 @@ void main() {
       );
       final customDevice = CustomDevice(
         config: customDeviceConfig,
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
         analytics: const NoOpAnalytics(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const NoOpBuildTargets(),

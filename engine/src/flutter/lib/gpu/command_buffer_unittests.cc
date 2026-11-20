@@ -7,11 +7,14 @@
 #include <memory>
 #include <vector>
 
+#include "flutter/lib/gpu/device_buffer.h"
 #include "flutter/lib/gpu/render_pass.h"
 #include "flutter/lib/gpu/texture.h"
 #include "fml/memory/ref_ptr.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "impeller/core/device_buffer_descriptor.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "third_party/abseil-cpp/absl/status/status.h"
 
@@ -35,21 +38,21 @@ TEST(FlutterGpuCommandBufferTest,
   auto context = std::make_shared<MockImpellerContext>();
   auto impeller_command_buffer = std::make_shared<MockCommandBuffer>(context);
   auto command_queue = std::make_shared<MockCommandQueue>();
-  CommandBuffer command_buffer(context, impeller_command_buffer);
+  auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
 
   std::vector<impeller::CommandBuffer::Status> statuses;
 
-  EXPECT_TRUE(command_buffer.AddCompletionCallback(
+  EXPECT_TRUE(command_buffer->AddCompletionCallback(
       [&statuses](impeller::CommandBuffer::Status status) {
         statuses.push_back(status);
       }));
-  EXPECT_TRUE(command_buffer.AddCompletionCallback(
+  EXPECT_TRUE(command_buffer->AddCompletionCallback(
       [&statuses](impeller::CommandBuffer::Status status) {
         statuses.push_back(status);
       }));
 
-  EXPECT_CALL(*context, GetBackendType)
-      .WillOnce(Return(impeller::Context::BackendType::kMetal));
+  EXPECT_CALL(*context, CreateCommandBuffer)
+      .WillOnce(Return(impeller_command_buffer));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
   EXPECT_CALL(*command_queue, Submit(_, _))
       .WillOnce(DoAll(
@@ -61,7 +64,7 @@ TEST(FlutterGpuCommandBufferTest,
           },
           Return(absl::OkStatus())));
 
-  EXPECT_TRUE(command_buffer.Submit(
+  EXPECT_TRUE(command_buffer->Submit(
       [&statuses](impeller::CommandBuffer::Status status) {
         statuses.push_back(status);
       }));
@@ -75,17 +78,17 @@ TEST(FlutterGpuCommandBufferTest, RejectsCompletionCallbacksAfterSubmit) {
   auto context = std::make_shared<MockImpellerContext>();
   auto impeller_command_buffer = std::make_shared<MockCommandBuffer>(context);
   auto command_queue = std::make_shared<MockCommandQueue>();
-  CommandBuffer command_buffer(context, impeller_command_buffer);
+  auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
 
-  EXPECT_CALL(*context, GetBackendType)
-      .WillOnce(Return(impeller::Context::BackendType::kMetal));
+  EXPECT_CALL(*context, CreateCommandBuffer)
+      .WillOnce(Return(impeller_command_buffer));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
   EXPECT_CALL(*command_queue, Submit(_, _)).WillOnce(Return(absl::OkStatus()));
 
-  EXPECT_TRUE(command_buffer.Submit());
-  EXPECT_FALSE(command_buffer.AddCompletionCallback(
+  EXPECT_TRUE(command_buffer->Submit());
+  EXPECT_FALSE(command_buffer->AddCompletionCallback(
       [](impeller::CommandBuffer::Status status) { (void)status; }));
-  EXPECT_FALSE(command_buffer.Submit());
+  EXPECT_FALSE(command_buffer->Submit());
 }
 
 TEST(FlutterGpuCommandBufferTest,
@@ -93,29 +96,30 @@ TEST(FlutterGpuCommandBufferTest,
   auto context = std::make_shared<MockImpellerContext>();
   auto impeller_command_buffer = std::make_shared<MockCommandBuffer>(context);
   auto command_queue = std::make_shared<MockCommandQueue>();
-  CommandBuffer command_buffer(context, impeller_command_buffer);
+  auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
 
   std::vector<impeller::CommandBuffer::Status> statuses;
 
-  EXPECT_TRUE(command_buffer.AddCompletionCallback(
+  EXPECT_TRUE(command_buffer->AddCompletionCallback(
       [&statuses](impeller::CommandBuffer::Status status) {
         statuses.push_back(status);
       }));
 
-  EXPECT_CALL(*context, GetBackendType)
-      .WillOnce(Return(impeller::Context::BackendType::kMetal));
+  EXPECT_CALL(*context, CreateCommandBuffer)
+      .WillOnce(Return(impeller_command_buffer));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
   EXPECT_CALL(*command_queue, Submit(_, _))
       .WillOnce(Return(absl::Status(absl::StatusCode::kInternal,
                                     "Command queue submit failed.")));
 
-  EXPECT_FALSE(command_buffer.Submit());
+  EXPECT_FALSE(command_buffer->Submit());
   EXPECT_EQ(statuses.size(), 1u);
   EXPECT_EQ(statuses[0], impeller::CommandBuffer::Status::kError);
 }
 
 // The pass lifecycle tests heap-allocate the command buffer, since it is
 // ref-counted and asserts in debug builds when destroyed without a reference.
+// With no replay queue, a pass is encoded on this thread as soon as it ends.
 class FlutterGpuPassLifecycleTest : public ::testing::Test {
  protected:
   void SetUp() override {
@@ -126,16 +130,22 @@ class FlutterGpuPassLifecycleTest : public ::testing::Test {
     ON_CALL(*context_, GetBackendType)
         .WillByDefault(Return(impeller::Context::BackendType::kMetal));
     ON_CALL(*context_, GetCommandQueue).WillByDefault(Return(command_queue_));
-    command_buffer_ =
-        fml::MakeRefCounted<CommandBuffer>(context_, impeller_command_buffer_);
+    ON_CALL(*context_, CreateCommandBuffer)
+        .WillByDefault(Return(impeller_command_buffer_));
+    command_buffer_ = fml::MakeRefCounted<CommandBuffer>(context_);
 
     impeller::TextureDescriptor texture_desc;
     texture_desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
     texture_desc.size = impeller::ISize(4, 4);
+    texture_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
     auto texture = std::make_shared<NiceMock<MockTexture>>(texture_desc);
+    ON_CALL(*texture, IsValid).WillByDefault(Return(true));
     ON_CALL(*texture, GetSize).WillByDefault(Return(impeller::ISize(4, 4)));
     texture_ = fml::MakeRefCounted<Texture>(texture);
   }
+
+  // Default actions can form a cycle through the context.
+  void TearDown() override { ::testing::Mock::VerifyAndClear(context_.get()); }
 
   std::shared_ptr<MockRenderPass> MakeRenderPass() {
     auto pass = std::make_shared<NiceMock<MockRenderPass>>(
@@ -148,6 +158,17 @@ class FlutterGpuPassLifecycleTest : public ::testing::Test {
     auto pass = std::make_shared<NiceMock<MockBlitPass>>();
     ON_CALL(*pass, IsValid).WillByDefault(Return(true));
     ON_CALL(*pass, OnCopyTextureToTextureCommand).WillByDefault(Return(true));
+    return pass;
+  }
+
+  // A pass rendering into `texture_`.
+  fml::RefPtr<RenderPass> MakePass() {
+    impeller::ColorAttachment color;
+    color.texture = texture_->GetTexture();
+    color.load_action = impeller::LoadAction::kClear;
+    color.store_action = impeller::StoreAction::kStore;
+    auto pass = fml::MakeRefCounted<RenderPass>();
+    pass->GetRenderTarget().SetColorAttachment(color, 0);
     return pass;
   }
 
@@ -195,10 +216,10 @@ TEST_F(FlutterGpuPassLifecycleTest,
   }
 
   EXPECT_TRUE(Copy());
-  EXPECT_EQ(command_buffer_->CreateRenderPass(impeller::RenderTarget()),
-            render_a);
-  EXPECT_EQ(command_buffer_->CreateRenderPass(impeller::RenderTarget()),
-            render_b);
+  auto pass_a = MakePass();
+  ASSERT_TRUE(pass_a->Begin(*command_buffer_));
+  auto pass_b = MakePass();
+  ASSERT_TRUE(pass_b->Begin(*command_buffer_));
   EXPECT_TRUE(Copy());
   EXPECT_TRUE(Copy());
   EXPECT_TRUE(command_buffer_->Submit());
@@ -214,10 +235,10 @@ TEST_F(FlutterGpuPassLifecycleTest, EndEncodesThePassOnce) {
     EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
-  auto pass = fml::MakeRefCounted<RenderPass>();
+  auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer_));
-  EXPECT_TRUE(pass->End());
-  EXPECT_TRUE(pass->End());
+  pass->End();
+  pass->End();
   EXPECT_TRUE(command_buffer_->Submit());
 }
 
@@ -230,45 +251,54 @@ TEST_F(FlutterGpuPassLifecycleTest,
     EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
         .WillOnce(Return(render_a));
     EXPECT_CALL(*render_a, OnEncodeCommands).WillOnce(Return(true));
+    // pass_b stays open until Submit, so its encoding comes after this.
     EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
         .WillOnce(Return(render_b));
     EXPECT_CALL(*render_b, OnEncodeCommands).WillOnce(Return(true));
     EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
   }
 
-  auto pass_a = fml::MakeRefCounted<RenderPass>();
-  auto pass_b = fml::MakeRefCounted<RenderPass>();
+  auto pass_a = MakePass();
+  auto pass_b = MakePass();
   ASSERT_TRUE(pass_a->Begin(*command_buffer_));
   ASSERT_TRUE(pass_b->Begin(*command_buffer_));
   // pass_b is still open, so this must not end it.
-  EXPECT_TRUE(pass_a->End());
+  pass_a->End();
+  EXPECT_NE(pass_b->GetRecordingForTesting(), nullptr);
   EXPECT_TRUE(command_buffer_->Submit());
 }
 
+// OpenGL ES encoding hands the reactor raw pointers into the recordings, which
+// only a submitted command buffer keeps alive.
 TEST_F(FlutterGpuPassLifecycleTest, OpenGLESDefersEncodingToSubmit) {
   ON_CALL(*context_, GetBackendType)
       .WillByDefault(Return(impeller::Context::BackendType::kOpenGLES));
   auto render_a = MakeRenderPass();
   auto blit_a = MakeBlitPass();
   auto render_b = MakeRenderPass();
-  EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
-      .WillOnce(Return(render_a))
-      .WillOnce(Return(render_b));
-  EXPECT_CALL(*impeller_command_buffer_, OnCreateBlitPass)
-      .WillOnce(Return(blit_a));
-  EXPECT_CALL(*render_a, OnEncodeCommands).Times(0);
-  EXPECT_CALL(*blit_a, EncodeCommands).Times(0);
-  EXPECT_CALL(*render_b, OnEncodeCommands).Times(0);
+  {
+    InSequence sequence;
+    EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
+        .WillOnce(Return(render_a));
+    EXPECT_CALL(*impeller_command_buffer_, OnCreateBlitPass)
+        .WillOnce(Return(blit_a));
+    EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
+        .WillOnce(Return(render_b));
+    // Encoded in creation order, once submitted.
+    EXPECT_CALL(*render_a, OnEncodeCommands).WillOnce(Return(true));
+    EXPECT_CALL(*blit_a, EncodeCommands).WillOnce(Return(true));
+    EXPECT_CALL(*render_b, OnEncodeCommands).WillOnce(Return(true));
+    EXPECT_CALL(*command_queue_, Submit).WillOnce(Return(absl::OkStatus()));
+  }
 
-  // Submit posts to the raster thread, which needs a running isolate, so
-  // this only checks that ending passes does not encode them on GLES.
-  auto pass = fml::MakeRefCounted<RenderPass>();
-  ASSERT_TRUE(pass->Begin(*command_buffer_));
+  auto pass_a = MakePass();
+  ASSERT_TRUE(pass_a->Begin(*command_buffer_));
   EXPECT_TRUE(Copy());
   EXPECT_TRUE(Copy());
-  EXPECT_EQ(command_buffer_->CreateRenderPass(impeller::RenderTarget()),
-            render_b);
-  EXPECT_TRUE(pass->End());
+  auto pass_b = MakePass();
+  ASSERT_TRUE(pass_b->Begin(*command_buffer_));
+  pass_b->End();
+  EXPECT_TRUE(command_buffer_->Submit());
 }
 
 TEST_F(FlutterGpuPassLifecycleTest, FailingToEncodeAnEndedPassFailsSubmit) {
@@ -278,9 +308,9 @@ TEST_F(FlutterGpuPassLifecycleTest, FailingToEncodeAnEndedPassFailsSubmit) {
   EXPECT_CALL(*render_a, OnEncodeCommands).WillOnce(Return(false));
   EXPECT_CALL(*command_queue_, Submit).Times(0);
 
-  EXPECT_EQ(command_buffer_->CreateRenderPass(impeller::RenderTarget()),
-            render_a);
-  EXPECT_FALSE(Copy());
+  auto pass = MakePass();
+  ASSERT_TRUE(pass->Begin(*command_buffer_));
+  pass->End();
 
   std::vector<impeller::CommandBuffer::Status> statuses;
   EXPECT_FALSE(command_buffer_->Submit(
@@ -289,6 +319,55 @@ TEST_F(FlutterGpuPassLifecycleTest, FailingToEncodeAnEndedPassFailsSubmit) {
       }));
   ASSERT_EQ(statuses.size(), 1u);
   EXPECT_EQ(statuses[0], impeller::CommandBuffer::Status::kError);
+}
+
+// A pass already handed to the reactor points into the recordings, so they can
+// only be recycled once the reactor has run it, which the queue guarantees.
+TEST_F(FlutterGpuPassLifecycleTest,
+       OpenGLESFailuresStillFlushPassesTheReactorHolds) {
+  ON_CALL(*context_, GetBackendType)
+      .WillByDefault(Return(impeller::Context::BackendType::kOpenGLES));
+  auto render_a = MakeRenderPass();
+  auto render_b = MakeRenderPass();
+  EXPECT_CALL(*impeller_command_buffer_, OnCreateRenderPass)
+      .WillOnce(Return(render_a))
+      .WillOnce(Return(render_b));
+  {
+    InSequence sequence;
+    EXPECT_CALL(*render_a, OnEncodeCommands).WillOnce(Return(true));
+    EXPECT_CALL(*render_b, OnEncodeCommands).WillOnce(Return(false));
+    EXPECT_CALL(*command_queue_, Submit(_, _))
+        .WillOnce(DoAll(
+            [](const std::vector<std::shared_ptr<impeller::CommandBuffer>>&,
+               const impeller::CommandQueue::CompletionCallback& callback) {
+              callback(impeller::CommandBuffer::Status::kCompleted);
+            },
+            Return(absl::OkStatus())));
+  }
+
+  auto pass_a = MakePass();
+  ASSERT_TRUE(pass_a->Begin(*command_buffer_));
+  auto pass_b = MakePass();
+  ASSERT_TRUE(pass_b->Begin(*command_buffer_));
+
+  std::vector<impeller::CommandBuffer::Status> statuses;
+  EXPECT_FALSE(command_buffer_->Submit(
+      [&statuses](impeller::CommandBuffer::Status status) {
+        statuses.push_back(status);
+      }));
+  ASSERT_EQ(statuses.size(), 1u);
+  EXPECT_EQ(statuses[0], impeller::CommandBuffer::Status::kError);
+}
+
+TEST_F(FlutterGpuPassLifecycleTest, CopiesMustFitTheSourceBuffer) {
+  impeller::DeviceBufferDescriptor desc;
+  desc.size = 64;
+  auto buffer = fml::MakeRefCounted<DeviceBuffer>(
+      std::make_shared<NiceMock<::impeller::testing::MockDeviceBuffer>>(desc));
+  EXPECT_FALSE(command_buffer_->CopyBufferToTexture(
+      *buffer, 32, 64, *texture_, impeller::IRect::MakeXYWH(0, 0, 1, 1), 0, 0));
+  EXPECT_FALSE(command_buffer_->CopyBufferToTexture(
+      *buffer, 128, 0, *texture_, impeller::IRect::MakeXYWH(0, 0, 1, 1), 0, 0));
 }
 
 }  // namespace

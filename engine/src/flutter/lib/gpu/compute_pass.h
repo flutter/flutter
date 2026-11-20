@@ -20,11 +20,9 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/buffer_view.h"
-#include "impeller/core/raw_ptr.h"
-#include "impeller/core/sampler.h"
+#include "impeller/core/sampler_descriptor.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/core/texture.h"
-#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/pipeline.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "third_party/abseil-cpp/absl/status/status.h"
@@ -34,9 +32,10 @@ namespace gpu {
 
 /// A pass that dispatches compute work, recorded into a command buffer.
 ///
-/// Bindings are kept here, keyed by the shader binding they fill, and applied
-/// to the backend pass at the next dispatch after they change. They persist
-/// across dispatches until replaced or cleared.
+/// Bindings are kept here, keyed by the shader binding they fill, and recorded
+/// at the next dispatch after they change. They persist across dispatches
+/// until replaced or cleared. Keeping them here also lets a dispatch with a
+/// missing binding fail when it is recorded.
 class ComputePass : public RefCountedDartWrappable<ComputePass> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(ComputePass);
@@ -51,9 +50,8 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
   absl::Status Begin(flutter::gpu::CommandBuffer& command_buffer);
 
   /// Ends this pass if it is still the command buffer's open pass. Does
-  /// nothing if a later command already ended it. Returns an error if the
-  /// pass fails to encode.
-  absl::Status End();
+  /// nothing if a later command already ended it.
+  void End();
 
   /// The context of the command buffer this pass records into. Null before
   /// `Begin`.
@@ -80,12 +78,11 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
       size_t length_in_bytes);
 
   /// The texture counterpart to `BindUniform`. Returns an error if the
-  /// texture or sampler is null.
-  absl::Status BindTexture(
-      const Shader& shader,
-      const Shader::TextureBinding* binding,
-      std::shared_ptr<const impeller::Texture> texture,
-      const impeller::raw_ptr<const impeller::Sampler>& sampler);
+  /// texture is null. The sampler is resolved when the pass is replayed.
+  absl::Status BindTexture(const Shader& shader,
+                           const Shader::TextureBinding* binding,
+                           std::shared_ptr<const impeller::Texture> texture,
+                           const impeller::SamplerDescriptor& sampler);
 
   /// The number of binding set slots a pass can hold at once. Mirrors
   /// `ComputePass.maxBindingSets` in `gpu/lib/src/compute_pass.dart`.
@@ -97,32 +94,37 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
 
   void ClearBindings();
 
-  /// Dispatches a grid of workgroups with the bound pipeline and bindings.
-  /// Returns an error if nothing is bound, a binding the shader declares is
-  /// missing, the count exceeds the device limit, or the backend fails.
-  /// Dispatching zero workgroups along any dimension does nothing.
+  /// Records a dispatch of a grid of workgroups with the bound pipeline and
+  /// bindings. Returns an error if nothing is bound, a binding the shader
+  /// declares is missing, or the count exceeds the device limit. Dispatching
+  /// zero workgroups along any dimension does nothing.
   absl::Status Dispatch(std::array<uint32_t, 3> workgroup_count);
 
-  /// Hands the backend pass a resource for every binding `shader` declares,
-  /// taking each from an individual bind if there is one, and otherwise from
-  /// the highest binding set slot that holds it. Returns an error naming the
-  /// first binding with no resource. Called by `Dispatch` whenever a binding
-  /// or the pipeline changed since the last dispatch.
+  /// Records a resource for every binding `shader` declares, taking each from
+  /// an individual bind if there is one, and otherwise from the highest
+  /// binding set slot that holds it. Returns an error naming the first binding
+  /// with no resource. Called by `Dispatch` whenever a binding or the pipeline
+  /// changed since the last dispatch.
   absl::Status ApplyBindings(const Shader& shader);
 
  private:
   /// A texture bound individually, with the sampler to read it with.
   struct TextureBinding {
     std::shared_ptr<const impeller::Texture> texture;
-    impeller::raw_ptr<const impeller::Sampler> sampler;
+    /// A `SamplerDescriptor::ToKey` key.
+    uint64_t sampler_key = 0;
   };
 
+  /// The recording while this pass is the command buffer's open pass.
+  PassRecording* GetRecording() const {
+    return command_buffer_ ? command_buffer_->GetOpenPass(this) : nullptr;
+  }
+
   std::shared_ptr<impeller::Context> context_;
-  std::shared_ptr<impeller::ComputePass> compute_pass_;
   fml::RefPtr<CommandBuffer> command_buffer_;
 
   fml::RefPtr<ComputePipeline> pipeline_;
-  // The backend pipeline last set on `compute_pass_`.
+  // The backend pipeline last recorded.
   std::shared_ptr<BackendComputePipeline> bound_pipeline_;
 
   // Individual bindings, keyed by the shader metadata of the binding they
@@ -133,7 +135,7 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
   absl::flat_hash_map<const impeller::ShaderMetadata*, TextureBinding>
       texture_bindings_;
   std::array<fml::RefPtr<BindingSet>, kMaxBindingSets> binding_sets_;
-  // Whether a binding changed since the backend pass last received them.
+  // Whether a binding changed since they were last recorded.
   bool bindings_dirty_ = true;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ComputePass);

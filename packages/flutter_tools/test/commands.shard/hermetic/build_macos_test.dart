@@ -542,6 +542,42 @@ STDERR STUFF
   );
 
   testUsingContext(
+    'macOS build writes the app deployment target to Flutter-Generated.xcconfig',
+    () async {
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createFakeBuildCommand(
+        fileSystem: fileSystem,
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        platform: macosPlatform,
+        featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
+          overrides: <String, String>{'MACOSX_DEPLOYMENT_TARGET': '14.4.1'},
+        ),
+      );
+
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'macos', '--config-only', '--no-pub']);
+
+      expect(
+        fileSystem.file('macos/Flutter/ephemeral/Flutter-Generated.xcconfig').readAsStringSync(),
+        contains('FLUTTER_MACOS_DEPLOYMENT_TARGET=14.4.1'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => macosPlatform,
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'MACOSX_DEPLOYMENT_TARGET': '14.4.1'},
+      ),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+    },
+  );
+
+  testUsingContext(
     'macOS build invokes xcode build (profile)',
     () async {
       createMinimalMockProjectFiles();
