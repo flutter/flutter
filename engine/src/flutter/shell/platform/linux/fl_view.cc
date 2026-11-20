@@ -4,7 +4,6 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
-#include <cmath>
 #include <cstring>
 
 #include "flutter/common/constants.h"
@@ -21,7 +20,6 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 #if FLUTTER_LINUX_GTK4
-#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 #else
@@ -44,17 +42,20 @@ static void fl_renderable_iface_init(FlRenderableInterface* iface);
 
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
-static void handle_geometry_changed(FlView* self);
 static void handle_geometry_changed_with_size(
     FlView* self,
     int width,
     int height,
     bool update_content_scale = false);
-#if FLUTTER_LINUX_GTK4
-static gboolean retry_native_texture_cb(gpointer user_data);
-#endif
 
-#if !FLUTTER_LINUX_GTK4
+#if FLUTTER_LINUX_GTK4
+void fl_view_notify_first_frame(FlView* self) {
+  if (!self->have_first_frame) {
+    self->have_first_frame = TRUE;
+    g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
+  }
+}
+#else
 static void first_frame_cb(FlView* self) {
   g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
 }
@@ -67,120 +68,6 @@ G_DEFINE_TYPE_WITH_CODE(
     G_IMPLEMENT_INTERFACE(fl_renderable_get_type(), fl_renderable_iface_init)
         G_IMPLEMENT_INTERFACE(fl_plugin_registry_get_type(),
                               fl_view_plugin_registry_iface_init))
-
-#if FLUTTER_LINUX_GTK4
-static void schedule_native_texture_retry(FlView* self) {
-  if (self->native_texture_retry_source_id == 0) {
-    self->native_texture_retry_source_id =
-        g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
-                           g_object_ref(self), g_object_unref);
-  }
-}
-
-// Redraw the view from the GTK thread.
-static gboolean redraw_cb(gpointer user_data) {
-  TRACE_EVENT0("flutter", "GTK4UpdateTexture");
-  g_autoptr(FlView) self = FL_VIEW(user_data);
-
-  if (!self->have_first_frame && !self->sized_to_content) {
-    self->have_first_frame = TRUE;
-    g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
-  }
-
-  // If Flutter is controlling the window size, then resize the view if
-  // necessary.
-  const double scale_factor =
-      fl_gtk_widget_get_scale(GTK_WIDGET(self->render_area));
-  const size_t width = fl_gtk_size_to_pixels(
-      gtk_widget_get_width(self->render_area), scale_factor);
-  const size_t height = fl_gtk_size_to_pixels(
-      gtk_widget_get_height(self->render_area), scale_factor);
-  size_t frame_width, frame_height;
-  fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
-  const gint logical_frame_width =
-      MAX(static_cast<gint>(ceil(frame_width / scale_factor)), 1);
-  const gint logical_frame_height =
-      MAX(static_cast<gint>(ceil(frame_height / scale_factor)), 1);
-  gboolean frame_size_matches = width == frame_width && height == frame_height;
-  if (self->sized_to_content && !frame_size_matches) {
-    gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
-                                logical_frame_width, logical_frame_height);
-    schedule_native_texture_retry(self);
-    // A popover is its own native surface. Resizing its content must not
-    // resize the parent window returned by gtk_widget_get_root().
-    GtkNative* native = gtk_widget_get_native(GTK_WIDGET(self->render_area));
-    if (GTK_IS_WINDOW(native)) {
-      gtk_window_set_default_size(GTK_WINDOW(native), logical_frame_width,
-                                  logical_frame_height);
-    }
-    return G_SOURCE_REMOVE;
-  }
-
-  if (!self->sized_to_content && !frame_size_matches && width > 1 &&
-      height > 1) {
-    handle_geometry_changed(self);
-    return G_SOURCE_REMOVE;
-  }
-
-  if (width == 0 || height == 0) {
-    schedule_native_texture_retry(self);
-    return G_SOURCE_REMOVE;
-  }
-
-  g_mutex_lock(&self->subsurface_mutex);
-  const gboolean subsurface_enabled = self->subsurface_enabled;
-  g_mutex_unlock(&self->subsurface_mutex);
-  if (subsurface_enabled) {
-    return G_SOURCE_REMOVE;
-  }
-
-  g_autoptr(GdkTexture) texture = nullptr;
-  FlGdkSurface* surface =
-      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  if (surface != nullptr) {
-    GdkGLContext* old_gl_context = gdk_gl_context_get_current();
-    if (self->render_context != nullptr) {
-      gdk_gl_context_make_current(self->render_context);
-    }
-
-    texture = fl_compositor_acquire_texture(
-        self->compositor, surface, self->render_context, width, height,
-        !self->sized_to_content || !self->native_texture_ready);
-
-    if (gdk_gl_context_get_current() != old_gl_context) {
-      gdk_gl_context_clear_current();
-    }
-
-    if (texture != nullptr && FL_IS_RENDER_TEXTURE_GTK4(self->render_area)) {
-      fl_render_texture_gtk4_set_flip_y(
-          FL_RENDER_TEXTURE_GTK4(self->render_area),
-          self->render_context != nullptr);
-      fl_render_texture_gtk4_set_texture(
-          FL_RENDER_TEXTURE_GTK4(self->render_area), texture);
-      self->native_texture_ready = TRUE;
-      if (!self->have_first_frame) {
-        self->have_first_frame = TRUE;
-        g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
-      }
-      if (self->native_texture_retry_source_id != 0) {
-        g_source_remove(self->native_texture_retry_source_id);
-        self->native_texture_retry_source_id = 0;
-      }
-    } else if (!self->native_texture_ready) {
-      schedule_native_texture_retry(self);
-    }
-  }
-
-  return G_SOURCE_REMOVE;
-}
-
-static gboolean retry_native_texture_cb(gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-  self->native_texture_retry_source_id = 0;
-  redraw_cb(g_object_ref(self));
-  return G_SOURCE_REMOVE;
-}
-#endif
 
 // Signal handler for GtkWidget::delete-event / GtkWindow::close-request.
 static gboolean window_delete_event_cb(FlView* self) {
@@ -299,7 +186,7 @@ static void handle_geometry_changed_with_size(FlView* self,
                                       max_height, scale);
 }
 
-static void handle_geometry_changed(FlView* self) {
+void fl_view_update_geometry(FlView* self) {
 #if FLUTTER_LINUX_GTK4
   int width = gtk_widget_get_width(GTK_WIDGET(self->render_area));
   int height = gtk_widget_get_height(GTK_WIDGET(self->render_area));
@@ -366,24 +253,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
     fl_view_renderer_present_layers(self->renderer, layers, layers_count);
   }
 #else
-  if (self->cancellable == nullptr ||
-      g_cancellable_is_cancelled(self->cancellable)) {
-    return;
-  }
-  // The engine can present its first frame before the GTK widget is realized.
-  // The compositor is created during realization, so request a replacement
-  // after realization rather than dropping the only frame for a new view.
-  if (self->compositor == nullptr) {
-    self->needs_frame_after_realize = TRUE;
-    return;
-  }
-
-  fl_compositor_present_layers(self->compositor, layers, layers_count);
-
-  fl_view_gtk4_present_subsurface(self);
-
-  // Perform the redraw in the GTK thead.
-  g_idle_add(redraw_cb, g_object_ref(self));
+  fl_view_gtk4_present_layers(self, layers, layers_count);
 #endif
 }
 
@@ -523,12 +393,12 @@ static void realize_cb(FlView* self) {
   }
 
   setup_cursor(self);
-  handle_geometry_changed(self);
+  fl_view_update_geometry(self);
 }
 
 #if !FLUTTER_LINUX_GTK4
 static void size_allocate_cb(FlView* self) {
-  handle_geometry_changed(self);
+  fl_view_update_geometry(self);
 }
 #endif
 
@@ -543,7 +413,7 @@ static void fl_view_notify(GObject* object, GParamSpec* pspec) {
   FlView* self = FL_VIEW(object);
 
   if (strcmp(pspec->name, "scale-factor") == 0) {
-    handle_geometry_changed(self);
+    fl_view_update_geometry(self);
   }
 
   if (G_OBJECT_CLASS(fl_view_parent_class)->notify != nullptr) {
@@ -634,10 +504,7 @@ static void fl_view_dispose(GObject* object) {
   g_mutex_unlock(&self->subsurface_mutex);
   fl_view_gtk4_accessibility_dispose(self->accessibility_backend);
   self->accessibility_backend = nullptr;
-  if (self->native_texture_retry_source_id != 0) {
-    g_source_remove(self->native_texture_retry_source_id);
-    self->native_texture_retry_source_id = 0;
-  }
+  fl_view_gtk4_cancel_native_texture_retry(self);
 #endif
   g_clear_object(&self->cancellable);
 

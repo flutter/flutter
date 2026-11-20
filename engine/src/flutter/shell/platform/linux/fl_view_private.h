@@ -70,6 +70,8 @@ struct _FlView {
   GCancellable* cancellable;
 };
 
+void fl_view_update_geometry(FlView* view);
+
 #if !FLUTTER_LINUX_GTK4
 /**
  * fl_view_get_accessible:
@@ -92,7 +94,11 @@ void fl_view_gtk4_update_accessible_tree(FlView* view);
 void fl_view_gtk4_setup_subsurface(FlView* view);
 void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height);
 void fl_view_gtk4_setup_rendering(FlView* view);
-void fl_view_gtk4_present_subsurface(FlView* view);
+void fl_view_notify_first_frame(FlView* view);
+void fl_view_gtk4_cancel_native_texture_retry(FlView* view);
+void fl_view_gtk4_present_layers(FlView* view,
+                                 const FlutterLayer** layers,
+                                 size_t layers_count);
 #endif
 
 G_END_DECLS
