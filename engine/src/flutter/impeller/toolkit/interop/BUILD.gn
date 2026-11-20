@@ -69,6 +69,8 @@ impeller_component("interop_base") {
     "surface.h",
     "texture.cc",
     "texture.h",
+    "tracing.cc",
+    "tracing.h",
     "typography_context.cc",
     "typography_context.h",
   ]
@@ -84,6 +86,11 @@ impeller_component("interop_base") {
     "//flutter/fml",
     "//flutter/txt",
   ]
+
+  deps = []
+  if (is_android) {
+    deps += [ "../android" ]
+  }
 }
 
 # Wires up the public API entrypoints to the appropriate backends.
@@ -180,6 +187,7 @@ impeller_component("interop_unittests") {
     "object_unittests.cc",
     "playground_test.cc",
     "playground_test.h",
+    "tracing_unittests.cc",
   ]
 
   deps = [

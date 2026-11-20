@@ -33,6 +33,7 @@
 #include "impeller/toolkit/interop/path_builder.h"
 #include "impeller/toolkit/interop/surface.h"
 #include "impeller/toolkit/interop/texture.h"
+#include "impeller/toolkit/interop/tracing.h"
 #include "impeller/toolkit/interop/typography_context.h"
 
 #if IMPELLER_ENABLE_OPENGLES
@@ -112,6 +113,7 @@ ImpellerContext ImpellerContextCreateOpenGLESNew(
   if (!CheckVersion(version)) {
     return nullptr;
   }
+  SetupPlatformTracingIfNecessary();
 #if IMPELLER_ENABLE_OPENGLES
   auto context = ContextGLES::Create(
       [gl_proc_address_callback,
@@ -135,6 +137,7 @@ ImpellerContextCreateMetalNew(uint32_t version) {
   if (!CheckVersion(version)) {
     return nullptr;
   }
+  SetupPlatformTracingIfNecessary();
 #if IMPELLER_ENABLE_METAL
   auto context = ContextMTL::Create();
   if (!context || !context->IsValid()) {
@@ -154,6 +157,7 @@ ImpellerContextCreateVulkanNew(uint32_t version,
   if (!CheckVersion(version)) {
     return nullptr;
   }
+  SetupPlatformTracingIfNecessary();
 #if IMPELLER_ENABLE_VULKAN
   auto context = ContextVK::Create(ContextVK::Settings(*settings));
   if (!context || !context->IsValid()) {
