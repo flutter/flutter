@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:android_driver_extensions/native_driver.dart' as android_driver;
+import 'package:android_hardware_smoke_test/animated_teardown_stress.dart';
 import 'package:android_hardware_smoke_test/constants.dart';
 import 'package:android_hardware_smoke_test/goldens.dart';
 import 'package:android_hardware_smoke_test/image_drawing_canvas.dart';
@@ -232,6 +233,34 @@ void main() {
       find.byType(VectorDrawingsCanvas),
     );
     expect(canvasWidget.message, equals(kAdvancedBlendTest));
+  });
+
+  testWidgets('engineTeardownTest message channel handler - success behavior', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+
+    final ByteData encodedMessage = const JSONMessageCodec().encodeMessage(<String, Object?>{
+      keyTestName: kEngineTeardownTest,
+      keyPerformAppSideGoldenCompare: false,
+      keyCaptureScreenshot: false,
+    })!;
+
+    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
+        .instance
+        .defaultBinaryMessenger
+        .handlePlatformMessage(testChannelName, encodedMessage, null);
+
+    await tester.pump();
+    await tester.pump();
+
+    final ByteData? responseBytes = await responseFuture;
+    expect(responseBytes, isNotNull);
+    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
+    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>).cast<String, Object?>();
+    expect(replyMap[keyMessage], equals('Rendered $kEngineTeardownTest'));
+
+    expect(find.byType(AnimatedTeardownStress), findsOneWidget);
   });
 
   testWidgets('backdropFilterBlurTest message channel handler - success behavior', (

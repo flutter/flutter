@@ -36,6 +36,36 @@ class MainActivity : FlutterActivity() {
             FlutterEngineCache.getInstance().remove(CACHED_ENGINE_KEY)
             lastConfiguredEngine = null
         }
+
+        internal fun readImpellerBackend(context: Context): String {
+            return try {
+                val appInfo =
+                    context.packageManager.getApplicationInfo(
+                        context.packageName,
+                        PackageManager.GET_META_DATA
+                    )
+                appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: "vulkan"
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
+                "vulkan"
+            }
+        }
+
+        internal fun createNativeSupportChannel(
+            flutterEngine: FlutterEngine,
+            impellerBackend: String
+        ): MethodChannel =
+            MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME).apply {
+                setMethodCallHandler { call, result ->
+                    if (call.method == "impeller_backend") {
+                        result.success(impellerBackend)
+                    } else {
+                        result.notImplemented()
+                    }
+                }
+            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,19 +82,7 @@ class MainActivity : FlutterActivity() {
     private var nativeDriverChannel: MethodChannel? = null
 
     override fun provideFlutterEngine(context: Context): FlutterEngine {
-        try {
-            val appInfo =
-                context.packageManager.getApplicationInfo(
-                    context.packageName,
-                    PackageManager.GET_META_DATA
-                )
-            val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
-            if (!manifestBackend.isNullOrEmpty()) {
-                impellerBackend = manifestBackend
-            }
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
-        }
+        impellerBackend = readImpellerBackend(context)
 
         // Cache the engine.
         // This both speeds up the test execution and avoids teardown crashes
@@ -104,14 +122,7 @@ class MainActivity : FlutterActivity() {
             lastConfiguredEngine = WeakReference(flutterEngine)
         }
 
-        methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
-        methodChannel?.setMethodCallHandler { call, result ->
-            if (call.method == "impeller_backend") {
-                result.success(impellerBackend)
-            } else {
-                result.notImplemented()
-            }
-        }
+        methodChannel = createNativeSupportChannel(flutterEngine, impellerBackend)
 
         // Register the native_driver channel. This responds to AndroidNativeDriver's connection ping
         // and property checks, enabling the host-side runner to take compositor-level screenshots via ADB.

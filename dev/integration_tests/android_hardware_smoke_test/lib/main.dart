@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'animated_teardown_stress.dart';
 import 'backdrop_filter_blur.dart';
 import 'constants.dart';
 import 'goldens.dart';
@@ -133,7 +134,7 @@ class _MyState extends State<MyWidget> {
     final completer = Completer<Map<String, Object?>>();
 
     final bool isPlatformView = testName?.startsWith(platformViewPrefix) ?? false;
-    if (isPlatformView) {
+    if (isPlatformView || testName == kEngineTeardownTest) {
       _platformViewDrawnCompleter = Completer<void>();
     } else {
       _platformViewDrawnCompleter = null;
@@ -154,10 +155,20 @@ class _MyState extends State<MyWidget> {
           settleFuture: _platformViewDrawnCompleter?.future,
         );
       } else {
-        completer.complete(<String, Object?>{
-          keyMessage: 'Rendered $testName',
-          keyImageBytes: null,
-        });
+        final Future<void>? settle = _platformViewDrawnCompleter?.future;
+        if (settle != null) {
+          settle.then((_) {
+            completer.complete(<String, Object?>{
+              keyMessage: 'Rendered $testName',
+              keyImageBytes: null,
+            });
+          });
+        } else {
+          completer.complete(<String, Object?>{
+            keyMessage: 'Rendered $testName',
+            keyImageBytes: null,
+          });
+        }
       }
     }, debugLabel: 'Rendered $testName');
 
@@ -203,6 +214,13 @@ class _MyState extends State<MyWidget> {
 
       kTextTest => const TextDrawingCanvas(),
       kImageTest => ImageDrawingCanvas(image: _loadedImage),
+      kEngineTeardownTest => AnimatedTeardownStress(
+        onResourcesReady: () {
+          if (_platformViewDrawnCompleter?.isCompleted == false) {
+            _platformViewDrawnCompleter?.complete();
+          }
+        },
+      ),
       _ => VectorDrawingsCanvas(message: _message),
     };
 
