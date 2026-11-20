@@ -2,12 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/config.gni")
 
 source_set("surface") {
   sources = [
     "android_surface.cc",
     "android_surface.h",
+    "deferred_root_surface.cc",
+    "deferred_root_surface.h",
     "snapshot_surface_producer.cc",
     "snapshot_surface_producer.h",
   ]
@@ -23,6 +26,13 @@ source_set("surface") {
     "//flutter/shell/platform/android/jni",
     "//flutter/skia",
   ]
+
+  if (impeller_supports_rendering) {
+    deps += [
+      "//flutter/impeller",
+      "//flutter/impeller/display_list",
+    ]
+  }
 }
 
 source_set("native_window") {

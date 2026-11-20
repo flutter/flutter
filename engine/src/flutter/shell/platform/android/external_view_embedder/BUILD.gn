@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("external_view_embedder") {
@@ -41,6 +42,7 @@ executable("android_external_view_embedder_unittests") {
   testonly = true
 
   sources = [
+    "../surface/deferred_root_surface_unittests.cc",
     "external_view_embedder_unittests.cc",
     "surface_pool_unittests.cc",
   ]
@@ -48,13 +50,22 @@ executable("android_external_view_embedder_unittests") {
   deps = [
     ":external_view_embedder",
     ":external_view_embedder_fixtures",
+    "//flutter/common/graphics",
     "//flutter/flow",
     "//flutter/shell/gpu:gpu_surface_gl",
     "//flutter/shell/platform/android/jni:jni_mock",
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:surface_mock",
+    "//flutter/skia",
     "//flutter/testing",
     "//flutter/testing:dart",
     "//flutter/testing:skia",
   ]
+
+  if (impeller_supports_rendering) {
+    deps += [
+      "//flutter/impeller/display_list",
+      "//flutter/impeller/renderer/testing:mocks",
+    ]
+  }
 }
