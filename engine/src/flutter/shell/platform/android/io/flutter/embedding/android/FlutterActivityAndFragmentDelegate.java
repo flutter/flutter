@@ -36,6 +36,7 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -89,8 +90,11 @@ import java.util.List;
   @NonNull private Host host;
   @Nullable private FlutterEngine flutterEngine;
   @VisibleForTesting @Nullable FlutterView flutterView;
+  // Kept separately from activityScopedPlugins because onPostResume() calls into it directly.
   @Nullable private PlatformPlugin platformPlugin;
-  @Nullable private SensitiveContentPlugin sensitiveContentPlugin;
+  // Every embedding component created for the currently attached Activity. They are destroyed, in
+  // creation order, when the Activity is detached. See ActivityScopedPlugin.
+  @NonNull private final List<ActivityScopedPlugin> activityScopedPlugins = new ArrayList<>();
   @VisibleForTesting @Nullable OnPreDrawListener activePreDrawListener;
   private boolean isFlutterEngineFromHost;
   private boolean isFlutterUiDisplayed;
@@ -142,7 +146,7 @@ import java.util.List;
     this.flutterEngine = null;
     this.flutterView = null;
     this.platformPlugin = null;
-    this.sensitiveContentPlugin = null;
+    this.activityScopedPlugins.clear();
   }
 
   /**
@@ -181,7 +185,8 @@ import java.util.List;
    * <ol>
    *   <li>Initializes the Flutter system.
    *   <li>Obtains or creates a {@link io.flutter.embedding.engine.FlutterEngine}.
-   *   <li>Creates and configures a {@link PlatformPlugin}.
+   *   <li>Creates and configures the {@link ActivityScopedPlugin}s bound to the surrounding {@code
+   *       Activity}, such as the {@link PlatformPlugin} and the {@link SensitiveContentPlugin}.
    *   <li>Attaches the {@link io.flutter.embedding.engine.FlutterEngine} to the surrounding {@code
    *       Activity}, if desired.
    *   <li>Configures the {@link io.flutter.embedding.engine.FlutterEngine} via {@link
@@ -213,18 +218,41 @@ import java.util.List;
 
     // Regardless of whether or not a FlutterEngine already existed, the PlatformPlugin and
     // SensitiveContentPlugin are bound to a specific Activity. Therefore, they need to be
-    // created and configured every time this delegate attaches the engine to a new Activity.
+    // created and configured every time this delegate attaches the engine to a new Activity, and
+    // destroyed every time it detaches. Any component created here must be registered with
+    // addActivityScopedPlugin() so that onDetach() destroys it.
     // TODO(mattcarroll): the PlatformPlugin needs to be reimagined because it implicitly takes
     //                    control of the entire window. This is unacceptable for non-fullscreen
     //                    use-cases.
-    // TODO(camsim99): Consider creating an interface for embedding plugins that require an
-    // `Activity` reference. See https://github.com/flutter/flutter/issues/164945.
     final Activity hostActivity = host.getActivity();
     platformPlugin = host.providePlatformPlugin(hostActivity, flutterEngine);
-    sensitiveContentPlugin = host.provideSensitiveContentPlugin(hostActivity, flutterEngine);
+    addActivityScopedPlugin(platformPlugin);
+    addActivityScopedPlugin(host.provideSensitiveContentPlugin(hostActivity, flutterEngine));
 
     host.configureFlutterEngine(flutterEngine);
     isAttached = true;
+  }
+
+  /**
+   * Registers an {@link ActivityScopedPlugin} created for the currently attached {@code Activity}
+   * so that it is destroyed when that {@code Activity} is detached.
+   *
+   * <p>A {@code null} plugin is ignored, because {@link Host} hooks may legitimately decline to
+   * provide one.
+   */
+  private void addActivityScopedPlugin(@Nullable ActivityScopedPlugin plugin) {
+    if (plugin != null) {
+      activityScopedPlugins.add(plugin);
+    }
+  }
+
+  /** Destroys, in creation order, every {@link ActivityScopedPlugin} registered since attach. */
+  private void destroyActivityScopedPlugins() {
+    for (ActivityScopedPlugin plugin : activityScopedPlugins) {
+      plugin.destroy();
+    }
+    activityScopedPlugins.clear();
+    platformPlugin = null;
   }
 
   @Override
@@ -740,7 +768,8 @@ import java.util.List;
    * <ol>
    *   <li>Detaches this delegate's {@link io.flutter.embedding.engine.FlutterEngine} from its
    *       surrounding {@code Activity}, if it was previously attached.
-   *   <li>Destroys this delegate's {@link PlatformPlugin}.
+   *   <li>Destroys every {@link ActivityScopedPlugin} created in {@link #onAttach(Context)}, such
+   *       as the {@link PlatformPlugin} and the {@link SensitiveContentPlugin}.
    *   <li>Destroys this delegate's {@link io.flutter.embedding.engine.FlutterEngine} if {@link
    *       Host#shouldDestroyEngineWithHost()} ()} returns true.
    * </ol>
@@ -767,16 +796,10 @@ import java.util.List;
       }
     }
 
-    // Null out the platformPlugin and sensitiveContentPlugin to avoid a possible
-    // retain cycle between the plugins, this Fragment, and this Fragment's Activity.
-    if (platformPlugin != null) {
-      platformPlugin.destroy();
-      platformPlugin = null;
-    }
-    if (sensitiveContentPlugin != null) {
-      sensitiveContentPlugin.destroy();
-      sensitiveContentPlugin = null;
-    }
+    // Destroy every component that was created for the detaching Activity, and drop our
+    // references to them, to avoid a possible retain cycle between the plugins, this Fragment,
+    // and this Fragment's Activity.
+    destroyActivityScopedPlugins();
 
     if (host.shouldDispatchAppLifecycleState() && flutterEngine != null) {
       flutterEngine.getLifecycleChannel().appIsDetached();
