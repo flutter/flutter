@@ -2223,8 +2223,24 @@ class TextInput {
       case 'TextInputClient.onFocusReceived':
         final args = methodCall.arguments as List<dynamic>;
         final clientId = args[0] as int;
-        if (_lastConnection != null && _lastConnection!._id == clientId) {
-          return _lastConnection!._client.onFocusReceived();
+        final TextInputConnection? last = _lastConnection;
+        if (last != null && last._id == clientId) {
+          // Take the reported connection back rather than leaving the client to
+          // attach a new one, so that it keeps the client id the platform is
+          // already using. iOS delivers the text picked from an AutoFill sheet
+          // such as "Hide My Email" immediately after restoring focus, using
+          // that id, and a connection attached later carries a different one.
+          // See https://github.com/flutter/flutter/issues/157495.
+          final wasDetached = _currentConnection == null;
+          if (wasDetached) {
+            _currentConnection = last;
+          }
+          final bool accepted = last._client.onFocusReceived();
+          if (!accepted && wasDetached) {
+            // The client is gone or refused focus, so leave it detached.
+            _currentConnection = null;
+          }
+          return accepted;
         }
         return false;
     }
