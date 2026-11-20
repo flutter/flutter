@@ -21,6 +21,9 @@ HybridJavaGlobalRef::HybridJavaGlobalRef(JNIEnv* env,
   }
   if (env != nullptr) {
     global_ref_ = env->NewGlobalRef(local_or_global_obj);
+    if (!fml::jni::CheckException(env)) {
+      global_ref_ = nullptr;
+    }
   }
 }
 #endif

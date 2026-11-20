@@ -29,6 +29,8 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Locale;
 
 /**
@@ -56,6 +58,7 @@ public class FlutterImageView extends View implements RenderSurface {
     @NonNull final Image image;
     @Nullable final Runnable releaseCallback;
     boolean commitCallbackRegistered = false;
+    boolean supersededByDraw = false;
     private boolean released = false;
 
     DisplayedImage(@NonNull Image image, @Nullable Runnable releaseCallback) {
@@ -80,7 +83,7 @@ public class FlutterImageView extends View implements RenderSurface {
   @Nullable private Image currentImage;
   @Nullable private DisplayedImage currentDisplayedImage;
   @Nullable private DisplayedImage retiringDisplayedImage;
-  @Nullable private DisplayedImage pendingCommitDisplayedImage;
+  private final Deque<DisplayedImage> pendingCommitDisplayedImages = new ArrayDeque<>();
   private boolean currentDisplayedImageDrawn = false;
   private boolean hasUnconsumedAutoAcquiredImage = false;
   @Nullable private Bitmap currentBitmap;
@@ -347,11 +350,27 @@ public class FlutterImageView extends View implements RenderSurface {
           retiringDisplayedImage.releaseOnce();
         }
         retiringDisplayedImage = currentDisplayedImage;
+        if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+          // Arm FrameCommitCallback BEFORE invalidate() because ViewRootImpl.performDraw() calls
+          // ViewTreeObserver.captureFrameCommitCallbacks() at the start of performDraw(), prior to
+          // invoking View.onDraw(Canvas).
+          armRetiringFrameCommitCallback(retiringDisplayedImage);
+        }
       }
     }
     currentDisplayedImage = new DisplayedImage(image, releaseCallback);
     currentDisplayedImageDrawn = false;
     invalidate();
+  }
+
+  private void releasePendingAndRetiringDisplayedImages() {
+    while (!pendingCommitDisplayedImages.isEmpty()) {
+      pendingCommitDisplayedImages.removeFirst().releaseOnce();
+    }
+    if (retiringDisplayedImage != null) {
+      retiringDisplayedImage.releaseOnce();
+      retiringDisplayedImage = null;
+    }
   }
 
   /**
@@ -360,14 +379,7 @@ public class FlutterImageView extends View implements RenderSurface {
    * reader-backed image is active.
    */
   public void releaseDisplayedImages() {
-    if (pendingCommitDisplayedImage != null) {
-      pendingCommitDisplayedImage.releaseOnce();
-      pendingCommitDisplayedImage = null;
-    }
-    if (retiringDisplayedImage != null) {
-      retiringDisplayedImage.releaseOnce();
-      retiringDisplayedImage = null;
-    }
+    releasePendingAndRetiringDisplayedImages();
     if (currentDisplayedImage != null) {
       currentDisplayedImage.releaseOnce();
       currentDisplayedImage = null;
@@ -377,6 +389,14 @@ public class FlutterImageView extends View implements RenderSurface {
       currentBitmap = null;
     }
     hasUnconsumedAutoAcquiredImage = false;
+  }
+
+  @Override
+  protected void onWindowVisibilityChanged(int visibility) {
+    super.onWindowVisibilityChanged(visibility);
+    if (visibility != View.VISIBLE) {
+      releasePendingAndRetiringDisplayedImages();
+    }
   }
 
   @Override
@@ -462,7 +482,9 @@ public class FlutterImageView extends View implements RenderSurface {
   @RequiresApi(API_LEVELS.API_29)
   @VisibleForTesting
   boolean registerFrameCommitCallback(@NonNull Runnable callback) {
-    if (!isAttachedToWindow() || getWindowVisibility() != View.VISIBLE) {
+    if (!isHardwareAccelerated()
+        || !isAttachedToWindow()
+        || getWindowVisibility() != View.VISIBLE) {
       return false;
     }
     final View rootView = getRootView();
@@ -474,6 +496,46 @@ public class FlutterImageView extends View implements RenderSurface {
     return true;
   }
 
+  @RequiresApi(API_LEVELS.API_29)
+  private void armRetiringFrameCommitCallback(@NonNull DisplayedImage retiringAtArm) {
+    if (retiringAtArm.released || retiringAtArm.commitCallbackRegistered) {
+      return;
+    }
+    retiringAtArm.commitCallbackRegistered = true;
+    if (!pendingCommitDisplayedImages.contains(retiringAtArm)) {
+      pendingCommitDisplayedImages.addLast(retiringAtArm);
+    }
+    final Runnable releaseRetiringCallback =
+        () -> {
+          if (retiringAtArm.released) {
+            pendingCommitDisplayedImages.remove(retiringAtArm);
+            return;
+          }
+          if (!retiringAtArm.supersededByDraw && this.retiringDisplayedImage == retiringAtArm) {
+            // A window traversal captured FrameCommitCallbacks while this view was clipped out or
+            // skipped onDraw, so its RenderNode may still reference retiringAtArm. Re-arm for the
+            // next hardware-accelerated traversal, or release immediately if no longer active.
+            retiringAtArm.commitCallbackRegistered = false;
+            pendingCommitDisplayedImages.remove(retiringAtArm);
+            armRetiringFrameCommitCallback(retiringAtArm);
+            return;
+          }
+          retiringAtArm.releaseOnce();
+          pendingCommitDisplayedImages.remove(retiringAtArm);
+          if (this.retiringDisplayedImage == retiringAtArm) {
+            this.retiringDisplayedImage = null;
+          }
+        };
+    if (!registerFrameCommitCallback(releaseRetiringCallback)) {
+      retiringAtArm.commitCallbackRegistered = false;
+      pendingCommitDisplayedImages.remove(retiringAtArm);
+      retiringAtArm.releaseOnce();
+      if (this.retiringDisplayedImage == retiringAtArm) {
+        this.retiringDisplayedImage = null;
+      }
+    }
+  }
+
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
@@ -482,40 +544,22 @@ public class FlutterImageView extends View implements RenderSurface {
         updateBitmapFromImage(currentDisplayedImage.image);
         currentDisplayedImageDrawn = true;
       }
-      if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-        if (retiringDisplayedImage != null && !retiringDisplayedImage.commitCallbackRegistered) {
-          final DisplayedImage retiringAtDraw = this.retiringDisplayedImage;
-          retiringAtDraw.commitCallbackRegistered = true;
-          if (pendingCommitDisplayedImage != null
-              && pendingCommitDisplayedImage != retiringAtDraw) {
-            pendingCommitDisplayedImage.releaseOnce();
-          }
-          pendingCommitDisplayedImage = retiringAtDraw;
-          final Runnable releaseRetiringCallback =
-              () -> {
-                retiringAtDraw.releaseOnce();
-                if (this.pendingCommitDisplayedImage == retiringAtDraw) {
-                  this.pendingCommitDisplayedImage = null;
-                }
-                if (this.retiringDisplayedImage == retiringAtDraw) {
-                  this.retiringDisplayedImage = null;
-                }
-              };
-          if (!registerFrameCommitCallback(releaseRetiringCallback)) {
-            releaseRetiringCallback.run();
-          }
+      if (retiringDisplayedImage != null) {
+        retiringDisplayedImage.supersededByDraw = true;
+      }
+      final boolean softwareWindowOnApi29Plus =
+          android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29
+              && isAttachedToWindow()
+              && !isHardwareAccelerated();
+      if (android.os.Build.VERSION.SDK_INT < API_LEVELS.API_29 || softwareWindowOnApi29Plus) {
+        // Below API 29 or on a software-rendered window, convert/retain an ARGB_8888 software
+        // Bitmap so neither retiringDisplayedImage nor currentDisplayedImage remains pinned.
+        if (softwareWindowOnApi29Plus
+            && currentBitmap != null
+            && currentBitmap.getConfig() == Bitmap.Config.HARDWARE) {
+          currentBitmap = currentBitmap.copy(Bitmap.Config.ARGB_8888, false);
         }
-      } else {
-        // Below API 29, updateBitmapFromImage copies the plane buffer into a software Bitmap,
-        // so neither retiringDisplayedImage nor currentDisplayedImage is referenced by Canvas.
-        if (pendingCommitDisplayedImage != null) {
-          pendingCommitDisplayedImage.releaseOnce();
-          pendingCommitDisplayedImage = null;
-        }
-        if (retiringDisplayedImage != null) {
-          retiringDisplayedImage.releaseOnce();
-          retiringDisplayedImage = null;
-        }
+        releasePendingAndRetiringDisplayedImages();
         currentDisplayedImage.releaseOnce();
         currentDisplayedImage = null;
         currentDisplayedImageDrawn = false;
@@ -524,6 +568,15 @@ public class FlutterImageView extends View implements RenderSurface {
       updateCurrentBitmap();
     }
     if (currentBitmap != null) {
+      if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29
+          && !canvas.isHardwareAccelerated()
+          && currentBitmap.getConfig() == Bitmap.Config.HARDWARE) {
+        final Bitmap softwareBitmap = currentBitmap.copy(Bitmap.Config.ARGB_8888, false);
+        if (softwareBitmap != null) {
+          canvas.drawBitmap(softwareBitmap, 0, 0, null);
+        }
+        return;
+      }
       canvas.drawBitmap(currentBitmap, 0, 0, null);
     }
   }
@@ -543,20 +596,29 @@ public class FlutterImageView extends View implements RenderSurface {
     updateBitmapFromImage(currentImage);
   }
 
+  @RequiresApi(API_LEVELS.API_29)
+  @VisibleForTesting
+  @Nullable
+  Bitmap wrapHardwareBuffer(@NonNull HardwareBuffer buffer) {
+    return Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
+  }
+
   private void updateBitmapFromImage(@NonNull Image image) {
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+      currentBitmap = null;
       final HardwareBuffer buffer = image.getHardwareBuffer();
       if (buffer == null) {
         return;
       }
       try {
-        currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
+        currentBitmap = wrapHardwareBuffer(buffer);
       } finally {
         buffer.close();
       }
     } else {
       final Image.Plane[] imagePlanes = image.getPlanes();
       if (imagePlanes == null || imagePlanes.length != 1) {
+        currentBitmap = null;
         return;
       }
 

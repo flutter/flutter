@@ -169,6 +169,10 @@ public class FlutterSurfaceView extends SurfaceView implements RenderSurface {
     this.hiddenForHybridComposition = hidden;
   }
 
+  /* package */ void rearmAlphaForNextFrameIfNeeded() {
+    surfaceHolderCallbackCompat.onResume();
+  }
+
   @Nullable
   @Override
   public FlutterRenderer getAttachedRenderer() {

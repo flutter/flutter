@@ -133,7 +133,10 @@ public class FlutterView extends FrameLayout
   @Nullable private FlutterImageView hcBackgroundImageView;
   private long hcBackgroundRemovalGeneration = 0;
   private boolean hcBackgroundRemovalPending = false;
+  private boolean hcRootSurfaceHidden = false;
   private boolean hcSurfaceZOrderOverridden = false;
+  private float savedTextureViewAlpha = OPAQUE_ALPHA;
+  private float savedCustomRenderSurfaceAlpha = OPAQUE_ALPHA;
 
   @Nullable @VisibleForTesting /* package */ RenderSurface renderSurface;
   @Nullable private RenderSurface previousRenderSurface;
@@ -1419,19 +1422,48 @@ public class FlutterView extends FrameLayout
     return hcBackgroundImageView;
   }
 
-  private int computeHcBackgroundInsertionIndex() {
+  private int computeMaxRenderSurfaceChildIndex() {
     int baseIndex = -1;
-    if (renderSurface instanceof View) {
+    if (flutterSurfaceView != null && flutterSurfaceView.getParent() == this) {
+      baseIndex = Math.max(baseIndex, indexOfChild(flutterSurfaceView));
+    }
+    if (flutterTextureView != null && flutterTextureView.getParent() == this) {
+      baseIndex = Math.max(baseIndex, indexOfChild(flutterTextureView));
+    }
+    if (flutterImageView != null && flutterImageView.getParent() == this) {
+      baseIndex = Math.max(baseIndex, indexOfChild(flutterImageView));
+    }
+    if (renderSurface instanceof View
+        && renderSurface != hcBackgroundImageView
+        && ((View) renderSurface).getParent() == this) {
       baseIndex = Math.max(baseIndex, indexOfChild((View) renderSurface));
     }
-    if (previousRenderSurface instanceof View) {
+    if (previousRenderSurface instanceof View
+        && previousRenderSurface != hcBackgroundImageView
+        && ((View) previousRenderSurface).getParent() == this) {
       baseIndex = Math.max(baseIndex, indexOfChild((View) previousRenderSurface));
     }
-    final int desiredIndex = baseIndex + 1;
+    return baseIndex;
+  }
+
+  private int computeHcBackgroundInsertionIndex() {
+    final int desiredIndex = computeMaxRenderSurfaceChildIndex() + 1;
     return Math.max(0, Math.min(desiredIndex, getChildCount()));
   }
 
   private void hideRootSurfaceForHybridComposition() {
+    if (!hcRootSurfaceHidden) {
+      if (flutterTextureView != null) {
+        savedTextureViewAlpha = flutterTextureView.getAlpha();
+      }
+      if (renderSurface instanceof View
+          && renderSurface != flutterSurfaceView
+          && renderSurface != flutterTextureView
+          && renderSurface != hcBackgroundImageView) {
+        savedCustomRenderSurfaceAlpha = ((View) renderSurface).getAlpha();
+      }
+      hcRootSurfaceHidden = true;
+    }
     if (flutterSurfaceView != null) {
       flutterSurfaceView.setHiddenForHybridComposition(true);
       flutterSurfaceView.setAlpha(TRANSPARENT_ALPHA);
@@ -1455,6 +1487,10 @@ public class FlutterView extends FrameLayout
   }
 
   private void restoreRootSurfaceAfterHybridComposition() {
+    if (!hcRootSurfaceHidden) {
+      return;
+    }
+    hcRootSurfaceHidden = false;
     if (flutterSurfaceView != null) {
       flutterSurfaceView.setHiddenForHybridComposition(false);
       if (hcSurfaceZOrderOverridden) {
@@ -1464,16 +1500,25 @@ public class FlutterView extends FrameLayout
           flutterSurfaceView.setZOrderOnTop(true);
         }
       }
-      flutterSurfaceView.setAlpha(OPAQUE_ALPHA);
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_26) {
+        // Below API 26, keep the SurfaceView transparent until Flutter has displayed a frame on
+        // the current surface, delegating reveal to SurfaceHolderCallbackCompat.alphaCallback.
+        flutterSurfaceView.setAlpha(TRANSPARENT_ALPHA);
+        flutterSurfaceView.rearmAlphaForNextFrameIfNeeded();
+      } else {
+        flutterSurfaceView.setAlpha(OPAQUE_ALPHA);
+      }
     }
     if (flutterTextureView != null) {
-      flutterTextureView.setAlpha(OPAQUE_ALPHA);
+      flutterTextureView.setAlpha(savedTextureViewAlpha);
     }
     if (renderSurface instanceof View
         && renderSurface != flutterSurfaceView
         && renderSurface != flutterTextureView
         && renderSurface != hcBackgroundImageView) {
-      ((View) renderSurface).setAlpha(OPAQUE_ALPHA);
+      final float restoredAlpha =
+          renderSurface == flutterImageView ? OPAQUE_ALPHA : savedCustomRenderSurfaceAlpha;
+      ((View) renderSurface).setAlpha(restoredAlpha);
     }
   }
 
@@ -1497,6 +1542,16 @@ public class FlutterView extends FrameLayout
           hcBackgroundImageView,
           computeHcBackgroundInsertionIndex(),
           new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    } else {
+      final int currentIndex = indexOfChild(hcBackgroundImageView);
+      final int expectedIndex = computeMaxRenderSurfaceChildIndex() + 1;
+      if (currentIndex != expectedIndex) {
+        removeView(hcBackgroundImageView);
+        addView(
+            hcBackgroundImageView,
+            computeHcBackgroundInsertionIndex(),
+            new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+      }
     }
     hcBackgroundImageView.setVisibility(View.VISIBLE);
     hideRootSurfaceForHybridComposition();
@@ -1506,7 +1561,9 @@ public class FlutterView extends FrameLayout
   @RequiresApi(API_LEVELS.API_29)
   @VisibleForTesting
   boolean registerHcFrameCommitCallback(@NonNull Runnable callback) {
-    if (!isAttachedToWindow() || getWindowVisibility() != View.VISIBLE) {
+    if (!isHardwareAccelerated()
+        || !isAttachedToWindow()
+        || getWindowVisibility() != View.VISIBLE) {
       return false;
     }
     final View rootView = getRootView();
@@ -1541,16 +1598,16 @@ public class FlutterView extends FrameLayout
           }
           removeHybridCompositionBackgroundNow();
         };
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
-      hcBackgroundImageView.invalidate();
-      invalidate();
-      if (!registerHcFrameCommitCallback(commitRemoval)) {
+    final boolean registeredCommitCallback =
+        Build.VERSION.SDK_INT >= API_LEVELS.API_29 && registerHcFrameCommitCallback(commitRemoval);
+    hcBackgroundImageView.invalidate();
+    invalidate();
+    if (!registeredCommitCallback) {
+      if (isAttachedToWindow() && getWindowVisibility() == View.VISIBLE) {
+        new Handler(Looper.getMainLooper()).post(commitRemoval);
+      } else {
         commitRemoval.run();
       }
-    } else if (isAttachedToWindow() && getWindowVisibility() == View.VISIBLE) {
-      post(commitRemoval);
-    } else {
-      commitRemoval.run();
     }
   }
 
@@ -1627,13 +1684,13 @@ public class FlutterView extends FrameLayout
     }
     renderSurface.pause();
 
+    final boolean hcBackgroundAttached =
+        hcBackgroundImageView != null && hcBackgroundImageView.getParent() == this;
     final boolean hcBackgroundVisible =
-        hcBackgroundImageView != null
-            && hcBackgroundImageView.getParent() == this
-            && hcBackgroundImageView.getVisibility() == View.VISIBLE;
+        hcBackgroundAttached && hcBackgroundImageView.getVisibility() == View.VISIBLE;
     if (flutterImageView == null) {
       flutterImageView = createImageView();
-      if (hcBackgroundVisible) {
+      if (hcBackgroundAttached) {
         addView(flutterImageView, indexOfChild(hcBackgroundImageView));
       } else {
         addView(flutterImageView);
@@ -1641,6 +1698,12 @@ public class FlutterView extends FrameLayout
     } else {
       flutterImageView.resizeIfNeeded(getWidth(), getHeight());
       flutterImageView.drainPendingImages();
+      if (hcBackgroundAttached
+          && flutterImageView.getParent() == this
+          && indexOfChild(flutterImageView) > indexOfChild(hcBackgroundImageView)) {
+        removeView(flutterImageView);
+        addView(flutterImageView, indexOfChild(hcBackgroundImageView));
+      }
     }
 
     previousRenderSurface = renderSurface;

@@ -1633,19 +1633,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       flutterView.addView(overlayView);
     }
 
+    final int desiredGravity = Gravity.LEFT | Gravity.TOP;
     final FrameLayout.LayoutParams layoutParams =
         (overlayView.getLayoutParams() instanceof FrameLayout.LayoutParams)
             ? (FrameLayout.LayoutParams) overlayView.getLayoutParams()
-            : new FrameLayout.LayoutParams(width, height);
+            : new FrameLayout.LayoutParams(width, height, desiredGravity);
     if (layoutParams.width != width
         || layoutParams.height != height
         || layoutParams.leftMargin != x
         || layoutParams.topMargin != y
+        || layoutParams.gravity != desiredGravity
         || overlayView.getLayoutParams() != layoutParams) {
       layoutParams.width = width;
       layoutParams.height = height;
       layoutParams.leftMargin = x;
       layoutParams.topMargin = y;
+      layoutParams.gravity = desiredGravity;
       overlayView.setLayoutParams(layoutParams);
     }
     overlayView.setVisibility(View.VISIBLE);

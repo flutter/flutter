@@ -63,6 +63,7 @@ public class SurfaceHolderCallbackCompat implements SurfaceHolder.Callback2 {
     @Override
     public void onResume() {
       if (flutterRenderer != null) {
+        flutterRenderer.removeIsDisplayingFlutterUiListener(alphaCallback);
         flutterRenderer.addIsDisplayingFlutterUiListener(alphaCallback);
       }
     }
