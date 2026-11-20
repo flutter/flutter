@@ -5,36 +5,58 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/platform/android/context/android_context.h"
-#include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
+#include "flutter/shell/platform/android/external_view_embedder/frame_packet_mailbox.h"
+#include "flutter/shell/platform/android/external_view_embedder/image_layer_pool.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/shell/platform/android/surface/deferred_root_surface.h"
 
 namespace flutter {
 
+// Shared raster-thread-only slot holding the current |DeferredRootSurface|
+// weak pointer across `NotifyCreated` / `NotifyDestroyed` surface lifecycles.
+// Wrapped in `std::optional` so constructing the slot on the platform thread
+// never default-constructs a thread-bound `fml::WeakPtr`.
+using DeferredRootSurfaceSlot =
+    std::optional<fml::WeakPtr<DeferredRootSurface>>;
+
 //------------------------------------------------------------------------------
-/// Allows to embed Android views into a Flutter application.
+/// Embeds Classic Hybrid Composition Android views into a Flutter scene without
+/// merging the raster thread onto the Android UI (`main`) thread.
 ///
-/// This class calls Java methods via |PlatformViewAndroidJNI| to manage the
-/// lifecycle of the Android view corresponding to |flutter::PlatformViewLayer|.
-///
-/// It also orchestrates overlay surfaces. These are Android views
-/// that render above (by Z order) the Android view corresponding to
-/// |flutter::PlatformViewLayer|.
+/// All layer rasterization, GPU submission, and `HybridImageReader` /
+/// `SyncFence` acquisition execute on `1.raster`. Completed buffers, platform
+/// view bounds, and mutator stacks are published as an immutable |FramePacket|
+/// into a single-slot |FramePacketMailbox| and applied atomically in a single
+/// `main` Looper turn.
 ///
 class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
  public:
+  using ScheduleFrameCallback = std::function<void()>;
+
   AndroidExternalViewEmbedder(
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      std::shared_ptr<HybridCompositionState> hc_state = nullptr,
+      std::shared_ptr<DeferredRootSurfaceSlot> deferred_root_surface_slot =
+          nullptr,
+      ScheduleFrameCallback schedule_frame_callback = {});
+
+  ~AndroidExternalViewEmbedder() override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -80,6 +102,12 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   bool SupportsDynamicThreadMerging() override;
 
   // |ExternalViewEmbedder|
+  bool SupportsPartialRepaint() const override;
+
+  // |ExternalViewEmbedder|
+  bool DidLastSubmitSucceed() const override;
+
+  // |ExternalViewEmbedder|
   void Teardown() override;
 
   // Gets the rect based on the device pixel ratio of a platform view displayed
@@ -87,77 +115,52 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   DlRect GetViewRect(int64_t view_id) const;
 
  private:
-  // The number of frames the rasterizer task runner will continue
-  // to run on the platform thread after no platform view is rendered.
-  //
-  // Note: this is an arbitrary number that attempts to account for cases
-  // where the platform view might be momentarily off the screen.
-  static const int kDefaultMergedLeaseDuration = 10;
+  static void DrainMailboxOnPlatformThread(
+      const std::shared_ptr<FramePacketMailbox>& mailbox,
+      const std::shared_ptr<HybridCompositionState>& hc_state,
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
-  // Provides metadata to the Android surfaces.
-  const AndroidContext& android_context_;
+  DeferredRootSurface* GetDeferredRootSurface() const;
 
-  // Allows to call methods in Java.
-  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  sk_sp<DisplayList> GetRootDisplayList(SurfaceFrame& frame) const;
 
-  // Allows to create surfaces.
-  const std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  void RestoreRootRenderContextIfNeeded(bool destroyed_any_layer) const;
 
-  // Holds surfaces. Allows to recycle surfaces or allocate new ones.
-  const std::shared_ptr<SurfacePool> surface_pool_;
+  void FlattenSlicesIntoCanvas(DlCanvas* canvas,
+                               std::optional<DlIRect> clip_damage) const;
 
-  // The task runners.
-  const TaskRunners task_runners_;
+  void PublishPacket(std::unique_ptr<FramePacket> packet);
 
-  // The size of the root canvas.
-  DlISize frame_size_;
+  void AbortFrameAndScheduleRetry(
+      const std::vector<ImageLayer*>& unacquired_submitted_layers,
+      bool destroyed_any_layer);
 
-  // The pixel ratio used to determinate the size of a platform view layer
-  // relative to the device layout system.
-  double device_pixel_ratio_ = 0.0;
-
-  // The order of composition. Each entry contains a unique id for the platform
-  // view.
-  std::vector<int64_t> composition_order_;
-
-  // The |EmbedderViewSlice| implementation keyed off the platform view id,
-  // which contains any subsequent operations until the next platform view or
-  // the end of the last leaf node in the layer tree.
-  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
-
-  // The params for a platform view, which contains the size, position and
-  // mutation stack.
-  std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
-
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_ = 0;
-
-  // Destroys the surfaces created from the surface factory.
-  // This method schedules a task on the platform thread, and waits for
-  // the task until it completes. Only call it where the platform thread can't
-  // be waiting for the caller, such as from |Teardown|, which the shell calls
-  // on the platform thread. Never call it from the raster thread.
-  void DestroySurfaces();
-
-  // Takes the overlay layers out of the pool and releases them without waiting
-  // for the platform thread. The rendering surfaces are released on the
-  // calling thread, and the overlay views are destroyed on the platform
-  // thread.
-  void ReleaseOverlayLayers();
-
-  // Resets the state.
   void Reset();
 
-  // Whether the layer tree in the current frame has platform layers.
-  bool FrameHasPlatformLayers();
+  bool FrameHasPlatformLayers() const;
 
-  // Creates a Surface when needed or recycles an existing one, and draws the
-  // picture on the frame's canvas. Returns nullptr if acquiring a frame from
-  // the overlay surface fails.
-  std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
-                                                      int64_t view_id,
-                                                      EmbedderViewSlice* slice,
-                                                      const DlRect& rect);
+  const AndroidContext& android_context_;
+  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  const std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  const TaskRunners task_runners_;
+  const std::shared_ptr<HybridCompositionState> hc_state_;
+  const std::shared_ptr<DeferredRootSurfaceSlot> deferred_root_surface_slot_;
+  const ScheduleFrameCallback schedule_frame_callback_;
+  const std::shared_ptr<FramePacketMailbox> mailbox_;
+
+  ImageLayerPool image_layer_pool_;
+  DlISize frame_size_;
+  double device_pixel_ratio_ = 0.0;
+  std::vector<int64_t> composition_order_;
+  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
+  std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
+
+  uint64_t current_frame_hc_epoch_ = 0;
+  bool frame_began_ = false;
+  bool hc_background_synchronized_ = false;
+  bool last_submit_succeeded_ = true;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalViewEmbedder);
 };
 
 }  // namespace flutter

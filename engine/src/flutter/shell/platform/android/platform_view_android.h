@@ -17,6 +17,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
@@ -25,6 +26,8 @@
 #include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
+
+class AndroidExternalViewEmbedderWrapper;
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
@@ -163,6 +166,10 @@ class PlatformViewAndroid final : public PlatformView {
       std::make_shared<std::atomic<uint64_t>>(0);
   const std::shared_ptr<HybridCompositionState> hc_state_ =
       std::make_shared<HybridCompositionState>();
+  const std::shared_ptr<DeferredRootSurfaceSlot> deferred_root_surface_slot_ =
+      std::make_shared<DeferredRootSurfaceSlot>();
+  std::shared_ptr<AndroidExternalViewEmbedderWrapper>
+      external_view_embedder_wrapper_;
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|

@@ -483,11 +483,11 @@ CreateImpellerContextWithoutGPU(
 
 /// Returns a future for a pipeline that is never created.
 impeller::PipelineFuture<impeller::PipelineDescriptor> ReturnNullPipeline(
-    impeller::PipelineDescriptor descriptor,
+    const impeller::PipelineDescriptor& descriptor,
     bool /*async*/,
     bool /*threadsafe*/) {
   return impeller::PipelineFuture<impeller::PipelineDescriptor>{
-      std::move(descriptor),
+      descriptor,
       impeller::RealizedFuture<
           std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>(
           nullptr)};
@@ -554,10 +554,10 @@ TEST_F(DefaultPipelineWarmUpTest, WarmsDefaultPipelinesOnRasterThreadForGLES) {
   EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/false, _)).Times(0);
   EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/true, _))
       .Times(AtLeast(1))
-      .WillRepeatedly([this](impeller::PipelineDescriptor descriptor,
+      .WillRepeatedly([this](const impeller::PipelineDescriptor& descriptor,
                              bool async, bool threadsafe) {
         EXPECT_TRUE(GetRasterTaskRunner()->RunsTasksOnCurrentThread());
-        return ReturnNullPipeline(std::move(descriptor), async, threadsafe);
+        return ReturnNullPipeline(descriptor, async, threadsafe);
       });
   FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
       impeller::Context::BackendType::kOpenGLES, pipeline_library));
@@ -575,10 +575,10 @@ TEST_F(DefaultPipelineWarmUpTest, WarmsDefaultPipelinesOnlyOnce) {
   size_t requested_pipelines = 0;
   ON_CALL(*pipeline_library, GetPipeline(_, _, _))
       .WillByDefault(
-          [&requested_pipelines](impeller::PipelineDescriptor descriptor,
+          [&requested_pipelines](const impeller::PipelineDescriptor& descriptor,
                                  bool async, bool threadsafe) {
             requested_pipelines++;
-            return ReturnNullPipeline(std::move(descriptor), async, threadsafe);
+            return ReturnNullPipeline(descriptor, async, threadsafe);
           });
   FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
       impeller::Context::BackendType::kOpenGLES, pipeline_library));
@@ -602,6 +602,69 @@ TEST_F(DefaultPipelineWarmUpTest, DoesNotWarmDefaultPipelinesForVulkan) {
 
   android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
   FlushRasterThread();
+}
+
+TEST_F(DefaultPipelineWarmUpTest,
+       OnPreEngineRestartBumpsEpochAndTearsDownClassicHcBeforeJniRestart) {
+  auto jni_mock = std::make_shared<NiceMock<MockPlatformViewAndroidJNI>>();
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  auto android_context =
+      std::make_shared<FakeAndroidContext>(CreateImpellerContextWithoutGPU(
+          impeller::Context::BackendType::kOpenGLES, pipeline_library));
+
+  NiceMock<MockPlatformViewDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, OnPlatformViewGetSettings())
+      .WillByDefault(ReturnRef(settings));
+
+  fml::Thread platform_thread("platform");
+  TaskRunners task_runners(
+      "OnPreEngineRestartTest", platform_thread.GetTaskRunner(),
+      GetRasterTaskRunner(), platform_thread.GetTaskRunner(),
+      platform_thread.GetTaskRunner());
+
+  std::unique_ptr<PlatformViewAndroid> platform_view;
+  std::shared_ptr<ExternalViewEmbedder> embedder;
+  PostTaskSync(platform_thread.GetTaskRunner(), [&]() {
+    platform_view = std::make_unique<PlatformViewAndroid>(
+        delegate, task_runners, jni_mock, android_context);
+    embedder = static_cast<PlatformView*>(platform_view.get())
+                   ->CreateExternalViewEmbedder();
+  });
+
+  // Initialize the inner Classic HC embedder on the raster thread.
+  PostTaskSync(GetRasterTaskRunner(), [&]() {
+    EXPECT_FALSE(embedder->SupportsDynamicThreadMerging());
+  });
+
+  std::vector<std::string> call_order;
+  EXPECT_CALL(*jni_mock, FlutterViewTeardownHybridComposition())
+      .WillOnce([&]() {
+        EXPECT_TRUE(
+            platform_thread.GetTaskRunner()->RunsTasksOnCurrentThread());
+        call_order.push_back("teardown_hc");
+      });
+  EXPECT_CALL(*jni_mock, FlutterViewOnPreEngineRestart()).WillOnce([&]() {
+    EXPECT_TRUE(platform_thread.GetTaskRunner()->RunsTasksOnCurrentThread());
+    call_order.push_back("pre_engine_restart");
+  });
+
+  const uint64_t initial_epoch =
+      platform_view->GetHybridCompositionState()->hc_epoch.load();
+  PostTaskSync(platform_thread.GetTaskRunner(), [&]() {
+    static_cast<const PlatformView*>(platform_view.get())->OnPreEngineRestart();
+  });
+
+  // Both `PlatformViewAndroid::OnPreEngineRestart()` and inner `Teardown()`
+  // advance `hc_epoch`, and Classic HC teardown precedes JNI pre-restart.
+  EXPECT_GT(platform_view->GetHybridCompositionState()->hc_epoch.load(),
+            initial_epoch);
+  ASSERT_EQ(call_order,
+            (std::vector<std::string>{"teardown_hc", "pre_engine_restart"}));
+
+  PostTaskSync(platform_thread.GetTaskRunner(),
+               [&]() { platform_view.reset(); });
 }
 #endif  // !SLIMPELLER
 

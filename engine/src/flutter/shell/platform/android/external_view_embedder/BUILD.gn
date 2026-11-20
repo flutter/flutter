@@ -14,6 +14,10 @@ source_set("external_view_embedder") {
     "external_view_embedder_2.h",
     "external_view_embedder_wrapper.cc",
     "external_view_embedder_wrapper.h",
+    "frame_packet_mailbox.cc",
+    "frame_packet_mailbox.h",
+    "image_layer_pool.cc",
+    "image_layer_pool.h",
     "surface_pool.cc",
     "surface_pool.h",
   ]
@@ -31,7 +35,10 @@ source_set("external_view_embedder") {
     "//flutter/skia",
   ]
 
-  public_deps = [ "//third_party/abseil-cpp/absl/container:flat_hash_set" ]
+  public_deps = [
+    "//flutter/shell/platform/android/surface:native_window",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+  ]
 }
 
 test_fixtures("external_view_embedder_fixtures") {
@@ -44,6 +51,8 @@ executable("android_external_view_embedder_unittests") {
   sources = [
     "../surface/deferred_root_surface_unittests.cc",
     "external_view_embedder_unittests.cc",
+    "frame_packet_mailbox_unittests.cc",
+    "image_layer_pool_unittests.cc",
     "surface_pool_unittests.cc",
   ]
 

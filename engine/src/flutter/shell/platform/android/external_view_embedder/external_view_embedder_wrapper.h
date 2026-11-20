@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
+#include <memory>
 #include <mutex>
 
 #include "flutter/common/task_runners.h"
@@ -30,7 +31,12 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      std::shared_ptr<HybridCompositionState> hc_state = nullptr,
+      std::shared_ptr<DeferredRootSurfaceSlot> deferred_root_surface_slot =
+          nullptr,
+      AndroidExternalViewEmbedder::ScheduleFrameCallback
+          schedule_frame_callback = {});
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -76,18 +82,34 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   bool SupportsDynamicThreadMerging() override;
 
   // |ExternalViewEmbedder|
+  bool SupportsPartialRepaint() const override;
+
+  // |ExternalViewEmbedder|
+  bool DidLastSubmitSucceed() const override;
+
+  // |ExternalViewEmbedder|
   void Teardown() override;
+
+  // Tears down Classic Hybrid Composition state (if `non_hcpp_view_embedder_`
+  // has been initialized) without calling `EnsureInitialized()` or touching
+  // `hcpp_view_embedder_`. Invoked from
+  // `PlatformViewAndroid::OnPreEngineRestart`.
+  void TeardownClassicHybridComposition();
 
  private:
   void EnsureInitialized();
+  bool IsUsingHcppLocked() const;
 
   // Whether the device has hcpp mode initialized and is at least API 34.
   const bool meets_hcpp_criteria_;
   const AndroidContext& android_context_;
   const TaskRunners& task_runners_;
-  std::mutex init_mutex_;
+  mutable std::mutex init_mutex_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  std::shared_ptr<HybridCompositionState> hc_state_;
+  std::shared_ptr<DeferredRootSurfaceSlot> deferred_root_surface_slot_;
+  AndroidExternalViewEmbedder::ScheduleFrameCallback schedule_frame_callback_;
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
   std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };
