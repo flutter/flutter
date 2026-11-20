@@ -36,6 +36,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.ProcessTextChannel;
 import io.flutter.embedding.engine.systemchannels.RestorationChannel;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
+import io.flutter.embedding.engine.systemchannels.ScrollCaptureChannel;
 import io.flutter.embedding.engine.systemchannels.SensitiveContentChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SpellCheckChannel;
@@ -108,6 +109,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final PlatformChannel platformChannel;
   @NonNull private final ProcessTextChannel processTextChannel;
   @NonNull private final ScribeChannel scribeChannel;
+  @NonNull private final ScrollCaptureChannel scrollCaptureChannel;
   @NonNull private final SensitiveContentChannel sensitiveContentChannel;
   @NonNull private final SettingsChannel settingsChannel;
   @NonNull private final SpellCheckChannel spellCheckChannel;
@@ -368,6 +370,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     processTextChannel = new ProcessTextChannel(dartExecutor, context.getPackageManager());
     restorationChannel = new RestorationChannel(dartExecutor, waitForRestorationData);
     scribeChannel = new ScribeChannel(dartExecutor);
+    scrollCaptureChannel = new ScrollCaptureChannel(dartExecutor);
     sensitiveContentChannel = new SensitiveContentChannel(dartExecutor);
     settingsChannel = new SettingsChannel(dartExecutor);
     spellCheckChannel = new SpellCheckChannel(dartExecutor);
@@ -657,6 +660,12 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public ScribeChannel getScribeChannel() {
     return scribeChannel;
+  }
+
+  /** System channel that captures scrolling content for Android's scrolling screenshots. */
+  @NonNull
+  public ScrollCaptureChannel getScrollCaptureChannel() {
+    return scrollCaptureChannel;
   }
 
   /** System channel that handles getting and setting content sensitivity. */
