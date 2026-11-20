@@ -6,6 +6,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #include "flutter/testing/autoreleasepool_test.h"
 #include "flutter/testing/testing.h"
@@ -138,6 +139,52 @@ TEST_F(AccessibilityBridgeMacWindowTest, SendsAccessibilityCreateNotificationFlu
   id target = bridge->actual_notifications[NSAccessibilityCreatedNotification];
   ASSERT_NE(target, nil);
   EXPECT_EQ(target, expectedTarget);
+  [engine shutDownEngine];
+}
+
+TEST_F(AccessibilityBridgeMacWindowTest, TextFieldValueChangeWithNonTextFieldNativeNode) {
+  FlutterViewController* viewController = CreateTestViewController();
+  FlutterEngine* engine = viewController.engine;
+  NSWindow* window = GetWindow();
+  window.contentView = viewController.view;
+  engine.semanticsEnabled = YES;
+  auto bridge = std::static_pointer_cast<AccessibilityBridgeMacSpy>(
+      viewController.accessibilityBridge.lock());
+
+  FlutterSemanticsNode2 root{};
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  root.id = 0;
+  root.flags2 = &flags;
+  root.text_selection_base = -1;
+  root.text_selection_extent = -1;
+  root.label = "root";
+  root.hint = "";
+  root.value = "";
+  root.increased_value = "";
+  root.decreased_value = "";
+  root.tooltip = "";
+  root.identifier = "";
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+  bridge->actual_notifications = [NSMutableDictionary dictionary];
+  auto delegate = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  ASSERT_TRUE(delegate);
+  id native_node = delegate->GetNativeViewAccessible();
+  ASSERT_NE(native_node, nil);
+  ASSERT_FALSE([native_node isKindOfClass:[FlutterTextField class]]);
+
+  ui::AXTree tree;
+  ui::AXNode ax_node(&tree, nullptr, 0, 0);
+  ui::AXNodeData node_data;
+  node_data.id = 0;
+  node_data.role = ax::mojom::Role::kTextField;
+  ax_node.SetData(node_data);
+  std::vector<ui::AXEventIntent> intent;
+  ui::AXEventGenerator::EventParams params(ui::AXEventGenerator::Event::VALUE_CHANGED,
+                                           ax::mojom::EventFrom::kNone, intent);
+  bridge->OnAccessibilityEvent(ui::AXEventGenerator::TargetedEvent(&ax_node, params));
+
+  EXPECT_EQ(bridge->actual_notifications[NSAccessibilityValueChangedNotification], native_node);
   [engine shutDownEngine];
 }
 
