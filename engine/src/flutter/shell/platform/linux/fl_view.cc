@@ -85,12 +85,7 @@ static gboolean redraw_cb(gpointer user_data) {
   TRACE_EVENT0("flutter", "GTK4UpdateTexture");
   g_autoptr(FlView) self = FL_VIEW(user_data);
 
-#if FLUTTER_LINUX_GTK4
-  const gboolean should_emit_first_frame = !self->sized_to_content;
-#else
-  const gboolean should_emit_first_frame = TRUE;
-#endif
-  if (!self->have_first_frame && should_emit_first_frame) {
+  if (!self->have_first_frame && !self->sized_to_content) {
     self->have_first_frame = TRUE;
     g_signal_emit(self, fl_view_signals[SIGNAL_FIRST_FRAME], 0);
   }
@@ -99,37 +94,20 @@ static gboolean redraw_cb(gpointer user_data) {
   // necessary.
   const double scale_factor =
       fl_gtk_widget_get_scale(GTK_WIDGET(self->render_area));
-  size_t width;
-  size_t height;
-#if FLUTTER_LINUX_GTK4
-  width = fl_gtk_size_to_pixels(gtk_widget_get_width(self->render_area),
-                                scale_factor);
-  height = fl_gtk_size_to_pixels(gtk_widget_get_height(self->render_area),
-                                 scale_factor);
-#else
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
-  width = allocation.width * scale_factor;
-  height = allocation.height * scale_factor;
-#endif
+  const size_t width = fl_gtk_size_to_pixels(
+      gtk_widget_get_width(self->render_area), scale_factor);
+  const size_t height = fl_gtk_size_to_pixels(
+      gtk_widget_get_height(self->render_area), scale_factor);
   size_t frame_width, frame_height;
   fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
-#if FLUTTER_LINUX_GTK4
   const gint logical_frame_width =
       MAX(static_cast<gint>(ceil(frame_width / scale_factor)), 1);
   const gint logical_frame_height =
       MAX(static_cast<gint>(ceil(frame_height / scale_factor)), 1);
-#else
-  const gint logical_frame_width =
-      MAX(static_cast<gint>(frame_width / scale_factor), 1);
-  const gint logical_frame_height =
-      MAX(static_cast<gint>(frame_height / scale_factor), 1);
-#endif
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
     gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
                                 logical_frame_width, logical_frame_height);
-#if FLUTTER_LINUX_GTK4
     if (self->native_texture_retry_source_id == 0) {
       self->native_texture_retry_source_id =
           g_timeout_add_full(G_PRIORITY_DEFAULT, 16, retry_native_texture_cb,
@@ -142,27 +120,15 @@ static gboolean redraw_cb(gpointer user_data) {
       gtk_window_set_default_size(GTK_WINDOW(native), logical_frame_width,
                                   logical_frame_height);
     }
-#else
-    GtkWidget* toplevel =
-        gtk_widget_get_toplevel(GTK_WIDGET(self->render_area));
-    if (GTK_IS_WINDOW(toplevel)) {
-      // Resize to smallest size, so that the window will shrink to fit the new
-      // size of the render area.
-      gtk_window_resize(GTK_WINDOW(toplevel), 1, 1);
-    }
-#endif
     return G_SOURCE_REMOVE;
   }
 
-#if FLUTTER_LINUX_GTK4
   if (!self->sized_to_content && !frame_size_matches && width > 1 &&
       height > 1) {
     handle_geometry_changed(self);
     return G_SOURCE_REMOVE;
   }
-#endif
 
-#if FLUTTER_LINUX_GTK4
   if (width == 0 || height == 0) {
     if (self->native_texture_retry_source_id == 0) {
       self->native_texture_retry_source_id =
@@ -218,9 +184,6 @@ static gboolean redraw_cb(gpointer user_data) {
                              g_object_ref(self), g_object_unref);
     }
   }
-#else
-  gtk_widget_queue_draw(GTK_WIDGET(self->render_area));
-#endif
 
   return G_SOURCE_REMOVE;
 }
