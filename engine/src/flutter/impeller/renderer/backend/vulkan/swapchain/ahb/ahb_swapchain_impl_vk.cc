@@ -168,11 +168,7 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
     return nullptr;
   }
 
-#if IMPELLER_DEBUG
-  if (context) {
-    ContextVK::Cast(*context).GetGPUTracer()->MarkFrameStart();
-  }
-#endif  // IMPELLER_DEBUG
+  ContextVK::Cast(*context).GetGPUTracer()->MarkFrameStart();
 
   auto surface = SurfaceVK::WrapSwapchainImage(
       transients_, pool_entry.texture,
@@ -205,10 +201,12 @@ bool AHBSwapchainImplVK::Present(
   if (!control || !control->IsValid()) {
     VALIDATION_LOG << "Surface control died before swapchain image could be "
                       "presented.";
+    frame_data_[frame_index_]->final_cmd_buffer.reset();
     return false;
   }
 
   if (!texture) {
+    frame_data_[frame_index_]->final_cmd_buffer.reset();
     return false;
   }
 
@@ -248,17 +246,19 @@ void AHBSwapchainImplVK::AddFinalCommandBuffer(
 std::shared_ptr<ExternalSemaphoreVK>
 AHBSwapchainImplVK::SubmitSignalForPresentReady(
     const std::shared_ptr<AHBTextureSourceVK>& texture) const {
+  auto& sync = frame_data_[frame_index_];
   auto context = transients_->GetContext().lock();
   if (!context) {
+    sync->final_cmd_buffer.reset();
     return nullptr;
   }
 
   auto present_ready = std::make_shared<ExternalSemaphoreVK>(context);
   if (!present_ready || !present_ready->IsValid()) {
+    sync->final_cmd_buffer.reset();
     return nullptr;
   }
 
-  auto& sync = frame_data_[frame_index_];
   auto command_buffer = sync->final_cmd_buffer;
   if (!command_buffer) {
     return nullptr;
@@ -266,6 +266,7 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   CommandBufferVK& command_buffer_vk = CommandBufferVK::Cast(*command_buffer);
   const auto command_encoder_vk = command_buffer_vk.GetCommandBuffer();
   if (!command_buffer_vk.EndCommandBuffer()) {
+    sync->final_cmd_buffer.reset();
     return nullptr;
   }
   sync->present_ready = present_ready;
@@ -282,12 +283,16 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   submit_info.setPSignalSemaphores(&sync->present_ready->GetHandle());
   submit_info.setSignalSemaphoreCount(1);
 
-  auto result = ContextVK::Cast(*context).GetGraphicsQueue()->Submit(
-      submit_info, *sync->acquire);
+  const auto& context_vk = ContextVK::Cast(*context);
+  auto result =
+      context_vk.GetGraphicsQueue()->Submit(submit_info, *sync->acquire);
   if (result != vk::Result::eSuccess) {
+    sync->final_cmd_buffer.reset();
     return nullptr;
   }
   sync->acquire_fence_pending = true;
+  context_vk.GetGPUTracer()->ReleaseCommandBufferOnFence(context_vk,
+                                                         command_buffer_vk);
   return present_ready;
 }
 

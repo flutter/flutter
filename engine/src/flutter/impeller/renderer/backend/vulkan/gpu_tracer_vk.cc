@@ -14,6 +14,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 
 namespace impeller {
 
@@ -142,11 +143,11 @@ void GPUTracerVK::RecordCmdBufferStart(const vk::CommandBuffer& buffer,
 void GPUTracerVK::RecordCmdBufferEnd(const vk::CommandBuffer& buffer,
                                      GPUProbe& probe) {
   if (!enabled_ || std::this_thread::get_id() != raster_thread_id_ ||
-      !in_frame_ || !probe.index_.has_value()) {
+      !probe.index_.has_value()) {
     return;
   }
   Lock lock(trace_state_mutex_);
-  GPUTraceState& state = trace_states_[current_state_];
+  GPUTraceState& state = trace_states_[probe.index_.value()];
 
   if (state.current_index >= kPoolSize) {
     return;
@@ -156,6 +157,38 @@ void GPUTracerVK::RecordCmdBufferEnd(const vk::CommandBuffer& buffer,
                         state.query_pool.get(), state.current_index);
 
   state.current_index += 1;
+}
+
+void GPUTracerVK::ReleaseCommandBufferOnFence(const ContextVK& context,
+                                              CommandBuffer& cmd_buffer) {
+  auto& cmd_buffer_vk = CommandBufferVK::Cast(cmd_buffer);
+  if (!enabled_ || !cmd_buffer_vk.HasGPUProbeIndex()) {
+    return;
+  }
+  auto [fence_result, fence] = context.GetDevice().createFenceUnique({});
+  if (fence_result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to create GPUTracer fence: "
+                   << vk::to_string(fence_result);
+    return;
+  }
+  auto probe_slot = std::make_shared<std::unique_ptr<GPUProbe>>();
+  auto* probe_slot_ptr = probe_slot.get();
+  auto submit_callback = [&context, &cmd_buffer_vk,
+                          probe_slot_ptr](vk::Fence submit_fence) {
+    auto status = context.GetGraphicsQueue()->Submit(submit_fence);
+    if (status != vk::Result::eSuccess) {
+      return absl::Status(absl::StatusCode::kCancelled,
+                          "Failed to submit GPUTracer fence.");
+    }
+    *probe_slot_ptr = cmd_buffer_vk.ReleaseGPUProbe();
+    return absl::OkStatus();
+  };
+  auto completion_callback = [probe_slot = std::move(probe_slot)]() {};
+  auto add_status = context.GetFenceWaiter()->AddFence(
+      std::move(fence), submit_callback, std::move(completion_callback));
+  if (!add_status.ok()) {
+    VALIDATION_LOG << "Failed to add GPUTracer fence: " << add_status.message();
+  }
 }
 
 void GPUTracerVK::OnFenceComplete(size_t frame_index) {
