@@ -875,7 +875,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   VoidCallback? _dragCancelCallback;
   final _DraggableSheetExtent Function() getExtent;
   final Set<AnimationController> _ballisticControllers = <AnimationController>{};
-  bool get listShouldScroll => pixels > 0.0;
+  bool get listShouldScroll => pixels > minScrollExtent;
 
   _DraggableSheetExtent get extent => getExtent();
 
@@ -905,10 +905,8 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   void applyUserOffset(double delta) {
-    if (!listShouldScroll &&
-        (!(extent.isAtMin || extent.isAtMax) ||
-            (extent.isAtMin && delta < 0) ||
-            (extent.isAtMax && delta > 0))) {
+    final bool resizeSheet = delta < 0 ? !extent.isAtMax : (!listShouldScroll && !extent.isAtMin);
+    if (resizeSheet) {
       extent.addPixelDelta(-delta, context.notificationContext!);
     } else {
       super.applyUserOffset(delta);
@@ -940,7 +938,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
   @override
   void goBallistic(double velocity) {
     if ((velocity == 0.0 && !_shouldSnap()) ||
-        (velocity < 0.0 && listShouldScroll) ||
+        (velocity < 0.0 && listShouldScroll && !_shouldSnap()) ||
         (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
       return;
