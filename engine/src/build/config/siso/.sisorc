@@ -1,0 +1,1 @@
+ninja --enable_cloud_logging=false --enable_cloud_monitoring=false --enable_cloud_trace=false --enable_cloud_profiler=false

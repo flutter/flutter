@@ -15,6 +15,7 @@ import 'logger.dart';
 const _flagConfig = 'config';
 const _flagConcurrency = 'concurrency';
 const _flagStrategy = 'build-strategy';
+const _flagSiso = 'siso';
 const _flagRbe = 'rbe';
 const _flagLto = 'lto';
 const _flagExtraGnArgs = 'gn-args';
@@ -52,6 +53,7 @@ final class BuildPlan {
     return BuildPlan._(
       build: build,
       strategy: BuildStrategy.values.byName(args.option(_flagStrategy)!),
+      useSiso: args.flag(_flagSiso),
       useRbe: () {
         final bool useRbe = args.flag(_flagRbe);
         if (useRbe && !environment.hasRbeConfigInTree()) {
@@ -86,6 +88,7 @@ final class BuildPlan {
   BuildPlan._({
     required this.build,
     required this.strategy,
+    required this.useSiso,
     required this.useRbe,
     required this.useLto,
     required this.concurrency,
@@ -101,8 +104,10 @@ final class BuildPlan {
   /// Instead, provide them explicitly as other [BuildPlan] arguments.
   @visibleForTesting
   static const Set<String> reservedGnArgs = {
+    _flagSiso,
     _flagRbe,
     _flagLto,
+    'no-$_flagSiso',
     'no-$_flagRbe',
     'no-$_flagLto',
     // If we are to expand this list to include flags that are not a 1:1 mapping
@@ -203,6 +208,9 @@ final class BuildPlan {
       hide: !environment.verbose,
     );
 
+    // Add --siso.
+    parser.addFlag(_flagSiso);
+
     // Add --rbe.
     final bool hasRbeConfigInTree = environment.hasRbeConfigInTree();
     parser.addFlag(
@@ -253,6 +261,9 @@ final class BuildPlan {
   final BuildStrategy strategy;
   static const BuildStrategy _defaultStrategy = BuildStrategy.auto;
 
+  /// Whether to use Siso (instead of Ninja).
+  final bool useSiso;
+
   /// Whether to configure the build plan to use RBE (remote build execution).
   final bool useRbe;
   static const _rbeInstructions =
@@ -282,6 +293,7 @@ final class BuildPlan {
     return other is BuildPlan &&
         build.name == other.build.name &&
         strategy == other.strategy &&
+        useSiso == other.useSiso &&
         useRbe == other.useRbe &&
         useLto == other.useLto &&
         concurrency == other.concurrency &&
@@ -293,6 +305,7 @@ final class BuildPlan {
     return Object.hash(
       build.name,
       strategy,
+      useSiso,
       useRbe,
       useLto,
       concurrency,
@@ -314,7 +327,12 @@ final class BuildPlan {
 
   /// Converts this build plan into extra GN arguments to pass to the build.
   List<String> toGnArgs() {
-    return [if (!useRbe) '--no-rbe', if (useLto) '--lto' else '--no-lto', ...extraGnArgs];
+    return [
+      if (useSiso) '--siso',
+      if (!useRbe) '--no-rbe',
+      if (useLto) '--lto' else '--no-lto',
+      ...extraGnArgs,
+    ];
   }
 
   @override
@@ -323,6 +341,7 @@ final class BuildPlan {
     buffer.writeln();
     buffer.writeln('  build: ${build.name}');
     buffer.writeln('  useLto: $useLto');
+    buffer.writeln('  useSiso: $useSiso');
     buffer.writeln('  useRbe: $useRbe');
     buffer.writeln('  strategy: $strategy');
     buffer.writeln('  concurrency: $concurrency');
