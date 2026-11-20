@@ -648,7 +648,11 @@ flutter:
             logger: logger,
           ),
           extensionManager: manager,
-          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem),
+            fs: fileSystem,
+            logger: logger,
+          ),
         );
         final List<Device> devices = await discovery.devices();
         return (manager, logger, fileSystem, devices);
