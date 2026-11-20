@@ -690,6 +690,11 @@ static void ResetAnchor(CALayer* layer) {
     }
     [self.platformViews removeAllObjects];
     [_previousCompositionOrder removeAllObjects];
+
+    // Discard any pending disposals, since their views were removed above.
+    // If we don't do this, `presentFrame:` would incorrectly dispose a view created with the same
+    // ID after the hot restart.
+    [self.viewsToDispose removeAllObjects];
   }];
 
   // The state below is otherwise only modified on the raster thread.
