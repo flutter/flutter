@@ -509,20 +509,6 @@ static void realize_cb(FlView* self) {
   // Handle requests by the user to close the application.
   g_signal_connect_swapped(toplevel_window, "close-request",
                            G_CALLBACK(window_delete_event_cb), self);
-
-  // Flutter engine will need to make the context current from raster thread
-  // during initialization.
-  fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
-
-  g_autoptr(GError) error = nullptr;
-  if (!fl_engine_start(self->engine, &error)) {
-    g_warning("Failed to start Flutter engine: %s", error->message);
-    return;
-  }
-
-  setup_cursor(self);
-
-  handle_geometry_changed(self);
 #else
   if (self->view_id != flutter::kFlutterImplicitViewId) {
     setup_cursor(self);
@@ -536,6 +522,7 @@ static void realize_cb(FlView* self) {
   g_signal_connect_swapped(toplevel_window, "delete-event",
                            G_CALLBACK(window_delete_event_cb), self);
 
+#endif
   // The renderer created its GL context during realization. Release it so the
   // raster thread can make Flutter's context current during engine startup.
   fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
@@ -548,7 +535,6 @@ static void realize_cb(FlView* self) {
 
   setup_cursor(self);
   handle_geometry_changed(self);
-#endif
 }
 
 #if !FLUTTER_LINUX_GTK4
