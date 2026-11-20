@@ -902,10 +902,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     _horizontalOffset.addListener(markNeedsLayout);
     _verticalOffset.addListener(markNeedsLayout);
     _delegate.addListener(_handleDelegateNotification);
-    for (final RenderBox child in _children.values) {
-      child.attach(owner);
-    }
-    for (final RenderBox child in _keepAliveBucket.values) {
+    // A kept-alive child can be in both maps, so de-duplicate.
+    for (final child in <RenderBox>{..._children.values, ..._keepAliveBucket.values}) {
       child.attach(owner);
     }
   }
@@ -916,10 +914,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     _horizontalOffset.removeListener(markNeedsLayout);
     _verticalOffset.removeListener(markNeedsLayout);
     _delegate.removeListener(_handleDelegateNotification);
-    for (final RenderBox child in _children.values) {
-      child.detach();
-    }
-    for (final RenderBox child in _keepAliveBucket.values) {
+    // A kept-alive child can be in both maps, so de-duplicate.
+    for (final child in <RenderBox>{..._children.values, ..._keepAliveBucket.values}) {
       child.detach();
     }
   }
