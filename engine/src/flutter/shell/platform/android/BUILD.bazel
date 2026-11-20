@@ -15,6 +15,7 @@ load("//build_defs/gn:gn_action.bzl", "gn_action", "gn_generated_file")
 load("//build_defs/java:robolectric.bzl", "android_test_apk", "java_classes", "robolectric_tests")
 load("//build_defs/testing:android_device_test.bzl", "flutter_android_device_test")
 load("//build_defs/testing:native_symbols.bzl", "check_forbidden_native_symbols")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -72,6 +73,14 @@ cc_library(
     alwayslink = True,
 )
 
+flutter_test_fixtures(
+    name = "flutter_shell_native_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
 flutter_android_device_test(
     name = "flutter_shell_native_unittests",
     size = "large",
@@ -109,6 +118,7 @@ flutter_android_device_test(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
+        ":flutter_shell_native_fixtures",
         ":flutter_shell_native_src",
         "//engine/src:include_root",
         "//engine/src/flutter:config",
@@ -116,6 +126,7 @@ flutter_android_device_test(
         "//engine/src/flutter/impeller/renderer/testing:mocks",
         "//engine/src/flutter/shell/platform/android/jni:jni_mock",
         "//engine/src/flutter/shell/platform/android/jni:mock_jni_env",
+        "//engine/src/flutter/testing:testing_lib",
         "@googletest//:gtest",
         "@googletest_tree//:root_includes",
         "@googletest_tree//:third_party_dir_includes",

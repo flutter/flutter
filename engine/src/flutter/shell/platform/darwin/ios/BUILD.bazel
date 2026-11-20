@@ -124,6 +124,8 @@ flutter_objc_library(
         "framework/Source/FlutterMetalLayer.mm",
         "framework/Source/FlutterOverlayView.mm",
         "framework/Source/FlutterPlatformPlugin.mm",
+        "framework/Source/FlutterPlatformViewFrame.m",
+        "framework/Source/FlutterPlatformViewLayer.m",
         "framework/Source/FlutterPlatformViews.mm",
         "framework/Source/FlutterPlatformViewsController.mm",
         "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
@@ -157,6 +159,7 @@ flutter_objc_library(
         "ios_surface_metal_impeller.mm",
         "platform_message_handler_ios.mm",
         "platform_view_ios.mm",
+        "platform_view_layer_conversion.mm",
         "rendering_api_selection.mm",
     ],
     hdrs = [
@@ -189,6 +192,8 @@ flutter_objc_library(
         "framework/Source/FlutterMetalLayer.h",
         "framework/Source/FlutterOverlayView.h",
         "framework/Source/FlutterPlatformPlugin.h",
+        "framework/Source/FlutterPlatformViewFrame.h",
+        "framework/Source/FlutterPlatformViewLayer.h",
         "framework/Source/FlutterPlatformViewsController.h",
         "framework/Source/FlutterPlatformViews_Internal.h",
         "framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h",
@@ -226,6 +231,7 @@ flutter_objc_library(
         "ios_surface_metal_impeller.h",
         "platform_message_handler_ios.h",
         "platform_view_ios.h",
+        "platform_view_layer_conversion.h",
         "rendering_api_selection.h",
     ],
     copts = FLUTTER_COPTS + [
@@ -320,6 +326,8 @@ cc_library(
         "framework/Source/FlutterMetalLayer.h",
         "framework/Source/FlutterOverlayView.h",
         "framework/Source/FlutterPlatformPlugin.h",
+        "framework/Source/FlutterPlatformViewFrame.h",
+        "framework/Source/FlutterPlatformViewLayer.h",
         "framework/Source/FlutterPlatformViewsController.h",
         "framework/Source/FlutterPlatformViews_Internal.h",
         "framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h",
@@ -357,6 +365,7 @@ cc_library(
         "ios_surface_metal_impeller.h",
         "platform_message_handler_ios.h",
         "platform_view_ios.h",
+        "platform_view_layer_conversion.h",
         "rendering_api_selection.h",
     ],
     copts = FLUTTER_COPTS + [
@@ -707,6 +716,7 @@ flutter_objc_library(
         "framework/Source/availability_version_check_test.mm",
         "platform_message_handler_ios_test.mm",
         "platform_view_ios_test.mm",
+        "platform_view_layer_conversion_test.mm",
     ],
     hdrs = [
         "framework/Source/FlutterEngine+Test.h",

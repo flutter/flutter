@@ -285,15 +285,15 @@ PUB_HOSTED = {
         ],
     ),
     "cupertino_icons": struct(
-        version = "1.0.9",
-        sha256 = "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd",
-        url = "https://pub.dev/api/archives/cupertino_icons-1.0.9.tar.gz",
+        version = "2.0.0",
+        sha256 = "b7cc2390aac296c083bea762859413eb1cf5b630c70e0c7e4d831018f762a8b2",
+        url = "https://pub.dev/api/archives/cupertino_icons-2.0.0.tar.gz",
         deps = [],
     ),
     "cupertino_ui": struct(
-        version = "1.1.6",
-        sha256 = "369e39a1c5c030a6212589c3da1809920b1c2cfade7b02aade7695bfa4b88c3a",
-        url = "https://pub.dev/api/archives/cupertino_ui-1.1.6.tar.gz",
+        version = "1.1.7",
+        sha256 = "c3eaf7f5bdfee36deb0b14a4cbf7602f1b6b8d8b8576b81f38fc08c25881c94c",
+        url = "https://pub.dev/api/archives/cupertino_ui-1.1.7.tar.gz",
         deps = [
             "collection",
             "flutter",
@@ -893,9 +893,9 @@ PUB_HOSTED = {
         ],
     ),
     "material_ui": struct(
-        version = "1.11.0",
-        sha256 = "474c135fd46b56ff1d35ca982155e8863d28fbc6464d1192acf4ee53a738680e",
-        url = "https://pub.dev/api/archives/material_ui-1.11.0.tar.gz",
+        version = "1.11.1",
+        sha256 = "a6b19012df437a356cbc01f8ea22a105e07194c47c9a6009da0032a0ce35c4ab",
+        url = "https://pub.dev/api/archives/material_ui-1.11.1.tar.gz",
         deps = [
             "collection",
             "cupertino_ui",
@@ -1598,9 +1598,9 @@ PUB_HOSTED = {
         ],
     ),
     "video_player_android": struct(
-        version = "2.12.2",
-        sha256 = "d27054dea34d748a44f06d433a57005d2aac69944485b0abbaed3303dbcfa3f1",
-        url = "https://pub.dev/api/archives/video_player_android-2.12.2.tar.gz",
+        version = "2.12.4",
+        sha256 = "73af648c6fbd0ced6b4863b3ae995bf86e9f976544891d92a3e38452647b91c5",
+        url = "https://pub.dev/api/archives/video_player_android-2.12.4.tar.gz",
         deps = [
             "flutter",
             "meta",
@@ -1608,9 +1608,9 @@ PUB_HOSTED = {
         ],
     ),
     "video_player_avfoundation": struct(
-        version = "2.12.3",
-        sha256 = "7d620d8c69d00c158a5c57bf3d2a051833b547631203ff724664fbf301024bc1",
-        url = "https://pub.dev/api/archives/video_player_avfoundation-2.12.3.tar.gz",
+        version = "2.12.4",
+        sha256 = "5af728d811c218fdc100b7e89bcda789fe34d36d53a968912011bc2d7df14b46",
+        url = "https://pub.dev/api/archives/video_player_avfoundation-2.12.4.tar.gz",
         deps = [
             "flutter",
             "meta",
@@ -2465,7 +2465,6 @@ PUB_WORKSPACE = {
             "dwds",
             "extension_discovery",
             "fake_async",
-            "ffi",
             "file",
             "fixnum",
             "flutter_template_images",

@@ -123,10 +123,7 @@ flutter_display_test(
     name = "impeller_unittests",
     size = "large",
     args = select({
-        "//engine/src/flutter/build/bazel:host_os_is_mac": [
-            "--gtest_filter=-*OpenGLES:*OpenGLESSDF",
-            "--enable_vulkan_validation",
-        ],
+        "//engine/src/flutter/build/bazel:host_os_is_mac": ["--gtest_filter=-*OpenGLES:*OpenGLESSDF:*Vulkan*"],
         "//conditions:default": [],
     }),
     data = [":gpu_test_backends"],

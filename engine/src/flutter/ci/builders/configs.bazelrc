@@ -156,11 +156,11 @@ build:host_debug_ddm --compilation_mode=opt --//engine/src/flutter/common:runtim
 build:host_debug_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=debug --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_debug
 
 # linux_host_engine_test.json: ci/host_profile_test
-#   --target-dir ci/host_profile_test --runtime-mode profile --prebuilt-dart-sdk --build-embedder-examples --thin-lto --no-rbe --bazel
+#   --target-dir ci/host_profile_test --runtime-mode profile --prebuilt-dart-sdk --build-embedder-examples --thin-lto --use-glfw-swiftshader --no-rbe --bazel
 build:host_profile_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=profile --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_profile --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:thin_lto
 
 # linux_host_engine_test.json: ci/host_release_test
-#   --target-dir ci/host_release_test --runtime-mode release --prebuilt-dart-sdk --build-embedder-examples --thin-lto --no-rbe --bazel
+#   --target-dir ci/host_release_test --runtime-mode release --prebuilt-dart-sdk --build-embedder-examples --thin-lto --use-glfw-swiftshader --no-rbe --bazel
 build:host_release_test --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release --//engine/src/flutter/build/bazel:lto --//engine/src/flutter/build/bazel:thin_lto
 
 # linux_license.json: licenses
@@ -234,10 +234,6 @@ build:host_profile --compilation_mode=opt --//engine/src/flutter/common:runtime_
 # local_engine.json: linux/host_release
 #   --runtime-mode release --no-stripped --no-lto --rbe --xcode-symlinks
 build:host_release --compilation_mode=opt --//engine/src/flutter/common:runtime_mode=release --platforms=//engine/src/flutter/build/bazel/toolchains:linux_x64_release --//engine/src/flutter/build/bazel:stripped=false
-
-# local_engine.json: linux/wasm_release
-#   --web --runtime-mode=release --no-rbe
-# The same configuration as linux_web_engine_build.json's ci/wasm_release, above.
 
 # local_engine_common.json: linux/android_debug_unopt_arm64
 #   --runtime-mode debug --unoptimized --android --android-cpu=arm64 --no-stripped --no-lto --rbe

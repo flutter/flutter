@@ -653,7 +653,7 @@ install(
     }),
 )
 
-# ci/host_profile_test's tests: run_tests.py --type dart,dart-host,engine.
+# ci/host_profile_test's tests: run_tests.py --type impeller,dart,dart-host,engine.
 test_suite(
     name = "host_profile_test_tests",
     tags = ["manual"],
@@ -664,6 +664,7 @@ test_suite(
         "//engine/src/flutter/display_list:display_list_unittests",
         "//engine/src/flutter/flow:flow_unittests",
         "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller:impeller_unittests",
         "//engine/src/flutter/lib/ui:ui_unittests",
         "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
         "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
@@ -715,7 +716,7 @@ install(
     }),
 )
 
-# ci/host_release_test's tests: run_tests.py --type dart,dart-host,engine,benchmarks.
+# ci/host_release_test's tests: run_tests.py --type impeller,dart,dart-host,engine,benchmarks.
 test_suite(
     name = "host_release_test_tests",
     tags = ["manual"],
@@ -727,6 +728,7 @@ test_suite(
         "//engine/src/flutter/display_list:display_list_unittests",
         "//engine/src/flutter/flow:flow_unittests",
         "//engine/src/flutter/fml:fml_unittests",
+        "//engine/src/flutter/impeller:impeller_unittests",
         "//engine/src/flutter/lib/ui:ui_unittests",
         "//engine/src/flutter/runtime:dart_plugin_registrant_unittests",
         "//engine/src/flutter/runtime:no_dart_plugin_registrant_unittests",
@@ -1017,10 +1019,6 @@ install(
 
 # local_engine.json: linux/host_release
 #   ninja's default target, everything: bazel build --config=host_release //engine/src/flutter:local_engine
-
-# local_engine.json: linux/wasm_release
-#   bazel run --config=wasm_release :wasm_release
-# The same install as linux_web_engine_build.json's ci/wasm_release, above.
 
 # local_engine_common.json: linux/android_debug_unopt_arm64
 #   ninja's default target, everything: bazel build --config=android_debug_unopt_arm64 //engine/src/flutter:local_engine
