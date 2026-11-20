@@ -58,6 +58,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       toolContext: toolContext,
       protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
+      trustPlugins: trustPlugins,
+      alwaysTrustPlugins: alwaysTrustPlugins,
+      neverTrustPlugins: neverTrustPlugins,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
