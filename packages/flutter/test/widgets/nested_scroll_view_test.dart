@@ -3590,6 +3590,31 @@ void main() {
     );
     expect(tester.getSize(find.byType(NestedScrollView)), Size.zero);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/123590.
+  testWidgets('NestedScrollView nested inside another can be disposed', (
+    WidgetTester tester,
+  ) async {
+    Widget nestedScrollView(Widget body) => NestedScrollView(
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => const <Widget>[
+        SliverToBoxAdapter(child: SizedBox(height: 50)),
+      ],
+      body: body,
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: nestedScrollView(
+          nestedScrollView(ListView(children: const <Widget>[SizedBox(height: 1000)])),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
 }
 
 double appBarHeight(WidgetTester tester) =>
