@@ -353,3 +353,22 @@ TEST(FileTest, FileTestsSupportsUnicode) {
       fml::IsFile(fml::paths::JoinPaths({dir.path(), filename}).c_str()));
   ASSERT_TRUE(fml::UnlinkFile(dir.fd(), filename));
 }
+
+TEST(FileTest, ReadFileToStringReadsContentsAndRespectsMaxBytes) {
+  fml::ScopedTemporaryDirectory dir;
+  ASSERT_TRUE(dir.fd().is_valid());
+  const std::string full_path = fml::paths::JoinPaths({dir.path(), "read.txt"});
+  {
+    auto fd = fml::OpenFile(dir.fd(), "read.txt", true,
+                            fml::FilePermission::kReadWrite);
+    ASSERT_TRUE(fd.is_valid());
+    ASSERT_TRUE(WriteStringToFile(fd, "hello flutter"));
+  }
+  auto all = fml::ReadFileToString(full_path.c_str());
+  ASSERT_TRUE(all.has_value());
+  EXPECT_EQ(*all, "hello flutter");
+
+  auto bounded = fml::ReadFileToString(full_path.c_str(), /*max_bytes=*/5);
+  ASSERT_TRUE(bounded.has_value());
+  EXPECT_EQ(*bounded, "hello");
+}

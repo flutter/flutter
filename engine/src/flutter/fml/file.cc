@@ -94,6 +94,19 @@ fml::UniqueFD OpenFileReadOnly(const fml::UniqueFD& base_directory,
   return OpenFile(base_directory, path, false, FilePermission::kRead);
 }
 
+std::optional<std::string> ReadFileToString(const char* path,
+                                            size_t max_bytes) {
+  fml::UniqueFD fd = OpenFile(path, false, FilePermission::kRead);
+  if (!fd.is_valid()) {
+    return std::nullopt;
+  }
+  std::string out;
+  if (!ReadFileToString(fd, &out, max_bytes)) {
+    return std::nullopt;
+  }
+  return out;
+}
+
 fml::UniqueFD OpenDirectoryReadOnly(const fml::UniqueFD& base_directory,
                                     const char* path) {
   return OpenDirectory(base_directory, path, false, FilePermission::kRead);

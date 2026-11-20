@@ -411,6 +411,29 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
   return true;
 }
 
+bool ReadFileToString(const fml::UniqueFD& file,
+                      std::string* out,
+                      size_t max_bytes) {
+  if (!file.is_valid() || out == nullptr) {
+    return false;
+  }
+  out->clear();
+  char chunk[1024];
+  while (out->size() < max_bytes) {
+    const DWORD to_read = static_cast<DWORD>(
+        std::min<size_t>(sizeof(chunk), max_bytes - out->size()));
+    DWORD bytes_read = 0;
+    if (!::ReadFile(file.get(), chunk, to_read, &bytes_read, nullptr)) {
+      return false;
+    }
+    if (bytes_read == 0) {
+      break;
+    }
+    out->append(chunk, bytes_read);
+  }
+  return true;
+}
+
 bool VisitFiles(const fml::UniqueFD& directory, const FileVisitor& visitor) {
   std::string search_pattern = GetFullHandlePath(directory) + "\\*";
   WIN32_FIND_DATA find_file_data;

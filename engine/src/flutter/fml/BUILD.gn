@@ -226,6 +226,13 @@ source_set("fml") {
     ]
   }
 
+  if (is_linux || is_android) {
+    sources += [
+      "platform/posix/unix_domain_socket_posix.cc",
+      "platform/posix/unix_domain_socket_posix.h",
+    ]
+  }
+
   if (is_win) {
     sources += [
       "platform/win/command_line_win.cc",
@@ -373,6 +380,10 @@ if (enable_unittests) {
         "platform/darwin/cf_utils_unittests.mm",
         "platform/darwin/string_range_sanitization_unittests.mm",
       ]
+    }
+
+    if (is_linux || is_android) {
+      sources += [ "platform/posix/unix_domain_socket_posix_unittests.cc" ]
     }
 
     if (is_win) {

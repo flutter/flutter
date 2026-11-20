@@ -233,6 +233,28 @@ bool WriteAtomically(const fml::UniqueFD& base_directory,
                     base_directory.get(), file_name) == 0;
 }
 
+bool ReadFileToString(const fml::UniqueFD& file,
+                      std::string* out,
+                      size_t max_bytes) {
+  if (!file.is_valid() || out == nullptr) {
+    return false;
+  }
+  out->clear();
+  char chunk[1024];
+  while (out->size() < max_bytes) {
+    const size_t to_read = std::min(sizeof(chunk), max_bytes - out->size());
+    const ssize_t n = FML_HANDLE_EINTR(::read(file.get(), chunk, to_read));
+    if (n < 0) {
+      return false;
+    }
+    if (n == 0) {
+      break;
+    }
+    out->append(chunk, static_cast<size_t>(n));
+  }
+  return true;
+}
+
 bool VisitFiles(const fml::UniqueFD& directory, const FileVisitor& visitor) {
   fml::UniqueFD dup_fd(dup(directory.get()));
   if (!dup_fd.is_valid()) {
