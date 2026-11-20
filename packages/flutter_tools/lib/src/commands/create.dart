@@ -25,7 +25,6 @@ import '../base/version_range.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
@@ -52,19 +51,25 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   CreateCommand({
     required this.androidContext,
     required this.appleContext,
+    required this.featureFlags,
+    required this.pub,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required super.toolContext,
     this.extensionTemplateManager,
     this.net,
-    this.pub,
     super.verboseHelp = false,
   });
 
   final AndroidContext androidContext;
   final AppleContext appleContext;
   final ExtensionTemplateManager? extensionTemplateManager;
+  final FeatureFlags featureFlags;
   final Net? net;
-  final Pub? pub;
+  final Pub pub;
+
+  @override
+  final TemplatePathProvider templatePathProvider;
 
   @override
   final TemplateRenderer templateRenderer;
@@ -285,22 +290,10 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     createAndroidLanguage: stringArg('android-language'),
   );
 
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
   Net get _netInstance => net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
-  Pub get _pubInstance =>
-      pub ??
-      Pub(
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        processManager: toolContext.processManager,
-        platform: toolContext.platform,
-        botDetector: toolContext.botDetector,
-      );
 
   /// Fetches the code for a sample from the Flutter docs website.
   Future<String?> _fetchSampleFromServer(String sampleId) async {
@@ -540,8 +533,9 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       includeMacos = false;
       includeWindows = false;
       includeDarwin = false;
-    } else if (template == FlutterTemplateType.package) {
-      // The package template does not supports any platform.
+    } else if (template == FlutterTemplateType.package ||
+        template == FlutterTemplateType.packageFfi) {
+      // The package and package_ffi templates do not support any platform at the root.
       includeIos = false;
       includeAndroid = false;
       includeWeb = false;
@@ -665,6 +659,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         generatedFileCount += await _generatePackage(
           relativeDir,
           templateContext,
+          platforms: platforms,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
         );
@@ -691,6 +686,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         generatedFileCount += await _generateFfiPackage(
           relativeDir,
           templateContext,
+          platforms: platforms,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
           projectType: template as FlutterTemplateType,
@@ -786,42 +782,42 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         throwToolExit('Unsupported template type: ${template.cliName}');
     }
 
-    _generatePubspecLock(relativeDir);
+    _generatePubspecLock(relativeDir, flutterRoot: flutterRoot);
 
     if (shouldCallPubGet) {
       projectFactory.invalidate(relativeDir);
       final FlutterProject project = projectFactory.fromDirectory(relativeDir);
-      await _pubInstance.get(
+      await pub.get(
         context: pubContext,
         project: project,
         offline: offline,
         outputMode: PubOutputMode.summaryOnly,
       );
-      // Setting `includeIos` etc to false as with FlutterProjectType.package
-      // causes the example sub directory to not get os sub directories.
-      // This will lead to `flutter build ios` to fail in the example.
-      // TODO(dacoharkes): Uncouple the app and parent project platforms. https://github.com/flutter/flutter/issues/133874
-      // Then this if can be removed.
-      if (!generateFfiPackage) {
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
-        //
-        // `flutter packages get` inherently is neither a debug or release build,
-        // and since a future build (`flutter build apk`) will regenerate tooling
-        // anyway, we assume this is fine.
-        //
-        // It won't be if they do `flutter build --no-pub`, though.
-        const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
-        await project.ensureReadyForPlatformSpecificTooling(
-          toolContext: toolContext,
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
-          androidPlatform: includeAndroid,
-          iosPlatform: includeIos || includeDarwin,
-          linuxPlatform: includeLinux,
-          macOSPlatform: includeMacos || includeDarwin,
-          windowsPlatform: includeWindows,
-          webPlatform: includeWeb,
-        );
-      }
+      // TODO(matanlurey): https://github.com/flutter/flutter/issues/163774.
+      //
+      // `flutter packages get` inherently is neither a debug or release build,
+      // and since a future build (`flutter build apk`) will regenerate tooling
+      // anyway, we assume this is fine.
+      //
+      // It won't be if they do `flutter build --no-pub`, though.
+      const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+      await project.ensureReadyForPlatformSpecificTooling(
+        toolContext: toolContext,
+        releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+        analytics: analytics,
+        androidPlatform: includeAndroid,
+        cocoaPods: appleContext.cocoaPods,
+        featureFlags: featureFlags,
+        gradleUtils: androidContext.gradleUtils,
+        iosPlatform: includeIos || includeDarwin,
+        linuxPlatform: includeLinux,
+        macOSPlatform: includeMacos || includeDarwin,
+        plistParser: appleContext.plistParser,
+        templatePathProvider: templatePathProvider,
+        templateRenderer: templateRenderer,
+        windowsPlatform: includeWindows,
+        webPlatform: includeWeb,
+      );
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
@@ -857,7 +853,10 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         _printNoPluginMessage(logger: logger);
       }
 
-      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      final List<String> platformsToWarn = _getPlatformWarningList(
+        requestedPlatforms,
+        featureFlags: featureFlags,
+      );
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
@@ -894,7 +893,10 @@ $commandsToRun
 Your $application code is in $relativeAppMain.
 ''');
       // Show warning if any selected platform is not enabled
-      final List<String> platformsToWarn = _getPlatformWarningList(requestedPlatforms);
+      final List<String> platformsToWarn = _getPlatformWarningList(
+        requestedPlatforms,
+        featureFlags: featureFlags,
+      );
       if (platformsToWarn.isNotEmpty) {
         _printWarningDisabledPlatform(platformsToWarn, logger: logger);
       }
@@ -943,6 +945,7 @@ Your $application code is in $relativeAppMain.
   Future<int> _generatePackage(
     Directory directory,
     Map<String, Object?> templateContext, {
+    required List<String> platforms,
     bool overwrite = false,
     bool printStatusWhenWriting = true,
   }) async {
@@ -957,6 +960,24 @@ Your $application code is in $relativeAppMain.
       templateContext,
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
+    );
+
+    final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
+
+    final Map<String, Object?> exampleTemplateContext = _createExampleTemplateContext(
+      platforms: platforms,
+      templateContext: templateContext,
+      withPackage: true,
+    );
+
+    generatedCount += await generateApp(
+      <String>['app'],
+      project.example.directory,
+      exampleTemplateContext,
+      overwrite: overwrite,
+      pluginExampleApp: true,
+      printStatusWhenWriting: printStatusWhenWriting,
+      projectType: FlutterTemplateType.package,
     );
     return generatedCount;
   }
@@ -1028,7 +1049,11 @@ Your $application code is in $relativeAppMain.
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: toolContext.cache,
+      );
     }
 
     final organization =
@@ -1111,7 +1136,11 @@ Your $application code is in $relativeAppMain.
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
-      gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
+      gradle.updateLocalProperties(
+        project: project,
+        requireAndroidSdk: false,
+        cache: toolContext.cache,
+      );
     }
 
     final projectName = templateContext['projectName'] as String?;
@@ -1155,6 +1184,7 @@ Your $application code is in $relativeAppMain.
   Future<int> _generateFfiPackage(
     Directory directory,
     Map<String, Object?> templateContext, {
+    required List<String> platforms,
     bool overwrite = false,
     bool printStatusWhenWriting = true,
     required FlutterTemplateType projectType,
@@ -1174,22 +1204,58 @@ Your $application code is in $relativeAppMain.
 
     final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
 
-    final projectName = templateContext['projectName'] as String?;
-    final exampleProjectName = '${projectName}_example';
-    templateContext['projectName'] = exampleProjectName;
-    templateContext['description'] = 'Demonstrates how to use the $projectName package.';
-    templateContext['pluginProjectName'] = projectName;
+    final Map<String, Object?> exampleTemplateContext = _createExampleTemplateContext(
+      platforms: platforms,
+      templateContext: templateContext,
+      withFfi: true,
+      withFfiPackage: true,
+    );
 
     generatedCount += await generateApp(
       <String>['app'],
       project.example.directory,
-      templateContext,
+      exampleTemplateContext,
       overwrite: overwrite,
       pluginExampleApp: true,
       printStatusWhenWriting: printStatusWhenWriting,
       projectType: projectType,
     );
     return generatedCount;
+  }
+
+  Map<String, Object?> _createExampleTemplateContext({
+    required List<String> platforms,
+    required Map<String, Object?> templateContext,
+    bool withFfi = false,
+    bool withFfiPackage = false,
+    bool withPackage = false,
+  }) {
+    final organization =
+        templateContext['organization']! as String; // Required to make the context.
+    final projectName = templateContext['projectName'] as String?;
+    final exampleProjectName = '${projectName}_example';
+    return <String, Object?>{
+      ...templateContext,
+      'projectName': exampleProjectName,
+      'androidIdentifier': CreateBase.createAndroidIdentifier(organization, exampleProjectName),
+      'iosIdentifier': CreateBase.createUTIIdentifier(organization, exampleProjectName),
+      'macosIdentifier': CreateBase.createUTIIdentifier(organization, exampleProjectName),
+      'windowsIdentifier': CreateBase.createWindowsIdentifier(organization, exampleProjectName),
+      'description': 'Demonstrates how to use the $projectName package.',
+      'pluginProjectName': projectName,
+      'android': featureFlags.isAndroidEnabled && platforms.contains('android'),
+      'ios': featureFlags.isIOSEnabled && platforms.contains('ios'),
+      'web': featureFlags.isWebEnabled && platforms.contains('web'),
+      'linux': featureFlags.isLinuxEnabled && platforms.contains('linux'),
+      'macos': featureFlags.isMacOSEnabled && platforms.contains('macos'),
+      'windows': featureFlags.isWindowsEnabled && platforms.contains('windows'),
+      'darwin':
+          featureFlags.isIOSEnabled && featureFlags.isMacOSEnabled && platforms.contains('darwin'),
+      'withPluginHook': true,
+      if (withPackage) 'withPackage': true,
+      if (withFfi) 'withFfi': true,
+      if (withFfiPackage) 'withFfiPackage': true,
+    };
   }
 
   // Takes an application template and replaces the main.dart with one from the
@@ -1369,7 +1435,10 @@ For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 }
 
 // returns a list disabled, but requested platforms
-List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+List<String> _getPlatformWarningList(
+  List<String> requestedPlatforms, {
+  required FeatureFlags featureFlags,
+}) {
   final platformsToWarn = <String>[
     if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled) 'web',
     if (requestedPlatforms.contains('macos') && !featureFlags.isMacOSEnabled) 'macos',
@@ -1634,16 +1703,15 @@ List<String>? _getBuildGradleConfigurationFilePaths(
 /// This ensures that a breaking change accidentally published to one of these
 /// packages that the Flutter SDK depends on cannot break the `flutter create`
 /// command.
-void _generatePubspecLock(Directory directory) {
+void _generatePubspecLock(Directory directory, {required String flutterRoot}) {
   final FileSystem fs = directory.fileSystem;
-  final String flutterRoot = Cache.flutterRoot!;
   final flutterPubspecLock =
       loadYaml(fs.file(fs.path.join(flutterRoot, 'pubspec.lock')).readAsStringSync()) as YamlMap;
 
   final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
 
   final packages = <String, Object?>{
-    for (final package in gatherSdkPackageDependencies(directory))
+    for (final package in gatherSdkPackageDependencies(directory, flutterRoot: flutterRoot))
       package: flutterPackages[package],
   };
 
@@ -1655,7 +1723,7 @@ void _generatePubspecLock(Directory directory) {
 
 /// Find the package names of external dependencies from the SDK packages that
 /// the package in [directory] depends on.
-List<String> gatherSdkPackageDependencies(Directory directory) {
+List<String> gatherSdkPackageDependencies(Directory directory, {required String flutterRoot}) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
   final File pubspecFile = directory.childFile('pubspec.yaml');
@@ -1691,9 +1759,6 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   }
 
   final result = <String>{};
-  // Initialized by FlutterCommandRunner on startup.
-  // So it is safe to access it here.
-  final String flutterRoot = Cache.flutterRoot!;
   for (final sdkPackage in sdkPackages) {
     final Directory? packageDir = _resolveSdkPackageDir(fs, flutterRoot, sdkPackage);
     if (packageDir == null) {

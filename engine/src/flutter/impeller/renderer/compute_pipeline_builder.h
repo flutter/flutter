@@ -5,12 +5,13 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_PIPELINE_BUILDER_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_PIPELINE_BUILDER_H_
 
-#include <format>
+#include <string>
 
 #include "impeller/base/validation.h"
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/shader_library.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -51,7 +52,7 @@ struct ComputePipelineBuilder {
       const Context& context,
       ComputePipelineDescriptor& desc) {
     // Setup debug instrumentation.
-    desc.SetLabel(std::format("{} Pipeline", ComputeShader::kLabel));
+    desc.SetLabel(absl::StrCat(ComputeShader::kLabel, " Pipeline"));
 
     // Resolve pipeline entrypoints.
     {

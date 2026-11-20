@@ -98,7 +98,7 @@ void testMain() {
       view.debugPhysicalSizeOverride = const ui.Size(100, 100);
       view.debugForceResize();
 
-      await rasterizer.draw(layerTree, null);
+      await rasterizer.draw(layerTree, view.physicalSize, null);
 
       final MockViewEmbedder mockEmbedder = rasterizer.viewEmbedder;
 
@@ -136,7 +136,7 @@ void testMain() {
       view.debugPhysicalSizeOverride = const ui.Size(123, 456);
       view.debugForceResize();
 
-      await rasterizer.draw(layerTree, null);
+      await rasterizer.draw(layerTree, view.physicalSize, null);
 
       expect(rasterizer.sizeDuringPrepare, const BitmapSize(123, 456));
     });
@@ -153,22 +153,68 @@ void testMain() {
       final layerTree = LayerTree(rootLayer);
 
       // Frame 1: 100x200
-      view.debugPhysicalSizeOverride = const ui.Size(100, 200);
-      view.debugForceResize();
-      await rasterizer.draw(layerTree, null);
+      await rasterizer.draw(layerTree, const ui.Size(100, 200), null);
 
       expect(mockEmbedder.frameSizeDuringOptimize, const BitmapSize(100, 200));
       expect(rasterizer.sizeDuringPrepare, const BitmapSize(100, 200));
       expect(rasterizer.sizeDuringRasterize, const BitmapSize(100, 200));
 
       // Frame 2: 300x400
-      view.debugPhysicalSizeOverride = const ui.Size(300, 400);
-      view.debugForceResize();
-      await rasterizer.draw(layerTree, null);
+      await rasterizer.draw(layerTree, const ui.Size(300, 400), null);
 
       expect(mockEmbedder.frameSizeDuringOptimize, const BitmapSize(300, 400));
       expect(rasterizer.sizeDuringPrepare, const BitmapSize(300, 400));
       expect(rasterizer.sizeDuringRasterize, const BitmapSize(300, 400));
+    });
+
+    test('uses passed frameSize rather than view.physicalSize', () async {
+      final view = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        domDocument.createElement('div'),
+      );
+      final rasterizer = OrderVerifyingRasterizer(view);
+      final MockViewEmbedder mockEmbedder = rasterizer.viewEmbedder;
+
+      final rootLayer = RootLayer();
+      final layerTree = LayerTree(rootLayer);
+
+      // Simulate a host element constrained to 360x260 while the framework
+      // renders a 680x260 frame via viewConstraints.
+      view.debugPhysicalSizeOverride = const ui.Size(360, 260);
+      view.debugForceResize();
+
+      await rasterizer.draw(layerTree, const ui.Size(680, 260), null);
+
+      expect(view.physicalSize, const ui.Size(360, 260));
+      expect(mockEmbedder.frameSizeDuringOptimize, const BitmapSize(680, 260));
+      expect(rasterizer.sizeDuringPrepare, const BitmapSize(680, 260));
+      expect(rasterizer.sizeDuringRasterize, const BitmapSize(680, 260));
+    });
+
+    test('skips drawing when frameSize is empty or rounds to 0 physical pixels', () async {
+      final view = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        domDocument.createElement('div'),
+      );
+      final rasterizer = OrderVerifyingRasterizer(view);
+      final MockViewEmbedder mockEmbedder = rasterizer.viewEmbedder;
+
+      final rootLayer = RootLayer();
+      final layerTree = LayerTree(rootLayer);
+
+      for (final size in const <ui.Size>[
+        ui.Size.zero,
+        ui.Size(0, double.infinity),
+        ui.Size(360, 0.2),
+        ui.Size(0.4, 260),
+      ]) {
+        await rasterizer.draw(layerTree, size, null);
+      }
+
+      expect(mockEmbedder.optimizeCompositionCalled, isFalse);
+      expect(rasterizer.prepareToDrawCalled, isFalse);
+      expect(rasterizer.rasterizeCalled, isFalse);
+      expect(rasterizer.currentFrameSize, BitmapSize.zero);
     });
   });
 }

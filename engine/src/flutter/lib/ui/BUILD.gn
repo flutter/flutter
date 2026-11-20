@@ -190,6 +190,7 @@ source_set("ui") {
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",
     "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
     "//third_party/zlib",
   ]
 
@@ -310,7 +311,7 @@ if (enable_unittests) {
     }
 
     if (impeller_enable_opengles) {
-      sources += [ "compositing/scene_impeller_gles_unittests.cc" ]
+      sources += [ "impeller_gles_without_surface_unittests.cc" ]
 
       deps += [
         "//flutter/impeller/entity:entity_shaders",

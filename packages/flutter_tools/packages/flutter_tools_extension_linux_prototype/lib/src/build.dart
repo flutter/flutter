@@ -28,7 +28,7 @@ const String _kGeneratedConfigCmake = 'generated_config.cmake';
 
 /// Top-level Linux build target contributed by the prototype extension.
 // TODO(bkonyi): Support target-platform agnostic BuildTargets, https://github.com/flutter/flutter/issues/194810.
-class CustomLinuxBuildTarget extends BuildTarget {
+final class CustomLinuxBuildTarget extends BuildTarget {
   const CustomLinuxBuildTarget()
     : super(
         description: 'A custom Linux build target from prototype extension.',
@@ -129,12 +129,20 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
       );
     }
 
-    return const ExtensionBuildResult(success: true);
+    final String? appName = _getCmakeBinaryName(projectDir.uri);
+    if (appName == null) {
+      return const ExtensionBuildResult(
+        success: false,
+        errorMessage: 'Could not find BINARY_NAME in linux/CMakeLists.txt.',
+      );
+    }
+    final executableFile = File('${outputDir.path}/bundle/$appName');
+    return ExtensionBuildResult(success: true, executableUri: executableFile.absolute.uri);
   }
 }
 
 /// Assemble-only Linux debug bundle target contributed by the prototype extension.
-class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
+final class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   const CustomLinuxAssembleOnlyDebug()
     : super(
         description: 'A custom Linux assemble-only debug target.',
@@ -226,6 +234,24 @@ class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
 
     return const ExtensionBuildResult(success: true);
   }
+}
+
+String? _getCmakeBinaryName(Uri projectDirUri) {
+  final cmakeFile = File.fromUri(projectDirUri.resolve('linux/CMakeLists.txt'));
+  if (!cmakeFile.existsSync()) {
+    return null;
+  }
+  final nameSetPattern = RegExp(r'^\s*set\(BINARY_NAME\s*"(.*)"\s*\)\s*$');
+  for (final String line in cmakeFile.readAsLinesSync()) {
+    final RegExpMatch? match = nameSetPattern.firstMatch(line);
+    if (match != null) {
+      final String name = match.group(1)!.trim();
+      if (name.isNotEmpty) {
+        return name;
+      }
+    }
+  }
+  return null;
 }
 
 /// Prototype Linux [BuildService] implementation.

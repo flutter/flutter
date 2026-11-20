@@ -12,8 +12,8 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -21,13 +21,18 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
+import '../features.dart';
 import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_debug.dart';
+import '../ios/xcodeproj.dart';
+import '../mdns_discovery.dart';
+import '../template.dart';
+import 'cocoapods.dart';
 import 'xcode.dart';
 
 class XCDeviceEventNotification {
@@ -53,49 +58,44 @@ enum XCDeviceEventInterface {
 class XCDevice {
   XCDevice({
     required this._analytics,
+    required this._cocoaPods,
+    required this._featureFlags,
     required IProxy iproxy,
+    required this._mdnsVmServiceDiscovery,
+    required this._plistParser,
+    required TemplatePathProvider templatePathProvider,
+    required this._templateRenderer,
     required this._toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
   }) : _iProxy = iproxy {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
-      fs: FileSystem fileSystem,
+      :FileSystem fs,
       :Logger logger,
-      :Platform platform,
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
     ) = _toolContext;
-    _coreDeviceControl =
-        coreDeviceControl ??
-        IOSCoreDeviceControl(
-          logger: logger,
-          processManager: processManager,
-          xcode: _xcode,
-          fileSystem: fileSystem,
-        );
     _iMobileDevice = IMobileDevice(
       artifacts: artifacts,
       cache: cache,
       logger: logger,
       processManager: processManager,
     );
-    _iosDeploy = IOSDeploy(
-      artifacts: artifacts,
-      cache: cache,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
+    _iosDeploy = IOSDeploy(toolContext: _toolContext);
+    _coreDeviceControl =
+        coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
     _xcodeDebug =
         xcodeDebug ??
         XcodeDebug(
+          fileSystem: fs,
           logger: logger,
           processManager: processManager,
+          templatePathProvider: templatePathProvider,
           xcode: _xcode,
-          fileSystem: fileSystem,
         );
     shutdownHooks.addShutdownHook(dispose);
 
@@ -120,10 +120,16 @@ class XCDevice {
   late final IMobileDevice _iMobileDevice;
   late final IOSDeploy _iosDeploy;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iProxy;
   late final IOSCoreDeviceControl _coreDeviceControl;
+  final MDnsVmServiceDiscovery _mdnsVmServiceDiscovery;
   late final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
+  final FeatureFlags _featureFlags;
+  final PlistParser _plistParser;
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   List<Object>? _cachedListResults;
@@ -494,7 +500,6 @@ class XCDevice {
     required List<Object> allAvailableDevices,
     required List<IOSCoreDevice> coreDevices,
   }) {
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     final coreDeviceMap = <String, IOSCoreDevice>{};
     for (final device in coreDevices) {
       if (device.udid != null) {
@@ -566,7 +571,7 @@ class XCDevice {
                 Event.appleUsageEvent(workflow: 'device', parameter: 'ios-trust-failure'),
               );
             }
-            logger.printTrace(errorMessage);
+            _toolContext.logger.printTrace(errorMessage);
           }
 
           final int? code = _errorCode(errorProperties);
@@ -647,31 +652,29 @@ class XCDevice {
           modelCode: modelCode,
           operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
-          fileSystem: globals.fs,
-          fileSystemUtils: globals.fsUtils,
-          logger: logger,
           toolContext: _toolContext,
-          analytics: globals.analytics,
+          analytics: _analytics,
+          cocoaPods: _cocoaPods,
+          featureFlags: _featureFlags,
+          mdnsVmServiceDiscovery: _mdnsVmServiceDiscovery,
+          plistParser: _plistParser,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           coreDeviceControl: _coreDeviceControl,
           coreDeviceLauncher: IOSCoreDeviceLauncher(
             coreDeviceControl: _coreDeviceControl,
-            logger: logger,
             xcodeDebug: _xcodeDebug,
-            fileSystem: globals.fs,
-            processUtils: processUtils,
-            xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-            deviceVersion: Version.parse(sdkVersionString),
             toolContext: _toolContext,
+            xcode: _xcode,
+            deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
-          platform: globals.platform,
+          xcodeProjectInterpreter: _xcodeProjectInterpreter,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
-          processUtils: processUtils,
+          templateRenderer: _templateRenderer,
         );
       }
     }
