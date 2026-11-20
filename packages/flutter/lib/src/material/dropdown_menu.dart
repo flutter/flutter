@@ -1258,7 +1258,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final Widget textField = Semantics(
           button: isButton,
-          // This is set specificly for iOS because iOS does not have any native
+          // This is set specifically for iOS because iOS does not have any native
           // APIs to show whether the menu is expanded or collapsed.
           hint: Theme.of(context).platform == TargetPlatform.iOS
               ? _controller.isOpen

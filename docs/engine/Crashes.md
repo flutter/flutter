@@ -114,7 +114,7 @@ the last step use a download url following this schema:
 
 For release since Flutter 3.24, these symbols are no longer uploaded as a
 separate archive and should be obtained from the artifact cache as described
-above. The artifact cache can be downloaded direcly using a URL following this
+above. The artifact cache can be downloaded directly using a URL following this
 schema:
 `https://storage.googleapis.com/flutter_infra_release/flutter/c11fe483947c95553610ab59210af643f031f5f4/ios-release/artifacts.zip`
 (replace the engine hash with your hash).
@@ -135,7 +135,7 @@ the last step use a download url following this schema:
 
 For release since Flutter 3.27, these symbols are no longer uploaded as a
 separate archive and should be obtained from the artifact cache as described
-above. The artifact cache can be downloaded direcly using a URL following this
+above. The artifact cache can be downloaded directly using a URL following this
 schema:
 `https://storage.googleapis.com/flutter_infra_release/flutter/cf4507ae1008c11c6155d31e852999d75670afcf/darwin-x64-release/framework.zip`
 (replace the engine hash with your hash).
