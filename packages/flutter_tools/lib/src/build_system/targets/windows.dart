@@ -19,7 +19,6 @@ import 'native_assets.dart';
 /// The only files/subdirectories we care about.
 const _kWindowsArtifacts = <String>[
   'flutter_windows.dll',
-  'flutter_windows.dll.exp',
   'flutter_windows.dll.lib',
   'flutter_windows.dll.pdb',
   'flutter_export.h',

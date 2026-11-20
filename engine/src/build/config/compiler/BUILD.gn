@@ -1060,6 +1060,19 @@ config("optimize") {
 
   ldflags = common_optimize_on_ldflags + lto_flags
   cflags += lto_flags
+
+  # On Windows only ThinLTO is supported. clang-cl emits LLVM bitcode objects
+  # and lld-link (see //build/toolchain/win) performs the ThinLTO backend
+  # automatically when it sees bitcode inputs, so no LTO specific linker flag
+  # is needed.
+  #
+  # TODO(https://github.com/llvm/llvm-project/issues/199717): lld-link can
+  # hang while writing the PDB for some ThinLTO modules (seen locally with the
+  # vulkan loader; CI is unaffected). Local workarounds: build with --no-lto,
+  # or keep LTO and reduce debug info with --gn-args symbol_level=1.
+  if (is_win && enable_lto && use_thin_lto) {
+    cflags += [ "-flto=thin" ]
+  }
 }
 
 # Turn off optimizations.

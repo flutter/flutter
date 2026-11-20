@@ -79,7 +79,7 @@
                 "ci/host_profile_arm64",
                 "--runtime-mode",
                 "profile",
-                "--no-lto",
+                "--thin-lto",
                 "--windows-cpu",
                 "arm64",
                 "--rbe"
@@ -121,7 +121,7 @@
                 "ci/host_release_arm64",
                 "--runtime-mode",
                 "release",
-                "--no-lto",
+                "--thin-lto",
                 "--windows-cpu",
                 "arm64",
                 "--rbe"
