@@ -104,10 +104,18 @@ void Skwasm::Surface::SetCallbackHandler(CallbackHandler* callback_handler) {
 }
 
 void Skwasm::Surface::Dispose() {
-  if (gl_context_) {
-    skwasm_destroyContext(gl_context_);
-  }
+  DestroyContext();
   delete this;
+}
+
+void Skwasm::Surface::DestroyContext() {
+  if (gl_context_) {
+    // GPU resources must be deleted in the context that owns them.
+    Skwasm::makeCurrent(gl_context_);
+    render_context_.reset();
+    skwasm_destroyContext(gl_context_);
+    gl_context_ = 0;
+  }
 }
 
 // Main thread only
@@ -135,9 +143,7 @@ void Skwasm::Surface::OnInitialized(uint32_t callback_id, bool success) {
 // Worker thread only
 void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
                                             uint32_t callback_id) {
-  if (render_context_) {
-    render_context_.reset();
-  }
+  DestroyContext();
   canvas_width_ = 1;
   canvas_height_ = 1;
   bool antialias = skwasm_isWimp();
@@ -327,11 +333,6 @@ void Skwasm::Surface::OnContextLossTriggered(uint32_t callback_id) {
   callback_handler_(callback_id, nullptr, __builtin_wasm_ref_null_extern());
 }
 
-void Skwasm::Surface::ReportContextLost(uint32_t callback_id) {
-  assert(emscripten_is_main_browser_thread());
-  callback_handler_(callback_id, nullptr, __builtin_wasm_ref_null_extern());
-}
-
 void Skwasm::Surface::TriggerContextLossOnWorker(uint32_t callback_id) {
   Skwasm::makeCurrent(gl_context_);
   skwasm_triggerContextLossOnCanvas();
@@ -343,7 +344,8 @@ void Skwasm::Surface::OnContextLost() {
     printf("Received context lost event but never set callback handler!\n");
     return;
   }
-  skwasm_reportContextLost(this, context_lost_callback_id_);
+  // The surface can be disposed before the main thread receives this message.
+  skwasm_reportContextLost(callback_handler_, context_lost_callback_id_);
 }
 
 // Other
@@ -459,9 +461,11 @@ SKWASM_EXPORT void surface_onContextLossTriggered(Skwasm::Surface* surface,
   surface->OnContextLossTriggered(callback_id);
 }
 
-SKWASM_EXPORT void surface_reportContextLost(Skwasm::Surface* surface,
-                                             uint32_t callback_id) {
-  surface->ReportContextLost(callback_id);
+SKWASM_EXPORT void surface_reportContextLost(
+    Skwasm::Surface::CallbackHandler* callback_handler,
+    uint32_t callback_id) {
+  assert(emscripten_is_main_browser_thread());
+  callback_handler(callback_id, nullptr, __builtin_wasm_ref_null_extern());
 }
 
 SKWASM_EXPORT void surface_setCallbackHandler(

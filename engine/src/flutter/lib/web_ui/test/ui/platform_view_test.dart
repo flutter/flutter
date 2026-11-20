@@ -402,6 +402,8 @@ Future<void> testMain() async {
   });
 
   test('correctly transforms platform views', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);
+    addTearDown(() => EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null));
     await createPlatformView(1, platformViewType);
 
     final sb = ui.SceneBuilder();
@@ -427,6 +429,8 @@ Future<void> testMain() async {
   });
 
   test('correctly offsets platform views', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);
+    addTearDown(() => EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null));
     await createPlatformView(1, platformViewType);
 
     final sb = ui.SceneBuilder();
@@ -448,6 +452,8 @@ Future<void> testMain() async {
   });
 
   test('correctly offsets when clip chain length is changed', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1);
+    addTearDown(() => EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null));
     await createPlatformView(1, platformViewType);
 
     var sb = ui.SceneBuilder();
