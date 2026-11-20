@@ -256,6 +256,88 @@ void main() {
     timeout: Timeout.none,
   );
 
+  test(
+    'transparent FlutterSurfaceView and FlutterTextureView transition into and out of HC cleanly',
+    () async {
+      await _requestState(flutterDriver, 'set_transparent_background:true');
+      try {
+        // 1. Transparent FlutterSurfaceView (`renderTransparently = true` ->
+        // `root_surface_transparent = true`).
+        await _requestState(flutterDriver, 'set_render_surface_mode:transparent_surface');
+        await _requestState(flutterDriver, 'show_platform_view');
+        final Map<String, Object?> transparentSurfaceHc = await _waitForState(
+          flutterDriver,
+          (Map<String, Object?> s) =>
+              s['renderSurfaceMode'] == 'transparent_surface' &&
+              s['flutterSurfaceViewCount'] == 1 &&
+              s['flutterImageViewCount'] == 1 &&
+              s['overlayViewCount'] == 1 &&
+              s['visibleMutatorViewCount'] == 1 &&
+              s['flutterSurfaceViewAlpha'] == 0.0,
+        );
+        expect(transparentSurfaceHc['renderSurfaceMode'], 'transparent_surface');
+        expect(transparentSurfaceHc['flutterSurfaceViewCount'], 1);
+        expect(transparentSurfaceHc['flutterImageViewCount'], 1);
+        expect(transparentSurfaceHc['overlayViewCount'], 1);
+        expect(transparentSurfaceHc['visibleMutatorViewCount'], 1);
+        expect(transparentSurfaceHc['flutterSurfaceViewAlpha'], 0.0);
+
+        await _requestState(flutterDriver, 'hide_platform_view');
+        final Map<String, Object?> transparentSurfaceExit = await _waitForState(
+          flutterDriver,
+          (Map<String, Object?> s) =>
+              s['renderSurfaceMode'] == 'transparent_surface' &&
+              s['flutterImageViewCount'] == 0 &&
+              s['overlayViewCount'] == 0 &&
+              s['visibleMutatorViewCount'] == 0 &&
+              s['flutterSurfaceViewAlpha'] == 1.0,
+        );
+        expect(transparentSurfaceExit['flutterImageViewCount'], 0);
+        expect(transparentSurfaceExit['flutterSurfaceViewAlpha'], 1.0);
+        expect(transparentSurfaceExit['visibleChildKinds'], <Object?>['FlutterSurfaceView']);
+
+        // 2. FlutterTextureView (BackgroundMode.transparent / RenderMode.texture).
+        await _requestState(flutterDriver, 'set_render_surface_mode:texture');
+        await _requestState(flutterDriver, 'show_platform_view');
+        final Map<String, Object?> textureHc = await _waitForState(
+          flutterDriver,
+          (Map<String, Object?> s) =>
+              s['renderSurfaceMode'] == 'texture' &&
+              s['flutterTextureViewCount'] == 1 &&
+              s['flutterImageViewCount'] == 1 &&
+              s['overlayViewCount'] == 1 &&
+              s['visibleMutatorViewCount'] == 1 &&
+              s['flutterTextureViewAlpha'] == 0.0,
+        );
+        expect(textureHc['renderSurfaceMode'], 'texture');
+        expect(textureHc['flutterTextureViewCount'], 1);
+        expect(textureHc['flutterImageViewCount'], 1);
+        expect(textureHc['overlayViewCount'], 1);
+        expect(textureHc['visibleMutatorViewCount'], 1);
+        expect(textureHc['flutterTextureViewAlpha'], 0.0);
+
+        await _requestState(flutterDriver, 'hide_platform_view');
+        final Map<String, Object?> textureExit = await _waitForState(
+          flutterDriver,
+          (Map<String, Object?> s) =>
+              s['renderSurfaceMode'] == 'texture' &&
+              s['flutterImageViewCount'] == 0 &&
+              s['overlayViewCount'] == 0 &&
+              s['visibleMutatorViewCount'] == 0 &&
+              s['flutterTextureViewAlpha'] == 1.0,
+        );
+        expect(textureExit['flutterImageViewCount'], 0);
+        expect(textureExit['flutterTextureViewAlpha'], 1.0);
+        expect(textureExit['visibleChildKinds'], <Object?>['FlutterTextureView']);
+      } finally {
+        await _requestState(flutterDriver, 'set_render_surface_mode:opaque_surface');
+        await _requestState(flutterDriver, 'set_transparent_background:false');
+        await _requestState(flutterDriver, 'show_platform_view');
+      }
+    },
+    timeout: Timeout.none,
+  );
+
   test('reverting FlutterImageView while surface is destroyed stops rendering cleanly', () async {
     await _requestState(flutterDriver, 'show_platform_view');
     final Map<String, Object?> activeState = await _waitForState(

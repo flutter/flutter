@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import io.flutter.Log
 import io.flutter.embedding.android.FlutterImageView
 import io.flutter.embedding.android.FlutterSurfaceView
+import io.flutter.embedding.android.FlutterTextureView
 import io.flutter.embedding.android.FlutterView
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView
@@ -41,6 +42,9 @@ class NativeDriverSupportPlugin :
     private var isFlutterUiDisplayed = false
     private val pendingDisplayResults = mutableListOf<MethodChannel.Result>()
     private var pendingResize: PendingResize? = null
+    private var originalFlutterView: FlutterView? = null
+    private var overrideFlutterView: FlutterView? = null
+    private var renderSurfaceMode: String = "opaque_surface"
 
     private class PendingResize(
         val view: FlutterView,
@@ -242,6 +246,85 @@ class NativeDriverSupportPlugin :
                 flutterView.addOnLayoutChangeListener(listener)
                 flutterView.requestLayout()
             }
+            "set_render_surface_mode" -> {
+                val requestedMode = call.argument<String>("mode") ?: "opaque_surface"
+                val engine = flutterEngine
+                if (engine == null) {
+                    result.error("DETACHED", "FlutterEngine is not attached", null)
+                    return
+                }
+                val currentFlutterView = findFlutterView(activity.window.decorView)
+                if (currentFlutterView == null) {
+                    result.error("FLUTTER_VIEW_NOT_FOUND", "Could not locate FlutterView", null)
+                    return
+                }
+                if (originalFlutterView == null) {
+                    originalFlutterView = currentFlutterView
+                }
+                val baseView = originalFlutterView!!
+                val parent = baseView.parent as? ViewGroup
+                if (parent == null) {
+                    result.error("NO_PARENT", "FlutterView has no ViewGroup parent", null)
+                    return
+                }
+
+                // Detach from any active override view and remove it before
+                // installing the requested render surface mode.
+                if (overrideFlutterView != null) {
+                    overrideFlutterView!!.detachFromFlutterEngine()
+                    parent.removeView(overrideFlutterView)
+                    overrideFlutterView = null
+                } else {
+                    baseView.detachFromFlutterEngine()
+                }
+
+                when (requestedMode) {
+                    "opaque_surface" -> {
+                        baseView.visibility = View.VISIBLE
+                        baseView.attachToFlutterEngine(engine)
+                        renderSurfaceMode = "opaque_surface"
+                    }
+                    "transparent_surface" -> {
+                        baseView.visibility = View.GONE
+                        val transparentView = FlutterView(activity, FlutterSurfaceView(activity, true))
+                        parent.addView(
+                            transparentView,
+                            ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        )
+                        overrideFlutterView = transparentView
+                        transparentView.attachToFlutterEngine(engine)
+                        renderSurfaceMode = "transparent_surface"
+                    }
+                    "texture" -> {
+                        baseView.visibility = View.GONE
+                        val textureView = FlutterView(activity, FlutterTextureView(activity))
+                        parent.addView(
+                            textureView,
+                            ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        )
+                        overrideFlutterView = textureView
+                        textureView.attachToFlutterEngine(engine)
+                        renderSurfaceMode = "texture"
+                    }
+                    else -> {
+                        baseView.visibility = View.VISIBLE
+                        baseView.attachToFlutterEngine(engine)
+                        renderSurfaceMode = "opaque_surface"
+                        result.error("INVALID_MODE", "Unsupported render surface mode: $requestedMode", null)
+                        return
+                    }
+                }
+                val activeView = overrideFlutterView ?: baseView
+                activeView.post {
+                    result.success(mapOf("renderSurfaceMode" to renderSurfaceMode))
+                }
+            }
             "get_hybrid_composition_state" -> {
                 val flutterView = findFlutterView(activity.window.decorView)
                 if (flutterView == null) {
@@ -251,6 +334,8 @@ class NativeDriverSupportPlugin :
                 var flutterSurfaceViewCount = 0
                 var surfaceAvailable = false
                 var flutterSurfaceViewAlpha = 1.0
+                var flutterTextureViewCount = 0
+                var flutterTextureViewAlpha = 1.0
                 var flutterImageViewCount = 0
                 var overlayViewCount = 0
                 var mutatorViewCount = 0
@@ -266,6 +351,16 @@ class NativeDriverSupportPlugin :
                             }
                             if (child.visibility == View.VISIBLE && child.alpha > 0f) {
                                 visibleChildKinds.add("FlutterSurfaceView")
+                            }
+                        }
+                        is FlutterTextureView -> {
+                            flutterTextureViewCount++
+                            flutterTextureViewAlpha = child.alpha.toDouble()
+                            if (child.isAvailable) {
+                                surfaceAvailable = true
+                            }
+                            if (child.visibility == View.VISIBLE && child.alpha > 0f) {
+                                visibleChildKinds.add("FlutterTextureView")
                             }
                         }
                         is PlatformOverlayView -> {
@@ -298,8 +393,11 @@ class NativeDriverSupportPlugin :
                     mapOf(
                         "overlayLayerViewsCount" to overlayLayerViewsCount,
                         "isDisplayingFlutterUi" to (flutterRenderer?.isDisplayingFlutterUi == true),
+                        "renderSurfaceMode" to renderSurfaceMode,
                         "flutterSurfaceViewCount" to flutterSurfaceViewCount,
                         "flutterSurfaceViewAlpha" to flutterSurfaceViewAlpha,
+                        "flutterTextureViewCount" to flutterTextureViewCount,
+                        "flutterTextureViewAlpha" to flutterTextureViewAlpha,
                         "surfaceAvailable" to surfaceAvailable,
                         "flutterImageViewCount" to flutterImageViewCount,
                         "overlayViewCount" to overlayViewCount,
@@ -323,6 +421,9 @@ class NativeDriverSupportPlugin :
             engine.platformViewsController.hybridOverlayViews.size()
 
     private fun findFlutterView(root: View): FlutterView? {
+        if (overrideFlutterView != null) {
+            return overrideFlutterView
+        }
         if (root is FlutterView) {
             return root
         }
@@ -355,6 +456,9 @@ class NativeDriverSupportPlugin :
 
     override fun onDetachedFromActivity() {
         cancelPendingResize("DETACHED", "Activity detached before FlutterView resize completed")
+        overrideFlutterView = null
+        originalFlutterView = null
+        renderSurfaceMode = "opaque_surface"
         activity = null
     }
 }

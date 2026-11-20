@@ -132,6 +132,23 @@ Future<String> _handleCommand(_LifecycleViewModel viewModel, String? command) as
     await _pumpFrames(_kFramesPerStateMutation);
     return json.encode(await _queryNativeState());
   }
+  const transparentBackgroundPrefix = 'set_transparent_background:';
+  if (command.startsWith(transparentBackgroundPrefix)) {
+    final enabled = command.substring(transparentBackgroundPrefix.length) == 'true';
+    viewModel.setTransparentBackground(enabled);
+    await _pumpFrames(_kFramesPerStateMutation);
+    return json.encode(await _queryNativeState());
+  }
+  const surfaceModePrefix = 'set_render_surface_mode:';
+  if (command.startsWith(surfaceModePrefix)) {
+    final String mode = command.substring(surfaceModePrefix.length);
+    await _nativeChannel.invokeMapMethod<String, Object?>(
+      'set_render_surface_mode',
+      <String, Object?>{'mode': mode},
+    );
+    await _pumpFrames(_kFramesPerStateMutation);
+    return json.encode(await _queryNativeState());
+  }
   const resizePrefix = 'resize_flutter_view:';
   if (command.startsWith(resizePrefix)) {
     final int? height = int.tryParse(command.substring(resizePrefix.length));
@@ -162,6 +179,7 @@ final class _LifecycleViewModel {
   final ValueNotifier<bool> showSecondaryPlatformView = ValueNotifier<bool>(false);
   final ValueNotifier<bool> showSecondaryOverlay = ValueNotifier<bool>(true);
   final ValueNotifier<bool> alternateOverlayColor = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> transparentBackground = ValueNotifier<bool>(false);
 
   void setShowPrimaryPlatformView(bool value) {
     if (showPrimaryPlatformView.value == value) {
@@ -184,15 +202,15 @@ final class _LifecycleViewModel {
     showSecondaryOverlay.value = value;
   }
 
-  void toggleOverlayColor() {
-    alternateOverlayColor.value = !alternateOverlayColor.value;
+  void setTransparentBackground(bool value) {
+    if (transparentBackground.value == value) {
+      return;
+    }
+    transparentBackground.value = value;
   }
 
-  void dispose() {
-    showPrimaryPlatformView.dispose();
-    showSecondaryPlatformView.dispose();
-    showSecondaryOverlay.dispose();
-    alternateOverlayColor.dispose();
+  void toggleOverlayColor() {
+    alternateOverlayColor.value = !alternateOverlayColor.value;
   }
 }
 
@@ -206,10 +224,23 @@ final class _LifecycleTestApp extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: viewModel.alternateOverlayColor,
       builder: (BuildContext context, bool useAlternateTheme, Widget? child) {
+        final ThemeData activeTheme = useAlternateTheme
+            ? _kAlternateLifecycleTheme
+            : _kPrimaryLifecycleTheme;
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: useAlternateTheme ? _kAlternateLifecycleTheme : _kPrimaryLifecycleTheme,
-          home: Scaffold(body: _LifecycleScene(viewModel: viewModel)),
+          theme: activeTheme,
+          home: ValueListenableBuilder<bool>(
+            valueListenable: viewModel.transparentBackground,
+            builder: (BuildContext context, bool useTransparentBg, Widget? child) {
+              return Scaffold(
+                backgroundColor: useTransparentBg
+                    ? activeTheme.colorScheme.surface.withValues(alpha: 0.0)
+                    : null,
+                body: _LifecycleScene(viewModel: viewModel),
+              );
+            },
+          ),
         );
       },
     );
@@ -227,7 +258,14 @@ final class _LifecycleScene extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        ColoredBox(color: colors.surface),
+        ValueListenableBuilder<bool>(
+          valueListenable: viewModel.transparentBackground,
+          builder: (BuildContext context, bool useTransparentBg, Widget? child) {
+            return ColoredBox(
+              color: useTransparentBg ? colors.surface.withValues(alpha: 0.0) : colors.surface,
+            );
+          },
+        ),
         Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
