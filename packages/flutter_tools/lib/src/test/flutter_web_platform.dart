@@ -68,7 +68,16 @@ shelf.Response _cachedFileResponse(
   );
 }
 
-shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOriginIsolated}) {
+const _kNonBlinkCrossOriginIsolationHeaders = <String, String>{
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+};
+
+shelf.Handler createDirectoryHandler(
+  Directory directory, {
+  required bool crossOriginIsolated,
+  Map<String, String> crossOriginIsolationHeaders = kCrossOriginIsolationHeaders,
+}) {
   final resolver = mime.MimeTypeResolver();
   final FileSystem fileSystem = directory.fileSystem;
   return (shelf.Request request) async {
@@ -84,12 +93,16 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
       return shelf.Response.notFound('Not Found');
     }
     final String? contentType = resolver.lookup(file.path);
-    final bool needsCrossOriginIsolated = crossOriginIsolated && uriPath.endsWith('.html');
+    final bool needsCrossOriginIsolated =
+        crossOriginIsolated &&
+        (uriPath.endsWith('.html') ||
+            (crossOriginIsolationHeaders['Cross-Origin-Embedder-Policy'] == 'require-corp' &&
+                (uriPath.endsWith('.js') || uriPath.endsWith('.mjs'))));
     return _cachedFileResponse(
       file,
       contentType: contentType,
       extraHeaders: needsCrossOriginIsolated
-          ? kCrossOriginIsolationHeaders
+          ? crossOriginIsolationHeaders
           : const <String, String>{},
     );
   };
@@ -112,7 +125,10 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this._buildDirectory,
     required this._testDartJs,
     required this._testHostDartJs,
-    required this._chromiumLauncher,
+    required this._browserLauncher,
+    required this._runtime,
+    required this._headless,
+    required this._webBrowserFlags,
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
@@ -128,6 +144,7 @@ class FlutterWebPlatform extends PlatformPlugin {
               _fileSystem.path.join(_toolContext.cache.flutterRoot, 'packages', 'flutter_tools'),
             ),
             crossOriginIsolated: crossOriginIsolation,
+            crossOriginIsolationHeaders: _crossOriginIsolationHeaders,
           ),
         )
         .add(_handleStaticArtifact)
@@ -139,6 +156,7 @@ class FlutterWebPlatform extends PlatformPlugin {
           createDirectoryHandler(
             _fileSystem.directory(_fileSystem.path.join(_fileSystem.currentDirectory.path, 'test')),
             crossOriginIsolated: crossOriginIsolation,
+            crossOriginIsolationHeaders: _crossOriginIsolationHeaders,
           ),
         )
         .add(_packageFilesHandler);
@@ -154,8 +172,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       flutterTesterBinPath: flutterTesterBinPath,
       toolContext: _toolContext,
       environment: <String, String>{
-        // Chrome is the only supported browser currently.
-        'FLUTTER_TEST_BROWSER': 'chrome',
+        'FLUTTER_TEST_BROWSER': _runtime.identifier,
         'FLUTTER_WEB_RENDERER': webRenderer.name,
         // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
         'FLUTTER_ROOT': _toolContext.cache.flutterRoot,
@@ -170,7 +187,10 @@ class FlutterWebPlatform extends PlatformPlugin {
   final File _testDartJs;
   final File _testHostDartJs;
   final ToolContext _toolContext;
-  final ChromiumLauncher _chromiumLauncher;
+  final WebTestBrowserLauncher _browserLauncher;
+  final Runtime _runtime;
+  final bool _headless;
+  final List<String> _webBrowserFlags;
   Logger get _logger => _toolContext.logger;
   Artifacts get _artifacts => _toolContext.artifacts;
   final bool updateGoldens;
@@ -180,6 +200,9 @@ class FlutterWebPlatform extends PlatformPlugin {
   final WebRendererMode webRenderer;
   final bool useWasm;
   final bool crossOriginIsolation;
+
+  Map<String, String> get _crossOriginIsolationHeaders =>
+      _runtime.isBlink ? kCrossOriginIsolationHeaders : _kNonBlinkCrossOriginIsolationHeaders;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -197,7 +220,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     String root, {
     required BuildInfo buildInfo,
     required Directory buildDirectory,
-    required ChromiumLauncher chromiumLauncher,
+    WebTestBrowserLauncher? browserLauncher,
+    ChromiumLauncher? chromiumLauncher,
+    Runtime runtime = Runtime.chrome,
+    bool headless = true,
+    List<String> webBrowserFlags = const <String>[],
     required bool crossOriginIsolation,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
@@ -212,6 +239,10 @@ class FlutterWebPlatform extends PlatformPlugin {
     Uri? testPackageUri,
     bool updateGoldens = false,
   }) async {
+    final WebTestBrowserLauncher? resolvedLauncher = browserLauncher ?? chromiumLauncher;
+    if (resolvedLauncher == null) {
+      throw ArgumentError('Either browserLauncher or chromiumLauncher must be provided.');
+    }
     final shelf.Server server = await serverFactory();
     final FileSystem fs = toolContext.fs;
     if (testPackageUri == null) {
@@ -235,7 +266,10 @@ class FlutterWebPlatform extends PlatformPlugin {
       testDartJs: testDartJs,
       testHostDartJs: testHostDartJs,
       buildDirectory: buildDirectory,
-      chromiumLauncher: chromiumLauncher,
+      browserLauncher: resolvedLauncher,
+      runtime: runtime,
+      headless: headless,
+      webBrowserFlags: webBrowserFlags,
       templateRenderer: templateRenderer,
       toolContext: toolContext,
       webRenderer: webRenderer,
@@ -418,7 +452,15 @@ window.\$dartLoader.loader.nextAttempt();
     if (!file.existsSync()) {
       return shelf.Response.notFound('Not Found');
     }
-    return _cachedFileResponse(file, contentType: contentType);
+    final bool needsCrossOriginIsolated =
+        crossOriginIsolation && !_runtime.isBlink && contentType == 'text/javascript';
+    return _cachedFileResponse(
+      file,
+      contentType: contentType,
+      extraHeaders: needsCrossOriginIsolated
+          ? _crossOriginIsolationHeaders
+          : const <String, String>{},
+    );
   }
 
   FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
@@ -432,6 +474,7 @@ window.\$dartLoader.loader.nextAttempt();
         final shelf.Handler handler = createDirectoryHandler(
           _fileSystem.directory(dirname),
           crossOriginIsolated: crossOriginIsolation,
+          crossOriginIsolationHeaders: _crossOriginIsolationHeaders,
         );
         final modifiedRequest = shelf.Request(
           request.method,
@@ -506,7 +549,15 @@ window.\$dartLoader.loader.nextAttempt();
     }
 
     final File canvasKitFile = _fileSystem.file(filePath);
-    return _cachedFileResponse(canvasKitFile, contentType: contentType);
+    final bool needsCrossOriginIsolated =
+        crossOriginIsolation && !_runtime.isBlink && extension == '.js';
+    return _cachedFileResponse(
+      canvasKitFile,
+      contentType: contentType,
+      extraHeaders: needsCrossOriginIsolated
+          ? _crossOriginIsolationHeaders
+          : const <String, String>{},
+    );
   }
 
   String _makeBuildConfigString() {
@@ -536,6 +587,7 @@ window.\$dartLoader.loader.nextAttempt();
       // TODO(vegorov): this should probably be part of Wasm bootstrapping
       // script when compiling for testing (just like it is part of DDC runtime)
       final bumpStackTraceLimit = useWasm ? 'Error.stackTraceLimit = Infinity;' : '';
+      final canvasKitVariant = _runtime.isBlink ? 'auto' : 'full';
       return shelf.Response.ok(
         '''
 <!DOCTYPE html>
@@ -555,7 +607,21 @@ window.\$dartLoader.loader.nextAttempt();
     _flutter.loader.load({
       config: {
         canvasKitBaseUrl: "/canvaskit/",
+        canvasKitVariant: "$canvasKitVariant",
+        wasmAllowList: {
+          blink: true,
+          gecko: true,
+          webkit: true,
+          unknown: true,
+        },
       }
+    }).catch((error) => {
+      console.error(error);
+      const message = (error && error.stack) ? error.stack.toString() : String(error);
+      window.parent.postMessage({
+        exception: true,
+        data: [0, { type: 'loadException', message: message }],
+      }, window.location.origin);
     });
   </script>
 </head>
@@ -563,7 +629,8 @@ window.\$dartLoader.loader.nextAttempt();
       ''',
         headers: <String, String>{
           'Content-Type': 'text/html',
-          if (webRenderer == WebRendererMode.skwasm) ...kCrossOriginIsolationHeaders,
+          if (crossOriginIsolation || webRenderer == WebRendererMode.skwasm)
+            ..._crossOriginIsolationHeaders,
         },
       );
     }
@@ -600,7 +667,8 @@ window.\$dartLoader.loader.nextAttempt();
     final Runtime browser = platform.runtime;
     try {
       _browserManager ??= await _launchBrowser(browser);
-    } on Error catch (_) {
+    } on Object {
+      lockResource.release();
       await _suiteLock.close();
       rethrow;
     }
@@ -718,20 +786,27 @@ window.\$dartLoader.loader.nextAttempt();
 
     _logger.printTrace('Serving tests at $hostUrl');
 
-    return BrowserManager.start(
-      _chromiumLauncher,
-      browser,
-      hostUrl,
-      completer.future,
-      headless: !_config.pauseAfterLoad,
-      logger: _logger,
-      systemClock: _toolContext.systemClock,
-      webBrowserFlags: const <String>[
+    final effectiveBrowserFlags = <String>[
+      if (browser == Runtime.chrome) ...<String>[
         // Enforce high-DPI (3x) device scale factor and standard window size
         // to standardize rendering across platforms and match CI golden baselines.
         '--force-device-scale-factor=3',
-        '--window-size=800,600',
+        if (!_webBrowserFlags.any((String flag) => flag.startsWith('--window-size=')))
+          '--window-size=800,600',
       ],
+      ..._webBrowserFlags,
+    ];
+
+    return BrowserManager.start(
+      _browserLauncher,
+      browser,
+      hostUrl,
+      completer.future,
+      debug: _config.pauseAfterLoad,
+      headless: _headless && !_config.pauseAfterLoad,
+      logger: _logger,
+      systemClock: _toolContext.systemClock,
+      webBrowserFlags: effectiveBrowserFlags,
     );
   }
 
@@ -808,16 +883,17 @@ class BrowserManager {
 
     unawaited(
       _browser.onExit.then((int exitCode) {
+        final pidSuffix = _browser.pid != null ? ' (PID: ${_browser.pid})' : '';
         if (_unexpectedDisconnect) {
           if (exitCode != 0) {
             _logger.printError(
-              'Chrome browser process (PID: ${_browser.pid}) '
+              '${_browser.name} browser process$pidSuffix '
               'exited with code $exitCode after disconnecting from the test host.',
             );
           }
         } else if (!_closed) {
           _logger.printError(
-            'Chrome browser process (PID: ${_browser.pid}) '
+            '${_browser.name} browser process$pidSuffix '
             'exited unexpectedly with code $exitCode during test execution.',
           );
         }
@@ -870,7 +946,7 @@ class BrowserManager {
   /// [webSocket].
   @visibleForTesting
   factory BrowserManager.test(
-    Chromium browser,
+    WebTestBrowser browser,
     Runtime runtime,
     WebSocketChannel webSocket,
     Logger logger,
@@ -878,7 +954,7 @@ class BrowserManager {
   ) = BrowserManager._;
 
   /// The browser instance that this is connected to via [_channel].
-  final Chromium _browser;
+  final WebTestBrowser _browser;
   final Runtime _runtime;
   final Logger _logger;
   final SystemClock _systemClock;
@@ -929,6 +1005,11 @@ class BrowserManager {
 
   final _closeMemoizer = AsyncMemoizer<void>();
 
+  /// Maximum time to wait for a launched browser to open its WebSocket back to
+  /// the test host before terminating the browser and exiting.
+  @visibleForTesting
+  static const kBrowserConnectTimeout = Duration(seconds: 60);
+
   /// Starts the browser identified by [runtime] and has it connect to [url].
   ///
   /// [url] should serve a page that establishes a WebSocket connection with
@@ -943,60 +1024,59 @@ class BrowserManager {
   /// Returns the browser manager, or throws an exception if
   /// a connection fails to be established.
   static Future<BrowserManager> start(
-    ChromiumLauncher chromiumLauncher,
+    WebTestBrowserLauncher browserLauncher,
     Runtime runtime,
     Uri url,
     Future<WebSocketChannel> future, {
     bool debug = false,
     bool headless = true,
     List<String> webBrowserFlags = const <String>[],
+    Duration connectTimeout = kBrowserConnectTimeout,
     required Logger logger,
     required SystemClock systemClock,
   }) async {
-    // WARNING: Do not pass a reused `--user-data-dir` here. The cached test
-    // assets (see [_kStaticAssetCacheControl]) have no validator, so a Chrome
-    // HTTP cache that survives this invocation can serve stale compiled test
-    // code to a later run. [ChromiumLauncher.launch] creates a fresh profile
-    // when no `--user-data-dir` flag is given.
-    final Chromium chrome = await chromiumLauncher.launch(
+    // WARNING: Do not pass a reused `--user-data-dir` / profile directory here.
+    // The cached test assets (see [_kStaticAssetCacheControl]) have no
+    // validator, so an HTTP cache that survives this invocation can serve stale
+    // compiled test code to a later run.
+    final WebTestBrowser browser = await browserLauncher.launch(
       url.toString(),
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
-    final Future<WipConnection?> wipConnectionFuture = () async {
-      try {
-        final ChromeTab? tab = await chrome.chromeConnection.getTab(
-          (ChromeTab tab) => tab.url.contains('index.html'),
-          retryFor: const Duration(seconds: 5),
-        );
-        if (tab == null) {
-          return null;
-        }
-        final WipConnection connection = await tab.connect();
-        await connection.runtime.enable();
-        connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
-          logger.printStatus(
-            '[BROWSER CONSOLE] [${event.type}]: ${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
-          );
-        });
-        connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
-          logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
-        });
-        return connection;
-      } on Object catch (_) {
-        return null;
-      }
-    }();
+    final Future<WipConnection?>? wipConnectionFuture = browser.wipConnection;
     final completer = Completer<BrowserManager>();
+    var timedOut = false;
+
+    Timer? connectTimer;
+    if (!debug) {
+      connectTimer = Timer(connectTimeout, () async {
+        if (completer.isCompleted) {
+          return;
+        }
+        timedOut = true;
+        await browser.close();
+        if (!completer.isCompleted) {
+          completer.completeWithToolExit(
+            'Timed out waiting for ${runtime.name} to connect to the test host '
+            'after ${connectTimeout.inSeconds} seconds.',
+          );
+        }
+      });
+    }
 
     unawaited(
-      chrome.onExit
+      browser.onExit
           .then<Object?>((int? browserExitCode) {
-            throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
+            if (!timedOut) {
+              throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
+            }
+            return null;
           })
           .then(
             (Object? obj) => obj,
             onError: (Object error, StackTrace stackTrace) {
+              connectTimer?.cancel();
               if (!completer.isCompleted) {
                 completer.completeError(error, stackTrace);
               }
@@ -1007,21 +1087,24 @@ class BrowserManager {
     unawaited(
       future.then(
         (WebSocketChannel webSocket) async {
+          connectTimer?.cancel();
           if (completer.isCompleted) {
             return;
           }
           // The test page can open its WebSocket before the CDP connection is
           // established. Wait for CDP (bounded) so hang diagnostics have it.
-          final WipConnection? wipConnection = await wipConnectionFuture.timeout(
-            const Duration(seconds: 10),
-            onTimeout: () => null,
-          );
+          final WipConnection? wipConnection = wipConnectionFuture != null
+              ? await wipConnectionFuture.timeout(
+                  const Duration(seconds: 10),
+                  onTimeout: () => null,
+                )
+              : null;
           if (completer.isCompleted) {
             return;
           }
           completer.complete(
             BrowserManager._(
-              chrome,
+              browser,
               runtime,
               webSocket,
               logger,
@@ -1031,7 +1114,8 @@ class BrowserManager {
           );
         },
         onError: (Object error, StackTrace stackTrace) {
-          chrome.close();
+          connectTimer?.cancel();
+          browser.close();
           if (!completer.isCompleted) {
             completer.completeError(error, stackTrace);
           }
@@ -1044,12 +1128,7 @@ class BrowserManager {
 
   /// Loads [_BrowserEnvironment].
   Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
-    return _BrowserEnvironment(
-      this,
-      null,
-      _browser.chromeConnection.url,
-      _onRestartController.stream,
-    );
+    return _BrowserEnvironment(this, null, _browser.remoteDebuggerUrl, _onRestartController.stream);
   }
 
   /// Tells the browser to load a test suite from the URL [url].
@@ -1107,7 +1186,7 @@ class BrowserManager {
     try {
       controller = deserializeSuite(
         path,
-        SuitePlatform(Runtime.chrome),
+        SuitePlatform(_runtime),
         suiteConfig,
         await _environment,
         suiteChannel,
@@ -1162,7 +1241,7 @@ class BrowserManager {
   /// Diagnoses potential test suite timeouts or browser hangs.
   Future<String> diagnoseHang() async {
     final report = StringBuffer();
-    report.writeln('[flutter_tools] --- Chrome Web Test Timeout Diagnostic ---');
+    report.writeln('[flutter_tools] --- ${_browser.name} Web Test Timeout Diagnostic ---');
 
     final DateTime now = _systemClock.now();
     final Duration? timeSinceLastPing = _lastMessageTime != null
@@ -1193,10 +1272,10 @@ class BrowserManager {
         // CDP timed out or the connection is gone; isCdpResponsive stays false.
       }
       report.writeln(
-        '  Chrome Host CDP Responsiveness: ${isCdpResponsive ? "Responsive" : "Unresponsive / Timed out"}',
+        '  ${_browser.name} Host CDP Responsiveness: ${isCdpResponsive ? "Responsive" : "Unresponsive / Timed out"}',
       );
     } else {
-      report.writeln('  Chrome Host CDP Responsiveness: CDP connection unavailable.');
+      report.writeln('  ${_browser.name} Host CDP Responsiveness: CDP connection unavailable.');
     }
 
     final List<String> pendingAssetRequests = _networkTracker?.getStalledRequests() ?? <String>[];
@@ -1205,7 +1284,7 @@ class BrowserManager {
       if (pendingAssetRequests.isNotEmpty) {
         report.writeln('  Diagnosis: [Iframe WASM/Asset Fetch Stalled]');
         report.writeln(
-          '    Chrome host process is healthy, but asset request(s) are pending in the browser:',
+          '    ${_browser.name} host process is healthy, but asset request(s) are pending in the browser:',
         );
         for (final req in pendingAssetRequests) {
           report.writeln('      - $req');
@@ -1213,12 +1292,14 @@ class BrowserManager {
       } else {
         report.writeln('  Diagnosis: [Iframe JS Execution Stalled]');
         report.writeln(
-          '    Chrome host process is healthy and no network requests are pending, but the test iframe JS execution stalled.',
+          '    ${_browser.name} host process is healthy and no network requests are pending, but the test iframe JS execution stalled.',
         );
       }
     } else {
       report.writeln('  Diagnosis: [Browser Process Freeze / Crash]');
-      report.writeln('    Chrome process or main renderer thread is unresponsive or frozen.');
+      report.writeln(
+        '    ${_browser.name} process or main renderer thread is unresponsive or frozen.',
+      );
     }
     report.write('[flutter_tools] ---------------------------------------------');
 
@@ -1343,7 +1424,7 @@ class _BrowserEnvironment implements Environment {
   final Uri? observatoryUrl;
 
   @override
-  final Uri remoteDebuggerUrl;
+  final Uri? remoteDebuggerUrl;
 
   @override
   final Stream<void> onRestart;

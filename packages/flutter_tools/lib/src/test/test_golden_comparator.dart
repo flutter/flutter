@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -63,7 +64,7 @@ final class TestGoldenComparator {
   ///
   /// Any operation in process is terminated and the comparator can no longer be used.
   Future<void> close() async {
-    _tempDir.deleteSync(recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(_tempDir, recursive: true);
     await _compiler.dispose();
     await _previousComparator?.close();
   }

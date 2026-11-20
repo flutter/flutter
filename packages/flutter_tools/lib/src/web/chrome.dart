@@ -19,8 +19,10 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import 'chrome_constants.dart';
+import 'web_browser.dart';
 
 export 'chrome_constants.dart';
+export 'web_browser.dart';
 
 /// An environment variable used to override the location of Google Chrome.
 const kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -158,7 +160,7 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
 }
 
 /// A launcher for Chromium browsers with devtools configured.
-class ChromiumLauncher {
+class ChromiumLauncher implements WebTestBrowserLauncher {
   ChromiumLauncher({
     required this._fileSystem,
     required this._platform,
@@ -242,6 +244,7 @@ class ChromiumLauncher {
   /// [skipCheck] does not attempt to make a devtools connection before returning.
   ///
   /// [webBrowserFlags] add arbitrary browser flags.
+  @override
   Future<Chromium> launch(
     String url, {
     bool headless = false,
@@ -633,7 +636,7 @@ class ChromiumLauncher {
 }
 
 /// A class for managing an instance of a Chromium browser.
-class Chromium {
+class Chromium implements WebTestBrowser {
   Chromium(
     this.debugPort,
     this.chromeConnection, {
@@ -666,7 +669,11 @@ class Chromium {
   var _hasValidChromeConnection = false;
   var _didClose = false;
 
+  @override
+  String get name => 'Chrome';
+
   /// Resolves to browser's main process' exit code, when the browser exits.
+  @override
   Future<int> get onExit async => _process.exitCode;
 
   /// The main Chromium process that represents this instance of Chromium.
@@ -676,7 +683,40 @@ class Chromium {
   Process get process => _process;
 
   /// The process ID of this Chromium instance.
+  @override
   int get pid => _process.pid;
+
+  @override
+  Uri? get remoteDebuggerUrl => chromeConnection.url;
+
+  @override
+  late final Future<WipConnection?> wipConnection = _connectWip();
+
+  Future<WipConnection?> _connectWip() async {
+    try {
+      final ChromeTab? tab = await chromeConnection.getTab(
+        (ChromeTab tab) => tab.url.contains('index.html'),
+        retryFor: const Duration(seconds: 5),
+      );
+      if (tab == null) {
+        return null;
+      }
+      final WipConnection connection = await tab.connect();
+      await connection.runtime.enable();
+      connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
+        _logger.printStatus(
+          '[BROWSER CONSOLE] [${event.type}]: '
+          '${event.args.map((RemoteObject a) => a.value ?? a.description).join(" ")}',
+        );
+      });
+      connection.runtime.onExceptionThrown.listen((ExceptionThrownEvent event) {
+        _logger.printStatus('[BROWSER EXCEPTION]: ${event.exceptionDetails}');
+      });
+      return connection;
+    } on Object {
+      return null;
+    }
+  }
 
   /// Gets the first Chrome tab in order to verify that the connection to
   /// the Chrome debug protocol is working properly.
@@ -723,6 +763,7 @@ class Chromium {
   }
 
   /// Closes all connections to the browser and asks the browser to exit.
+  @override
   Future<void> close() async {
     _didClose = true;
     if (_logger.isVerbose) {

@@ -4,10 +4,13 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:test_core/src/runner/parse_metadata.dart'; // ignore: implementation_imports
+import 'package:test_core/src/util/io.dart' show currentPlatform; // ignore: implementation_imports
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -21,6 +24,7 @@ import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
+import '../web/firefox.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
@@ -73,6 +77,7 @@ class TestExecutionSpecification {
     this.icudtlPath,
     this.coverageDirectory,
     this.web = false,
+    this.webRuntime,
     this.randomSeed,
     this.reporter,
     this.fileReporter,
@@ -100,6 +105,7 @@ class TestExecutionSpecification {
   final String? icudtlPath;
   final Directory? coverageDirectory;
   final bool web;
+  final Runtime? webRuntime;
   final String? randomSeed;
   final String? reporter;
   final String? fileReporter;
@@ -184,33 +190,47 @@ interface class FlutterTestRunner {
     );
 
     if (spec.web) {
+      final Runtime runtime = spec.webRuntime ?? Runtime.chrome;
+      final bool useWasm = debuggingOptions.webConfig.useWasm;
+      final SuitePlatform suitePlatform = currentPlatform(
+        runtime,
+        useWasm ? Compiler.dart2wasm : Compiler.dart2js,
+      );
+      final compilableTestFiles = <String>[
+        for (final Uri uri in testFiles)
+          if (matchesWebSuitePlatform(fs.file(uri.toFilePath()), suitePlatform)) uri.toFilePath(),
+      ];
       // Unsupported for general Flutter developers.
       // This is only used by the Flutter Framework tests.
       // See: https://github.com/flutter/flutter/pull/65984.
-      final String tempBuildDir = fs.systemTempDirectory
-          .createTempSync('flutter_test.')
-          .absolute
-          .uri
-          .toFilePath();
-      final WebMemoryFS result =
-          await WebTestCompiler(analytics: _analytics, toolContext: _toolContext).initialize(
-            projectDirectory: flutterProject!.directory,
-            testOutputDir: tempBuildDir,
-            testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
-            buildInfo: debuggingOptions.buildInfo,
-            webRenderer: debuggingOptions.webConfig.renderer,
-            useWasm: debuggingOptions.webConfig.useWasm,
-          );
-      testArgs
-        ..add('--platform=chrome')
-        ..add('--')
-        ..addAll(testFiles.map((Uri uri) => uri.toString()));
-      testWrapper.registerPlatformPlugin(<Runtime>[Runtime.chrome], () {
-        return FlutterWebPlatform.start(
-          flutterProject.directory.path,
-          buildDirectory: fs.directory(tempBuildDir),
-          buildInfo: debuggingOptions.buildInfo,
-          chromiumLauncher: ChromiumLauncher(
+      final Directory tempBuildDir = fs.systemTempDirectory.createTempSync('flutter_test.');
+      FlutterWebPlatform? webPlatform;
+      _toolContext.shutdownHooks.addShutdownHook(() async {
+        await webPlatform?.close();
+        ErrorHandlingFileSystem.deleteIfExists(tempBuildDir, recursive: true);
+      });
+      try {
+        final WebMemoryFS result =
+            await WebTestCompiler(analytics: _analytics, toolContext: _toolContext).initialize(
+              projectDirectory: flutterProject!.directory,
+              testOutputDir: tempBuildDir.absolute.uri.toFilePath(),
+              testFiles: compilableTestFiles,
+              buildInfo: debuggingOptions.buildInfo,
+              webRenderer: debuggingOptions.webConfig.renderer,
+              useWasm: useWasm,
+            );
+        testArgs
+          ..add('--platform=${runtime.identifier}')
+          ..add('--')
+          ..addAll(testFiles.map((Uri uri) => uri.toString()));
+        final WebTestBrowserLauncher browserLauncher = switch (runtime) {
+          Runtime.firefox => FirefoxLauncher(
+            fileSystem: fs,
+            platform: platform,
+            processManager: processManager,
+            logger: logger,
+          ),
+          _ => ChromiumLauncher(
             fileSystem: fs,
             platform: platform,
             processManager: processManager,
@@ -218,21 +238,35 @@ interface class FlutterTestRunner {
             browserFinder: findChromeExecutable,
             logger: logger,
           ),
-          crossOriginIsolation: debuggingOptions.webConfig.crossOriginIsolation,
-          flutterProject: flutterProject,
-          flutterTesterBinPath: flutterTesterBinPath,
-          templateRenderer: _templateRenderer,
-          toolContext: _toolContext,
-          useWasm: debuggingOptions.webConfig.useWasm,
-          webMemoryFS: result,
-          webRenderer: debuggingOptions.webConfig.renderer,
-          pauseAfterLoad: debuggingOptions.startPaused,
-          testTimeRecorder: spec.testTimeRecorder,
-          updateGoldens: spec.updateGoldens,
-        );
-      });
-      await testWrapper.main(testArgs);
-      return exitCode;
+        };
+        testWrapper.registerPlatformPlugin(<Runtime>[runtime], () async {
+          return webPlatform = await FlutterWebPlatform.start(
+            flutterProject.directory.path,
+            buildDirectory: tempBuildDir,
+            buildInfo: debuggingOptions.buildInfo,
+            browserLauncher: browserLauncher,
+            runtime: runtime,
+            headless: debuggingOptions.webConfig.runHeadless,
+            webBrowserFlags: debuggingOptions.webConfig.browserFlags,
+            crossOriginIsolation: debuggingOptions.webConfig.crossOriginIsolation,
+            flutterProject: flutterProject,
+            flutterTesterBinPath: flutterTesterBinPath,
+            templateRenderer: _templateRenderer,
+            toolContext: _toolContext,
+            useWasm: useWasm,
+            webMemoryFS: result,
+            webRenderer: debuggingOptions.webConfig.renderer,
+            pauseAfterLoad: debuggingOptions.startPaused,
+            testTimeRecorder: spec.testTimeRecorder,
+            updateGoldens: spec.updateGoldens,
+          );
+        });
+        await testWrapper.main(testArgs);
+        return exitCode;
+      } finally {
+        await webPlatform?.close();
+        ErrorHandlingFileSystem.deleteIfExists(tempBuildDir, recursive: true);
+      }
     }
 
     testArgs
@@ -279,5 +313,31 @@ interface class FlutterTestRunner {
     } finally {
       await platformInstance.close();
     }
+  }
+}
+
+/// Returns whether the `@TestOn` selector in [testFile] matches [suitePlatform].
+///
+/// Used before [WebTestCompiler] compiles all test files into a single web
+/// entrypoint so VM-only test suites (for example `@TestOn('!browser')` suites
+/// using 64-bit integer literals or host-only imports) are excluded from web
+/// compilation while `package:test` still handles suite skipping/reporting.
+@visibleForTesting
+bool matchesWebSuitePlatform(File testFile, SuitePlatform suitePlatform) {
+  if (!testFile.existsSync()) {
+    return true;
+  }
+  try {
+    final String contents = testFile.readAsStringSync();
+    if (!contents.contains('TestOn')) {
+      return true;
+    }
+    return parseMetadata(testFile.path, contents, <String>{
+      suitePlatform.runtime.identifier,
+    }).testOn.evaluate(suitePlatform);
+  } on Object {
+    // Defer syntax or metadata errors to package:test's Loader so they are
+    // reported as standard LoadExceptions.
+    return true;
   }
 }

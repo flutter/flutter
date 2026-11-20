@@ -2569,6 +2569,8 @@ resolution: workspace
           'disable-service-origin-check',
           'ipv6',
           'platform',
+          'headless',
+          'web-browser-flag',
           'enable-vmservice',
           'cross-origin-isolation',
           'disable-dds',
@@ -2592,6 +2594,39 @@ resolution: workspace
       };
       expect(hiddenInVerboseMode, isEmpty);
     });
+
+    testUsingContext(
+      'plumbs --platform=firefox, --no-headless, and --web-browser-flag into execution spec',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--platform=firefox',
+          '--wasm',
+          '--no-headless',
+          '--web-browser-flag=-devtools',
+        ]);
+
+        expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[DevelopmentArtifact.web]);
+        expect(testRunner.lastExecutionSpec!.web, isTrue);
+        expect(testRunner.lastExecutionSpec!.webRuntime, Runtime.firefox);
+        expect(testRunner.lastDebuggingOptionsValue.webConfig.renderer, WebRendererMode.skwasm);
+        expect(testRunner.lastDebuggingOptionsValue.webConfig.runHeadless, isFalse);
+        expect(testRunner.lastDebuggingOptionsValue.webConfig.browserFlags, <String>['-devtools']);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 }
 
