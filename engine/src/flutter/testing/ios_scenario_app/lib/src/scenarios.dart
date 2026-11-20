@@ -118,6 +118,8 @@ Map<String, _ScenarioFactory> _scenarios = <String, _ScenarioFactory>{
         foregroundId: _viewId++,
         backgroundId: _viewId++,
       ),
+  'platform_view_share_sheet_dismiss': (FlutterView view) =>
+      PlatformViewShareSheetDismissScenario(view, id: _viewId++),
   'platform_view_scrolling_under_widget': (FlutterView view) => PlatformViewScrollingUnderWidget(
     view,
     firstPlatformViewId: _viewId++,

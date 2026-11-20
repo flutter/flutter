@@ -3620,6 +3620,10 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   FlutterTouchInterceptingView* touchInterceptorView = FindTouchInterceptingView(gMockPlatformView);
   XCTAssertNotNil(touchInterceptorView);
 
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  [flutterView addSubview:touchInterceptorView];
+
   touchInterceptorView.frame = CGRectMake(0, 0, 100, 100);
   CGPoint touchBeganLocation = CGPointMake(1, 1);
 
@@ -3631,8 +3635,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
               platformViewShouldAcceptTouchAtTouchBeganLocation:touchBeganLocation])
       .andReturn(NO);
   UIView* hitTestResult = [touchInterceptorView hitTest:touchBeganLocation withEvent:mockEvent];
-  // HitTest returning the touch interceptor view means platform view will not receive touch events.
-  XCTAssert(hitTestResult == touchInterceptorView);
+  // HitTest returning the flutter view means the touch is delivered to the flutter view directly,
+  // the same as a touch on Flutter UI without a platform view underneath, so neither the platform
+  // view nor its gesture recognizers will receive touch events.
+  // See: https://github.com/flutter/flutter/issues/196236.
+  XCTAssert(hitTestResult == flutterView);
 }
 
 - (void)testFlutterPlatformViewGestureBlockingPolicy_PolicyMappingIsCorrect {

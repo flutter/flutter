@@ -576,12 +576,39 @@ static BOOL _preparedOnce = NO;
   }
   CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
   // Consult the framework on if the touch should be handled by the platform view.
-  // If NO, the touch is handled by a Flutter widget and should be blocked (by returning self).
+  //
   // If YES, the touch should continue to the standard hit-testing (through super), allowing the
   // touch to be delivered to the underlying native platform view or one of its subviews.
+  //
+  // If NO, the touch is handled by a Flutter widget, and the platform view should not receive it.
+  // Return the FlutterView (if available), so that the touch is handled exactly the same
+  // as a touch on Flutter UI without a platform view underneath. The platform view is neither the
+  // hit-test view nor its ancestor, so neither it nor its gesture recognizers receive the touch.
+  //
+  // Returning this view would also block the platform view, but it makes the touch go through the
+  // delaying and forwarding gesture recognizers, because a touch is delivered to the gesture
+  // recognizers of the hit-test view and all of its ancestors. These recognizers interfere with
+  // gesture recognizers outside of Flutter. For example, on iOS 26+, when a sheet is presented,
+  // UIKit adds 2 private passthrough gesture recognizers to the window, so that tapping outside of
+  // the sheet dismisses the sheet, and is not delivered to the app:
+  //   - _UIPassthroughScrollGestureRecognizer, which recognizes the tap and dismisses the sheet.
+  //   - _UIPassthroughGateGestureRecognizer, which delays and cancels the touches to the hit-test
+  //     view (delaysTouchesBegan and cancelsTouchesInView are YES).
+  // If this view were returned:
+  //   1. The sheet would not be dismissed, because the delaying recognizer requires all other
+  //      recognizers of the touch (including _UIPassthroughScrollGestureRecognizer) to fail, and
+  //      it blocks them when the framework rejects the gesture.
+  //   2. The touch would still be delivered to Flutter, because Flutter would receive it through
+  //      the forwarding recognizer, rather than through the hit-test view's touch events, which
+  //      are the only ones _UIPassthroughGateGestureRecognizer can delay or cancel.
+  // See: https://github.com/flutter/flutter/issues/196236.
   if (![self.flutterViewController
           platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
-    return self;
+    // The FlutterViewController's view should not be nil here, since touches are only delivered
+    // when the FlutterView is on screen. Fall back to this view just in case, so that the platform
+    // view is still blocked. Returning nil would make the hit-testing continue to the views behind
+    // this view instead (e.g. the backdrop filter views in ChildClippingView).
+    return self.flutterViewController.view ?: self;
   }
 
   return [super hitTest:point withEvent:event];

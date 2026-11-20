@@ -192,4 +192,35 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   XCTAssertEqualObjects(textView.label,
                         @"-gestureTouchesBegan-gestureTouchesEnded-platformViewTapped");
 }
+
+// Tapping outside a share sheet should dismiss the sheet without delivering the touch to Flutter,
+// even if the tap lands on Flutter UI covering a platform view. This is the same behavior as when
+// there is no platform view underneath the Flutter UI.
+// See: https://github.com/flutter/flutter/issues/196236.
+- (void)testTapOutsideShareSheetOverPlatformViewDismissesShareSheet {
+  XCUIApplication* app = [[XCUIApplication alloc] init];
+  app.launchArguments = @[ @"--platform-view-share-sheet-dismiss" ];
+  [app launch];
+
+  XCUIElement* presentedLabel = app.staticTexts[@"share_sheet_presented"];
+  XCTAssertTrue([presentedLabel waitForExistenceWithTimeout:kSecondsToWaitForPlatformView],
+                @"Share sheet was not presented.");
+
+  // Tap near the top of the screen, which is outside of the share sheet, on the Flutter UI
+  // covering the platform view.
+  [[app coordinateWithNormalizedOffset:CGVectorMake(0.5, 0.1)] tap];
+
+  XCUIElement* dismissedLabel = app.staticTexts[@"share_sheet_dismissed"];
+  XCTAssertTrue([dismissedLabel waitForExistenceWithTimeout:kSecondsToWaitForPlatformView],
+                @"Share sheet was not dismissed when tapping outside of it.");
+
+  // Flutter should not receive the touch that dismissed the share sheet.
+  NSPredicate* flutterPointerPredicate =
+      [NSPredicate predicateWithFormat:@"value BEGINSWITH 'flutter_pointer:'"];
+  XCUIElement* flutterPointerEvent =
+      [app.textFields elementMatchingPredicate:flutterPointerPredicate];
+  XCTAssertFalse([flutterPointerEvent waitForExistenceWithTimeout:1],
+                 @"Flutter received the touch that dismissed the share sheet: %@",
+                 flutterPointerEvent.value);
+}
 @end
