@@ -397,6 +397,12 @@ FLUTTER_EXPORT void FlutterDesktopPluginRegistrarPostPlatformThreadTask(
     VoidCallback on_cancel,
     void* user_data);
 
+// Returns the unique identifier for the engine associated with this registrar.
+//
+// This corresponds to PlatformDispatcher.instance.engineId in Dart.
+FLUTTER_EXPORT int64_t FlutterDesktopPluginRegistrarGetEngineId(
+    FlutterDesktopPluginRegistrarRef registrar);
+
 // ========== Freestanding Utilities ==========
 
 // Gets the DPI for a given |hwnd|, depending on the supported APIs per
