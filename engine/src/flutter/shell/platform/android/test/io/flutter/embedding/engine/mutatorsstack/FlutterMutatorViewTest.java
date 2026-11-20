@@ -10,6 +10,7 @@ import static org.mockito.Mockito.*;
 
 import android.content.Context;
 import android.graphics.Matrix;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -268,6 +269,110 @@ public class FlutterMutatorViewTest {
     view.onTouchEvent(moveEvent);
     assertEquals(moveEvent, lastRequestedEvent[0]);
     assertFalse(view.getFlutterWonGesture());
+  }
+
+  /** Adds {@code view} to a laid out parent at the given position and size. */
+  private FrameLayout layOutInParent(
+      FlutterMutatorView view, FlutterMutatorsStack mutatorsStack, int left, int top) {
+    final FrameLayout parent = new FrameLayout(ctx);
+    parent.addView(view);
+    view.readyToDisplay(mutatorsStack, left, top, 10, 10);
+    parent.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    parent.layout(0, 0, 100, 100);
+    return parent;
+  }
+
+  @Test
+  public void readyToDisplay_movesViewWithoutRequestingLayoutWhenSizeUnchanged() {
+    final int[] scrollChangedCalls = new int[1];
+    final int[] invalidateCalls = new int[1];
+    final FlutterMutatorView view =
+        new FlutterMutatorView(ctx) {
+          @Override
+          protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+            super.onScrollChanged(l, t, oldl, oldt);
+            scrollChangedCalls[0]++;
+          }
+
+          @Override
+          public void invalidate() {
+            super.invalidate();
+            invalidateCalls[0]++;
+          }
+        };
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    final FrameLayout parent = layOutInParent(view, mutatorsStack, 1, 2);
+    assertEquals(1, view.getLeft());
+    assertEquals(2, view.getTop());
+    assertFalse(view.isLayoutRequested());
+    invalidateCalls[0] = 0;
+
+    view.readyToDisplay(mutatorsStack, 30, 40, 10, 10);
+
+    // The view is moved and invalidated immediately, without a layout pass, and scroll listeners
+    // are notified.
+    assertFalse(view.isLayoutRequested());
+    assertFalse(parent.isLayoutRequested());
+    assertEquals(30, view.getLeft());
+    assertEquals(40, view.getTop());
+    assertEquals(40, view.getRight());
+    assertEquals(50, view.getBottom());
+    assertEquals(1, scrollChangedCalls[0]);
+    assertEquals(1, invalidateCalls[0]);
+
+    // Setting the same offset again does not fire onScrollChanged, but still invalidates so
+    // mutator stack changes (e.g. clip or opacity) are redrawn.
+    view.readyToDisplay(mutatorsStack, 30, 40, 10, 10);
+    assertEquals(1, scrollChangedCalls[0]);
+    assertEquals(2, invalidateCalls[0]);
+
+    // The layout params are kept in sync, so a later layout pass keeps the position.
+    final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) view.getLayoutParams();
+    assertEquals(30, params.leftMargin);
+    assertEquals(40, params.topMargin);
+    parent.requestLayout();
+    parent.measure(
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY));
+    parent.layout(0, 0, 100, 100);
+    assertEquals(30, view.getLeft());
+    assertEquals(40, view.getTop());
+
+    // Changing size still requests layout.
+    view.readyToDisplay(mutatorsStack, 30, 40, 20, 20);
+    assertTrue(view.isLayoutRequested());
+  }
+
+  @Test
+  public void readyToDisplay_beforeLayout_onlyUpdatesLayoutParams() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    view.setLayoutParams(new FrameLayout.LayoutParams(10, 10));
+
+    view.readyToDisplay(mutatorsStack, 30, 40, 10, 10);
+
+    final FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) view.getLayoutParams();
+    assertEquals(30, params.leftMargin);
+    assertEquals(40, params.topMargin);
+    assertEquals(Gravity.LEFT | Gravity.TOP, params.gravity);
+    assertEquals(0, view.getLeft());
+    assertEquals(0, view.getTop());
+  }
+
+  @Test
+  public void readyToDisplay_whileLayoutRequested_stillMovesImmediately() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final FlutterMutatorsStack mutatorsStack = new FlutterMutatorsStack();
+    layOutInParent(view, mutatorsStack, 1, 2);
+    view.requestLayout();
+    assertTrue(view.isLayoutRequested());
+
+    view.readyToDisplay(mutatorsStack, 30, 40, 10, 10);
+
+    assertEquals(30, view.getLeft());
+    assertEquals(40, view.getTop());
   }
 
   @Implements(ViewGroup.class)
