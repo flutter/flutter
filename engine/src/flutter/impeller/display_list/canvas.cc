@@ -2097,6 +2097,8 @@ bool Canvas::Restore() {
 
     SaveLayerState save_layer_state = save_layer_state_.back();
     save_layer_state_.pop_back();
+    // Must be popped before FlipBackdrop, which replays the parent clips.
+    clip_coverage_stack_.PopSubpass();
     auto global_pass_position = GetGlobalPassPosition();
 
     std::shared_ptr<Contents> contents = CreateContentsForSubpassTarget(
@@ -2147,7 +2149,10 @@ bool Canvas::Restore() {
         // to the render target texture so far need to execute before it's bound
         // for blending (otherwise the blend pass will end up executing before
         // all the previous commands in the active pass).
-        auto input_texture = FlipBackdrop(GetGlobalPassPosition());
+        auto input_texture = FlipBackdrop(GetGlobalPassPosition(),  //
+                                          /*should_remove_texture=*/false,
+                                          /*should_use_onscreen=*/false,
+                                          /*post_depth_increment=*/true);
         if (!input_texture) {
           return false;
         }
@@ -2168,7 +2173,6 @@ bool Canvas::Restore() {
         renderer_,                                                      //
         *render_passes_.back().GetInlinePassContext()->GetRenderPass()  //
     );
-    clip_coverage_stack_.PopSubpass();
     transform_stack_.pop_back();
 
     // We don't need to restore clips if a saveLayer was performed, as the clip
