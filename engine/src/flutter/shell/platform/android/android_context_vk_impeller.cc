@@ -49,6 +49,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.enable_validation = p_settings.enable_validation;
   settings.enable_gpu_tracing = p_settings.enable_gpu_tracing;
   settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.enable_wide_gamut = p_settings.enable_wide_gamut;
   settings.flags = p_settings.impeller_flags;
   // Android can fall back to OpenGLES, so drivers that are known to have
   // issues with Vulkan are rejected as soon as the physical device is

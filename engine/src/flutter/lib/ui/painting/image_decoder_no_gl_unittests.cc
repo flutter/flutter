@@ -14,6 +14,7 @@
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 #include "include/core/SkColorType.h"
+#include "third_party/skia/include/codec/SkJpegDecoder.h"
 #include "third_party/skia/include/codec/SkPngDecoder.h"
 
 namespace flutter {
@@ -284,6 +285,43 @@ TEST(ImageDecoderNoGLTest, ImpellerWideGamutIndexedPng) {
   ASSERT_TRUE(narrow_result.ok());
   ASSERT_EQ(narrow_result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3OpaqueFp16Default) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "Fuchsia can't load the test fixtures.";
+#endif
+  SkCodecs::Register(SkJpegDecoder::Decoder());
+  auto data = flutter::testing::OpenFixtureAsSkData("DisplayP3Logo.jpg");
+  auto image = SkImages::DeferredFromEncodedData(data);
+  ASSERT_TRUE(image != nullptr);
+  ASSERT_EQ(SkISize::Make(100, 100), image->dimensions());
+
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> generator =
+      registry.CreateCompatibleGenerator(data);
+  ASSERT_TRUE(generator);
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
+                                                         std::move(generator));
+
+#if IMPELLER_SUPPORTS_RENDERING
+  std::shared_ptr<impeller::Capabilities> fp16_capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .SetDefaultColorFormat(impeller::PixelFormat::kR16G16B16A16Float)
+          .Build();
+  std::shared_ptr<impeller::Allocator> allocator =
+      std::make_shared<impeller::TestImpellerAllocator>();
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> wide_result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
+          /*supports_wide_gamut=*/true, fp16_capabilities, allocator);
+  ASSERT_TRUE(wide_result.ok());
+  ASSERT_EQ(wide_result->image_info.format,
+            impeller::PixelFormat::kR16G16B16A16Float);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 

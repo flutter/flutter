@@ -257,6 +257,15 @@ public final class FlutterEngineFlags {
   private static final Flag IMPELLER_USE_SDFS = new Flag("--impeller-use-sdfs", "EnableSDFs", true);
 
   /**
+   * Enables wide gamut color rendering when supported by the device and display.
+   *
+   * <p>Allowed in release to enable wide gamut and extended dynamic range rendering in production.
+   * Settable via the command line and the manifest.
+   */
+  private static final Flag ENABLE_WIDE_GAMUT =
+      new Flag("--enable-wide-gamut", "EnableWideGamut", true);
+
+  /**
    * Fake flag used for integration testing of the Android embedding processing engine flags.
    *
    * <p>Settable via the command line and the manifest.
@@ -493,7 +502,8 @@ public final class FlutterEngineFlags {
               IMPELLER_USE_SDFS,
               IMPELLER_OPENGL_GPU_TRACING,
               IMPELLER_VULKAN_GPU_TRACING,
-              ENABLE_HCPP));
+              ENABLE_HCPP,
+              ENABLE_WIDE_GAMUT));
 
   // Flags that have been turned off.
   private static final List<Flag> DISABLED_FLAGS =

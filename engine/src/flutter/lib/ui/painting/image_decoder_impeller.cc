@@ -134,7 +134,8 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
     const SkImageInfo& base_image_info,
     const SkISize& decode_size,
     bool supports_wide_gamut,
-    ImageDecoder::TargetPixelFormat target_format) {
+    ImageDecoder::TargetPixelFormat target_format,
+    const std::shared_ptr<const impeller::Capabilities>& capabilities) {
   const SkColorSpace* color_space = base_image_info.colorSpace();
   const bool is_hdr = IsHdr(color_space);
   const bool is_extended_range =
@@ -152,12 +153,16 @@ absl::StatusOr<SkImageInfo> CreateImageInfo(
         .makeAlphaType(alpha_type)
         .makeColorSpace(SkColorSpace::MakeSRGB());
   } else if (is_extended_range) {
-    // Use 10-bit for opaque SDR images (less memory: 4 bytes vs 8 bytes per
-    // pixel). Use F16 for HDR images or images with alpha channel.
+    // Use 10-bit XR for opaque SDR images on Metal (less memory: 4 bytes vs 8
+    // bytes per pixel). Use F16 for HDR images, images with alpha channel, or
+    // backends with an FP16 default color format (e.g. Vulkan) that do not
+    // support 10-bit XR textures.
+    const bool use_f16 =
+        is_hdr || alpha_type != SkAlphaType::kOpaque_SkAlphaType ||
+        (capabilities && capabilities->GetDefaultColorFormat() ==
+                             impeller::PixelFormat::kR16G16B16A16Float);
     SkColorType color_type =
-        (!is_hdr && alpha_type == SkAlphaType::kOpaque_SkAlphaType)
-            ? kBGR_101010x_XR_SkColorType
-            : kRGBA_F16_SkColorType;
+        use_f16 ? kRGBA_F16_SkColorType : kBGR_101010x_XR_SkColorType;
     return base_image_info.makeWH(decode_size.width(), decode_size.height())
         .makeColorType(color_type)
         .makeAlphaType(alpha_type)
@@ -422,8 +427,9 @@ ImageDecoderImpeller::DecompressTexture(
 
   const SkImageInfo base_image_info =
       ImageDescriptor::ToSkImageInfo(descriptor->image_info());
-  const absl::StatusOr<SkImageInfo> image_info = CreateImageInfo(
-      base_image_info, decode_size, supports_wide_gamut, options.target_format);
+  const absl::StatusOr<SkImageInfo> image_info =
+      CreateImageInfo(base_image_info, decode_size, supports_wide_gamut,
+                      options.target_format, capabilities);
 
   if (!image_info.ok()) {
     return image_info.status();
@@ -749,10 +755,16 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
             context->GetResourceAllocator()->GetMaxTextureSizeSupported();
 
         // Always decompress on the concurrent runner.
+        const bool is_vulkan = context->GetBackendType() ==
+                               impeller::Context::BackendType::kVulkan;
+        const bool supports_wide_gamut =
+            wide_gamut_enabled &&
+            context->GetCapabilities()->SupportsExtendedRangeFormats() &&
+            (!is_vulkan ||
+             context->GetCapabilities()->GetDefaultColorFormat() ==
+                 impeller::PixelFormat::kR16G16B16A16Float);
         auto bitmap_result = DecompressTexture(
-            raw_descriptor, options, max_size_supported,
-            /*supports_wide_gamut=*/wide_gamut_enabled &&
-                context->GetCapabilities()->SupportsExtendedRangeFormats(),
+            raw_descriptor, options, max_size_supported, supports_wide_gamut,
             context->GetCapabilities(), context->GetResourceAllocator());
         if (!bitmap_result.ok()) {
           result(nullptr, std::string(bitmap_result.status().message()));

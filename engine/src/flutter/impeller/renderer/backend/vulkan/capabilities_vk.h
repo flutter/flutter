@@ -371,6 +371,7 @@ class CapabilitiesVK final : public Capabilities,
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;
   bool supports_external_fence_and_semaphore_ = false;
+  bool supports_extended_range_formats_ = false;
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;

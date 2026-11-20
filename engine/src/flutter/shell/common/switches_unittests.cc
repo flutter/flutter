@@ -173,6 +173,23 @@ TEST(SwitchesTest, ProfileStartup) {
   }
 }
 
+TEST(SwitchesTest, EnableWideGamut) {
+  {
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command", "--enable-wide-gamut"});
+    EXPECT_TRUE(command_line.HasOption("enable-wide-gamut"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_wide_gamut, true);
+  }
+  {
+    // default
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_wide_gamut, false);
+  }
+}
+
 #if !FLUTTER_RELEASE
 TEST(SwitchesTest, EnableAsserts) {
   fml::CommandLine command_line = fml::CommandLineFromInitializerList(

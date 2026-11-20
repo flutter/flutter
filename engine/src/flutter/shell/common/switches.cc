@@ -569,6 +569,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.impeller_top_left_default_framebuffer_origin =
       command_line.HasOption(
           FlagForSwitch(Switch::kImpellerTopLeftDefaultFramebufferOrigin));
+  settings.enable_wide_gamut =
+      command_line.HasOption(FlagForSwitch(Switch::kEnableWideGamut));
 
   return settings;
 }

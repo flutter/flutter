@@ -75,7 +75,27 @@ static bool ContainsFormat(const std::vector<vk::SurfaceFormatKHR>& formats,
 
 static std::optional<vk::SurfaceFormatKHR> ChooseSurfaceFormat(
     const std::vector<vk::SurfaceFormatKHR>& formats,
-    PixelFormat preference) {
+    PixelFormat preference,
+    bool wide_gamut) {
+  if (wide_gamut) {
+    // Extended sRGB with the sRGB transfer function: the same definition as
+    // the iOS surface. Android maps this pair to ADATASPACE_SCRGB.
+    const vk::SurfaceFormatKHR extended{
+        vk::Format::eR16G16B16A16Sfloat,
+        vk::ColorSpaceKHR::eExtendedSrgbNonlinearEXT};
+    if (ContainsFormat(formats, extended)) {
+      FML_LOG(IMPORTANT) << "Using an extended sRGB FP16 swapchain.";
+      return extended;
+    }
+    FML_LOG(IMPORTANT) << "Wide gamut requested, but the surface offers no "
+                          "extended sRGB FP16 format ("
+                       << formats.size() << " formats).";
+    // Do not fall back to an FP16 swapchain with standard sRGB colorspace;
+    // that doubles memory bandwidth with no color gamut benefit.
+    if (preference == PixelFormat::kR16G16B16A16Float) {
+      preference = PixelFormat::kR8G8B8A8UNormInt;
+    }
+  }
   const auto colorspace = vk::ColorSpaceKHR::eSrgbNonlinear;
   const auto vk_preference =
       vk::SurfaceFormatKHR{ToVKImageFormat(preference), colorspace};
@@ -152,7 +172,8 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
   }
 
   const auto format = ChooseSurfaceFormat(
-      formats, vk_context.GetCapabilities()->GetDefaultColorFormat());
+      formats, vk_context.GetCapabilities()->GetDefaultColorFormat(),
+      vk_context.GetShouldEnableWideGamut());
   if (!format.has_value()) {
     VALIDATION_LOG << "Swapchain has no supported formats.";
     return;

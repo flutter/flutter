@@ -302,6 +302,9 @@ DEF_SWITCH(kImpellerTopLeftDefaultFramebufferOrigin,
            "bottom-left. Set by embedders whose window surface is created "
            "with an inverted Y axis, such as ANGLE's "
            "EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE. Defaults to false.")
+DEF_SWITCH(kEnableWideGamut,
+           "enable-wide-gamut",
+           "Enable wide gamut color support on supported platforms.")
 DEF_SWITCHES_END
 
 }  // namespace flutter

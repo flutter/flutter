@@ -522,6 +522,10 @@ void ContextVK::Setup(DeviceSelection selection) {
   descriptor_pool_recycler_ = std::move(descriptor_pool_recycler);
   command_queue_vk_ = std::make_shared<CommandQueueVK>(weak_from_this());
   should_enable_surface_control_ = settings.enable_surface_control;
+  should_enable_wide_gamut_ = settings.enable_wide_gamut;
+  if (GetShouldEnableWideGamut()) {
+    SetOffscreenFormat(PixelFormat::kR16G16B16A16Float);
+  }
   should_batch_cmd_buffers_ = !workarounds_.batch_submit_command_buffer_timeout;
   is_valid_ = true;
 
@@ -782,9 +786,14 @@ const std::unique_ptr<DriverInfoVK>& ContextVK::GetDriverInfo() const {
 }
 
 bool ContextVK::GetShouldEnableSurfaceControlSwapchain() const {
-  return should_enable_surface_control_ &&
+  return should_enable_surface_control_ && !GetShouldEnableWideGamut() &&
          CapabilitiesVK::Cast(*device_capabilities_)
              .SupportsExternalSemaphoreExtensions();
+}
+
+bool ContextVK::GetShouldEnableWideGamut() const {
+  return should_enable_wide_gamut_ &&
+         device_capabilities_->SupportsExtendedRangeFormats();
 }
 
 RuntimeStageBackend ContextVK::GetRuntimeStageBackend() const {
