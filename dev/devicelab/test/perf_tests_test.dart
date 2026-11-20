@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
+import 'package:flutter_devicelab/tasks/new_gallery.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 import 'common.dart';
@@ -198,6 +199,130 @@ void main() {
     );
   });
 
+  Map<String, dynamic> minimalFakePerfData() => <String, dynamic>{
+    'frame_count': 5,
+    'average_frame_build_time_millis': 0.1,
+    'worst_frame_build_time_millis': 0.1,
+    '90th_percentile_frame_build_time_millis': 0.1,
+    '99th_percentile_frame_build_time_millis': 0.1,
+    'average_frame_rasterizer_time_millis': 0.1,
+    'worst_frame_rasterizer_time_millis': 0.1,
+    '90th_percentile_frame_rasterizer_time_millis': 0.1,
+    '99th_percentile_frame_rasterizer_time_millis': 0.1,
+    'old_gen_gc_count': 1,
+    'total_ui_gc_time': 1,
+    'average_vsync_transitions_missed': 1,
+    '90th_percentile_vsync_transitions_missed': 1,
+    '99th_percentile_vsync_transitions_missed': 1,
+  };
+
+  test('PerfTest enables and restores fixed-performance mode by default', () async {
+    final events = <String>[];
+    final recordingDevice = _FixedPerformanceModeRecordingFakeDevice(
+      onToggle: (bool enable) => events.add('toggle:$enable'),
+    );
+    const resultFileName = 'fake_result';
+    void driveCallback(List<String> arguments) {
+      events.add('drive');
+      final resultFile = File('$perfTestOutputPath/$resultFileName.json')
+        ..createSync(recursive: true);
+      resultFile.writeAsStringSync(json.encode(minimalFakePerfData()));
+    }
+
+    final perfTest = PerfTest(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      'test_file',
+      resultFilename: resultFileName,
+      device: recordingDevice,
+      flutterDriveCallback: driveCallback,
+    );
+    await perfTest.run();
+    expect(events, <String>['toggle:true', 'drive', 'toggle:false']);
+  });
+
+  test('PerfTest restores fixed-performance mode when flutter drive throws', () async {
+    final events = <String>[];
+    final recordingDevice = _FixedPerformanceModeRecordingFakeDevice(
+      onToggle: (bool enable) => events.add('toggle:$enable'),
+    );
+
+    final perfTest = PerfTest(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      'test_file',
+      resultFilename: 'fake_result',
+      device: recordingDevice,
+      flutterDriveCallback: (List<String> arguments) {
+        events.add('drive');
+        throw StateError('drive failed');
+      },
+    );
+    await expectLater(perfTest.run(), throwsStateError);
+    expect(events, <String>['toggle:true', 'drive', 'toggle:false']);
+  });
+
+  test(
+    'PerfTest explicitly disables fixed-performance mode when enableFixedPerformanceMode is false',
+    () async {
+      final events = <String>[];
+      final recordingDevice = _FixedPerformanceModeRecordingFakeDevice(
+        onToggle: (bool enable) => events.add('toggle:$enable'),
+      );
+      const resultFileName = 'fake_result';
+      void driveCallback(List<String> arguments) {
+        events.add('drive');
+        final resultFile = File('$perfTestOutputPath/$resultFileName.json')
+          ..createSync(recursive: true);
+        resultFile.writeAsStringSync(json.encode(minimalFakePerfData()));
+      }
+
+      final perfTest = PerfTest(
+        testDirectory.absolute.path,
+        testTarget.absolute.path,
+        'test_file',
+        resultFilename: resultFileName,
+        device: recordingDevice,
+        flutterDriveCallback: driveCallback,
+        enableFixedPerformanceMode: false,
+      );
+      await perfTest.run();
+      expect(events, <String>['toggle:false', 'drive']);
+    },
+  );
+
+  test('PerfTest.e2e explicitly disables fixed-performance mode when enableFixedPerformanceMode is false', () async {
+    final events = <String>[];
+    final recordingDevice = _FixedPerformanceModeRecordingFakeDevice(
+      onToggle: (bool enable) => events.add('toggle:$enable'),
+    );
+    const resultFileName = 'e2e_perf_summary';
+    void driveCallback(List<String> arguments) {
+      events.add('drive');
+      final resultFile = File('$perfTestOutputPath/$resultFileName.json')
+        ..createSync(recursive: true);
+      resultFile.writeAsStringSync(json.encode(minimalFakePerfData()));
+    }
+
+    final perfTest = PerfTest.e2e(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      device: recordingDevice,
+      flutterDriveCallback: driveCallback,
+      enableFixedPerformanceMode: false,
+    );
+    await perfTest.run();
+    expect(events, <String>['toggle:false', 'drive']);
+  });
+
+  test('NewGalleryPerfTest forwards enableFixedPerformanceMode', () {
+    expect(NewGalleryPerfTest().enableFixedPerformanceMode, isTrue);
+    expect(
+      NewGalleryPerfTest(enableFixedPerformanceMode: false).enableFixedPerformanceMode,
+      isFalse,
+    );
+  });
+
   test('MemoryTest.handleLogcatLine ignores duplicate benchmark markers', () async {
     final memoryTest = MemoryTest('project', 'test', 'package');
     memoryTest.prepareForNextMessage('TAPPED');
@@ -249,6 +374,18 @@ class _TapRecordingFakeDevice extends FakeDevice {
 
   @override
   Future<void> tap(int x, int y) => onTap(x, y);
+}
+
+class _FixedPerformanceModeRecordingFakeDevice extends FakeDevice {
+  const _FixedPerformanceModeRecordingFakeDevice({required this.onToggle})
+    : super(deviceId: 'fakeDeviceId');
+
+  final void Function(bool enable) onToggle;
+
+  @override
+  Future<void> toggleFixedPerformanceMode(bool enable) async {
+    onToggle(enable);
+  }
 }
 
 class _TestMemoryTest extends MemoryTest {

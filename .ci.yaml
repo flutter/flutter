@@ -2713,6 +2713,21 @@ targets:
           {"dependency": "open_jdk", "version": "version:25.0.2"}
         ]
 
+  # Pixel 7 Pro, Impeller (Vulkan), fixed-performance mode disabled.
+  # Exists to track Android ADPF performance under the normal OS CPU governor
+  # (RFC 410.0000: https://github.com/flutter/rfc/pull/45). Because CPU clocks
+  # are not pinned, results may be noisier than the fixed-performance sibling
+  # and should only be trusted for long-term trends.
+  - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller_no_fixed_perf__timeline_summary_noisy
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: complex_layout_scroll_perf_impeller_no_fixed_perf__timeline_summary_noisy
+
   - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller_gles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3384,6 +3399,21 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_impeller__transition_perf
+
+  # Pixel 7 Pro, Impeller (Vulkan), fixed-performance mode disabled.
+  # Exists to track Android ADPF performance under the normal OS CPU governor
+  # (RFC 410.0000: https://github.com/flutter/rfc/pull/45). Because CPU clocks
+  # are not pinned, results may be noisier than the fixed-performance sibling
+  # and should only be trusted for long-term trends.
+  - name: Linux_pixel_7pro new_gallery_impeller_no_fixed_perf__transition_perf_noisy
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery_impeller_no_fixed_perf__transition_perf_noisy
 
   # Samsung Galaxy S24, Impeller (Vulkan)
   - name: Linux_galaxy_s24 new_gallery_impeller__transition_perf
