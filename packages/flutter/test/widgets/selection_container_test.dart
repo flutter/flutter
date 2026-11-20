@@ -213,6 +213,56 @@ void main() {
     );
     expect(tester.getSize(find.byType(SelectionContainer)), Size.zero);
   });
+
+  testWidgets(
+    'clearing the selection does not crash when a nested container unregisters during the clear',
+    (WidgetTester tester) async {
+      final delegate = StaticSelectionContainerDelegate();
+      addTearDown(delegate.dispose);
+      final childDelegate = StaticSelectionContainerDelegate();
+      addTearDown(childDelegate.dispose);
+
+      Widget buildContainer({required bool showNestedText}) {
+        return SelectionContainer(
+          delegate: delegate,
+          child: Column(
+            children: <Widget>[
+              const Text('first', textDirection: TextDirection.ltr),
+              SelectionContainer(
+                delegate: childDelegate,
+                child: showNestedText
+                    ? const Text('nested', textDirection: TextDirection.ltr)
+                    : const SizedBox.shrink(),
+              ),
+              const Text('last', textDirection: TextDirection.ltr),
+            ],
+          ),
+        );
+      }
+
+      await pumpContainer(tester, buildContainer(showNestedText: true));
+      await tester.pump();
+      await tester.idle();
+      // first, the nested container, last.
+      expect(delegate.selectables.length, 3);
+
+      // Removing the nested text leaves the nested container empty, but the
+      // nested container only finds out that it has no content when its
+      // scheduled update runs after this frame. A clear dispatched before that
+      // makes the nested container recompute its geometry, see that it has no
+      // content and remove itself from the parent while the parent is still
+      // iterating its selectables.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        delegate.dispatchSelectionEvent(const ClearSelectionEvent());
+      });
+      await pumpContainer(tester, buildContainer(showNestedText: false));
+      await tester.idle();
+
+      expect(tester.takeException(), isNull);
+      // first, last.
+      expect(delegate.selectables.length, 2);
+    },
+  );
 }
 
 class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {

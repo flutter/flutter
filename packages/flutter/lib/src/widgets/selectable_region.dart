@@ -3079,7 +3079,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Removes the selection of all [Selectable]s this delegate manages.
   @protected
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
-    for (final Selectable selectable in selectables) {
+    // Iterate over a copy. Clearing a child can make it remove itself from
+    // this delegate synchronously, for example a nested container that has
+    // lost all of its selectables recomputes its geometry, finds no content
+    // and unregisters.
+    for (final Selectable selectable in selectables.toList(growable: false)) {
       dispatchSelectionEventToChild(selectable, event);
     }
     currentSelectionEndIndex = -1;
