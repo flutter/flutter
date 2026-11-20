@@ -1109,6 +1109,14 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
   }
 
   @override
+  void forget(ChildBackButtonDispatcher child) {
+    super.forget(child);
+    if (!hasCallbacks) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+  }
+
+  @override
   Future<bool> didPopRoute() => invokeCallback(Future<bool>.value(false));
 }
 
@@ -1163,6 +1171,14 @@ class ChildBackButtonDispatcher extends BackButtonDispatcher {
       parent.forget(this);
     }
   }
+
+  @override
+  void forget(ChildBackButtonDispatcher child) {
+    super.forget(child);
+    if (!hasCallbacks) {
+      parent.forget(this);
+    }
+  }
 }
 
 /// A convenience widget that registers a callback for when the back button is pressed.
@@ -1193,7 +1209,7 @@ class BackButtonListener extends StatefulWidget {
 }
 
 class _BackButtonListenerState extends State<BackButtonListener> {
-  BackButtonDispatcher? dispatcher;
+  ChildBackButtonDispatcher? dispatcher;
 
   @override
   void didChangeDependencies() {
@@ -1215,6 +1231,15 @@ class _BackButtonListenerState extends State<BackButtonListener> {
   void didUpdateWidget(covariant BackButtonListener oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.onBackButtonPressed != widget.onBackButtonPressed) {
+      final BackButtonDispatcher? rootBackDispatcher = context
+          .getInheritedWidgetOfExactType<_RouterScope>()
+          ?.backButtonDispatcher;
+      if (dispatcher?.parent != rootBackDispatcher) {
+        dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
+        dispatcher = null;
+        // didChangeDependencies will attach to the new dispatcher.
+        return;
+      }
       dispatcher?.removeCallback(oldWidget.onBackButtonPressed);
       dispatcher?.addCallback(widget.onBackButtonPressed);
       dispatcher?.takePriority();

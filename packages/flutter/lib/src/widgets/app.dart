@@ -608,8 +608,9 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This object will be used by the underlying [Router].
   ///
-  /// If this is not provided, the widgets app will create a
-  /// [RootBackButtonDispatcher] by default.
+  /// If neither this property nor [RouterConfig.backButtonDispatcher] is
+  /// provided, this widget creates and owns a default [RootBackButtonDispatcher].
+  /// A supplied dispatcher remains owned by its creator.
   ///
   /// See also:
   ///
@@ -643,10 +644,14 @@ class WidgetsApp extends StatefulWidget {
   /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
   /// and [backButtonDispatcher], must all be null.
   ///
+  /// If [RouterConfig.backButtonDispatcher] is null, this widget creates and
+  /// owns a [RootBackButtonDispatcher] to handle system back button requests.
+  /// It stops using the default when a dispatcher is supplied. The supplied
+  /// dispatcher remains owned by its creator.
+  ///
   /// See also:
   ///
-  ///  * [Router.withConfig], which receives this object when this
-  ///    widget builds the [Router].
+  ///  * [Router], which is configured by this object.
   /// {@endtemplate}
   final RouterConfig<Object>? routerConfig;
 
@@ -1503,10 +1508,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   void _updateRouting({WidgetsApp? oldWidget}) {
-    if (_usesRouterWithDelegates) {
-      assert(!_usesNavigator && !_usesRouterWithConfig);
+    if (_usesRouterWithDelegates || _usesRouterWithConfig) {
+      assert(!_usesNavigator && !(_usesRouterWithDelegates && _usesRouterWithConfig));
       _clearNavigatorResource();
-      if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
+      if (_usesRouterWithDelegates &&
+          widget.routeInformationProvider == null &&
+          widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(uri: Uri.parse(_initialRouteName)),
         );
@@ -1514,8 +1521,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         _defaultRouteInformationProvider?.dispose();
         _defaultRouteInformationProvider = null;
       }
-      if (widget.backButtonDispatcher == null) {
+      if (widget.backButtonDispatcher == null &&
+          widget.routerConfig?.backButtonDispatcher == null) {
         _defaultBackButtonDispatcher ??= RootBackButtonDispatcher();
+      } else {
+        _defaultBackButtonDispatcher = null;
       }
     } else if (_usesNavigator) {
       assert(!_usesRouterWithDelegates && !_usesRouterWithConfig);
@@ -1525,8 +1535,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       assert(_navigator != null);
     } else {
-      assert(widget.builder != null || _usesRouterWithConfig);
-      assert(!_usesRouterWithDelegates && !_usesNavigator);
+      assert(widget.builder != null);
+      assert(!_usesRouterWithDelegates && !_usesNavigator && !_usesRouterWithConfig);
       _clearRouterResource();
       _clearNavigatorResource();
     }
@@ -1548,7 +1558,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       widget.routeInformationProvider ?? _defaultRouteInformationProvider;
   PlatformRouteInformationProvider? _defaultRouteInformationProvider;
   BackButtonDispatcher get _effectiveBackButtonDispatcher =>
-      widget.backButtonDispatcher ?? _defaultBackButtonDispatcher!;
+      widget.routerConfig?.backButtonDispatcher ??
+      widget.backButtonDispatcher ??
+      _defaultBackButtonDispatcher!;
   RootBackButtonDispatcher? _defaultBackButtonDispatcher;
 
   // NAVIGATOR
@@ -1731,9 +1743,13 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         reportsRouteUpdateToEngine: true,
       );
     } else if (_usesRouterWithConfig) {
-      routing = Router<Object>.withConfig(
+      final RouterConfig<Object> config = widget.routerConfig!;
+      routing = Router<Object>(
         restorationScopeId: 'router',
-        config: widget.routerConfig!,
+        routeInformationProvider: config.routeInformationProvider,
+        routeInformationParser: config.routeInformationParser,
+        routerDelegate: config.routerDelegate,
+        backButtonDispatcher: _effectiveBackButtonDispatcher,
       );
     }
 
