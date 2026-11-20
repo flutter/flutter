@@ -365,12 +365,17 @@ class ExtensionAssembleTarget {
   /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
   /// files into their build directory and [Depfile.parse] to read them back.
   ///
-  /// Each entry must match [isValidDepfileName]. Relative paths inside each
-  /// depfile are resolved against the project root directory and rewritten in
-  /// place with normalized paths by the host after a successful build. If a
-  /// declared depfile is missing or invalid after a successful build, the host
-  /// logs an error and disables incremental build caching for this target
-  /// without failing the build.
+  /// Each entry must match [isValidDepfileName]. Because all targets write
+  /// depfiles directly into the shared build directory, depfile names must be
+  /// unique across built-in Flutter tool targets and all active extensions.
+  /// Prefix depfile names with the target platform or extension name (for
+  /// example, `'linux_build.d'`) to avoid conflicts.
+  ///
+  /// Relative paths inside each depfile are resolved against the project root
+  /// directory and rewritten in place with normalized paths by the host after
+  /// a successful build. If a declared depfile is missing or invalid after a
+  /// successful build, the host logs an error and disables incremental build
+  /// caching for this target without failing the build.
   final List<String> depfiles;
 
   /// Input file patterns and artifacts.
