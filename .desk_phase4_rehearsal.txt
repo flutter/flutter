@@ -1,0 +1,2 @@
+line 1: initial
+line 2: old value
