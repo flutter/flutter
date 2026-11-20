@@ -104,25 +104,16 @@ static vk::UniqueSampler CreateSampler(
   return std::move(sampler.value);
 }
 
-static vk::UniqueSampler CreateSamplerForHolder(
-    const std::weak_ptr<DeviceHolderVK>& device_holder,
-    const SamplerDescriptor& desc,
-    const std::shared_ptr<YUVConversionVK>& yuv_conversion) {
-  auto holder = device_holder.lock();
-  if (!holder || !holder->GetDevice()) {
-    return {};
-  }
-  return CreateSampler(holder->GetDevice(), desc, yuv_conversion);
-}
-
-SamplerVK::SamplerVK(std::weak_ptr<DeviceHolderVK> device_holder,
+SamplerVK::SamplerVK(const std::shared_ptr<DeviceHolderVK>& device_holder,
                      const SamplerDescriptor& desc,
                      std::shared_ptr<YUVConversionVK> yuv_conversion)
     : Sampler(desc),
-      device_holder_(std::move(device_holder)),
+      device_holder_(device_holder),
       sampler_(MakeSharedVK<vk::Sampler>(
-          CreateSamplerForHolder(device_holder_, desc_, yuv_conversion),
-          device_holder_)),
+          device_holder && device_holder->GetDevice()
+              ? CreateSampler(device_holder->GetDevice(), desc_, yuv_conversion)
+              : vk::UniqueSampler{},
+          device_holder)),
       yuv_conversion_(std::move(yuv_conversion)) {
   is_valid_ = sampler_ && !!sampler_->Get();
 }
@@ -138,8 +129,12 @@ std::shared_ptr<SamplerVK> SamplerVK::CreateVariantForConversion(
   if (!conversion || !is_valid_) {
     return nullptr;
   }
+  auto device_holder = device_holder_.lock();
+  if (!device_holder || !device_holder->GetDevice()) {
+    return nullptr;
+  }
   auto variant =
-      std::make_shared<SamplerVK>(device_holder_, desc_, std::move(conversion));
+      std::make_shared<SamplerVK>(device_holder, desc_, std::move(conversion));
   if (!variant->is_valid_) {
     return nullptr;
   }

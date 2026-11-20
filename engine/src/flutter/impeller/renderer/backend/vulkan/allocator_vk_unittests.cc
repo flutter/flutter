@@ -195,6 +195,15 @@ TEST(AllocatorVKTest,
     context->Shutdown();
   }
 
+  // Verify that |texture| is still keeping the VkDevice and cached frame data
+  // alive before it is reset.
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyDevice"),
+            called->end());
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyFramebuffer"),
+            called->end());
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyRenderPass"),
+            called->end());
+
   // |texture| holds the last reference to the backing DeviceHolderVK via its
   // ImageResource. Destroying it must clear cached frame_data_ before
   // ImageResource drops DeviceHolderVK and destroys the VkDevice.
@@ -215,9 +224,11 @@ TEST(AllocatorVKTest,
 
 TEST(AllocatorVKTest, SharedObjectReleasesHandleAfterDeviceIsDestroyed) {
   SharedHandleVK<vk::Framebuffer> shared_framebuffer;
+  std::shared_ptr<std::vector<std::string>> called;
   {
     auto context = MockVulkanContextBuilder().Build();
     ASSERT_TRUE(context);
+    called = GetMockVulkanFunctions(context->GetDevice());
 
     auto framebuffer = context->GetDevice().createFramebufferUnique(
         vk::FramebufferCreateInfo{});
@@ -229,9 +240,16 @@ TEST(AllocatorVKTest, SharedObjectReleasesHandleAfterDeviceIsDestroyed) {
     context->Shutdown();
   }
 
-  // The context and its VkDevice are now destroyed. Releasing the shared handle
-  // must not call vkDestroyFramebuffer on the dead VkDevice.
+  // The context and its VkDevice must already be destroyed (SharedObjectVKT
+  // must not retain DeviceHolderVK strongly).
+  EXPECT_NE(std::find(called->begin(), called->end(), "vkDestroyDevice"),
+            called->end());
+
+  // Releasing the shared handle must not call vkDestroyFramebuffer on the dead
+  // VkDevice.
   shared_framebuffer.reset();
+  EXPECT_EQ(std::find(called->begin(), called->end(), "vkDestroyFramebuffer"),
+            called->end());
 }
 
 }  // namespace testing
