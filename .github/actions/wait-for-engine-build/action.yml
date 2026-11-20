@@ -15,6 +15,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Enforce strict engine version
+      shell: bash
+      run: echo "FLUTTER_STRICT_ENGINE_VERSION=true" >> $GITHUB_ENV # zizmor: ignore[github-env]
+
     - name: Check Engine Changes
       id: check_engine
       uses: ./.github/actions/has-engine-changes

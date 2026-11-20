@@ -32,7 +32,7 @@
 # EOF
 # ```
 
-if grep -qE "^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh))$"; then
+if grep -qE "^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh)|bin/internal/release-candidate-branch\.version)$"; then
   echo "true"
 else
   echo "false"
