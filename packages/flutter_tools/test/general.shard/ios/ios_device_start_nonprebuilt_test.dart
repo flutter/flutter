@@ -700,6 +700,7 @@ void main() {
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
