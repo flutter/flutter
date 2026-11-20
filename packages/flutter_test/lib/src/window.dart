@@ -907,6 +907,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
     resetSystemFontFamily();
+    resetPerformanceModeTestValues();
   }
 
   @override
@@ -1118,8 +1119,24 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.registerBackgroundIsolate(token);
   }
 
+  /// Returns the list of [DartPerformanceMode]s that have been requested by
+  /// [requestDartPerformanceMode] since the last call to
+  /// [resetPerformanceModeTestValues].
+  ///
+  /// Clearing or modifying the returned list will do nothing (it's a copy).
+  /// Call [resetPerformanceModeTestValues] to clear.
+  List<DartPerformanceMode> get testPerformanceModeRequests =>
+      _testPerformanceModeRequests.toList();
+  final List<DartPerformanceMode> _testPerformanceModeRequests = <DartPerformanceMode>[];
+
+  /// Clears [testPerformanceModeRequests].
+  void resetPerformanceModeTestValues() {
+    _testPerformanceModeRequests.clear();
+  }
+
   @override
   void requestDartPerformanceMode(DartPerformanceMode mode) {
+    _testPerformanceModeRequests.add(mode);
     _platformDispatcher.requestDartPerformanceMode(mode);
   }
 

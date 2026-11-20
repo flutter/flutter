@@ -1300,6 +1300,7 @@ mixin SchedulerBinding on BindingBase {
       assert(_numPerformanceModeRequests == 0);
       _performanceMode = mode;
       _numPerformanceModeRequests = 1;
+      platformDispatcher.requestDartPerformanceMode(mode);
     }
 
     return PerformanceModeRequestHandle._(_disposePerformanceModeRequest);
@@ -1313,7 +1314,7 @@ mixin SchedulerBinding on BindingBase {
     _numPerformanceModeRequests--;
     if (_numPerformanceModeRequests == 0) {
       _performanceMode = null;
-      PlatformDispatcher.instance.requestDartPerformanceMode(DartPerformanceMode.balanced);
+      platformDispatcher.requestDartPerformanceMode(DartPerformanceMode.balanced);
     }
   }
 
