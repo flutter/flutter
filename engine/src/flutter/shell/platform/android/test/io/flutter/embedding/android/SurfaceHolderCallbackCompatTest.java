@@ -101,6 +101,20 @@ public class SurfaceHolderCallbackCompatTest {
   }
 
   @Test
+  @Config(minSdk = API_LEVELS.FLUTTER_MIN, maxSdk = API_LEVELS.API_25)
+  public void alphaCallbackShouldKeepSurfaceHiddenBelowApi26WhenHiddenForHybridComposition() {
+    FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);
+    org.mockito.Mockito.when(fakeSurfaceView.isHiddenForHybridComposition()).thenReturn(true);
+    FlutterRenderer fakeFlutterRenderer = mock(FlutterRenderer.class);
+    SurfaceHolderCallbackCompat test =
+        new SurfaceHolderCallbackCompat(null, fakeSurfaceView, fakeFlutterRenderer);
+    test.alphaCallback.onFlutterUiDisplayed();
+    verify(fakeSurfaceView, times(1)).setAlpha(0.0f);
+    verify(fakeSurfaceView, never()).setAlpha(1.0f);
+    verify(fakeFlutterRenderer, times(1)).removeIsDisplayingFlutterUiListener(test.alphaCallback);
+  }
+
+  @Test
   @Config(minSdk = API_LEVELS.FLUTTER_MIN)
   public void testSurfaceHolderCallbackPassesThroughToInnerCallback() {
     FlutterSurfaceView fakeSurfaceView = mock(FlutterSurfaceView.class);

@@ -21,6 +21,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.media.Image;
 import android.os.Build;
 import android.os.LocaleList;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -30,6 +31,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
+import io.flutter.plugin.platform.HybridImageReader;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.nio.ByteBuffer;
 import java.util.Locale;
@@ -300,6 +302,53 @@ public class FlutterJNITest {
   }
 
   @Test
+  public void hybridPacketMethods_forwardToPlatformViewsControllerOrReleaseImagesWhenNull() {
+    FlutterJNI nullControllerJni = new FlutterJNI();
+    Image orphanBg = mock(Image.class);
+    Image orphanOverlay = mock(Image.class);
+    HybridImageReader mockReader = mock(HybridImageReader.class);
+
+    nullControllerJni.onBeginHybridFrame(orphanBg, mockReader);
+    nullControllerJni.onDisplayHybridOverlaySurface(1, 0, 0, 10, 10, orphanOverlay, null);
+    nullControllerJni.onDisplayHybridPlatformView(
+        1, 0, 0, 10, 10, 10, 10, new FlutterMutatorsStack());
+    nullControllerJni.onEndHybridFrame(true, true);
+    nullControllerJni.teardownHybridComposition();
+
+    verify(mockReader, times(1)).releaseImage(orphanBg);
+    verify(orphanOverlay, times(1)).close();
+
+    PlatformViewsController pvc = mock(PlatformViewsController.class);
+    FlutterJNITester attachedJni = new FlutterJNITester(true);
+    attachedJni.setPlatformViewsController(pvc);
+    verify(pvc, times(1)).syncHybridCompositionState();
+
+    attachedJni.updateHybridCompositionState(true, false, true);
+    assertTrue(attachedJni.hcViewsAlive);
+    assertFalse(attachedJni.synchronizeToNativeViewHierarchy);
+    assertTrue(attachedJni.rootSurfaceTransparent);
+
+    FlutterJNITester unattachedJni = new FlutterJNITester(false);
+    unattachedJni.updateHybridCompositionState(true, false, true);
+    assertFalse(unattachedJni.hcViewsAlive);
+
+    Image bg = mock(Image.class);
+    Image ov = mock(Image.class);
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    attachedJni.onBeginHybridFrame(bg, mockReader);
+    attachedJni.onDisplayHybridPlatformView(2, 1, 2, 30, 40, 30, 40, stack);
+    attachedJni.onDisplayHybridOverlaySurface(3, 5, 6, 20, 25, ov, mockReader);
+    attachedJni.onEndHybridFrame(false, true);
+    attachedJni.teardownHybridComposition();
+
+    verify(pvc, times(1)).onBeginHybridFrame(bg, mockReader);
+    verify(pvc, times(1)).onDisplayHybridPlatformView(2, 1, 2, 30, 40, 30, 40, stack);
+    verify(pvc, times(1)).onDisplayHybridOverlaySurface(3, 5, 6, 20, 25, ov, mockReader);
+    verify(pvc, times(1)).onEndHybridFrame(false, true);
+    verify(pvc, times(1)).teardownHybridCompositionViews(false);
+  }
+
+  @Test
   public void setSemanticsTreeEnabled_callsAccessibilityDelegate() {
     FlutterJNI.AccessibilityDelegate accessibilityDelegate =
         mock(FlutterJNI.AccessibilityDelegate.class);
@@ -413,6 +462,9 @@ public class FlutterJNITest {
     final boolean isAttached;
     boolean semanticsEnabled = false;
     int flags = 0;
+    boolean hcViewsAlive = false;
+    boolean synchronizeToNativeViewHierarchy = true;
+    boolean rootSurfaceTransparent = false;
 
     @Override
     public boolean isAttached() {
@@ -427,6 +479,16 @@ public class FlutterJNITest {
     @Override
     public void setAccessibilityFeaturesInNative(int flags) {
       this.flags = flags;
+    }
+
+    @Override
+    public void updateHybridCompositionStateInNative(
+        boolean hcViewsAlive,
+        boolean synchronizeToNativeViewHierarchy,
+        boolean rootSurfaceTransparent) {
+      this.hcViewsAlive = hcViewsAlive;
+      this.synchronizeToNativeViewHierarchy = synchronizeToNativeViewHierarchy;
+      this.rootSurfaceTransparent = rootSurfaceTransparent;
     }
   }
 }

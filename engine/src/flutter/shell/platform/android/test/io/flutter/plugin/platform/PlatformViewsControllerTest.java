@@ -15,6 +15,7 @@ import android.content.MutableContextWrapper;
 import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
+import android.media.ImageReader;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -2656,6 +2657,12 @@ public class PlatformViewsControllerTest {
     public void onSurfaceWindowChanged(Surface surface) {}
 
     @Implementation
+    public void updateHybridCompositionState(
+        boolean hcViewsAlive,
+        boolean synchronizeToNativeViewHierarchy,
+        boolean rootSurfaceTransparent) {}
+
+    @Implementation
     public void setViewportMetrics(
         float devicePixelRatio,
         int physicalWidth,
@@ -2711,5 +2718,175 @@ public class PlatformViewsControllerTest {
     public SurfaceHolder getHolder() {
       return holder;
     }
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void hybridPacketPresentation_syncsStateLaysOutViewsPrunesOverlaysAndHandlesTeardown() {
+    final int viewSizePx = 40;
+    final int overlayId0 = 0;
+    final int overlayId1 = 1;
+    final int platformViewId = 7;
+
+    final PlatformViewsController controller = new PlatformViewsController();
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View embeddedView = new View(ApplicationProvider.getApplicationContext());
+    when(platformView.getView()).thenReturn(embeddedView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    controller.getRegistry().registerViewFactory("hcTestType", viewFactory);
+
+    final List<boolean[]> syncedStates = new java.util.ArrayList<>();
+    final FlutterJNI recordingJni =
+        new FlutterJNI() {
+          @Override
+          public void updateHybridCompositionState(
+              boolean hcViewsAlive,
+              boolean synchronizeToNativeViewHierarchy,
+              boolean rootSurfaceTransparent) {
+            if (!isAttached()) {
+              return;
+            }
+            syncedStates.add(
+                new boolean[] {
+                  hcViewsAlive, synchronizeToNativeViewHierarchy, rootSurfaceTransparent
+                });
+          }
+        };
+    controller.setFlutterJNI(recordingJni);
+    // Unattached FlutterJNI must not invoke native state sync.
+    assertTrue(syncedStates.isEmpty());
+
+    recordingJni.attachToNative();
+    recordingJni.setPlatformViewsController(controller);
+    final FlutterView flutterView = attach(recordingJni, controller);
+    syncedStates.clear();
+
+    // Creating a Classic HC view syncs hcViewsAlive == true.
+    createPlatformView(recordingJni, controller, platformViewId, "hcTestType", /* hybrid=*/ true);
+    assertFalse(syncedStates.isEmpty());
+    assertArrayEquals(new boolean[] {true, true, false}, syncedStates.get(syncedStates.size() - 1));
+
+    syncedStates.clear();
+    synchronizeToNativeViewHierarchy(recordingJni, controller, false);
+    assertEquals(1, syncedStates.size());
+    assertArrayEquals(new boolean[] {true, false, false}, syncedStates.get(0));
+
+    syncedStates.clear();
+    synchronizeToNativeViewHierarchy(recordingJni, controller, true);
+    assertEquals(1, syncedStates.size());
+    assertArrayEquals(new boolean[] {true, true, false}, syncedStates.get(0));
+
+    // Frame 1: background + PV + two hybrid overlays (display-only, no convertToImageView).
+    final ImageReader mockReaderBacking = mock(ImageReader.class);
+    final Image bgImg = mock(Image.class);
+    final Image ov0Img = mock(Image.class);
+    final Image ov1Img = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(bgImg, ov0Img, ov1Img);
+    final HybridImageReader hybridReader = new HybridImageReader(mockReaderBacking);
+    hybridReader.disableFenceForTest();
+    assertSame(bgImg, hybridReader.acquireLatestImage());
+    assertSame(ov0Img, hybridReader.acquireLatestImage());
+    assertSame(ov1Img, hybridReader.acquireLatestImage());
+
+    controller.onBeginHybridFrame(bgImg, hybridReader);
+    controller.onDisplayHybridPlatformView(
+        platformViewId,
+        0,
+        0,
+        viewSizePx,
+        viewSizePx,
+        viewSizePx,
+        viewSizePx,
+        new FlutterMutatorsStack());
+    controller.onDisplayHybridOverlaySurface(
+        overlayId0, 0, 0, viewSizePx, viewSizePx, ov0Img, hybridReader);
+    controller.onDisplayHybridOverlaySurface(
+        overlayId1, 0, 0, viewSizePx, viewSizePx, ov1Img, hybridReader);
+    controller.onEndHybridFrame(
+        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
+
+    assertNull(flutterView.getCurrentImageSurface());
+    assertNotNull(flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(2, controller.getHybridOverlayViews().size());
+    assertEquals(3, hybridReader.getOpenImageCount());
+
+    // Frame 2: only overlay 0 used -> overlay 1 is immediately pruned and its Image released.
+    final Image bgImg2 = mock(Image.class);
+    final Image ov0Img2 = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(bgImg2, ov0Img2);
+    assertSame(bgImg2, hybridReader.acquireLatestImage());
+    assertSame(ov0Img2, hybridReader.acquireLatestImage());
+
+    controller.onBeginHybridFrame(bgImg2, hybridReader);
+    controller.onDisplayHybridPlatformView(
+        platformViewId,
+        0,
+        0,
+        viewSizePx,
+        viewSizePx,
+        viewSizePx,
+        viewSizePx,
+        new FlutterMutatorsStack());
+    controller.onDisplayHybridOverlaySurface(
+        overlayId0, 0, 0, viewSizePx, viewSizePx, ov0Img2, hybridReader);
+    controller.onEndHybridFrame(
+        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
+
+    assertEquals(1, controller.getHybridOverlayViews().size());
+    assertNull(controller.getHybridOverlayViews().get(overlayId1));
+    verify(ov1Img, times(1)).close();
+
+    // Simulate Activity.onStop() / onSurfaceDestroyed(): releases open Images synchronously
+    // without removeView inside dispatchDetachedFromWindow (#97679), then test re-entry before
+    // Looper idles.
+    org.robolectric.shadows.ShadowLooper.pauseMainLooper();
+    controller.teardownHybridCompositionViews(/* allowImmediateRemoveView=*/ false);
+    assertEquals(0, hybridReader.getOpenImageCount());
+    assertEquals(View.GONE, controller.getPlatformViewParent(platformViewId).getVisibility());
+
+    final Image reenteredOvImg = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(reenteredOvImg);
+    assertSame(reenteredOvImg, hybridReader.acquireLatestImage());
+    controller.onBeginHybridFrame(null, null);
+    controller.onDisplayHybridOverlaySurface(
+        overlayId0, 0, 0, viewSizePx, viewSizePx, reenteredOvImg, hybridReader);
+    controller.onEndHybridFrame(
+        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
+    org.robolectric.shadows.ShadowLooper.idleMainLooper();
+
+    // Stale teardown runnable did NOT remove the re-entered overlay.
+    assertEquals(1, controller.getHybridOverlayViews().size());
+    assertEquals(1, hybridReader.getOpenImageCount());
+
+    // Now tear down without re-entry and resume into non-HC: overlay is removed once Looper idles.
+    org.robolectric.shadows.ShadowLooper.pauseMainLooper();
+    controller.teardownHybridCompositionViews(/* allowImmediateRemoveView=*/ false);
+    assertEquals(0, hybridReader.getOpenImageCount());
+    org.robolectric.shadows.ShadowLooper.idleMainLooper();
+    assertEquals(0, controller.getHybridOverlayViews().size());
+    assertNull(flutterView.getHybridCompositionBackgroundImageView());
+
+    // Disposing the HC view syncs hcViewsAlive == false.
+    syncedStates.clear();
+    disposePlatformView(recordingJni, controller, platformViewId);
+    assertFalse(syncedStates.isEmpty());
+    assertArrayEquals(
+        new boolean[] {false, true, false}, syncedStates.get(syncedStates.size() - 1));
+
+    // When detached from FlutterView, incoming packet Images are released immediately without NPE.
+    controller.detachFromView();
+    final Image detachedBg = mock(Image.class);
+    final Image detachedOv = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(detachedBg, detachedOv);
+    assertSame(detachedBg, hybridReader.acquireLatestImage());
+    assertSame(detachedOv, hybridReader.acquireLatestImage());
+    controller.onBeginHybridFrame(detachedBg, hybridReader);
+    controller.onDisplayHybridOverlaySurface(overlayId0, 0, 0, 10, 10, detachedOv, hybridReader);
+    controller.onEndHybridFrame(/* isExitFrame=*/ true, /* removeBackgroundAfterTraversal=*/ true);
+    assertEquals(0, hybridReader.getOpenImageCount());
+
+    hybridReader.retire();
+    assertTrue(hybridReader.isClosed());
   }
 }

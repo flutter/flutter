@@ -95,6 +95,7 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowDisplay;
+import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowViewGroup;
 
 @RunWith(AndroidJUnit4.class)
@@ -1992,5 +1993,199 @@ public class FlutterViewTest {
     SparseArray<AutofillValue> values = mock(SparseArray.class);
     flutterView.autofill(values);
     // No exception should be thrown
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_30)
+  public void
+      hcBackground_showsAboveTransparentSurfaceAndRestoresOnScheduledCommitOrCancelsStaleCommit() {
+    final AtomicReference<Runnable> pendingRemovalCommit = new AtomicReference<>();
+    final FlutterSurfaceView transparentSurface = spy(new FlutterSurfaceView(ctx, true));
+    final FlutterView flutterView =
+        new FlutterView(ctx, transparentSurface) {
+          @Override
+          boolean registerHcFrameCommitCallback(Runnable callback) {
+            pendingRemovalCommit.set(callback);
+            return true;
+          }
+        };
+    assertTrue(flutterView.isRootSurfaceTransparent());
+
+    final View existingPlatformView = new View(ctx);
+    flutterView.addView(existingPlatformView);
+
+    final AtomicBoolean img1Released = new AtomicBoolean(false);
+    final Image img1 = mock(Image.class);
+    clearInvocations(transparentSurface);
+    flutterView.showHybridCompositionBackgroundImage(img1, () -> img1Released.set(true));
+
+    final FlutterImageView bgView = flutterView.getHybridCompositionBackgroundImageView();
+    assertNotNull(bgView);
+    assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_NO, bgView.getImportantForAccessibility());
+    assertEquals(1, flutterView.indexOfChild(bgView));
+    assertEquals(2, flutterView.indexOfChild(existingPlatformView));
+    assertTrue(transparentSurface.isHiddenForHybridComposition());
+    assertEquals(0.0f, transparentSurface.getAlpha(), 0.0f);
+    assertFalse(transparentSurface.gatherTransparentRegion(new Region()));
+    verify(transparentSurface, times(1)).setZOrderOnTop(false);
+    assertTrue(flutterView.acquireLatestImageViewFrame());
+    assertFalse(flutterView.acquireLatestImageViewFrame());
+
+    // Schedule deferred exit removal, then re-enter HC before the exit FrameCommitCallback fires.
+    flutterView.scheduleHybridCompositionBackgroundRemoval();
+    assertNotNull(pendingRemovalCommit.get());
+    final Runnable staleCommit = pendingRemovalCommit.get();
+
+    final AtomicBoolean img2Released = new AtomicBoolean(false);
+    flutterView.showHybridCompositionBackgroundImage(
+        mock(Image.class), () -> img2Released.set(true));
+    assertTrue(img1Released.get());
+
+    // Firing the stale commit must NOT remove the newly re-shown background view.
+    staleCommit.run();
+    assertSame(bgView, flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(View.VISIBLE, bgView.getVisibility());
+    assertEquals(0.0f, transparentSurface.getAlpha(), 0.0f);
+
+    // Schedule removal again and fire the active commit: removes background and restores surface.
+    pendingRemovalCommit.set(null);
+    clearInvocations(transparentSurface);
+    flutterView.scheduleHybridCompositionBackgroundRemoval();
+    assertNotNull(pendingRemovalCommit.get());
+    pendingRemovalCommit.get().run();
+
+    assertTrue(img2Released.get());
+    assertNull(flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(-1, flutterView.indexOfChild(bgView));
+    assertFalse(transparentSurface.isHiddenForHybridComposition());
+    assertEquals(1.0f, transparentSurface.getAlpha(), 0.0f);
+    verify(transparentSurface, times(1)).setZOrderOnTop(true);
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_24)
+  public void hcBackground_coldStartOnFirstFrameBelowApi26KeepsSurfaceHidden() {
+    final FlutterSurfaceView surfaceView = new FlutterSurfaceView(ctx);
+    final FlutterView flutterView = new FlutterView(ctx, surfaceView);
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    when(flutterEngine.getPlatformViewsController()).thenReturn(platformViewsController);
+    when(flutterEngine.getPlatformViewsController2()).thenReturn(platformViewsController2);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    final ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
+        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
+    verify(mockFlutterJni, org.mockito.Mockito.atLeastOnce())
+        .addIsDisplayingFlutterUiListener(listenerCaptor.capture());
+
+    flutterView.showHybridCompositionBackgroundImage(mock(Image.class), null);
+    assertEquals(0.0f, surfaceView.getAlpha(), 0.0f);
+    assertTrue(surfaceView.isHiddenForHybridComposition());
+
+    // Firing cold-start onFirstFrame() on API 24 must NOT clobber alpha back to 1.0f while HC is
+    // hiding the surface.
+    for (FlutterUiDisplayListener listener : listenerCaptor.getAllValues()) {
+      listener.onFlutterUiDisplayed();
+    }
+    assertEquals(0.0f, surfaceView.getAlpha(), 0.0f);
+    assertTrue(surfaceView.isHiddenForHybridComposition());
+  }
+
+  @Test
+  public void
+      hcBackground_surfaceDestroyDefersRemoveViewSafelyAndCancelsIfReenteredBeforeLooperIdles() {
+    final FlutterSurfaceView surfaceView = new FlutterSurfaceView(ctx);
+    final FlutterView flutterView = spy(new FlutterView(ctx, surfaceView));
+    final AtomicBoolean img1Released = new AtomicBoolean(false);
+
+    flutterView.showHybridCompositionBackgroundImage(
+        mock(Image.class), () -> img1Released.set(true));
+    final FlutterImageView bgView = flutterView.getHybridCompositionBackgroundImageView();
+    assertNotNull(bgView);
+
+    // Pause main Looper so we can inspect synchronous state inside dispatchDetachedFromWindow.
+    ShadowLooper.pauseMainLooper();
+    clearInvocations(flutterView);
+    flutterView.hideHybridCompositionBackgroundForSurfaceDestroy();
+
+    // Displayed images are released immediately and renderSurface is restored, without calling
+    // synchronous removeView (#97679).
+    assertTrue(img1Released.get());
+    assertEquals(View.GONE, bgView.getVisibility());
+    assertEquals(1.0f, surfaceView.getAlpha(), 0.0f);
+    assertFalse(surfaceView.isHiddenForHybridComposition());
+    verify(flutterView, never()).removeView(bgView);
+
+    // Re-enter HC before main Looper runs the deferred removal runnable.
+    final AtomicBoolean img2Released = new AtomicBoolean(false);
+    flutterView.showHybridCompositionBackgroundImage(
+        mock(Image.class), () -> img2Released.set(true));
+    ShadowLooper.idleMainLooper();
+
+    // Deferred removal runnable saw a newer generation and left the re-shown background intact.
+    assertSame(bgView, flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(View.VISIBLE, bgView.getVisibility());
+    assertFalse(img2Released.get());
+    assertEquals(0.0f, surfaceView.getAlpha(), 0.0f);
+
+    // Now hide again and let main Looper idle without re-entry: removes bgView cleanly.
+    ShadowLooper.pauseMainLooper();
+    flutterView.hideHybridCompositionBackgroundForSurfaceDestroy();
+    assertTrue(img2Released.get());
+    ShadowLooper.idleMainLooper();
+    assertNull(flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(-1, flutterView.indexOfChild(bgView));
+    assertEquals(1.0f, surfaceView.getAlpha(), 0.0f);
+  }
+
+  @Test
+  public void
+      hcBackground_windowVisibilityChangeFlushesPendingRemovalAndConvertToImageViewStaysBelow() {
+    final int testSizePx = 64;
+    final FlutterSurfaceView surfaceView = spy(new FlutterSurfaceView(ctx));
+    doReturn(true).when(surfaceView).isSurfaceAvailableForRendering();
+    final FlutterView flutterView =
+        new FlutterView(ctx, surfaceView) {
+          @Override
+          boolean registerHcFrameCommitCallback(Runnable callback) {
+            return true;
+          }
+
+          @Override
+          public FlutterImageView createImageView() {
+            return new FlutterImageView(
+                ctx, testSizePx, testSizePx, FlutterImageView.SurfaceKind.background);
+          }
+        };
+
+    final FlutterEngine flutterEngine =
+        spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+    final FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+    flutterView.attachToFlutterEngine(flutterEngine);
+
+    final AtomicBoolean released = new AtomicBoolean(false);
+    flutterView.showHybridCompositionBackgroundImage(mock(Image.class), () -> released.set(true));
+    final FlutterImageView hcBg = flutterView.getHybridCompositionBackgroundImageView();
+    assertNotNull(hcBg);
+
+    // Calling convertToImageView() while hcBackgroundImageView is visible inserts flutterImageView
+    // strictly below hcBackgroundImageView with alpha == 0.0f.
+    flutterView.convertToImageView();
+    final FlutterImageView legacyImageView = flutterView.getCurrentImageSurface();
+    assertNotNull(legacyImageView);
+    assertTrue(flutterView.indexOfChild(legacyImageView) < flutterView.indexOfChild(hcBg));
+    assertEquals(0.0f, legacyImageView.getAlpha(), 0.0f);
+
+    // Schedule deferred HC exit removal, then transition window visibility to INVISIBLE: flushes
+    // immediately and restores active renderSurface alpha to 1.0f.
+    flutterView.scheduleHybridCompositionBackgroundRemoval();
+    assertFalse(released.get());
+    flutterView.onWindowVisibilityChanged(View.INVISIBLE);
+    assertTrue(released.get());
+    assertNull(flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(1.0f, legacyImageView.getAlpha(), 0.0f);
+
+    flutterView.detachFromFlutterEngine();
   }
 }

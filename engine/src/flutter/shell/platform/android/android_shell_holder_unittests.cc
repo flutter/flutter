@@ -104,6 +104,54 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
               (),
               (override));
   MOCK_METHOD(void, FlutterViewDestroyOverlaySurfaces, (), (override));
+  MOCK_METHOD(
+      std::unique_ptr<PlatformViewAndroidJNI::HybridImageReaderMetadata>,
+      CreateHybridImageReader,
+      (int32_t width, int32_t height),
+      (override));
+  MOCK_METHOD(HybridJavaGlobalRef,
+              AcquireLatestHybridImage,
+              (const HybridJavaGlobalRef& reader),
+              (override));
+  MOCK_METHOD(void,
+              ReleaseHybridImage,
+              (const HybridJavaGlobalRef& reader, HybridJavaGlobalRef image),
+              (override));
+  MOCK_METHOD(void,
+              RetireHybridImageReader,
+              (HybridJavaGlobalRef reader),
+              (override));
+  MOCK_METHOD(void,
+              FlutterViewBeginHybridFrame,
+              (HybridJavaGlobalRef background_image,
+               const HybridJavaGlobalRef& background_reader),
+              (override));
+  MOCK_METHOD(void,
+              FlutterViewOnDisplayHybridPlatformView,
+              (int view_id,
+               int x,
+               int y,
+               int width,
+               int height,
+               int viewWidth,
+               int viewHeight,
+               MutatorsStack mutators_stack),
+              (override));
+  MOCK_METHOD(void,
+              FlutterViewDisplayHybridOverlaySurface,
+              (int surface_id,
+               int x,
+               int y,
+               int width,
+               int height,
+               HybridJavaGlobalRef image,
+               const HybridJavaGlobalRef& reader),
+              (override));
+  MOCK_METHOD(void,
+              FlutterViewEndHybridFrame,
+              (bool is_exit_frame, bool remove_background_after_traversal),
+              (override));
+  MOCK_METHOD(void, FlutterViewTeardownHybridComposition, (), (override));
   MOCK_METHOD(ASurfaceTransaction*,
               createTransaction,
               (std::function<void()>&),

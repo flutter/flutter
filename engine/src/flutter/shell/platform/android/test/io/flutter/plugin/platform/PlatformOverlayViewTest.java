@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.platform;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -41,6 +43,31 @@ public class PlatformOverlayViewTest {
             size / 2,
             0);
     imageView.onHoverEvent(event);
+
+    verify(mockAccessibilityDelegate, times(1)).onAccessibilityHoverEvent(event, true);
+  }
+
+  @Test
+  public void displayOnlyConstructor_forwardsHoverWithoutInternalImageReader() {
+    final AccessibilityEventsDelegate mockAccessibilityDelegate =
+        mock(AccessibilityEventsDelegate.class);
+    when(mockAccessibilityDelegate.onAccessibilityHoverEvent(any(), eq(true))).thenReturn(true);
+
+    final float hoverCoordinatePx = 5.0f;
+    final PlatformOverlayView overlayView = new PlatformOverlayView(ctx, mockAccessibilityDelegate);
+    assertNull(overlayView.getImageReader());
+    assertNull(overlayView.getSurface());
+    assertFalse(overlayView.acquireLatestImage());
+
+    final MotionEvent event =
+        MotionEvent.obtain(
+            SystemClock.uptimeMillis(),
+            SystemClock.uptimeMillis(),
+            MotionEvent.ACTION_HOVER_MOVE,
+            hoverCoordinatePx,
+            hoverCoordinatePx,
+            0);
+    overlayView.onHoverEvent(event);
 
     verify(mockAccessibilityDelegate, times(1)).onAccessibilityHoverEvent(event, true);
   }

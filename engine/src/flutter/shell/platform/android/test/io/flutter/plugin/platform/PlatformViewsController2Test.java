@@ -1473,6 +1473,12 @@ public class PlatformViewsController2Test {
     public void onSurfaceWindowChanged(Surface surface) {}
 
     @Implementation
+    public void updateHybridCompositionState(
+        boolean hcViewsAlive,
+        boolean synchronizeToNativeViewHierarchy,
+        boolean rootSurfaceTransparent) {}
+
+    @Implementation
     public void setViewportMetrics(
         float devicePixelRatio,
         int physicalWidth,

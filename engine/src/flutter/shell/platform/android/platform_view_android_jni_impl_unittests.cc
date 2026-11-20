@@ -1052,5 +1052,182 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_EQ(tracker.ActiveCount(), 0u);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest,
+       HybridImageReaderLifecycleRetiresOrphanOnFailureAndBalancesRefs) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  LocalRefTracker tracker;
+  tracker.InstallDefaults(mock_env);
+  tracker.InstallExceptionSupport(mock_env);
+
+  const jobject kFlutterJniObj =
+      reinterpret_cast<jobject>(kFakeFlutterJniAddress);
+  const jmethodID kRegisteredMethod =
+      reinterpret_cast<jmethodID>(kRegisteredMethodIdAddress);
+
+  std::unordered_map<jobject, int> global_refs;
+  EXPECT_CALL(mock_env, NewGlobalRef(_))
+      .WillRepeatedly([&](jobject obj) -> jobject {
+        if (obj != nullptr) {
+          ++global_refs[obj];
+        }
+        return obj;
+      });
+  EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly([&](jobject obj) {
+    if (obj != nullptr) {
+      auto it = global_refs.find(obj);
+      ASSERT_NE(it, global_refs.end());
+      if (--it->second == 0) {
+        global_refs.erase(it);
+      }
+    }
+  });
+
+  bool fail_from_surface = true;
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_ref(&mock_env, kFlutterJniObj);
+  PlatformViewAndroidJNIImpl android_jni(
+      flutter_jni_ref, [&](JNIEnv*, jobject) -> AndroidNativeWindow::Handle {
+        return fail_from_surface ? nullptr : nullptr;
+      });
+
+  constexpr int32_t kTestReaderDimPx = 64;
+
+  // Subcase 1: ANativeWindow_fromSurface returns nullptr ->
+  // CreateHybridImageReader immediately calls HybridImageReader.retire() and
+  // deletes the global ref.
+  jobject orphan_reader = nullptr;
+  EXPECT_CALL(mock_env, NewObjectV(_, kRegisteredMethod, _))
+      .WillOnce([&](jclass, jmethodID, va_list) -> jobject {
+        orphan_reader = tracker.AllocateNew<jobject>();
+        return orphan_reader;
+      });
+  EXPECT_CALL(mock_env, CallObjectMethodV(_, kRegisteredMethod, _))
+      .WillOnce([&](jobject obj, jmethodID, va_list) -> jobject {
+        EXPECT_EQ(obj, orphan_reader);
+        return tracker.AllocateNew<jobject>();
+      });
+  bool orphan_retired = false;
+  EXPECT_CALL(mock_env, CallVoidMethodV(_, kRegisteredMethod, _))
+      .WillOnce([&](jobject obj, jmethodID, va_list) {
+        EXPECT_EQ(obj, orphan_reader);
+        orphan_retired = true;
+      });
+
+  EXPECT_EQ(
+      android_jni.CreateHybridImageReader(kTestReaderDimPx, kTestReaderDimPx),
+      nullptr);
+  EXPECT_TRUE(orphan_retired);
+  EXPECT_TRUE(global_refs.empty());
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  // Subcase 2: AcquireLatestHybridImage -> ReleaseHybridImage ->
+  // RetireHybridImageReader balances all local and global references.
+  const jobject kFakeReaderObj = reinterpret_cast<jobject>(0x7101);
+  HybridJavaGlobalRef reader_ref(&mock_env, kFakeReaderObj);
+  EXPECT_EQ(global_refs.size(), 1u);
+
+  jobject acquired_local_img = nullptr;
+  EXPECT_CALL(mock_env, CallObjectMethodV(kFakeReaderObj, kRegisteredMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list) -> jobject {
+        acquired_local_img = tracker.AllocateNew<jobject>();
+        return acquired_local_img;
+      });
+  HybridJavaGlobalRef image_ref =
+      android_jni.AcquireLatestHybridImage(reader_ref);
+  EXPECT_FALSE(image_ref.is_null());
+  EXPECT_EQ(image_ref.obj(), acquired_local_img);
+  EXPECT_EQ(global_refs.size(), 2u);
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+
+  // If FlutterJNI was collected before Drain runs, BeginHybridFrame releases
+  // the orphan image through HybridImageReader.releaseImage instead of leaking.
+  fml::jni::JavaObjectWeakGlobalRef empty_jni_ref;
+  PlatformViewAndroidJNIImpl detached_jni(empty_jni_ref);
+  bool released_on_detached = false;
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFakeReaderObj, kRegisteredMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list args) {
+        EXPECT_EQ(va_arg(args, jobject), acquired_local_img);
+        released_on_detached = true;
+      });
+  detached_jni.FlutterViewBeginHybridFrame(std::move(image_ref), reader_ref);
+  EXPECT_TRUE(released_on_detached);
+  // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
+  EXPECT_TRUE(image_ref.is_null());
+  EXPECT_EQ(global_refs.size(), 1u);
+
+  bool reader_retired = false;
+  EXPECT_CALL(mock_env, CallVoidMethodV(kFakeReaderObj, kRegisteredMethod, _))
+      .WillOnce([&](jobject, jmethodID, va_list) { reader_retired = true; });
+  android_jni.RetireHybridImageReader(std::move(reader_ref));
+  EXPECT_TRUE(reader_retired);
+  EXPECT_TRUE(global_refs.empty());
+  EXPECT_EQ(tracker.ActiveCount(), 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       NativeUpdateHybridCompositionStateUpdatesPlatformViewState) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  using UpdateHcStateFn =
+      void (*)(JNIEnv*, jobject, jlong, jboolean, jboolean, jboolean);
+  UpdateHcStateFn update_hc_state = nullptr;
+
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+  const jfieldID kPlaceholderFieldID = reinterpret_cast<jfieldID>(200);
+  const jmethodID kPlaceholderMethodID = reinterpret_cast<jmethodID>(300);
+
+  EXPECT_CALL(mock_env, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
+  EXPECT_CALL(mock_env, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, GetStaticFieldID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderFieldID));
+  EXPECT_CALL(mock_env, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(kPlaceholderMethodID));
+  EXPECT_CALL(mock_env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  EXPECT_CALL(mock_env, RegisterNatives(_, _, _))
+      .WillRepeatedly([&](jclass, const JNINativeMethod* methods,
+                          jint nMethods) {
+        for (jint i = 0; i < nMethods; ++i) {
+          if (strcmp(methods[i].name, "nativeUpdateHybridCompositionState") ==
+              0) {
+            update_hc_state =
+                reinterpret_cast<UpdateHcStateFn>(methods[i].fnPtr);
+          }
+        }
+        return 0;
+      });
+
+  ASSERT_TRUE(PlatformViewAndroid::Register(&mock_env));
+  ASSERT_NE(update_hc_state, nullptr);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+
+  const auto& hc_state = holder->GetPlatformView()->GetHybridCompositionState();
+  EXPECT_FALSE(hc_state->hc_views_alive.load());
+  EXPECT_TRUE(hc_state->synchronize_to_native_view_hierarchy.load());
+  EXPECT_FALSE(hc_state->root_surface_transparent.load());
+
+  update_hc_state(&mock_env, reinterpret_cast<jobject>(kFakeFlutterJniAddress),
+                  reinterpret_cast<jlong>(holder.get()), JNI_TRUE, JNI_FALSE,
+                  JNI_TRUE);
+  EXPECT_TRUE(hc_state->hc_views_alive.load());
+  EXPECT_FALSE(hc_state->synchronize_to_native_view_hierarchy.load());
+  EXPECT_TRUE(hc_state->root_surface_transparent.load());
+}
+
 }  // namespace testing
 }  // namespace flutter
