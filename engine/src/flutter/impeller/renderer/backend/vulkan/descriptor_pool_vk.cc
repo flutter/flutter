@@ -6,6 +6,7 @@
 
 #include <optional>
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 
 namespace impeller {
@@ -69,6 +70,8 @@ absl::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     return descriptor_set;
   }
 
+  TRACE_EVENT0("impeller",
+               "DescriptorPoolVK::AllocateDescriptorSets (Cache Miss)");
   if (pools_.empty()) {
     CreateNewPool(context_vk).IgnoreError();
   }
@@ -101,6 +104,7 @@ absl::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
 }
 
 absl::Status DescriptorPoolVK::CreateNewPool(const ContextVK& context_vk) {
+  TRACE_EVENT0("impeller", "DescriptorPoolVK::CreateNewPool");
   auto new_pool = context_vk.GetDescriptorPoolRecycler()->Get();
   if (!new_pool) {
     return absl::Status(absl::StatusCode::kUnknown,
