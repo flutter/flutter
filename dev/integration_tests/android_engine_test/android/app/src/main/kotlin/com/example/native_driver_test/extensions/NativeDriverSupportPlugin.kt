@@ -250,28 +250,41 @@ class NativeDriverSupportPlugin :
                 }
                 var flutterSurfaceViewCount = 0
                 var surfaceAvailable = false
+                var flutterSurfaceViewAlpha = 1.0
                 var flutterImageViewCount = 0
                 var overlayViewCount = 0
                 var mutatorViewCount = 0
                 var visibleMutatorViewCount = 0
+                val visibleChildKinds = mutableListOf<String>()
                 for (i in 0 until flutterView.childCount) {
                     when (val child = flutterView.getChildAt(i)) {
                         is FlutterSurfaceView -> {
                             flutterSurfaceViewCount++
+                            flutterSurfaceViewAlpha = child.alpha.toDouble()
                             if (child.holder.surface?.isValid == true) {
                                 surfaceAvailable = true
                             }
+                            if (child.visibility == View.VISIBLE && child.alpha > 0f) {
+                                visibleChildKinds.add("FlutterSurfaceView")
+                            }
                         }
                         is PlatformOverlayView -> {
-                            overlayViewCount++
+                            if (child.visibility == View.VISIBLE) {
+                                overlayViewCount++
+                                visibleChildKinds.add("PlatformOverlayView")
+                            }
                         }
                         is FlutterImageView -> {
-                            flutterImageViewCount++
+                            if (child.visibility == View.VISIBLE) {
+                                flutterImageViewCount++
+                                visibleChildKinds.add("FlutterImageView")
+                            }
                         }
                         is FlutterMutatorView -> {
                             mutatorViewCount++
                             if (child.visibility == View.VISIBLE) {
                                 visibleMutatorViewCount++
+                                visibleChildKinds.add("FlutterMutatorView")
                             }
                         }
                     }
@@ -286,11 +299,13 @@ class NativeDriverSupportPlugin :
                         "overlayLayerViewsCount" to overlayLayerViewsCount,
                         "isDisplayingFlutterUi" to (flutterRenderer?.isDisplayingFlutterUi == true),
                         "flutterSurfaceViewCount" to flutterSurfaceViewCount,
+                        "flutterSurfaceViewAlpha" to flutterSurfaceViewAlpha,
                         "surfaceAvailable" to surfaceAvailable,
                         "flutterImageViewCount" to flutterImageViewCount,
                         "overlayViewCount" to overlayViewCount,
                         "mutatorViewCount" to mutatorViewCount,
                         "visibleMutatorViewCount" to visibleMutatorViewCount,
+                        "visibleChildKinds" to visibleChildKinds,
                         "flutterViewWidth" to flutterView.width,
                         "flutterViewHeight" to flutterView.height
                     )
@@ -303,7 +318,9 @@ class NativeDriverSupportPlugin :
     }
 
     @SuppressLint("VisibleForTesting")
-    private fun getOverlayLayerViewsSize(engine: FlutterEngine): Int = engine.platformViewsController.overlayLayerViews.size()
+    private fun getOverlayLayerViewsSize(engine: FlutterEngine): Int =
+        engine.platformViewsController.overlayLayerViews.size() +
+            engine.platformViewsController.hybridOverlayViews.size()
 
     private fun findFlutterView(root: View): FlutterView? {
         if (root is FlutterView) {

@@ -19,6 +19,10 @@ const double _kCompactHeightFraction = 0.65;
 const double _kMediumHeightFraction = 0.85;
 const int _kResizeCycleCount = 4;
 
+/// Number of rapid back-to-back `0 -> 1 -> 0 -> 1` show/hide iterations (`3`)
+/// exercising single-frame Hybrid Composition entry and exit transitions.
+const int _kRapidToggleCycles = 3;
+
 Future<Map<String, Object?>> _requestState(
   FlutterDriver driver, [
   String command = 'get_state',
@@ -86,6 +90,7 @@ void main() {
     expect(initialState['overlayViewCount'], 1);
     expect(initialState['overlayLayerViewsCount'], 1);
     expect(initialState['visibleMutatorViewCount'], greaterThan(0));
+    expect(initialState['flutterSurfaceViewAlpha'], 0.0);
 
     final int compactHeight = (initialHeight * _kCompactHeightFraction).round();
     final int mediumHeight = (initialHeight * _kMediumHeightFraction).round();
@@ -112,7 +117,7 @@ void main() {
           stateAfterResize['overlayLayerViewsCount'],
           1,
           reason:
-              'Destroyed PlatformOverlayView entries must be pruned from overlayLayerViews after resize $i',
+              'Destroyed PlatformOverlayView entries must be pruned from overlay maps after resize $i',
         );
         expect(
           stateAfterResize['overlayViewCount'],
@@ -142,6 +147,114 @@ void main() {
     expect(restoredState['flutterViewHeight'], initialHeight);
     expect(restoredState['overlayLayerViewsCount'], 1);
   }, timeout: Timeout.none);
+
+  test(
+    'multi-overlay interleaved z-order and unused overlay pruning keep views in lockstep',
+    () async {
+      await _requestState(flutterDriver, 'show_second_platform_view');
+      final Map<String, Object?> twoViewState = await _waitForState(
+        flutterDriver,
+        (Map<String, Object?> s) =>
+            s['visibleMutatorViewCount'] == 2 &&
+            s['overlayViewCount'] == 2 &&
+            s['overlayLayerViewsCount'] == 2,
+      );
+      expect(twoViewState['visibleMutatorViewCount'], 2);
+      expect(twoViewState['overlayViewCount'], 2);
+      expect(twoViewState['overlayLayerViewsCount'], 2);
+      expect(
+        twoViewState['visibleChildKinds'],
+        <Object?>[
+          'FlutterImageView',
+          'FlutterMutatorView',
+          'PlatformOverlayView',
+          'FlutterMutatorView',
+          'PlatformOverlayView',
+        ],
+        reason: 'Hybrid Composition views and overlays must interleave in exact composition order',
+      );
+
+      // Hide only the second overlay while keeping both platform views visible:
+      // unused overlay 1 must be pruned immediately (`2 -> 1`).
+      await _requestState(flutterDriver, 'hide_second_overlay_only');
+      final Map<String, Object?> prunedOneOverlayState = await _waitForState(
+        flutterDriver,
+        (Map<String, Object?> s) =>
+            s['visibleMutatorViewCount'] == 2 &&
+            s['overlayViewCount'] == 1 &&
+            s['overlayLayerViewsCount'] == 1,
+      );
+      expect(prunedOneOverlayState['visibleMutatorViewCount'], 2);
+      expect(prunedOneOverlayState['overlayViewCount'], 1);
+      expect(prunedOneOverlayState['overlayLayerViewsCount'], 1);
+      expect(prunedOneOverlayState['visibleChildKinds'], <Object?>[
+        'FlutterImageView',
+        'FlutterMutatorView',
+        'PlatformOverlayView',
+        'FlutterMutatorView',
+      ]);
+
+      // Remove the second platform view to return to the single-PV baseline.
+      await _requestState(flutterDriver, 'hide_second_platform_view');
+      final Map<String, Object?> singleViewState = await _waitForState(
+        flutterDriver,
+        (Map<String, Object?> s) =>
+            s['visibleMutatorViewCount'] == 1 &&
+            s['overlayViewCount'] == 1 &&
+            s['overlayLayerViewsCount'] == 1,
+      );
+      expect(singleViewState['visibleMutatorViewCount'], 1);
+      expect(singleViewState['overlayViewCount'], 1);
+      expect(singleViewState['overlayLayerViewsCount'], 1);
+    },
+    timeout: Timeout.none,
+  );
+
+  test(
+    'rapid per-frame 0 -> 1 -> 0 -> 1 toggling transitions root alpha and background cleanly',
+    () async {
+      for (var i = 0; i < _kRapidToggleCycles; i++) {
+        await _requestState(flutterDriver, 'rapid_hide_platform_view');
+        await _requestState(flutterDriver, 'rapid_show_platform_view');
+      }
+
+      // Verify exit (`1 -> 0`) restores FlutterSurfaceView alpha to 1.0 and removes
+      // hcBackgroundImageView and all overlays after the exit traversal commit.
+      await _requestState(flutterDriver, 'rapid_hide_platform_view');
+      final Map<String, Object?> exitedState = await _waitForState(
+        flutterDriver,
+        (Map<String, Object?> s) =>
+            s['flutterImageViewCount'] == 0 &&
+            s['overlayViewCount'] == 0 &&
+            s['overlayLayerViewsCount'] == 0 &&
+            s['visibleMutatorViewCount'] == 0 &&
+            s['flutterSurfaceViewAlpha'] == 1.0,
+      );
+      expect(exitedState['flutterImageViewCount'], 0);
+      expect(exitedState['overlayViewCount'], 0);
+      expect(exitedState['overlayLayerViewsCount'], 0);
+      expect(exitedState['visibleMutatorViewCount'], 0);
+      expect(exitedState['flutterSurfaceViewAlpha'], 1.0);
+      expect(exitedState['visibleChildKinds'], <Object?>['FlutterSurfaceView']);
+
+      // Re-enter (`0 -> 1`) on a single pumped frame and verify HC background +
+      // overlay return with FlutterSurfaceView hidden at alpha 0.0.
+      await _requestState(flutterDriver, 'rapid_show_platform_view');
+      final Map<String, Object?> reenteredState = await _waitForState(
+        flutterDriver,
+        (Map<String, Object?> s) =>
+            s['flutterImageViewCount'] == 1 &&
+            s['overlayViewCount'] == 1 &&
+            s['visibleMutatorViewCount'] == 1 &&
+            s['flutterSurfaceViewAlpha'] == 0.0,
+      );
+      expect(reenteredState['flutterImageViewCount'], 1);
+      expect(reenteredState['overlayViewCount'], 1);
+      expect(reenteredState['visibleMutatorViewCount'], 1);
+      expect(reenteredState['flutterSurfaceViewAlpha'], 0.0);
+    },
+    timeout: Timeout.none,
+  );
 
   test('reverting FlutterImageView while surface is destroyed stops rendering cleanly', () async {
     await _requestState(flutterDriver, 'show_platform_view');
@@ -186,7 +299,7 @@ void main() {
     );
 
     // Draw another Flutter frame while still backgrounded to ensure no native rendering targets
-    // the closed FlutterImageView.
+    // a closed ImageReader.
     final Map<String, Object?> backgroundFrameState = await _requestState(
       flutterDriver,
       'toggle_overlay_color',

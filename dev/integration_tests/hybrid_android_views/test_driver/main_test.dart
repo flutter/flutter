@@ -5,6 +5,22 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
+/// Maximum duration (`10` seconds) and polling cadence (`50` milliseconds) while
+/// waiting for asynchronous `1.raster` Frame-Packet presentation or 1-traversal
+/// exit cleanup to settle on the Android UI thread after a Dart widget toggle.
+const Duration _kHierarchySettleTimeout = Duration(seconds: 10);
+const Duration _kHierarchyPollInterval = Duration(milliseconds: 50);
+
+Future<String> _waitForHierarchy(FlutterDriver driver, String expected) async {
+  final stopwatch = Stopwatch()..start();
+  String hierarchy = await driver.requestData('hierarchy');
+  while (hierarchy != expected && stopwatch.elapsed < _kHierarchySettleTimeout) {
+    await Future<void>.delayed(_kHierarchyPollInterval);
+    hierarchy = await driver.requestData('hierarchy');
+  }
+  return hierarchy;
+}
+
 Future<void> main() async {
   late FlutterDriver driver;
 
@@ -125,42 +141,29 @@ Future<void> main() async {
     });
 
     test('Uses FlutterImageView when Android view is on the screen', () async {
-      await driver.waitFor(find.byValueKey('PlatformView'));
+      const expectedHcHierarchy =
+          '|-FlutterView\n'
+          '  |-FlutterImageView\n' // Flutter UI (background surface)
+          '  |-ViewGroup\n' // Platform View
+          '    |-ViewGroup\n'
+          '  |-FlutterImageView\n'; // Flutter UI (overlay surface)
+      const expectedSurfaceHierarchy =
+          '|-FlutterView\n'
+          '  |-FlutterSurfaceView\n'; // Just the Flutter UI
 
-      expect(
-        await driver.requestData('hierarchy'),
-        '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n' // Flutter UI (hidden)
-        '  |-FlutterImageView\n' // Flutter UI (background surface)
-        '  |-ViewGroup\n' // Platform View
-        '    |-ViewGroup\n'
-        '  |-FlutterImageView\n', // Flutter UI (overlay surface)
-      );
+      await driver.waitFor(find.byValueKey('PlatformView'));
+      expect(await _waitForHierarchy(driver, expectedHcHierarchy), expectedHcHierarchy);
 
       // Hide platform view.
       final SerializableFinder togglePlatformView = find.byValueKey('TogglePlatformView');
       await driver.tap(togglePlatformView);
       await driver.waitForAbsent(find.byValueKey('PlatformView'));
-
-      expect(
-        await driver.requestData('hierarchy'),
-        '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n', // Just the Flutter UI
-      );
+      expect(await _waitForHierarchy(driver, expectedSurfaceHierarchy), expectedSurfaceHierarchy);
 
       // Show platform view again.
       await driver.tap(togglePlatformView);
       await driver.waitFor(find.byValueKey('PlatformView'));
-
-      expect(
-        await driver.requestData('hierarchy'),
-        '|-FlutterView\n'
-        '  |-FlutterSurfaceView\n' // Flutter UI (hidden)
-        '  |-FlutterImageView\n' // Flutter UI (background surface)
-        '  |-ViewGroup\n' // Platform View
-        '    |-ViewGroup\n'
-        '  |-FlutterImageView\n', // Flutter UI (overlay surface)
-      );
+      expect(await _waitForHierarchy(driver, expectedHcHierarchy), expectedHcHierarchy);
     }, timeout: Timeout.none);
   });
 }

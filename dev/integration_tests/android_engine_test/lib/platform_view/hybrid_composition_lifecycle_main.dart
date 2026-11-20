@@ -17,22 +17,31 @@ import '../src/allow_list_devices.dart';
 
 const MethodChannel _nativeChannel = MethodChannel('native_driver');
 
-/// Number of UI frames (`2`) pumped per state mutation command so both layout
-/// and post-frame platform-view registration complete before returning.
+/// Number of UI frames (`2`) pumped per standard state mutation command so both
+/// layout and post-frame platform-view registration complete before returning.
 const int _kFramesPerStateMutation = 2;
+
+/// Single UI frame (`1`) pumped per step during rapid `0 -> 1 -> 0 -> 1`
+/// frame-by-frame Hybrid Composition entry/exit toggling.
+const int _kSingleFramePump = 1;
 
 /// Maximum duration (`30` seconds) to wait for a single scheduled frame while
 /// pumping forced or normal UI frames.
 const Duration _kFramePumpTimeout = Duration(seconds: 30);
 
-/// Logical width and height (`240` dp) of the centered Hybrid Composition
-/// Android platform view.
-const double _kPlatformViewExtentLogical = 240.0;
+/// Logical width and height (`180` dp) of each Hybrid Composition Android
+/// platform view.
+const double _kPlatformViewExtentLogical = 180.0;
 
-/// Logical width (`140` dp) and height (`80` dp) of the translucent Flutter
-/// overlay box drawn on top of the Hybrid Composition platform view.
-const double _kOverlayWidthLogical = 140.0;
-const double _kOverlayHeightLogical = 80.0;
+/// Logical vertical spacing (`24` dp) separating the primary and secondary
+/// stacked Hybrid Composition platform views so their overlay rects remain
+/// disjoint.
+const double _kPlatformViewSpacingLogical = 24.0;
+
+/// Logical width (`120` dp) and height (`64` dp) of each translucent Flutter
+/// overlay box drawn on top of its corresponding platform view.
+const double _kOverlayWidthLogical = 120.0;
+const double _kOverlayHeightLogical = 64.0;
 
 /// Translucent alpha (`85%`) allowing both the Flutter overlay box and the
 /// underlying Hybrid Composition platform view to remain visible.
@@ -70,36 +79,58 @@ void main() async {
   runApp(_LifecycleTestApp(viewModel: viewModel));
 }
 
+Future<Map<String, Object?>> _queryNativeState() async {
+  return await _nativeChannel.invokeMapMethod<String, Object?>('get_hybrid_composition_state') ??
+      <String, Object?>{};
+}
+
 Future<String> _handleCommand(_LifecycleViewModel viewModel, String? command) async {
   if (command == null || command == 'get_state') {
-    final Map<String, Object?>? state = await _nativeChannel.invokeMapMethod<String, Object?>(
-      'get_hybrid_composition_state',
-    );
-    return json.encode(state ?? <String, Object?>{});
+    return json.encode(await _queryNativeState());
   }
   if (command == 'show_platform_view') {
-    viewModel.setShowPlatformView(true);
+    viewModel.setShowPrimaryPlatformView(true);
     await _pumpFrames(_kFramesPerStateMutation);
-    return json.encode(
-      await _nativeChannel.invokeMapMethod<String, Object?>('get_hybrid_composition_state') ??
-          <String, Object?>{},
-    );
+    return json.encode(await _queryNativeState());
   }
   if (command == 'hide_platform_view') {
-    viewModel.setShowPlatformView(false);
+    viewModel.setShowSecondaryPlatformView(false);
+    viewModel.setShowPrimaryPlatformView(false);
     await _pumpFrames(_kFramesPerStateMutation);
-    return json.encode(
-      await _nativeChannel.invokeMapMethod<String, Object?>('get_hybrid_composition_state') ??
-          <String, Object?>{},
-    );
+    return json.encode(await _queryNativeState());
+  }
+  if (command == 'rapid_show_platform_view') {
+    viewModel.setShowPrimaryPlatformView(true);
+    await _pumpFrames(_kSingleFramePump);
+    return json.encode(await _queryNativeState());
+  }
+  if (command == 'rapid_hide_platform_view') {
+    viewModel.setShowPrimaryPlatformView(false);
+    await _pumpFrames(_kSingleFramePump);
+    return json.encode(await _queryNativeState());
+  }
+  if (command == 'show_second_platform_view') {
+    viewModel.setShowPrimaryPlatformView(true);
+    viewModel.setShowSecondaryPlatformView(true);
+    viewModel.setShowSecondaryOverlay(true);
+    await _pumpFrames(_kFramesPerStateMutation);
+    return json.encode(await _queryNativeState());
+  }
+  if (command == 'hide_second_overlay_only') {
+    viewModel.setShowSecondaryOverlay(false);
+    await _pumpFrames(_kFramesPerStateMutation);
+    return json.encode(await _queryNativeState());
+  }
+  if (command == 'hide_second_platform_view') {
+    viewModel.setShowSecondaryPlatformView(false);
+    viewModel.setShowSecondaryOverlay(true);
+    await _pumpFrames(_kFramesPerStateMutation);
+    return json.encode(await _queryNativeState());
   }
   if (command == 'toggle_overlay_color') {
     viewModel.toggleOverlayColor();
     await _pumpFrames(_kFramesPerStateMutation);
-    return json.encode(
-      await _nativeChannel.invokeMapMethod<String, Object?>('get_hybrid_composition_state') ??
-          <String, Object?>{},
-    );
+    return json.encode(await _queryNativeState());
   }
   const resizePrefix = 'resize_flutter_view:';
   if (command.startsWith(resizePrefix)) {
@@ -127,14 +158,30 @@ Future<void> _pumpFrames(int count) async {
 }
 
 final class _LifecycleViewModel {
-  final ValueNotifier<bool> showPlatformView = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> showPrimaryPlatformView = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> showSecondaryPlatformView = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> showSecondaryOverlay = ValueNotifier<bool>(true);
   final ValueNotifier<bool> alternateOverlayColor = ValueNotifier<bool>(false);
 
-  void setShowPlatformView(bool value) {
-    if (showPlatformView.value == value) {
+  void setShowPrimaryPlatformView(bool value) {
+    if (showPrimaryPlatformView.value == value) {
       return;
     }
-    showPlatformView.value = value;
+    showPrimaryPlatformView.value = value;
+  }
+
+  void setShowSecondaryPlatformView(bool value) {
+    if (showSecondaryPlatformView.value == value) {
+      return;
+    }
+    showSecondaryPlatformView.value = value;
+  }
+
+  void setShowSecondaryOverlay(bool value) {
+    if (showSecondaryOverlay.value == value) {
+      return;
+    }
+    showSecondaryOverlay.value = value;
   }
 
   void toggleOverlayColor() {
@@ -142,7 +189,9 @@ final class _LifecycleViewModel {
   }
 
   void dispose() {
-    showPlatformView.dispose();
+    showPrimaryPlatformView.dispose();
+    showSecondaryPlatformView.dispose();
+    showSecondaryOverlay.dispose();
     alternateOverlayColor.dispose();
   }
 }
@@ -179,57 +228,102 @@ final class _LifecycleScene extends StatelessWidget {
       fit: StackFit.expand,
       children: <Widget>[
         ColoredBox(color: colors.surface),
-        ValueListenableBuilder<bool>(
-          valueListenable: viewModel.showPlatformView,
-          builder: (BuildContext context, bool isVisible, Widget? child) {
-            return Visibility(
-              visible: isVisible,
-              maintainState: true,
-              maintainSize: true,
-              maintainAnimation: true,
-              child: child!,
-            );
-          },
-          child: const _PlatformViewWithOverlay(),
+        Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ValueListenableBuilder<bool>(
+                valueListenable: viewModel.showPrimaryPlatformView,
+                builder: (BuildContext context, bool isVisible, Widget? child) {
+                  return Visibility(
+                    visible: isVisible,
+                    maintainState: true,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    child: child!,
+                  );
+                },
+                child: const _PlatformViewSlot(label: 'HC Overlay 1'),
+              ),
+              const SizedBox(height: _kPlatformViewSpacingLogical),
+              ValueListenableBuilder<bool>(
+                valueListenable: viewModel.showSecondaryPlatformView,
+                builder: (BuildContext context, bool isVisible, Widget? child) {
+                  if (!isVisible) {
+                    return const SizedBox.shrink();
+                  }
+                  return _SecondaryPlatformViewSlot(viewModel: viewModel);
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-final class _PlatformViewWithOverlay extends StatelessWidget {
-  const _PlatformViewWithOverlay();
+final class _SecondaryPlatformViewSlot extends StatelessWidget {
+  const _SecondaryPlatformViewSlot({required this.viewModel});
+
+  final _LifecycleViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: viewModel.showSecondaryOverlay,
+      builder: (BuildContext context, bool showOverlay, Widget? child) {
+        return _PlatformViewSlot(label: 'HC Overlay 2', showOverlay: showOverlay);
+      },
+    );
+  }
+}
+
+final class _PlatformViewSlot extends StatelessWidget {
+  const _PlatformViewSlot({required this.label, this.showOverlay = true});
+
+  final String label;
+  final bool showOverlay;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _kPlatformViewExtentLogical,
+      height: _kPlatformViewExtentLogical,
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          const SizedBox.expand(
+            child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
+          ),
+          if (showOverlay) _OverlayBadge(label: label),
+        ],
+      ),
+    );
+  }
+}
+
+final class _OverlayBadge extends StatelessWidget {
+  const _OverlayBadge({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colors = theme.colorScheme;
-    return Stack(
-      fit: StackFit.expand,
-      children: <Widget>[
-        const Center(
-          child: SizedBox(
-            width: _kPlatformViewExtentLogical,
-            height: _kPlatformViewExtentLogical,
-            child: _HybridCompositionAndroidPlatformView(viewType: 'box_platform_view'),
+    return ColoredBox(
+      color: colors.secondaryContainer,
+      child: SizedBox(
+        width: _kOverlayWidthLogical,
+        height: _kOverlayHeightLogical,
+        child: Center(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(color: colors.onSecondaryContainer),
           ),
         ),
-        Center(
-          child: ColoredBox(
-            color: colors.secondaryContainer,
-            child: SizedBox(
-              width: _kOverlayWidthLogical,
-              height: _kOverlayHeightLogical,
-              child: Center(
-                child: Text(
-                  'HC Overlay',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: colors.onSecondaryContainer),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
