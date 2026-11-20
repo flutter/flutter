@@ -4,15 +4,15 @@
 
 #include "flutter/shell/platform/linux/fl_compositor_opengl_private.h"
 
-#include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
-#include "flutter/common/constants.h"
+#include <cstring>
+
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/fl_gl_fence.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
+#include "flutter/shell/platform/linux/fl_task_runner.h"
 
 // Vertex shader to draw Flutter window contents.
 static const char* vertex_shader_src =

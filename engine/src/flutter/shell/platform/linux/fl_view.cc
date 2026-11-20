@@ -4,37 +4,31 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
-#if !FLUTTER_LINUX_GTK4
-#include <atk/atk.h>
-#endif
-#if FLUTTER_LINUX_GTK4
-#include <gdk/wayland/gdkwayland.h>
-#else
-#include <gdk/gdkwayland.h>
-#endif
-#if !FLUTTER_LINUX_GTK4
-#include <gtk/gtk-a11y.h>
-#endif
-
 #include <cmath>
 #include <cstring>
 
 #include "flutter/common/constants.h"
-#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
-#include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
+#include "flutter/shell/platform/linux/fl_touch_manager.h"
+#include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/fl_window_state_monitor.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
+
 #if FLUTTER_LINUX_GTK4
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
-#endif
-#include "flutter/shell/platform/linux/fl_touch_manager.h"
-#if !FLUTTER_LINUX_GTK4
-#include "flutter/shell/platform/linux/fl_accessible_node.h"
+#else
+#include <atk/atk.h>
+#include <gdk/gdkwayland.h>
+
+#include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
@@ -42,10 +36,6 @@
 #include "flutter/shell/platform/linux/fl_view_renderer_software.h"
 #include "flutter/shell/platform/linux/fl_view_renderer_subsurface.h"
 #endif
-#include "flutter/shell/platform/linux/fl_view_private.h"
-#include "flutter/shell/platform/linux/fl_window_state_monitor.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
 
