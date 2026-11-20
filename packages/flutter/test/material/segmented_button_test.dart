@@ -32,9 +32,9 @@ void main() {
   }
 
   RenderBox getSegmentedButtonBox(WidgetTester tester) {
-    return tester.allRenderObjects.firstWhere(
-      (RenderObject object) => object.runtimeType.toString().startsWith('_RenderSegmentedButton'),
-    ) as RenderBox;
+    return tester.renderObject<RenderBox>(
+      find.byWidgetPredicate((Widget widget) => widget is SegmentedButton),
+    );
   }
 
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
@@ -1720,9 +1720,7 @@ void main() {
     expect(width3, lessThan(width1 * 2));
   });
 
-  testWidgets('Horizontal SegmentedButton intrinsics are unchanged', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Horizontal SegmentedButton intrinsics are unchanged', (WidgetTester tester) async {
     Widget button(int count) {
       return MaterialApp(
         home: Scaffold(
