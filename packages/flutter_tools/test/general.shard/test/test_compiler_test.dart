@@ -139,6 +139,73 @@ name: foo
   );
 
   testUsingContext(
+    'TestCompiler reports an error when the compiler produces no output',
+    () async {
+      residentCompiler.compilerOutput = null;
+      final testCompiler = FakeTestCompiler(
+        debugBuild,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        residentCompiler,
+      );
+
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerFailure(error: 'Unknown Error', mainUri: input),
+      );
+      expect(residentCompiler.didShutdown, true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'TestCompiler reports an error and keeps compiling when a compile step throws',
+    () async {
+      residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+      // A directory where the compiled test should be copied makes the copy
+      // throw, like a full disk does.
+      fileSystem.directory('test/foo.dart.dill').createSync(recursive: true);
+      fileSystem.file('test/bar.dart').createSync(recursive: true);
+      final testCompiler = FakeTestCompiler(
+        debugBuild,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        residentCompiler,
+      );
+
+      final Uri foo = Uri.parse('test/foo.dart');
+      final Uri bar = Uri.parse('test/bar.dart');
+      final Future<TestCompilerResult> fooResult = testCompiler.compile(foo);
+      final Future<TestCompilerResult> barResult = testCompiler.compile(bar);
+
+      expect(
+        await fooResult,
+        isA<TestCompilerFailure>()
+            .having((TestCompilerFailure failure) => failure.mainUri, 'mainUri', foo)
+            .having(
+              (TestCompilerFailure failure) => failure.error,
+              'error',
+              contains('FileSystemException'),
+            ),
+      );
+      expect(residentCompiler.didShutdown, true);
+      expect(await barResult, TestCompilerComplete(outputPath: 'test/bar.dart.dill', mainUri: bar));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'TestCompiler records test timings when provided TestTimeRecorder',
     () async {
       residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
