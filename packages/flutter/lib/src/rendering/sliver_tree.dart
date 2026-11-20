@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'sliver.dart';
 import 'sliver_fixed_extent_list.dart';
 import 'sliver_multi_box_adaptor.dart';
 
@@ -158,6 +159,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
   void _updateAnimationCache() {
     _animationLeadingIndices.clear();
     _activeAnimations.forEach((UniqueKey key, TreeSliverNodesAnimation animation) {
+      assert(animation.fromIndex > 0);
       _animationLeadingIndices[animation.fromIndex - 1] = key;
     });
     // Remove any stored offsets or clip layers that are no longer actively
@@ -312,6 +314,54 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
 
   final Map<UniqueKey, LayerHandle<ClipRectLayer>> _clipHandles =
       <UniqueKey, LayerHandle<ClipRectLayer>>{};
+
+  @override
+  bool hitTestChildren(
+    SliverHitTestResult result, {
+    required double mainAxisPosition,
+    required double crossAxisPosition,
+  }) {
+    RenderBox? child = lastChild;
+    if (child == null) {
+      return false;
+    }
+    final boxResult = BoxHitTestResult.wrap(result);
+    final List<int> animationIndices = _animationLeadingIndices.keys.toList()..sort();
+    // Visit the same segments as paint, in reverse paint order.
+    animationIndices.insert(0, -1);
+    int trailingIndex = indexOf(child);
+    for (final int parentIndex in animationIndices.reversed) {
+      Rect? clip;
+      if (parentIndex >= 0) {
+        // These clip rects deliberately mirror paint(); changes to its clip
+        // coordinates must also be applied here.
+        final double leadingOffset =
+            indexToLayoutOffset(0.0, parentIndex) +
+            itemExtentBuilder(parentIndex, layoutDimensions)!;
+        final double trailingOffset =
+            indexToLayoutOffset(0.0, trailingIndex) +
+            itemExtentBuilder(trailingIndex, layoutDimensions)!;
+        clip = Rect.fromPoints(
+          Offset(0.0, leadingOffset),
+          Offset(constraints.crossAxisExtent, trailingOffset),
+        );
+      }
+      while (child != null && indexOf(child) > parentIndex) {
+        if ((clip == null || clip.contains(Offset(crossAxisPosition, mainAxisPosition))) &&
+            hitTestBoxChild(
+              boxResult,
+              child,
+              mainAxisPosition: mainAxisPosition,
+              crossAxisPosition: crossAxisPosition,
+            )) {
+          return true;
+        }
+        child = childBefore(child);
+      }
+      trailingIndex = parentIndex;
+    }
+    return false;
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
