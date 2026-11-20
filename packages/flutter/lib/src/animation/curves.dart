@@ -1265,7 +1265,8 @@ class _DecelerateCurve extends Curve {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
-    return t * (2 - t);
+    final double invertedT = 1.0 - t;
+    return 1.0 - invertedT * invertedT;
   }
 }
 
@@ -1275,8 +1276,8 @@ double _bounce(double t) {
   if (t < 1.0 / 2.75) {
     return 7.5625 * t * t;
   } else if (t < 2 / 2.75) {
-    final double positionedT = t - 1.5 / 2.75;
-    return 7.5625 * positionedT * positionedT + 0.75;
+    t -= 1.5 / 2.75;
+    return 7.5625 * t * t + 0.75;
   } else if (t < 2.5 / 2.75) {
     t -= 2.25 / 2.75;
     return 7.5625 * t * t + 0.9375;
