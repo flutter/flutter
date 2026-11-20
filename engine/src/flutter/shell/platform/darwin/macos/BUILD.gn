@@ -292,9 +292,9 @@ action("copy_framework_info_plist") {
   outputs = [ "$_flutter_framework_dir/Versions/A/Resources/Info.plist" ]
   args = [
     "--source",
-    rebase_path(sources[0]),
+    rebase_path(sources[0], root_build_dir),
     "--destination",
-    rebase_path(outputs[0]),
+    rebase_path(outputs[0], root_build_dir),
     "--buildmode",
     flutter_runtime_mode,
   ]
@@ -394,11 +394,11 @@ action("flutter_framework") {
   outputs = [ "$root_out_dir/FlutterMacOS.xcframework" ]
   args = [
     "--frameworks",
-    rebase_path(_flutter_framework_dir),
+    rebase_path(_flutter_framework_dir, root_build_dir),
     "--name",
     "FlutterMacOS",
     "--location",
-    rebase_path(root_out_dir),
+    rebase_path(root_out_dir, root_build_dir),
   ]
   deps = [ ":universal_flutter_framework" ]
 }
@@ -439,7 +439,7 @@ generated_file("macos_framework_without_entitlement_config") {
 }
 
 shared_library("_generate_symlinks_and_verify_framework_module") {
-  framework_search_path = rebase_path("$root_out_dir")
+  framework_search_path = rebase_path("$root_out_dir", root_build_dir)
   visibility = [ ":*" ]
   cflags_objc = [ "-F$framework_search_path" ]
 

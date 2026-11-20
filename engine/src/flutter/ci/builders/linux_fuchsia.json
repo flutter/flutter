@@ -28,6 +28,7 @@
                 "arm64",
                 "--runtime-mode",
                 "profile",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/fuchsia_profile_arm64",
@@ -56,6 +57,7 @@
                 "arm64",
                 "--runtime-mode",
                 "release",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/fuchsia_release_arm64",
@@ -85,6 +87,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/fuchsia_debug_arm64",
@@ -128,6 +131,7 @@
                 "x64",
                 "--runtime-mode",
                 "profile",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/fuchsia_profile_x64",
@@ -157,6 +161,7 @@
                 "x64",
                 "--runtime-mode",
                 "release",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/fuchsia_release_x64",
@@ -187,6 +192,7 @@
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/fuchsia_debug_x64",

@@ -18,6 +18,7 @@
                 "--prebuilt-dart-sdk",
                 "--asan",
                 "--dart-debug",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_debug_unopt",
@@ -121,6 +122,7 @@
                 "--prebuilt-dart-sdk",
                 "--target-dir",
                 "ci/host_debug_unopt_impeller_tests",
+                "--siso",
                 "--rbe",
                 "--use-glfw-swiftshader"
             ],
@@ -176,6 +178,7 @@
                 "--target-dir",
                 "ci/android_embedder_debug_unopt",
                 "--unoptimized",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_embedder_debug_unopt",
@@ -203,6 +206,7 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--enable-vulkan-validation-layers",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
@@ -234,6 +238,7 @@
                 "ci/android_debug_unopt",
                 "--android",
                 "--unoptimized",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_debug_unopt",
@@ -289,6 +294,7 @@
                 "--runtime-mode",
                 "release",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_release_licenses",
@@ -322,6 +328,7 @@
                 "--android",
                 "--android-cpu=arm",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_debug_test",
@@ -371,6 +378,7 @@
                 "--no-prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_debug_no_prebuilt_dart_sdk",

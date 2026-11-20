@@ -10,6 +10,7 @@ import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
 import("//build/toolchain/rbe.gni")
+import("//build/toolchain/siso.gni")
 import("//build/toolchain/toolchain.gni")
 
 declare_args() {
@@ -67,7 +68,7 @@ if (use_ccache) {
   cxx_prefix = "ccache "
   objc_prefix = "ccache "
   link_prefix = ""
-} else if (use_rbe) {
+} else if (use_rbe && !use_siso) {
   remote_wrapper =
       rebase_path("//flutter/build/rbe/remote_wrapper.sh", root_build_dir)
   local_wrapper =

@@ -21,6 +21,7 @@
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
                 "--no-lto",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_debug_test",
@@ -67,6 +68,7 @@
                 "--build-embedder-examples",
                 "--thin-lto",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_profile_test",
@@ -130,6 +132,7 @@
                 "--build-embedder-examples",
                 "--thin-lto",
                 "--use-glfw-swiftshader",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/host_release_test",

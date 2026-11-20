@@ -691,6 +691,15 @@ deps = {
     ],
     'dep_type': 'cipd',
   },
+  'third_party/siso': {
+    'packages': [
+      {
+        'package': 'build/siso/${{platform}}',
+        'version': 'git_revision:bf30a944645c5d51b692ae04ee32e078fe9c71d6',
+      }
+    ],
+    'dep_type': 'cipd',
+  },
 
   'engine/src/flutter/prebuilts/emsdk': {
    'url': Var('skia_git') + '/external/github.com/emscripten-core/emsdk.git' + '@' + '2514ec738de72cebbba7f4fdba0cf2fabcb779a5',

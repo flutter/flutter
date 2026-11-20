@@ -447,6 +447,8 @@ def to_gn_args(args):
 
   gn_args.update(setup_git_versions())
 
+  gn_args['use_siso'] = args.siso is True
+
   gn_args.update(setup_rbe(args))
 
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
@@ -1026,6 +1028,8 @@ def parse_args(args):
       help='Do not build the host-side development artifacts.'
   )
 
+  parser.add_argument('--siso', default=None, action='store_true')
+  parser.add_argument('--no-siso', dest='siso', action='store_false')
   parser.add_argument('--rbe', default=None, action='store_true')
   parser.add_argument('--no-rbe', dest='rbe', action='store_false')
   parser.add_argument(

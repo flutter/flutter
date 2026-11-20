@@ -42,6 +42,7 @@
                 "--android-cpu",
                 "arm64",
                 "--no-dart-secure-socket",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_release_arm64_size_exp",
@@ -93,6 +94,7 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--no-dart-secure-socket",
+                "--siso",
                 "--rbe"
             ],
             "name": "ci/android_debug_arm64_size_exp",

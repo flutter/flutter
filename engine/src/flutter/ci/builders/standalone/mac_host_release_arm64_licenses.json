@@ -17,6 +17,7 @@
         "--mac-cpu",
         "arm64",
         "--no-lto",
+        "--siso",
         "--rbe",
         "--xcode-symlinks"
     ],

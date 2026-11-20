@@ -152,7 +152,12 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
   Future<int> run() async {
     final plan = BuildPlan.fromArgResults(argResults!, environment, builds: builds);
 
-    if (!await ensureBuildDir(environment, plan.build, enableRbe: plan.useRbe)) {
+    if (!await ensureBuildDir(
+      environment,
+      plan.build,
+      useSiso: plan.useSiso,
+      enableRbe: plan.useRbe,
+    )) {
       return 1;
     }
 

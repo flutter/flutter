@@ -79,6 +79,7 @@ String demangleConfigName(Environment env, String name) {
 Future<int> runBuild(
   Environment environment,
   Build build, {
+  required bool useSiso,
   required bool enableRbe,
   List<String> extraGnArgs = const <String>[],
   List<Label> targets = const <Label>[],
@@ -144,6 +145,7 @@ Future<bool> ensureBuildDir(
   Environment environment,
   Build build, {
   List<String> extraGnArgs = const <String>[],
+  required bool useSiso,
   required bool enableRbe,
 }) async {
   // TODO(matanlurey): https://github.com/flutter/flutter/issues/148442.
@@ -156,6 +158,7 @@ Future<bool> ensureBuildDir(
     environment,
     build,
     extraGnArgs: extraGnArgs,
+    useSiso: useSiso,
     enableRbe: enableRbe,
   );
   if (built && !buildDir.existsSync()) {
@@ -172,9 +175,10 @@ Future<bool> _runGn(
   Environment environment,
   Build build, {
   List<String> extraGnArgs = const <String>[],
+  required bool useSiso,
   required bool enableRbe,
 }) async {
-  final gnArgs = <String>[if (!enableRbe) '--no-rbe', ...extraGnArgs];
+  final gnArgs = <String>[if (useSiso) '--siso', if (!enableRbe) '--no-rbe', ...extraGnArgs];
 
   final buildRunner = BuildRunner(
     platform: environment.platform,
