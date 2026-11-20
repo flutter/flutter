@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
@@ -289,6 +290,58 @@ static gboolean leave_notify_event_cb(FlView* self,
       self->pointer_manager, gdk_event_get_time(event),
       get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
       rotation, pressure);
+}
+
+static gboolean handle_key_event(GtkWidget* widget, GdkEventKey* key_event) {
+  FlView* self = FL_VIEW(widget);
+  g_autoptr(FlKeyEvent) event = fl_key_event_new_from_gdk_event(
+      gdk_event_copy(reinterpret_cast<GdkEvent*>(key_event)));
+
+  fl_keyboard_manager_handle_event(
+      fl_engine_get_keyboard_manager(self->engine), event, self->cancellable,
+      [](GObject* object, GAsyncResult* result, gpointer user_data) {
+        FlView* self = FL_VIEW(user_data);
+
+        g_autoptr(FlKeyEvent) redispatch_event = nullptr;
+        g_autoptr(GError) error = nullptr;
+        if (!fl_keyboard_manager_handle_event_finish(
+                FL_KEYBOARD_MANAGER(object), result, &redispatch_event,
+                &error)) {
+          if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+            return;
+          }
+
+          g_warning("Failed to handle key event: %s", error->message);
+        }
+
+        if (redispatch_event != nullptr) {
+          if (!fl_text_input_handler_filter_keypress(
+                  fl_engine_get_text_input_handler(self->engine),
+                  redispatch_event)) {
+            fl_keyboard_manager_add_redispatched_event(
+                fl_engine_get_keyboard_manager(self->engine), redispatch_event);
+            gdk_event_put(fl_key_event_get_origin(redispatch_event));
+          }
+        }
+      },
+      self);
+
+  return TRUE;
+}
+
+// Implements GtkWidget::focus_in_event.
+static gboolean fl_view_focus_in_event(GtkWidget* widget,
+                                       GdkEventFocus* event) {
+  FlView* self = FL_VIEW(widget);
+  fl_text_input_handler_set_widget(
+      fl_engine_get_text_input_handler(self->engine), widget);
+  return FALSE;
+}
+
+void fl_view_input_gtk3_class_init(GtkWidgetClass* widget_class) {
+  widget_class->focus_in_event = fl_view_focus_in_event;
+  widget_class->key_press_event = handle_key_event;
+  widget_class->key_release_event = handle_key_event;
 }
 
 void fl_view_input_gtk3_setup(FlView* view) {

@@ -28,7 +28,6 @@
 #include <atk/atk.h>
 #include <gdk/gdkwayland.h>
 
-#include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/fl_view_renderer.h"
@@ -662,68 +661,6 @@ static void fl_view_realize(GtkWidget* widget) {
   gtk_widget_realize(GTK_WIDGET(FL_VIEW(widget)->render_area));
 }
 
-// GTK3 event handling.
-#if !FLUTTER_LINUX_GTK4
-static gboolean handle_key_event(FlView* self, GdkEventKey* key_event) {
-  g_autoptr(FlKeyEvent) event = fl_key_event_new_from_gdk_event(
-      gdk_event_copy(reinterpret_cast<GdkEvent*>(key_event)));
-
-  fl_keyboard_manager_handle_event(
-      fl_engine_get_keyboard_manager(self->engine), event, self->cancellable,
-      [](GObject* object, GAsyncResult* result, gpointer user_data) {
-        FlView* self = FL_VIEW(user_data);
-
-        g_autoptr(FlKeyEvent) redispatch_event = nullptr;
-        g_autoptr(GError) error = nullptr;
-        if (!fl_keyboard_manager_handle_event_finish(
-                FL_KEYBOARD_MANAGER(object), result, &redispatch_event,
-                &error)) {
-          if (g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-            return;
-          }
-
-          g_warning("Failed to handle key event: %s", error->message);
-        }
-
-        if (redispatch_event != nullptr) {
-          if (!fl_text_input_handler_filter_keypress(
-                  fl_engine_get_text_input_handler(self->engine),
-                  redispatch_event)) {
-            fl_keyboard_manager_add_redispatched_event(
-                fl_engine_get_keyboard_manager(self->engine), redispatch_event);
-            gdk_event_put(fl_key_event_get_origin(redispatch_event));
-          }
-        }
-      },
-      self);
-
-  return TRUE;
-}
-
-// Implements GtkWidget::key_press_event.
-static gboolean fl_view_focus_in_event(GtkWidget* widget,
-                                       GdkEventFocus* event) {
-  FlView* self = FL_VIEW(widget);
-  fl_text_input_handler_set_widget(
-      fl_engine_get_text_input_handler(self->engine), widget);
-  return FALSE;
-}
-
-// Implements GtkWidget::key_press_event.
-static gboolean fl_view_key_press_event(GtkWidget* widget,
-                                        GdkEventKey* key_event) {
-  FlView* self = FL_VIEW(widget);
-  return handle_key_event(self, key_event);
-}
-
-// Implements GtkWidget::key_release_event.
-static gboolean fl_view_key_release_event(GtkWidget* widget,
-                                          GdkEventKey* key_event) {
-  FlView* self = FL_VIEW(widget);
-  return handle_key_event(self, key_event);
-}
-#endif
-
 static void fl_view_class_init(FlViewClass* klass) {
   GObjectClass* object_class = G_OBJECT_CLASS(klass);
   object_class->notify = fl_view_notify;
@@ -733,9 +670,7 @@ static void fl_view_class_init(FlViewClass* klass) {
   GtkWidgetClass* widget_class = GTK_WIDGET_CLASS(klass);
   widget_class->realize = fl_view_realize;
 #if !FLUTTER_LINUX_GTK4
-  widget_class->focus_in_event = fl_view_focus_in_event;
-  widget_class->key_press_event = fl_view_key_press_event;
-  widget_class->key_release_event = fl_view_key_release_event;
+  fl_view_input_gtk3_class_init(widget_class);
 #else
 #if GTK_CHECK_VERSION(4, 0, 0)
   gtk_widget_class_set_accessible_role(widget_class, GTK_ACCESSIBLE_ROLE_GROUP);
