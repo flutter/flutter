@@ -4,6 +4,7 @@
 
 #include "flutter/lib/gpu/recording.h"
 
+#include <cstdint>
 #include <future>
 #include <memory>
 #include <string>
@@ -354,6 +355,21 @@ TEST(FlutterGpuAllocationCounterTest, SeesAllocations) {
   // Volatile, or the optimizer may remove these allocations.
   int* volatile single = new int(0);
   int* volatile array = new int[2];
+  delete single;
+  delete[] array;
+  EXPECT_GE(counter.Stop(), 2u);
+}
+
+// Over-aligned types allocate through their own `operator new`.
+TEST(FlutterGpuAllocationCounterTest, SeesOverAlignedAllocations) {
+  struct alignas(64) OverAligned {
+    uint8_t bytes[64];
+  };
+  AllocationCounter counter;
+  OverAligned* volatile single = new OverAligned();
+  OverAligned* volatile array = new OverAligned[2];
+  EXPECT_EQ(reinterpret_cast<uintptr_t>(single) % alignof(OverAligned), 0u);
+  EXPECT_EQ(reinterpret_cast<uintptr_t>(array) % alignof(OverAligned), 0u);
   delete single;
   delete[] array;
   EXPECT_GE(counter.Stop(), 2u);
