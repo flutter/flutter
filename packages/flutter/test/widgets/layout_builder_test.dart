@@ -1057,6 +1057,80 @@ void main() {
       ),
     );
   });
+
+  testWidgets('LayoutBuilder ignores rebuild requests after it is unmounted', (
+    WidgetTester tester,
+  ) async {
+    Widget buildApp({required bool showLayoutBuilder, required bool fail}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: showLayoutBuilder
+            ? LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return _ThrowOnUpdate(fail: fail, child: const _Rebuildable());
+                },
+              )
+            : const SizedBox(),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(showLayoutBuilder: true, fail: false));
+    final StateSetter? setRebuildableState = _rebuildableSetState;
+    expect(setRebuildableState, isNotNull);
+
+    // Updating the child throws. LayoutBuilder falls back to an ErrorWidget and
+    // the previous child subtree is left active, still using LayoutBuilder's
+    // BuildScope.
+    await tester.pumpWidget(buildApp(showLayoutBuilder: true, fail: true));
+    expect(tester.takeException(), isStateError);
+
+    await tester.pumpWidget(buildApp(showLayoutBuilder: false, fail: false));
+    expect(tester.takeException(), isNull);
+
+    // A rebuild request from that subtree during a frame, as an animation
+    // listener would make, reaches the unmounted LayoutBuilder.
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      setRebuildableState!(() {});
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+}
+
+class _ThrowOnUpdate extends SingleChildRenderObjectWidget {
+  const _ThrowOnUpdate({required this.fail, super.child});
+
+  final bool fail;
+
+  @override
+  RenderProxyBox createRenderObject(BuildContext context) => RenderProxyBox();
+
+  @override
+  void updateRenderObject(BuildContext context, RenderProxyBox renderObject) {
+    if (fail) {
+      throw StateError('updateRenderObject failed');
+    }
+  }
+}
+
+StateSetter? _rebuildableSetState;
+
+class _Rebuildable extends StatefulWidget {
+  const _Rebuildable();
+
+  @override
+  State<_Rebuildable> createState() => _RebuildableState();
+}
+
+class _RebuildableState extends State<_Rebuildable> {
+  @override
+  void initState() {
+    super.initState();
+    _rebuildableSetState = setState;
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
 
 class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
