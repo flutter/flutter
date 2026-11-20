@@ -6977,6 +6977,182 @@ void main() {
     expect(outerParagraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 3));
     expect(outerParagraph2.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
   });
+
+  testWidgets(
+    'removing a selectable that holds the start selection edge while the end edge is scrolled out of view does not crash',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/196102.
+      final topController = ScrollController();
+      final bottomController = ScrollController();
+      addTearDown(topController.dispose);
+      addTearDown(bottomController.dispose);
+      var showTopList = true;
+      late StateSetter setState;
+
+      Widget buildList(String prefix, ScrollController controller, int itemCount) {
+        return ListView.builder(
+          controller: controller,
+          itemCount: itemCount,
+          itemExtent: 50,
+          itemBuilder: (BuildContext context, int index) =>
+              _KeepAliveText('$prefix $index', key: Key('$prefix$index')),
+        );
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: emptyTextSelectionControls,
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (showTopList)
+                      SizedBox(height: 150, child: buildList('Top', topController, 20)),
+                    Expanded(child: buildList('Bottom', bottomController, 100)),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // 1. Drag-select from the top list into the bottom list.
+      final TestGesture gesture = await tester.startGesture(
+        tester.getTopLeft(find.byKey(const Key('Top0'))) + const Offset(2, 2),
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      // The top list auto-scrolls to its end before the selection moves on.
+      final Offset bottom3 = tester.getCenter(find.byKey(const Key('Bottom3')));
+      for (var i = 0; i < 60; i++) {
+        await gesture.moveTo(bottom3 + Offset(0, i.isEven ? 0 : 1));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // 2. Scroll the top list back so the start edge is in view, and scroll the
+      // bottom list so the end edge is out of view.
+      topController.jumpTo(0);
+      bottomController.jumpTo(2000);
+      await tester.pumpAndSettle();
+
+      // 3. Remove the top list (which holds the selection start at index 0).
+      setState(() => showTopList = false);
+      await tester.pump();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'removing a selectable that holds the end selection edge while the start edge is scrolled out of view does not crash',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/196102.
+      final topController = ScrollController(initialScrollOffset: 850);
+      final bottomController = ScrollController();
+      addTearDown(topController.dispose);
+      addTearDown(bottomController.dispose);
+      final delegate = StaticSelectionContainerDelegate();
+      addTearDown(delegate.dispose);
+      var showTopList = true;
+      late StateSetter setState;
+
+      Widget buildList(String prefix, ScrollController controller, int itemCount) {
+        return ListView.builder(
+          controller: controller,
+          itemCount: itemCount,
+          itemExtent: 50,
+          itemBuilder: (BuildContext context, int index) =>
+              _KeepAliveText('$prefix $index', key: Key('$prefix$index')),
+        );
+      }
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: emptyTextSelectionControls,
+            child: SelectionContainer(
+              delegate: delegate,
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setter) {
+                  setState = setter;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      if (showTopList)
+                        SizedBox(height: 150, child: buildList('Top', topController, 20)),
+                      Expanded(child: buildList('Bottom', bottomController, 100)),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 1. Drag-select backwards from the bottom list into the top list.
+      final Offset bottom3 = tester.getCenter(find.byKey(const Key('Bottom3')));
+      final TestGesture gesture = await tester.startGesture(bottom3, kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(tester.getTopLeft(find.byKey(const Key('Top19'))) + const Offset(2, 2));
+      await tester.pump();
+      for (var offset = 800.0; offset >= 0.0; offset -= 50.0) {
+        topController.jumpTo(offset);
+        await tester.pump();
+      }
+      await gesture.moveTo(tester.getTopLeft(find.byKey(const Key('Top0'))) + const Offset(2, 2));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // 2. Scroll the bottom list so that the start edge (Bottom 3) is out of
+      // view while the end edge (Top 0) remains in view.
+      bottomController.jumpTo(2000);
+      await tester.pumpAndSettle();
+
+      // 3. Remove the top list (which holds the selection end at index 0) and
+      // adjust the start edge before selection geometry is recomputed.
+      setState(() => showTopList = false);
+      WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        delegate.handleSelectionEdgeUpdate(
+          SelectionEdgeUpdateEvent.forStart(globalPosition: bottom3),
+        );
+      });
+      await tester.pump();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+}
+
+class _KeepAliveText extends StatefulWidget {
+  const _KeepAliveText(this.text, {super.key});
+  final String text;
+
+  @override
+  State<_KeepAliveText> createState() => _KeepAliveTextState();
+}
+
+class _KeepAliveTextState extends State<_KeepAliveText> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Text(widget.text);
+  }
 }
 
 class ColumnSelectionContainerDelegate extends StaticSelectionContainerDelegate {
