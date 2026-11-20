@@ -22,6 +22,7 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.util.TraceSection;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Locale;
@@ -53,6 +54,10 @@ public class HybridImageReader {
 
   // Initial reference count representing ownership by the native ImageLayerPool until retire().
   private static final int INITIAL_OWNER_REF_COUNT = 1;
+
+  // Bounded timeout for awaiting an Image acquire SyncFence on 1.raster so a stalled GPU driver
+  // fence cannot permanently freeze the raster thread and cause an ANR during teardown.
+  @VisibleForTesting static final long SYNC_FENCE_TIMEOUT_MS = 250L;
 
   @NonNull private final Object lock = new Object();
   @NonNull private final ImageReader imageReader;
@@ -154,7 +159,15 @@ public class HybridImageReader {
     try (TraceSection trace = TraceSection.scoped("HybridImageReader.waitOnFence");
         SyncFence fence = image.getFence()) {
       if (fence != null && fence.isValid()) {
-        fence.awaitForever();
+        final boolean signaled = fence.await(Duration.ofMillis(SYNC_FENCE_TIMEOUT_MS));
+        if (!signaled) {
+          Log.w(
+              TAG,
+              String.format(
+                  Locale.US,
+                  "Timed out after %dms waiting on HybridImageReader SyncFence",
+                  SYNC_FENCE_TIMEOUT_MS));
+        }
       }
     } catch (IOException | RuntimeException ex) {
       Log.w(TAG, "Failed waiting on HybridImageReader SyncFence", ex);

@@ -54,11 +54,17 @@ public class FlutterImageView extends View implements RenderSurface {
   // Minimum valid pixel dimension accepted by Android ImageReader.newInstance.
   private static final int MIN_IMAGE_DIMENSION_PX = 1;
 
+  // Maximum consecutive window traversals to re-arm a retiring Image's FrameCommitCallback while
+  // this view skips onDraw (for example, when clipped or scrolled offscreen) before releasing the
+  // buffer so HardwareBuffer slots cannot stay pinned indefinitely.
+  @VisibleForTesting static final int MAX_RETIRING_FRAME_COMMIT_REARMS = 3;
+
   private static final class DisplayedImage {
     @NonNull final Image image;
     @Nullable final Runnable releaseCallback;
     boolean commitCallbackRegistered = false;
     boolean supersededByDraw = false;
+    int commitCallbackRearmCount = 0;
     private boolean released = false;
 
     DisplayedImage(@NonNull Image image, @Nullable Runnable releaseCallback) {
@@ -511,10 +517,14 @@ public class FlutterImageView extends View implements RenderSurface {
             pendingCommitDisplayedImages.remove(retiringAtArm);
             return;
           }
-          if (!retiringAtArm.supersededByDraw && this.retiringDisplayedImage == retiringAtArm) {
+          if (!retiringAtArm.supersededByDraw
+              && this.retiringDisplayedImage == retiringAtArm
+              && retiringAtArm.commitCallbackRearmCount < MAX_RETIRING_FRAME_COMMIT_REARMS) {
             // A window traversal captured FrameCommitCallbacks while this view was clipped out or
-            // skipped onDraw, so its RenderNode may still reference retiringAtArm. Re-arm for the
-            // next hardware-accelerated traversal, or release immediately if no longer active.
+            // skipped onDraw, so its RenderNode may still reference retiringAtArm. Re-arm up to
+            // MAX_RETIRING_FRAME_COMMIT_REARMS traversals before releasing to avoid pinning buffers
+            // indefinitely on offscreen views.
+            ++retiringAtArm.commitCallbackRearmCount;
             retiringAtArm.commitCallbackRegistered = false;
             pendingCommitDisplayedImages.remove(retiringAtArm);
             armRetiringFrameCommitCallback(retiringAtArm);

@@ -168,6 +168,9 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Monotonic generation token guarding deferred View.GONE hybrid overlay removals.
   private long hybridTeardownGeneration = 0;
 
+  // Whether the current Hybrid Composition Frame Packet supplied a replacement background image.
+  private boolean hasCurrentFrameHybridBackground = false;
+
   // Used to acquire the original motion events using the motionEventIds.
   private final MotionEventTracker motionEventTracker;
 
@@ -1550,6 +1553,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     ++hybridTeardownGeneration;
     currentFrameUsedHybridOverlayIds.clear();
     currentFrameUsedPlatformViewIds.clear();
+    hasCurrentFrameHybridBackground = backgroundImage != null;
     if (backgroundImage == null) {
       return;
     }
@@ -1688,8 +1692,15 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       }
     }
 
-    if (flutterView != null && (isExitFrame || removeBackgroundAfterTraversal)) {
-      flutterView.scheduleHybridCompositionBackgroundRemoval();
+    if (flutterView != null) {
+      if (isExitFrame && !hasCurrentFrameHybridBackground) {
+        // Exit frame had no replacement HC background image (either background sync was disabled or
+        // exit background rendering failed while inner_ already received the exit scene). Remove
+        // any stale HC background immediately so pre-exit pixels do not linger for another frame.
+        flutterView.removeHybridCompositionBackgroundNow();
+      } else if (isExitFrame || removeBackgroundAfterTraversal) {
+        flutterView.scheduleHybridCompositionBackgroundRemoval();
+      }
     }
   }
 

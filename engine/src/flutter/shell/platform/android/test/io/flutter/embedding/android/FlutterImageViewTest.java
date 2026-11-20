@@ -376,4 +376,55 @@ public class FlutterImageViewTest {
     assertNull(overlayView.getSurface());
     assertFalse(overlayView.acquireLatestImage());
   }
+
+  @Test
+  @SuppressLint("WrongCall")
+  @Config(sdk = API_LEVELS.API_33)
+  public void setImage_boundsRetiringFrameCommitCallbackRearmsWhenOffscreen() {
+    final Deque<Runnable> pendingCommitCallbacks = new ArrayDeque<>();
+    final android.graphics.Bitmap mockHardwareBitmap = mock(android.graphics.Bitmap.class);
+    when(mockHardwareBitmap.getConfig()).thenReturn(android.graphics.Bitmap.Config.HARDWARE);
+
+    final FlutterImageView view =
+        new FlutterImageView(ctx, FlutterImageView.SurfaceKind.background) {
+          @Override
+          boolean registerFrameCommitCallback(Runnable callback) {
+            pendingCommitCallbacks.addLast(callback);
+            return true;
+          }
+
+          @Override
+          android.graphics.Bitmap wrapHardwareBuffer(HardwareBuffer buffer) {
+            return mockHardwareBitmap;
+          }
+        };
+
+    final Canvas hwCanvas = mock(Canvas.class);
+    when(hwCanvas.isHardwareAccelerated()).thenReturn(true);
+    final AtomicInteger img1Releases = new AtomicInteger(0);
+    final AtomicInteger img2Releases = new AtomicInteger(0);
+
+    // Draw image 1, then replace it with image 2 without drawing image 2 (simulating a clipped or
+    // offscreen view that skips onDraw across unrelated window traversals).
+    view.setImage(createMockApi29Image(), img1Releases::incrementAndGet);
+    view.onDraw(hwCanvas);
+    view.setImage(createMockApi29Image(), img2Releases::incrementAndGet);
+    assertEquals(1, pendingCommitCallbacks.size());
+
+    // First MAX_RETIRING_FRAME_COMMIT_REARMS traversals re-arm and retain image 1.
+    for (int i = 0; i < FlutterImageView.MAX_RETIRING_FRAME_COMMIT_REARMS; i++) {
+      pendingCommitCallbacks.removeFirst().run();
+      assertEquals(0, img1Releases.get());
+      assertEquals(1, pendingCommitCallbacks.size());
+    }
+
+    // The next traversal hits the re-arm bound and releases image 1 instead of spinning forever.
+    pendingCommitCallbacks.removeFirst().run();
+    assertEquals(1, img1Releases.get());
+    assertTrue(pendingCommitCallbacks.isEmpty());
+    assertFalse(view.hasRetiringDisplayedImageForTest());
+
+    view.releaseDisplayedImages();
+    assertEquals(1, img2Releases.get());
+  }
 }

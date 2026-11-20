@@ -2891,6 +2891,33 @@ public class PlatformViewsControllerTest {
     assertEquals(0, controller.getHybridOverlayViews().size());
     assertNull(flutterView.getHybridCompositionBackgroundImageView());
 
+    // Simulate an exit frame whose background Image failed to acquire while hcBackgroundImageView
+    // is visible: onEndHybridFrame must remove hcBackgroundImageView immediately rather than
+    // holding stale pre-exit pixels for another traversal.
+    final Image preExitBgImg = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(preExitBgImg);
+    assertSame(preExitBgImg, hybridReader.acquireLatestImage());
+    controller.onBeginHybridFrame(preExitBgImg, hybridReader);
+    controller.onDisplayHybridPlatformView(
+        platformViewId,
+        0,
+        0,
+        viewSizePx,
+        viewSizePx,
+        viewSizePx,
+        viewSizePx,
+        new FlutterMutatorsStack());
+    controller.onEndHybridFrame(
+        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
+    assertNotNull(flutterView.getHybridCompositionBackgroundImageView());
+
+    org.robolectric.shadows.ShadowLooper.pauseMainLooper();
+    controller.onBeginHybridFrame(null, null);
+    controller.onEndHybridFrame(/* isExitFrame=*/ true, /* removeBackgroundAfterTraversal=*/ false);
+    assertNull(flutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(0, hybridReader.getOpenImageCount());
+    org.robolectric.shadows.ShadowLooper.idleMainLooper();
+
     // Disposing the HC view syncs hcViewsAlive == false.
     syncedStates.clear();
     disposePlatformView(recordingJni, controller, platformViewId);

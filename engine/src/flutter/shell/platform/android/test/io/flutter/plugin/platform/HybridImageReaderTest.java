@@ -23,6 +23,7 @@ import android.media.ImageReader;
 import android.view.Surface;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import java.io.IOException;
+import java.time.Duration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
@@ -125,26 +126,43 @@ public class HybridImageReaderTest {
   public void acquireLatestImageAwaitsValidSyncFenceAndClosesFenceOnApi33Plus() throws IOException {
     final ImageReader mockImageReader = mock(ImageReader.class);
     final Image validFenceImage = mock(Image.class);
+    final Image timedOutFenceImage = mock(Image.class);
     final Image invalidFenceImage = mock(Image.class);
     final SyncFence validFence = mock(SyncFence.class);
+    final SyncFence timedOutFence = mock(SyncFence.class);
     final SyncFence invalidFence = mock(SyncFence.class);
+    final Duration expectedTimeout = Duration.ofMillis(HybridImageReader.SYNC_FENCE_TIMEOUT_MS);
     when(validFence.isValid()).thenReturn(true);
+    when(validFence.await(expectedTimeout)).thenReturn(true);
+    when(timedOutFence.isValid()).thenReturn(true);
+    when(timedOutFence.await(expectedTimeout)).thenReturn(false);
     when(invalidFence.isValid()).thenReturn(false);
     when(validFenceImage.getFence()).thenReturn(validFence);
+    when(timedOutFenceImage.getFence()).thenReturn(timedOutFence);
     when(invalidFenceImage.getFence()).thenReturn(invalidFence);
-    when(mockImageReader.acquireLatestImage()).thenReturn(validFenceImage, invalidFenceImage);
+    when(mockImageReader.acquireLatestImage())
+        .thenReturn(validFenceImage, timedOutFenceImage, invalidFenceImage);
 
     final HybridImageReader hybridReader = new HybridImageReader(mockImageReader);
 
     assertSame(validFenceImage, hybridReader.acquireLatestImage());
-    verify(validFence, times(1)).awaitForever();
+    verify(validFence, times(1)).await(expectedTimeout);
+    verify(validFence, never()).awaitForever();
     verify(validFence, times(1)).close();
 
+    // A timed-out SyncFence logs a warning, closes the fence, and returns without hanging.
+    assertSame(timedOutFenceImage, hybridReader.acquireLatestImage());
+    verify(timedOutFence, times(1)).await(expectedTimeout);
+    verify(timedOutFence, never()).awaitForever();
+    verify(timedOutFence, times(1)).close();
+
     assertSame(invalidFenceImage, hybridReader.acquireLatestImage());
+    verify(invalidFence, never()).await(expectedTimeout);
     verify(invalidFence, never()).awaitForever();
     verify(invalidFence, times(1)).close();
 
     hybridReader.releaseImage(validFenceImage);
+    hybridReader.releaseImage(timedOutFenceImage);
     hybridReader.releaseImage(invalidFenceImage);
     hybridReader.retire();
     assertTrue(hybridReader.isClosed());
