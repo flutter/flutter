@@ -2,7 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build_overrides/build.gni")
 import("//flutter/common/config.gni")
+import("//flutter/common/heapprofd.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("test_font") {
@@ -52,6 +54,8 @@ source_set("dart_plugin_registrant") {
 
 source_set("runtime") {
   sources = [
+    "dart_heap_profiler.cc",
+    "dart_heap_profiler.h",
     "dart_isolate.cc",
     "dart_isolate.h",
     "dart_isolate_group_data.cc",
@@ -119,6 +123,21 @@ source_set("runtime") {
     "//flutter/third_party/tonic",
     "//flutter/txt",
   ]
+
+  if (flutter_enable_heapprofd && is_android) {
+    defines = [ "FLUTTER_ENABLE_HEAPPROFD=1" ]
+    sources += [
+      "${perfetto_root_path}src/tracing/core/shared_memory_abi.cc",
+      "dart_heap_profiler_internal.h",
+    ]
+    deps += [
+      "${perfetto_root_path}gn:gen_buildflags",
+      "${perfetto_root_path}include/perfetto/ext/tracing/core",
+      "${perfetto_root_path}src/base",
+      "${perfetto_root_path}src/protozero",
+      "//third_party/perfetto:libprotozero",
+    ]
+  }
 }
 
 if (enable_unittests) {
@@ -130,6 +149,7 @@ if (enable_unittests) {
     testonly = true
 
     sources = [
+      "dart_heap_profiler_unittests.cc",
       "dart_isolate_unittests.cc",
       "dart_lifecycle_unittests.cc",
       "dart_service_isolate_unittests.cc",
@@ -146,6 +166,7 @@ if (enable_unittests) {
       ":runtime",
       ":runtime_fixtures",
       "$dart_src/runtime/bin:elf_loader",
+      "${perfetto_root_path}src/protozero",
       "//flutter/common",
       "//flutter/fml",
       "//flutter/lib/snapshot",
@@ -155,6 +176,7 @@ if (enable_unittests) {
       "//flutter/testing:dart",
       "//flutter/testing:fixture_test",
       "//flutter/third_party/tonic",
+      "//third_party/perfetto:libprotozero",
     ]
   }
 

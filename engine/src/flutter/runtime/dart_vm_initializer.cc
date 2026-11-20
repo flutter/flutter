@@ -10,6 +10,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/runtime/dart_heap_profiler.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/logging/dart_error.h"
 
@@ -107,10 +108,12 @@ void DartVMInitializer::Initialize(Dart_InitializeParams* params,
 
   fml::TimePoint::SetClockSource(flutter::DartTimelineTicksSinceEpoch);
   tonic::SetUnhandledExceptionReporter(&ReportUnhandledException);
+  flutter::DartHeapProfiler::OnDartVMInitialized();
 }
 
 void DartVMInitializer::Cleanup() {
   FML_DCHECK(gDartInitialized);
+  flutter::DartHeapProfiler::OnDartVMCleanup();
 
   // Dart_RecordTimelineEvent is unsafe during a concurrent call to Dart_Cleanup
   // because Dart_Cleanup will destroy the timeline recorder.  Clear the

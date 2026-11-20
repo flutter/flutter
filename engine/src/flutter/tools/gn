@@ -496,6 +496,12 @@ def to_gn_args(args):
     gn_args['skia_enable_ganesh'] = False
     gn_args['slimpeller'] = True
 
+  if args.enable_heapprofd:
+    if args.target_os != 'android':
+      raise Exception('--enable-heapprofd is only supported when targeting Android.')
+    gn_args['flutter_enable_heapprofd'] = True
+    gn_args['dart_include_sampling_heap_profiler'] = True
+
   if args.target_os == 'android' or args.target_os == 'ios':
     gn_args['skia_gl_standard'] = 'gles'
   else:
@@ -1260,6 +1266,14 @@ def parse_args(args):
       help='Enable optimizations that attempt to reduce binary size of the ' +
       'Flutter engine by assuming only the Impeller rendering engine is supported.' +
       'See [go/slimpeller-dashboard](https://github.com/orgs/flutter/projects/21) for details.'
+  )
+
+  parser.add_argument(
+      '--enable-heapprofd',
+      default=False,
+      action='store_true',
+      help='Enable Dart heap allocation sampling integration with Android ' +
+      'Perfetto (/dev/socket/traced_producer).'
   )
 
   # Sanitizers.
