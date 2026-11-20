@@ -393,6 +393,7 @@ class AssembleCommand extends FlutterCommand {
       processManager: processManager,
       analytics: analytics,
       androidSdkBuilder: () => _androidContext.androidSdk,
+      featureFlags: _featureFlags,
       platform: platform,
       projectFactory: projectFactory,
       visualStudio: VisualStudio(toolContext: toolContext),

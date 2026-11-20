@@ -147,6 +147,7 @@ void main() {
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
     );
   });
@@ -350,6 +351,7 @@ void main() {
         fileSystem.currentDirectory,
         artifacts: modeAssertingArtifacts,
         defines: <String, String>{kBuildMode: BuildMode.release.cliName},
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,

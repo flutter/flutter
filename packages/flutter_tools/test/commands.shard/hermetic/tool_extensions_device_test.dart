@@ -516,7 +516,7 @@ flutter:
               ExtensionDevices(
                 extensionBuildManager: _createTestBuildManager(
                   extensionManager: logsExtensionManager!,
-                  featureFlags: featureFlags,
+                  featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
                   logger: testLogger,
                 ),
                 extensionManager: logsExtensionManager!,

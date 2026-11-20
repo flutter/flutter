@@ -41,6 +41,7 @@ import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
 import 'package:flutter_tools_core/flutter_tools_core.dart' as core show Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
@@ -841,6 +842,7 @@ platforms:
           fileSystem.currentDirectory,
           projectDir: projectDir,
           artifacts: artifacts,
+          featureFlags: TestFeatureFlags(),
           fileSystem: fileSystem,
           logger: logger,
           processManager: FakeProcessManager.any(),
@@ -1579,6 +1581,7 @@ dev_dependencies:
         gradleUtils: null,
         plistParser: FakePlistParser(),
         releaseMode: false,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: '/flutter'),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
       );
@@ -2053,6 +2056,7 @@ environment:
             kExtensionCCompilerAr: '/usr/bin/aarch64-linux-gnu-ar',
             kExtensionCCompilerLd: '/usr/bin/aarch64-linux-gnu-ld',
           },
+          featureFlags: testFeatureFlags,
           fileSystem: fileSystem,
           inputs: <String, String>{},
           logger: logger,
@@ -2118,6 +2122,7 @@ environment:
           kExtensionHookTargetOs: 'windows',
           kExtensionPluginPlatformKey: 'custom_embedder',
         },
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         inputs: <String, String>{},
         logger: logger,
@@ -2255,6 +2260,7 @@ environment:
           kBuildMode: BuildMode.debug.cliName,
           kTargetPlatform: 'linux-x46',
         },
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         inputs: <String, String>{},
         logger: logger,
@@ -2292,6 +2298,7 @@ environment:
             kExtensionCCompilerAr: '/opt/custom-sdk/llvm/bin/llvm-ar',
             kExtensionCCompilerLd: '/opt/custom-sdk/llvm/bin/ld.lld',
           },
+          featureFlags: testFeatureFlags,
           fileSystem: fileSystem,
           inputs: <String, String>{},
           logger: logger,
@@ -2348,6 +2355,7 @@ environment:
           kTargetPlatform: 'custom-arm64',
           kExtensionHookTargetOs: 'linux',
         },
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         inputs: <String, String>{},
         logger: logger,
@@ -2474,6 +2482,7 @@ flutter:
         projectDir,
         artifacts: artifacts,
         defines: capturedEnvironment!.defines,
+        featureFlags: featureFlags,
         fileSystem: fileSystem,
         inputs: <String, String>{},
         logger: logger,

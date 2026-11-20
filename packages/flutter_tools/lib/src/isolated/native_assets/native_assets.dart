@@ -574,6 +574,7 @@ Future<List<File>> installCodeAssets({
     assetTargetLocations,
     codesignIdentity,
     flutterTester,
+    iosDeploymentVersion: targetOS == OS.iOS ? iosDeploymentVersion(environmentDefines) : null,
     logger: logger,
     nativeAssetsFileUri: nativeAssetsFileUri,
     processManager: processManager,
@@ -863,6 +864,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
   String? codesignIdentity,
   bool flutterTester, {
+  AppleVersion? iosDeploymentVersion,
   required Logger logger,
   required Uri nativeAssetsFileUri,
   required ProcessManager processManager,
@@ -917,6 +919,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
           codesignIdentity,
           buildMode,
           fileSystem,
+          logger: logger,
           processUtils: processUtils,
         );
       } else {
@@ -937,6 +940,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         codesignIdentity,
         buildMode,
         fileSystem,
+        deploymentVersion: iosDeploymentVersion,
         logger: logger,
         processUtils: processUtils,
       );
