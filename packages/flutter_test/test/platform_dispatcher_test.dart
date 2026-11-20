@@ -51,6 +51,13 @@ void main() {
     expect(fakePlatformDispatcher.resetInternalStateCalled, isTrue);
   });
 
+  testWidgets('TestPlatformDispatcher forwards the binding hit-test callback', (
+    WidgetTester tester,
+  ) async {
+    expect(PlatformDispatcher.instance.onHitTest, isNotNull);
+    expect(tester.platformDispatcher.onHitTest, same(PlatformDispatcher.instance.onHitTest));
+  });
+
   testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {
     verifyPropertyFaked<Locale>(
       tester: tester,
