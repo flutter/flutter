@@ -31,19 +31,6 @@ FlScrollingManager* fl_scrolling_manager_new(FlEngine* engine,
                                              FlutterViewId view_id);
 
 /**
- * fl_scrolling_manager_set_last_mouse_position:
- * @manager: an #FlScrollingManager.
- * @x: the mouse x-position, in window coordinates.
- * @y: the mouse y-position, in window coordinates.
- *
- * Inform the scrolling manager of the mouse position.
- * This position will be used when sending scroll pointer events.
- */
-void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* manager,
-                                                  gdouble x,
-                                                  gdouble y);
-
-/**
  * fl_scrolling_manager_handle_scroll_event:
  * @manager: an #FlScrollingManager.
  * @event: the scroll event.
@@ -58,54 +45,78 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* manager,
 /**
  * fl_scrolling_manager_handle_rotation_begin:
  * @manager: an #FlScrollingManager.
+ * @x: the gesture x-position, in physical pixels.
+ * @y: the gesture y-position, in physical pixels.
  *
  * Inform the scrolling manager that a rotation gesture has begun.
  */
-void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* manager,
+                                                gdouble x,
+                                                gdouble y);
 
 /**
  * fl_scrolling_manager_handle_rotation_update:
  * @manager: an #FlScrollingManager.
+ * @x: the gesture x-position, in physical pixels.
+ * @y: the gesture y-position, in physical pixels.
  * @rotation: the rotation angle, in radians.
  *
  * Inform the scrolling manager that a rotation gesture has updated.
  */
 void fl_scrolling_manager_handle_rotation_update(FlScrollingManager* manager,
+                                                 gdouble x,
+                                                 gdouble y,
                                                  gdouble rotation);
 
 /**
  * fl_scrolling_manager_handle_rotation_end:
  * @manager: an #FlScrollingManager.
+ * @x: the gesture x-position, in physical pixels.
+ * @y: the gesture y-position, in physical pixels.
  *
  * Inform the scrolling manager that a rotation gesture has ended.
  */
-void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* manager,
+                                              gdouble x,
+                                              gdouble y);
 
 /**
  * fl_scrolling_manager_handle_zoom_begin:
  * @manager: an #FlScrollingManager.
+ * @x: the gesture x-position, in physical pixels.
+ * @y: the gesture y-position, in physical pixels.
  *
  * Inform the scrolling manager that a zoom gesture has begun.
  */
-void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* manager,
+                                            gdouble x,
+                                            gdouble y);
 
 /**
  * fl_scrolling_manager_handle_zoom_update:
  * @manager: an #FlScrollingManager.
+ * @x: the gesture x-position, in physical pixels.
+ * @y: the gesture y-position, in physical pixels.
  * @scale: the zoom scale.
  *
  * Inform the scrolling manager that a zoom gesture has updated.
  */
 void fl_scrolling_manager_handle_zoom_update(FlScrollingManager* manager,
+                                             gdouble x,
+                                             gdouble y,
                                              gdouble scale);
 
 /**
  * fl_scrolling_manager_handle_zoom_end:
  * @manager: an #FlScrollingManager.
+ * @x: the gesture x-position, in physical pixels.
+ * @y: the gesture y-position, in physical pixels.
  *
  * Inform the scrolling manager that a zoom gesture has ended.
  */
-void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* manager);
+void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* manager,
+                                          gdouble x,
+                                          gdouble y);
 
 G_END_DECLS
 
