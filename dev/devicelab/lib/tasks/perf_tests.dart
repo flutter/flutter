@@ -32,6 +32,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool badScroll = false,
   bool? enableImpeller,
   bool forceOpenGLES = false,
+  bool enableFixedPerformanceMode = true,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -40,6 +41,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
+    enableFixedPerformanceMode: enableFixedPerformanceMode,
   ).run;
 }
 
@@ -1252,6 +1254,7 @@ class PerfTest {
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
     this.enableVulkanGPUTracing = true,
+    this.enableFixedPerformanceMode = true,
     this.createPlatforms = const <String>[],
   });
 
@@ -1276,6 +1279,7 @@ class PerfTest {
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
     this.enableVulkanGPUTracing = false,
+    this.enableFixedPerformanceMode = true,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
        timelineFileName = null;
@@ -1340,6 +1344,14 @@ class PerfTest {
   /// Whether to enable Vulkan GPU tracing in AndroidManifest.xml when running with Impeller.
   final bool enableVulkanGPUTracing;
 
+  /// Whether to enable Android's fixed-performance mode while running the test.
+  ///
+  /// Defaults to `true` to pin CPU clocks and reduce benchmark noise. When set
+  /// to `false`, fixed-performance mode is explicitly disabled before running
+  /// the benchmark so that performance is measured under the normal OS CPU
+  /// governor.
+  final bool enableFixedPerformanceMode;
+
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
 
@@ -1382,7 +1394,6 @@ class PerfTest {
       late Device selectedDevice;
       selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
-      await selectedDevice.toggleFixedPerformanceMode(true);
 
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
@@ -1435,6 +1446,7 @@ class PerfTest {
       final bool shouldTraceVulkanGPU =
           isAndroidDevice && isImpellerEnabled && enableVulkanGPUTracing && !isGlesTracingForced;
 
+      await selectedDevice.toggleFixedPerformanceMode(enableFixedPerformanceMode);
       try {
         if (shouldTraceVulkanGPU) {
           changedManifest = true;
@@ -1497,7 +1509,9 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
-        await selectedDevice.toggleFixedPerformanceMode(false);
+        if (enableFixedPerformanceMode) {
+          await selectedDevice.toggleFixedPerformanceMode(false);
+        }
       }
 
       final data = json.decode(
