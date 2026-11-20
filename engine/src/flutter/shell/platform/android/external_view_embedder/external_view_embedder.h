@@ -135,6 +135,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       const std::vector<ImageLayer*>& unacquired_submitted_layers,
       bool destroyed_any_layer);
 
+  void ScheduleRetryFrameIfAllowed();
+
   void Reset();
 
   bool FrameHasPlatformLayers() const;
@@ -159,6 +161,7 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   bool frame_began_ = false;
   bool hc_background_synchronized_ = false;
   bool last_submit_succeeded_ = true;
+  int consecutive_abort_retries_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalViewEmbedder);
 };

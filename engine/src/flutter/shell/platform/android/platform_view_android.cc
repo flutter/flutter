@@ -327,8 +327,9 @@ void PlatformViewAndroid::HandlePlatformMessage(
 // |PlatformView|
 void PlatformViewAndroid::OnPreEngineRestart() const {
   hc_state_->hc_epoch.fetch_add(1, std::memory_order_acq_rel);
-  if (external_view_embedder_wrapper_) {
-    external_view_embedder_wrapper_->TeardownClassicHybridComposition();
+  if (std::shared_ptr<AndroidExternalViewEmbedderWrapper> wrapper =
+          external_view_embedder_wrapper_.lock()) {
+    wrapper->TeardownClassicHybridComposition();
   }
   jni_facade_->FlutterViewOnPreEngineRestart();
 }
@@ -483,16 +484,16 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
-  external_view_embedder_wrapper_ =
-      std::make_shared<AndroidExternalViewEmbedderWrapper>(
-          android_meets_hcpp_criteria_, *android_context_, jni_facade_,
-          surface_factory_, task_runners_, hc_state_,
-          deferred_root_surface_slot_, [weak_platform_view = GetWeakPtr()]() {
-            if (weak_platform_view) {
-              weak_platform_view->ScheduleFrame();
-            }
-          });
-  return external_view_embedder_wrapper_;
+  auto wrapper = std::make_shared<AndroidExternalViewEmbedderWrapper>(
+      android_meets_hcpp_criteria_, *android_context_, jni_facade_,
+      surface_factory_, task_runners_, hc_state_, deferred_root_surface_slot_,
+      [weak_platform_view = GetWeakPtr()]() {
+        if (weak_platform_view) {
+          weak_platform_view->ScheduleFrame();
+        }
+      });
+  external_view_embedder_wrapper_ = wrapper;
+  return wrapper;
 }
 
 // |PlatformView|

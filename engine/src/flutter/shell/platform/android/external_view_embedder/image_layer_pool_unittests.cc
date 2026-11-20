@@ -68,8 +68,7 @@ std::unique_ptr<AndroidSurfaceMock> MakeValidAndroidSurfaceMock(
     int expected_gpu_surfaces = 1) {
   auto android_surface = std::make_unique<AndroidSurfaceMock>();
   EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*android_surface, SetNativeWindow(_, _)).WillOnce(Return(true));
   EXPECT_CALL(*android_surface, CreateGPUSurface(_))
       .Times(expected_gpu_surfaces)
       .WillRepeatedly([] {
@@ -145,10 +144,10 @@ TEST(ImageLayerPoolTest,
     EXPECT_EQ(bg1, bg2);
     EXPECT_FALSE(destroyed);
 
-    ImageLayer* ov0 = pool.GetOrCreateOverlayLayer(
-        0, size, nullptr, jni_mock, surface_factory, &destroyed);
-    ImageLayer* ov1 = pool.GetOrCreateOverlayLayer(
-        1, size, nullptr, jni_mock, surface_factory, &destroyed);
+    ImageLayer* ov0 = pool.GetOrCreateOverlayLayer(0, size, nullptr, jni_mock,
+                                                   surface_factory, &destroyed);
+    ImageLayer* ov1 = pool.GetOrCreateOverlayLayer(1, size, nullptr, jni_mock,
+                                                   surface_factory, &destroyed);
     ASSERT_NE(ov0, nullptr);
     ASSERT_NE(ov1, nullptr);
     EXPECT_EQ(ov0->id, 0);
@@ -189,11 +188,11 @@ TEST(ImageLayerPoolTest,
 
   std::vector<intptr_t> events;
   EXPECT_CALL(*jni_mock, ReleaseHybridImage(_, _))
-      .WillOnce([&](const HybridJavaGlobalRef& reader,
-                    HybridJavaGlobalRef image) {
-        EXPECT_EQ(reader.token(), kReaderTokenBase);
-        events.push_back(image.token());
-      });
+      .WillOnce(
+          [&](const HybridJavaGlobalRef& reader, HybridJavaGlobalRef image) {
+            EXPECT_EQ(reader.token(), kReaderTokenBase);
+            events.push_back(image.token());
+          });
   EXPECT_CALL(*jni_mock, RetireHybridImageReader(_))
       .WillRepeatedly([&](HybridJavaGlobalRef reader) {
         events.push_back(reader.token());
@@ -262,10 +261,10 @@ TEST(ImageLayerPoolTest, RetiresReaderImmediatelyWhenSetNativeWindowFails) {
       });
 
   ImageLayerPool pool;
-  EXPECT_EQ(
-      pool.GetOrCreateBackgroundLayer(DlISize(kInitialWidthPx, kInitialHeightPx),
-                                      nullptr, jni_mock, surface_factory),
-      nullptr);
+  EXPECT_EQ(pool.GetOrCreateBackgroundLayer(
+                DlISize(kInitialWidthPx, kInitialHeightPx), nullptr, jni_mock,
+                surface_factory),
+            nullptr);
   EXPECT_FALSE(pool.HasLayers());
 }
 

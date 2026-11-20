@@ -50,6 +50,11 @@ class DeferredRootSurface final : public Surface {
   // Composition entry while keeping post-deferral full-repaint tracking armed).
   std::unique_ptr<SurfaceFrame> AcquireInnerFrame(const DlISize& size);
 
+  // Returns true if |frame| is the active deferred frame created by this
+  // |DeferredRootSurface| (recording into a |DisplayList| without having
+  // acquired |inner_|), and false if |frame| is a direct |inner_| frame.
+  bool IsDeferredFrame(const SurfaceFrame& frame) const;
+
   // Builds and caches the recorded |DisplayList| for |frame| so callers that
   // render the root |DisplayList| to multiple targets (such as a Hybrid
   // Composition exit frame rendering to both the background |ImageReader| and

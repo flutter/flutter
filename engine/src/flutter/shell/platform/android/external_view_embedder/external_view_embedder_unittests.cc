@@ -178,6 +178,14 @@ constexpr int kSingleOverlayFrameLayerCount = 2;
 constexpr int kBackgroundOnlyPacketImageCount = 1;
 // Expected FlutterViewBeginHybridFrame calls during teardown entry+exit reuse.
 constexpr int kTeardownReuseFrameCount = 2;
+// Number of back-to-back unsynchronized HC frames submitted while main is
+// occupied so the second packet overwrites the first in FramePacketMailbox.
+constexpr int kOverwritingUnsyncedFrameCount = 2;
+// Number of consecutive failed submits issued to verify
+// AbortFrameAndScheduleRetry caps ScheduleFrame retries at
+// AndroidExternalViewEmbedder's limit (3).
+constexpr int kMaxExpectedAbortRetries = 3;
+constexpr int kExcessiveFailedSubmitCount = 5;
 
 std::unique_ptr<SurfaceFrame> MakeRecordingSurfaceFrame(
     const DlISize& size,
@@ -827,6 +835,7 @@ TEST(AndroidExternalViewEmbedder,
   h.hc_state->hc_views_alive.store(true, std::memory_order_release);
   h.hc_state->synchronize_to_native_view_hierarchy.store(
       false, std::memory_order_release);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, true)).Times(1);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     h.embedder->BeginFrame(nullptr, nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
@@ -1293,6 +1302,209 @@ TEST(
   }
   EXPECT_FALSE(timed_out);
   h.FlushPlatform();
+}
+
+TEST(AndroidExternalViewEmbedder,
+     OverwrittenUnsyncedPacketRetainsRemoveBackgroundAfterTraversal) {
+  FramePacketTestHarness h;
+  const DlISize frame_size(kDefaultFrameExtentPx, kDefaultFrameExtentPx);
+
+  // Enter HC with background synchronization enabled so hcBackgroundImageView
+  // is active on main.
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, false)).Times(1);
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+    auto root_frame = h.deferred_root->AcquireFrame(frame_size);
+    MutatorsStack stack;
+    h.embedder->PrerollCompositeEmbeddedView(
+        kPrimaryViewId,
+        std::make_unique<EmbeddedViewParams>(
+            DlMatrix(),
+            DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
+    h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                  std::move(root_frame));
+    h.embedder->EndFrame(false, nullptr);
+  });
+  h.FlushPlatform();
+
+  // Hold main while disabling synchronize_to_native_view_hierarchy and
+  // publishing two consecutive frames so Packet 2 overwrites Packet 1.
+  fml::AutoResetWaitableEvent platform_occupied;
+  fml::AutoResetWaitableEvent release_platform;
+  h.task_runners.GetPlatformTaskRunner()->PostTask([&]() {
+    platform_occupied.Signal();
+    release_platform.Wait();
+  });
+  platform_occupied.Wait();
+
+  h.hc_state->synchronize_to_native_view_hierarchy.store(
+      false, std::memory_order_release);
+  EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, true)).Times(1);
+
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    for (int i = 0; i < kOverwritingUnsyncedFrameCount; ++i) {
+      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+      auto root_frame = h.deferred_root->AcquireFrame(frame_size);
+      MutatorsStack stack;
+      h.embedder->PrerollCompositeEmbeddedView(
+          kPrimaryViewId,
+          std::make_unique<EmbeddedViewParams>(
+              DlMatrix(),
+              DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical),
+              stack));
+      h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                    std::move(root_frame));
+      h.embedder->EndFrame(false, nullptr);
+    }
+  });
+
+  release_platform.Signal();
+  h.FlushPlatform();
+}
+
+TEST(AndroidExternalViewEmbedder,
+     AliveFlipBetweenAcquireAndSubmitFlattensDirectFrameAndSchedulesHcEntry) {
+  FramePacketTestHarness h;
+  const DlISize frame_size(kDefaultFrameExtentPx, kDefaultFrameExtentPx);
+  h.hc_state->hc_views_alive.store(false, std::memory_order_release);
+  h.hc_state->root_surface_transparent.store(true, std::memory_order_release);
+
+  EXPECT_CALL(*h.jni_mock, FlutterViewBeginHybridFrame(_, _)).Times(0);
+
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+    // T1: hc_views_alive is false, so DeferredRootSurface acquires a direct
+    // inner_ SurfaceFrame.
+    auto direct_root_frame = h.deferred_root->AcquireFrame(frame_size);
+
+    // T2->T3: main creates an HC view and flips hc_views_alive -> true before
+    // SubmitFlutterView runs.
+    h.hc_state->hc_views_alive.store(true, std::memory_order_release);
+
+    MutatorsStack stack;
+    h.embedder->PrerollCompositeEmbeddedView(
+        kPrimaryViewId,
+        std::make_unique<EmbeddedViewParams>(
+            DlMatrix(),
+            DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
+    h.embedder->CompositeEmbeddedView(kPrimaryViewId)
+        ->DrawRect(DlRect::MakeXYWH(
+                       static_cast<DlScalar>(kMidTestOverlayRectOffsetLogical),
+                       static_cast<DlScalar>(kMidTestOverlayRectOffsetLogical),
+                       static_cast<DlScalar>(kMidTestOverlayRectExtentLogical),
+                       static_cast<DlScalar>(kMidTestOverlayRectExtentLogical)),
+                   DlPaint());
+    h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                  std::move(direct_root_frame));
+    EXPECT_TRUE(h.embedder->DidLastSubmitSucceed());
+    EXPECT_FALSE(h.hc_state->hc_session_active.load());
+    h.embedder->EndFrame(false, nullptr);
+  });
+  h.FlushPlatform();
+
+  // Direct inner_ frame submitted once without double-acquiring inner_ or
+  // allocating HC readers, and a follow-up frame was scheduled to enter HC.
+  EXPECT_EQ(h.root_inner_submits.load(), 1);
+  EXPECT_EQ(h.created_readers.load(), 0);
+  EXPECT_EQ(h.schedule_frame_calls_on_platform.load(), 1);
+}
+
+TEST(
+    AndroidExternalViewEmbedder,
+    SubmitFailurePropagatesDidLastSubmitSucceedAndCapsConsecutiveAbortRetries) {
+  FramePacketTestHarness h;
+  const DlISize frame_size(kDefaultFrameExtentPx, kDefaultFrameExtentPx);
+
+  // Part 1: Direct frame->Submit() failure propagates to
+  // DidLastSubmitSucceed().
+  h.hc_state->hc_views_alive.store(false, std::memory_order_release);
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+    auto failing_frame =
+        MakeRecordingSurfaceFrame(frame_size, []() { return false; });
+    h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                  std::move(failing_frame));
+    EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
+    h.embedder->EndFrame(false, nullptr);
+  });
+
+  // Part 2: Repeated HC layer allocation failures cap ScheduleFrame retries
+  // instead of spinning indefinitely, and reset after a successful frame.
+  h.hc_state->hc_views_alive.store(true, std::memory_order_release);
+  ON_CALL(*h.jni_mock, AcquireLatestHybridImage(_))
+      .WillByDefault(
+          [](const HybridJavaGlobalRef&) { return HybridJavaGlobalRef(); });
+
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    for (int i = 0; i < kExcessiveFailedSubmitCount; ++i) {
+      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+      auto root_frame = h.deferred_root->AcquireFrame(frame_size);
+      MutatorsStack stack;
+      h.embedder->PrerollCompositeEmbeddedView(
+          kPrimaryViewId,
+          std::make_unique<EmbeddedViewParams>(
+              DlMatrix(),
+              DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical),
+              stack));
+      h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                    std::move(root_frame));
+      EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
+      h.embedder->EndFrame(false, nullptr);
+    }
+  });
+  h.FlushPlatform();
+  EXPECT_EQ(h.schedule_frame_calls_on_platform.load(),
+            kMaxExpectedAbortRetries);
+
+  // A subsequent successful submit resets the consecutive-abort counter so a
+  // future failure can schedule a retry again.
+  ON_CALL(*h.jni_mock, AcquireLatestHybridImage(_))
+      .WillByDefault([&](const HybridJavaGlobalRef&) {
+        return HybridJavaGlobalRef::ForTest(h.next_image_token.fetch_add(1));
+      });
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+    auto root_frame = h.deferred_root->AcquireFrame(frame_size);
+    MutatorsStack stack;
+    h.embedder->PrerollCompositeEmbeddedView(
+        kPrimaryViewId,
+        std::make_unique<EmbeddedViewParams>(
+            DlMatrix(),
+            DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
+    h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                  std::move(root_frame));
+    EXPECT_TRUE(h.embedder->DidLastSubmitSucceed());
+    h.embedder->EndFrame(false, nullptr);
+  });
+  h.FlushPlatform();
+
+  ON_CALL(*h.jni_mock, AcquireLatestHybridImage(_))
+      .WillByDefault(
+          [](const HybridJavaGlobalRef&) { return HybridJavaGlobalRef(); });
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+    auto root_frame = h.deferred_root->AcquireFrame(frame_size);
+    MutatorsStack stack;
+    h.embedder->PrerollCompositeEmbeddedView(
+        kPrimaryViewId,
+        std::make_unique<EmbeddedViewParams>(
+            DlMatrix(),
+            DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
+    h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                  std::move(root_frame));
+    EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
+    h.embedder->EndFrame(false, nullptr);
+  });
+  h.FlushPlatform();
+  EXPECT_EQ(h.schedule_frame_calls_on_platform.load(),
+            kMaxExpectedAbortRetries + 1);
 }
 
 TEST(AndroidExternalViewEmbedder2,

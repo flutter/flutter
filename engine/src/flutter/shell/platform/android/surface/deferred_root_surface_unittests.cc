@@ -654,5 +654,39 @@ TEST(DeferredRootSurfaceTest,
   EXPECT_FALSE(inner_submit_called);
 }
 
+TEST(DeferredRootSurfaceTest,
+     IsDeferredFrameDistinguishesDeferredAndDirectFrames) {
+  auto inner = std::make_unique<NiceMock<MockInnerSurface>>();
+  MockInnerSurface* raw_inner = inner.get();
+  EXPECT_CALL(*raw_inner, IsValid()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*raw_inner, MakeRenderContextCurrent()).WillRepeatedly([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*raw_inner, AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx)))
+      .WillOnce([](const DlISize& size) {
+        return std::make_unique<SurfaceFrame>(
+            nullptr, SurfaceFrame::FramebufferInfo{.supports_readback = true},
+            [](const SurfaceFrame&, DlCanvas*) { return true; },
+            [](const SurfaceFrame&) { return true; }, size,
+            /*context_result=*/nullptr, /*display_list_fallback=*/true);
+      });
+
+  bool should_defer = false;
+  auto deferred = std::make_unique<DeferredRootSurface>(
+      std::move(inner), [&should_defer] { return should_defer; });
+
+  auto direct_frame =
+      deferred->AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx));
+  ASSERT_NE(direct_frame, nullptr);
+  EXPECT_FALSE(deferred->IsDeferredFrame(*direct_frame));
+  EXPECT_TRUE(direct_frame->Submit());
+
+  should_defer = true;
+  auto deferred_frame =
+      deferred->AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx));
+  ASSERT_NE(deferred_frame, nullptr);
+  EXPECT_TRUE(deferred->IsDeferredFrame(*deferred_frame));
+}
+
 }  // namespace testing
 }  // namespace flutter

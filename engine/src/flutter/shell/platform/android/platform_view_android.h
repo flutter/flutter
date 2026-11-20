@@ -168,7 +168,9 @@ class PlatformViewAndroid final : public PlatformView {
       std::make_shared<HybridCompositionState>();
   const std::shared_ptr<DeferredRootSurfaceSlot> deferred_root_surface_slot_ =
       std::make_shared<DeferredRootSurfaceSlot>();
-  std::shared_ptr<AndroidExternalViewEmbedderWrapper>
+  // Weak reference so Rasterizer remains the sole strong owner of the embedder
+  // and destroys it on the raster thread during Shell teardown.
+  std::weak_ptr<AndroidExternalViewEmbedderWrapper>
       external_view_embedder_wrapper_;
   bool android_meets_hcpp_criteria_ = false;
 

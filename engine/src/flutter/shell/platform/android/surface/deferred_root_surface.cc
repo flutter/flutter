@@ -58,6 +58,14 @@ std::unique_ptr<SurfaceFrame> DeferredRootSurface::AcquireInnerFrame(
   return frame;
 }
 
+bool DeferredRootSurface::IsDeferredFrame(const SurfaceFrame& frame) const {
+  if (std::shared_ptr<DeferredFrameState> state =
+          active_deferred_frame_state_.lock()) {
+    return state->frame == &frame;
+  }
+  return false;
+}
+
 sk_sp<DisplayList> DeferredRootSurface::GetOrBuildDisplayList(
     SurfaceFrame& frame) {
   if (std::shared_ptr<DeferredFrameState> state =

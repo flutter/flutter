@@ -666,6 +666,56 @@ TEST_F(DefaultPipelineWarmUpTest,
   PostTaskSync(platform_thread.GetTaskRunner(),
                [&]() { platform_view.reset(); });
 }
+
+TEST_F(DefaultPipelineWarmUpTest,
+       ExternalViewEmbedderWeakReferenceExpiresWhenCallerDropsOwnership) {
+  auto jni_mock = std::make_shared<NiceMock<MockPlatformViewAndroidJNI>>();
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  auto android_context =
+      std::make_shared<FakeAndroidContext>(CreateImpellerContextWithoutGPU(
+          impeller::Context::BackendType::kOpenGLES, pipeline_library));
+
+  NiceMock<MockPlatformViewDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, OnPlatformViewGetSettings())
+      .WillByDefault(ReturnRef(settings));
+
+  fml::Thread platform_thread("platform");
+  TaskRunners task_runners(
+      "WeakEmbedderOwnerTest", platform_thread.GetTaskRunner(),
+      GetRasterTaskRunner(), platform_thread.GetTaskRunner(),
+      platform_thread.GetTaskRunner());
+
+  std::unique_ptr<PlatformViewAndroid> platform_view;
+  std::shared_ptr<ExternalViewEmbedder> embedder;
+  PostTaskSync(platform_thread.GetTaskRunner(), [&]() {
+    platform_view = std::make_unique<PlatformViewAndroid>(
+        delegate, task_runners, jni_mock, android_context);
+    embedder = static_cast<PlatformView*>(platform_view.get())
+                   ->CreateExternalViewEmbedder();
+  });
+  std::weak_ptr<ExternalViewEmbedder> weak_embedder = embedder;
+  ASSERT_FALSE(weak_embedder.expired());
+
+  // Initialize on the raster thread, then drop the caller's (Rasterizer's)
+  // sole strong reference on the raster thread while PlatformViewAndroid is
+  // still alive on the platform thread.
+  PostTaskSync(GetRasterTaskRunner(), [&]() {
+    EXPECT_FALSE(embedder->SupportsDynamicThreadMerging());
+    embedder.reset();
+  });
+  EXPECT_TRUE(weak_embedder.expired());
+
+  // Subsequent OnPreEngineRestart skips teardown of the already-destroyed
+  // embedder and still notifies JNI cleanly.
+  EXPECT_CALL(*jni_mock, FlutterViewTeardownHybridComposition()).Times(0);
+  EXPECT_CALL(*jni_mock, FlutterViewOnPreEngineRestart()).Times(1);
+  PostTaskSync(platform_thread.GetTaskRunner(), [&]() {
+    static_cast<const PlatformView*>(platform_view.get())->OnPreEngineRestart();
+    platform_view.reset();
+  });
+}
 #endif  // !SLIMPELLER
 
 }  // namespace testing

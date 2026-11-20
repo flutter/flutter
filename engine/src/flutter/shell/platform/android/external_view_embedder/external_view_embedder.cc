@@ -9,6 +9,7 @@
 
 #include "flow/view_slicer.h"
 #include "flutter/common/constants.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
@@ -19,6 +20,9 @@ namespace {
 
 constexpr const char* kPacketTraceCategory = "flutter";
 constexpr const char* kPacketTraceFlowName = "HybridCompositionFramePacket";
+// Maximum consecutive ScheduleFrame retries after aborted Hybrid Composition
+// submits so persistent OOM or GPU loss cannot spin indefinitely every VSync.
+constexpr int kMaxConsecutiveAbortRetries = 3;
 
 // Converts a size in logical pixels to the whole number of physical pixels the
 // platform view should be laid out at.
@@ -191,6 +195,17 @@ void AndroidExternalViewEmbedder::AbortFrameAndScheduleRetry(
   }
   RestoreRootRenderContextIfNeeded(destroyed_any_layer);
   last_submit_succeeded_ = false;
+  ScheduleRetryFrameIfAllowed();
+}
+
+void AndroidExternalViewEmbedder::ScheduleRetryFrameIfAllowed() {
+  if (consecutive_abort_retries_ >= kMaxConsecutiveAbortRetries) {
+    FML_LOG(ERROR) << "Reached Hybrid Composition retry limit ("
+                   << kMaxConsecutiveAbortRetries
+                   << " consecutive failures); skipping ScheduleFrame retry.";
+    return;
+  }
+  ++consecutive_abort_retries_;
   if (const fml::RefPtr<fml::TaskRunner>& platform_runner =
           task_runners_.GetPlatformTaskRunner()) {
     platform_runner->PostTask([schedule_frame = schedule_frame_callback_]() {
@@ -309,23 +324,39 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
       hc_state_ &&
       hc_state_->root_surface_transparent.load(std::memory_order_acquire);
   const bool has_pv = FrameHasPlatformLayers();
+  const DeferredRootSurface* deferred_root = GetDeferredRootSurface();
+  const bool is_direct_non_deferred_frame =
+      deferred_root != nullptr && !deferred_root->IsDeferredFrame(*frame);
 
   // Cases 1 & 2: No active HC session and no PlatformViewLayer in this frame.
   // Case 1 (alive=0, active=0, has_pv=0): direct root frame submit.
   // Case 2 (alive=1, active=0, has_pv=0): deferred DisplayList replays onto
   // inner_ inside frame->Submit().
   if (!active && !has_pv) {
-    frame->Submit();
+    last_submit_succeeded_ = frame->Submit();
+    if (last_submit_succeeded_) {
+      consecutive_abort_retries_ = 0;
+    }
     return;
   }
 
   // Case 8 (alive=0, active=0, has_pv=1): PlatformView was created and disposed
-  // on main before its first HC frame ever rasterized. Flatten slices into the
-  // root canvas and submit directly to inner_.
-  if (!alive && !active && has_pv) {
+  // on main before its first HC frame ever rasterized.
+  // Also handles the T1-to-T3 race where `hc_views_alive` flipped false -> true
+  // between `DeferredRootSurface::AcquireFrame` (T1, which acquired `inner_`
+  // directly) and `SubmitFlutterView` (T3): finish submitting the already-
+  // acquired direct `inner_` frame without double-acquiring `inner_` or calling
+  // `BuildDisplayList()` on a direct Skia/Software surface, and schedule a
+  // follow-up frame when `alive` is now true so HC activates on the next VSync.
+  if (!active && has_pv && (!alive || is_direct_non_deferred_frame)) {
     FlattenSlicesIntoCanvas(frame->Canvas(),
                             frame->submit_info().buffer_damage);
-    frame->Submit();
+    last_submit_succeeded_ = frame->Submit();
+    if (alive) {
+      ScheduleRetryFrameIfAllowed();
+    } else if (last_submit_succeeded_) {
+      consecutive_abort_retries_ = 0;
+    }
     return;
   }
 
@@ -369,7 +400,16 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
 
     // 2. Sequentially replay the cached DisplayList onto inner_ via
     // frame->Submit() so the root surface holds the exact exit scene.
-    frame->Submit();
+    const bool inner_submitted = frame->Submit();
+    last_submit_succeeded_ = inner_submitted;
+    if (inner_submitted) {
+      consecutive_abort_retries_ = 0;
+    } else {
+      FML_LOG(WARNING)
+          << "Failed submitting root inner surface during Hybrid Composition "
+             "exit; scheduling retry.";
+      ScheduleRetryFrameIfAllowed();
+    }
 
     // 3. Acquire the exit background Image (if bg_layer was submitted).
     AcquiredHybridImage exit_bg_image;
@@ -380,6 +420,11 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
         exit_bg_image = AcquiredHybridImage(
             submitted_exit_bg_layer->reader_handle, std::move(raw_image));
       }
+    }
+    if (hc_background_synchronized_ && !exit_bg_image) {
+      FML_LOG(WARNING)
+          << "Failed rendering or acquiring Hybrid Composition exit background "
+             "image; Java will remove hcBackgroundImageView immediately.";
     }
 
     // 4. Release all GPU surfaces in ImageLayerPool and restore the root GL
@@ -432,7 +477,10 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
           if (DlCanvas* clear_canvas = clear_frame->Canvas()) {
             clear_canvas->Clear(DlColor::kTransparent());
           }
-          clear_frame->Submit();
+          if (!clear_frame->Submit()) {
+            FML_LOG(WARNING) << "Failed submitting transparent root clear "
+                                "frame on Hybrid Composition entry.";
+          }
         }
       }
     }
@@ -471,13 +519,19 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
     unacquired_submitted_layers.push_back(bg_layer);
   } else {
     // `synchronizeToNativeViewHierarchy` is disabled: submit the background
-    // scene directly to `inner_` and schedule removal of any previously active
-    // `hcBackgroundImageView`.
-    frame->Submit();
+    // scene directly to `inner_` and request removal of any active
+    // `hcBackgroundImageView` on every unsynchronized packet (level-triggered
+    // so overwriting a prior packet in `FramePacketMailbox` cannot lose the
+    // removal request).
+    if (!frame->Submit()) {
+      AbortFrameAndScheduleRetry(unacquired_submitted_layers,
+                                 destroyed_any_layer);
+      return;
+    }
     if (hc_background_synchronized_) {
       destroyed_any_layer |= image_layer_pool_.DestroyBackgroundLayer();
-      remove_background_after_traversal = true;
     }
+    remove_background_after_traversal = true;
   }
 
   std::vector<PendingViewEntry> pending_entries;
@@ -605,6 +659,7 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
   RestoreRootRenderContextIfNeeded(destroyed_any_layer);
 
   hc_background_synchronized_ = sync_bg_live;
+  consecutive_abort_retries_ = 0;
   if (hc_state_) {
     hc_state_->hc_session_active.store(true, std::memory_order_release);
   }
@@ -728,6 +783,7 @@ void AndroidExternalViewEmbedder::Teardown() {
     const bool destroyed = image_layer_pool_.DestroyAllLayers();
     RestoreRootRenderContextIfNeeded(destroyed);
     hc_background_synchronized_ = false;
+    consecutive_abort_retries_ = 0;
     if (hc_state_) {
       hc_state_->hc_session_active.store(false, std::memory_order_release);
     }

@@ -86,9 +86,8 @@ std::unique_ptr<ImageLayer> ImageLayerPool::CreateLayer(
   auto reader_handle = std::make_shared<HybridReaderHandle>(
       std::move(metadata->reader), jni_facade);
   if (!metadata->window) {
-    FML_LOG(ERROR)
-        << "ImageLayerPool received null AndroidNativeWindow for id " << id
-        << ".";
+    FML_LOG(ERROR) << "ImageLayerPool received null AndroidNativeWindow for id "
+                   << id << ".";
     return nullptr;
   }
 
