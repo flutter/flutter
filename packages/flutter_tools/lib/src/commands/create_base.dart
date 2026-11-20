@@ -48,6 +48,9 @@ const _kDefaultPlatformArgumentHelp =
 /// Common behavior for `flutter create` and `flutter widget-preview start` commands.
 mixin CreateBase on FlutterCommand {
   @protected
+  TemplatePathProvider get templatePathProvider;
+
+  @protected
   TemplateRenderer get templateRenderer => const MustacheTemplateRenderer();
 
   /// Pattern for a Windows file system drive (e.g. "D:").
@@ -355,6 +358,7 @@ mixin CreateBase on FlutterCommand {
     bool withSwiftPackageManager = false,
     bool withFfiPluginHook = false,
     bool withFfiPackage = false,
+    bool withPackage = false,
     bool withEmptyMain = false,
     bool ios = false,
     bool android = false,
@@ -409,7 +413,9 @@ mixin CreateBase on FlutterCommand {
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
       'withSwiftPackageManager': withSwiftPackageManager,
-      'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
+      'withPluginHook':
+          withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook || withPackage,
+      'withPackage': withPackage,
       'withEmptyMain': withEmptyMain,
       'withJava': androidLanguage == 'java',
       'androidLanguage': androidLanguage,
@@ -456,6 +462,7 @@ mixin CreateBase on FlutterCommand {
       templateName,
       fileSystem: fs,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       templateManifest: _templateManifest,
     );
@@ -486,6 +493,7 @@ mixin CreateBase on FlutterCommand {
       directory,
       fileSystem: fs,
       logger: logger,
+      templatePathProvider: templatePathProvider,
       templateRenderer: templateRenderer,
       templateManifest: _templateManifest,
     );

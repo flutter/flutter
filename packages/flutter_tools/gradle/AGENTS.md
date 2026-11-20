@@ -21,6 +21,9 @@
 ## 3. Lazy Configuration & Execution Avoidance
 - **Never Eagerly Resolve at Configuration Time**: Never call .get() or .getOrNull() during plugin application or task configuration (afterEvaluate, task creation). Wire inputs and outputs lazily using Property, Provider, ListProperty, MapProperty, DirectoryProperty, and RegularFileProperty.
 - **Wire Providers Directly**: Pass providers directly into task inputs (e.g., `task.inputDir.set(extension.path)`).
+- **Variant Sources Can Be Task Outputs**: Lists such as `variant.sources.manifests.all` can contain files that other tasks write (`addGeneratedManifestFile`, `addGeneratedSourceDirectory`). Never `flatMap`, `get()`, or read files from them in a provider. Pass them to a task input and read them in the task action.
+- **Read Task Outputs Through the Task**: Consume a task's output file with `task.flatMap { it.outputFile }.map { ... }`, which carries the task dependency. `providers.fileContents(...)` drops it.
+- **Test With a Task-Produced Entry**: When a unit test mocks one of these lists, include an entry produced by a real task in a `ProjectBuilder` project and assert the consumer's `taskDependencies`, as `FlutterPluginTest` does for generated manifests.
 
 ## 4. Strict Configuration Cache Compatibility
 - **No Project State in Tasks**: Tasks must never hold references to `Project`, `SourceSet`, `Configuration`, or other non-serializable Gradle model objects in fields or action closures.
