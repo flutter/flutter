@@ -2238,6 +2238,56 @@ void main() {
     expect(groupValue, 1);
   });
 
+  testWidgets('Sliding segmented control left and right arrow keys follow the text direction', (
+    WidgetTester tester,
+  ) async {
+    var selected = 1;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return CupertinoSlidingSegmentedControl<int>(
+                  children: const <int, Widget>{0: Text('A'), 1: Text('B'), 2: Text('C')},
+                  groupValue: selected,
+                  onValueChanged: (int? value) {
+                    setState(() {
+                      selected = value!;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // In right-to-left text, A is on the right of B and C on its left.
+    expect(tester.getCenter(find.text('A')).dx, greaterThan(tester.getCenter(find.text('B')).dx));
+    expect(tester.getCenter(find.text('C')).dx, lessThan(tester.getCenter(find.text('B')).dx));
+
+    Future<void> expectFocusAndSelection(String label, int value) async {
+      await tester.pumpAndSettle();
+      expect(selected, value);
+      expect(
+        FocusManager.instance.primaryFocus!.rect.center.dx,
+        moreOrLessEquals(tester.getCenter(find.text(label)).dx, epsilon: 1.0),
+      );
+    }
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await expectFocusAndSelection('B', 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await expectFocusAndSelection('A', 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await expectFocusAndSelection('B', 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await expectFocusAndSelection('C', 2);
+  });
+
   testWidgets('Sliding segmented control skips disabled segments with keyboard', (
     WidgetTester tester,
   ) async {
