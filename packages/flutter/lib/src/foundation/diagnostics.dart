@@ -2428,16 +2428,9 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 
   @override
   DiagnosticLevel get level {
-    if (value != null) {
-      if (ifPresent == null) {
-        return DiagnosticLevel.hidden;
-      }
-    } else {
-      if (ifNull == null) {
-        return DiagnosticLevel.hidden;
-      }
+    if ((value != null && ifPresent == null) || (value == null && ifNull == null)) {
+      return DiagnosticLevel.hidden;
     }
-
     return super.level;
   }
 
