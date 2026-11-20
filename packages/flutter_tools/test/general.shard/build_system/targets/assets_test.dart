@@ -591,6 +591,70 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('exits tool if shader compilation fails', () async {
+    final artifacts = Artifacts.test();
+    final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+    fileSystem.file(impellercPath).createSync(recursive: true);
+
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+name: example
+flutter:
+  shaders:
+    - shaders/test.frag
+''');
+
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+
+    final String shaderOutputPath = fileSystem.path.join(
+      'build',
+      'flutter_assets',
+      'shaders',
+      'test.frag',
+    );
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <Pattern>[RegExp(r'.*impellerc.*'), ...List<Pattern>.filled(11, RegExp(r'.*'))],
+        exitCode: 1,
+        stderr: 'Could not write file to "$shaderOutputPath"',
+      ),
+      FakeCommand(
+        command: <Pattern>[RegExp(r'.*impellerc.*'), ...List<Pattern>.filled(10, RegExp(r'.*'))],
+        exitCode: 1,
+        stderr: 'Could not write file to "$shaderOutputPath"',
+      ),
+    ]);
+
+    final environment = Environment.test(
+      fileSystem.currentDirectory,
+      processManager: processManager,
+      artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: FakePlatform(),
+      defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+    );
+
+    final File shaderFile = environment.projectDir.childDirectory('shaders').childFile('test.frag')
+      ..createSync(recursive: true);
+
+    await expectToolExitLater(
+      const CopyAssets().build(environment),
+      allOf(
+        contains('Shader compilation of "${shaderFile.path}" to'),
+        contains('The shader compiler (impellerc) failed to write the output file.'),
+        contains(
+          'Ensure the build/ directory is writable and concurrent flutter test runs are not racing on it.',
+        ),
+        contains('Could not write file to "$shaderOutputPath"'),
+      ),
+    );
+    expect(logger.errorText, contains('Could not write file to "$shaderOutputPath"'));
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext(
     'asset transformation, per each asset, uses unique paths for temporary files',
     () async {
