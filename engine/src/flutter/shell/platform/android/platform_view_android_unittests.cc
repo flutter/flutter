@@ -634,9 +634,7 @@ TEST_F(DefaultPipelineWarmUpTest,
   });
 
   // Initialize the inner Classic HC embedder on the raster thread.
-  PostTaskSync(GetRasterTaskRunner(), [&]() {
-    EXPECT_FALSE(embedder->SupportsDynamicThreadMerging());
-  });
+  PostTaskSync(GetRasterTaskRunner(), [&]() { embedder->CancelFrame(); });
 
   std::vector<std::string> call_order;
   EXPECT_CALL(*jni_mock, FlutterViewTeardownHybridComposition())
@@ -702,7 +700,7 @@ TEST_F(DefaultPipelineWarmUpTest,
   // sole strong reference on the raster thread while PlatformViewAndroid is
   // still alive on the platform thread.
   PostTaskSync(GetRasterTaskRunner(), [&]() {
-    EXPECT_FALSE(embedder->SupportsDynamicThreadMerging());
+    embedder->CancelFrame();
     embedder.reset();
   });
   EXPECT_TRUE(weak_embedder.expired());

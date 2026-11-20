@@ -677,13 +677,6 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
   PublishPacket(std::move(packet));
 }
 
-// |ExternalViewEmbedder|
-PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  (void)raster_thread_merger;
-  return PostPrerollResult::kSuccess;
-}
-
 bool AndroidExternalViewEmbedder::FrameHasPlatformLayers() const {
   return !composition_order_.empty();
 }
@@ -699,11 +692,8 @@ void AndroidExternalViewEmbedder::Reset() {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void AndroidExternalViewEmbedder::BeginFrame(GrDirectContext* context) {
   (void)context;
-  (void)raster_thread_merger;
   // Snapshot `hc_epoch` at the start of `BeginFrame` BEFORE reading
   // `hc_views_alive` so any concurrent `OnPreEngineRestart`, `NotifyDestroyed`,
   // or `Teardown` increments `hc_epoch` past `current_frame_hc_epoch_`.
@@ -750,17 +740,8 @@ void AndroidExternalViewEmbedder::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedder::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  (void)should_resubmit_frame;
-  (void)raster_thread_merger;
+void AndroidExternalViewEmbedder::EndFrame() {
   frame_began_ = false;
-}
-
-// |ExternalViewEmbedder|
-bool AndroidExternalViewEmbedder::SupportsDynamicThreadMerging() {
-  return false;
 }
 
 // |ExternalViewEmbedder|

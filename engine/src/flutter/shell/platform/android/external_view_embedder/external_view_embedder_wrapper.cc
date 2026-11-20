@@ -104,31 +104,18 @@ void AndroidExternalViewEmbedderWrapper::SubmitFlutterView(
   }
 }
 
-// |ExternalViewEmbedder|
-PostPrerollResult AndroidExternalViewEmbedderWrapper::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  EnsureInitialized();
-  if (hcpp_view_embedder_) {
-    return hcpp_view_embedder_->PostPrerollAction(raster_thread_merger);
-  } else {
-    return non_hcpp_view_embedder_->PostPrerollAction(raster_thread_merger);
-  }
-}
-
 DlCanvas* AndroidExternalViewEmbedderWrapper::GetRootCanvas() {
   // On Android, the root surface is created from the on-screen render target.
   return nullptr;
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedderWrapper::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void AndroidExternalViewEmbedderWrapper::BeginFrame(GrDirectContext* context) {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->BeginFrame(context, raster_thread_merger);
+    hcpp_view_embedder_->BeginFrame(context);
   } else {
-    non_hcpp_view_embedder_->BeginFrame(context, raster_thread_merger);
+    non_hcpp_view_embedder_->BeginFrame(context);
   }
 }
 
@@ -155,25 +142,12 @@ void AndroidExternalViewEmbedderWrapper::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedderWrapper::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void AndroidExternalViewEmbedderWrapper::EndFrame() {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->EndFrame(should_resubmit_frame, raster_thread_merger);
+    hcpp_view_embedder_->EndFrame();
   } else {
-    non_hcpp_view_embedder_->EndFrame(should_resubmit_frame,
-                                      raster_thread_merger);
-  }
-}
-
-// |ExternalViewEmbedder|
-bool AndroidExternalViewEmbedderWrapper::SupportsDynamicThreadMerging() {
-  EnsureInitialized();
-  if (hcpp_view_embedder_) {
-    return hcpp_view_embedder_->SupportsDynamicThreadMerging();
-  } else {
-    return non_hcpp_view_embedder_->SupportsDynamicThreadMerging();
+    non_hcpp_view_embedder_->EndFrame();
   }
 }
 

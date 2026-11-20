@@ -15,36 +15,11 @@
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/stopwatch.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/raster_thread_merger.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 
 namespace flutter {
 
 class LayerTree;
-
-// The result status of CompositorContext::ScopedFrame::Raster.
-enum class RasterStatus {
-  // Frame has been successfully rasterized.
-  kSuccess,
-  // Frame has been submited, but must be submitted again. This is only used
-  // on Android when switching the background surface to FlutterImageView.
-  //
-  // On Android, the first frame doesn't make the image available
-  // to the ImageReader right away. The second frame does.
-  //
-  // TODO(egarciad): https://github.com/flutter/flutter/issues/65652
-  kResubmit,
-  // Frame has be dropped and a new frame with the same layer tree must be
-  // attempted.
-  //
-  // This is currently used to wait for the thread merger to merge
-  // the raster and platform threads.
-  //
-  // Since the thread merger may be disabled, the system will proceed
-  // with separate threads for rasterization and platform tasks,
-  // potentially leading to different performance characteristics.
-  kSkipAndRetry,
-};
 
 class FrameDamage {
  public:
@@ -113,7 +88,6 @@ class CompositorContext {
                 const DlMatrix& root_surface_transformation,
                 bool instrumentation_enabled,
                 bool surface_supports_readback,
-                fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
                 impeller::AiksContext* aiks_context);
 
     virtual ~ScopedFrame();
@@ -134,9 +108,9 @@ class CompositorContext {
 
     impeller::AiksContext* aiks_context() const { return aiks_context_; }
 
-    virtual RasterStatus Raster(LayerTree& layer_tree,
-                                bool ignore_raster_cache,
-                                FrameDamage* frame_damage);
+    virtual void Raster(LayerTree& layer_tree,
+                        bool ignore_raster_cache,
+                        FrameDamage* frame_damage);
 
    private:
     void PaintLayerTreeSkia(flutter::LayerTree& layer_tree,
@@ -156,7 +130,6 @@ class CompositorContext {
     const DlMatrix root_surface_transformation_;
     const bool instrumentation_enabled_;
     const bool surface_supports_readback_;
-    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
@@ -174,7 +147,6 @@ class CompositorContext {
       const DlMatrix& root_surface_transformation,
       bool instrumentation_enabled,
       bool surface_supports_readback,
-      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger,
       impeller::AiksContext* aiks_context);
 
   void OnGrContextCreated();

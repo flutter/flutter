@@ -417,10 +417,9 @@ TEST(AndroidShellHolder, SupersededNotifyCreatedAndNotifyChangedAreSkipped) {
   holder->GetPlatformView()->NotifyDestroyed();
 }
 
-// With hybrid composition the raster task queue can be merged onto the platform
-// thread while surface setup or an earlier resize is still queued. A resize
-// requested on the platform thread at that point must queue behind them rather
-// than run inline.
+// When the raster task queue is merged onto the platform thread while surface
+// setup or an earlier resize is still queued, a resize requested on the
+// platform thread must queue behind them rather than run inline.
 TEST(AndroidShellHolder, NotifyChangedStaysBehindQueuedSetupWhenThreadsMerge) {
   // Declared before `holder` so they outlive the raster thread on every exit
   // path.

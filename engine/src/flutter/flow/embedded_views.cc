@@ -52,10 +52,6 @@ void ExternalViewEmbedder::SubmitFlutterView(
   frame->Submit();
 }
 
-bool ExternalViewEmbedder::SupportsDynamicThreadMerging() {
-  return false;
-}
-
 void ExternalViewEmbedder::Teardown() {}
 
 void MutatorsStack::PushClipRect(const DlRect& rect) {

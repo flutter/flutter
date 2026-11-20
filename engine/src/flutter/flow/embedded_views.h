@@ -16,7 +16,6 @@
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/memory/ref_counted.h"
-#include "flutter/fml/raster_thread_merger.h"
 
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/aiks_context.h"  // nogncheck
@@ -354,18 +353,6 @@ class EmbeddedViewParams {
   DlRect final_bounding_rect_;
 };
 
-enum class PostPrerollResult {
-  // Frame has successfully rasterized.
-  kSuccess,
-  // Frame is submitted twice. This is currently only used when
-  // thread configuration change occurs.
-  kResubmitFrame,
-  // Frame is dropped and a new frame with the same layer tree is
-  // attempted. This is currently only used when thread configuration
-  // change occurs.
-  kSkipAndRetryFrame
-};
-
 // The |EmbedderViewSlice| represents the details of recording all of
 // the layer tree rendering operations that appear before, after
 // and between the embedded views.
@@ -457,25 +444,11 @@ class ExternalViewEmbedder {
   virtual void CancelFrame() = 0;
 
   // Indicates the beginning of a frame.
-  //
-  // The `raster_thread_merger` will be null if |SupportsDynamicThreadMerging|
-  // returns false.
-  virtual void BeginFrame(
-      GrDirectContext* context,
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) = 0;
+  virtual void BeginFrame(GrDirectContext* context) = 0;
 
   virtual void PrerollCompositeEmbeddedView(
       int64_t platform_view_id,
       std::unique_ptr<EmbeddedViewParams> params) = 0;
-
-  // This needs to get called after |Preroll| finishes on the layer tree.
-  // Returns kResubmitFrame if the frame needs to be processed again, this is
-  // after it does any requisite tasks needed to bring itself to a valid state.
-  // Returns kSuccess if the view embedder is already in a valid state.
-  virtual PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-    return PostPrerollResult::kSuccess;
-  }
 
   // Must be called on the UI thread.
   virtual DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) = 0;
@@ -498,27 +471,8 @@ class ExternalViewEmbedder {
       const std::shared_ptr<impeller::AiksContext>& aiks_context,
       std::unique_ptr<SurfaceFrame> frame);
 
-  // This method provides the embedder a way to do additional tasks after
-  // |SubmitFrame|. For example, merge task runners if `should_resubmit_frame`
-  // is true.
-  //
-  // For example on the iOS embedder, threads are merged in this call.
-  // A new frame on the platform thread starts immediately. If the GPU thread
-  // still has some task running, there could be two frames being rendered
-  // concurrently, which causes undefined behaviors.
-  //
-  // The `raster_thread_merger` will be null if |SupportsDynamicThreadMerging|
-  // returns false.
-  virtual void EndFrame(
-      bool should_resubmit_frame,
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
-
-  // Whether the embedder should support dynamic thread merging.
-  //
-  // Returning `true` results a |RasterThreadMerger| instance to be created.
-  // * See also |BegineFrame| and |EndFrame| for getting the
-  // |RasterThreadMerger| instance.
-  virtual bool SupportsDynamicThreadMerging();
+  // Indicates the end of a frame.
+  virtual void EndFrame() {}
 
   // Whether the embedder allows the rasterizer to compute and submit partial
   // frame/buffer damage when `SubmitFlutterView` is active.

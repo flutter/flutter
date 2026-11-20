@@ -7,18 +7,8 @@
 namespace flutter {
 
 ShellTestExternalViewEmbedder::ShellTestExternalViewEmbedder(
-    const EndFrameCallBack& end_frame_call_back,
-    PostPrerollResult post_preroll_result,
-    bool support_thread_merging)
-    : end_frame_call_back_(end_frame_call_back),
-      post_preroll_result_(post_preroll_result),
-      support_thread_merging_(support_thread_merging),
-      submitted_frame_count_(0) {}
-
-void ShellTestExternalViewEmbedder::UpdatePostPrerollResult(
-    PostPrerollResult post_preroll_result) {
-  post_preroll_result_ = post_preroll_result;
-}
+    const EndFrameCallBack& end_frame_call_back)
+    : end_frame_call_back_(end_frame_call_back), submitted_frame_count_(0) {}
 
 int ShellTestExternalViewEmbedder::GetSubmittedFrameCount() {
   return submitted_frame_count_;
@@ -40,9 +30,7 @@ MutatorsStack ShellTestExternalViewEmbedder::GetStack(int64_t view_id) {
 void ShellTestExternalViewEmbedder::CancelFrame() {}
 
 // |ExternalViewEmbedder|
-void ShellTestExternalViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+void ShellTestExternalViewEmbedder::BeginFrame(GrDirectContext* context) {}
 
 // |ExternalViewEmbedder|
 void ShellTestExternalViewEmbedder::PrepareFlutterView(
@@ -60,13 +48,6 @@ void ShellTestExternalViewEmbedder::PrerollCompositeEmbeddedView(
   DlRect view_bounds = DlRect::MakeSize(frame_size_);
   auto view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
   slices_.insert_or_assign(view_id, std::move(view));
-}
-
-// |ExternalViewEmbedder|
-PostPrerollResult ShellTestExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  FML_DCHECK(raster_thread_merger);
-  return post_preroll_result_;
 }
 
 // |ExternalViewEmbedder|
@@ -111,19 +92,13 @@ void ShellTestExternalViewEmbedder::SubmitFlutterView(
 }
 
 // |ExternalViewEmbedder|
-void ShellTestExternalViewEmbedder::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  end_frame_call_back_(should_resubmit_frame, raster_thread_merger);
+void ShellTestExternalViewEmbedder::EndFrame() {
+  end_frame_call_back_();
 }
 
 // |ExternalViewEmbedder|
 DlCanvas* ShellTestExternalViewEmbedder::GetRootCanvas() {
   return nullptr;
-}
-
-bool ShellTestExternalViewEmbedder::SupportsDynamicThreadMerging() {
-  return support_thread_merging_;
 }
 
 }  // namespace flutter

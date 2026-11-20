@@ -104,14 +104,7 @@ flutter::DlCanvas* ExternalViewEmbedder::CompositeEmbeddedView(
   return found->second.canvas_spy->GetSpyingCanvas();
 }
 
-flutter::PostPrerollResult ExternalViewEmbedder::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  return flutter::PostPrerollResult::kSuccess;
-}
-
-void ExternalViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+void ExternalViewEmbedder::BeginFrame(GrDirectContext* context) {}
 
 // |ExternalViewEmbedder|
 void ExternalViewEmbedder::PrepareFlutterView(flutter::DlISize frame_size,
@@ -128,9 +121,7 @@ void ExternalViewEmbedder::PrepareFlutterView(flutter::DlISize frame_size,
   frame_composition_order_.push_back(kRootLayerId);
 }
 
-void ExternalViewEmbedder::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void ExternalViewEmbedder::EndFrame() {
   TRACE_EVENT0("flutter", "ExternalViewEmbedder::EndFrame");
 }
 

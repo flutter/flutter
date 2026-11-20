@@ -29,7 +29,6 @@ class LayerTreeTest : public CanvasTest {
                                                        root_transform_,
                                                        false,
                                                        true,
-                                                       nullptr,
                                                        nullptr)) {}
 
   CompositorContext::ScopedFrame& frame() { return *scoped_frame_.get(); }

@@ -19,7 +19,6 @@
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/make_copyable.h"
-#include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/shell/common/thread_host.h"
@@ -371,29 +370,13 @@ TEST(AndroidExternalViewEmbedder, CompositeEmbeddedViewAndCancelFrame) {
   ASSERT_EQ(nullptr, embedder->CompositeEmbeddedView(0));
 }
 
-TEST(AndroidExternalViewEmbedder,
-     SupportsDynamicThreadMergingIsFalseAndPostPrerollAlwaysSucceeds) {
-  auto jni_mock = std::make_shared<JNIMock>();
-  auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
-  auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
-      android_context, jni_mock, nullptr, GetTaskRunnersForFixture());
-
-  EXPECT_FALSE(embedder->SupportsDynamicThreadMerging());
-  embedder->PrepareFlutterView(
-      DlISize(kDefaultFrameExtentPx, kDefaultFrameExtentPx),
-      kDefaultDevicePixelRatio);
-  embedder->PrerollCompositeEmbeddedView(
-      0, std::make_unique<EmbeddedViewParams>());
-  EXPECT_EQ(embedder->PostPrerollAction(nullptr), PostPrerollResult::kSuccess);
-}
-
 TEST(AndroidExternalViewEmbedder, PlatformViewRectAndChangedParams) {
   auto jni_mock = std::make_shared<JNIMock>();
   auto android_context = AndroidContext(AndroidRenderingAPI::kSoftware);
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
       android_context, jni_mock, nullptr, GetTaskRunnersForFixture());
 
-  embedder->BeginFrame(nullptr, nullptr);
+  embedder->BeginFrame(nullptr);
   embedder->PrepareFlutterView(
       DlISize(kTinyViewportWidthPx, kTinyViewportHeightPx),
       kDefaultDevicePixelRatio);
@@ -448,7 +431,7 @@ TEST(AndroidExternalViewEmbedder, PlatformViewSizeIsRoundedNotTruncated) {
       .Times(1);
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kPixel6Dpr);
     std::unique_ptr<SurfaceFrame> root_frame =
         h.deferred_root->AcquireFrame(frame_size);
@@ -456,7 +439,7 @@ TEST(AndroidExternalViewEmbedder, PlatformViewSizeIsRoundedNotTruncated) {
         0, std::make_unique<EmbeddedViewParams>(scale, size_points, stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
 }
@@ -577,7 +560,7 @@ TEST(AndroidExternalViewEmbedder,
       });
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kDefaultDevicePixelRatio);
     std::unique_ptr<SurfaceFrame> root_frame =
         h.deferred_root->AcquireFrame(frame_size);
@@ -615,7 +598,7 @@ TEST(AndroidExternalViewEmbedder,
 
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
 
@@ -644,12 +627,12 @@ TEST(AndroidExternalViewEmbedder,
   h.hc_state->hc_views_alive.store(false, std::memory_order_release);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     EXPECT_TRUE(h.embedder->SupportsPartialRepaint());
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   EXPECT_EQ(h.root_inner_submits.load(), ++expected_root_submits);
   EXPECT_EQ(h.created_readers.load(), 0);
@@ -657,7 +640,7 @@ TEST(AndroidExternalViewEmbedder,
   // Case 8: (alive=0, active=0, has_pv=1) -> PV created & disposed before first
   // HC frame; slices flattened onto root canvas, submitted directly to inner_.
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     SurfaceFrame::SubmitInfo info;
@@ -679,7 +662,7 @@ TEST(AndroidExternalViewEmbedder,
                    DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   EXPECT_EQ(h.root_inner_submits.load(), ++expected_root_submits);
   EXPECT_EQ(h.created_readers.load(), 0);
@@ -690,7 +673,7 @@ TEST(AndroidExternalViewEmbedder,
   h.hc_state->root_surface_transparent.store(true, std::memory_order_release);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     EXPECT_FALSE(h.embedder->SupportsPartialRepaint());
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     root_frame->Canvas()->DrawRect(
@@ -699,7 +682,7 @@ TEST(AndroidExternalViewEmbedder,
         DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   EXPECT_EQ(h.root_inner_submits.load(), ++expected_root_submits);
   EXPECT_FALSE(h.hc_state->hc_session_active.load());
@@ -708,7 +691,7 @@ TEST(AndroidExternalViewEmbedder,
   // clears inner_ once via AcquireInnerFrame, allocates bg + 1 overlay reader,
   // sets hc_session_active = true.
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -726,7 +709,7 @@ TEST(AndroidExternalViewEmbedder,
                    DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.root_inner_submits.load(), ++expected_root_submits);
@@ -736,7 +719,7 @@ TEST(AndroidExternalViewEmbedder,
   // Case 4: (alive=1, active=1, has_pv=1) with 0 overlays -> reuses bg_layer,
   // trims unused overlay_0 immediately, does NOT touch inner_ again.
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -747,7 +730,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.root_inner_submits.load(), expected_root_submits);
@@ -760,7 +743,7 @@ TEST(AndroidExternalViewEmbedder,
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(true, false))
       .WillOnce([&](bool, bool) { saw_exit_frame = true; });
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     root_frame->Canvas()->DrawRect(
@@ -770,7 +753,7 @@ TEST(AndroidExternalViewEmbedder,
         DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_TRUE(saw_exit_frame);
@@ -781,7 +764,7 @@ TEST(AndroidExternalViewEmbedder,
   // Re-enter HC and test Case 7: (alive=0, active=1, has_pv=1) -> frame built
   // before dispose(), rasterized after dispose().
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -792,7 +775,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   ASSERT_TRUE(h.hc_state->hc_session_active.load());
@@ -804,7 +787,7 @@ TEST(AndroidExternalViewEmbedder,
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(true, false))
       .WillOnce([&](bool, bool) { saw_case7_exit = true; });
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -822,7 +805,7 @@ TEST(AndroidExternalViewEmbedder,
             DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_TRUE(saw_case7_exit);
@@ -837,7 +820,7 @@ TEST(AndroidExternalViewEmbedder,
       false, std::memory_order_release);
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, true)).Times(1);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -848,7 +831,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.created_readers.load(), readers_before_unsynced);
@@ -857,12 +840,12 @@ TEST(AndroidExternalViewEmbedder,
   h.hc_state->hc_views_alive.store(false, std::memory_order_release);
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(true, false)).Times(1);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.created_readers.load(), readers_before_unsynced);
@@ -876,7 +859,7 @@ TEST(AndroidExternalViewEmbedder,
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, false)).Times(1);
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -887,7 +870,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   ASSERT_EQ(h.retired_readers.load(), 0);
@@ -897,7 +880,7 @@ TEST(AndroidExternalViewEmbedder,
       false, std::memory_order_release);
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, true)).Times(1);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -908,7 +891,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.retired_readers.load(), kBackgroundOnlyPacketImageCount);
@@ -927,7 +910,7 @@ TEST(AndroidExternalViewEmbedder,
   // becomes true, hc_background_synchronized_ stays false, and inner_ receives
   // the root frame directly without allocating a background HybridImageReader.
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -938,7 +921,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   ASSERT_TRUE(h.hc_state->hc_session_active.load());
@@ -962,7 +945,7 @@ TEST(AndroidExternalViewEmbedder,
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, false)).Times(2);
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -973,7 +956,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.created_readers.load(), kBackgroundOnlyPacketImageCount);
@@ -982,7 +965,7 @@ TEST(AndroidExternalViewEmbedder,
   // Subsequent frame with background already synchronized must NOT touch
   // inner_.
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -993,7 +976,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.root_inner_submits.load(), 2);
@@ -1020,7 +1003,7 @@ TEST(
   EXPECT_CALL(*h.jni_mock, FlutterViewBeginHybridFrame(_, _)).Times(0);
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
 
@@ -1057,7 +1040,7 @@ TEST(
                                   std::move(root_frame));
     EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
     EXPECT_FALSE(h.hc_state->hc_session_active.load());
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
 
@@ -1088,7 +1071,7 @@ TEST(AndroidExternalViewEmbedder,
   fml::AutoResetWaitableEvent raster_done;
   h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
     for (const DlISize& s : {size1, size2}) {
-      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->BeginFrame(nullptr);
       h.embedder->PrepareFlutterView(s, kUnitDevicePixelRatio);
       auto root_frame = h.deferred_root->AcquireFrame(s);
       MutatorsStack stack;
@@ -1108,7 +1091,7 @@ TEST(AndroidExternalViewEmbedder,
               DlPaint());
       h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                     std::move(root_frame));
-      h.embedder->EndFrame(false, nullptr);
+      h.embedder->EndFrame();
     }
     raster_done.Signal();
   });
@@ -1151,7 +1134,7 @@ TEST(
   platform_occupied.Wait();
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1162,7 +1145,7 @@ TEST(
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
 
   // Bump epoch before main drains -> packet must be discarded and its image
@@ -1192,7 +1175,7 @@ TEST(
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     // Entry on DeferredRootSurface #2.
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto entry_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1203,15 +1186,15 @@ TEST(
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(entry_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
 
     // Exit on DeferredRootSurface #2.
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto exit_frame = h.deferred_root->AcquireFrame(frame_size);
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(exit_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_FALSE(h.hc_state->hc_session_active.load());
@@ -1227,7 +1210,7 @@ TEST(
   EXPECT_CALL(*h.jni_mock, FlutterViewBeginHybridFrame(_, _)).Times(1);
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, false)).Times(1);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1245,7 +1228,7 @@ TEST(
                    DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   ASSERT_TRUE(h.hc_state->hc_session_active.load());
@@ -1264,7 +1247,7 @@ TEST(
 
   fml::AutoResetWaitableEvent destroy_done;
   h.task_runners.GetRasterTaskRunner()->PostTask([&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1282,7 +1265,7 @@ TEST(
                    DlPaint());
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
 
     h.embedder.reset();
     destroy_done.Signal();
@@ -1313,7 +1296,7 @@ TEST(AndroidExternalViewEmbedder,
   // is active on main.
   EXPECT_CALL(*h.jni_mock, FlutterViewEndHybridFrame(false, false)).Times(1);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1324,7 +1307,7 @@ TEST(AndroidExternalViewEmbedder,
             DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical), stack));
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
 
@@ -1344,7 +1327,7 @@ TEST(AndroidExternalViewEmbedder,
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     for (int i = 0; i < kOverwritingUnsyncedFrameCount; ++i) {
-      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->BeginFrame(nullptr);
       h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
       auto root_frame = h.deferred_root->AcquireFrame(frame_size);
       MutatorsStack stack;
@@ -1356,7 +1339,7 @@ TEST(AndroidExternalViewEmbedder,
               stack));
       h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                     std::move(root_frame));
-      h.embedder->EndFrame(false, nullptr);
+      h.embedder->EndFrame();
     }
   });
 
@@ -1378,7 +1361,7 @@ TEST(AndroidExternalViewEmbedder,
           [](const HybridJavaGlobalRef&) { return HybridJavaGlobalRef(); });
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     for (int i = 0; i < kMaxExpectedAbortRetries; ++i) {
-      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->BeginFrame(nullptr);
       h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
       auto failing_root = h.deferred_root->AcquireFrame(frame_size);
       MutatorsStack stack;
@@ -1391,7 +1374,7 @@ TEST(AndroidExternalViewEmbedder,
       h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                     std::move(failing_root));
       EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
-      h.embedder->EndFrame(false, nullptr);
+      h.embedder->EndFrame();
     }
   });
   h.FlushPlatform();
@@ -1404,7 +1387,7 @@ TEST(AndroidExternalViewEmbedder,
   EXPECT_CALL(*h.jni_mock, FlutterViewBeginHybridFrame(_, _)).Times(0);
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     // T1: hc_views_alive is false, so DeferredRootSurface acquires a direct
     // inner_ SurfaceFrame.
@@ -1431,7 +1414,7 @@ TEST(AndroidExternalViewEmbedder,
                                   std::move(direct_root_frame));
     EXPECT_TRUE(h.embedder->DidLastSubmitSucceed());
     EXPECT_FALSE(h.hc_state->hc_session_active.load());
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
 
@@ -1454,14 +1437,14 @@ TEST(
   // DidLastSubmitSucceed().
   h.hc_state->hc_views_alive.store(false, std::memory_order_release);
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto failing_frame =
         MakeRecordingSurfaceFrame(frame_size, []() { return false; });
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(failing_frame));
     EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
 
   // Part 2: Repeated HC layer allocation failures cap ScheduleFrame retries
@@ -1473,7 +1456,7 @@ TEST(
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
     for (int i = 0; i < kExcessiveFailedSubmitCount; ++i) {
-      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->BeginFrame(nullptr);
       h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
       auto root_frame = h.deferred_root->AcquireFrame(frame_size);
       MutatorsStack stack;
@@ -1486,7 +1469,7 @@ TEST(
       h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                     std::move(root_frame));
       EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
-      h.embedder->EndFrame(false, nullptr);
+      h.embedder->EndFrame();
     }
   });
   h.FlushPlatform();
@@ -1500,7 +1483,7 @@ TEST(
         return HybridJavaGlobalRef::ForTest(h.next_image_token.fetch_add(1));
       });
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1512,7 +1495,7 @@ TEST(
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
     EXPECT_TRUE(h.embedder->DidLastSubmitSucceed());
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
 
@@ -1520,7 +1503,7 @@ TEST(
       .WillByDefault(
           [](const HybridJavaGlobalRef&) { return HybridJavaGlobalRef(); });
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
-    h.embedder->BeginFrame(nullptr, nullptr);
+    h.embedder->BeginFrame(nullptr);
     h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
     auto root_frame = h.deferred_root->AcquireFrame(frame_size);
     MutatorsStack stack;
@@ -1532,7 +1515,7 @@ TEST(
     h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                   std::move(root_frame));
     EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
-    h.embedder->EndFrame(false, nullptr);
+    h.embedder->EndFrame();
   });
   h.FlushPlatform();
   EXPECT_EQ(h.schedule_frame_calls_on_platform.load(),
@@ -2150,8 +2133,7 @@ TEST(AndroidExternalViewEmbedderWrapperTest,
   constexpr int kFrameExtentPx = 100;
   constexpr DlScalar kViewExtentLogical = 50.0f;
   PostTaskSync(task_runners.GetRasterTaskRunner(), [&]() {
-    EXPECT_FALSE(wrapper->SupportsDynamicThreadMerging());
-    wrapper->BeginFrame(nullptr, nullptr);
+    wrapper->BeginFrame(nullptr);
     wrapper->PrepareFlutterView(DlISize(kFrameExtentPx, kFrameExtentPx), 1.0);
     MutatorsStack stack;
     wrapper->PrerollCompositeEmbeddedView(
@@ -2163,7 +2145,7 @@ TEST(AndroidExternalViewEmbedderWrapperTest,
     wrapper->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
                                std::move(root_frame));
     EXPECT_FALSE(wrapper->DidLastSubmitSucceed());
-    wrapper->EndFrame(false, nullptr);
+    wrapper->EndFrame();
   });
 
   // Occupy RasterTaskRunner, start TeardownClassicHybridComposition() on

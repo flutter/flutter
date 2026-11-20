@@ -9,7 +9,7 @@
 #include <thread>
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/raster_thread_merger.h"
+#include "flutter/fml/message_loop_task_queues.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "gtest/gtest.h"
@@ -92,21 +92,13 @@ TEST(TaskRunnerCheckerTests, MergedTaskRunnersRunsOnTheSameThread) {
   latch2.Wait();
   fml::TaskQueueId qid1 = loop1->GetTaskRunner()->GetTaskQueueId();
   fml::TaskQueueId qid2 = loop2->GetTaskRunner()->GetTaskQueueId();
-  const auto raster_thread_merger =
-      fml::MakeRefCounted<fml::RasterThreadMerger>(qid1, qid2);
-  const size_t kNumFramesMerged = 5;
-
-  raster_thread_merger->MergeWithLease(kNumFramesMerged);
+  auto* task_queues = fml::MessageLoopTaskQueues::GetInstance();
+  ASSERT_TRUE(task_queues->Merge(qid1, qid2));
 
   // merged, running on the same thread
   EXPECT_EQ(TaskRunnerChecker::RunsOnTheSameThread(qid1, qid2), true);
 
-  for (size_t i = 0; i < kNumFramesMerged; i++) {
-    ASSERT_TRUE(raster_thread_merger->IsMerged());
-    raster_thread_merger->DecrementLease();
-  }
-
-  ASSERT_FALSE(raster_thread_merger->IsMerged());
+  ASSERT_TRUE(task_queues->Unmerge(qid1, qid2));
 
   // un-merged, not running on the same thread
   EXPECT_EQ(TaskRunnerChecker::RunsOnTheSameThread(qid1, qid2), false);

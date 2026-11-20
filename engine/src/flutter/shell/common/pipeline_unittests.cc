@@ -107,42 +107,5 @@ TEST(PipelineTest, PushingMultiProcessesInOrder) {
   ASSERT_EQ(consume_result_2, PipelineConsumeResult::Done);
 }
 
-TEST(PipelineTest, ProduceIfEmptyDoesNotConsumeWhenQueueIsNotEmpty) {
-  const int depth = 2;
-  std::shared_ptr<IntPipeline> pipeline = std::make_shared<IntPipeline>(depth);
-
-  Continuation continuation_1 = pipeline->Produce();
-  Continuation continuation_2 = pipeline->ProduceIfEmpty();
-
-  const int test_val_1 = 1, test_val_2 = 2;
-  PipelineProduceResult result =
-      continuation_1.Complete(std::make_unique<int>(test_val_1));
-  ASSERT_EQ(result.success, true);
-  ASSERT_EQ(result.is_first_item, true);
-  result = continuation_2.Complete(std::make_unique<int>(test_val_2));
-  ASSERT_EQ(result.success, false);
-
-  PipelineConsumeResult consume_result_1 = pipeline->Consume(
-      [&test_val_1](std::unique_ptr<int> v) { ASSERT_EQ(*v, test_val_1); });
-  ASSERT_EQ(consume_result_1, PipelineConsumeResult::Done);
-}
-
-TEST(PipelineTest, ProduceIfEmptySuccessfulIfQueueIsEmpty) {
-  const int depth = 1;
-  std::shared_ptr<IntPipeline> pipeline = std::make_shared<IntPipeline>(depth);
-
-  Continuation continuation_1 = pipeline->ProduceIfEmpty();
-
-  const int test_val_1 = 1;
-  PipelineProduceResult result =
-      continuation_1.Complete(std::make_unique<int>(test_val_1));
-  ASSERT_EQ(result.success, true);
-  ASSERT_EQ(result.is_first_item, true);
-
-  PipelineConsumeResult consume_result_1 = pipeline->Consume(
-      [&test_val_1](std::unique_ptr<int> v) { ASSERT_EQ(*v, test_val_1); });
-  ASSERT_EQ(consume_result_1, PipelineConsumeResult::Done);
-}
-
 }  // namespace testing
 }  // namespace flutter

@@ -156,27 +156,6 @@ class Pipeline {
         GetNextPipelineTraceID()};         // trace id
   }
 
-  /// Creates a `ProducerContinuation` that will only push the task if the
-  /// queue is empty.
-  ///
-  /// Prefer using |Produce|. ProducerContinuation returned by this method
-  /// doesn't guarantee that the frame will be rendered.
-  ProducerContinuation ProduceIfEmpty() {
-    if (!empty_.TryWait()) {
-      return {};
-    }
-    ++inflight_;
-    FML_TRACE_COUNTER("flutter", "Pipeline Depth",
-                      reinterpret_cast<int64_t>(this),      //
-                      "frames in flight", inflight_.load()  //
-    );
-
-    return ProducerContinuation{
-        std::bind(&Pipeline::ProducerCommitIfEmpty, this, std::placeholders::_1,
-                  std::placeholders::_2),  // continuation
-        GetNextPipelineTraceID()};         // trace id
-  }
-
   using Consumer = std::function<void(ResourcePtr)>;
 
   /// @note Procedure doesn't copy all closures.
@@ -232,24 +211,6 @@ class Pipeline {
     // Ensure the queue mutex is not held as that would be a pessimization.
     available_.Signal();
     return {.success = true, .is_first_item = is_first_item};
-  }
-
-  PipelineProduceResult ProducerCommitIfEmpty(ResourcePtr resource,
-                                              size_t trace_id) {
-    {
-      std::scoped_lock lock(queue_mutex_);
-      if (!queue_.empty()) {
-        // Bail if the queue is not empty, opens up spaces to produce other
-        // frames.
-        empty_.Signal();
-        return {.success = false, .is_first_item = false};
-      }
-      queue_.emplace_back(std::move(resource), trace_id);
-    }
-
-    // Ensure the queue mutex is not held as that would be a pessimization.
-    available_.Signal();
-    return {.success = true, .is_first_item = true};
   }
 
   FML_DISALLOW_COPY_AND_ASSIGN(Pipeline);

@@ -35,9 +35,7 @@ void IOSExternalViewEmbedder::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void IOSExternalViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+void IOSExternalViewEmbedder::BeginFrame(GrDirectContext* context) {}
 
 // |ExternalViewEmbedder|
 void IOSExternalViewEmbedder::PrepareFlutterView(DlISize frame_size, double device_pixel_ratio) {
@@ -75,11 +73,6 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   FML_CHECK(platform_views_controller_);
   [platform_views_controller_ submitFrame:std::move(frame) withIosContext:ios_context_];
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
-}
-
-// |ExternalViewEmbedder|
-bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
-  return false;
 }
 
 // |ExternalViewEmbedder|
