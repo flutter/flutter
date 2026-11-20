@@ -1752,10 +1752,18 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
       'DebugViewMetricsPlatformDispatcher(${_viewId == null ? 'implicit view' : 'view $_viewId'})';
 
   @override
-  ui.MarkAllViewsNeedRenderCallback? onMarkAllViewsNeedRender;
+  ui.MarkAllViewsNeedRenderCallback? get onMarkAllViewsNeedRender =>
+      _dispatcher.onMarkAllViewsNeedRender;
+  @override
+  set onMarkAllViewsNeedRender(ui.MarkAllViewsNeedRenderCallback? callback) =>
+      _dispatcher.onMarkAllViewsNeedRender = callback;
 
   @override
-  ui.TextureFrameAvailableCallback? onTextureFrameAvailable;
+  ui.TextureFrameAvailableCallback? get onTextureFrameAvailable =>
+      _dispatcher.onTextureFrameAvailable;
+  @override
+  set onTextureFrameAvailable(ui.TextureFrameAvailableCallback? callback) =>
+      _dispatcher.onTextureFrameAvailable = callback;
 }
 
 // A [ui.FlutterView] that reports the metrics of its [debugViewMetricsOverrides]
