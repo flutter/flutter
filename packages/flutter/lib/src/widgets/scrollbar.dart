@@ -1395,8 +1395,13 @@ class RawScrollbar extends StatefulWidget {
   /// cursor (for example, the I-beam cursor of an enclosing [EditableText]) is
   /// preserved.
   ///
-  /// When this is null, or when its resolved value is null, [MouseCursor.defer]
-  /// is used and ancestor cursors are left unchanged.
+  /// When this is null, [SystemMouseCursors.basic] is used while the pointer is
+  /// over the scrollbar or the thumb is being dragged. An ancestor cursor, such
+  /// as the I-beam of an enclosing text field, therefore does not apply to the
+  /// scrollbar itself.
+  ///
+  /// When the resolved value is null, [MouseCursor.defer] is used and ancestor
+  /// cursors are left unchanged, including over the scrollbar.
   /// {@endtemplate}
   final WidgetStateProperty<MouseCursor?>? mouseCursor;
 
@@ -2307,14 +2312,21 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void updateMouseCursor() {
     // The wrapping MouseRegion covers the entire scrollable viewport rather
-    // than just the scrollbar painter. Therefore, _hoverIsActive is used to
-    // gate the cursor override to the painted scrollbar track/thumb; otherwise
-    // MouseCursor.defer is used to preserve ancestor cursors (e.g. the
-    // EditableText I-beam).
+    // than just the scrollbar painter. Gate the override to the painted
+    // scrollbar so the rest of the viewport keeps the ancestor cursor, such
+    // as an EditableText I-beam. The default override is the basic arrow.
+    // Resolve on every update so a WidgetStateProperty observes the pointer
+    // leaving the hovered and dragged states.
+    final bool applyScrollbarCursor = _hoverIsActive || _dragIsActive;
     final MouseCursor? resolved = widget.mouseCursor?.resolve(cursorStates);
-    final MouseCursor desired = ((_hoverIsActive || _dragIsActive) && resolved != null)
-        ? resolved
-        : MouseCursor.defer;
+    final MouseCursor desired;
+    if (!applyScrollbarCursor) {
+      desired = MouseCursor.defer;
+    } else if (widget.mouseCursor == null) {
+      desired = SystemMouseCursors.basic;
+    } else {
+      desired = resolved ?? MouseCursor.defer;
+    }
     if (desired != _effectiveMouseCursor) {
       setState(() {
         _effectiveMouseCursor = desired;
