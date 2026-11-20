@@ -297,15 +297,39 @@ compares pixel by pixel with the latest accepted image of the host's
 platform. An image that matches only another platform's accepted look, or
 an old one, passes here.
 
+In a pull request's presubmit (`dev/bots/test.dart --bazel` on LUCI, where
+`goldctl` and `GOLD_TRYJOB` are set: `goldTryjobChangelist` in
+`dev/bots/bazel.dart`) the comparisons are made the same way, and what they
+leave in the tests' outputs is sent to Gold once `bazelisk test` is over:
+
+- the expectations are the pull request's
+  (`--repo_env=FLUTTER_GOLD_CHANGELIST=<number>`): the main branch's with
+  the triage done on the pull request;
+- an image Gold does not accept fails its test, as off a bot, and is sent;
+  the image of a test Gold does not know passes, and is sent too;
+- `packages/flutter_goldens/bin/upload_tryjob_images.dart` sends them with
+  flutter_goldens' own client, as results of the pull request's tryjob and
+  with the keys `flutter test` uploads with, so that Gold shows each beside
+  the accepted images of the same platform, and its check on the pull
+  request waits for the triage. The shard's log ends with Gold's link for
+  each image and for the pull request
+  (`https://flutter-gold.skia.org/cl/github/<number>`);
+- once the images are triaged there, the run made again fetches the pull
+  request's expectations and passes.
+
+This differs from `flutter test` in presubmit in two ways: only the images
+that do not match are sent, not every image; and a mismatch fails the test,
+where `flutter test` passes every comparison and leaves the verdict to
+Gold's check.
+
 Not compared: the Impeller runs (the one bot that runs them is a Mac, so
 Gold's Impeller images are macOS renderings and a Linux host has none to
 match; comparing them on a Mac has not been tried);
 the other test trees whose configuration is flutter_goldens' (the API
-samples, integration_test); and anything on a bot, where
-`dev/bots/test.dart --bazel` passes
-`--no//build_defs/dart:golden_comparisons` -- a bot's part is to send a new
-image to Gold for triage, not to fail it, and the Bazel shards do not
-upload yet.
+samples, integration_test); and a bot's run that is not such a presubmit
+(post-submit, a shard without `goldctl`), where
+`--no//build_defs/dart:golden_comparisons` is passed -- post-submit's part
+is to send every image to Gold, which the Bazel shards do not do yet.
 
 ### The same tests on the prebuilt engine: `--config=prebuilt_engine`
 

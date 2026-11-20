@@ -112,19 +112,43 @@ Map<String, String> bazelEnvironment() {
   return <String, String>{'BAZELISK_HOME': path.join(bazelHome(), 'bazelisk')};
 }
 
+/// The pull request whose presubmit this is, when the run can send images to
+/// Flutter Gold: a swarming task with `goldctl`, a `GOLD_TRYJOB` that names
+/// the pull request (`refs/pull/<number>/head`), and the main branch as its
+/// base -- the conditions under which flutter_goldens uploads from
+/// `flutter test` (FlutterPreSubmitFileComparator.isForEnvironment). Null
+/// anywhere else.
+String? goldTryjobChangelist([Map<String, String>? environment]) {
+  environment ??= Platform.environment;
+  if (!environment.containsKey('SWARMING_TASK_ID') || !environment.containsKey('GOLDCTL')) {
+    return null;
+  }
+  final String? branch = environment['GIT_BRANCH'];
+  if (branch != 'main' && branch != 'master') {
+    return null;
+  }
+  return RegExp(r'^refs/pull/(\d+)/head$').firstMatch(environment['GOLD_TRYJOB'] ?? '')?.group(1);
+}
+
 /// `bazelisk test`'s options: the prebuilt engine; every target built and
 /// run whatever fails, failures' output only; the targets of another host
 /// skipped rather than refused (the tool's apple shard is declared on every
 /// host); the bots' .bazelrc config, remote execution and sandbox location.
 ///
-/// On a bot the golden comparisons compare nothing: off a bot a test fails an
-/// image that is none of those Flutter Gold accepts
-/// (`//build_defs/dart:golden_comparisons`), but a bot's part is to send such
-/// an image to Gold for triage, which the Bazel shards do not do yet.
+/// The golden comparisons (`//build_defs/dart:golden_comparisons`): a test
+/// fails an image that is none of those Flutter Gold accepts. They are on
+/// off a bot, and in a pull request's presubmit that can reach Gold
+/// ([goldTryjobChangelist]), where the expectations are the pull request's
+/// (FLUTTER_GOLD_CHANGELIST, build_defs/repositories/gold.bzl) and the
+/// images a run fails are sent to Gold for triage afterwards
+/// ([BazelShard.run]). Any other bot compares nothing: post-submit's part is
+/// to send every image to Gold, which the Bazel shards do not do yet.
 List<String> bazelTestOptions() {
+  final String? changelist = isLuci ? goldTryjobChangelist() : null;
   return <String>[
     if (isLuci) '--config=ci',
-    if (isLuci) '--no//build_defs/dart:golden_comparisons',
+    if (isLuci && changelist == null) '--no//build_defs/dart:golden_comparisons',
+    if (changelist != null) '--repo_env=FLUTTER_GOLD_CHANGELIST=$changelist',
     '--config=prebuilt_engine',
     '--keep_going',
     '--test_output=errors',
@@ -423,8 +447,9 @@ class BazelShard {
   }
 
   /// Runs the shard: one `bazelisk query` for the suites' tests, the steps
-  /// of the files without one, one `bazelisk test` of the rest, and the
-  /// results to ResultDB.
+  /// of the files without one, one `bazelisk test` of the rest, the results
+  /// to ResultDB, and in a pull request's presubmit the golden images the
+  /// run failed to Flutter Gold.
   Future<void> run() async {
     // test.dart passes --local-engine* through to `flutter test`.
     if (flutterTestArgs.any((String argument) => argument.startsWith('--local-engine'))) {
@@ -508,7 +533,51 @@ class BazelShard {
     );
     if (!dryRun) {
       await _reportToResultDb(bazelisk, ran);
+      await _sendGoldenImages(bazelisk, ran);
     }
+  }
+
+  /// The images the golden comparisons of [labels] wrote out
+  /// ([bazelGoldenImageDirectories]) to Flutter Gold, as results of the pull
+  /// request's tryjob: the images Gold does not accept, whose tests failed,
+  /// and those of tests Gold does not know, which passed. Gold then shows
+  /// them on the pull request's page with their differences, to be triaged;
+  /// the run after a triage fetches the pull request's expectations and
+  /// passes. flutter_goldens' own client does the sending
+  /// (packages/flutter_goldens/bin/upload_tryjob_images.dart), with the
+  /// arguments and keys `flutter test` uploads with. A no-op unless
+  /// [goldTryjobChangelist].
+  Future<void> _sendGoldenImages(String bazelisk, Set<String> labels) async {
+    final String? changelist = goldTryjobChangelist();
+    if (changelist == null) {
+      return;
+    }
+    final String? testlogs = await _bazelInfo(bazelisk, 'bazel-testlogs');
+    if (testlogs == null) {
+      return;
+    }
+    final directories = <String>[
+      for (final String label in labels.toList()..sort())
+        for (final Directory directory in bazelGoldenImageDirectories(testlogs, label))
+          directory.path,
+    ];
+    if (directories.isEmpty) {
+      print('No golden image to send to Flutter Gold: every comparison matched what Gold accepts.');
+      return;
+    }
+    printProgress(
+      '${green}Sending the golden images of ${directories.length} test run(s) to Flutter Gold '
+      '(pull request $changelist)$reset',
+    );
+    await runCommand(
+      dart,
+      <String>[
+        path.join(flutterRoot, 'packages', 'flutter_goldens', 'bin', 'upload_tryjob_images.dart'),
+        ...directories,
+      ],
+      workingDirectory: flutterRoot,
+      environment: <String, String>{'FLUTTER_ROOT': flutterRoot},
+    );
   }
 
   /// The per-case results of [labels] to LUCI ResultDB, as `flutter test`'s
@@ -656,8 +725,47 @@ List<File> bazelTestResultsFiles(String testlogs, String label) {
   if (whole.existsSync()) {
     return <File>[whole];
   }
+  return <File>[
+    for (final Directory shard in _bazelShardDirectories(target))
+      if (File(path.join(shard.path, 'test.outputs', 'test_results.json')).existsSync())
+        File(path.join(shard.path, 'test.outputs', 'test_results.json')),
+  ];
+}
+
+/// The directories of golden images the test target [label] left under
+/// [testlogs] (`bazel info bazel-testlogs`): `<package>/<name>/test.outputs/goldens`,
+/// or one per shard of a sharded target, as [bazelTestResultsFiles] finds
+/// the results. flutter_goldens' offline comparator writes there the images
+/// that are none of those Flutter Gold accepts and those of tests Gold does
+/// not know (FLUTTER_GOLD_FAILURES, build_defs/dart/flutter_test.bzl). Only
+/// the directories that hold an image.
+List<Directory> bazelGoldenImageDirectories(String testlogs, String label) {
+  final String package = bazelPackageOf(label);
+  final String name = label.substring(label.indexOf(':') + 1);
+  final target = Directory(path.joinAll(<String>[testlogs, ...path.posix.split(package), name]));
+  bool holdsImage(Directory directory) {
+    return directory.existsSync() &&
+        directory
+            .listSync(recursive: true)
+            .any((FileSystemEntity entity) => entity is File && entity.path.endsWith('.png'));
+  }
+
+  final whole = Directory(path.join(target.path, 'test.outputs', 'goldens'));
+  if (holdsImage(whole)) {
+    return <Directory>[whole];
+  }
+  return <Directory>[
+    for (final Directory shard in _bazelShardDirectories(target))
+      if (holdsImage(Directory(path.join(shard.path, 'test.outputs', 'goldens'))))
+        Directory(path.join(shard.path, 'test.outputs', 'goldens')),
+  ];
+}
+
+/// The `shard_<i>_of_<n>` directories of a sharded test target's directory
+/// under bazel-testlogs, in shard order -- of the largest `n` there.
+List<Directory> _bazelShardDirectories(Directory target) {
   if (!target.existsSync()) {
-    return const <File>[];
+    return const <Directory>[];
   }
   final shard = RegExp(r'^shard_(\d+)_of_(\d+)$');
   final shards = <int, Map<int, Directory>>{};
@@ -671,14 +779,10 @@ List<File> bazelTestResultsFiles(String testlogs, String label) {
     }
   }
   if (shards.isEmpty) {
-    return const <File>[];
+    return const <Directory>[];
   }
   final Map<int, Directory> latest = shards[shards.keys.reduce(math.max)]!;
-  return <File>[
-    for (final int index in latest.keys.toList()..sort())
-      if (File(path.join(latest[index]!.path, 'test.outputs', 'test_results.json')).existsSync())
-        File(path.join(latest[index]!.path, 'test.outputs', 'test_results.json')),
-  ];
+  return <Directory>[for (final int index in latest.keys.toList()..sort()) latest[index]!];
 }
 
 /// The directory [parsed]'s suite paths are relative to: the test's package

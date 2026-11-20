@@ -572,8 +572,10 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 ///
 /// This comparator is for runners that give a test no network and fetch what
 /// it needs beforehand, such as a build system that runs tests in a sandbox.
-/// Nothing is uploaded: an image Gold has not seen fails here, where the
-/// [FlutterPreSubmitFileComparator] would have sent it for triage.
+/// The test uploads nothing: an image Gold has not seen fails here, where
+/// the [FlutterPreSubmitFileComparator] would have sent it for triage. The
+/// runner can send the images this comparator writes out once the tests are
+/// over ([SkiaGoldClient.tryjobAddDirectory]).
 ///
 /// A test without an entry in the file is taken for a new one, as the
 /// [FlutterLocalFileComparator] takes a test Gold has no baseline for: its

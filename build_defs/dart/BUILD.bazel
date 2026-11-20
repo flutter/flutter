@@ -31,8 +31,9 @@ exports_files([
 # Whether a framework test compares its goldens with what was fetched from
 # Flutter Gold (flutter_test's gold_expectations; build_defs/repositories/
 # gold.bzl). On by default. Off, a comparison compares nothing, as before
-# there was anything to compare with: for the bots, where an image that Gold
-# has not seen is to be sent for triage, not failed (dev/bots/bazel.dart).
+# there was anything to compare with: for a bot's run that cannot send to
+# Gold the images that fail, which is every one but a pull request's
+# presubmit (dev/bots/bazel.dart).
 #
 #   bazel test --no//build_defs/dart:golden_comparisons ...
 bool_flag(
