@@ -4018,6 +4018,26 @@ Future<void> main() async {
 
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'HeroController restores toRoute onstage if fromRoute is removed before post frame callback',
+    (WidgetTester tester) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(navigatorKey: navigatorKey, home: const Text('home')));
+
+      navigatorKey.currentState!.push(
+        MaterialPageRoute<void>(builder: (BuildContext context) => const Text('page')),
+      );
+      await tester.pump(const Duration(milliseconds: 16));
+
+      final above = MaterialPageRoute<void>(builder: (BuildContext context) => const Text('above'));
+      navigatorKey.currentState!.push(above);
+      navigatorKey.currentState!.removeRoute(above);
+
+      await tester.pumpAndSettle();
+      expect(find.text('page'), findsOneWidget);
+    },
+  );
 }
 
 class TestDependencies extends StatelessWidget {
