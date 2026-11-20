@@ -893,7 +893,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           if (embeddedView != null) {
             // The embedded view is initially marked as not important at creation in the platform
             // view controller, so we must explicitly mark it as important here.
-            embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+            //
+            // Use YES rather than AUTO: under AUTO a plain container such as a FrameLayout is not
+            // important, and services that only see important views (TalkBack) would get no node
+            // for this child, which hides the whole platform view.
+            embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             result.addChild(embeddedView);
             continue;
           }
@@ -1553,7 +1557,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         View embeddedView =
             platformViewsAccessibilityDelegate.getPlatformViewById(semanticsNode.platformViewId);
         if (embeddedView != null) {
-          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+          // YES for the same reason as in createAccessibilityNodeInfo.
+          embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
       }
     }

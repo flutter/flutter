@@ -48,6 +48,7 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.FrameLayout;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -2233,7 +2234,7 @@ public class AccessibilityBridgeTest {
     AccessibilityNodeInfo result = accessibilityBridge.createAccessibilityNodeInfo(0);
     assertNotNull(result);
     assertEquals(1, result.getChildCount());
-    verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+    verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     assertEquals("android.view.View", result.getClassName());
   }
 
@@ -2269,7 +2270,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsRootUpdate = root.toUpdate();
     testSemanticsRootUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+    verify(embeddedView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
   }
 
   @Test
@@ -2312,6 +2313,53 @@ public class AccessibilityBridgeTest {
 
     verify(embeddedView)
         .setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+  }
+
+  @Test
+  public void itMakesPlainContainerPlatformViewImportantUntilRemoved() {
+    PlatformViewsAccessibilityDelegate accessibilityDelegate =
+        mock(PlatformViewsAccessibilityDelegate.class);
+
+    Context context = ApplicationProvider.getApplicationContext();
+    View rootAccessibilityView = new View(context);
+    AccessibilityViewEmbedder accessibilityViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(
+            rootAccessibilityView,
+            /* accessibilityChannel= */ null,
+            /* accessibilityManager= */ null,
+            /* contentResolver= */ null,
+            accessibilityViewEmbedder,
+            accessibilityDelegate);
+
+    // A plain container is not important for accessibility under AUTO, so services that only see
+    // important views would get no node for it.
+    FrameLayout embeddedView = new FrameLayout(context);
+    embeddedView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    when(accessibilityDelegate.getPlatformViewById(1)).thenReturn(embeddedView);
+    when(accessibilityDelegate.usesVirtualDisplay(1)).thenReturn(false);
+
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    TestSemanticsNode platformView = new TestSemanticsNode();
+    platformView.id = 1;
+    platformView.platformViewId = 1;
+    root.addChild(platformView);
+    root.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo result = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(result);
+    assertEquals(1, result.getChildCount());
+    assertTrue(embeddedView.isImportantForAccessibility());
+
+    TestSemanticsNode rootWithoutPlatformView = new TestSemanticsNode();
+    rootWithoutPlatformView.id = 0;
+    rootWithoutPlatformView.toUpdate().sendUpdateToBridge(accessibilityBridge);
+
+    assertEquals(
+        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS,
+        embeddedView.getImportantForAccessibility());
+    assertFalse(embeddedView.isImportantForAccessibility());
   }
 
   @Test
