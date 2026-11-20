@@ -126,19 +126,21 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver
       return;
     }
     final double beforePaddingPaintExtent = paintOffset(from: 0.0, to: beforePadding);
+    final double beforePaddingCacheExtent = cacheOffset(from: 0.0, to: beforePadding);
+    final double childScrollOffset = math.max(0.0, constraints.scrollOffset - beforePadding);
     double overlap = constraints.overlap;
     if (overlap > 0) {
       overlap = math.max(0.0, constraints.overlap - beforePaddingPaintExtent);
     }
     child!.layout(
       constraints.copyWith(
-        scrollOffset: math.max(0.0, constraints.scrollOffset - beforePadding),
-        cacheOrigin: math.min(0.0, constraints.cacheOrigin + beforePadding),
+        scrollOffset: childScrollOffset,
+        // Keep the viewport's cache origin unless it reaches before the child.
+        cacheOrigin: math.max(constraints.cacheOrigin, -childScrollOffset),
         overlap: overlap,
         remainingPaintExtent:
             constraints.remainingPaintExtent - paintOffset(from: 0.0, to: beforePadding),
-        remainingCacheExtent:
-            constraints.remainingCacheExtent - cacheOffset(from: 0.0, to: beforePadding),
+        remainingCacheExtent: constraints.remainingCacheExtent - beforePaddingCacheExtent,
         crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
         precedingScrollExtent: beforePadding + constraints.precedingScrollExtent,
       ),
@@ -150,7 +152,6 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver
       return;
     }
     final double scrollExtent = childLayoutGeometry.scrollExtent;
-    final double beforePaddingCacheExtent = cacheOffset(from: 0.0, to: beforePadding);
     final double afterPaddingCacheExtent = cacheOffset(
       from: beforePadding + scrollExtent,
       to: mainAxisPadding + scrollExtent,
