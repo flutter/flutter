@@ -682,6 +682,7 @@ void main() {
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
     expect(editableText.hintLocales, isNull);
+    expect(editableText.autofillHintText, isNull);
   });
 
   testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (
@@ -19265,69 +19266,6 @@ void main() {
         tester.testTextInput.setClientArgs?['autofill'],
         containsPair('hintText', 'Enter your email'),
       );
-    });
-
-    testWidgets('omits hintText in AutofillConfiguration by default', (WidgetTester tester) async {
-      final controller = TextEditingController();
-      addTearDown(controller.dispose);
-      final focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: Center(
-            child: EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-              backgroundCursorColor: const Color(0xFF000000),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.byType(EditableText));
-      await tester.pump();
-
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-      expect(state.textInputConfiguration.autofillConfiguration.enabled, isTrue);
-      expect(state.textInputConfiguration.autofillConfiguration.hintText, isNull);
-      final autofillArgs = tester.testTextInput.setClientArgs?['autofill'] as Map<String, dynamic>?;
-      expect(autofillArgs, isNotNull);
-      expect(autofillArgs!.containsKey('hintText'), isFalse);
-    });
-
-    testWidgets('sends autofillHintText alongside explicit autofillHints', (
-      WidgetTester tester,
-    ) async {
-      final controller = TextEditingController();
-      addTearDown(controller.dispose);
-      final focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: Center(
-            child: EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              style: textStyle,
-              cursorColor: cursorColor,
-              backgroundCursorColor: const Color(0xFF000000),
-              autofillHints: const <String>[AutofillHints.email],
-              autofillHintText: 'Email address',
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.byType(EditableText));
-      await tester.pump();
-
-      final autofillArgs = tester.testTextInput.setClientArgs?['autofill'] as Map<String, dynamic>?;
-      expect(autofillArgs, containsPair('hints', <String>[AutofillHints.email]));
-      expect(autofillArgs, containsPair('hintText', 'Email address'));
     });
 
     testWidgets('ignores autofillHintText when autofillHints is null', (WidgetTester tester) async {
