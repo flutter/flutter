@@ -274,6 +274,27 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    // Recover from a stale pointer sequence left unresolved (e.g. a native
+    // platform dialog swallows the pointer up/cancel events, leaving this
+    // recognizer stuck tracking an old pointer id). When a new pointer down
+    // arrives on a different id, force-resolve the stale one so the state
+    // machine transitions back to [GestureRecognizerState.ready] and accepts
+    // the new pointer normally.
+    if (state != GestureRecognizerState.ready &&
+        _down != null &&
+        _down!.pointer != event.pointer &&
+        event.timeStamp - _down!.timeStamp > kLongPressTimeout) {
+      // A pointer down that has persisted longer than [kLongPressTimeout]
+      // without a matching up/cancel can no longer form a valid tap — it's
+      // either a long press (handled by a different recognizer) or stale
+      // (e.g. native dialog swallowed the up event on Windows). Force-resolve
+      // so the new pointer can be accepted.
+      final int stalePointer = _down!.pointer;
+      resolve(GestureDisposition.rejected);
+      stopTrackingPointer(stalePointer);
+      _reset();
+    }
+
     if (state == GestureRecognizerState.ready) {
       // If there is no result in the previous gesture arena,
       // we ignore them and prepare to accept a new pointer.
