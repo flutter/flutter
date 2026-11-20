@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.util.SparseArrayKt;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
@@ -392,26 +393,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return platformView.getView();
   }
 
-  private void lockInputConnection(@NonNull VirtualDisplayController controller) {
-    if (textInputPlugin == null) {
-      return;
-    }
-    textInputPlugin.lockPlatformViewInputConnection();
-    controller.onInputConnectionLocked();
-  }
-
-  private void unlockInputConnection(@NonNull VirtualDisplayController controller) {
-    if (textInputPlugin == null) {
-      return;
-    }
-    textInputPlugin.unlockPlatformViewInputConnection();
-    controller.onInputConnectionUnlocked();
-  }
-
-  private static boolean validateDirection(int direction) {
-    return direction == View.LAYOUT_DIRECTION_LTR || direction == View.LAYOUT_DIRECTION_RTL;
-  }
-
   @SuppressWarnings("unchecked")
   private static List<PointerProperties> parsePointerPropertiesList(Object rawPropertiesList) {
     List<Object> rawProperties = (List<Object>) rawPropertiesList;
@@ -457,24 +438,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return coords;
   }
 
-  private float getDisplayDensity() {
-    return context.getResources().getDisplayMetrics().density;
-  }
-
-  private int toPhysicalPixels(double logicalPixels) {
-    return (int) Math.round(logicalPixels * getDisplayDensity());
-  }
-
-  private int toLogicalPixels(double physicalPixels, float displayDensity) {
-    return (int) Math.round(physicalPixels / displayDensity);
-  }
-
-  private int toLogicalPixels(double physicalPixels) {
-    return toLogicalPixels(physicalPixels, getDisplayDensity());
-  }
-
   private void disposeAllViews() {
-    while (platformViews.size() > 0) {
+    while (SparseArrayKt.isNotEmpty(platformViews)) {
       final int viewId = platformViews.keyAt(0);
       // Dispose deletes the entry from platformViews and clears associated resources.
       channelHandler.dispose(viewId);

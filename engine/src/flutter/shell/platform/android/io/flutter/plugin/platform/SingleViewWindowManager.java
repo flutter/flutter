@@ -30,7 +30,7 @@ import java.util.function.Consumer;
  * methods to prevent these crashes, and forwards all other calls to the delegate.
  *
  * <p>This is an abstract class because some clients of Flutter compile the Android embedding with
- * the Android System SDK, which has additional abstract methods that need to be overriden.
+ * the Android System SDK, which has additional abstract methods that need to be overridden.
  */
 abstract class SingleViewWindowManager implements WindowManager {
   private static final String TAG = "PlatformViewsController";

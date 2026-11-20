@@ -31,18 +31,6 @@ public final class Preconditions {
    * Ensures the truth of an expression involving the state of the calling instance.
    *
    * @param expression a boolean expression that must be checked to be true
-   * @throws IllegalStateException if {@code expression} is false
-   */
-  public static void checkState(boolean expression) {
-    if (!expression) {
-      throw new IllegalStateException();
-    }
-  }
-
-  /**
-   * Ensures the truth of an expression involving the state of the calling instance.
-   *
-   * @param expression a boolean expression that must be checked to be true
    * @param errorMessage the exception message to use if the check fails; will be converted to a
    *     string using {@link String#valueOf(Object)}
    * @throws IllegalStateException if {@code expression} is false
