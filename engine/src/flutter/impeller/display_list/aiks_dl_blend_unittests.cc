@@ -18,6 +18,9 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/scalar.h"
+#include "fml/synchronization/count_down_latch.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/playground/playground.h"
@@ -999,6 +1002,80 @@ TEST_P(AiksTest, EmulatedAdvancedBlendRestore) {
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+// Bug: https://github.com/flutter/flutter/issues/160589
+TEST_P(AiksTest, AdvancedBlendSaveLayerRestoreNoFbFetchKeepsClip) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  std::shared_ptr<const Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  auto mock_capabilities = std::make_shared<MockCapabilities>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AtLeast(1))
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetMaximumRenderPassAttachmentSize);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+
+  DisplayListBuilder builder;
+  builder.Save();
+  builder.ClipPath(DlPath::MakeCircle(DlPoint(50, 50), 50));
+  DlPaint layer_paint;
+  layer_paint.setBlendMode(DlBlendMode::kSoftLight);
+  builder.SaveLayer(std::nullopt, &layer_paint);
+  builder.DrawPaint(DlPaint(DlColor::kBlue()));
+  builder.Restore();
+  builder.Restore();
+
+  AiksContext renderer(GetContext(), nullptr);
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize(100, 100), renderer);
+  ASSERT_TRUE(texture);
+
+  DeviceBufferDescriptor desc;
+  desc.size = texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+  desc.readback = true;
+  desc.storage_mode = StorageMode::kHostVisible;
+  auto buffer = GetContext()->GetResourceAllocator()->CreateBuffer(desc);
+  auto cmd_buffer = GetContext()->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  blit_pass->AddCopy(texture, buffer);
+  blit_pass->EncodeCommands();
+  fml::CountDownLatch latch(1u);
+  GetContext()
+      ->GetCommandQueue()
+      ->Submit({cmd_buffer},
+               [&latch](CommandBuffer::Status status) { latch.CountDown(); })
+      .IgnoreError();
+  latch.Wait();
+
+  auto alpha_at = [&](int x, int y) {
+    return buffer->OnGetContents()[(y * 100 + x) * 4 + 3];
+  };
+  EXPECT_EQ(alpha_at(50, 50), 255);
+  EXPECT_EQ(alpha_at(5, 5), 0);
 }
 
 }  // namespace testing
