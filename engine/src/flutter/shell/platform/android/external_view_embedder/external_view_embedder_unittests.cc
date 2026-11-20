@@ -1368,9 +1368,39 @@ TEST(AndroidExternalViewEmbedder,
      AliveFlipBetweenAcquireAndSubmitFlattensDirectFrameAndSchedulesHcEntry) {
   FramePacketTestHarness h;
   const DlISize frame_size(kDefaultFrameExtentPx, kDefaultFrameExtentPx);
-  h.hc_state->hc_views_alive.store(false, std::memory_order_release);
   h.hc_state->root_surface_transparent.store(true, std::memory_order_release);
 
+  // Exhaust consecutive abort retries first so we also prove a healthy T1->T3
+  // direct submit does not consume or get blocked by the abort retry budget.
+  h.hc_state->hc_views_alive.store(true, std::memory_order_release);
+  ON_CALL(*h.jni_mock, AcquireLatestHybridImage(_))
+      .WillByDefault(
+          [](const HybridJavaGlobalRef&) { return HybridJavaGlobalRef(); });
+  PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
+    for (int i = 0; i < kMaxExpectedAbortRetries; ++i) {
+      h.embedder->BeginFrame(nullptr, nullptr);
+      h.embedder->PrepareFlutterView(frame_size, kUnitDevicePixelRatio);
+      auto failing_root = h.deferred_root->AcquireFrame(frame_size);
+      MutatorsStack stack;
+      h.embedder->PrerollCompositeEmbeddedView(
+          kPrimaryViewId,
+          std::make_unique<EmbeddedViewParams>(
+              DlMatrix(),
+              DlSize(kMediumViewExtentLogical, kMediumViewExtentLogical),
+              stack));
+      h.embedder->SubmitFlutterView(kImplicitViewId, nullptr, nullptr,
+                                    std::move(failing_root));
+      EXPECT_FALSE(h.embedder->DidLastSubmitSucceed());
+      h.embedder->EndFrame(false, nullptr);
+    }
+  });
+  h.FlushPlatform();
+  const int inner_submits_before_flip = h.root_inner_submits.load();
+  const int readers_before_flip = h.created_readers.load();
+  ASSERT_EQ(h.schedule_frame_calls_on_platform.load(),
+            kMaxExpectedAbortRetries);
+
+  h.hc_state->hc_views_alive.store(false, std::memory_order_release);
   EXPECT_CALL(*h.jni_mock, FlutterViewBeginHybridFrame(_, _)).Times(0);
 
   PostTaskSync(h.task_runners.GetRasterTaskRunner(), [&]() {
@@ -1406,10 +1436,12 @@ TEST(AndroidExternalViewEmbedder,
   h.FlushPlatform();
 
   // Direct inner_ frame submitted once without double-acquiring inner_ or
-  // allocating HC readers, and a follow-up frame was scheduled to enter HC.
-  EXPECT_EQ(h.root_inner_submits.load(), 1);
-  EXPECT_EQ(h.created_readers.load(), 0);
-  EXPECT_EQ(h.schedule_frame_calls_on_platform.load(), 1);
+  // allocating new HC readers, and the healthy follow-up frame was scheduled
+  // even though prior abort retries had reached the limit.
+  EXPECT_EQ(h.root_inner_submits.load(), inner_submits_before_flip + 1);
+  EXPECT_EQ(h.created_readers.load(), readers_before_flip);
+  EXPECT_EQ(h.schedule_frame_calls_on_platform.load(),
+            kMaxExpectedAbortRetries + 1);
 }
 
 TEST(

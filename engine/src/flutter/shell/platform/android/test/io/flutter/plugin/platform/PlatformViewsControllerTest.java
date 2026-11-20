@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.platform;
 
+import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -2891,33 +2892,6 @@ public class PlatformViewsControllerTest {
     assertEquals(0, controller.getHybridOverlayViews().size());
     assertNull(flutterView.getHybridCompositionBackgroundImageView());
 
-    // Simulate an exit frame whose background Image failed to acquire while hcBackgroundImageView
-    // is visible: onEndHybridFrame must remove hcBackgroundImageView immediately rather than
-    // holding stale pre-exit pixels for another traversal.
-    final Image preExitBgImg = mock(Image.class);
-    when(mockReaderBacking.acquireLatestImage()).thenReturn(preExitBgImg);
-    assertSame(preExitBgImg, hybridReader.acquireLatestImage());
-    controller.onBeginHybridFrame(preExitBgImg, hybridReader);
-    controller.onDisplayHybridPlatformView(
-        platformViewId,
-        0,
-        0,
-        viewSizePx,
-        viewSizePx,
-        viewSizePx,
-        viewSizePx,
-        new FlutterMutatorsStack());
-    controller.onEndHybridFrame(
-        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
-    assertNotNull(flutterView.getHybridCompositionBackgroundImageView());
-
-    org.robolectric.shadows.ShadowLooper.pauseMainLooper();
-    controller.onBeginHybridFrame(null, null);
-    controller.onEndHybridFrame(/* isExitFrame=*/ true, /* removeBackgroundAfterTraversal=*/ false);
-    assertNull(flutterView.getHybridCompositionBackgroundImageView());
-    assertEquals(0, hybridReader.getOpenImageCount());
-    org.robolectric.shadows.ShadowLooper.idleMainLooper();
-
     // Disposing the HC view syncs hcViewsAlive == false.
     syncedStates.clear();
     disposePlatformView(recordingJni, controller, platformViewId);
@@ -2936,6 +2910,77 @@ public class PlatformViewsControllerTest {
     controller.onDisplayHybridOverlaySurface(overlayId0, 0, 0, 10, 10, detachedOv, hybridReader);
     controller.onEndHybridFrame(/* isExitFrame=*/ true, /* removeBackgroundAfterTraversal=*/ true);
     assertEquals(0, hybridReader.getOpenImageCount());
+
+    hybridReader.retire();
+    assertTrue(hybridReader.isClosed());
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_33)
+  public void onEndHybridFrame_defersRemovalWithExitBackgroundAndRemovesImmediatelyWhenNull() {
+    final FlutterView attachedFlutterView =
+        new FlutterView(ApplicationProvider.getApplicationContext()) {
+          @Override
+          public boolean isAttachedToWindow() {
+            return true;
+          }
+
+          @Override
+          public int getWindowVisibility() {
+            return View.VISIBLE;
+          }
+
+          @Override
+          public boolean isHardwareAccelerated() {
+            return false;
+          }
+        };
+
+    final PlatformViewsController controller = new PlatformViewsController();
+    controller.attachToView(attachedFlutterView);
+
+    final ImageReader mockReaderBacking = mock(ImageReader.class);
+    final HybridImageReader hybridReader = new HybridImageReader(mockReaderBacking);
+    hybridReader.disableFenceForTest();
+
+    // Subcase A: Exit frame WITH a fresh exit background image defers removal via
+    // scheduleHybridCompositionBackgroundRemoval() until the posted commit runnable executes.
+    final Image activeBg1 = mock(Image.class);
+    final Image exitBg = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(activeBg1, exitBg);
+    assertSame(activeBg1, hybridReader.acquireLatestImage());
+    assertSame(exitBg, hybridReader.acquireLatestImage());
+
+    controller.onBeginHybridFrame(activeBg1, hybridReader);
+    controller.onEndHybridFrame(
+        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
+    assertNotNull(attachedFlutterView.getHybridCompositionBackgroundImageView());
+
+    org.robolectric.shadows.ShadowLooper.pauseMainLooper();
+    controller.onBeginHybridFrame(exitBg, hybridReader);
+    controller.onEndHybridFrame(/* isExitFrame=*/ true, /* removeBackgroundAfterTraversal=*/ false);
+    assertNotNull(attachedFlutterView.getHybridCompositionBackgroundImageView());
+    org.robolectric.shadows.ShadowLooper.idleMainLooper();
+    assertNull(attachedFlutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(0, hybridReader.getOpenImageCount());
+
+    // Subcase B: Exit frame with null background image (e.g., exit background render failure while
+    // hcBackgroundImageView is visible) removes hcBackgroundImageView synchronously even while the
+    // main Looper is paused.
+    final Image activeBg2 = mock(Image.class);
+    when(mockReaderBacking.acquireLatestImage()).thenReturn(activeBg2);
+    assertSame(activeBg2, hybridReader.acquireLatestImage());
+    controller.onBeginHybridFrame(activeBg2, hybridReader);
+    controller.onEndHybridFrame(
+        /* isExitFrame=*/ false, /* removeBackgroundAfterTraversal=*/ false);
+    assertNotNull(attachedFlutterView.getHybridCompositionBackgroundImageView());
+
+    org.robolectric.shadows.ShadowLooper.pauseMainLooper();
+    controller.onBeginHybridFrame(null, null);
+    controller.onEndHybridFrame(/* isExitFrame=*/ true, /* removeBackgroundAfterTraversal=*/ false);
+    assertNull(attachedFlutterView.getHybridCompositionBackgroundImageView());
+    assertEquals(0, hybridReader.getOpenImageCount());
+    org.robolectric.shadows.ShadowLooper.idleMainLooper();
 
     hybridReader.retire();
     assertTrue(hybridReader.isClosed());

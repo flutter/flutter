@@ -198,14 +198,7 @@ void AndroidExternalViewEmbedder::AbortFrameAndScheduleRetry(
   ScheduleRetryFrameIfAllowed();
 }
 
-void AndroidExternalViewEmbedder::ScheduleRetryFrameIfAllowed() {
-  if (consecutive_abort_retries_ >= kMaxConsecutiveAbortRetries) {
-    FML_LOG(ERROR) << "Reached Hybrid Composition retry limit ("
-                   << kMaxConsecutiveAbortRetries
-                   << " consecutive failures); skipping ScheduleFrame retry.";
-    return;
-  }
-  ++consecutive_abort_retries_;
+void AndroidExternalViewEmbedder::PostScheduleFrame() const {
   if (const fml::RefPtr<fml::TaskRunner>& platform_runner =
           task_runners_.GetPlatformTaskRunner()) {
     platform_runner->PostTask([schedule_frame = schedule_frame_callback_]() {
@@ -214,6 +207,17 @@ void AndroidExternalViewEmbedder::ScheduleRetryFrameIfAllowed() {
       }
     });
   }
+}
+
+void AndroidExternalViewEmbedder::ScheduleRetryFrameIfAllowed() {
+  if (consecutive_abort_retries_ >= kMaxConsecutiveAbortRetries) {
+    FML_LOG(ERROR) << "Reached Hybrid Composition retry limit ("
+                   << kMaxConsecutiveAbortRetries
+                   << " consecutive failures); skipping ScheduleFrame retry.";
+    return;
+  }
+  ++consecutive_abort_retries_;
+  PostScheduleFrame();
 }
 
 void AndroidExternalViewEmbedder::PublishPacket(
@@ -352,10 +356,13 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
     FlattenSlicesIntoCanvas(frame->Canvas(),
                             frame->submit_info().buffer_damage);
     last_submit_succeeded_ = frame->Submit();
-    if (alive) {
-      ScheduleRetryFrameIfAllowed();
-    } else if (last_submit_succeeded_) {
+    if (last_submit_succeeded_) {
       consecutive_abort_retries_ = 0;
+      if (alive) {
+        PostScheduleFrame();
+      }
+    } else if (alive) {
+      ScheduleRetryFrameIfAllowed();
     }
     return;
   }

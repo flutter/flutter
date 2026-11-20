@@ -135,6 +135,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
       const std::vector<ImageLayer*>& unacquired_submitted_layers,
       bool destroyed_any_layer);
 
+  void PostScheduleFrame() const;
+
   void ScheduleRetryFrameIfAllowed();
 
   void Reset();
