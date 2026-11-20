@@ -92,6 +92,7 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   PassRecording::Ptr open_pass_;
   const void* open_pass_owner_ = nullptr;
+  size_t recorded_bytes_ = 0;
   std::vector<impeller::CommandBuffer::CompletionCallback>
       completion_callbacks_;
   bool submitted_ = false;

@@ -14,7 +14,9 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/compute_pipeline.h"
+#include "flutter/lib/gpu/pipeline_state.h"
 #include "flutter/lib/gpu/render_pipeline.h"
+#include "flutter/lib/gpu/retain_stamp.h"
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -22,7 +24,6 @@
 #include "impeller/core/texture.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_target.h"
 
 namespace flutter {
@@ -67,9 +68,16 @@ struct Op : OpHeader {
 // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 
 struct SetPipelineStateOp : Op<RecordedOp::kSetPipelineState> {
+  /// The op's size when it holds [state], whose unused color attachments are
+  /// not recorded.
+  static size_t SizeFor(const PipelineState& state) {
+    return sizeof(SetPipelineStateOp) - sizeof(PipelineState) +
+           state.GetUsedSize();
+  }
+
   const RenderPipeline::Core* core;
-  /// The draw state, without shaders or a vertex layout.
-  const impeller::PipelineDescriptor* descriptor;
+  /// Must stay last. See `SizeFor`.
+  PipelineState state;
 };
 
 struct BindUniformOp : Op<RecordedOp::kBindUniform> {
@@ -181,7 +189,8 @@ struct CopyTextureToTextureOp : Op<RecordedOp::kCopyTextureToTexture> {
 // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
 /// A block of recorded ops. Chunks are fixed size so that a stream grows
-/// without moving what it already holds.
+/// without moving what it already holds, and so that one free list serves
+/// every recording.
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 struct RecordingChunk {
   static constexpr size_t kSize = 64 * 1024;
@@ -198,13 +207,13 @@ class OpStream {
 
   ~OpStream();
 
-  /// Appends an op, and returns it for the caller to fill in.
+  /// Appends an op, and returns it for the caller to fill in. [size] is
+  /// smaller than the op when its trailing fields are unused.
   template <typename T>
-  T* Append() {
+  T* Append(size_t size = sizeof(T)) {
     static_assert(std::is_trivially_destructible_v<T>);
     static_assert(alignof(T) <= kAlignment);
-    constexpr size_t aligned_size =
-        (sizeof(T) + kAlignment - 1) & ~(kAlignment - 1);
+    const size_t aligned_size = (size + kAlignment - 1) & ~(kAlignment - 1);
     if (aligned_size > static_cast<size_t>(limit_ - cursor_)) [[unlikely]] {
       AddChunk();
     }
@@ -231,8 +240,13 @@ class OpStream {
     }
   }
 
-  /// Drops every op and frees the chunks.
+  /// Drops every op and returns the chunks.
   void Reset();
+
+  /// The memory this stream holds.
+  size_t GetAllocatedSize() const {
+    return chunk_count_ * RecordingChunk::kSize;
+  }
 
  private:
   static constexpr size_t kAlignment = 8;
@@ -245,6 +259,7 @@ class OpStream {
   RecordingChunk* tail_ = nullptr;
   uint8_t* cursor_ = nullptr;
   uint8_t* limit_ = nullptr;
+  size_t chunk_count_ = 0;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpStream);
 };
@@ -259,11 +274,26 @@ class PassRecording {
     kBlit,
   };
 
-  using Ptr = std::unique_ptr<PassRecording>;
+  /// Returns a recording to the pool when it is dropped.
+  struct Recycler {
+    void operator()(PassRecording* recording) const;
+  };
 
-  explicit PassRecording(Kind kind) : kind_(kind) {}
+  using Ptr = std::unique_ptr<PassRecording, Recycler>;
 
-  /// Keeps [object] alive until this recording is dropped.
+  /// Takes an empty recording from the pool.
+  static Ptr Acquire(Kind kind);
+
+  /// Keeps [object] alive until this recording is recycled. Costs one
+  /// comparison when [stamp] shows it already does.
+  template <typename T>
+  void Retain(const RetainStamp& stamp, const std::shared_ptr<T>& object) {
+    if (stamp.Update(id_)) {
+      retained_.emplace_back(object);
+    }
+  }
+
+  /// The form of `Retain` for objects without a stamp.
   void Retain(std::shared_ptr<const void> object) {
     retained_.emplace_back(std::move(object));
   }
@@ -275,8 +305,19 @@ class PassRecording {
 
   OpStream ops;
 
+  /// What this recording binds, for presizing backends that store commands.
+  size_t draw_count = 0;
+  size_t uniform_bind_count = 0;
+  size_t texture_bind_count = 0;
+  size_t vertex_buffer_bind_count = 0;
+
  private:
-  const Kind kind_;
+  friend class RecordingPool;
+
+  PassRecording() = default;
+
+  uint64_t id_ = 0;
+  Kind kind_ = Kind::kRender;
   std::vector<std::shared_ptr<const void>> retained_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PassRecording);

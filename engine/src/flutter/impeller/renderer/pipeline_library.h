@@ -96,10 +96,13 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
       std::shared_ptr<const ShaderFunction> function) = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief      Records that the pipeline for the descriptor was bound in a
-  ///             render pass. Only recorded in debug and profile builds.
+  /// @brief      Records that the pipeline for the descriptor was bound
+  ///             [count] times in a render pass. Render passes report once
+  ///             per distinct pipeline through a `PipelineUseCounter` rather
+  ///             than once per draw. Only recorded in debug and profile
+  ///             builds.
   ///
-  void LogPipelineUsage(const PipelineDescriptor& p);
+  void LogPipelineUsage(const PipelineDescriptor& p, int count = 1);
 
   //----------------------------------------------------------------------------
   /// @brief      Records that the pipeline for the descriptor was created

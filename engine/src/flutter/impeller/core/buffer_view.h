@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_CORE_BUFFER_VIEW_H_
 
 #include <memory>
+#include <utility>
+
 #include "impeller/core/range.h"
 
 namespace impeller {
@@ -18,19 +20,23 @@ class DeviceBuffer;
 /// if it is created with a std::shared_ptr or a raw pointer.
 struct BufferView {
  public:
-  BufferView();
+  BufferView() = default;
 
-  BufferView(DeviceBuffer* buffer, Range range);
+  BufferView(const DeviceBuffer* buffer, Range range)
+      : raw_buffer_(buffer), range_(range) {}
 
-  BufferView(std::shared_ptr<const DeviceBuffer> buffer, Range range);
+  BufferView(std::shared_ptr<const DeviceBuffer> buffer, Range range)
+      : buffer_(std::move(buffer)), range_(range) {}
 
   Range GetRange() const { return range_; }
 
-  const DeviceBuffer* GetBuffer() const;
+  const DeviceBuffer* GetBuffer() const {
+    return raw_buffer_ ? raw_buffer_ : buffer_.get();
+  }
 
   std::shared_ptr<const DeviceBuffer> TakeBuffer();
 
-  explicit operator bool() const;
+  explicit operator bool() const { return buffer_ || raw_buffer_; }
 
  private:
   std::shared_ptr<const DeviceBuffer> buffer_;
@@ -38,8 +44,8 @@ struct BufferView {
   /// lives for the duration of the BufferView's life. Usually this is done
   /// automatically by the graphics API or in the case of Vulkan the HostBuffer
   /// or TrackedObjectsVK keeps it alive.
-  const DeviceBuffer* raw_buffer_;
-  Range range_;
+  const DeviceBuffer* raw_buffer_ = nullptr;
+  Range range_ = {};
 };
 
 }  // namespace impeller

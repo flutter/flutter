@@ -6,10 +6,13 @@
 #define FLUTTER_LIB_GPU_REPLAY_H_
 
 #include <array>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "flutter/fml/closure.h"
@@ -30,7 +33,8 @@
 namespace flutter {
 namespace gpu {
 
-/// Replays recordings into Impeller passes.
+/// Replays recordings into Impeller passes. Its working storage lasts between
+/// passes, so that replaying allocates nothing once it has warmed up.
 ///
 /// Every method must run on the replay thread.
 class PassReplayer {
@@ -60,6 +64,11 @@ class PassReplayer {
   void Draw(impeller::RenderPass& pass, const DrawOp& op);
 
   impeller::Context& context_;
+
+  // A frame uses a handful of samplers across thousands of binds, and the
+  // sampler library owns them for the context's lifetime.
+  std::vector<std::pair<uint64_t, impeller::raw_ptr<const impeller::Sampler>>>
+      samplers_;
 
   // The state bound at the current point in the pass. The ops are stable in
   // the recording, so these point at them rather than copying.
@@ -106,6 +115,17 @@ class ReplayQueue {
   /// Whether `Post` runs tasks before returning.
   bool RunsOnCallingThread() const { return !task_runner_; }
 
+  /// Counts [bytes] of submitted recordings as in flight. When too many are,
+  /// this first waits for the replay thread and GPU to catch up, so that a
+  /// thread submitting in a loop cannot queue work without bound.
+  ///
+  /// Frames are normally paced well below the limit. The wait is bounded so
+  /// that a stalled GPU cannot hang the calling thread.
+  void AddInFlightBytes(size_t bytes);
+
+  /// Counts [bytes] as finished.
+  void RemoveInFlightBytes(size_t bytes);
+
   /// The replayer, for use on the replay thread.
   PassReplayer& GetReplayer() { return replayer_; }
 
@@ -114,13 +134,17 @@ class ReplayQueue {
   const fml::RefPtr<fml::TaskRunner> task_runner_;
   PassReplayer replayer_;
 
+  std::mutex in_flight_mutex_;
+  std::condition_variable in_flight_changed_;
+  size_t in_flight_bytes_ = 0;
+
   FML_DISALLOW_COPY_AND_ASSIGN(ReplayQueue);
 };
 
 /// The Impeller command buffer a Flutter GPU command buffer encodes into.
 ///
 /// Created on the recording thread and used on the replay thread. Dropping
-/// the last reference, which happens once the GPU finishes, frees the
+/// the last reference, which happens once the GPU finishes, recycles the
 /// recordings. Everything they point at stays alive until then, which is why
 /// replay can hand Impeller non-owning references.
 class CommandBufferEncoder {
@@ -132,11 +156,12 @@ class CommandBufferEncoder {
   /// Encodes a finished pass.
   void Encode(PassRecording::Ptr recording);
 
-  /// Encodes anything deferred and submits. [completion] runs when the work
-  /// finishes, with `kError` if anything failed. Returns whether the work was
-  /// submitted.
+  /// Encodes anything deferred and submits. [completion] runs once when the
+  /// work finishes, with `kError` if anything failed. [in_flight_bytes] is
+  /// released when the GPU finishes. Returns whether the work was submitted.
   static bool Submit(std::shared_ptr<CommandBufferEncoder> encoder,
-                     impeller::CommandBuffer::CompletionCallback completion);
+                     impeller::CommandBuffer::CompletionCallback completion,
+                     size_t in_flight_bytes);
 
  private:
   /// A pass that OpenGL ES encodes at submit. Encoding hands the reactor raw
@@ -163,6 +188,7 @@ class CommandBufferEncoder {
   std::shared_ptr<impeller::CommandBuffer> command_buffer_;
   std::vector<DeferredPass> deferred_passes_;
   std::vector<PassRecording::Ptr> recordings_;
+  size_t in_flight_bytes_ = 0;
   bool failed_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBufferEncoder);

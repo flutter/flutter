@@ -75,6 +75,11 @@ std::shared_ptr<impeller::Texture> DlImageImpellerTexture::GetImpellerTexture(
   return texture_;
 }
 
+std::shared_ptr<impeller::Texture> DlImageImpellerTexture::GetResolvedTexture()
+    const {
+  return texture_;
+}
+
 // |DlImage|
 flutter::DlColorSpace DlImageImpellerTexture::GetColorSpace() const {
   if (!texture_) {
