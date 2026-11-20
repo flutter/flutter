@@ -761,6 +761,13 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
+  HitTestCallback? get onHitTest => _platformDispatcher.onHitTest;
+  @override
+  set onHitTest(HitTestCallback? callback) {
+    _platformDispatcher.onHitTest = callback;
+  }
+
+  @override
   String get defaultRouteName => _defaultRouteNameTestValue ?? _platformDispatcher.defaultRouteName;
   String? _defaultRouteNameTestValue;
 
