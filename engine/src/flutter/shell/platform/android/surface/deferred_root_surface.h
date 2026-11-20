@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <vector>
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
@@ -92,6 +93,7 @@ class DeferredRootSurface final : public Surface {
   ShouldDeferFn should_defer_;
   std::unique_ptr<Surface> inner_;
   std::weak_ptr<DeferredFrameState> active_deferred_frame_state_;
+  std::vector<std::weak_ptr<DeferredFrameState>> live_deferred_frames_;
   bool had_deferred_frame_ = false;
   fml::WeakPtrFactory<DeferredRootSurface> weak_factory_;
 

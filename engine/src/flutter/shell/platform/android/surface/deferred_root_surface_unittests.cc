@@ -51,6 +51,14 @@ constexpr uint32_t kSolidGreenPremul = 0xFF00FF00u;
 constexpr int kSamplePixelCoord = 8;
 // Sample monotonic nanosecond timestamp for SubmitInfo propagation checks.
 constexpr int64_t kPresentationTimestampNs = 123456789;
+// Sample negative extent in physical pixels used to verify non-positive frame
+// dimension rejection.
+constexpr int kNegativeExtentPx = -10;
+#if SLIMPELLER
+// Non-null sentinel address for opaque GrDirectContext* delegation checks when
+// Ganesh is compiled out under SLIMPELLER (never dereferenced).
+constexpr uintptr_t kSlimpellerSentinelGrContextAddr = 0x1234u;
+#endif  // SLIMPELLER
 
 class MockInnerSurface : public Surface {
  public:
@@ -129,7 +137,7 @@ TEST(DeferredRootSurfaceTest, DelegatesAllTenSurfaceVirtualsAndHandlesNull) {
   GrDirectContext* expected_gr_context = mock_gr_context.get();
 #else
   GrDirectContext* expected_gr_context =
-      reinterpret_cast<GrDirectContext*>(0x1234);
+      reinterpret_cast<GrDirectContext*>(kSlimpellerSentinelGrContextAddr);
 #endif
 
 #if IMPELLER_SUPPORTS_RENDERING
@@ -216,7 +224,6 @@ TEST(DeferredRootSurfaceTest, RejectsZeroNegativeOrInvalidSurfaceFrames) {
 
   DeferredRootSurface deferred(std::move(inner), [&defer] { return defer; });
 
-  constexpr int kNegativeExtentPx = -10;
   const std::vector<DlISize> kInvalidSizes = {
       DlISize(0, 0),
       DlISize(0, kTestHeightPx),
@@ -440,8 +447,8 @@ TEST(DeferredRootSurfaceTest,
   EXPECT_CALL(*raw_inner, IsValid()).WillRepeatedly(Return(true));
   EXPECT_CALL(*raw_inner, MakeRenderContextCurrent()).WillRepeatedly([&] {
     return std::make_unique<GLContextSwitch>(
-        std::make_unique<TrackingSwitchableGLContext>(
-            &is_gl_current, &events, set_current_succeeds));
+        std::make_unique<TrackingSwitchableGLContext>(&is_gl_current, &events,
+                                                      set_current_succeeds));
   });
   EXPECT_CALL(*raw_inner, AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx)))
       .WillOnce([&](const DlISize& size) {
@@ -457,7 +464,8 @@ TEST(DeferredRootSurfaceTest,
               EXPECT_TRUE(is_gl_current);
               return true;
             },
-            size, nullptr, /*display_list_fallback=*/true);
+            size, raw_inner->MakeRenderContextCurrent(),
+            /*display_list_fallback=*/true);
       });
 
   DeferredRootSurface deferred(std::move(inner), [] { return true; });
@@ -469,11 +477,15 @@ TEST(DeferredRootSurfaceTest,
 
   frame->Canvas()->Clear(DlColor::kBlue());
   EXPECT_TRUE(frame->Submit());
-  // Context remains bound until the deferred SurfaceFrame itself is destroyed.
+  // Both nested GLContextSwitches remain alive until the outer deferred
+  // SurfaceFrame itself is destroyed.
   EXPECT_TRUE(is_gl_current);
+  EXPECT_EQ(events, (std::vector<std::string>{"SetCurrent", "SetCurrent"}));
   frame.reset();
   EXPECT_FALSE(is_gl_current);
-  EXPECT_EQ(events, (std::vector<std::string>{"SetCurrent", "RemoveCurrent"}));
+  EXPECT_EQ(events,
+            (std::vector<std::string>{"SetCurrent", "SetCurrent",
+                                      "RemoveCurrent", "RemoveCurrent"}));
 
   // Failed MakeRenderContextCurrent returns nullptr without acquiring a frame.
   set_current_succeeds = false;
@@ -524,7 +536,8 @@ TEST(DeferredRootSurfaceTest,
   auto inner_clear_frame =
       deferred.AcquireInnerFrame(DlISize(kTestWidthPx, kTestHeightPx));
   ASSERT_NE(inner_clear_frame, nullptr);
-  EXPECT_FALSE(inner_clear_frame->framebuffer_info().existing_damage.has_value());
+  EXPECT_FALSE(
+      inner_clear_frame->framebuffer_info().existing_damage.has_value());
   deferred_frame.reset();
 
   // 3. First direct frame after deferral clears existing_damage to force full
@@ -554,7 +567,8 @@ TEST(DeferredRootSurfaceTest,
     return std::make_unique<GLContextDefaultResult>(true);
   });
 
-  // Subcase 1: Lazy inner AcquireFrame returning nullptr fails Submit() cleanly.
+  // Subcase 1: Lazy inner AcquireFrame returning nullptr fails Submit()
+  // cleanly.
   EXPECT_CALL(*raw_inner, AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx)))
       .WillOnce(Return(ByMove(nullptr)));
 
@@ -568,7 +582,7 @@ TEST(DeferredRootSurfaceTest,
   frame1->Canvas()->Clear(DlColor::kRed());
   EXPECT_FALSE(frame1->Submit());
 
-  // Subcase 2: Destroying DeferredRootSurface before Submit() invalidates
+  // Subcase 2: Destroying DeferredRootSurface before Encode() invalidates
   // weak_surface and causes Submit() to return false without UAF.
   auto frame2 = deferred->AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx));
   ASSERT_NE(frame2, nullptr);
@@ -576,6 +590,68 @@ TEST(DeferredRootSurfaceTest,
   deferred.reset();
   EXPECT_FALSE(static_cast<bool>(weak_surface));
   EXPECT_FALSE(frame2->Submit());
+
+  // Subcase 3: Destroying DeferredRootSurface after Encode() succeeds and
+  // before Submit() destroys state->inner_frame while inner_ is still alive and
+  // causes Submit() to return false without invoking inner SubmitCallback.
+  struct LifetimeTrackingInnerSurface : public MockInnerSurface {
+    explicit LifetimeTrackingInnerSurface(bool* alive) : alive_(alive) {}
+    ~LifetimeTrackingInnerSurface() override { *alive_ = false; }
+    bool* alive_;
+  };
+  struct InnerFrameDestructorGuard final : public GLContextDefaultResult {
+    InnerFrameDestructorGuard(const bool* inner_alive, bool* destroyed)
+        : GLContextDefaultResult(true),
+          inner_alive_(inner_alive),
+          destroyed_(destroyed) {}
+    ~InnerFrameDestructorGuard() override {
+      EXPECT_TRUE(*inner_alive_);
+      *destroyed_ = true;
+    }
+    const bool* inner_alive_;
+    bool* destroyed_;
+  };
+
+  bool inner_alive = true;
+  bool inner_frame_destroyed = false;
+  bool inner_submit_called = false;
+  auto inner2 =
+      std::make_unique<NiceMock<LifetimeTrackingInnerSurface>>(&inner_alive);
+  LifetimeTrackingInnerSurface* raw_inner2 = inner2.get();
+  EXPECT_CALL(*raw_inner2, IsValid()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*raw_inner2, MakeRenderContextCurrent()).WillRepeatedly([] {
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*raw_inner2, AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx)))
+      .WillOnce([&](const DlISize& size) {
+        return std::make_unique<SurfaceFrame>(
+            nullptr, SurfaceFrame::FramebufferInfo{.supports_readback = true},
+            [](SurfaceFrame& inner_frame, DlCanvas*) {
+              return inner_frame.BuildDisplayList() != nullptr;
+            },
+            [&](const SurfaceFrame&) {
+              inner_submit_called = true;
+              return true;
+            },
+            size,
+            std::make_unique<InnerFrameDestructorGuard>(&inner_alive,
+                                                        &inner_frame_destroyed),
+            /*display_list_fallback=*/true);
+      });
+
+  auto deferred2 = std::make_unique<DeferredRootSurface>(std::move(inner2),
+                                                         [] { return true; });
+  auto frame3 = deferred2->AcquireFrame(DlISize(kTestWidthPx, kTestHeightPx));
+  ASSERT_NE(frame3, nullptr);
+  frame3->Canvas()->Clear(DlColor::kRed());
+  ASSERT_TRUE(frame3->Encode());
+  EXPECT_FALSE(inner_frame_destroyed);
+
+  deferred2.reset();
+  EXPECT_FALSE(inner_alive);
+  EXPECT_TRUE(inner_frame_destroyed);
+  EXPECT_FALSE(frame3->Submit());
+  EXPECT_FALSE(inner_submit_called);
 }
 
 }  // namespace testing

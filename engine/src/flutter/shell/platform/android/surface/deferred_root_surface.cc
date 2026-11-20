@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/surface/deferred_root_surface.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -20,6 +21,7 @@ struct DeferredRootSurface::DeferredFrameState {
   const SurfaceFrame* frame = nullptr;
   sk_sp<DisplayList> cached_display_list;
   std::unique_ptr<SurfaceFrame> inner_frame;
+  bool inner_encoded = false;
 };
 
 DeferredRootSurface::DeferredRootSurface(std::unique_ptr<Surface> inner,
@@ -28,7 +30,17 @@ DeferredRootSurface::DeferredRootSurface(std::unique_ptr<Surface> inner,
       inner_(std::move(inner)),
       weak_factory_(this) {}
 
-DeferredRootSurface::~DeferredRootSurface() = default;
+DeferredRootSurface::~DeferredRootSurface() {
+  for (const std::weak_ptr<DeferredFrameState>& weak_state :
+       live_deferred_frames_) {
+    if (std::shared_ptr<DeferredFrameState> state = weak_state.lock()) {
+      state->inner_frame.reset();
+      state->inner_encoded = false;
+    }
+  }
+  live_deferred_frames_.clear();
+  active_deferred_frame_state_.reset();
+}
 
 fml::WeakPtr<DeferredRootSurface> DeferredRootSurface::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
@@ -106,6 +118,11 @@ std::unique_ptr<SurfaceFrame> DeferredRootSurface::AcquireFrame(
   had_deferred_frame_ = true;
   auto state = std::make_shared<DeferredFrameState>();
   active_deferred_frame_state_ = state;
+  std::erase_if(live_deferred_frames_,
+                [](const std::weak_ptr<DeferredFrameState>& weak_state) {
+                  return weak_state.expired();
+                });
+  live_deferred_frames_.push_back(state);
 
   fml::WeakPtr<DeferredRootSurface> weak_self = weak_factory_.GetWeakPtr();
   SurfaceFrame::EncodeCallback encode_callback =
@@ -129,27 +146,29 @@ std::unique_ptr<SurfaceFrame> DeferredRootSurface::AcquireFrame(
     }
     inner_frame->ClearExistingDamage();
     inner_frame->set_submit_info(deferred_frame.submit_info());
+    state->inner_frame = std::move(inner_frame);
 
-    DlCanvas* inner_canvas = inner_frame->Canvas();
+    DlCanvas* inner_canvas = state->inner_frame->Canvas();
     if (!inner_canvas) {
       return false;
     }
     inner_canvas->DrawDisplayList(state->cached_display_list);
-    if (!inner_frame->Encode()) {
+    if (!state->inner_frame->Encode()) {
       return false;
     }
-    state->inner_frame = std::move(inner_frame);
+    state->inner_encoded = true;
     return true;
   };
 
   SurfaceFrame::SubmitCallback submit_callback =
-      [state](SurfaceFrame& deferred_frame) -> bool {
-    if (!state->inner_frame) {
+      [weak_self, state](SurfaceFrame& deferred_frame) -> bool {
+    TRACE_EVENT0("flutter", "DeferredRootSurface::SubmitDeferredFrame");
+    if (!weak_self || !weak_self->IsValid() || !state->inner_frame ||
+        !state->inner_encoded) {
       return false;
     }
-    std::unique_ptr<SurfaceFrame> inner_frame = std::move(state->inner_frame);
-    inner_frame->set_submit_info(deferred_frame.submit_info());
-    return inner_frame->Submit();
+    state->inner_frame->set_submit_info(deferred_frame.submit_info());
+    return state->inner_frame->Submit();
   };
 
   SurfaceFrame::FramebufferInfo framebuffer_info;
