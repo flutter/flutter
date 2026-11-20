@@ -745,7 +745,9 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
+  @mustCallSuper
   void rejectGesture(int pointer) {
+    super.rejectGesture(pointer);
     _giveUpPointer(pointer);
   }
 

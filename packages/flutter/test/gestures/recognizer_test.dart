@@ -117,10 +117,9 @@ void main() {
       tester.async.flushMicrotasks();
       tester.route(down);
       tester.route(move);
-      expect(rejecting.state, GestureRecognizerState.defunct);
+      expect(rejecting.state, GestureRecognizerState.ready);
       expect(rejecting.primaryPointer, 5);
-      expect(rejecting.initialPosition!.global, down.position);
-      expect(rejecting.initialPosition!.local, down.localPosition);
+      expect(rejecting.initialPosition, isNull);
       expect(resolutions, <String>['rejected']);
 
       tester.route(up);
