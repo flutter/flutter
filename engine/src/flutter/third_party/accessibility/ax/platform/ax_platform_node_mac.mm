@@ -794,6 +794,11 @@ bool AlsoUseShowMenuActionForDefaultAction(const ui::AXNodeData& data) {
   return [self AXHelpInternal];
 }
 
+- (NSString*)accessibilityIdentifier {
+  NSString* identifier = [self getStringAttribute:ax::mojom::StringAttribute::kIdentifier];
+  return identifier.length > 0 ? identifier : nil;
+}
+
 - (id)accessibilityParent {
   return [self AXParentInternal];
 }
