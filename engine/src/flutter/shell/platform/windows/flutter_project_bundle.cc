@@ -101,6 +101,10 @@ FlutterProjectBundle::FlutterProjectBundle(
 
   enable_flutter_gpu_ = properties.enable_flutter_gpu;
 
+  if (properties.program_cache_path != nullptr) {
+    program_cache_path_ = std::wstring(properties.program_cache_path);
+  }
+
   max_d3d_feature_level_ = GetMaxD3DFeatureLevelFromEnvironment();
 
   // Resolve any relative paths.

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "flutter/shell/platform/windows/client_wrapper/include/flutter/dart_project.h"
@@ -25,6 +26,12 @@ class DartProjectTest : public ::testing::Test {
   // Wrapper for accessing private aot_library_path_.
   std::wstring GetProjectAotLibraryPath(const DartProject& project) {
     return project.aot_library_path();
+  }
+
+  // Wrapper for accessing private program_cache_path_.
+  std::optional<std::wstring> GetProjectProgramCachePath(
+      const DartProject& project) {
+    return project.program_cache_path();
   }
 };
 
@@ -64,6 +71,17 @@ TEST_F(DartProjectTest, EnableFlutterGpu) {
 
   project.set_enable_flutter_gpu(false);
   EXPECT_FALSE(project.enable_flutter_gpu());
+}
+
+TEST_F(DartProjectTest, ProgramCachePath) {
+  DartProject project(L"test");
+  EXPECT_FALSE(GetProjectProgramCachePath(project).has_value());
+
+  project.set_program_cache_path(L"C:\\cache");
+  EXPECT_EQ(GetProjectProgramCachePath(project), L"C:\\cache");
+
+  project.set_program_cache_path(L"");
+  EXPECT_EQ(GetProjectProgramCachePath(project), L"");
 }
 
 }  // namespace flutter
