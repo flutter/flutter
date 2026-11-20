@@ -260,6 +260,13 @@
                 UIActivityViewController* shareSheet =
                     [[UIActivityViewController alloc] initWithActivityItems:@[ @"Share sheet" ]
                                                       applicationActivities:nil];
+                // On iPad, the share sheet is presented as a popover, which crashes without a
+                // source view. Anchor it at the bottom center, so that the top of the screen,
+                // where the test taps, is outside of the popover.
+                UIView* sourceView = weakFlutterViewController.view;
+                shareSheet.popoverPresentationController.sourceView = sourceView;
+                shareSheet.popoverPresentationController.sourceRect = CGRectMake(
+                    CGRectGetMidX(sourceView.bounds), CGRectGetMaxY(sourceView.bounds) - 1, 1, 1);
                 shareSheet.completionWithItemsHandler =
                     ^(UIActivityType activityType, BOOL completed, NSArray* returnedItems,
                       NSError* activityError) {
