@@ -844,31 +844,51 @@ abstract class AutofillScope {
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration);
 }
 
+// The configuration sent to the platform when an [AutofillClient] in an
+// [AutofillScope] attaches: the client's own configuration, plus the
+// configurations of every client in the scope under the `fields` key.
+//
+// The payload is built from `currentClientConfiguration.toJson()`, so every
+// field of the client's configuration reaches the platform, including fields
+// added to [TextInputConfiguration] in the future (see
+// https://github.com/flutter/flutter/issues/192340).
+//
+// Every constructor parameter of [TextInputConfiguration] is also forwarded to
+// `super` so that the getters on this object match the client's configuration.
+// Keep this list in sync with the [TextInputConfiguration] constructor.
 @immutable
 class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
-    required TextInputConfiguration currentClientConfiguration,
+    required this.currentClientConfiguration,
   }) : super(
          viewId: currentClientConfiguration.viewId,
          inputType: currentClientConfiguration.inputType,
+         readOnly: currentClientConfiguration.readOnly,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
          smartQuotesType: currentClientConfiguration.smartQuotesType,
          enableSuggestions: currentClientConfiguration.enableSuggestions,
+         enableInteractiveSelection: currentClientConfiguration.enableInteractiveSelection,
          inputAction: currentClientConfiguration.inputAction,
          textCapitalization: currentClientConfiguration.textCapitalization,
          keyboardAppearance: currentClientConfiguration.keyboardAppearance,
          actionLabel: currentClientConfiguration.actionLabel,
          autofillConfiguration: currentClientConfiguration.autofillConfiguration,
+         enableIMEPersonalizedLearning: currentClientConfiguration.enableIMEPersonalizedLearning,
+         allowedMimeTypes: currentClientConfiguration.allowedMimeTypes,
+         enableDeltaModel: currentClientConfiguration.enableDeltaModel,
+         hintLocales: currentClientConfiguration.hintLocales,
+         enableInlinePrediction: currentClientConfiguration.enableInlinePrediction,
        );
 
   final Iterable<TextInputConfiguration> allConfigurations;
+  final TextInputConfiguration currentClientConfiguration;
 
   @override
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> result = super.toJson();
+    final Map<String, dynamic> result = currentClientConfiguration.toJson();
     result['fields'] = allConfigurations
         .map((TextInputConfiguration configuration) => configuration.toJson())
         .toList(growable: false);
