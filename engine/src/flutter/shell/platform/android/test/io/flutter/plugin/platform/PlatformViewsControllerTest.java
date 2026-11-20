@@ -1813,6 +1813,72 @@ public class PlatformViewsControllerTest {
   }
 
   @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void finishFrame_prunesDestroyedOverlaySurfacesFromOverlayLayerViews() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    final FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.acquireLatestImageViewFrame()).thenReturn(true);
+    platformViewsController.attachToView(flutterView);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+
+    final PlatformOverlayView destroyedOverlay = mock(PlatformOverlayView.class);
+    when(destroyedOverlay.acquireLatestImage()).thenReturn(true);
+    final FlutterOverlaySurface destroyedSurface =
+        platformViewsController.createOverlaySurface(destroyedOverlay);
+
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId, 0, 0, 10, 10, 10, 10, new FlutterMutatorsStack());
+    platformViewsController.onDisplayOverlaySurface(
+        destroyedSurface.getId(), /* x=*/ 0, /* y=*/ 0, /* width=*/ 10, /* height=*/ 10);
+    platformViewsController.onEndFrame();
+    assertEquals(1, platformViewsController.getOverlayLayerViews().size());
+
+    // Resize closes existing overlay ImageReaders without removing Views immediately (#97679), and
+    // repeated destroyOverlaySurfaces() calls do not re-close already closed overlays.
+    platformViewsController.destroyOverlaySurfaces();
+    platformViewsController.destroyOverlaySurfaces();
+    verify(destroyedOverlay, times(1)).closeImageReader();
+    verify(flutterView, never()).removeView(destroyedOverlay);
+    assertEquals(1, platformViewsController.getOverlayLayerViews().size());
+
+    // Allocate a replacement overlay for the new size and present the next frame: the closed
+    // overlay is removed from flutterView and pruned from overlayLayerViews while the active
+    // replacement remains tracked.
+    final PlatformOverlayView activeOverlay = mock(PlatformOverlayView.class);
+    when(activeOverlay.acquireLatestImage()).thenReturn(true);
+    final FlutterOverlaySurface activeSurface =
+        platformViewsController.createOverlaySurface(activeOverlay);
+    assertEquals(2, platformViewsController.getOverlayLayerViews().size());
+
+    platformViewsController.onBeginFrame();
+    platformViewsController.onDisplayPlatformView(
+        platformViewId, 0, 0, 20, 20, 20, 20, new FlutterMutatorsStack());
+    platformViewsController.onDisplayOverlaySurface(
+        activeSurface.getId(), /* x=*/ 0, /* y=*/ 0, /* width=*/ 20, /* height=*/ 20);
+    platformViewsController.onEndFrame();
+
+    verify(flutterView, times(1)).removeView(destroyedOverlay);
+    assertEquals(1, platformViewsController.getOverlayLayerViews().size());
+    assertNull(platformViewsController.getOverlayLayerViews().get(destroyedSurface.getId()));
+    assertEquals(
+        activeOverlay, platformViewsController.getOverlayLayerViews().get(activeSurface.getId()));
+  }
+
+  @Test
   public void checkInputConnectionProxy_falseIfViewIsNull() {
     final PlatformViewsController platformViewsController = new PlatformViewsController();
     boolean shouldProxying = platformViewsController.checkInputConnectionProxy(null);
