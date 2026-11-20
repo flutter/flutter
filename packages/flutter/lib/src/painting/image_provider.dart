@@ -1254,6 +1254,15 @@ enum ResizeImagePolicy {
 /// The decoded image may still be displayed at sizes other than the
 /// cached size provided here.
 ///
+/// {@template flutter.painting.ResizeImage.downscaleQuality}
+/// How the smaller image looks depends on its format. On iOS, Android, and
+/// desktop, non-animated WebP images are decoded directly at the requested
+/// size. Some formats, such as PNG, are decoded at their natural size and
+/// then scaled down with a linear filter, so thin lines and fine patterns can
+/// look jagged when an image is shrunk to less than half its size. For large
+/// reductions, consider using WebP or resizing the image ahead of time.
+/// {@endtemplate}
+///
 /// The [width] and [height] parameters determine the image resolution.
 /// These values also set the image's width & height in logical pixels
 /// if it is unconstrained.

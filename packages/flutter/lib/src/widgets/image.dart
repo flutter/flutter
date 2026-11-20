@@ -331,6 +331,8 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// using the `cacheWidth` and `cacheHeight` parameters, a 100-fold reduction in
 /// memory usage.
 ///
+/// {@macro flutter.painting.ResizeImage.downscaleQuality}
+///
 /// ## Custom image providers
 ///
 /// {@tool sample}
