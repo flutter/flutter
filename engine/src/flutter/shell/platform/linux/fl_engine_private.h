@@ -616,6 +616,15 @@ gboolean fl_engine_unregister_external_texture(FlEngine* engine,
 void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
 
 /**
+ * fl_engine_update_semantics_enabled:
+ * @engine: an #FlEngine.
+ * @enabled: whether to build semantics.
+ *
+ * Tells the Flutter engine whether to build semantics.
+ */
+void fl_engine_update_semantics_enabled(FlEngine* engine, gboolean enabled);
+
+/**
  * fl_engine_request_app_exit:
  * @engine: an #FlEngine.
  *
