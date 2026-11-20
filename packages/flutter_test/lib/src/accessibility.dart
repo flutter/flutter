@@ -269,6 +269,64 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
   }
 }
 
+/// A guideline which enforces that all image nodes have a label, value, hint,
+/// or tooltip.
+///
+/// See also:
+///  * [AccessibilityGuideline], which provides a general overview of
+///    accessibility guidelines and how to use them.
+@visibleForTesting
+class LabeledImageGuideline extends AccessibilityGuideline {
+  const LabeledImageGuideline._();
+
+  @override
+  String get description => 'Images should have a semantic label';
+
+  @override
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+    var result = const Evaluation.pass();
+
+    for (final RenderView view in tester.binding.renderViews) {
+      result += _traverse(view.owner!.semanticsOwner!.rootSemanticsNode!);
+    }
+
+    return result;
+  }
+
+  Evaluation _traverse(SemanticsNode node) {
+    var result = const Evaluation.pass();
+    node.visitChildren((SemanticsNode child) {
+      result += _traverse(child);
+      return true;
+    });
+    if (node.isMergedIntoParent || node.isInvisible || node.flagsCollection.isHidden) {
+      return result;
+    }
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.flagsCollection.isImage) {
+      return result;
+    }
+    // Tappable images are reported by LabeledTapTargetGuideline instead.
+    if (data.hasAction(ui.SemanticsAction.tap) || data.hasAction(ui.SemanticsAction.longPress)) {
+      return result;
+    }
+    // A button with an image is exposed as a button, not as an image.
+    if (data.flagsCollection.isButton) {
+      return result;
+    }
+    if (data.label.trim().isEmpty &&
+        data.value.trim().isEmpty &&
+        data.hint.trim().isEmpty &&
+        data.tooltip.trim().isEmpty) {
+      result += Evaluation.fail(
+        '$node: expected image node to have a label, value, hint, or tooltip, '
+        'but none was found.',
+      );
+    }
+    return result;
+  }
+}
+
 /// A guideline which verifies that all nodes that contribute semantics via text
 /// meet minimum contrast levels.
 ///
@@ -820,3 +878,18 @@ const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuidelin
 ///  * [AccessibilityGuideline], which provides a general overview of
 ///    accessibility guidelines and how to use them.
 const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();
+
+/// A guideline which enforces that all image nodes have a label, value, hint,
+/// or tooltip.
+///
+/// Image nodes that also have a tap or long press action are left to
+/// [labeledTapTargetGuideline].
+///
+/// This guideline only sees nodes that keep the image flag. An [Image] without
+/// an [Image.semanticLabel] does not force a node of its own, so its flag can
+/// be absorbed into an enclosing node that has an unrelated label, and that
+/// node passes. A decorative image should set [Image.excludeFromSemantics].
+///
+///  * [AccessibilityGuideline], which provides a general overview of
+///    accessibility guidelines and how to use them.
+const AccessibilityGuideline labeledImageGuideline = LabeledImageGuideline._();

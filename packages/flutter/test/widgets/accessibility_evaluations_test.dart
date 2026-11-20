@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/widgets.dart';
@@ -651,4 +654,197 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('UnlabeledImageEvaluation', () {
+    const evaluation = UnlabeledImageEvaluation();
+
+    Future<List<Violation>> evaluate(WidgetTester tester, Widget home) async {
+      await tester.pumpWidget(TestWidgetsApp(home: home));
+      final EvaluationResult result = await evaluation.evaluate(tester.binding);
+      return result.violations;
+    }
+
+    Widget image({String label = '', String value = '', String hint = '', String tooltip = ''}) {
+      return Semantics(
+        container: true,
+        image: true,
+        label: label,
+        value: value,
+        hint: hint,
+        tooltip: tooltip,
+        child: const SizedBox.square(dimension: 10.0),
+      );
+    }
+
+    testWidgets('passes if image has label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      expect(await evaluate(tester, image(label: 'A cat')), isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('passes if image has only a value', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      expect(await evaluate(tester, image(value: '50%')), isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('passes if image has only a hint', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      expect(await evaluate(tester, image(hint: 'A cat')), isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('passes if image has only a tooltip', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      expect(await evaluate(tester, image(tooltip: 'A cat')), isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('fails if image has no label, value, hint, or tooltip', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(tester, image());
+      expect(violations, hasLength(1));
+      expect(
+        violations.first.reason,
+        contains(
+          'expected image node to have a label, value, hint, or tooltip, but none was found.',
+        ),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('fails if image label is only whitespace', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      expect(await evaluate(tester, image(label: '   ')), hasLength(1));
+      handle.dispose();
+    });
+
+    testWidgets('fails for Image with empty semanticLabel', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        Image(image: _TestImageProvider(), semanticLabel: ''),
+      );
+      expect(violations, hasLength(1));
+      expect(violations.first.node.getSemanticsData().flagsCollection.isImage, isTrue);
+      handle.dispose();
+    });
+
+    testWidgets('fails for FadeInImage with empty imageSemanticLabel', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        FadeInImage(
+          placeholder: _TestImageProvider(),
+          image: _TestImageProvider(),
+          imageSemanticLabel: '',
+        ),
+      );
+      expect(violations, hasLength(1));
+      handle.dispose();
+    });
+
+    testWidgets('skips Image excluded from semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      expect(
+        await evaluate(tester, Image(image: _TestImageProvider(), excludeFromSemantics: true)),
+        isEmpty,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('skips hidden nodes', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        Semantics(
+          container: true,
+          image: true,
+          hidden: true,
+          child: const SizedBox.square(dimension: 10.0),
+        ),
+      );
+      expect(violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('skips tappable images', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        Semantics(
+          container: true,
+          image: true,
+          onTap: () {},
+          child: const SizedBox.square(dimension: 10.0),
+        ),
+      );
+      expect(violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('skips buttons', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        Semantics(
+          container: true,
+          image: true,
+          button: true,
+          child: const SizedBox.square(dimension: 10.0),
+        ),
+      );
+      expect(violations, isEmpty);
+      handle.dispose();
+    });
+
+    testWidgets('reports each unlabeled image node', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        Semantics(container: true, child: Column(children: <Widget>[image(), image()])),
+      );
+      expect(violations, hasLength(2));
+      handle.dispose();
+    });
+
+    testWidgets('reports merged images once', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final List<Violation> violations = await evaluate(
+        tester,
+        MergeSemantics(child: Column(children: <Widget>[image(), image()])),
+      );
+      expect(violations, hasLength(1));
+      handle.dispose();
+    });
+
+    testWidgets('passes for Image absorbed into a labeled container', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      // The Image has no node of its own, so the container's label counts for it.
+      final List<Violation> violations = await evaluate(
+        tester,
+        Semantics(
+          container: true,
+          label: 'Profile',
+          child: Image(image: _TestImageProvider()),
+        ),
+      );
+      expect(violations, isEmpty);
+      handle.dispose();
+    });
+  });
+}
+
+class _TestImageProvider extends ImageProvider<Object> {
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+    return OneFrameImageStreamCompleter(Completer<ImageInfo>().future);
+  }
 }

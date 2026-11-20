@@ -66,6 +66,12 @@ enum AccessibilityEvaluationType {
   ///
   /// Evaluated by [TitleEvaluation].
   title,
+
+  /// Enforces that all image semantics nodes have a label, value, hint, or
+  /// tooltip.
+  ///
+  /// Evaluated by [UnlabeledImageEvaluation].
+  unlabeledImage,
 }
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
@@ -922,5 +928,66 @@ class TitleEvaluation extends AccessibilityEvaluation {
       }
     });
     return found;
+  }
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
+///
+/// An evaluation which enforces that all image semantics nodes have a label,
+/// value, hint, or tooltip.
+@internal
+class UnlabeledImageEvaluation extends AccessibilityEvaluation {
+  const UnlabeledImageEvaluation();
+
+  @override
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.unlabeledImage;
+
+  @override
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
+    final violations = <Violation>[];
+    for (final RenderView view in binding.renderViews) {
+      final SemanticsNode? root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        violations.addAll(_traverse(root));
+      }
+    }
+    return EvaluationResult(violations);
+  }
+
+  List<Violation> _traverse(SemanticsNode node) {
+    final violations = <Violation>[];
+    node.visitChildren((SemanticsNode child) {
+      violations.addAll(_traverse(child));
+      return true;
+    });
+    if (node.isMergedIntoParent || node.isInvisible || node.flagsCollection.isHidden) {
+      return violations;
+    }
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.flagsCollection.isImage) {
+      return violations;
+    }
+    // Tappable images are reported by LabeledTapTargetEvaluation instead.
+    if (data.hasAction(ui.SemanticsAction.tap) || data.hasAction(ui.SemanticsAction.longPress)) {
+      return violations;
+    }
+    // A button with an image is exposed as a button, not as an image, and
+    // UnlabeledLeafNodeEvaluation reports it.
+    if (data.flagsCollection.isButton) {
+      return violations;
+    }
+    if (data.label.trim().isEmpty &&
+        data.value.trim().isEmpty &&
+        data.hint.trim().isEmpty &&
+        data.tooltip.trim().isEmpty) {
+      violations.add(
+        Violation(
+          node,
+          '$node: expected image node to have a label, value, hint, or tooltip, '
+          'but none was found.',
+        ),
+      );
+    }
+    return violations;
   }
 }

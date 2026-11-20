@@ -182,6 +182,7 @@ class AccessibilityInspector {
       MinimumTapTargetEvaluation(size: minSize),
       const LabeledTapTargetEvaluation(),
       const UnlabeledLeafNodeEvaluation(),
+      const UnlabeledImageEvaluation(),
     ];
 
     for (final evaluation in evaluations) {

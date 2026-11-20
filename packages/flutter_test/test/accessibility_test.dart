@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -946,6 +949,116 @@ void main() {
     });
   });
 
+  group('Labeled image guideline', () {
+    Widget image({
+      String label = '',
+      String value = '',
+      bool hidden = false,
+      bool button = false,
+      VoidCallback? onTap,
+    }) {
+      return Semantics(
+        container: true,
+        image: true,
+        label: label,
+        value: value,
+        hidden: hidden,
+        button: button ? true : null,
+        onTap: onTap,
+        child: const SizedBox(width: 10.0, height: 10.0),
+      );
+    }
+
+    testWidgets('Passes when image is labeled', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image(label: 'A cat')));
+      await expectLater(tester, meetsGuideline(labeledImageGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Passes when image only has a value', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image(value: '50%')));
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Fails if image has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image()));
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, false);
+      expect(
+        result.reason,
+        contains('expected image node to have a label, value, hint, or tooltip'),
+      );
+      await expectLater(tester, doesNotMeetGuideline(labeledImageGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Fails if image label is only whitespace', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image(label: '   ')));
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Fails for Image with empty semanticLabel', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Image(image: _PendingImageProvider(), width: 10.0, height: 10.0, semanticLabel: ''),
+        ),
+      );
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Passes for Image excluded from semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Image(
+            image: _PendingImageProvider(),
+            width: 10.0,
+            height: 10.0,
+            excludeFromSemantics: true,
+          ),
+        ),
+      );
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Skips hidden images', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image(hidden: true)));
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Skips tappable images', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image(onTap: () {})));
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Skips buttons', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(image(button: true)));
+      final Evaluation result = await labeledImageGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+  });
+
   testWidgets('regression test for material widget', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
@@ -970,4 +1083,16 @@ Widget _boilerplate(Widget child, {bool? useMaterial3}) {
     theme: ThemeData(useMaterial3: useMaterial3),
     home: Scaffold(body: Center(child: child)),
   );
+}
+
+class _PendingImageProvider extends ImageProvider<Object> {
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_PendingImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+    return OneFrameImageStreamCompleter(Completer<ImageInfo>().future);
+  }
 }
