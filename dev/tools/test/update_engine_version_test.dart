@@ -258,31 +258,34 @@ void main() {
 
   group('GIT_DIR', () {
     late Directory externalGit;
-    late String externalHead;
     setUp(() {
       externalGit = localFs.systemTempDirectory.createTempSync('GIT_DIR_test.');
       initGitRepoWithBlankInitialCommit(workingPath: externalGit.path);
       setupRemote(remote: 'upstream', rootPath: externalGit.path);
-
-      externalHead =
-          (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout
-                  as String)
-              .trim();
     });
 
     test('un-sets environment variables', () {
-      // Needs to happen before GIT_DIR is set
+      // Needs to happen before GIT_* variables are set so expectedHash reflects
+      // testRoot's committed DEPS rather than externalGit's empty tree.
+      testRoot.root.childFile('DEPS').writeAsStringSync('test_root_deps');
       initGitRepoWithBlankInitialCommit();
       setupRemote(remote: 'upstream');
+      final String expectedHash = gitContentHash(fileSystem: testRoot).trim();
+      expect(expectedHash, isNot(equals('e69de29bb2d1d6434b8b29ae775ad8c2e48c5391')));
 
-      environment['GIT_DIR'] = '${externalGit.path}/.git';
-      environment['GIT_INDEX_FILE'] = '${externalGit.path}/.git/index';
+      final String externalGitDir = localFs.path.join(externalGit.path, '.git');
+      final String externalObjectsDir = localFs.path.join(externalGitDir, 'objects');
+      environment['GIT_DIR'] = externalGitDir;
+      environment['GIT_INDEX_FILE'] = localFs.path.join(externalGitDir, 'index');
       environment['GIT_WORK_TREE'] = externalGit.path;
+      environment['GIT_OBJECT_DIRECTORY'] = externalObjectsDir;
+      environment['GIT_ALTERNATE_OBJECT_DIRECTORIES'] = externalObjectsDir;
+      environment['GIT_QUARANTINE_PATH'] = externalObjectsDir;
+      environment['GIT_COMMON_DIR'] = externalGitDir;
 
       runUpdateEngineVersion();
 
-      final String engineStamp = testRoot.binCacheEngineStamp.readAsStringSync().trim();
-      expect(engineStamp, isNot(equals(externalHead)));
+      expect(testRoot.binCacheEngineStamp, _hasFileContentsMatching(expectedHash));
     });
 
     tearDown(() async {

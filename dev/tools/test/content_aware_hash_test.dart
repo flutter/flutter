@@ -416,6 +416,35 @@ void main() {
       reason: 'content hash from HEAD when no merge-base',
     );
   });
+
+  group('GIT_DIR', () {
+    late Directory externalGit;
+
+    setUp(() {
+      externalGit = localFs.systemTempDirectory.createTempSync('content_aware_hash_git_dir.');
+      initGitRepoWithBlankInitialCommit(workingPath: externalGit.path);
+    });
+
+    tearDown(() async {
+      await deleteTempDirectory(externalGit);
+    });
+
+    test('un-sets environment variables', () {
+      initGitRepoWithBlankInitialCommit();
+
+      final String externalGitDir = localFs.path.join(externalGit.path, '.git');
+      final String externalObjectsDir = localFs.path.join(externalGitDir, 'objects');
+      environment['GIT_DIR'] = externalGitDir;
+      environment['GIT_INDEX_FILE'] = localFs.path.join(externalGitDir, 'index');
+      environment['GIT_WORK_TREE'] = externalGit.path;
+      environment['GIT_OBJECT_DIRECTORY'] = externalObjectsDir;
+      environment['GIT_ALTERNATE_OBJECT_DIRECTORIES'] = externalObjectsDir;
+      environment['GIT_QUARANTINE_PATH'] = externalObjectsDir;
+      environment['GIT_COMMON_DIR'] = externalGitDir;
+
+      expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
+    });
+  });
 }
 
 /// A FrUT, or "Flutter Root"-Under Test (parallel to a SUT, System Under Test).

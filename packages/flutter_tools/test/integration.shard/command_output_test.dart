@@ -272,6 +272,211 @@ void main() {
     expect(result.stderr, isEmpty);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/195791.
+  testWithoutContext('dart and flutter run from a git hook in a linked worktree preserve flutter.version.json and caller GIT_* environment', () async {
+    final Directory flutterRoot = fileSystem.directory(getFlutterRoot());
+    final String dartBin = fileSystem.path.join(
+      flutterRoot.path,
+      'bin',
+      platform.isWindows ? 'dart.bat' : 'dart',
+    );
+    final Directory cacheDir = flutterRoot.childDirectory('bin').childDirectory('cache');
+    final File flutterVersionJson = cacheDir.childFile('flutter.version.json');
+    final File flutterToolsStamp = cacheDir.childFile('flutter_tools.stamp');
+
+    if (!flutterVersionJson.existsSync() || !flutterToolsStamp.existsSync()) {
+      final ProcessResult initResult = await processManager.run(<String>[flutterBin, '--version']);
+      expect(initResult, const ProcessResultMatcher());
+    }
+    final String initialVersionJson = flutterVersionJson.readAsStringSync();
+    final String initialToolsStamp = flutterToolsStamp.readAsStringSync();
+
+    final Directory tempDir = createResolvedTempDirectorySync('git_hook_worktree_test.');
+    try {
+      final Directory demoDir = tempDir.childDirectory('demo')..createSync();
+      for (final command in <List<String>>[
+        <String>['git', 'init', '-q'],
+        <String>['git', 'config', 'user.email', 'test@example.com'],
+        <String>['git', 'config', 'user.name', 'Test User'],
+      ]) {
+        expect(
+          await processManager.run(command, workingDirectory: demoDir.path),
+          const ProcessResultMatcher(),
+        );
+      }
+
+      demoDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: demo
+environment:
+  sdk: ^3.8.0
+dependencies:
+  sky_engine:
+    sdk: flutter
+''');
+      expect(
+        await processManager.run(<String>[
+          'git',
+          'add',
+          'pubspec.yaml',
+        ], workingDirectory: demoDir.path),
+        const ProcessResultMatcher(),
+      );
+      expect(
+        await processManager.run(<String>[
+          'git',
+          'commit',
+          '-q',
+          '-m',
+          'init',
+        ], workingDirectory: demoDir.path),
+        const ProcessResultMatcher(),
+      );
+
+      final Directory worktreeDir = tempDir.childDirectory('demo-wt');
+      expect(
+        await processManager.run(<String>[
+          'git',
+          'worktree',
+          'add',
+          '-q',
+          worktreeDir.path,
+        ], workingDirectory: demoDir.path),
+        const ProcessResultMatcher(),
+      );
+
+      final File hookEnvOutput = tempDir.childFile('hook_env.json');
+      final File dumpEnvScript = tempDir.childFile('dump_git_env.dart')
+        ..writeAsStringSync('''
+import 'dart:convert';
+import 'dart:io';
+
+void main(List<String> args) {
+  final gitVars = <String, String>{
+    for (final MapEntry(:key, :value) in Platform.environment.entries)
+      if (key.toUpperCase().startsWith('GIT_')) key.toUpperCase(): value,
+  };
+  File(args.single).writeAsStringSync(jsonEncode(gitVars));
+}
+''');
+
+      final String posixDartBin = dartBin.replaceAll(r'\', '/');
+      final String posixDumpScript = dumpEnvScript.path.replaceAll(r'\', '/');
+      final String posixHookEnvOutput = hookEnvOutput.path.replaceAll(r'\', '/');
+      final Directory hooksDir = worktreeDir.childDirectory('hooks')..createSync();
+      final File preCommitHook = hooksDir.childFile('pre-commit')
+        ..writeAsStringSync('''
+#!/bin/sh
+set -e
+"$posixDartBin" --version
+"$posixDartBin" "$posixDumpScript" "$posixHookEnvOutput"
+''');
+      if (!platform.isWindows) {
+        expect(
+          processManager.runSync(<String>['chmod', '+x', preCommitHook.path]),
+          const ProcessResultMatcher(),
+        );
+      }
+
+      expect(
+        await processManager.run(<String>[
+          'git',
+          '-c',
+          'core.hooksPath=hooks',
+          'commit',
+          '-q',
+          '--allow-empty',
+          '-m',
+          'trigger',
+        ], workingDirectory: worktreeDir.path),
+        const ProcessResultMatcher(),
+      );
+
+      expect(
+        flutterVersionJson.existsSync(),
+        isTrue,
+        reason: 'bin/cache/flutter.version.json must not be deleted by dart in a git hook',
+      );
+      expect(flutterVersionJson.readAsStringSync(), initialVersionJson);
+      expect(flutterToolsStamp.readAsStringSync(), initialToolsStamp);
+
+      // Verify the user's dart process inside the hook still received GIT_DIR.
+      expect(hookEnvOutput.existsSync(), isTrue);
+      final Object? decodedHookEnv = json.decode(hookEnvOutput.readAsStringSync());
+      if (decodedHookEnv is! Map<String, Object?>) {
+        fail('Expected JSON object from hook environment dump, got $decodedHookEnv');
+      }
+      expect(
+        decodedHookEnv['GIT_DIR'],
+        isA<String>().having((String value) => value, 'GIT_DIR', contains('demo-wt')),
+      );
+
+      // Verify `dart pub get --offline` still resolves the Flutter SDK dependency.
+      expect(
+        await processManager.run(<String>[
+          dartBin,
+          'pub',
+          'get',
+          '--offline',
+        ], workingDirectory: worktreeDir.path),
+        const ProcessResultMatcher(),
+      );
+
+      // Verify all 7 git repository environment variables are isolated from
+      // the wrapper's own git calls while remaining visible to user commands.
+      final File directEnvOutput = tempDir.childFile('direct_env.json');
+      final String demoGitDir = demoDir.childDirectory('.git').path;
+      final String demoObjectsDir = fileSystem.path.join(demoGitDir, 'objects');
+      final injectedGitVars = <String, String>{
+        'GIT_DIR': demoGitDir,
+        'GIT_INDEX_FILE': fileSystem.path.join(demoGitDir, 'index'),
+        'GIT_WORK_TREE': demoDir.path,
+        'GIT_OBJECT_DIRECTORY': demoObjectsDir,
+        'GIT_ALTERNATE_OBJECT_DIRECTORIES': demoObjectsDir,
+        'GIT_QUARANTINE_PATH': demoObjectsDir,
+        'GIT_COMMON_DIR': demoGitDir,
+      };
+      final combinedEnv = <String, String>{...platform.environment, ...injectedGitVars};
+      expect(
+        await processManager.run(
+          <String>[dartBin, dumpEnvScript.path, directEnvOutput.path],
+          workingDirectory: worktreeDir.path,
+          environment: combinedEnv,
+        ),
+        const ProcessResultMatcher(),
+      );
+      expect(flutterVersionJson.existsSync(), isTrue);
+      expect(flutterToolsStamp.readAsStringSync(), initialToolsStamp);
+
+      final Object? decodedDirectEnv = json.decode(directEnvOutput.readAsStringSync());
+      if (decodedDirectEnv is! Map<String, Object?>) {
+        fail('Expected JSON object from direct environment dump, got $decodedDirectEnv');
+      }
+      for (final MapEntry(:key, :value) in injectedGitVars.entries) {
+        expect(decodedDirectEnv[key], value, reason: '$key should be preserved for user command');
+      }
+
+      final ProcessResult flutterResult = await processManager.run(
+        <String>[flutterBin, '--version', '--machine'],
+        workingDirectory: worktreeDir.path,
+        environment: combinedEnv,
+      );
+      expect(flutterResult, const ProcessResultMatcher());
+      expect(flutterResult.stderr, isNot(contains('Building flutter tool')));
+      expect(flutterToolsStamp.readAsStringSync(), initialToolsStamp);
+    } finally {
+      try {
+        if (!flutterVersionJson.existsSync() ||
+            !flutterToolsStamp.existsSync() ||
+            flutterVersionJson.readAsStringSync() != initialVersionJson ||
+            flutterToolsStamp.readAsStringSync() != initialToolsStamp) {
+          await processManager.run(<String>[flutterBin, '--version']);
+        }
+      } finally {
+        tryToDelete(tempDir);
+      }
+    }
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/75876.
   testWithoutContext('flutter create daemon produces output', () async {
     final Directory directory = createResolvedTempDirectorySync('create_daemon_test.');

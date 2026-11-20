@@ -63,6 +63,20 @@ GOTO :after_subroutine
     CALL "%bootstrap_path%"
   )
 
+  REM Unset Git environment variables that may be inherited (e.g. from a git hook
+  REM in a user repository or linked worktree) so git commands target FLUTTER_ROOT.
+  REM Keep in sync with Git._kGitEnvironmentVariables in
+  REM packages/flutter_tools/lib/src/git.dart.
+  REM SETLOCAL at the top of shared.bat ensures the caller's environment is
+  REM preserved for the user command executed after shared.bat returns.
+  IF DEFINED GIT_DIR SET "GIT_DIR="
+  IF DEFINED GIT_INDEX_FILE SET "GIT_INDEX_FILE="
+  IF DEFINED GIT_WORK_TREE SET "GIT_WORK_TREE="
+  IF DEFINED GIT_OBJECT_DIRECTORY SET "GIT_OBJECT_DIRECTORY="
+  IF DEFINED GIT_ALTERNATE_OBJECT_DIRECTORIES SET "GIT_ALTERNATE_OBJECT_DIRECTORIES="
+  IF DEFINED GIT_QUARANTINE_PATH SET "GIT_QUARANTINE_PATH="
+  IF DEFINED GIT_COMMON_DIR SET "GIT_COMMON_DIR="
+
   REM Get the Git revision.
   2>NUL (
     REM 'FOR /f' spawns a new terminal instance to run the command. If an
