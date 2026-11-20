@@ -1943,8 +1943,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.services.AutofillConfiguration.autofillHints}
   final Iterable<String>? autofillHints;
 
-  /// Optional text that describes the expected input to platform autofill
-  /// services, for example `"Enter your password"`.
+  /// Optional text describing the expected input for this text field, sent to
+  /// the platform's autofill service as a hint, for example
+  /// `"Enter your password"`.
   ///
   /// This text is not rendered visually by [EditableText]. It is passed to
   /// [AutofillConfiguration.hintText] to help platform autofill services (such
@@ -1961,10 +1962,12 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [AutofillConfiguration.hintText], the underlying platform configuration
-  ///    field populated by this property.
-  ///  * [autofillHints], which provides standardized autofill hint constants
-  ///    from [AutofillHints].
+  ///  * [AutofillConfiguration.hintText], which receives the value of this
+  ///    property.
+  ///  * [autofillHints], which is the list of hints that identifies the type
+  ///    of this field to the autofill service.
+  ///  * [AutofillHints], which contains commonly used values for
+  ///    [autofillHints].
   final String? autofillHintText;
 
   /// The [AutofillClient] that controls this input field's autofill behavior.
