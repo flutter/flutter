@@ -245,6 +245,7 @@ group("unittests") {
         "//flutter/impeller:impeller_dart_unittests",
         "//flutter/impeller:impeller_unittests",
         "//flutter/impeller/toolkit/interop:example",
+        "//flutter/impeller/toolkit/interop:static_library_tests",
       ]
     }
 
