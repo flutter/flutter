@@ -44,6 +44,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fake_web_devfs.dart';
 import '../../src/fakes.dart';
 import '../../src/testbed.dart';
+import '../../src/throwing_pub.dart';
 
 const kTransparentImage = <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, //
@@ -138,10 +139,12 @@ void main() {
       final cache = FlutterCache(
         flutterRoot: '',
         fileSystem: fs,
+        isLocalEngineBuilder: () => artifacts.localEngineInfo != null,
         logger: logger,
         platform: platform,
         osUtils: os,
         projectFactory: FlutterProjectFactory(config: config, fileSystem: fs, logger: logger),
+        pub: () => const ThrowingPub(),
       );
       artifacts = overrides?[Artifacts] != null
           ? overrides![Artifacts]!() as Artifacts
