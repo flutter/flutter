@@ -100,6 +100,9 @@ constexpr float kScrollExtentMaxForInf = 1000;
 
 - (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child;
 
+/** Replaces an existing hit-test child by identity without changing parent relationships. */
+- (void)replaceChildInHitTestOrder:(SemanticsObject*)oldChild withChild:(SemanticsObject*)child;
+
 - (BOOL)nodeWillCauseLayoutChange:(const flutter::SemanticsNode*)node;
 
 - (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node;
