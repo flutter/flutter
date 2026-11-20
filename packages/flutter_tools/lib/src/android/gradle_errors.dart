@@ -888,15 +888,28 @@ const String kMigrateToBuiltInKotlinDocsUrl =
 const String kOptOutOfNewDslDocsUrl =
     'https://developer.android.com/build/releases/agp-9-0-0-release-notes';
 
-/// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
-/// using AGP 9+ because built-in Kotlin has become the default behavior.
+/// The URL for documentation on migrating an app to built-in Kotlin.
+const String kMigrateAppToBuiltInKotlinDocsUrl =
+    'https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers';
+
+/// Captures the build file that the Kotlin Gradle Plugin names when it refuses
+/// to apply because `android.builtInKotlin` is enabled. The path is relative to
+/// the Android root project, for example `app/build.gradle.kts` or
+/// `../../my_plugin/android/build.gradle`.
+final RegExp _kotlinAndroidPluginBuildFileRegex = RegExp(
+  r"Remove the 'org\.jetbrains\.kotlin\.android' plugin from this project's build file: (.+?)\.?\s*$",
+  multiLine: true,
+);
+
+/// Handler for the `kotlin-android` plugin failing to apply because
+/// `android.builtInKotlin` is enabled.
+///
+/// Matches the solution line that the Kotlin Gradle Plugin prints, which names
+/// the build file that applies the plugin. The message tells the developer
+/// whether the app or a plugin needs to change.
 @visibleForTesting
 final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
-  test: (String line) {
-    return line.contains(
-      "The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0",
-    );
-  },
+  test: _kotlinAndroidPluginBuildFileRegex.hasMatch,
   handler:
       ({
         required utils.GradleUtils gradleUtils,
@@ -907,11 +920,31 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
         Java? java,
       }) async {
         final Logger logger = toolContext.logger;
-        logger.printBox('''
-${logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin.
-This results in a build failure when applying the kotlin-android plugin.
-To resolve this, migrate to built-in Kotlin.
-\nFor instructions on how to migrate, see: $kMigrateToBuiltInKotlinDocsUrl''', title: _boxTitle);
+        // Kotlin Gradle Plugin prints the path with the platform separator.
+        final String buildFile = _kotlinAndroidPluginBuildFileRegex
+            .firstMatch(line)!
+            .group(1)!
+            .replaceAll(r'\', '/');
+        if (buildFile == 'app/build.gradle' || buildFile == 'app/build.gradle.kts') {
+          logger.printBox('''
+${logger.terminal.warningMark} android/$buildFile applies the kotlin-android plugin, which does not work with `android.builtInKotlin=true`.
+
+To fix this, migrate the app to built-in Kotlin:
+  1. Remove the kotlin-android plugin (`org.jetbrains.kotlin.android`) from the plugins block of android/$buildFile.
+  2. Replace any `kotlinOptions {}` block with `kotlin { compilerOptions {} }`.
+For instructions, see: $kMigrateAppToBuiltInKotlinDocsUrl''', title: _boxTitle);
+        } else {
+          logger.printBox('''
+${logger.terminal.warningMark} A plugin applies the kotlin-android plugin, which does not work with `android.builtInKotlin=true`.
+Build file: $buildFile
+
+To fix this, upgrade the plugin to a version that supports built-in Kotlin.
+If no such version exists, report it to the plugin author.
+See: $kMigrateAppToBuiltInKotlinDocsUrl
+
+To build until then, set `android.builtInKotlin=false` and `android.newDsl=false` in android/gradle.properties.
+For details, see: $kMigrateToBuiltInKotlinDocsUrl''', title: _boxTitle);
+        }
 
         return GradleBuildStatus.exit;
       },
