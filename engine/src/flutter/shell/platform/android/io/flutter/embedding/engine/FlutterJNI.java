@@ -1698,6 +1698,12 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
+  /**
+   * @deprecated Use {@link
+   *     io.flutter.embedding.engine.renderer.FlutterRenderer#getBitmapAsync(java.util.function.Consumer)}
+   *     instead.
+   */
+  @Deprecated
   @UiThread
   public Bitmap getBitmap() {
     ensureRunningOnMainThread();
