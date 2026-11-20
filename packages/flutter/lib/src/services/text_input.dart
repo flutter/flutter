@@ -2228,6 +2228,32 @@ class TextInput {
         }
         return false;
     }
+    // The updateEditingStateWithTag request (autofill) can come up even to a
+    // text field that doesn't have a connection.
+    if (method == 'TextInputClient.updateEditingStateWithTag') {
+      final args = methodCall.arguments as List<dynamic>;
+      // On the web a browser password manager can autofill in the brief window
+      // after the connection is torn down, so fall back to the last connection.
+      // Other platforms only route to the current connection.
+      // https://github.com/flutter/flutter/issues/174773
+      final TextInputConnection? connection = kIsWeb
+          ? (_currentConnection ?? _lastConnection)
+          : _currentConnection;
+      final AutofillScope? scope = connection?._client.currentAutofillScope;
+      final editingValue = args[1] as Map<String, dynamic>;
+      for (final String tag in editingValue.keys) {
+        final textEditingValue = TextEditingValue.fromJSON(
+          editingValue[tag] as Map<String, dynamic>,
+        );
+        final AutofillClient? client = scope?.getAutofillClient(tag);
+        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
+          client.autofill(textEditingValue);
+        }
+      }
+
+      return;
+    }
+
     if (_currentConnection == null) {
       return;
     }
@@ -2244,26 +2270,6 @@ class TextInput {
     }
 
     final args = methodCall.arguments as List<dynamic>;
-
-    // The updateEditingStateWithTag request (autofill) can come up even to a
-    // text field that doesn't have a connection.
-    if (method == 'TextInputClient.updateEditingStateWithTag') {
-      final TextInputClient client = _currentConnection!._client;
-      final AutofillScope? scope = client.currentAutofillScope;
-      final editingValue = args[1] as Map<String, dynamic>;
-      for (final String tag in editingValue.keys) {
-        final textEditingValue = TextEditingValue.fromJSON(
-          editingValue[tag] as Map<String, dynamic>,
-        );
-        final AutofillClient? client = scope?.getAutofillClient(tag);
-        if (client != null && client.textInputConfiguration.autofillConfiguration.enabled) {
-          client.autofill(textEditingValue);
-        }
-      }
-
-      return;
-    }
-
     final client = args[0] as int;
     if (client != _currentConnection!._id) {
       // If the client IDs don't match, the incoming message was for a different

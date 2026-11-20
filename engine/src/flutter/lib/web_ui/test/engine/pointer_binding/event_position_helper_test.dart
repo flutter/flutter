@@ -188,6 +188,59 @@ void doTests() {
       expect(offset, const ui.Offset(40, 190));
     });
 
+    test('Event dispatched on a non-active text editing node is positioned like any '
+        'other element', () async {
+      // The text editing host also holds the non-focused fields of an autofill
+      // form, kept hit-testable so a password manager's own hit test finds them.
+      // A pointer event on one of them must not be mapped through the active
+      // element's geometry; it is an event at its own place in the view.
+      textEditing.strategy
+        ..enable(
+          InputConfiguration(viewId: view.viewId),
+          onChange: (_, _) {},
+          onAction: (_) {},
+        )
+        ..updateElementPlacement(
+          EditableTextGeometry(
+            width: 150,
+            height: 100,
+            globalTransform: Matrix4.identity().storage,
+          ),
+        );
+      addTearDown(() {
+        textEditing.strategy.disable();
+      });
+
+      final DomElement proxy = createDomElement('input');
+      proxy.style
+        ..position = 'absolute'
+        ..width = '100px'
+        ..height = '40px'
+        ..top = '150px'
+        ..left = '120px'
+        // An <input> has a default border and padding, which offsetX/Y exclude.
+        ..border = '0'
+        ..padding = '0';
+      view.dom.textEditingHost.append(proxy);
+      expect(proxy, isNot(textEditing.strategy.domElement));
+
+      final DomMouseEvent event = await dispatchAndCatch(
+        proxy,
+        createDomPointerEvent('click', <String, Object>{
+          'bubbles': true,
+          'clientX': 130, // x = 10px into `proxy`.
+          'clientY': 160, // y = 10px into `proxy`.
+        }),
+      );
+      expect(event.target, proxy);
+      expect(event.offsetX, 10);
+      expect(event.offsetY, 10);
+
+      // Relative to the view, not 10,10 transformed by the active input's geometry.
+      final ui.Offset offset = computeEventOffsetToTarget(event, view);
+      expect(offset, const ui.Offset(130, 160));
+    });
+
     test('Event dispatched by TalkBack gets a computed offset', () async {
       // Fill this in to test _computeOffsetForTalkbackEvent
 
