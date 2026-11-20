@@ -349,7 +349,7 @@ class WebDevices extends PollingDeviceDiscovery {
   final FeatureFlags _featureFlags;
 
   @override
-  bool get canListAnything => featureFlags.isWebEnabled;
+  bool get canListAnything => _featureFlags.isWebEnabled;
 
   @override
   Future<List<Device>> pollingGetDevices({

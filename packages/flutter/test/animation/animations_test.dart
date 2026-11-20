@@ -15,6 +15,29 @@ class BogusCurve extends Curve {
   double transform(double t) => 100.0;
 }
 
+class _CountingAnimation extends Animation<double> {
+  int listenerCount = 0;
+  int statusListenerCount = 0;
+
+  @override
+  void addListener(VoidCallback listener) => listenerCount += 1;
+
+  @override
+  void removeListener(VoidCallback listener) => listenerCount -= 1;
+
+  @override
+  void addStatusListener(AnimationStatusListener listener) => statusListenerCount += 1;
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) => statusListenerCount -= 1;
+
+  @override
+  AnimationStatus get status => AnimationStatus.dismissed;
+
+  @override
+  double get value => 0.0;
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -511,5 +534,65 @@ FlutterError
       ),
       areCreateAndDispose,
     );
+  });
+
+  test(
+    'ProxyAnimation attaches to its parent when a listener is added and detaches when removed',
+    () {
+      final parent = _CountingAnimation();
+      final animation = ProxyAnimation(parent);
+      void listener() {}
+
+      expect(parent.listenerCount, 0);
+      expect(parent.statusListenerCount, 0);
+      expect(animation.isListening, isFalse);
+
+      animation.addListener(listener);
+      expect(parent.listenerCount, 1);
+      expect(parent.statusListenerCount, 1);
+      expect(animation.isListening, isTrue);
+
+      animation.removeListener(listener);
+      expect(parent.listenerCount, 0);
+      expect(parent.statusListenerCount, 0);
+      expect(animation.isListening, isFalse);
+    },
+  );
+  test('ProxyAnimation listens to its parent only while it has listeners', () {
+    final parent = _CountingAnimation();
+    final animation = ProxyAnimation(parent);
+    void listener() {}
+    void statusListener(AnimationStatus status) {}
+
+    expect(parent.listenerCount, 0);
+    expect(parent.statusListenerCount, 0);
+    expect(animation.isListening, isFalse);
+
+    animation.addListener(listener);
+    animation.addStatusListener(statusListener);
+    expect(parent.listenerCount, 1);
+    expect(parent.statusListenerCount, 1);
+    expect(animation.isListening, isTrue);
+
+    animation.removeListener(listener);
+    expect(parent.listenerCount, 1);
+    expect(parent.statusListenerCount, 1);
+    expect(animation.isListening, isTrue);
+
+    animation.removeStatusListener(statusListener);
+    expect(parent.listenerCount, 0);
+    expect(parent.statusListenerCount, 0);
+    expect(animation.isListening, isFalse);
+  });
+
+  test('ProxyAnimation without a parent can gain and lose listeners', () {
+    final animation = ProxyAnimation();
+    void listener() {}
+
+    animation.addListener(listener);
+    expect(animation.isListening, isTrue);
+
+    animation.removeListener(listener);
+    expect(animation.isListening, isFalse);
   });
 }

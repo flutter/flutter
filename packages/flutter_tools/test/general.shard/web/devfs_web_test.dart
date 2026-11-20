@@ -139,6 +139,7 @@ void main() {
       final cache = FlutterCache(
         flutterRoot: '',
         fileSystem: fs,
+        isLocalEngineBuilder: () => artifacts.localEngineInfo != null,
         logger: logger,
         platform: platform,
         osUtils: os,

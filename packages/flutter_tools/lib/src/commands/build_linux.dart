@@ -127,6 +127,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       project.linux,
       buildInfo,
       analytics: analytics,
+      featureFlags: _featureFlags,
       target: targetFile,
       sizeAnalyzer: SizeAnalyzer(fileSystem: fs, logger: logger, analytics: analytics),
       needCrossBuild: needCrossBuild,
