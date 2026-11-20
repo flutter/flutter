@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 
 #include "impeller/renderer/backend/vulkan/android/android_test_utils.h"
@@ -174,6 +175,17 @@ TEST(AndroidAHBSwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   }
 
   ahb_swapchain.reset();
+
+  for (int i = 0; i < 2; ++i) {
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    auto flush_cmd = context->CreateCommandBuffer();
+    ASSERT_TRUE(
+        context->GetCommandQueue()
+            ->Submit({flush_cmd},
+                     [latch](CommandBuffer::Status) { latch->CountDown(); })
+            .ok());
+    latch->Wait();
+  }
 
   auto query_counts =
       impeller::testing::GetQueryPoolResultCounts(context->GetDevice());

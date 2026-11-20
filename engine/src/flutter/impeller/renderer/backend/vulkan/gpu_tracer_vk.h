@@ -48,6 +48,14 @@ class GPUTracerVK : public std::enable_shared_from_this<GPUTracerVK> {
   /// Initialize the set of query pools.
   void InitializeQueryPool(const ContextVK& context);
 
+  /// @brief Hand ownership of [cmd_buffer]'s [GPUProbe] to [FenceWaiterVK]
+  ///        via a trailing queue fence so the probe is released on GPU
+  ///        completion even if the caller's swapchain goes idle. Does nothing
+  ///        if tracing is disabled, [cmd_buffer] has no active probe index, or
+  ///        fence submission fails.
+  void ReleaseCommandBufferOnFence(const ContextVK& context,
+                                   CommandBuffer& cmd_buffer);
+
  private:
   friend class GPUProbe;
 
@@ -114,6 +122,9 @@ class GPUProbe {
   /// @brief Record a timestamp query into the provided cmd buffer to record end
   ///        time.
   void RecordCmdBufferEnd(const vk::CommandBuffer& buffer);
+
+  /// @brief Returns true if this probe was attached to a traced frame.
+  bool HasIndex() const { return index_.has_value(); }
 
  private:
   friend class GPUTracerVK;

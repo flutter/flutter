@@ -70,6 +70,14 @@ class CommandBufferVK final
   /// @brief End recording of the current command buffer.
   bool EndCommandBuffer() const;
 
+  /// @brief Returns true if this command buffer's [GPUProbe] is tracing a
+  /// frame.
+  bool HasGPUProbeIndex() const;
+
+  /// @brief Transfers ownership of this command buffer's [GPUProbe] to the
+  ///        caller.
+  std::unique_ptr<GPUProbe> ReleaseGPUProbe();
+
   /// @brief Allocate a new descriptor set for the given [layout].
   absl::StatusOr<vk::DescriptorSet> AllocateDescriptorSets(
       const vk::DescriptorSetLayout& layout,

@@ -497,6 +497,8 @@ bool KHRSwapchainImplVK::Present(
       return false;
     }
     sync->acquire_fence_pending = true;
+    context.GetGPUTracer()->ReleaseCommandBufferOnFence(
+        context, *sync->final_cmd_buffer);
   }
 
   //----------------------------------------------------------------------------

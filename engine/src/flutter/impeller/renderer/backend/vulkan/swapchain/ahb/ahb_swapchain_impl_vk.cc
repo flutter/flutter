@@ -168,11 +168,7 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
     return nullptr;
   }
 
-#if IMPELLER_DEBUG
-  if (context) {
-    ContextVK::Cast(*context).GetGPUTracer()->MarkFrameStart();
-  }
-#endif  // IMPELLER_DEBUG
+  ContextVK::Cast(*context).GetGPUTracer()->MarkFrameStart();
 
   auto surface = SurfaceVK::WrapSwapchainImage(
       transients_, pool_entry.texture,
@@ -288,6 +284,9 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
     return nullptr;
   }
   sync->acquire_fence_pending = true;
+  const auto& context_vk = ContextVK::Cast(*context);
+  context_vk.GetGPUTracer()->ReleaseCommandBufferOnFence(context_vk,
+                                                         command_buffer_vk);
   return present_ready;
 }
 

@@ -10,10 +10,12 @@
 #include <utility>
 
 #include "fml/logging.h"
+#include "fml/make_copyable.h"
 #include "fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 
 namespace impeller {
 
@@ -146,7 +148,7 @@ void GPUTracerVK::RecordCmdBufferEnd(const vk::CommandBuffer& buffer,
     return;
   }
   Lock lock(trace_state_mutex_);
-  GPUTraceState& state = trace_states_[current_state_];
+  GPUTraceState& state = trace_states_[probe.index_.value()];
 
   if (state.current_index >= kPoolSize) {
     return;
@@ -156,6 +158,37 @@ void GPUTracerVK::RecordCmdBufferEnd(const vk::CommandBuffer& buffer,
                         state.query_pool.get(), state.current_index);
 
   state.current_index += 1;
+}
+
+void GPUTracerVK::ReleaseCommandBufferOnFence(const ContextVK& context,
+                                              CommandBuffer& cmd_buffer) {
+  auto& cmd_buffer_vk = CommandBufferVK::Cast(cmd_buffer);
+  if (!enabled_ || !cmd_buffer_vk.HasGPUProbeIndex()) {
+    return;
+  }
+  auto [fence_result, fence] = context.GetDevice().createFenceUnique({});
+  if (fence_result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Failed to create GPUTracer fence: "
+                   << vk::to_string(fence_result);
+    return;
+  }
+  auto probe = cmd_buffer_vk.ReleaseGPUProbe();
+  if (!probe) {
+    return;
+  }
+  auto submit_callback = [&context](vk::Fence submit_fence) {
+    auto status = context.GetGraphicsQueue()->Submit(submit_fence);
+    if (status != vk::Result::eSuccess) {
+      return absl::Status(absl::StatusCode::kCancelled,
+                          "Failed to submit GPUTracer fence.");
+    }
+    return absl::OkStatus();
+  };
+  auto completion_callback = fml::MakeCopyable([probe = std::move(probe)]() {});
+  context.GetFenceWaiter()
+      ->AddFence(std::move(fence), submit_callback,
+                 std::move(completion_callback))
+      .IgnoreError();
 }
 
 void GPUTracerVK::OnFenceComplete(size_t frame_index) {
