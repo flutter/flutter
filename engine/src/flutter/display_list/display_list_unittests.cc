@@ -5354,7 +5354,28 @@ TEST_F(DisplayListTest, DrawRRectPathPromoteToDrawRect) {
   ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
 }
 
-TEST_F(DisplayListTest, DrawLinePathPromoteToDrawLine) {
+TEST_F(DisplayListTest, DrawStrokedLinePathPromoteToDrawLine) {
+  DlPoint start = DlPoint::MakeXY(10.0f, 10.0f);
+  DlPoint end = DlPoint::MakeXY(20.0f, 20.0f);
+
+  for (DlDrawStyle style :
+       {DlDrawStyle::kStroke, DlDrawStyle::kStrokeAndFill}) {
+    DlPaint paint = DlPaint().setDrawStyle(style);
+
+    DisplayListBuilder builder;
+    builder.DrawPath(DlPath::MakeLine(start, end), paint);
+    auto dl = builder.Build();
+
+    DisplayListBuilder expected;
+    expected.DrawLine(start, end, paint);
+    auto expect_dl = expected.Build();
+
+    ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl))
+        << "style: " << static_cast<int>(style);
+  }
+}
+
+TEST_F(DisplayListTest, DrawFilledLinePathDoesNotPromoteToDrawLine) {
   DlPoint start = DlPoint::MakeXY(10.0f, 10.0f);
   DlPoint end = DlPoint::MakeXY(20.0f, 20.0f);
 
@@ -5362,11 +5383,8 @@ TEST_F(DisplayListTest, DrawLinePathPromoteToDrawLine) {
   builder.DrawPath(DlPath::MakeLine(start, end), DlPaint());
   auto dl = builder.Build();
 
-  DisplayListBuilder expected;
-  expected.DrawLine(start, end, DlPaint());
-  auto expect_dl = expected.Build();
-
-  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+  ASSERT_EQ(dl->GetRecordCount(), 1u);
+  EXPECT_EQ(dl->GetOpType(0u), DisplayListOpType::kDrawPath);
 }
 
 TEST_F(DisplayListTest, DrawOvalRRectPathPromoteToDrawOval) {

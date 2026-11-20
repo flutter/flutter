@@ -1422,9 +1422,11 @@ void DisplayListBuilder::DrawPath(const DlPath& path, const DlPaint& paint) {
     return;
   }
 
+  // A line has no area, so filling it paints nothing. Only a stroked line can
+  // be drawn as a line.
   DlPoint start;
   DlPoint end;
-  if (path.IsLine(&start, &end)) {
+  if (paint.getDrawStyle() != DlDrawStyle::kFill && path.IsLine(&start, &end)) {
     DrawLine(start, end, paint);
     return;
   }
