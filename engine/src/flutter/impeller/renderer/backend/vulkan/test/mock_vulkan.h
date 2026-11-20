@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "impeller/base/thread.h"
@@ -17,6 +18,10 @@
 
 namespace impeller {
 namespace testing {
+
+/// A replacement implementation of `vkGetPipelineCacheData`.
+using GetPipelineCacheDataCallback =
+    std::function<std::remove_pointer_t<PFN_vkGetPipelineCacheData>>;
 
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device);
@@ -143,9 +148,11 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  /// Sets the callback that implements `vkGetPipelineCacheData` for devices
+  /// created by this builder. It is called on whichever thread persists the
+  /// pipeline cache, which is usually a worker thread.
   MockVulkanContextBuilder& SetGetPipelineCacheDataCallback(
-      std::function<std::remove_pointer_t<PFN_vkGetPipelineCacheData>>
-          get_pipeline_cache_data_callback) {
+      GetPipelineCacheDataCallback get_pipeline_cache_data_callback) {
     get_pipeline_cache_data_callback_ =
         std::move(get_pipeline_cache_data_callback);
     return *this;
@@ -181,8 +188,7 @@ class MockVulkanContextBuilder {
       acquire_next_image_callback_;
   std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
       wait_for_fences_callback_;
-  std::function<std::remove_pointer_t<PFN_vkGetPipelineCacheData>>
-      get_pipeline_cache_data_callback_;
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback_;
   int compression_exhausted_create_image_failures_ = 0;
 };
 

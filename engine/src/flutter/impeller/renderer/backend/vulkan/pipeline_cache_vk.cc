@@ -115,8 +115,10 @@ void PipelineCacheVK::PersistCacheToDisk() {
   if (!is_valid_) {
     return;
   }
-  // Keep the device alive for the duration of the persist. The cache may
-  // outlive the context while this task is running on a worker thread.
+  // Keep the device alive for the duration of the persist in case the cache
+  // outlives the context. This is never the last reference to the device:
+  // ContextVK declares its worker loop after its device holder, so the loop is
+  // destroyed (joining this thread) before the device holder is released.
   std::shared_ptr<DeviceHolderVK> strong_device = device_holder_.lock();
   if (!strong_device) {
     return;

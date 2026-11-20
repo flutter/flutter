@@ -99,12 +99,9 @@ class MockDevice final {
 
   MockPhysicalDevice& physical_device() { return physical_device_; }
 
-  using GetPipelineCacheDataCallback =
-      std::function<std::remove_pointer_t<PFN_vkGetPipelineCacheData>>;
-
-  // The callback is captured at device creation because MockVulkanState is
-  // thread-local, while vkGetPipelineCacheData is typically called from a
-  // worker thread.
+  /// Sets the callback that `vkGetPipelineCacheData` calls for this device in
+  /// place of its default implementation. Set from the
+  /// `MockVulkanContextBuilder` when the device is created.
   void SetGetPipelineCacheDataCallback(GetPipelineCacheDataCallback callback) {
     get_pipeline_cache_data_callback_ = std::move(callback);
   }
@@ -236,8 +233,7 @@ struct MockVulkanState {
       wait_for_fences_callback;
   std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
       acquire_next_image_callback;
-  std::function<std::remove_pointer_t<PFN_vkGetPipelineCacheData>>
-      get_pipeline_cache_data_callback;
+  GetPipelineCacheDataCallback get_pipeline_cache_data_callback;
   // When > 0, the next vkCreateImage for a fixed-rate-compressed image returns
   // VK_ERROR_COMPRESSION_EXHAUSTED_EXT and decrements (models PowerVR).
   int compression_exhausted_create_image_failures = 0;
@@ -464,6 +460,8 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
   MockPhysicalDevice* mock_physical_device =
       reinterpret_cast<MockPhysicalDevice*>(physicalDevice);
   *pDevice = reinterpret_cast<VkDevice>(mock_physical_device->CreateDevice());
+  // The mock state is thread-local, but vkGetPipelineCacheData is usually
+  // called on a worker thread, so store the callback on the device.
   if (g_mock_vulkan_state) {
     MockDevice::Unwrap(*pDevice)->SetGetPipelineCacheDataCallback(
         GetMockVulkanState().get_pipeline_cache_data_callback);
