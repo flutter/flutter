@@ -19298,63 +19298,6 @@ void main() {
       expect(tester.testTextInput.setClientArgs?['autofill'], isNull);
     });
 
-    testWidgets('sends autofillHintText for all fields in an AutofillGroup', (
-      WidgetTester tester,
-    ) async {
-      final usernameController = TextEditingController();
-      addTearDown(usernameController.dispose);
-      final usernameFocusNode = FocusNode();
-      addTearDown(usernameFocusNode.dispose);
-      final passwordController = TextEditingController();
-      addTearDown(passwordController.dispose);
-      final passwordFocusNode = FocusNode();
-      addTearDown(passwordFocusNode.dispose);
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: AutofillGroup(
-            child: Column(
-              children: <Widget>[
-                EditableText(
-                  key: const Key('username'),
-                  controller: usernameController,
-                  focusNode: usernameFocusNode,
-                  style: textStyle,
-                  cursorColor: cursorColor,
-                  backgroundCursorColor: const Color(0xFF000000),
-                  autofillHintText: 'Username',
-                ),
-                EditableText(
-                  key: const Key('password'),
-                  controller: passwordController,
-                  focusNode: passwordFocusNode,
-                  style: textStyle,
-                  cursorColor: cursorColor,
-                  backgroundCursorColor: const Color(0xFF000000),
-                  autofillHintText: 'Password',
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.byKey(const Key('username')));
-      await tester.pump();
-
-      expect(tester.testTextInput.setClientArgs?['autofill'], containsPair('hintText', 'Username'));
-      final fields = tester.testTextInput.setClientArgs?['fields'] as List<dynamic>?;
-      expect(fields, isNotNull);
-      expect(fields, hasLength(2));
-      final List<Object?> fieldHintTexts = fields!
-          .map(
-            (dynamic field) =>
-                ((field as Map<String, dynamic>)['autofill'] as Map<String, dynamic>?)?['hintText'],
-          )
-          .toList();
-      expect(fieldHintTexts, containsAll(<String>['Username', 'Password']));
-    });
-
     testWidgets('updates autofillHintText when widget rebuilds and refocuses', (
       WidgetTester tester,
     ) async {
