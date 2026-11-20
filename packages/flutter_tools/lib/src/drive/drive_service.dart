@@ -25,6 +25,7 @@ import '../context/tool_context.dart';
 import '../device.dart';
 import '../features.dart' show FeatureFlags;
 import '../hook_runner.dart' show FlutterHookRunner;
+import '../project.dart';
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -203,6 +204,18 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
+    if (_applicationPackage == null) {
+      String? hint;
+      if (applicationBinary == null) {
+        final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+        hint = await getMissingPackageHintForPlatform(
+          targetPlatform,
+          fileSystem: fs,
+          projectFactory: projectFactory,
+        );
+      }
+      throwToolExit(<String>['No application found for $targetPlatform.', ?hint].join('\n'));
+    }
     var attempt = 0;
     LaunchResult? result;
     var prebuiltApplication = applicationBinary != null;
