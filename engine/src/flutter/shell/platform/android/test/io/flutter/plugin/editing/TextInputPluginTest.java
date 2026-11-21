@@ -1879,7 +1879,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            null,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             autofill,
@@ -1896,7 +1897,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            null,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             autofill,
@@ -1947,7 +1949,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            null,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             null,
@@ -1994,7 +1997,8 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
-            null,
+            new TextInputChannel.InputType(
+                TextInputChannel.TextInputType.TEXT, false, false, false),
             null,
             null,
             autofill,
@@ -2055,7 +2059,8 @@ public class TextInputPluginTest {
                     true,
                     false,
                     TextInputChannel.TextCapitalization.NONE,
-                    null,
+                    new TextInputChannel.InputType(
+                        TextInputChannel.TextInputType.TEXT, false, false, false),
                     null,
                     null,
                     autofill1,
@@ -2064,13 +2069,14 @@ public class TextInputPluginTest {
                     null);
             final TextInputChannel.Configuration config2 =
                 new TextInputChannel.Configuration(
-                    false,
+                    true,
                     false,
                     true,
                     true,
                     false,
                     TextInputChannel.TextCapitalization.NONE,
-                    null,
+                    new TextInputChannel.InputType(
+                        TextInputChannel.TextInputType.TEXT, false, false, false),
                     null,
                     null,
                     autofill2,
@@ -2087,7 +2093,8 @@ public class TextInputPluginTest {
                     true,
                     false,
                     TextInputChannel.TextCapitalization.NONE,
-                    null,
+                    new TextInputChannel.InputType(
+                        TextInputChannel.TextInputType.TEXT, false, false, false),
                     null,
                     null,
                     autofill1,
@@ -2115,6 +2122,25 @@ public class TextInputPluginTest {
             verify(children[1]).setAutofillHints(aryEq(new String[] {"HINT2", "EXTRA"}));
             verify(children[1]).setDimens(anyInt(), anyInt(), anyInt(), anyInt(), gt(0), gt(0));
             verify(children[1], times(0)).setHint(any());
+
+            verify(children[0]).setDataIsSensitive(false);
+            ArgumentCaptor<Integer> normalInputTypeCaptor = ArgumentCaptor.forClass(Integer.class);
+            verify(children[0]).setInputType(normalInputTypeCaptor.capture());
+            int normalInputType = normalInputTypeCaptor.getValue();
+            assertTrue(
+                (normalInputType & InputType.TYPE_MASK_VARIATION)
+                    != InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+            verify(children[1]).setDataIsSensitive(true);
+            ArgumentCaptor<Integer> passwordInputTypeCaptor =
+                ArgumentCaptor.forClass(Integer.class);
+            verify(children[1]).setInputType(passwordInputTypeCaptor.capture());
+            int passwordInputType = passwordInputTypeCaptor.getValue();
+            assertEquals(
+                InputType.TYPE_CLASS_TEXT, passwordInputType & InputType.TYPE_MASK_CLASS);
+            assertEquals(
+                InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                passwordInputType & InputType.TYPE_MASK_VARIATION);
           });
     }
   }
@@ -2155,7 +2181,8 @@ public class TextInputPluginTest {
                     true,
                     false,
                     TextInputChannel.TextCapitalization.NONE,
-                    null,
+                    new TextInputChannel.InputType(
+                        TextInputChannel.TextInputType.TEXT, false, false, false),
                     null,
                     null,
                     autofill,
