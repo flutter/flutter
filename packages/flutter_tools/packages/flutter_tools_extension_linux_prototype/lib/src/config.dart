@@ -9,6 +9,7 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 final class LinuxConfigurationExtension extends ConfigurationExtension {
   static const String kEnableLinuxCustomPrototype = 'enable-linux-custom-prototype';
   static const String kLinuxGtkVersion = 'linux-gtk-version';
+  static const String kClearLinuxCustomSettings = 'clear-linux-custom-settings';
 
   @override
   String get title => 'Linux Custom Extension Prototype';
@@ -35,5 +36,27 @@ final class LinuxConfigurationExtension extends ConfigurationExtension {
         value: '3',
       ),
     ];
+  }
+
+  @override
+  Future<List<ConfigAction>> getConfigActions() async {
+    return const <ConfigAction>[
+      ConfigAction(
+        name: kClearLinuxCustomSettings,
+        help: 'Clear saved custom Linux extension configuration settings.',
+        settingsKeys: <String>[kLinuxGtkVersion],
+      ),
+    ];
+  }
+
+  @override
+  Future<Map<String, String?>> runConfigAction(
+    String name, {
+    required Map<String, String?> currentSettings,
+  }) async {
+    if (name == kClearLinuxCustomSettings) {
+      return const <String, String?>{kLinuxGtkVersion: null};
+    }
+    throw ToolExtensionException('Unsupported Linux config action: $name');
   }
 }

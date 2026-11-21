@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
 
@@ -136,7 +137,19 @@ final class _ProtocolHardeningService extends ToolExtensionService {
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
       'throwUserError': (Map<String, Object?> _) {
-        throw const ToolExtensionException('Missing custom SDK at /opt/custom_sdk');
+        throw const ToolExtensionException(
+          'Missing custom SDK at /opt/custom_sdk',
+          data: <String, Object?>{'sdkPath': '/opt/custom_sdk'},
+        );
+      },
+      'throwUserErrorWithoutData': (Map<String, Object?> _) {
+        throw const ToolExtensionException('Missing custom SDK without extra data');
+      },
+      'throwUnsupportedCapability': (Map<String, Object?> _) {
+        throw UnsupportedError('Screen recording is not supported.');
+      },
+      'throwUnimplementedError': (Map<String, Object?> _) {
+        throw UnimplementedError('Not implemented yet');
       },
       'callProcessExit': (Map<String, Object?> _) {
         io.exit(42);
@@ -648,7 +661,7 @@ void main() {
       expect(logger.errorText, contains('Simulated unhandled async error'));
     });
 
-    test('ToolExtensionException with domainErrorCode (-32001) translates to ToolExtensionException on sendRequest', () async {
+    test('ToolExtensionEntryPoint serializes ToolExtensionException.data and ExtensionConnection.sendRequest strips injected json_rpc_2 request entry', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
         _protocolHardeningEntryPoint,
@@ -659,11 +672,73 @@ void main() {
       await expectLater(
         connection.sendRequest('hardening.throwUserError'),
         throwsA(
-          isA<ToolExtensionException>().having(
-            (ToolExtensionException e) => e.message,
-            'message',
-            'Missing custom SDK at /opt/custom_sdk',
-          ),
+          isA<ToolExtensionException>()
+              .having(
+                (ToolExtensionException e) => e.message,
+                'message',
+                'Missing custom SDK at /opt/custom_sdk',
+              )
+              .having(
+                (ToolExtensionException e) => e.code,
+                'code',
+                ToolExtensionException.domainErrorCode,
+              )
+              .having((ToolExtensionException e) => e.data, 'data', const <String, Object?>{
+                'sdkPath': '/opt/custom_sdk',
+              }),
+        ),
+      );
+
+      await expectLater(
+        connection.sendRequest('hardening.throwUserErrorWithoutData'),
+        throwsA(
+          isA<ToolExtensionException>()
+              .having(
+                (ToolExtensionException e) => e.code,
+                'code',
+                ToolExtensionException.domainErrorCode,
+              )
+              .having((ToolExtensionException e) => e.data, 'data', isNull),
+        ),
+      );
+    });
+
+    test('ToolExtensionEntryPoint maps UnsupportedError to unsupportedCapabilityErrorCode (-32002) while preserving UnimplementedError as SERVER_ERROR (-32000)', () async {
+      final logger = BufferLogger.test();
+      final ExtensionConnection connection = await ExtensionConnection.spawn(
+        _protocolHardeningEntryPoint,
+        logger: logger,
+      );
+      addTearDown(connection.dispose);
+
+      await expectLater(
+        connection.sendRequest('hardening.throwUnsupportedCapability'),
+        throwsA(
+          isA<ToolExtensionException>()
+              .having(
+                (ToolExtensionException e) => e.message,
+                'message',
+                'Screen recording is not supported.',
+              )
+              .having(
+                (ToolExtensionException e) => e.code,
+                'code',
+                ToolExtensionException.unsupportedCapabilityErrorCode,
+              )
+              .having((ToolExtensionException e) => e.data, 'data', isNull),
+        ),
+      );
+
+      await expectLater(
+        connection.sendRequest('hardening.throwUnimplementedError'),
+        throwsA(
+          isA<json_rpc.RpcException>()
+              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+              .having(
+                (json_rpc.RpcException e) => e.message,
+                'message',
+                contains('Not implemented yet'),
+              ),
         ),
       );
     });
@@ -679,14 +754,16 @@ void main() {
       await expectLater(
         connection.sendRequest('hardening.callProcessExit'),
         throwsA(
-          isA<json_rpc.RpcException>().having(
-            (json_rpc.RpcException e) => e.message,
-            'message',
-            contains(
-              'Unsupported operation: Tool extensions must not call exit(42); '
-              'throw ToolExtensionException instead.',
-            ),
-          ),
+          isA<json_rpc.RpcException>()
+              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+              .having(
+                (json_rpc.RpcException e) => e.message,
+                'message',
+                contains(
+                  'Bad state: Tool extensions must not call exit(42); '
+                  'throw ToolExtensionException instead.',
+                ),
+              ),
         ),
       );
     });

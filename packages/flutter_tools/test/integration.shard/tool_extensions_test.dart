@@ -77,13 +77,68 @@ void main() {
 
     if (isLinux) {
       expect(result.stdout, contains('Extension Settings:'));
-      expect(result.stdout, contains('  Linux Custom Extension Prototype:'));
+      expect(
+        result.stdout,
+        contains(
+          '  Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype):',
+        ),
+      );
       expect(result.stdout, contains('    enable-linux-custom-prototype:'));
     } else {
       expect(result.stdout, isNot(contains('Extension Settings:')));
     }
     expect(result.exitCode, 0);
   });
+
+  testWithoutContext(
+    'flutter config sets and clears extension settings via ConfigAction when enabled',
+    () async {
+      if (!isLinux) {
+        return;
+      }
+      final env = <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'};
+
+      final ProcessResult setResult = await processManager.run(<String>[
+        flutterBin,
+        'config',
+        '--linux-gtk-version=4',
+      ], environment: env);
+      expect(
+        setResult.exitCode,
+        0,
+        reason: 'stdout: ${setResult.stdout}\nstderr: ${setResult.stderr}',
+      );
+      expect(setResult.stdout, contains('Setting "linux-gtk-version" value to "4".'));
+
+      final ProcessResult listAfterSet = await processManager.run(<String>[
+        flutterBin,
+        'config',
+        '--list',
+      ], environment: env);
+      expect(listAfterSet.exitCode, 0);
+      expect(listAfterSet.stdout, contains('    linux-gtk-version: 4'));
+
+      final ProcessResult clearActionResult = await processManager.run(<String>[
+        flutterBin,
+        'config',
+        '--clear-linux-custom-settings',
+      ], environment: env);
+      expect(
+        clearActionResult.exitCode,
+        0,
+        reason: 'stdout: ${clearActionResult.stdout}\nstderr: ${clearActionResult.stderr}',
+      );
+      expect(clearActionResult.stdout, contains('Removing "linux-gtk-version" value.'));
+
+      final ProcessResult listAfterClear = await processManager.run(<String>[
+        flutterBin,
+        'config',
+        '--list',
+      ], environment: env);
+      expect(listAfterClear.exitCode, 0);
+      expect(listAfterClear.stdout, contains('    linux-gtk-version: 3'));
+    },
+  );
 
   testWithoutContext('flutter devices outputs custom extension device when enabled', () async {
     final ProcessResult result = await processManager.run(

@@ -160,8 +160,7 @@ ExtensionBuildManager _createBuildManager({
       extensionManager ??
       ExtensionManager(
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
   if (extensionManager == null) {
     addTearDown(manager.dispose);
@@ -565,8 +564,7 @@ void main() {
       final manager = ExtensionManager(
         entryPoints: <ExtensionEntryPoint>[entryPoint],
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       addTearDown(manager.dispose);
 
@@ -716,8 +714,7 @@ void main() {
       final manager = ExtensionManager(
         entryPoints: <ExtensionEntryPoint>[domainErrorEntryPoint],
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
       );
       addTearDown(manager.dispose);
 

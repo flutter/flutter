@@ -1249,6 +1249,9 @@ class FakeEmulatorManager extends Fake implements EmulatorManager {
 class FakeExtensionManager extends Fake implements ExtensionManager {
   @override
   void disable() {}
+
+  @override
+  void enableMachineMode() {}
 }
 
 class _FakeAndroidBuilder extends Fake implements AndroidBuilder {}

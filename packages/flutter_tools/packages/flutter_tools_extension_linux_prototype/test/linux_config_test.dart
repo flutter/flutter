@@ -25,5 +25,25 @@ void main() {
       expect(configs.first.name, 'linux-gtk-version');
       expect(configs.first.value, '3');
     });
+
+    test('getConfigActions and runConfigAction clear Linux custom settings', () async {
+      final extension = LinuxConfigurationExtension();
+      final List<ConfigAction> actions = await extension.getConfigActions();
+
+      expect(actions, hasLength(1));
+      expect(actions.first.name, 'clear-linux-custom-settings');
+      expect(actions.first.settingsKeys, const <String>['linux-gtk-version']);
+
+      final Map<String, String?> updates = await extension.runConfigAction(
+        'clear-linux-custom-settings',
+        currentSettings: const <String, String?>{'linux-gtk-version': '4'},
+      );
+      expect(updates, const <String, String?>{'linux-gtk-version': null});
+
+      await expectLater(
+        extension.runConfigAction('unknown-action', currentSettings: const <String, String?>{}),
+        throwsA(isA<ToolExtensionException>()),
+      );
+    });
   });
 }

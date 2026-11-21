@@ -809,8 +809,7 @@ class ToolDependencies {
     final extensionManager = ExtensionManager(
       entryPoints: extensionEntryPoints,
       featureFlags: finalFeatureFlags,
-      hostPlatform: finalOS.hostPlatform,
-      logger: finalLogger,
+      toolContext: finalToolContext,
     );
     finalShutdownHooks.addShutdownHook(extensionManager.dispose);
 

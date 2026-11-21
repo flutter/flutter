@@ -38,8 +38,7 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
     : super(
         extensionManager: ExtensionManager(
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          hostPlatform: HostPlatform.linux_x64,
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(),
         ),
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
         logger: BufferLogger.test(),
@@ -344,8 +343,7 @@ void main() {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags();
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
@@ -369,8 +367,7 @@ void main() {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -414,8 +411,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -467,8 +463,7 @@ void main() {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
@@ -503,8 +498,7 @@ void main() {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[_throwingQueryExtensionEntryPoint],
         featureFlags: featureFlags,
       );
@@ -535,8 +529,7 @@ void main() {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
@@ -622,8 +615,7 @@ void main() {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -674,8 +666,7 @@ void main() {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[
             _firstDuplicateExtensionEntryPoint,
             _secondDuplicateExtensionEntryPoint,
@@ -746,8 +737,7 @@ void main() {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[_invalidTargetBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -775,8 +765,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -822,8 +811,7 @@ void main() {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
@@ -908,8 +896,7 @@ void main() {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: FakeToolContext(logger: logger),
           entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -1057,8 +1044,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[_failingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -1174,8 +1160,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -1220,8 +1205,7 @@ void main() {
       final logger = BufferLogger.test();
       final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
+        toolContext: FakeToolContext(logger: logger),
         entryPoints: <ExtensionEntryPoint>[_domainErrorBuildExtensionEntryPoint],
         featureFlags: featureFlags,
       );
