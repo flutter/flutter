@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
@@ -319,6 +320,11 @@ void main() {
           logger: logger,
         );
         final discovery = ExtensionDevices(
+          extensionArtifactManager: ExtensionArtifactManager(
+            extensionManager: manager,
+            featureFlags: featureFlags,
+            toolContext: toolContext,
+          ),
           extensionBuildManager: buildManager,
           extensionManager: manager,
           fileSystem: toolContext.fs,

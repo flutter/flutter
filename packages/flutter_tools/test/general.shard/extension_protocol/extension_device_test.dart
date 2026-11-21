@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Cate
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
@@ -211,6 +213,7 @@ void main() {
       expect(targetDevices, hasLength(2));
 
       final device = ExtensionBackedDevice(
+        artifactManager: _NoOpExtensionArtifactManager(),
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
@@ -276,6 +279,7 @@ void main() {
         final client = ExtensionDeviceClient(conn, logger: logger);
         final List<TargetDevice> targetDevices = await client.getDevices();
         final device = ExtensionBackedDevice(
+          artifactManager: _NoOpExtensionArtifactManager(),
           buildManager: _createBuildManager(logger: logger),
           connection: conn,
           deviceService: client,
@@ -514,6 +518,7 @@ void main() {
       final client = ExtensionDeviceClient(conn, logger: logger);
       final List<TargetDevice> targetDevices = await client.getDevices();
       final device = ExtensionBackedDevice(
+        artifactManager: _NoOpExtensionArtifactManager(),
         buildManager: _createBuildManager(logger: logger),
         connection: conn,
         deviceService: client,
@@ -571,6 +576,7 @@ void main() {
       addTearDown(manager.dispose);
 
       final discovery = ExtensionDevices(
+        extensionArtifactManager: _NoOpExtensionArtifactManager(),
         extensionBuildManager: _createBuildManager(extensionManager: manager, logger: logger),
         extensionManager: manager,
         fileSystem: MemoryFileSystem.test(),
@@ -636,6 +642,7 @@ void main() {
 
         final client = ExtensionDeviceClient(conn, logger: logger);
         final device = ExtensionBackedDevice(
+          artifactManager: _NoOpExtensionArtifactManager(),
           buildManager: _createBuildManager(
             logger: logger,
             targets: const <ExtensionBuildTarget>[],
@@ -722,6 +729,7 @@ void main() {
       addTearDown(manager.dispose);
 
       final discovery = ExtensionDevices(
+        extensionArtifactManager: _NoOpExtensionArtifactManager(),
         extensionBuildManager: _createBuildManager(extensionManager: manager, logger: logger),
         extensionManager: manager,
         fileSystem: MemoryFileSystem.test(),
@@ -772,4 +780,14 @@ final class _DomainErrorDeviceService extends DeviceService {
 
   @override
   Future<void> stopLogStream({required String deviceId}) async {}
+}
+
+class _NoOpExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
+  @override
+  Future<Map<String, ResolvedExtensionArtifact>> ensureArtifactsDownloaded({
+    Set<String>? artifactNames,
+    String? extensionName,
+    bool force = false,
+    Set<String>? targetPlatforms,
+  }) async => const <String, ResolvedExtensionArtifact>{};
 }

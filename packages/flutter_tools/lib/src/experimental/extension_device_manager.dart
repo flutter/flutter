@@ -20,6 +20,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../project.dart';
 import '../vmservice.dart';
+import 'extension_artifact_manager.dart';
 import 'extension_build_manager.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
@@ -366,6 +367,7 @@ class ExtensionDeviceLogReader extends DeviceLogReader {
 class ExtensionDevices extends PollingDeviceDiscovery {
   /// Creates an [ExtensionDevices] instance.
   ExtensionDevices({
+    required this._extensionArtifactManager,
     required this._extensionBuildManager,
     required this._extensionManager,
     required this._fileSystem,
@@ -378,6 +380,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
   final Artifacts? _artifacts;
   final Cache? _cache;
   final Config? _config;
+  final ExtensionArtifactManager _extensionArtifactManager;
   final ExtensionBuildManager _extensionBuildManager;
   final ExtensionManager _extensionManager;
   final FileSystem _fileSystem;
@@ -456,6 +459,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
           device = existing;
         } else {
           device = ExtensionBackedDevice(
+            artifactManager: _extensionArtifactManager,
             artifacts: _artifacts,
             buildManager: _extensionBuildManager,
             cache: _cache,
@@ -513,6 +517,7 @@ class ExtensionDevices extends PollingDeviceDiscovery {
 class ExtensionBackedDevice extends Device {
   /// Creates an [ExtensionBackedDevice] wrapping a [TargetDevice].
   ExtensionBackedDevice({
+    required this._artifactManager,
     required this._buildManager,
     required this.connection,
     required this._deviceService,
@@ -529,6 +534,7 @@ class ExtensionBackedDevice extends Device {
          platformType: PlatformType.custom,
        );
 
+  final ExtensionArtifactManager _artifactManager;
   final Artifacts? _artifacts;
   final ExtensionBuildManager _buildManager;
   final Cache? _cache;
@@ -675,13 +681,26 @@ class ExtensionBackedDevice extends Device {
                 ? _fileSystem.path.join(projectDir.path, target.outputDir)
                 : target.outputDir,
           );
+    final String owningExtensionName =
+        _buildManager.tryExtensionNameForBuildTarget(buildTargetName) ?? connection.extensionName;
+    final Map<String, ResolvedExtensionArtifact> extensionArtifacts = await _artifactManager
+        .ensureArtifactsDownloaded(
+          artifactNames: customArtifactNamesForBuildTarget(target),
+          extensionName: owningExtensionName,
+          targetPlatforms: <String>{target.targetPlatform},
+        );
     final Map<String, String> resolvedArtifacts = _artifacts != null
         ? resolveExtensionBuildTargetArtifacts(
             artifacts: _artifacts,
             buildMode: buildMode,
+            extensionArtifacts: extensionArtifacts,
             target: target,
           )
-        : const <String, String>{};
+        : <String, String>{
+            for (final MapEntry(:String key, :ResolvedExtensionArtifact value)
+                in extensionArtifacts.entries)
+              key: value.path,
+          };
 
     final String flutterRootPath = _cache?.flutterRoot ?? projectDir.path;
 
