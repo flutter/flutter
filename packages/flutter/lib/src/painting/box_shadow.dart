@@ -33,13 +33,14 @@ class BoxShadow extends ui.Shadow {
   /// Creates a box shadow.
   ///
   /// By default, the shadow is solid black with zero [offset], zero [blurRadius],
-  /// zero [spreadRadius], and [BlurStyle.normal].
+  /// zero [spreadRadius], [BlurStyle.normal], and is not [inset].
   const BoxShadow({
     super.color,
     super.offset,
     super.blurRadius,
     this.spreadRadius = 0.0,
     this.blurStyle = BlurStyle.normal,
+    this.inset = false,
   });
 
   /// The amount the box should be inflated prior to applying the blur.
@@ -51,7 +52,26 @@ class BoxShadow extends ui.Shadow {
   ///
   /// When [debugDisableShadows] is true, [toPaint] ignores the [blurStyle] and
   /// acts as if [BlurStyle.normal] was used.
+  ///
+  /// Inset shadows ignore [blurStyle]. See [inset].
   final BlurStyle blurStyle;
+
+  /// Whether this shadow is painted inside the box.
+  ///
+  /// When false, the shadow is painted below the box background. When true,
+  /// the decoration paints it above the background and image and below the
+  /// border. The decorated box's child is painted above the shadow, and the
+  /// shadow is clipped to the box.
+  ///
+  /// Inset shadows ignore [blurStyle]. They are a normal blur of the area
+  /// outside the inset hole. A positive [spreadRadius] grows that shadow
+  /// inward. This matches the CSS `box-shadow` `inset` keyword.
+  ///
+  /// An inset shadow whose blur fits inside the hole may be drawn with a
+  /// rounded-rectangle mask. Sharp shadows and blurs wider than the hole use
+  /// an inverse path. Those two techniques are not pixel-identical, so a blur
+  /// that animates across the threshold can change slightly.
+  final bool inset;
 
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
@@ -89,6 +109,7 @@ class BoxShadow extends ui.Shadow {
       blurRadius: blurRadius * factor,
       spreadRadius: spreadRadius * factor,
       blurStyle: blurStyle,
+      inset: inset,
     );
   }
 
@@ -100,6 +121,7 @@ class BoxShadow extends ui.Shadow {
     double? blurRadius,
     double? spreadRadius,
     BlurStyle? blurStyle,
+    bool? inset,
   }) {
     return BoxShadow(
       color: color ?? this.color,
@@ -107,6 +129,7 @@ class BoxShadow extends ui.Shadow {
       blurRadius: blurRadius ?? this.blurRadius,
       spreadRadius: spreadRadius ?? this.spreadRadius,
       blurStyle: blurStyle ?? this.blurStyle,
+      inset: inset ?? this.inset,
     );
   }
 
@@ -133,6 +156,7 @@ class BoxShadow extends ui.Shadow {
       blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t)!,
       spreadRadius: ui.lerpDouble(a.spreadRadius, b.spreadRadius, t)!,
       blurStyle: a.blurStyle == BlurStyle.normal ? b.blurStyle : a.blurStyle,
+      inset: t < 0.5 ? a.inset : b.inset,
     );
   }
 
@@ -168,13 +192,14 @@ class BoxShadow extends ui.Shadow {
         other.offset == offset &&
         other.blurRadius == blurRadius &&
         other.spreadRadius == spreadRadius &&
-        other.blurStyle == blurStyle;
+        other.blurStyle == blurStyle &&
+        other.inset == inset;
   }
 
   @override
-  int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle);
+  int get hashCode => Object.hash(color, offset, blurRadius, spreadRadius, blurStyle, inset);
 
   @override
   String toString() =>
-      'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}, $blurStyle)';
+      'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)}, $blurStyle, inset: $inset)';
 }
