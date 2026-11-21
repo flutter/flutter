@@ -842,14 +842,16 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
         child.setAutofillHints(autofill.hints);
       }
       child.setAutofillType(View.AUTOFILL_TYPE_TEXT);
-      child.setInputType(
-          inputTypeFromTextInputType(
-              config.inputType,
-              config.obscureText,
-              config.autocorrect,
-              config.enableSuggestions,
-              config.enableIMEPersonalizedLearning,
-              config.textCapitalization));
+      if (config.inputType != null) {
+        child.setInputType(
+            inputTypeFromTextInputType(
+                config.inputType,
+                config.obscureText,
+                config.autocorrect,
+                config.enableSuggestions,
+                config.enableIMEPersonalizedLearning,
+                config.textCapitalization));
+      }
       child.setDataIsSensitive(config.obscureText);
       child.setVisibility(View.VISIBLE);
       if (autofill.hintText != null) {
