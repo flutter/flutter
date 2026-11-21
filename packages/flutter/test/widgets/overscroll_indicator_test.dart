@@ -730,6 +730,108 @@ void main() {
           ..circle(),
       );
     });
+
+    testWidgets('Leading does not invert when the scroll position is out of range', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191646
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              if (notification.leading) {
+                notification.paintOffset = 50.0;
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              controller: controller,
+              slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+            ),
+          ),
+        ),
+      );
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+      expect(
+        painter,
+        paints
+          ..save()
+          ..translate(y: 50.0)
+          ..scale()
+          ..circle(),
+      );
+      // Move the scroll position before the leading edge, which can happen with
+      // bouncing physics or right after the content dimensions changed.
+      controller.jumpTo(controller.position.minScrollExtent - 480.0);
+      await tester.pump();
+      // The OverscrollIndicator should stay at its paint offset instead of
+      // being pushed away from the leading edge.
+      expect(
+        painter,
+        paints
+          ..save()
+          ..translate(y: 50.0)
+          ..scale()
+          ..circle(),
+      );
+    });
+
+    testWidgets('Trailing does not invert when the scroll position is out of range', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191646
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: NotificationListener<OverscrollIndicatorNotification>(
+            onNotification: (OverscrollIndicatorNotification notification) {
+              if (!notification.leading) {
+                notification.paintOffset = 50.0;
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              controller: controller,
+              slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],
+            ),
+          ),
+        ),
+      );
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      await tester.dragFrom(const Offset(200.0, 200.0), const Offset(200.0, -10000.0));
+      await tester.pump();
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
+      expect(
+        painter,
+        paints
+          ..scale(y: -1.0)
+          ..save()
+          ..translate(y: 50.0)
+          ..scale()
+          ..circle(),
+      );
+      // Move the scroll position past the trailing edge, which can happen with
+      // bouncing physics or right after the content dimensions changed.
+      controller.jumpTo(controller.position.maxScrollExtent + 480.0);
+      await tester.pump();
+      // The OverscrollIndicator should stay at its paint offset instead of
+      // being pushed away from the trailing edge.
+      expect(
+        painter,
+        paints
+          ..scale(y: -1.0)
+          ..save()
+          ..translate(y: 50.0)
+          ..scale()
+          ..circle(),
+      );
+    });
   });
 
   testWidgets('StretchingOverscrollIndicator does not crash when child is null', (
