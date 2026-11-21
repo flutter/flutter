@@ -2088,6 +2088,70 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  test('TextPainter.paintMasked clips, modulates opacity, and no-ops when hidden', () {
+    final painter = TextPainter(
+      text: const TextSpan(text: 'Hello masked world', style: TextStyle(fontSize: 14.0)),
+      textDirection: TextDirection.ltr,
+    );
+    addTearDown(painter.dispose);
+
+    // Throws before layout.
+    expect(
+      () => painter.paintMasked(
+        MockCanvas(),
+        Offset.zero,
+        clipRect: const Rect.fromLTWH(0, 0, 50, 20),
+      ),
+      throwsStateError,
+    );
+
+    painter.layout();
+    const clipRect = Rect.fromLTWH(0, 0, 60, 20);
+
+    // Zero opacity or empty clipRect records no operations.
+    final zeroCanvas = _RecordingMaskedCanvas();
+    painter.paintMasked(zeroCanvas, Offset.zero, clipRect: clipRect, opacity: 0.0);
+    painter.paintMasked(zeroCanvas, Offset.zero, clipRect: Rect.zero);
+    expect(zeroCanvas.operations, isEmpty);
+
+    // Full opacity clips without saveLayer.
+    final opaqueCanvas = _RecordingMaskedCanvas();
+    painter.paintMasked(opaqueCanvas, Offset.zero, clipRect: clipRect);
+    expect(opaqueCanvas.operations, <String>['save', 'clipRect', 'drawParagraph', 'restore']);
+
+    // Partial opacity records saveLayer between clipRect and drawParagraph.
+    final partialCanvas = _RecordingMaskedCanvas();
+    painter.paintMasked(partialCanvas, Offset.zero, clipRect: clipRect, opacity: 0.5);
+    expect(partialCanvas.operations, <String>[
+      'save',
+      'clipRect',
+      'saveLayer',
+      'drawParagraph',
+      'restore',
+      'restore',
+    ]);
+  });
+}
+
+class _RecordingMaskedCanvas extends Fake implements Canvas {
+  final List<String> operations = <String>[];
+
+  @override
+  void save() => operations.add('save');
+
+  @override
+  void saveLayer(Rect? bounds, Paint paint) => operations.add('saveLayer');
+
+  @override
+  void clipRect(Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) =>
+      operations.add('clipRect');
+
+  @override
+  void drawParagraph(ui.Paragraph paragraph, Offset offset) => operations.add('drawParagraph');
+
+  @override
+  void restore() => operations.add('restore');
 }
 
 class MockCanvas extends Fake implements Canvas {}

@@ -59,6 +59,47 @@ enum TextOverflow {
   visible,
 }
 
+/// Where within the text visual overflow truncation or fading should occur.
+///
+/// Used by [Text.overflowPosition], [RichText.overflowPosition], and
+/// [DefaultTextStyle.overflowPosition].
+///
+/// See also:
+///
+///  * [TextOverflow], which defines the visual effect applied at this position.
+enum TextOverflowPosition {
+  /// Truncate or fade the leading (start) edge of the text, keeping the
+  /// trailing end visible (for example, `...packages/flutter/lib/text.dart`).
+  start,
+
+  /// Truncate or fade the middle of the text, keeping both the leading prefix
+  /// and trailing suffix visible (for example, `user...@flutter.dev`).
+  middle,
+
+  /// Truncate or fade the trailing (end) edge of the text, keeping the leading
+  /// start visible. This is the default behavior.
+  end,
+}
+
+/// How a [Text] or [RichText] widget behaves when its incoming layout
+/// constraints dynamically shrink below its expanded dimensions during
+/// scrolling, drag gestures, or layout transitions.
+enum TextScrollOverflow {
+  /// Standard layout behavior: re-wrap lines to fit the shrinking width on
+  /// every frame. This is the default when [Text.scrollOverflow] is not set.
+  wrap,
+
+  /// Lock the expanded layout dimensions (`high-water mark`) so lines do not
+  /// re-wrap or jump while the available space shrinks, and smoothly fade text
+  /// opacity out as the container contracts.
+  fade,
+
+  /// Lock the expanded layout dimensions (`high-water mark`) so lines do not
+  /// re-wrap or jump while the available space shrinks, clipping the
+  /// overflowing edge without fading the overall paragraph opacity.
+  clip,
+}
+
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
 ///
@@ -1403,6 +1444,38 @@ class TextPainter {
       !debugPaintTextLayoutBoxes || _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset),
     );
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
+  }
+
+  /// Paints the text onto the given [canvas] at the given [offset], clipped to
+  /// [clipRect] (in canvas coordinates) and composited with [opacity]
+  /// (`0.0` to `1.0`), without re-running [layout].
+  ///
+  /// Valid only after [layout] has been called. If [opacity] is `0.0`, this
+  /// method returns immediately without recording any draw operations.
+  void paintMasked(Canvas canvas, Offset offset, {required Rect clipRect, double opacity = 1.0}) {
+    if (_layoutCache == null) {
+      throw StateError(
+        'TextPainter.paintMasked called when text geometry was not yet calculated.\n'
+        'Please call layout() before paintMasked() to position the text before painting it.',
+      );
+    }
+
+    final double effectiveOpacity = clampDouble(opacity, 0.0, 1.0);
+    final int alpha = Color.getAlphaFromOpacity(effectiveOpacity);
+    if (alpha == 0 || clipRect.isEmpty) {
+      return;
+    }
+
+    canvas.save();
+    canvas.clipRect(clipRect);
+    if (alpha < 255) {
+      canvas.saveLayer(clipRect, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+      paint(canvas, offset);
+      canvas.restore();
+    } else {
+      paint(canvas, offset);
+    }
+    canvas.restore();
   }
 
   bool _debugPaintCharacterLayoutBoxes(

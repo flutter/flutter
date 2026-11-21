@@ -134,11 +134,47 @@ class Paragraph {
   // before Painting and getting any statistics from this class.
   virtual void Layout(double width) = 0;
 
+  // Lays out the paragraph while optionally locking the layout width to the
+  // high-water-mark width seen so far, preventing line re-wrapping while the
+  // available width shrinks during layout or scroll transitions.
+  virtual void LayoutWithShrinkLock(double width, bool lock_width) {
+    Layout(width);
+  }
+
+  // Computes the scroll-shrink fade opacity in [0.0, 1.0] based on the locked
+  // high-water-mark dimensions and the current visible container dimensions.
+  virtual double ComputeScrollFadeOpacity(double current_width,
+                                          double current_height,
+                                          double fade_end_fraction = 0.5) {
+    return 1.0;
+  }
+
   // Paints the laid out text onto the supplied DisplayListBuilder at
   // (x, y) offset from the origin. Only valid after Layout() is called.
   virtual bool Paint(flutter::DisplayListBuilder* builder,
                      double x,
                      double y) = 0;
+
+  // Paints the laid out text clipped to [clip_left, clip_top, clip_right,
+  // clip_bottom], modulated by [opacity] and an optional horizontal fade
+  // shader supporting multiline last-line horizontal fade and directional
+  // start/middle/end fade.
+  virtual bool PaintMasked(
+      flutter::DisplayListBuilder* builder,
+      double x,
+      double y,
+      double clip_left,
+      double clip_top,
+      double clip_right,
+      double clip_bottom,
+      double opacity = 1.0,
+      bool fade_horizontal = false,
+      OverflowPosition overflow_position = OverflowPosition::kEnd) {
+    if (!builder || !(opacity > 0.0)) {
+      return true;
+    }
+    return Paint(builder, x, y);
+  }
 
   // Returns a vector of bounding boxes that enclose all text between start and
   // end glyph indexes, including start and excluding end.

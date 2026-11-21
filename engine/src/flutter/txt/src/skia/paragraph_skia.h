@@ -18,7 +18,8 @@ class ParagraphSkia : public Paragraph {
  public:
   ParagraphSkia(std::unique_ptr<skia::textlayout::Paragraph> paragraph,
                 std::vector<flutter::DlPaint>&& dl_paints,
-                bool impeller_enabled);
+                bool impeller_enabled,
+                TextDirection text_direction = TextDirection::ltr);
 
   virtual ~ParagraphSkia() = default;
 
@@ -50,7 +51,25 @@ class ParagraphSkia : public Paragraph {
 
   void Layout(double width) override;
 
+  void LayoutWithShrinkLock(double width, bool lock_width) override;
+
+  double ComputeScrollFadeOpacity(double current_width,
+                                  double current_height,
+                                  double fade_end_fraction = 0.5) override;
+
   bool Paint(flutter::DisplayListBuilder* builder, double x, double y) override;
+
+  bool PaintMasked(
+      flutter::DisplayListBuilder* builder,
+      double x,
+      double y,
+      double clip_left,
+      double clip_top,
+      double clip_right,
+      double clip_bottom,
+      double opacity = 1.0,
+      bool fade_horizontal = false,
+      OverflowPosition overflow_position = OverflowPosition::kEnd) override;
 
   std::vector<TextBox> GetRectsForRange(
       size_t start,
@@ -75,6 +94,8 @@ class ParagraphSkia : public Paragraph {
   Range<size_t> GetWordBoundary(size_t offset) override;
 
  private:
+  void LayoutInternal(double width);
+
   TextStyle SkiaToTxt(const skia::textlayout::TextStyle& skia);
 
   std::unique_ptr<skia::textlayout::Paragraph> paragraph_;
@@ -82,6 +103,9 @@ class ParagraphSkia : public Paragraph {
   std::optional<std::vector<LineMetrics>> line_metrics_;
   std::vector<TextStyle> line_metrics_styles_;
   const bool impeller_enabled_;
+  const TextDirection text_direction_;
+  double locked_max_width_ = 0.0;
+  double locked_max_height_ = 0.0;
 };
 
 }  // namespace txt

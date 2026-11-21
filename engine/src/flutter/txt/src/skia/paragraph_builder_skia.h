@@ -53,6 +53,7 @@ class ParagraphBuilderSkia : public ParagraphBuilder {
   ///             `drawLine` API, because Impeller's path rendering does not
   ///             support dashed and dotted lines (but Skia's does).
   const bool impeller_enabled_;
+  const TextDirection text_direction_;
   std::stack<TextStyle> txt_style_stack_;
   std::vector<flutter::DlPaint> dl_paints_;
 };

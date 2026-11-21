@@ -33,6 +33,13 @@ enum class TextDirection {
   // NOLINTEND(readability-identifier-naming)
 };
 
+// Where inside a line an overflow truncation or fade should be applied.
+enum class OverflowPosition {
+  kStart = 0,
+  kMiddle = 1,
+  kEnd = 2,
+};
+
 // Adjusts the leading over and under text.
 //
 // kDisableFirstAscent and kDisableLastDescent allow disabling height

@@ -80,6 +80,8 @@ export 'package:flutter/rendering.dart'
         StackFit,
         SystemMouseCursors,
         TextOverflow,
+        TextOverflowPosition,
+        TextScrollOverflow,
         ValueChanged,
         ValueGetter,
         WrapAlignment,
@@ -6573,6 +6575,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     @Deprecated(
       'Use textScaler instead. '
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -6639,6 +6643,17 @@ class RichText extends MultiChildRenderObjectWidget {
 
   /// How visual overflow should be handled.
   final TextOverflow overflow;
+
+  /// Where within the text visual overflow truncation or fading should occur.
+  ///
+  /// Defaults to [TextOverflowPosition.end].
+  final TextOverflowPosition overflowPosition;
+
+  /// How this text behaves when its enclosing container dynamically shrinks
+  /// during scrolling, drag gestures, or layout transitions.
+  ///
+  /// Defaults to [TextScrollOverflow.wrap].
+  final TextScrollOverflow scrollOverflow;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
@@ -6724,6 +6739,8 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
+      overflowPosition: overflowPosition,
+      scrollOverflow: scrollOverflow,
       textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
@@ -6746,6 +6763,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
+      ..overflowPosition = overflowPosition
+      ..scrollOverflow = scrollOverflow
       ..textScaler = textScaler
       ..maxLines = maxLines
       ..strutStyle = strutStyle
@@ -6774,6 +6793,20 @@ class RichText extends MultiChildRenderObjectWidget {
     );
     properties.add(
       EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip),
+    );
+    properties.add(
+      EnumProperty<TextOverflowPosition>(
+        'overflowPosition',
+        overflowPosition,
+        defaultValue: TextOverflowPosition.end,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextScrollOverflow>(
+        'scrollOverflow',
+        scrollOverflow,
+        defaultValue: TextScrollOverflow.wrap,
+      ),
     );
     properties.add(
       DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling),

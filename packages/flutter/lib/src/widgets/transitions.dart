@@ -1027,6 +1027,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     this.maxLines,
   }) : super(listenable: style);
 
@@ -1045,6 +1047,17 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   ///
   final TextOverflow overflow;
 
+  /// Where within the text visual overflow truncation or fading should occur.
+  ///
+  /// See [DefaultTextStyle.overflowPosition] for more details.
+  final TextOverflowPosition overflowPosition;
+
+  /// How descendant [Text] widgets behave when their enclosing container
+  /// dynamically shrinks during scrolling or layout transitions.
+  ///
+  /// See [DefaultTextStyle.scrollOverflow] for more details.
+  final TextScrollOverflow scrollOverflow;
+
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// See [DefaultTextStyle.maxLines] for more details.
@@ -1062,6 +1075,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
       textAlign: textAlign,
       softWrap: softWrap,
       overflow: overflow,
+      overflowPosition: overflowPosition,
+      scrollOverflow: scrollOverflow,
       maxLines: maxLines,
       child: child,
     );

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -370,6 +371,130 @@ class EngineCanvas implements LayerCanvas {
     } else {
       throw UnimplementedError('Unknown paragraph type.');
     }
+  }
+
+  @override
+  void drawParagraphMasked(
+    ui.Paragraph paragraph,
+    ui.Offset offset, {
+    required ui.Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  }) {
+    assert(!paragraph.debugDisposed);
+    assert(offsetIsValid(offset));
+    assert(rectIsValid(clipRect));
+    assert(overflowPosition >= 0 && overflowPosition <= 2);
+    if (!(opacity > 0.0)) {
+      return;
+    }
+    final ui.Rect sortedClip = ui.Rect.fromLTRB(
+      math.min(clipRect.left, clipRect.right),
+      math.min(clipRect.top, clipRect.bottom),
+      math.max(clipRect.left, clipRect.right),
+      math.max(clipRect.top, clipRect.bottom),
+    );
+    if (sortedClip.isEmpty) {
+      return;
+    }
+    final double effectiveOpacity = opacity > 1.0 ? 1.0 : opacity;
+    final int alpha = ui.Color.getAlphaFromOpacity(effectiveOpacity);
+    if (alpha == 0) {
+      return;
+    }
+
+    save();
+    this.clipRect(sortedClip, doAntiAlias: false);
+
+    if (fadeHorizontal) {
+      final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+      double fadeWidth = 14.0;
+      if (lines.isNotEmpty) {
+        final ui.LineMetrics lastLine = lines.last;
+        fadeWidth = (lastLine.ascent + lastLine.descent).roundToDouble();
+      } else if (sortedClip.height > 0.0) {
+        fadeWidth = sortedClip.height;
+      }
+      fadeWidth = math.max(fadeWidth, 1.0);
+
+      final ui.Paint layerPaint = ui.Paint();
+      if (alpha < 255) {
+        layerPaint.color = ui.Color.fromARGB(alpha, 0, 0, 0);
+      }
+      saveLayer(sortedClip, layerPaint);
+      drawParagraph(paragraph, offset);
+
+      final ui.Paint maskPaint = ui.Paint()..blendMode = ui.BlendMode.modulate;
+      if (lines.length > 1) {
+        final ui.LineMetrics lastLine = lines.last;
+        final double lineTop = math.max(
+          sortedClip.top,
+          offset.dy + lastLine.baseline - lastLine.ascent,
+        );
+        final double lineLeft = math.max(sortedClip.left, offset.dx + lastLine.left);
+        final double lineRight = math.min(
+          sortedClip.right,
+          offset.dx + lastLine.left + lastLine.width,
+        );
+        if (lineRight > lineLeft && sortedClip.bottom > lineTop) {
+          final double effectiveFade = math.min(fadeWidth * 2.0, lineRight - lineLeft);
+          final bool fadeAtLeft = overflowPosition == 0;
+          final double fadeStart = fadeAtLeft
+              ? math.min(lineRight, lineLeft + effectiveFade)
+              : math.max(lineLeft, lineRight - effectiveFade);
+          final double fadeEnd = fadeAtLeft ? lineLeft : lineRight;
+          maskPaint.shader = ui.Gradient.linear(
+            ui.Offset(fadeStart, 0.0),
+            ui.Offset(fadeEnd, 0.0),
+            const <ui.Color>[ui.Color(0xFFFFFFFF), ui.Color(0x00FFFFFF)],
+          );
+          drawRect(
+            ui.Rect.fromLTRB(sortedClip.left, lineTop, sortedClip.right, sortedClip.bottom),
+            maskPaint,
+          );
+        }
+      } else if (overflowPosition == 1 && sortedClip.width > 0.0) {
+        final double halfWidth = sortedClip.width / 2.0;
+        final double halfFade = math.min(fadeWidth, halfWidth);
+        final double stop1 = ui.clampDouble((halfWidth - halfFade) / sortedClip.width, 0.0, 0.5);
+        final double stop2 = ui.clampDouble((halfWidth + halfFade) / sortedClip.width, 0.5, 1.0);
+        maskPaint.shader = ui.Gradient.linear(
+          ui.Offset(sortedClip.left, 0.0),
+          ui.Offset(sortedClip.right, 0.0),
+          const <ui.Color>[
+            ui.Color(0xFFFFFFFF),
+            ui.Color(0xFFFFFFFF),
+            ui.Color(0x00FFFFFF),
+            ui.Color(0xFFFFFFFF),
+            ui.Color(0xFFFFFFFF),
+          ],
+          <double>[0.0, stop1, 0.5, stop2, 1.0],
+        );
+        drawRect(sortedClip, maskPaint);
+      } else {
+        final bool fadeAtLeft = overflowPosition == 0;
+        final double fadeStart = fadeAtLeft
+            ? math.min(sortedClip.right, sortedClip.left + fadeWidth)
+            : math.max(sortedClip.left, sortedClip.right - fadeWidth);
+        final double fadeEnd = fadeAtLeft ? sortedClip.left : sortedClip.right;
+        maskPaint.shader = ui.Gradient.linear(
+          ui.Offset(fadeStart, 0.0),
+          ui.Offset(fadeEnd, 0.0),
+          const <ui.Color>[ui.Color(0xFFFFFFFF), ui.Color(0x00FFFFFF)],
+        );
+        drawRect(sortedClip, maskPaint);
+      }
+      restore();
+    } else if (alpha < 255) {
+      saveLayer(sortedClip, ui.Paint()..color = ui.Color.fromARGB(alpha, 0, 0, 0));
+      drawParagraph(paragraph, offset);
+      restore();
+    } else {
+      drawParagraph(paragraph, offset);
+    }
+
+    restore();
   }
 
   /// Draws a sequence of points according to [pointMode].

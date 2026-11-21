@@ -7360,6 +7360,22 @@ abstract class Canvas {
   /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
   void drawParagraph(Paragraph paragraph, Offset offset);
 
+  /// Draws the text in the given [Paragraph] into this canvas at the given
+  /// [Offset], clipped to [clipRect], modulated by [opacity] (`0.0..1.0`), and
+  /// optionally applying a horizontal overflow fade at [overflowPosition]
+  /// (`0` = start, `1` = middle, `2` = end).
+  ///
+  /// The [Paragraph] object must have had [Paragraph.layout] called on it
+  /// first. If [opacity] is less than or equal to `0.0`, nothing is drawn.
+  void drawParagraphMasked(
+    Paragraph paragraph,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  });
+
   /// Draws a sequence of points according to the given [PointMode].
   ///
   /// The `points` argument is interpreted as offsets from the origin.
@@ -8254,6 +8270,42 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     assert(_offsetIsValid(offset));
     assert(!nativeParagraph._needsLayout);
     nativeParagraph._paint(this, offset.dx, offset.dy);
+  }
+
+  @override
+  void drawParagraphMasked(
+    Paragraph paragraph,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  }) {
+    final nativeParagraph = paragraph as _NativeParagraph;
+    assert(!nativeParagraph.debugDisposed);
+    assert(_offsetIsValid(offset));
+    assert(_rectIsValid(clipRect));
+    assert(!nativeParagraph._needsLayout);
+    assert(overflowPosition >= 0 && overflowPosition <= 2);
+    if (!(opacity > 0.0)) {
+      return;
+    }
+    final Rect sortedClip = _sorted(clipRect);
+    if (sortedClip.isEmpty) {
+      return;
+    }
+    nativeParagraph._paintMasked(
+      this,
+      offset.dx,
+      offset.dy,
+      sortedClip.left,
+      sortedClip.top,
+      sortedClip.right,
+      sortedClip.bottom,
+      opacity > 1.0 ? 1.0 : opacity,
+      fadeHorizontal,
+      overflowPosition,
+    );
   }
 
   @override

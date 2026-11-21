@@ -2065,6 +2065,8 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.textAlign,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    this.overflowPosition = TextOverflowPosition.end,
+    this.scrollOverflow = TextScrollOverflow.wrap,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
@@ -2100,6 +2102,21 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// This property takes effect immediately when changed, it is not animated.
   final TextOverflow overflow;
 
+  /// Where within the text visual overflow truncation or fading should occur.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  ///
+  /// See [DefaultTextStyle.overflowPosition] for more details.
+  final TextOverflowPosition overflowPosition;
+
+  /// How descendant [Text] widgets behave when their enclosing container
+  /// dynamically shrinks during scrolling or layout transitions.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  ///
+  /// See [DefaultTextStyle.scrollOverflow] for more details.
+  final TextScrollOverflow scrollOverflow;
+
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// This property takes effect immediately when changed, it is not animated.
@@ -2134,6 +2151,20 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
       ),
     );
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(
+      EnumProperty<TextOverflowPosition>(
+        'overflowPosition',
+        overflowPosition,
+        defaultValue: TextOverflowPosition.end,
+      ),
+    );
+    properties.add(
+      EnumProperty<TextScrollOverflow>(
+        'scrollOverflow',
+        scrollOverflow,
+        defaultValue: TextScrollOverflow.wrap,
+      ),
+    );
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(
       EnumProperty<TextWidthBasis>(
@@ -2171,6 +2202,8 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
       textAlign: widget.textAlign,
       softWrap: widget.softWrap,
       overflow: widget.overflow,
+      overflowPosition: widget.overflowPosition,
+      scrollOverflow: widget.scrollOverflow,
       maxLines: widget.maxLines,
       textWidthBasis: widget.textWidthBasis,
       textHeightBehavior: widget.textHeightBehavior,

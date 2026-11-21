@@ -3399,6 +3399,34 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Double, Double)>(symbol: 'Paragraph::paint')
   external void _paint(_NativeCanvas canvas, double x, double y);
 
+  @Native<
+    Void Function(
+      Pointer<Void>,
+      Pointer<Void>,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Bool,
+      Int32,
+    )
+  >(symbol: 'Paragraph::paintMasked')
+  external void _paintMasked(
+    _NativeCanvas canvas,
+    double x,
+    double y,
+    double clipLeft,
+    double clipTop,
+    double clipRight,
+    double clipBottom,
+    double opacity,
+    bool fadeHorizontal,
+    int overflowPosition,
+  );
+
   @override
   List<LineMetrics> computeLineMetrics() {
     final Float64List encoded = _computeLineMetrics();

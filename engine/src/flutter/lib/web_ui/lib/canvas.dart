@@ -88,6 +88,14 @@ abstract class Canvas {
   void drawImageNine(Image image, Rect center, Rect dst, Paint paint);
   void drawPicture(Picture picture);
   void drawParagraph(Paragraph paragraph, Offset offset);
+  void drawParagraphMasked(
+    Paragraph paragraph,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  });
   void drawPoints(PointMode pointMode, List<Offset> points, Paint paint);
   void drawRawPoints(PointMode pointMode, Float32List points, Paint paint);
 
