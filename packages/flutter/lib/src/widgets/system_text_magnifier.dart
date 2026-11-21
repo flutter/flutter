@@ -19,8 +19,9 @@ import 'overlay.dart';
 
 /// Displays the platform's text magnifier instead of one drawn by Flutter.
 ///
-/// Currently, only supports iOS 17.0 and above, where it shows the system
-/// loupe, and displays nothing on other platforms and earlier iOS versions.
+/// Currently, only supports iOS, where it shows the system loupe on iOS 17.0
+/// and above and displays nothing on earlier iOS versions. Check [isSupported]
+/// before building this widget.
 ///
 /// Flutter typically draws the text magnifier itself, for example with
 /// [CupertinoTextMagnifier], which approximates the platform's look. The
@@ -91,7 +92,9 @@ class SystemTextMagnifier extends StatefulWidget {
 }
 
 class _SystemTextMagnifierState extends State<SystemTextMagnifier> {
-  late final bool _isSupported = SystemTextMagnifier.isSupported(context);
+  // Set when the platform reports that it has no system magnifier. This then
+  // stops listening to the magnifier info and sends nothing more.
+  bool _unsupported = false;
 
   @override
   void initState() {
@@ -103,7 +106,7 @@ class _SystemTextMagnifierState extends State<SystemTextMagnifier> {
   @override
   void didUpdateWidget(SystemTextMagnifier oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.magnifierInfo != widget.magnifierInfo) {
+    if (!_unsupported && oldWidget.magnifierInfo != widget.magnifierInfo) {
       oldWidget.magnifierInfo.removeListener(_show);
       widget.magnifierInfo.addListener(_show);
       _show();
@@ -112,40 +115,44 @@ class _SystemTextMagnifierState extends State<SystemTextMagnifier> {
 
   @override
   void dispose() {
-    widget.magnifierInfo.removeListener(_show);
-    if (_isSupported) {
-      SystemChannels.platform.invokeMethod<void>('Magnifier.hideSystemMagnifier');
+    if (!_unsupported) {
+      widget.magnifierInfo.removeListener(_show);
+      SystemMagnifier.hide();
     }
     super.dispose();
   }
 
   void _show() {
-    if (!_isSupported) {
+    // The magnifier info is in the root overlay's coordinates, and the
+    // platform takes coordinates in the Flutter view.
+    final overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
+    // There is no position to show the magnifier at until the overlay is laid
+    // out.
+    if (overlay == null || !overlay.hasSize) {
+      return;
+    }
+    final Matrix4 toView = overlay.getTransformTo(null);
+    // The transform is singular, for example zero when an ancestor does not
+    // paint the overlay, so there is no position to show the magnifier at.
+    if (toView.determinant() == 0.0) {
       return;
     }
     final MagnifierInfo info = widget.magnifierInfo.value;
-    // The magnifier info is in the root overlay's coordinates, and the
-    // platform takes coordinates in the Flutter view.
-    final RenderObject? overlay = Overlay.maybeOf(
-      context,
-      rootOverlay: true,
-    )?.context.findRenderObject();
-    final Matrix4 toView = overlay is RenderBox && overlay.hasSize
-        ? overlay.getTransformTo(null)
-        : Matrix4.identity();
-    final Offset position = MatrixUtils.transformPoint(toView, info.globalGesturePosition);
-    final Rect caretRect = MatrixUtils.transformRect(toView, info.caretRect);
-    SystemChannels.platform.invokeMethod<bool>('Magnifier.showSystemMagnifier', <String, Object>{
-      'position': <String, double>{'x': position.dx, 'y': position.dy},
-      'caretRect': <String, double>{
-        'x': caretRect.left,
-        'y': caretRect.top,
-        'width': caretRect.width,
-        'height': caretRect.height,
-      },
+    SystemMagnifier.show(
+      gesturePosition: MatrixUtils.transformPoint(toView, info.globalGesturePosition),
+      caretRect: MatrixUtils.transformRect(toView, info.caretRect),
+    ).then((SystemMagnifierShowResult result) {
+      if (!mounted || _unsupported || result != SystemMagnifierShowResult.unsupported) {
+        return;
+      }
+      _unsupported = true;
+      widget.magnifierInfo.removeListener(_show);
     });
   }
 
   @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
+  Widget build(BuildContext context) {
+    assert(SystemTextMagnifier.isSupported(context));
+    return const SizedBox.shrink();
+  }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -33,13 +35,18 @@ void main() {
     );
   }
 
-  List<MethodCall> recordPlatformCalls(WidgetTester tester) {
+  // Records the calls sent on the platform channel. The platform answers each
+  // show call with what `showResult` returns.
+  List<MethodCall> recordPlatformCalls(
+    WidgetTester tester, {
+    Future<bool?> Function() showResult = _shown,
+  }) {
     final calls = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
       MethodCall call,
     ) async {
       calls.add(call);
-      return call.method == 'Magnifier.showSystemMagnifier' ? true : null;
+      return call.method == 'Magnifier.showSystemMagnifier' ? showResult() : null;
     });
     addTearDown(() {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
@@ -100,6 +107,7 @@ void main() {
     final newInfo = ValueNotifier<MagnifierInfo>(secondInfo);
     addTearDown(newInfo.dispose);
 
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
     await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: oldInfo)));
     await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: newInfo)));
 
@@ -115,8 +123,154 @@ void main() {
     expect(calls, hasLength(2));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('is not supported and sends nothing on other platforms', (WidgetTester tester) async {
+  testWidgets('keeps following the magnifier info when the loupe is not shown', (
+    WidgetTester tester,
+  ) async {
+    final List<MethodCall> calls = recordPlatformCalls(
+      tester,
+      showResult: () => Future<bool?>.value(false),
+    );
+    final magnifierInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(magnifierInfo.dispose);
+
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+    await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: magnifierInfo)));
+    magnifierInfo.value = secondInfo;
+    await tester.pump();
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+
+    expect(calls.map((MethodCall call) => call.method), <String>[
+      'Magnifier.showSystemMagnifier',
+      'Magnifier.showSystemMagnifier',
+      'Magnifier.hideSystemMagnifier',
+    ]);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('stops sending calls when the platform has no system loupe', (
+    WidgetTester tester,
+  ) async {
+    final List<MethodCall> calls = recordPlatformCalls(
+      tester,
+      showResult: () => Future<bool?>.value(),
+    );
+    final magnifierInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(magnifierInfo.dispose);
+    final otherInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(otherInfo.dispose);
+
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+    await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: magnifierInfo)));
+    expect(calls, hasLength(1));
+
+    magnifierInfo.value = secondInfo;
+    await tester.pump();
+    await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: otherInfo)));
+    otherInfo.value = secondInfo;
+    await tester.pump();
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+
+    expect(calls, hasLength(1));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('stops following a new magnifier info when the platform answers late', (
+    WidgetTester tester,
+  ) async {
+    final result = Completer<bool?>();
+    final List<MethodCall> calls = recordPlatformCalls(tester, showResult: () => result.future);
+    final oldInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(oldInfo.dispose);
+    final newInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(newInfo.dispose);
+
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+    await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: oldInfo)));
+    // The widget follows the new magnifier info before the first result
+    // arrives.
+    await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: newInfo)));
+    expect(calls, hasLength(2));
+
+    result.complete();
+    await tester.pump();
+
+    newInfo.value = secondInfo;
+    await tester.pump();
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+
+    expect(calls, hasLength(2));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('hides the loupe when removed before the platform answers', (
+    WidgetTester tester,
+  ) async {
+    final result = Completer<bool?>();
+    final List<MethodCall> calls = recordPlatformCalls(tester, showResult: () => result.future);
+    final magnifierInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(magnifierInfo.dispose);
+
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+    await tester.pumpWidget(buildMagnifier(SystemTextMagnifier(magnifierInfo: magnifierInfo)));
+    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
+
+    result.complete();
+    await tester.pump();
+
+    expect(calls.map((MethodCall call) => call.method), <String>[
+      'Magnifier.showSystemMagnifier',
+      'Magnifier.hideSystemMagnifier',
+    ]);
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('does not show the loupe when the overlay has a singular transform', (
+    WidgetTester tester,
+  ) async {
     final List<MethodCall> calls = recordPlatformCalls(tester);
+    final magnifierInfo = ValueNotifier<MagnifierInfo>(firstInfo);
+    addTearDown(magnifierInfo.dispose);
+
+    // A FittedBox with no size does not paint its child, so the overlay's
+    // paint transform is the zero matrix.
+    Widget buildInEmptyFittedBox(Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: FittedBox(
+              child: SizedBox(width: 200, height: 100, child: Overlay.wrap(child: child)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildInEmptyFittedBox(const SizedBox.shrink()));
+    await tester.pumpWidget(
+      buildInEmptyFittedBox(SystemTextMagnifier(magnifierInfo: magnifierInfo)),
+    );
+    magnifierInfo.value = secondInfo;
+    await tester.pump();
+
+    // A zero scale gives a singular transform that is not the zero matrix.
+    Widget buildScaledToZero(Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Transform.scale(scale: 0, child: Overlay.wrap(child: child)),
+      );
+    }
+
+    await tester.pumpWidget(buildScaledToZero(const SizedBox.shrink()));
+    await tester.pumpWidget(buildScaledToZero(SystemTextMagnifier(magnifierInfo: magnifierInfo)));
+    magnifierInfo.value = firstInfo;
+    await tester.pump();
+
+    expect(
+      calls.where((MethodCall call) => call.method == 'Magnifier.showSystemMagnifier'),
+      isEmpty,
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('is not supported and asserts on other platforms', (WidgetTester tester) async {
+    recordPlatformCalls(tester);
     final magnifierInfo = ValueNotifier<MagnifierInfo>(firstInfo);
     addTearDown(magnifierInfo.dispose);
     late BuildContext context;
@@ -131,13 +285,9 @@ void main() {
         ),
       ),
     );
+
     expect(SystemTextMagnifier.isSupported(context), isFalse);
-
-    magnifierInfo.value = secondInfo;
-    await tester.pump();
-    await tester.pumpWidget(buildMagnifier(const SizedBox.shrink()));
-
-    expect(calls, isEmpty);
+    expect(tester.takeException(), isAssertionError);
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
   test('debugFillProperties', () {
@@ -168,3 +318,5 @@ void main() {
     expect(SystemTextMagnifier.isSupported(context), isTrue);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }
+
+Future<bool?> _shown() => Future<bool?>.value(true);
