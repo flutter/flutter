@@ -6498,6 +6498,120 @@ void main() {
     expect(content!.plainText, 'Ho');
   });
 
+  group('keyboard selection with an edge scrolled out of view', () {
+    const activators = <String, SingleActivator>{
+      'down': SingleActivator(LogicalKeyboardKey.arrowDown, shift: true),
+      'up': SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+      'right': SingleActivator(LogicalKeyboardKey.arrowRight, shift: true),
+      'left': SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true),
+    };
+
+    // Selects 'Line 0' through 'Line [lastLine]' and reports every selection change.
+    Future<ValueGetter<String?>> selectLines(
+      WidgetTester tester,
+      ScrollController controller, {
+      required int lastLine,
+    }) async {
+      SelectedContent? content;
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _selectableRegion(
+            onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+            child: ListView.builder(
+              controller: controller,
+              itemExtent: 40,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) => Text('Line $index'),
+            ),
+          ),
+        ),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        tester.getTopLeft(find.text('Line 0')),
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(tester.getBottomRight(find.text('Line $lastLine')));
+      await gesture.up();
+      await tester.pump();
+      expect(
+        content!.plainText,
+        List<String>.generate(lastLine + 1, (int index) => 'Line $index').join(),
+      );
+      return () => content?.plainText;
+    }
+
+    for (final MapEntry<String, SingleActivator>(key: String name, value: SingleActivator activator)
+        in activators.entries) {
+      testWidgets('shift + $name does nothing when both edges are out of view', (
+        WidgetTester tester,
+      ) async {
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+        final ValueGetter<String?> selectedText = await selectLines(
+          tester,
+          controller,
+          lastLine: 2,
+        );
+
+        // The selected items are kept alive but no longer painted, so the
+        // selection has no start or end point.
+        controller.jumpTo(2000);
+        await tester.pump();
+
+        await sendKeyCombination(tester, activator);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(selectedText(), 'Line 0Line 1Line 2');
+      });
+
+      testWidgets('shift + $name does not throw when only the start is out of view', (
+        WidgetTester tester,
+      ) async {
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+        final ValueGetter<String?> selectedText = await selectLines(
+          tester,
+          controller,
+          lastLine: 13,
+        );
+        final String? before = selectedText();
+
+        // 'Line 0' is past the cache extent; 'Line 13' is still visible.
+        controller.jumpTo(400);
+        await tester.pump();
+
+        await sendKeyCombination(tester, activator);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(selectedText(), before);
+      });
+    }
+
+    testWidgets('shift + down keeps extending after the edges scroll out of view', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final ValueGetter<String?> selectedText = await selectLines(tester, controller, lastLine: 2);
+
+      // Decides which edge moves and records the horizontal baseline.
+      await sendKeyCombination(tester, activators['down']!);
+      await tester.pump();
+      final String? before = selectedText();
+      expect(before, isNot('Line 0Line 1Line 2'));
+
+      controller.jumpTo(2000);
+      await tester.pump();
+
+      await sendKeyCombination(tester, activators['down']!);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(selectedText(), isNot(before));
+    });
+  });
+
   group('BrowserContextMenu', () {
     setUp(() async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
