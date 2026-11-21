@@ -6,6 +6,7 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/testing/mock_signal_handler.h"
@@ -159,4 +160,27 @@ TEST_F(FlViewAccessibleTest, AddRemoveChildren) {
   }
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 0);
+}
+
+TEST_F(FlViewAccessibleTest, Extents) {
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
+  g_autoptr(FlAccessibleNode) parent = fl_accessible_node_new(engine, 456, 0);
+  fl_accessible_node_set_extents(parent, 10, 20, 30, 40);
+  atk_object_set_parent(ATK_OBJECT(accessible), ATK_OBJECT(parent));
+
+  // Simulate at-spi2-atk embedding.
+  AtkComponentIface* iface = ATK_COMPONENT_GET_IFACE(accessible);
+  iface->get_extents = [](AtkComponent* component, gint* x, gint* y,
+                          gint* width, gint* height, AtkCoordType coord_type) {
+    *x = *y = *width = *height = -1;
+  };
+  atk_object_get_n_accessible_children(ATK_OBJECT(accessible));
+
+  gint x, y, width, height;
+  atk_component_get_extents(ATK_COMPONENT(accessible), &x, &y, &width, &height,
+                            ATK_XY_SCREEN);
+  EXPECT_EQ(x, 10);
+  EXPECT_EQ(y, 20);
+  EXPECT_EQ(width, 30);
+  EXPECT_EQ(height, 40);
 }
