@@ -157,6 +157,13 @@ class ScrollBehavior {
   };
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
+  ///
+  /// The scrollbars built here do not set a thumb visibility, so they resolve
+  /// it in this order: [RawScrollbar.thumbVisibility], then the ambient
+  /// scrollbar theme (for example [ScrollbarThemeData.thumbVisibility]), then
+  /// the platform preference reported by
+  /// [MediaQueryData.persistentScrollbars]. An override subclass is free to
+  /// ignore the platform preference by passing an explicit visibility.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
