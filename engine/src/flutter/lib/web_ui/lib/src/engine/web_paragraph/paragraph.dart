@@ -1144,10 +1144,7 @@ class WebParagraph implements ui.Paragraph {
       widthAlpha = ui.clampDouble(1.0 - (progress / denom), 0.0, 1.0);
     }
     var heightAlpha = 1.0;
-    final double naturalH = height;
-    final double refH = (naturalH.isFinite && naturalH > 0.0 && _lockedMaxHeight > 0.0)
-        ? math.min(_lockedMaxHeight, naturalH)
-        : math.max(_lockedMaxHeight, naturalH);
+    final double refH = _lockedMaxHeight;
     if (refH > 0.0 && currentHeight.isFinite && currentHeight < refH) {
       final double progress = ui.clampDouble(1.0 - (currentHeight / refH), 0.0, 1.0);
       heightAlpha = ui.clampDouble(1.0 - (progress / denom), 0.0, 1.0);

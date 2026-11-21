@@ -359,11 +359,7 @@ double ParagraphSkia::ComputeScrollFadeOpacity(double current_width,
   }
 
   double height_alpha = 1.0;
-  const double natural_h = GetHeight();
-  const double ref_h = (std::isfinite(natural_h) && natural_h > 0.0 &&
-                        locked_max_height_ > 0.0)
-                           ? std::min(locked_max_height_, natural_h)
-                           : std::max(locked_max_height_, natural_h);
+  const double ref_h = locked_max_height_;
   if (ref_h > 0.0 && std::isfinite(current_height) && current_height < ref_h) {
     const double shrink_progress =
         std::clamp(1.0 - (current_height / ref_h), 0.0, 1.0);
