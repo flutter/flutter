@@ -76,6 +76,9 @@ et test --backend bazel --config host_debug_unopt //flutter/fml:fml_unittests
 ```
 
 `ET_BACKEND=bazel` in the environment has the same effect as the option.
+In a checkout without `gclient sync`, `et` needs one of the two to start at
+all: it then runs on the Dart SDK and the packages Bazel fetches
+(`docs/dependencies.md`), and `et fetch` has nothing to do.
 `et build` prints the directory to give the flutter tool as `--local-engine`;
 `docs/artifacts.md` describes how the tool reads it.
 

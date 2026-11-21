@@ -136,6 +136,22 @@ configuration resolved over the old Dart tree stayed as it was after a Dart
 roll, and a conversion that ran while the tree was being fetched found half
 of it.)
 
+**`et`.** The engine tool checks for gclient only when it builds with GN.
+Where `gclient sync` has run, `bin/et` starts as it always did, on the
+checkout's prebuilt Dart SDK and package resolution. Where it has not, the
+backend decides. With GN (the default) it asks for `gclient sync`, as
+before. With Bazel (`--backend bazel`, or `ET_BACKEND=bazel`) it asks Bazel
+where the host's prebuilt Dart SDK and the engine's package configuration
+are -- one `bazel query --output=location` over
+`//engine/src/flutter:package_config` and `@dart_sdk_<host>//:bin/dart`,
+which fetches them the first time (and the Dart tree, which holds the
+packages) -- and runs the checkout's `tools/engine_tool/bin/et.dart` on
+those. A query and not a build: a build with other options than the
+developer's last one would discard that build's analysis. `et fetch` with
+the Bazel backend looks for neither gclient nor `.gclient` and fetches
+nothing: Bazel does that when a build first reads a dependency. `et.bat` is
+unchanged; there is no Bazel build on a Windows host.
+
 **What it does not do.**
 
 - The web engine: the Emscripten SDK is installed by a hook of `DEPS`
@@ -143,10 +159,6 @@ of it.)
   build asks for it.
 - macOS and Windows hosts: the rules are host-independent, but only Linux
   x64 has been run.
-- `et`: the engine tool is a gclient checkout's, and three of
-  `//engine/src/flutter/tools/engine_tool:tests` fail without one -- the
-  entry point's (`bin/et` asks for `gclient sync`) and the two of
-  `et fetch` (it looks for `.gclient`). The target builds either way.
 - A synced checkout that lacks one nested dependency (a roll added it and
   `gclient sync` has not run since) is not repaired: a tree comes from the
   checkout or from a fetch, whole.

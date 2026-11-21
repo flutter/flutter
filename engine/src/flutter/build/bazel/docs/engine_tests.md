@@ -215,20 +215,26 @@ reading the directory's name -- and empty for every other package, since
 
 What each package's tests read is declared beside it: `ci/builders/**/*.json`
 (`//engine/src/flutter/ci:builder_configs`) and `.ci.yaml` for
-`engine_build_configs` and `engine_tool`; `bin/et` and the checkout's
-`.gclient` for `engine_tool` (whose `et fetch` runs gclient from its
-directory); `DEPS`, `.bazelignore` and `deps.lock.bzl` for `bazel_tools`,
+`engine_build_configs` and `engine_tool`; `bin/et` for `engine_tool`;
+`DEPS`, `.bazelignore` and `deps.lock.bzl` for `bazel_tools`,
 which regenerates them and compares; dart:ui's sources, the web engine's,
 `embedder.h`, the headers behind dart:ui and the Java and Swift files that
 mirror its enums for `api_check`. The repository root has a `BUILD.bazel`
-for the three checkout-level files. One read escapes the tree: `bin/et`
+for the checkout-level files. One read escapes the tree: `bin/et`
 resolves its own location with `realpath`, which follows the runfiles
 symlink to the checkout, so `engine_tool`'s entry-point test runs the
-checkout's copy of the package on the checkout's prebuilt SDK. That test
-and the two of `et fetch` are the ones that need a gclient checkout: in one
-that was never synced (`docs/dependencies.md`) `.gclient` is absent
-(`//:gclient_config` is empty, so the target still builds) and `bin/et`
-asks for `gclient sync`.
+checkout's copy of the package. The suite passes with or without
+`gclient sync` (`docs/dependencies.md`). Where it has run, the entry point
+starts on the checkout's prebuilt SDK, as under `dart test`. Where it has
+not, the test checks both halves of what `bin/et` does there: it asks for
+`gclient sync` under the GN backend, and under the Bazel backend it starts
+the tool on the SDK and package configuration Bazel names -- which a
+stand-in for Bazel answers with the ones the test itself runs on, since a
+Bazel inside a test would wait for the build that runs the test. The
+script's own logic (which backend, what it asks Bazel, what it does with
+the answer) is tested in a tree made for it, the same in every checkout,
+and `et fetch`'s tests make their own engine, with and without a
+`.gclient`.
 
 Eleven of the thirteen packages are here, under
 `//engine/src/flutter:dart_host_tests`. The two that are not run with
