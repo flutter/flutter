@@ -224,6 +224,7 @@ struct MockVulkanState {
   // When > 0, the next vkCreateImage for a fixed-rate-compressed image returns
   // VK_ERROR_COMPRESSION_EXHAUSTED_EXT and decrements (models PowerVR).
   int compression_exhausted_create_image_failures = 0;
+  std::vector<VkSurfaceFormatKHR> surface_formats;
 };
 
 class MockVulkanStatePtr {
@@ -1011,6 +1012,16 @@ VkResult vkGetPhysicalDeviceSurfaceFormatsKHR(
     VkSurfaceKHR surface,
     uint32_t* pSurfaceFormatCount,
     VkSurfaceFormatKHR* pSurfaceFormats) {
+  if (g_mock_vulkan_state && !GetMockVulkanState().surface_formats.empty()) {
+    const auto& formats = GetMockVulkanState().surface_formats;
+    *pSurfaceFormatCount = static_cast<uint32_t>(formats.size());
+    if (pSurfaceFormats != nullptr) {
+      for (size_t i = 0; i < formats.size(); ++i) {
+        pSurfaceFormats[i] = formats[i];
+      }
+    }
+    return VK_SUCCESS;
+  }
   *pSurfaceFormatCount = 1u;
   if (pSurfaceFormats != nullptr) {
     pSurfaceFormats[0] =
@@ -1434,6 +1445,7 @@ ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   g_mock_vulkan_state->wait_for_fences_callback = wait_for_fences_callback_;
   g_mock_vulkan_state->compression_exhausted_create_image_failures =
       compression_exhausted_create_image_failures_;
+  g_mock_vulkan_state->surface_formats = surface_formats_;
   settings.embedder_data = embedder_data_;
   return settings;
 }

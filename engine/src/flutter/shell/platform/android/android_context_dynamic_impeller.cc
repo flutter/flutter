@@ -139,6 +139,7 @@ GetActualRenderingAPIForImpeller(
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
           .enable_gpu_tracing = settings.enable_gpu_tracing,
           .enable_surface_control = settings.enable_surface_control,
+          .enable_wide_gamut = settings.enable_wide_gamut,
           .impeller_flags = settings.impeller_flags,
       });
   if (!vulkan_backend->IsValid()) {

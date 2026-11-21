@@ -593,6 +593,22 @@ TEST_F(ImageDecoderFixtureTest, ImpellerWideGamutDisplayP3Opaque) {
   ASSERT_TRUE(narrow_result.ok());
   ASSERT_EQ(narrow_result->image_info.format,
             impeller::PixelFormat::kR8G8B8A8UNormInt);
+
+  // When the backend's default color format is FP16 (e.g. Vulkan wide gamut),
+  // opaque wide-gamut images decode to kR16G16B16A16Float instead of 10-bit XR.
+  std::shared_ptr<impeller::Capabilities> fp16_capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetSupportsTextureToTextureBlits(true)
+          .SetDefaultColorFormat(impeller::PixelFormat::kR16G16B16A16Float)
+          .Build();
+  absl::StatusOr<ImageDecoderImpeller::DecompressResult> fp16_result =
+      ImageDecoderImpeller::DecompressTexture(
+          descriptor.get(), {.target_width = 100, .target_height = 100},
+          {100, 100},
+          /*supports_wide_gamut=*/true, fp16_capabilities, allocator);
+  ASSERT_TRUE(fp16_result.ok());
+  ASSERT_EQ(fp16_result->image_info.format,
+            impeller::PixelFormat::kR16G16B16A16Float);
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 

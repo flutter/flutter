@@ -66,6 +66,7 @@ AndroidContext::ContextSettings PlatformViewAndroid::CreateContextSettings(
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control =
       p_settings.enable_surface_control && api_level >= kMinAPILevelHCPP;
+  settings.enable_wide_gamut = p_settings.enable_wide_gamut;
   settings.impeller_flags.use_sdfs = p_settings.impeller_use_sdfs;
   return settings;
 }

@@ -154,6 +154,12 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  MockVulkanContextBuilder& SetSurfaceFormats(
+      std::vector<VkSurfaceFormatKHR> surface_formats) {
+    surface_formats_ = std::move(surface_formats);
+    return *this;
+  }
+
  private:
   ContextVK::Settings PrepareSettings();
 
@@ -174,6 +180,7 @@ class MockVulkanContextBuilder {
   std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
       wait_for_fences_callback_;
   int compression_exhausted_create_image_failures_ = 0;
+  std::vector<VkSurfaceFormatKHR> surface_formats_;
 };
 
 /// @brief Override the image size returned by all swapchain images.

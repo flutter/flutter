@@ -133,6 +133,11 @@ CapabilitiesVK::GetEnabledInstanceExtensions() const {
     has_wsi = true;
   }
 
+  // Lets a surface advertise extended sRGB color spaces.
+  if (HasExtension("VK_EXT_swapchain_colorspace")) {
+    required.push_back("VK_EXT_swapchain_colorspace");
+  }
+
   if (HasExtension("VK_KHR_xcb_surface")) {
     required.push_back("VK_KHR_xcb_surface");
     has_wsi = true;
@@ -575,6 +580,17 @@ bool CapabilitiesVK::SetPhysicalDevice(
     default_color_format_ = PixelFormat::kUnknown;
   }
 
+  {
+    const auto props =
+        device.getFormatProperties(vk::Format::eR16G16B16A16Sfloat);
+    const auto needed = vk::FormatFeatureFlagBits::eColorAttachment |
+                        vk::FormatFeatureFlagBits::eColorAttachmentBlend |
+                        vk::FormatFeatureFlagBits::eSampledImageFilterLinear;
+    supports_extended_range_formats_ =
+        HasExtension("VK_EXT_swapchain_colorspace") &&
+        (props.optimalTilingFeatures & needed) == needed;
+  }
+
   if (HasSuitableDepthStencilFormat(device, vk::Format::eD24UnormS8Uint)) {
     default_depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
   } else if (HasSuitableDepthStencilFormat(device,
@@ -927,7 +943,7 @@ bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {
 }
 
 bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
-  return false;
+  return supports_extended_range_formats_;
 }
 
 bool CapabilitiesVK::SupportsFramebufferRenderMipmap() const {

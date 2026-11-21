@@ -256,5 +256,105 @@ TEST(SwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
 }
 #endif  // IMPELLER_DEBUG
 
+namespace {
+void WideGamutFormatProperties(VkPhysicalDevice physicalDevice,
+                               VkFormat format,
+                               VkFormatProperties* pFormatProperties) {
+  if (format == VK_FORMAT_R8G8B8A8_UNORM) {
+    pFormatProperties->optimalTilingFeatures =
+        static_cast<VkFormatFeatureFlags>(
+            vk::FormatFeatureFlagBits::eColorAttachment);
+  } else if (format == VK_FORMAT_R16G16B16A16_SFLOAT) {
+    pFormatProperties->optimalTilingFeatures =
+        static_cast<VkFormatFeatureFlags>(
+            vk::FormatFeatureFlagBits::eColorAttachment |
+            vk::FormatFeatureFlagBits::eColorAttachmentBlend |
+            vk::FormatFeatureFlagBits::eSampledImageFilterLinear);
+  } else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+             format == VK_FORMAT_S8_UINT) {
+    pFormatProperties->optimalTilingFeatures =
+        static_cast<VkFormatFeatureFlags>(
+            vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+  }
+}
+}  // namespace
+
+TEST(SwapchainTest, SelectsExtendedSrgbFp16WhenWideGamutEnabled) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetInstanceExtensions({"VK_KHR_surface", "VK_MVK_macos_surface",
+                                  "VK_EXT_swapchain_colorspace"})
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_wide_gamut = true;
+          })
+          .SetPhysicalDeviceFormatPropertiesCallback(WideGamutFormatProperties)
+          .SetSurfaceFormats(
+              {{VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR},
+               {VK_FORMAT_R16G16B16A16_SFLOAT,
+                VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT}})
+          .Build();
+
+  ASSERT_TRUE(context->GetShouldEnableWideGamut());
+  auto surface = CreateSurface(*context);
+  auto swapchain =
+      KHRSwapchainVK::Create(context, std::move(surface), ISize{1, 1});
+
+  EXPECT_TRUE(swapchain->IsValid());
+  EXPECT_EQ(swapchain->GetSurfaceFormat(), vk::Format::eR16G16B16A16Sfloat);
+  EXPECT_EQ(context->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kR16G16B16A16Float);
+}
+
+TEST(SwapchainTest, FallsBackToSrgbWhenExtendedSrgbSurfaceFormatUnavailable) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetInstanceExtensions({"VK_KHR_surface", "VK_MVK_macos_surface",
+                                  "VK_EXT_swapchain_colorspace"})
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_wide_gamut = true;
+          })
+          .SetPhysicalDeviceFormatPropertiesCallback(WideGamutFormatProperties)
+          .SetSurfaceFormats(
+              {{VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}})
+          .Build();
+
+  ASSERT_TRUE(context->GetShouldEnableWideGamut());
+  auto surface = CreateSurface(*context);
+  auto swapchain =
+      KHRSwapchainVK::Create(context, std::move(surface), ISize{1, 1});
+
+  EXPECT_TRUE(swapchain->IsValid());
+  EXPECT_EQ(swapchain->GetSurfaceFormat(), vk::Format::eR8G8B8A8Unorm);
+  EXPECT_EQ(context->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kR8G8B8A8UNormInt);
+}
+
+TEST(SwapchainTest,
+     FallsBackToSrgb8BitWhenFp16SrgbIsPresentWithoutExtendedColorspace) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetInstanceExtensions({"VK_KHR_surface", "VK_MVK_macos_surface",
+                                  "VK_EXT_swapchain_colorspace"})
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_wide_gamut = true;
+          })
+          .SetPhysicalDeviceFormatPropertiesCallback(WideGamutFormatProperties)
+          .SetSurfaceFormats(
+              {{VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR},
+               {VK_FORMAT_R16G16B16A16_SFLOAT,
+                VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}})
+          .Build();
+
+  ASSERT_TRUE(context->GetShouldEnableWideGamut());
+  auto surface = CreateSurface(*context);
+  auto swapchain =
+      KHRSwapchainVK::Create(context, std::move(surface), ISize{1, 1});
+
+  EXPECT_TRUE(swapchain->IsValid());
+  EXPECT_EQ(swapchain->GetSurfaceFormat(), vk::Format::eR8G8B8A8Unorm);
+  EXPECT_EQ(context->GetCapabilities()->GetDefaultColorFormat(),
+            PixelFormat::kR8G8B8A8UNormInt);
+}
+
 }  // namespace testing
 }  // namespace impeller

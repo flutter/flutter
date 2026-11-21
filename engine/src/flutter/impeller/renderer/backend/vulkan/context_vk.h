@@ -97,6 +97,8 @@ class ContextVK final : public Context,
     bool enable_sync_validation = false;
     bool enable_gpu_tracing = false;
     bool enable_surface_control = false;
+    /// Prefer an extended range surface format when the surface offers one.
+    bool enable_wide_gamut = false;
     /// If validations are requested but cannot be enabled, log a fatal error.
     bool fatal_missing_validations = false;
     Flags flags;
@@ -270,6 +272,9 @@ class ContextVK final : public Context,
   ///        enabled
   bool GetShouldEnableSurfaceControlSwapchain() const;
 
+  /// Whether swapchains should prefer an extended range (wide gamut) format.
+  bool GetShouldEnableWideGamut() const;
+
   // | Context |
   bool EnqueueCommandBuffer(
       std::shared_ptr<CommandBuffer> command_buffer) override;
@@ -338,6 +343,7 @@ class ContextVK final : public Context,
   mutable DescriptorPoolMap IPLR_GUARDED_BY(desc_pool_mutex_)
       cached_descriptor_pool_;
   bool should_enable_surface_control_ = false;
+  bool should_enable_wide_gamut_ = false;
   bool should_batch_cmd_buffers_ = false;
   std::vector<std::shared_ptr<CommandBuffer>> pending_command_buffers_;
 

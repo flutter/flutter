@@ -492,5 +492,80 @@ TEST(ContextVKTest, CreateAcceptsKnownBadDriversByDefault) {
   EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
 }
 
+TEST(ContextVKTest, WideGamutCapabilitiesAndDefaultFormat) {
+  auto fp16_format_properties = [](VkPhysicalDevice physicalDevice,
+                                   VkFormat format,
+                                   VkFormatProperties* pFormatProperties) {
+    if (format == VK_FORMAT_R8G8B8A8_UNORM) {
+      pFormatProperties->optimalTilingFeatures =
+          static_cast<VkFormatFeatureFlags>(
+              vk::FormatFeatureFlagBits::eColorAttachment);
+    } else if (format == VK_FORMAT_R16G16B16A16_SFLOAT) {
+      pFormatProperties->optimalTilingFeatures =
+          static_cast<VkFormatFeatureFlags>(
+              vk::FormatFeatureFlagBits::eColorAttachment |
+              vk::FormatFeatureFlagBits::eColorAttachmentBlend |
+              vk::FormatFeatureFlagBits::eSampledImageFilterLinear);
+    } else if (format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+               format == VK_FORMAT_S8_UINT) {
+      pFormatProperties->optimalTilingFeatures =
+          static_cast<VkFormatFeatureFlags>(
+              vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+    }
+  };
+
+  // Without R16G16B16A16_SFLOAT format support, SupportsExtendedRangeFormats()
+  // and GetShouldEnableWideGamut() are false even if enable_wide_gamut is true.
+  {
+    std::shared_ptr<ContextVK> context =
+        MockVulkanContextBuilder()
+            .SetInstanceExtensions({"VK_KHR_surface", "VK_MVK_macos_surface",
+                                    "VK_EXT_swapchain_colorspace"})
+            .SetSettingsCallback([](ContextVK::Settings& settings) {
+              settings.enable_wide_gamut = true;
+            })
+            .Build();
+    EXPECT_FALSE(context->GetCapabilities()->SupportsExtendedRangeFormats());
+    EXPECT_FALSE(context->GetShouldEnableWideGamut());
+    EXPECT_EQ(context->GetCapabilities()->GetDefaultColorFormat(),
+              PixelFormat::kR8G8B8A8UNormInt);
+  }
+
+  // Without VK_EXT_swapchain_colorspace, SupportsExtendedRangeFormats() is
+  // false even when R16G16B16A16_SFLOAT format features are supported.
+  {
+    std::shared_ptr<ContextVK> context =
+        MockVulkanContextBuilder()
+            .SetSettingsCallback([](ContextVK::Settings& settings) {
+              settings.enable_wide_gamut = true;
+            })
+            .SetPhysicalDeviceFormatPropertiesCallback(fp16_format_properties)
+            .Build();
+    EXPECT_FALSE(context->GetCapabilities()->SupportsExtendedRangeFormats());
+    EXPECT_FALSE(context->GetShouldEnableWideGamut());
+    EXPECT_EQ(context->GetCapabilities()->GetDefaultColorFormat(),
+              PixelFormat::kR8G8B8A8UNormInt);
+  }
+
+  // With both VK_EXT_swapchain_colorspace and R16G16B16A16_SFLOAT support,
+  // SupportsExtendedRangeFormats() is true, and enabling wide gamut updates
+  // the default color format to FP16.
+  {
+    std::shared_ptr<ContextVK> context =
+        MockVulkanContextBuilder()
+            .SetInstanceExtensions({"VK_KHR_surface", "VK_MVK_macos_surface",
+                                    "VK_EXT_swapchain_colorspace"})
+            .SetSettingsCallback([](ContextVK::Settings& settings) {
+              settings.enable_wide_gamut = true;
+            })
+            .SetPhysicalDeviceFormatPropertiesCallback(fp16_format_properties)
+            .Build();
+    EXPECT_TRUE(context->GetCapabilities()->SupportsExtendedRangeFormats());
+    EXPECT_TRUE(context->GetShouldEnableWideGamut());
+    EXPECT_EQ(context->GetCapabilities()->GetDefaultColorFormat(),
+              PixelFormat::kR16G16B16A16Float);
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
