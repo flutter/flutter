@@ -2018,6 +2018,14 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   // Idempotent.
   XCTAssertTrue(CGRectEqualToRect(finalRect, [inputView firstRectForRange:range]));
 
+  // The engine can switch controllers before UIKit finishes querying the old input view.
+  FlutterViewController* newViewController = [[FlutterViewController alloc] init];
+  textInputPlugin.viewController = newViewController;
+  XCTAssertFalse([inputView isDescendantOfView:newViewController.view]);
+  XCTAssertTrue(CGRectEqualToRect(kInvalidFirstRect, [inputView firstRectForRange:range]));
+  textInputPlugin.viewController = viewController;
+  XCTAssertTrue(CGRectEqualToRect(finalRect, [inputView firstRectForRange:range]));
+
   // Use an invalid matrix:
   [inputView setEditableTransform:zeroMatrix];
   // Invalid matrix is invalid.
