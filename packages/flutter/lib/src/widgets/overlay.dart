@@ -1083,6 +1083,7 @@ mixin _RenderTheaterMixin on RenderBox {
 
   Iterable<RenderBox> _childrenInPaintOrder();
   Iterable<RenderBox> _childrenInHitTestOrder();
+  Iterable<RenderBox> get _onstageOverlayEntryChildren => _childrenInPaintOrder();
 
   @override
   void setupParentData(RenderBox child) {
@@ -1095,7 +1096,7 @@ mixin _RenderTheaterMixin on RenderBox {
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (final RenderBox child in _childrenInPaintOrder()) {
+    for (final RenderBox child in _onstageOverlayEntryChildren) {
       assert(!child.debugNeedsLayout);
       final childParentData = child.parentData! as StackParentData;
       baselineOffset = baselineOffset.minOf(
@@ -1407,7 +1408,7 @@ class _RenderTheater extends RenderBox
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (final RenderBox child in _childrenInPaintOrder()) {
+    for (final RenderBox child in _onstageOverlayEntryChildren) {
       baselineOffset = baselineOffset.minOf(
         BaselineOffset(
           _RenderTheaterMixin.baselineForChild(
@@ -1429,6 +1430,19 @@ class _RenderTheater extends RenderBox
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
+  }
+
+  // Like intrinsic dimensions, baselines only depend on ordinary entry children.
+  // Portal children are laid out after the theater and its ancestors.
+  @override
+  Iterable<RenderBox> get _onstageOverlayEntryChildren {
+    final children = <RenderBox>[];
+    RenderBox? child = _firstOnstageChild;
+    while (child != null) {
+      children.add(child);
+      child = (child.parentData! as _TheaterParentData).nextSibling;
+    }
+    return children;
   }
 
   @override
@@ -1825,6 +1839,9 @@ enum OverlayChildLocation {
 /// overlay child is showing. The overlay child is rendered by the [Overlay]
 /// ancestor, not by the widget itself. This allows the overlay child to float
 /// above other widgets, independent of its position in the widget tree.
+///
+/// The overlay child does not contribute to the target [Overlay]'s intrinsic
+/// dimensions or baseline.
 ///
 /// When [OverlayPortalController.hide] is called, the widget built using
 /// [overlayChildBuilder] will be removed from the widget tree the next time the

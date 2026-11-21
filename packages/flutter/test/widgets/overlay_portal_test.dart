@@ -3056,6 +3056,70 @@ void main() {
     });
   });
 
+  for (final useLayoutBuilder in <bool>[false, true]) {
+    for (final entryHasBaseline in <bool>[false, true]) {
+      testWidgets(
+        'Overlay inside Baseline excludes portal baseline, layoutBuilder: $useLayoutBuilder, entry baseline: $entryHasBaseline',
+        (WidgetTester tester) async {
+          final controller = OverlayPortalController()..show();
+          late final OverlayEntry entry;
+          addTearDown(() {
+            entry.remove();
+            entry.dispose();
+          });
+          const Widget overlayChild = Text('Portal baseline');
+          final Widget entryChild = entryHasBaseline
+              ? const Text('Entry baseline', style: TextStyle(fontSize: 20.0))
+              : const SizedBox.shrink();
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Baseline(
+                baseline: 30.0,
+                baselineType: TextBaseline.alphabetic,
+                child: Overlay(
+                  initialEntries: <OverlayEntry>[
+                    entry = OverlayEntry(
+                      builder: (BuildContext context) => useLayoutBuilder
+                          ? OverlayPortal.overlayChildLayoutBuilder(
+                              controller: controller,
+                              overlayChildBuilder: (
+                                BuildContext context,
+                                OverlayChildLayoutInfo info,
+                              ) => overlayChild,
+                              child: entryChild,
+                            )
+                          : OverlayPortal(
+                              controller: controller,
+                              overlayChildBuilder: (BuildContext context) => overlayChild,
+                              child: entryChild,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          final RenderBox theater = tester.renderObject(find.byType(Overlay));
+          final double? entryBaseline = entryHasBaseline
+              ? tester
+                    .renderObject<RenderBox>(find.text('Entry baseline'))
+                    .getDryBaseline(theater.constraints, TextBaseline.alphabetic)
+              : null;
+          expect(
+            theater.getDryBaseline(theater.constraints, TextBaseline.alphabetic),
+            entryBaseline,
+          );
+          // Query again after deferred layout has completed, with unchanged constraints.
+          tester.renderObject(find.byType(Baseline)).markNeedsLayout();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   group('Semantics', () {
     testWidgets('ordering and transform', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
