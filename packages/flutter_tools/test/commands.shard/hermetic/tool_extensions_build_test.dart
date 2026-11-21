@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
@@ -33,6 +34,22 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+ExtensionBuildManager _createTestBuildManager({
+  required ExtensionManager extensionManager,
+  required FeatureFlags featureFlags,
+  required Logger logger,
+  FileSystem? fileSystem,
+}) {
+  final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
+  return ExtensionBuildManager(
+    extensionManager: extensionManager,
+    featureFlags: featureFlags,
+    fileSystem: fs,
+    logger: logger,
+    projectFactory: FlutterProjectFactory(config: FakeConfig(), fileSystem: fs, logger: logger),
+  );
+}
+
 final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
   _RecordingExtensionBuildManager()
     : super(
@@ -42,7 +59,13 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
           logger: BufferLogger.test(),
         ),
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
+        projectFactory: FlutterProjectFactory(
+          config: FakeConfig(),
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+        ),
       );
 
   Map<String, Object?>? lastBuildArgs;
@@ -349,7 +372,7 @@ void main() {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,
@@ -374,7 +397,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: logger,
@@ -419,7 +442,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: testLogger,
@@ -472,7 +495,7 @@ void main() {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,
@@ -508,7 +531,7 @@ void main() {
         entryPoints: <ExtensionEntryPoint>[_throwingQueryExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,
@@ -540,7 +563,7 @@ void main() {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,
@@ -627,7 +650,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: logger,
@@ -682,7 +705,7 @@ void main() {
           ],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: logger,
@@ -751,7 +774,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[_invalidTargetBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: logger,
@@ -780,7 +803,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: testLogger,
@@ -827,9 +850,10 @@ void main() {
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
+        fileSystem: fs,
         logger: logger,
       );
 
@@ -913,9 +937,10 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
+          fileSystem: fs,
           logger: logger,
         );
         final buildSystem = FlutterBuildSystem(
@@ -1062,7 +1087,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[_failingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: testLogger,
@@ -1179,7 +1204,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final buildManager = ExtensionBuildManager(
+        final ExtensionBuildManager buildManager = _createTestBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
           logger: testLogger,
@@ -1227,7 +1252,7 @@ void main() {
       );
       addTearDown(manager.dispose);
 
-      final buildManager = ExtensionBuildManager(
+      final ExtensionBuildManager buildManager = _createTestBuildManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         logger: logger,

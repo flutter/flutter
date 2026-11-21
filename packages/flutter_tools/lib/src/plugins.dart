@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionBuildTarget;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -22,6 +23,7 @@ class Plugin {
     required this.isDirectDependency,
     required this.isDevDependency,
     this.implementsPackage,
+    this.rawPlatformConfigurations = const <String, Map<String, Object?>>{},
   });
 
   /// Parses [Plugin] specification from the provided pluginYaml.
@@ -71,6 +73,7 @@ class Plugin {
     List<String> dependencies, {
     required bool isDevDependency,
     Set<String>? appDependencies,
+    Iterable<String> extraPlatformKeys = const <String>[],
   }) {
     final ParseResult<Plugin> result = _parseFromYaml(
       name,
@@ -80,6 +83,7 @@ class Plugin {
       dependencies,
       isDevDependency: isDevDependency,
       appDependencies: appDependencies,
+      extraPlatformKeys: extraPlatformKeys,
     );
     switch (result) {
       case ParseResultPass(value: final Plugin plugin):
@@ -97,6 +101,7 @@ class Plugin {
     List<String> dependencies, {
     required bool isDevDependency,
     Set<String>? appDependencies,
+    Iterable<String> extraPlatformKeys = const <String>[],
   }) {
     if (pluginYaml == null) {
       return .fail(<String>['Invalid "plugin" specification.']);
@@ -137,6 +142,7 @@ class Plugin {
         dependencies,
         isDirectDependency,
         isDevDependency: isDevDependency,
+        extraPlatformKeys: extraPlatformKeys,
       );
     }
     return _parseLegacyYaml(
@@ -158,6 +164,7 @@ class Plugin {
     List<String> dependencies,
     bool isDirectDependency, {
     required bool isDevDependency,
+    Iterable<String> extraPlatformKeys = const <String>[],
   }) {
     final Object? platformsValue = pluginYaml['platforms'];
     if (platformsValue is! YamlMap?) {
@@ -170,8 +177,10 @@ class Plugin {
     }
     final YamlMap platformsYaml = platformsValue;
 
+    final Set<String> extraKeys = extraPlatformKeys.toSet();
     final errors = <String>[];
     final platforms = <String, PluginPlatform>{};
+    final rawPlatformConfigurations = <String, Map<String, Object?>>{};
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     //  fact that its implementation of Dart-only plugins and default packages
     //  are separate is legacy.
@@ -212,6 +221,12 @@ class Plugin {
               defaultPackages[platformKey] = defaultPackage;
             } else if (parsed != null) {
               platforms[platformKey] = parsed;
+              if (extraKeys.contains(platformKey)) {
+                rawPlatformConfigurations[platformKey] = switch (parsed) {
+                  final CustomPlatformPlugin custom => custom.configuration,
+                  _ => yamlMapToPlatformConfiguration(yamlValue),
+                };
+              }
             } else {
               return .fail(<String>['Invalid "$platformKey" plugin specification.']);
             }
@@ -244,6 +259,16 @@ class Plugin {
       WindowsPlugin.kConfigKey,
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
     );
+    for (final key in extraKeys) {
+      if (builtInPlatformKeys.contains(key) || !platformsYaml.containsKey(key)) {
+        continue;
+      }
+      if (!ExtensionBuildTarget.isValidPluginPlatformKey(key)) {
+        errors.add('Invalid "$key" plugin specification.');
+        continue;
+      }
+      parsePlatform(key, (YamlMap yaml) => CustomPlatformPlugin.parseFromYaml(name, key, yaml));
+    }
 
     final Object? implementsValue = pluginYaml['implements'];
     var implementsPackage = '';
@@ -264,6 +289,7 @@ class Plugin {
         name: name,
         path: path,
         platforms: platforms,
+        rawPlatformConfigurations: rawPlatformConfigurations,
         defaultPackagePlatforms: defaultPackages,
         pluginDartClassPlatforms: dartPluginClasses,
         flutterConstraint: flutterConstraint,
@@ -371,7 +397,21 @@ class Plugin {
     return YamlMap.wrap(map);
   }
 
-  static List<String> validatePluginYaml(YamlMap? yaml, {required String packageName}) {
+  /// Built-in platform keys under `flutter.plugin.platforms` in `pubspec.yaml`.
+  static const builtInPlatformKeys = <String>{
+    AndroidPlugin.kConfigKey,
+    IOSPlugin.kConfigKey,
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WebPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+  };
+
+  static List<String> validatePluginYaml(
+    YamlMap? yaml, {
+    required String packageName,
+    Iterable<String> extraPlatformKeys = const <String>[],
+  }) {
     final ParseResult<Plugin> result = _parseFromYaml(
       packageName,
       '',
@@ -379,6 +419,7 @@ class Plugin {
       null,
       const <String>[],
       isDevDependency: false,
+      extraPlatformKeys: extraPlatformKeys,
     );
     return switch (result) {
       ParseResultFail(:final List<String> errors) => errors,
@@ -401,6 +442,9 @@ class Plugin {
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
+
+  /// Raw parsed `pubspec.yaml` platform configuration maps keyed by platform.
+  final Map<String, Map<String, Object?>> rawPlatformConfigurations;
 
   /// This is a mapping from platform config key to the default package implementation.
   final Map<String, String> defaultPackagePlatforms;

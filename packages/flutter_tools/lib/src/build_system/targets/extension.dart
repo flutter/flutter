@@ -8,12 +8,84 @@ import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
+import '../../convert.dart' show json;
 import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 
 /// Resolves a build target dependency by its [dependency] name.
 typedef DependencyResolverCallback = Target Function(String dependency);
+
+/// The target operating system for Dart build/link hooks on an extension target.
+const kExtensionHookTargetOs = 'ExtensionHookTargetOs';
+
+/// The target CPU architecture for Dart build/link hooks on an extension target.
+const kExtensionHookTargetArch = 'ExtensionHookTargetArch';
+
+/// Optional C compiler (`cc`) path for Dart build/link hooks on an extension target.
+const kExtensionCCompilerCc = 'ExtensionCCompilerCc';
+
+/// Optional archiver (`ar`) path for Dart build/link hooks on an extension target.
+const kExtensionCCompilerAr = 'ExtensionCCompilerAr';
+
+/// Optional linker (`ld`) path for Dart build/link hooks on an extension target.
+const kExtensionCCompilerLd = 'ExtensionCCompilerLd';
+
+/// Optional compiler environment setup script path for Dart build/link hooks on an extension target.
+const kExtensionCCompilerEnvScript = 'ExtensionCCompilerEnvScript';
+
+/// Optional JSON-encoded arguments for [kExtensionCCompilerEnvScript].
+const kExtensionCCompilerEnvScriptArgs = 'ExtensionCCompilerEnvScriptArgs';
+
+/// Optional platform key under `flutter.plugin.platforms.<key>` used to resolve
+/// Dart plugins on an extension target.
+const kExtensionPluginPlatformKey = 'ExtensionPluginPlatformKey';
+
+/// Optional explicit [ExtensionBuildTarget.name] used to resolve extension
+/// native assets and plugin defines in `flutter assemble`.
+const kExtensionBuildTarget = 'ExtensionBuildTarget';
+
+/// Marks [kTargetPlatform] as a custom target platform registered by an active
+/// tool extension (`'true'`).
+const kExtensionCustomTargetPlatform = 'ExtensionCustomTargetPlatform';
+
+/// Whether [defines] contains custom platform configuration from a tool
+/// extension ([kExtensionBuildTarget], [kExtensionHookTargetOs],
+/// [kExtensionPluginPlatformKey], or [kExtensionCustomTargetPlatform]).
+bool hasExtensionPlatformDefines(Map<String, String> defines) {
+  final String? extensionBuildTarget = defines[kExtensionBuildTarget];
+  if (extensionBuildTarget != null && extensionBuildTarget.trim().isNotEmpty) {
+    return true;
+  }
+  final String? extensionHookTargetOs = defines[kExtensionHookTargetOs];
+  if (extensionHookTargetOs != null && extensionHookTargetOs.trim().isNotEmpty) {
+    return true;
+  }
+  final String? extensionPluginPlatformKey = defines[kExtensionPluginPlatformKey];
+  if (extensionPluginPlatformKey != null && extensionPluginPlatformKey.trim().isNotEmpty) {
+    return true;
+  }
+  return defines[kExtensionCustomTargetPlatform] == 'true';
+}
+
+/// Converts [config] into `flutter assemble` environment defines consumed by
+/// `BuildHooks`, `LinkHooks`, and `InstallCodeAssets`.
+Map<String, String> nativeAssetsEnvironmentDefines(ExtensionNativeAssetsConfig config) {
+  final ExtensionCCompilerConfig? compiler = config.cCompilerConfig;
+  return <String, String>{
+    kExtensionHookTargetOs: config.targetOs,
+    kExtensionHookTargetArch: config.targetArchitecture,
+    if (compiler != null) ...<String, String>{
+      kExtensionCCompilerCc: compiler.cc.toString(),
+      kExtensionCCompilerAr: compiler.ar.toString(),
+      kExtensionCCompilerLd: compiler.ld.toString(),
+      if (compiler.envScript case final Uri envScript)
+        kExtensionCCompilerEnvScript: envScript.toString(),
+      if (compiler.envScriptArgs.isNotEmpty)
+        kExtensionCCompilerEnvScriptArgs: json.encode(compiler.envScriptArgs),
+    },
+  };
+}
 
 /// A `flutter assemble` target that delegates to a tool extension.
 class ExtensionTarget extends Target {
@@ -139,6 +211,7 @@ class ExtensionTarget extends Target {
       flutterRoot: environment.flutterRootDir.uri,
       mainPath: mainPath,
       outputDir: outputDir.uri,
+      pluginPlatformKey: defines[kExtensionPluginPlatformKey],
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
       targetName: assembleTarget.name,

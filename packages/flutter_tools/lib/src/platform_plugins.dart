@@ -631,6 +631,89 @@ class WebPlugin extends PluginPlatform {
   }
 }
 
+/// Represents a plugin declaration for a custom or extension-contributed
+/// platform.
+///
+/// Preserves the full platform configuration map from
+/// `flutter.plugin.platforms.<platformKey>` in `pubspec.yaml` while validating
+/// standard `pluginClass`, `dartPluginClass`, and `dartFileName` entries when
+/// present.
+class CustomPlatformPlugin extends PluginPlatform implements NativePlugin, DartPlugin {
+  const CustomPlatformPlugin({
+    required this.configuration,
+    required this.name,
+    required this.platformKey,
+    this.dartFileName,
+    this.dartPluginClass,
+  });
+
+  static ParseResult<CustomPlatformPlugin?> parseFromYaml(
+    String name,
+    String platformKey,
+    YamlMap yaml,
+  ) {
+    final parser = PluginYamlParser(yaml, pluginName: name, configKey: platformKey);
+    return (
+      parser.identifier(kPluginClass, allowNull: false),
+      parser.flag(kFfiPlugin),
+      parser.parseDartPluginFields(displayName: platformKey),
+    ).map((String? _, bool _, ({String dartPluginClass, String dartFileName})? dartPluginFields) {
+      if (yaml.isEmpty) {
+        return null;
+      }
+      return CustomPlatformPlugin(
+        configuration: yamlMapToPlatformConfiguration(yaml),
+        name: name,
+        platformKey: platformKey,
+        dartFileName: dartPluginFields?.dartFileName,
+        dartPluginClass: dartPluginFields?.dartPluginClass,
+      );
+    });
+  }
+
+  final String name;
+  final String platformKey;
+  final Map<String, Object?> configuration;
+
+  @override
+  final String? dartPluginClass;
+
+  @override
+  final String? dartFileName;
+
+  @override
+  bool hasMethodChannel() => configuration[kPluginClass] is String;
+
+  @override
+  bool hasFfi() => configuration[kFfiPlugin] == true;
+
+  @override
+  Map<String, Object?> toMap({required FileSystem fileSystem}) => <String, Object?>{
+    ...configuration,
+    'name': name,
+    'platformKey': platformKey,
+  };
+}
+
+/// Recursively converts a `pubspec.yaml` [YamlMap] into a plain JSON-safe
+/// `Map<String, Object?>` suitable for crossing isolate boundaries.
+Map<String, Object?> yamlMapToPlatformConfiguration(YamlMap yaml) {
+  return <String, Object?>{
+    for (final MapEntry(:Object? key, :Object? value) in yaml.entries)
+      if (key is String) key: _convertYamlConfigurationValue(value),
+  };
+}
+
+Object? _convertYamlConfigurationValue(Object? value) {
+  return switch (value) {
+    final YamlMap map => yamlMapToPlatformConfiguration(map),
+    final YamlList list => <Object?>[
+      for (final Object? item in list) _convertYamlConfigurationValue(item),
+    ],
+    _ => value,
+  };
+}
+
 final _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
   return className.splitMapJoin(

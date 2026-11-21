@@ -49,6 +49,7 @@ import 'src/dart/pub.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
+import 'src/experimental/extension_build_manager.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/git.dart';
@@ -117,6 +118,7 @@ Future<int> run(
     :DevtoolsLauncher devtoolsLauncher,
     :Doctor doctor,
     :EmulatorManager emulatorManager,
+    :ExtensionBuildManager? extensionBuildManager,
     :ExtensionManager? extensionManager,
     :FeatureFlags featureFlags,
     :FlutterHookRunner? flutterHookRunner,
@@ -233,6 +235,7 @@ Future<int> run(
         deviceManager: deviceManager,
         devtoolsLauncher: devtoolsLauncher,
         doctor: doctor,
+        extensionBuildManager: extensionBuildManager,
         extensionManager: extensionManager!,
         featureFlags: featureFlags,
         plistParser: appleContext.plistParser,
