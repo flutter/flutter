@@ -25,6 +25,10 @@ import 'viewport_offset.dart';
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 
+// The largest horizontal distance between two selection boxes on the same line
+// for the highlighted area to be considered contiguous.
+const double _kBidiSelectionGapTolerance = 0.5; // pixels
+
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
 const EdgeInsets _kFloatingCursorSizeIncrease = EdgeInsets.symmetric(
@@ -1747,11 +1751,120 @@ class RenderEditable extends RenderBox
       final Offset end =
           Offset(clampDouble(boxes.last.end, 0, _textPainter.size.width), boxes.last.bottom) +
           paintOffset;
-      return <TextSelectionPoint>[
-        TextSelectionPoint(start, boxes.first.direction),
-        TextSelectionPoint(end, boxes.last.direction),
-      ];
+      return _getBidiLineEndpoints(selection, boxes, start: start, end: end) ??
+          <TextSelectionPoint>[
+            TextSelectionPoint(start, boxes.first.direction),
+            TextSelectionPoint(end, boxes.last.direction),
+          ];
     }
+  }
+
+  // Returns the endpoints of a selection that contains both LTR and RTL runs,
+  // or null if the selection is not such a selection.
+  //
+  // The boxes of a selection are in visual order, so the start of the first
+  // box and the end of the last box may be within the highlighted area when
+  // the selection crosses a text direction boundary. For example, in an RTL
+  // paragraph containing "Welcome حبيبي Here", the end of the selection
+  // "Welcome ح" is to the left of "Welcome", but the start of its first box, the
+  // RTL box of " ح", is between " ح" and "Welcome".
+  //
+  // Instead, if the highlighted area is contiguous, place the endpoints at its
+  // edges, facing away from each other, so that a selection handle stays under
+  // the pointer while it is dragged across a text direction boundary.
+  // Otherwise, like on native Android, place each endpoint at the caret
+  // position of its offset, next to the character it bounds.
+  //
+  // `start` and `end` are the endpoints derived from the first and the last
+  // box, which determine the edge each endpoint is placed at.
+  List<TextSelectionPoint>? _getBidiLineEndpoints(
+    TextSelection selection,
+    List<ui.TextBox> boxes, {
+    required Offset start,
+    required Offset end,
+  }) {
+    if (boxes.every((ui.TextBox box) => box.direction == boxes.first.direction)) {
+      return null;
+    }
+    final TextRange line = _textPainter.getLineBoundary(TextPosition(offset: selection.start));
+    if (selection.end > line.end) {
+      // The selection spans multiple lines, so its highlighted area is not
+      // contiguous.
+      return _getCaretEndpoints(selection);
+    }
+
+    final List<ui.TextBox> sortedBoxes = boxes.toList()
+      ..sort((ui.TextBox a, ui.TextBox b) => a.left.compareTo(b.left));
+    final ui.TextBox leftBox = sortedBoxes.first;
+    ui.TextBox rightBox = sortedBoxes.first;
+    for (final box in sortedBoxes) {
+      if (box.left - rightBox.right > _kBidiSelectionGapTolerance) {
+        return _getCaretEndpoints(selection);
+      }
+      if (box.right > rightBox.right) {
+        rightBox = box;
+      }
+    }
+    final Offset left =
+        Offset(clampDouble(leftBox.left, 0, _textPainter.size.width), leftBox.bottom) +
+        _paintOffset;
+    final Offset right =
+        Offset(clampDouble(rightBox.right, 0, _textPainter.size.width), rightBox.bottom) +
+        _paintOffset;
+
+    final TextDirection direction;
+    if (start.dx != end.dx) {
+      direction = start.dx < end.dx ? TextDirection.ltr : TextDirection.rtl;
+    } else {
+      direction = textDirection;
+    }
+    return switch (direction) {
+      TextDirection.ltr => <TextSelectionPoint>[
+        TextSelectionPoint(left, TextDirection.ltr),
+        TextSelectionPoint(right, TextDirection.ltr),
+      ],
+      TextDirection.rtl => <TextSelectionPoint>[
+        TextSelectionPoint(right, TextDirection.rtl),
+        TextSelectionPoint(left, TextDirection.rtl),
+      ],
+    };
+  }
+
+  // Returns the endpoints at the caret positions of the start and the end of
+  // the non-collapsed `selection`, facing the characters within the selection
+  // that are next to them, or null if they cannot be computed.
+  List<TextSelectionPoint>? _getCaretEndpoints(TextSelection selection) {
+    ui.TextBox? characterBox(int start, int? end) {
+      if (end == null) {
+        return null;
+      }
+      final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(
+        TextSelection(baseOffset: start, extentOffset: end),
+        boxHeightStyle: selectionHeightStyle,
+        boxWidthStyle: selectionWidthStyle,
+      );
+      return boxes.isEmpty ? null : boxes.first;
+    }
+
+    final ui.TextBox? first = characterBox(
+      selection.start,
+      _textPainter.getOffsetAfter(selection.start),
+    );
+    final int? lastStart = _textPainter.getOffsetBefore(selection.end);
+    final ui.TextBox? last = lastStart == null ? null : characterBox(lastStart, selection.end);
+    if (first == null || last == null) {
+      return null;
+    }
+    return <TextSelectionPoint>[
+      TextSelectionPoint(
+        Offset(clampDouble(first.start, 0, _textPainter.size.width), first.bottom) + _paintOffset,
+        first.direction,
+      ),
+      TextSelectionPoint(
+        Offset(clampDouble(last.end, 0, _textPainter.size.width), last.bottom) + _paintOffset,
+        last.direction,
+      ),
+    ];
   }
 
   /// Returns the smallest [Rect], in the local coordinate system, that covers

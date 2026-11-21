@@ -2139,9 +2139,9 @@ void main() {
       selectionBase: 0,
       selectionExtent: 9,
       expectedStartEndpointDirection: TextDirection.ltr,
-      expectedEndEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.ltr,
       expectedStartHandleType: TextSelectionHandleType.left,
-      expectedEndHandleType: TextSelectionHandleType.left,
+      expectedEndHandleType: TextSelectionHandleType.right,
     ),
     _DirectionalityTestCase(
       description: 'ambient RTL, English then Arabic text',
@@ -2149,9 +2149,9 @@ void main() {
       text: 'abc مرحبا',
       selectionBase: 0,
       selectionExtent: 9,
-      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedStartEndpointDirection: TextDirection.ltr,
       expectedEndEndpointDirection: TextDirection.ltr,
-      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedStartHandleType: TextSelectionHandleType.left,
       expectedEndHandleType: TextSelectionHandleType.right,
     ),
   ];
@@ -2248,11 +2248,316 @@ void main() {
 
     expect(endpoints, hasLength(2));
     expect(endpoints.first.direction, TextDirection.ltr);
-    expect(endpoints.last.direction, TextDirection.rtl);
+    expect(endpoints.last.direction, TextDirection.ltr);
     expect(customControls.builtHandleTypes, hasLength(2));
     expect(customControls.builtHandleTypes.first, TextSelectionHandleType.left);
     expect(customControls.builtHandleTypes.last, TextSelectionHandleType.right);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  group('selection handle drag on a line with mixed text directions', () {
+    // Laid out in an RTL field, the runs of this text appear from right to
+    // left as "Welcome", "حبيبي", "Here". The characters to the right of
+    // "Here" logically precede it, and the characters to the left of
+    // "Welcome" logically follow it.
+    const text = 'Welcome حبيبي Here';
+    const here = TextSelection(baseOffset: 14, extentOffset: 18);
+    const welcome = TextSelection(baseOffset: 0, extentOffset: 7);
+
+    late TextEditingController controller;
+    late FocusNode focusNode;
+
+    Future<RenderEditable> pumpField(WidgetTester tester, TextSelection selection) async {
+      controller = TextEditingController(text: text);
+      focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: TestTextField(
+              controller: controller,
+              focusNode: focusNode,
+              selectionControls: _DirectionalitySpyTextSelectionControls(),
+              // On the web selectAllOnFocus defaults to true, interfering with
+              // this test's programmatic selection.
+              selectAllOnFocus: false,
+            ),
+          ),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+      controller.selection = selection;
+      await tester.pumpAndSettle();
+      return tester.allRenderObjects.whereType<RenderEditable>().first;
+    }
+
+    // Returns the global location of a point on the given horizontal location
+    // within the line of text, at the height of the selection handles.
+    Offset handleLevel(RenderEditable renderEditable, double dx) {
+      final double handleCenter = renderEditable.preferredLineHeight * 1.5;
+      return renderEditable.localToGlobal(Offset(dx, handleCenter));
+    }
+
+    // Returns the horizontal bounds of the character at the given offset, in
+    // the RenderEditable's local coordinates.
+    TextBox characterBox(RenderEditable renderEditable, int offset) {
+      return renderEditable
+          .getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + 1))
+          .single;
+    }
+
+    // Verifies that the start handle is at `leftEdge` and the end handle is at
+    // `rightEdge`, both facing away from the highlighted text.
+    void expectHandlesAtHighlightEdges(
+      RenderEditable renderEditable, {
+      required double leftEdge,
+      required double rightEdge,
+    }) {
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      expect(endpoints, hasLength(2));
+      expect(endpoints.first.point.dx, moreOrLessEquals(leftEdge));
+      expect(endpoints.first.direction, TextDirection.ltr);
+      expect(endpoints.last.point.dx, moreOrLessEquals(rightEdge));
+      expect(endpoints.last.direction, TextDirection.ltr);
+    }
+
+    Future<TestGesture> startHandleDrag(WidgetTester tester, Offset handlePoint) async {
+      final Offset start = handlePoint + const Offset(2.0, 0.0);
+      final TestGesture gesture = await tester.startGesture(start);
+      // Exceed the touch slop so that the drag starts.
+      await gesture.moveTo(start + const Offset(0.0, kTouchSlop + 1.0));
+      await gesture.moveTo(start);
+      await tester.pump();
+      return gesture;
+    }
+
+    testWidgets('end handle extends the selection into the preceding RTL run', (
+      WidgetTester tester,
+    ) async {
+      final RenderEditable renderEditable = await pumpField(tester, here);
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(here);
+      // The end handle is at the right edge of "Here".
+      expect(endpoints.last.point.dx, greaterThan(endpoints.first.point.dx));
+
+      final TestGesture gesture = await startHandleDrag(
+        tester,
+        handleLevel(renderEditable, endpoints.last.point.dx),
+      );
+
+      // Drag over the space and onto the right part of "ي", the last letter of
+      // the Arabic word, which is visually adjacent to "Here".
+      final TextBox space = characterBox(renderEditable, 13);
+      await gesture.moveTo(handleLevel(renderEditable, space.right - 1.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 13, extentOffset: 18));
+
+      final TextBox yeh = characterBox(renderEditable, 12);
+      await gesture.moveTo(handleLevel(renderEditable, yeh.right - 1.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 12, extentOffset: 18));
+      expect(controller.selection.textInside(text), 'ي Here');
+      // The end handle follows the pointer to the right edge of "ي".
+      expectHandlesAtHighlightEdges(
+        renderEditable,
+        leftEdge: endpoints.first.point.dx,
+        rightEdge: yeh.right,
+      );
+
+      // Dragging back into "Here" shrinks the selection from its end.
+      final TextBox e = characterBox(renderEditable, 17);
+      await gesture.moveTo(handleLevel(renderEditable, e.left + 1.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 14, extentOffset: 17));
+
+      // The handles do not swap.
+      await gesture.moveTo(handleLevel(renderEditable, endpoints.first.point.dx - 20.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 14, extentOffset: 17));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('start handle extends the selection into the following RTL run', (
+      WidgetTester tester,
+    ) async {
+      final RenderEditable renderEditable = await pumpField(tester, welcome);
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(welcome);
+      // The start handle is at the left edge of "Welcome".
+      expect(endpoints.first.point.dx, lessThan(endpoints.last.point.dx));
+
+      final TestGesture gesture = await startHandleDrag(
+        tester,
+        handleLevel(renderEditable, endpoints.first.point.dx),
+      );
+
+      // Drag over the space and onto the left part of "ح", the first letter of
+      // the Arabic word, which is visually adjacent to "Welcome".
+      final TextBox hah = characterBox(renderEditable, 8);
+      await gesture.moveTo(handleLevel(renderEditable, hah.left + 1.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 9));
+      expect(controller.selection.textInside(text), 'Welcome ح');
+      // The start handle follows the pointer to the left edge of "ح".
+      expectHandlesAtHighlightEdges(
+        renderEditable,
+        leftEdge: hah.left,
+        rightEdge: endpoints.last.point.dx,
+      );
+
+      // The handles do not swap.
+      await gesture.moveTo(handleLevel(renderEditable, endpoints.last.point.dx + 20.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 9));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('handle moves to the position under the pointer when the handles do not swap', (
+      WidgetTester tester,
+    ) async {
+      // Select the space between "حبيبي" and "Here".
+      const space = TextSelection(baseOffset: 13, extentOffset: 14);
+      final RenderEditable renderEditable = await pumpField(tester, space);
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(space);
+      final TextBox spaceBox = characterBox(renderEditable, 13);
+      // The end handle is at the left edge of the space, which is to the right
+      // of "Here".
+      expect(endpoints.last.point.dx, moreOrLessEquals(spaceBox.left));
+
+      final TestGesture gesture = await startHandleDrag(
+        tester,
+        handleLevel(renderEditable, endpoints.last.point.dx),
+      );
+
+      // Drag onto the left part of "r". Like on native Android, the end of the
+      // selection moves to the position under the pointer, even though "re" is
+      // rendered between "He" and the space.
+      final TextBox r = characterBox(renderEditable, 16);
+      await gesture.moveTo(handleLevel(renderEditable, r.left + 1.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 13, extentOffset: 16));
+      expect(controller.selection.textInside(text), ' He');
+      // Because the highlighted area is not contiguous, the handles are next to
+      // the characters at the start and at the end of the selection.
+      List<TextSelectionPoint> selectionEndpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      expect(selectionEndpoints.first.point.dx, moreOrLessEquals(spaceBox.right));
+      expect(selectionEndpoints.first.direction, TextDirection.rtl);
+      expect(selectionEndpoints.last.point.dx, moreOrLessEquals(r.left));
+      expect(selectionEndpoints.last.direction, TextDirection.ltr);
+
+      // Drag onto the right part of the last "e", next to the space.
+      final TextBox e = characterBox(renderEditable, 17);
+      await gesture.moveTo(handleLevel(renderEditable, e.right - 1.0));
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 13, extentOffset: 18));
+      expect(controller.selection.textInside(text), ' Here');
+      expectHandlesAtHighlightEdges(
+        renderEditable,
+        leftEdge: characterBox(renderEditable, 14).left,
+        rightEdge: spaceBox.right,
+      );
+
+      // Drag onto the left part of "H".
+      final TextBox h = characterBox(renderEditable, 14);
+      await gesture.moveTo(handleLevel(renderEditable, h.left + 1.0));
+      await tester.pump();
+      expect(controller.selection, space);
+
+      // The handles do not swap.
+      await gesture.moveTo(handleLevel(renderEditable, spaceBox.right + 20.0));
+      await tester.pump();
+      expect(controller.selection, space);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      selectionEndpoints = renderEditable.getEndpointsForSelection(controller.selection);
+      expect(selectionEndpoints, hasLength(2));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('end handle on another line extends the selection into the preceding RTL run', (
+      WidgetTester tester,
+    ) async {
+      // Two lines of the same text.
+      const multilineText = '$text\n$text';
+      controller = TextEditingController(text: multilineText);
+      focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: TestTextField(
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: null,
+              selectionControls: _DirectionalitySpyTextSelectionControls(),
+              // On the web selectAllOnFocus defaults to true, interfering with
+              // this test's programmatic selection.
+              selectAllOnFocus: false,
+            ),
+          ),
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+      // Select from "Here" on the first line to "Wel" on the second line.
+      const int secondLineStart = text.length + 1;
+      controller.selection = const TextSelection(baseOffset: 14, extentOffset: secondLineStart + 3);
+      await tester.pumpAndSettle();
+      final RenderEditable renderEditable = tester.allRenderObjects
+          .whereType<RenderEditable>()
+          .first;
+
+      // Each handle is next to the character it bounds.
+      final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+        controller.selection,
+      );
+      expect(endpoints, hasLength(2));
+      expect(endpoints.first.point.dx, moreOrLessEquals(characterBox(renderEditable, 14).left));
+      expect(endpoints.first.direction, TextDirection.ltr);
+      expect(
+        endpoints.last.point.dx,
+        moreOrLessEquals(characterBox(renderEditable, secondLineStart + 2).right),
+      );
+      expect(endpoints.last.direction, TextDirection.ltr);
+
+      final double lineHeight = renderEditable.preferredLineHeight;
+      final Offset handleOnSecondLine = renderEditable.localToGlobal(
+        Offset(endpoints.last.point.dx + 2.0, endpoints.last.point.dy + lineHeight / 2),
+      );
+      final TestGesture gesture = await tester.startGesture(handleOnSecondLine);
+      // Exceed the touch slop so that the drag starts.
+      await gesture.moveTo(handleOnSecondLine + const Offset(0.0, kTouchSlop + 1.0));
+      await gesture.moveTo(handleOnSecondLine);
+      await tester.pump();
+
+      // Drag up onto the first line, to the right part of "ي", which is
+      // visually adjacent to "Here" where the selection starts.
+      final TextBox yeh = characterBox(renderEditable, 12);
+      await gesture.moveTo(
+        Offset(
+          renderEditable.localToGlobal(Offset(yeh.right - 1.0, 0.0)).dx,
+          handleOnSecondLine.dy - lineHeight,
+        ),
+      );
+      await tester.pump();
+      expect(controller.selection, const TextSelection(baseOffset: 12, extentOffset: 18));
+      expect(controller.selection.textInside(multilineText), 'ي Here');
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
