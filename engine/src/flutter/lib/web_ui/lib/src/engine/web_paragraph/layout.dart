@@ -72,19 +72,26 @@ class TextLayout {
     // Wrapping text into lines is required on every layout.
     wrapText(width);
     formatLines(width);
-
-    if (paragraph.text.isNotEmpty) {
-      // When the paragraph is empty, instead of setting the bounds to a zero rect, we let it unset.
-      // This will make it easy to detect when there's a bug in our painting pipeline that's trying
-      // to paint an empty paragraph.
-
-      // Calculate the actual paint bounds of the paragraph.
-      _calculatePaintBounds();
-    }
+    _paintBounds = null;
 
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
     // clear the paint cache.
     paragraph.clearPaintCache();
+  }
+
+  ui.Rect? _paintBounds;
+
+  /// The actual paint bounds of the paragraph, measured on first use after each layout.
+  ui.Rect get paintBounds {
+    // An empty paragraph has no paint bounds: painting it is a bug in the painting pipeline, so
+    // fail loudly here instead of returning a zero rect.
+    if (paragraph.text.isEmpty) {
+      throw StateError('An empty paragraph has no paint bounds');
+    }
+    // Before the first layout there are no lines, which would yield an inverted infinite rect.
+    assert(!_isFirstLayout, 'paintBounds read before the first layout');
+    // Calculate the actual paint bounds of the paragraph.
+    return _paintBounds ??= _calculatePaintBounds();
   }
 
   void calculateStrutMetrics() {
@@ -96,11 +103,26 @@ class TextLayout {
   void extractTextClusters() {
     assert(allClusters.isEmpty);
 
+    // Spans are in logical order and single-run spans emit clusters in ascending start order, so
+    // track monotonic start offsets during insertion and only sort when a multi-run BiDi span
+    // emits clusters out of logical order.
+    var isSorted = true;
+    var previousStart = -1;
     for (final ParagraphSpan span in paragraph.spans) {
       assert(span.isNotEmpty);
-      allClusters.addAll(span.extractClusters());
+      for (final WebCluster cluster in span.extractClusters()) {
+        final int start = cluster.start;
+        // Multi-run BiDi spans emit clusters in visual run order rather than logical order.
+        if (start < previousStart) {
+          isSorted = false;
+        }
+        previousStart = start;
+        allClusters.add(cluster);
+      }
     }
-    allClusters.sort((a, b) => a.start.compareTo(b.start));
+    if (!isSorted) {
+      allClusters.sort((a, b) => a.start.compareTo(b.start));
+    }
     // The browser gives some invisible characters, such as a soft hyphen (U+00AD) or a zero
     // width space (U+200B), no cluster of their own. Map each of those code units to the
     // cluster before it (or the first cluster, at the start of the text), so that text ranges
@@ -188,6 +210,9 @@ class TextLayout {
 
   void wrapText(double width) {
     lines.clear();
+    // Truncation state belongs to the previous width; a wider layout may fit within maxLines.
+    ellipsisClusters = <WebCluster>[];
+    paragraph.didExceedMaxLines = false;
 
     // A paragraph that is empty or contains only characters without clusters has only the
     // trailing EmptyCluster and produces no lines.
@@ -404,9 +429,11 @@ class TextLayout {
 
         // This is the intersection of the bidi region + line + span.
         final ui.TextRange bidiLineSpanTextRange = bidiLineTextRange.intersect(span);
-        final ui.TextRange bidiLineSpanPhysicalTextRange = bidiLinePhysicalTextRange.intersect(
-          span,
-        );
+        final ui.TextRange rawPhysicalTextRange = bidiLinePhysicalTextRange.intersect(span);
+        // Disjoint intersections produce start > end; keep collapsed ranges within span bounds.
+        final bidiLineSpanPhysicalTextRange = rawPhysicalTextRange.start <= rawPhysicalTextRange.end
+            ? rawPhysicalTextRange
+            : ui.TextRange.collapsed(bidiLineSpanTextRange.start);
         final ClusterRange bidiLineSpanRange = _mapping.toClusterRange(
           bidiLineSpanTextRange.start,
           bidiLineSpanTextRange.end,
@@ -431,6 +458,7 @@ class TextLayout {
           );
           blockWidth = span.width;
         } else {
+          final textSpan = span as TextSpan;
           final ClusterRange physicalClusterRange = bidiLineSpanPhysicalTextRange.isNotEmpty
               ? _mapping.toClusterRange(
                   bidiLineSpanPhysicalTextRange.start,
@@ -441,15 +469,32 @@ class TextLayout {
               ? allClusters[physicalClusterRange.start]
               : allClusters[physicalClusterRange.end - 1];
           final double blockShiftFromSpanStart = firstVisualClusterInBlock.advance.left;
+          // A re-layout only rearranges clusters measured once per span, so the block advance
+          // comes from their cached selection rects unless negative spacing inverted cluster order.
+          final ui.Rect? blockAdvance;
+          if (textSpan.hasNonMonotonicNegativeSpacing) {
+            blockAdvance = null;
+          } else {
+            final ui.Rect blockSelection = bidiLineSpanPhysicalTextRange.isEmpty
+                ? ui.Rect.zero
+                : _clusterSelection(physicalClusterRange);
+            blockAdvance = ui.Rect.fromLTWH(
+              blockShiftFromLineStart,
+              blockSelection.top,
+              blockSelection.width,
+              blockSelection.height,
+            );
+          }
           line.visualBlocks.add(
             block = TextBlock(
-              span as TextSpan,
+              textSpan,
               bidiRun.bidiLevel,
               bidiLineSpanRange,
               bidiLineSpanTextRange,
               bidiLineSpanPhysicalTextRange,
               blockShiftFromLineStart,
               blockShiftFromSpanStart,
+              advance: blockAdvance,
             ),
           );
 
@@ -460,9 +505,22 @@ class TextLayout {
             _mapping.toTextRange(textIntersection),
           );
           if (blockLineWhitespaces.start < blockLineWhitespaces.end) {
-            trailingSpacesWidth = span
-                .getTextRangeSelectionInBlock(line.visualBlocks.last, blockLineWhitespaces)
-                .width;
+            if (textSpan.hasNonMonotonicNegativeSpacing) {
+              // Mixed positive and negative cluster advances require net endpoint selection.
+              trailingSpacesWidth = textSpan
+                  .getTextRangeSelectionInBlock(block, blockLineWhitespaces)
+                  .width;
+            } else {
+              // Trailing whitespace clusters are cached like the rest, see the block advance.
+              final ui.TextRange physicalWhitespaces = bidiLineSpanPhysicalTextRange.intersect(
+                blockLineWhitespaces,
+              );
+              trailingSpacesWidth = physicalWhitespaces.start >= physicalWhitespaces.end
+                  ? 0.0
+                  : _clusterSelection(
+                      _mapping.toClusterRange(physicalWhitespaces.start, physicalWhitespaces.end),
+                    ).width;
+            }
             (line.visualBlocks.last as TextBlock).clusterRangeWithoutWhitespaces = _mapping
                 .toClusterRange(blockLineNoWhitespaces.start, blockLineNoWhitespaces.end);
             (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
@@ -554,6 +612,35 @@ class TextLayout {
     return line.advance.height;
   }
 
+  /// The union of the span-relative selection rects of the clusters in [range], which all
+  /// belong to one span without inverted negative-spacing advances.
+  ui.Rect _clusterSelection(ClusterRange range) {
+    // Callers guard empty text ranges before mapping, so an empty or inverted range is a bug.
+    assert(range.start >= 0 && range.start < range.end && range.end <= allClusters.length);
+    final ui.Rect first = allClusters[range.start].advance;
+    double left = first.left;
+    double top = first.top;
+    double right = first.right;
+    double bottom = first.bottom;
+    for (int i = range.start + 1; i < range.end; i++) {
+      final ui.Rect advance = allClusters[i].advance;
+      // Plain comparisons: math.min/max pay for NaN and -0.0 handling in this hot loop.
+      if (advance.left < left) {
+        left = advance.left;
+      }
+      if (advance.top < top) {
+        top = advance.top;
+      }
+      if (advance.right > right) {
+        right = advance.right;
+      }
+      if (advance.bottom > bottom) {
+        bottom = advance.bottom;
+      }
+    }
+    return ui.Rect.fromLTRB(left, top, right, bottom);
+  }
+
   void formatLines(double width) {
     // Special case similar to SkParagraph: clean all text in case of maxWidth == INF & align != left
     // We had to go through shaping though because we need all the measurement numbers
@@ -602,13 +689,11 @@ class TextLayout {
     }
   }
 
-  void _calculatePaintBounds() {
+  ui.Rect _calculatePaintBounds() {
     if (lines.isEmpty) {
       // A non-empty paragraph containing only clusterless characters has no lines to paint.
-      paragraph.paintBounds = ui.Rect.zero;
-      return;
+      return ui.Rect.zero;
     }
-
     double left = double.infinity;
     double top = double.infinity;
     double right = double.negativeInfinity;
@@ -621,7 +706,7 @@ class TextLayout {
       bottom = math.max(bottom, line.baseline + line.paintBoundsDescent);
     }
 
-    paragraph.paintBounds = ui.Rect.fromLTRB(left, top, right, bottom);
+    return ui.Rect.fromLTRB(left, top, right, bottom);
   }
 
   List<ui.TextBox> getBoxesForRange(
@@ -1184,7 +1269,16 @@ abstract class WebCluster {
 }
 
 class TextCluster extends WebCluster {
-  TextCluster(this.span, this._cluster) : startInSpan = _cluster.start, endInSpan = _cluster.end;
+  // Optional precomputed advance lets span extraction populate cluster geometry without
+  // browser queries.
+  TextCluster(this.span, this._cluster, {ui.Rect? advance})
+    : startInSpan = _cluster.start,
+      endInSpan = _cluster.end,
+      // Cache paragraph-wide UTF-16 bounds so sorting, mapping, and line wrapping avoid
+      // span.start additions.
+      start = span.start + _cluster.start,
+      end = span.start + _cluster.end,
+      _advance = advance;
 
   @override
   final TextSpan span;
@@ -1196,9 +1290,19 @@ class TextCluster extends WebCluster {
   final int startInSpan;
   @override
   final int endInSpan;
+  // Paragraph-wide UTF-16 start and end offsets cached at cluster creation time.
+  @override
+  final int start;
+  @override
+  final int end;
+
+  /// The cluster advance computed from `DomTextCluster.x` and the span's font box, if any.
+  final ui.Rect? _advance;
 
   @override
-  late final ui.Rect advance = span.getClusterSelection(this);
+  // Fall back to a browser selection query when x coordinates are tied or non-monotonic with
+  // negative spacing.
+  late final ui.Rect advance = _advance ?? span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
 
@@ -1354,18 +1458,23 @@ class TextBlock extends LineBlock {
     super.textRange,
     this.physicalTextRange,
     super.shiftFromLineStart,
-    double shiftFromSpanStart,
-  ) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
-      clusterRangeWithoutWhitespaces = clusterRange,
-      whitespacesWidth = 0.0;
+    double shiftFromSpanStart, {
+    ui.Rect? advance,
+  }) : spanShiftFromLineStart = shiftFromLineStart - shiftFromSpanStart,
+       clusterRangeWithoutWhitespaces = clusterRange,
+       whitespacesWidth = 0.0,
+       _advance = advance;
 
   final ui.TextRange physicalTextRange;
 
   @override
   TextSpan get span => super.span as TextSpan;
 
+  /// The block advance computed by the layout from cached cluster advances, if any.
+  final ui.Rect? _advance;
+
   @override
-  late final ui.Rect advance = span.getBlockSelection(this);
+  late final ui.Rect advance = _advance ?? span.getBlockSelection(this);
 
   late final ui.Rect paintBounds = span.getBlockBounds(this);
 
@@ -1586,10 +1695,45 @@ class TextLine {
   bool usesRawDescent = false;
   bool _hasLineMetrics = false;
 
-  double paintBoundsAscent = 0.0;
-  double paintBoundsDescent = 0.0;
-  double paintBoundsLeft = double.infinity;
-  double paintBoundsRight = double.negativeInfinity;
+  /// The line whose ink extent above and below the baseline this synthetic empty line repeats.
+  TextLine? paintBoundsSource;
+
+  // Ink bounds need a browser query per block, so they are measured on the first paint rather
+  // than on every layout(width).
+  late final ({double ascent, double descent, double left, double right}) _paintBounds =
+      _measurePaintBounds();
+
+  double get paintBoundsAscent => _paintBounds.ascent;
+  double get paintBoundsDescent => _paintBounds.descent;
+  double get paintBoundsLeft => _paintBounds.left;
+  double get paintBoundsRight => _paintBounds.right;
+
+  ({double ascent, double descent, double left, double right}) _measurePaintBounds() {
+    final TextLine? source = paintBoundsSource;
+    if (source != null) {
+      return (
+        ascent: source.paintBoundsAscent,
+        descent: source.paintBoundsDescent,
+        left: double.infinity,
+        right: double.negativeInfinity,
+      );
+    }
+    var ascent = 0.0;
+    var descent = 0.0;
+    double left = double.infinity;
+    double right = double.negativeInfinity;
+    // There's no need to update paint bounds because placeholders aren't painted by the
+    // paragraph.
+    for (final LineBlock block in visualBlocks) {
+      if (block is TextBlock) {
+        ascent = math.max(ascent, block.paintBoundsAscent);
+        descent = math.max(descent, block.paintBoundsDescent);
+        left = math.min(left, block.paintBounds.left);
+        right = math.max(right, block.paintBounds.right);
+      }
+    }
+    return (ascent: ascent, descent: descent, left: left, right: right);
+  }
 
   double formattingShift = 0.0; // For centered or right aligned text
   late final double trailingSpacesWidth;
@@ -1607,8 +1751,7 @@ class TextLine {
     fontBoundingBoxDescent = other.fontBoundingBoxDescent;
     rawFontBoundingBoxAscent = other.rawFontBoundingBoxAscent;
     rawFontBoundingBoxDescent = other.rawFontBoundingBoxDescent;
-    paintBoundsAscent = other.paintBoundsAscent;
-    paintBoundsDescent = other.paintBoundsDescent;
+    paintBoundsSource = other;
     _hasLineMetrics = other._hasLineMetrics;
   }
 
@@ -1636,14 +1779,6 @@ class TextLine {
   }
 
   void updateBoundingBox(LineBlock block) {
-    // Only text blocks have painted glyphs; placeholders are not painted by the paragraph.
-    if (block is TextBlock) {
-      paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
-      paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
-      paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
-      paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
-    }
-
     final (double ascent, double descent, double rawAscent, double rawDescent) = switch (block) {
       // Text blocks carry both height-scaled and unscaled font metrics.
       TextBlock() => (
@@ -1672,8 +1807,12 @@ class TextLine {
   }
 }
 
+/// Counts text metrics queries sent to the browser, so tests can pin which operations make them.
+int debugTextMetricsQueryCount = 0;
+
 extension DomTextMetricsExtension on DomTextMetrics {
   ui.Rect getSelection(int start, int end) {
+    debugTextMetricsQueryCount++;
     final List<DomRectReadOnly> rects = getSelectionRects(start, end);
     double minLeft = rects.first.left;
     double minTop = rects.first.top;
@@ -1693,6 +1832,7 @@ extension DomTextMetricsExtension on DomTextMetrics {
   }
 
   ui.Rect getBounds(int start, int end) {
+    debugTextMetricsQueryCount++;
     final DomRectReadOnly box = getActualBoundingBox(start, end);
     return ui.Rect.fromLTWH(box.left, box.top, box.width, box.height);
   }
