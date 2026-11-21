@@ -75,8 +75,14 @@ class ContinuousRectangleBorder extends OutlinedBorder {
     return super.lerpTo(b, t);
   }
 
-  double _clampToShortest(RRect rrect, double value) {
-    return value > rrect.shortestSide ? rrect.shortestSide : value;
+  // Returns `scale`, further reduced if needed so that `radius1 + radius2` fits
+  // within `limit`. Mirrors the scaling that `RRect.scaleRadii` applies.
+  static double _scaleToFit(double scale, double radius1, double radius2, double limit) {
+    final double sum = radius1 + radius2;
+    if (sum > limit && sum > 0.0) {
+      return math.min(scale, limit / sum);
+    }
+    return scale;
   }
 
   Path _getPath(RRect rrect) {
@@ -84,16 +90,50 @@ class ContinuousRectangleBorder extends OutlinedBorder {
     final double right = rrect.right;
     final double top = rrect.top;
     final double bottom = rrect.bottom;
-    //  Radii will be clamped to the value of the shortest side
-    // of rrect to avoid strange tie-fighter shapes.
-    final double tlRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
-    final double tlRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
-    final double trRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
-    final double trRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
-    final double blRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
-    final double blRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
-    final double brRadiusX = math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
-    final double brRadiusY = math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
+
+    // Negative radii are documented to behave like zero radii. Clamp them
+    // before the scaling below rather than after it, because the scaling looks
+    // at the sum of the two radii drawn along a side: a negative radius would
+    // otherwise cancel out part of the radius of the corner it shares that side
+    // with and let an overflowing corner through unscaled.
+    double tlRadiusX = math.max(0.0, rrect.tlRadiusX);
+    double tlRadiusY = math.max(0.0, rrect.tlRadiusY);
+    double trRadiusX = math.max(0.0, rrect.trRadiusX);
+    double trRadiusY = math.max(0.0, rrect.trRadiusY);
+    double blRadiusX = math.max(0.0, rrect.blRadiusX);
+    double blRadiusY = math.max(0.0, rrect.blRadiusY);
+    double brRadiusX = math.max(0.0, rrect.brRadiusX);
+    double brRadiusY = math.max(0.0, rrect.brRadiusY);
+
+    // Every side is shared by two corners, and the curves below consume one
+    // radius worth of that side at each of its ends. When those two radii do
+    // not fit, the curves overshoot and the straight segment between them runs
+    // backwards, so the contour crosses over itself. That stays invisible while
+    // the shape is filled, but it is drawn as a tie-fighter shape as soon as
+    // the shape is stroked. Shrink every radius by the same factor until each
+    // side fits, the way `RRect.scaleRadii` does for rounded rectangles.
+    //
+    // Note that this shape has always spent the x radii along the vertical
+    // sides and the y radii along the horizontal ones, so the pairs below are
+    // matched to the sides the path actually walks rather than to the pairs
+    // `RRect.scaleRadii` would use.
+    final double width = math.max(0.0, right - left);
+    final double height = math.max(0.0, bottom - top);
+    var scale = 1.0;
+    scale = _scaleToFit(scale, tlRadiusY, trRadiusX, width); // Top side.
+    scale = _scaleToFit(scale, trRadiusY, brRadiusX, height); // Right side.
+    scale = _scaleToFit(scale, brRadiusY, blRadiusX, width); // Bottom side.
+    scale = _scaleToFit(scale, blRadiusY, tlRadiusX, height); // Left side.
+    if (scale < 1.0) {
+      tlRadiusX *= scale;
+      tlRadiusY *= scale;
+      trRadiusX *= scale;
+      trRadiusY *= scale;
+      blRadiusX *= scale;
+      blRadiusY *= scale;
+      brRadiusX *= scale;
+      brRadiusY *= scale;
+    }
 
     return Path()
       ..moveTo(left, top + tlRadiusX)
