@@ -104,7 +104,9 @@ bool CommandBufferVK::EndCommandBuffer() const {
   InsertDebugMarker("QueueSubmit");
 
   auto command_buffer = GetCommandBuffer();
-  tracked_objects_->GetGPUProbe().RecordCmdBufferEnd(command_buffer);
+  if (tracked_objects_->GetGPUProbePtr()) {
+    tracked_objects_->GetGPUProbe().RecordCmdBufferEnd(command_buffer);
+  }
 
   auto status = command_buffer.end();
   if (status != vk::Result::eSuccess) {
@@ -112,6 +114,15 @@ bool CommandBufferVK::EndCommandBuffer() const {
     return false;
   }
   return true;
+}
+
+bool CommandBufferVK::HasGPUProbeIndex() const {
+  auto* probe = tracked_objects_->GetGPUProbePtr();
+  return probe && probe->HasIndex();
+}
+
+std::unique_ptr<GPUProbe> CommandBufferVK::ReleaseGPUProbe() {
+  return tracked_objects_->ReleaseGPUProbe();
 }
 
 vk::CommandBuffer CommandBufferVK::GetCommandBuffer() const {

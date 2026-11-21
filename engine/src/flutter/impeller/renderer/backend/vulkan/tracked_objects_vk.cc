@@ -81,4 +81,8 @@ GPUProbe& TrackedObjectsVK::GetGPUProbe() const {
   return *probe_.get();
 }
 
+std::unique_ptr<GPUProbe> TrackedObjectsVK::ReleaseGPUProbe() {
+  return std::move(probe_);
+}
+
 }  // namespace impeller

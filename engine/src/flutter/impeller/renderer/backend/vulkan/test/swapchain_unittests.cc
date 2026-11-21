@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
+#include "fml/synchronization/count_down_latch.h"
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
@@ -248,6 +249,17 @@ TEST(SwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
 
   swapchain.reset();
 
+  for (int i = 0; i < 2; ++i) {
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    auto flush_cmd = context->CreateCommandBuffer();
+    ASSERT_TRUE(
+        context->GetCommandQueue()
+            ->Submit({flush_cmd},
+                     [latch](CommandBuffer::Status) { latch->CountDown(); })
+            .ok());
+    latch->Wait();
+  }
+
   auto query_counts = GetQueryPoolResultCounts(context->GetDevice());
   ASSERT_EQ(query_counts.size(), 3u);
   for (uint32_t count : query_counts) {
@@ -255,6 +267,58 @@ TEST(SwapchainTest, TracesOnscreenCommandBufferStartAndEnd) {
   }
 }
 #endif  // IMPELLER_DEBUG
+
+TEST(SwapchainTest, IdleSwapchainReleasesFinalCmdBufferProbe) {
+  auto const context =
+      MockVulkanContextBuilder()
+          .SetSettingsCallback([](ContextVK::Settings& settings) {
+            settings.enable_gpu_tracing = true;
+          })
+          .Build();
+
+  // Present once on swapchain1, then leave it idle.
+  auto surface1 = CreateSurface(*context);
+  auto swapchain1 = KHRSwapchainVK::Create(context, std::move(surface1),
+                                           ISize(1, 1), /*enable_msaa=*/false);
+  ASSERT_NE(swapchain1, nullptr);
+  auto drawable1 = swapchain1->AcquireNextDrawable();
+  ASSERT_NE(drawable1, nullptr);
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_NE(cmd_buffer, nullptr);
+  swapchain1->AddFinalCommandBuffer(std::move(cmd_buffer));
+  ASSERT_TRUE(drawable1->Present());
+
+  // Flush the fence waiter with two sequential submits so the first batch's
+  // erased_entries cleanup (including swapchain1's GPUProbe) has fully
+  // completed before swapchain2 wraps around.
+  for (int i = 0; i < 2; ++i) {
+    auto latch = std::make_shared<fml::CountDownLatch>(1u);
+    auto flush_cmd = context->CreateCommandBuffer();
+    ASSERT_TRUE(
+        context->GetCommandQueue()
+            ->Submit({flush_cmd},
+                     [latch](CommandBuffer::Status) { latch->CountDown(); })
+            .ok());
+    latch->Wait();
+  }
+
+#ifdef IMPELLER_DEBUG
+  EXPECT_EQ(GetQueryPoolResultCounts(context->GetDevice()).size(), 1u);
+#endif  // IMPELLER_DEBUG
+
+  // Present 17 frames on swapchain2 (exceeding kTraceStatesSize = 16).
+  // If swapchain1 retained its final_cmd_buffer GPUProbe, wrapping back to
+  // state 0 trips FML_DCHECK(state.pending_buffers == 0u).
+  auto surface2 = CreateSurface(*context);
+  auto swapchain2 = KHRSwapchainVK::Create(context, std::move(surface2),
+                                           ISize(1, 1), /*enable_msaa=*/false);
+  ASSERT_NE(swapchain2, nullptr);
+  for (int i = 0; i < 17; ++i) {
+    auto drawable2 = swapchain2->AcquireNextDrawable();
+    ASSERT_NE(drawable2, nullptr);
+    ASSERT_TRUE(drawable2->Present());
+  }
+}
 
 }  // namespace testing
 }  // namespace impeller
