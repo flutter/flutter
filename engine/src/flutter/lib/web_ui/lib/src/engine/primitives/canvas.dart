@@ -398,7 +398,7 @@ class EngineCanvas implements LayerCanvas {
     if (sortedClip.isEmpty) {
       return;
     }
-    final double effectiveOpacity = opacity > 1.0 ? 1.0 : opacity;
+    final effectiveOpacity = opacity > 1.0 ? 1.0 : opacity;
     final int alpha = ui.Color.getAlphaFromOpacity(effectiveOpacity);
     if (alpha == 0) {
       return;
@@ -409,7 +409,7 @@ class EngineCanvas implements LayerCanvas {
 
     if (fadeHorizontal) {
       final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
-      double fadeWidth = 14.0;
+      var fadeWidth = 14.0;
       if (lines.isNotEmpty) {
         final ui.LineMetrics lastLine = lines.last;
         fadeWidth = (lastLine.ascent + lastLine.descent).roundToDouble();
@@ -418,14 +418,14 @@ class EngineCanvas implements LayerCanvas {
       }
       fadeWidth = math.max(fadeWidth, 1.0);
 
-      final ui.Paint layerPaint = ui.Paint();
+      final layerPaint = ui.Paint();
       if (alpha < 255) {
         layerPaint.color = ui.Color.fromARGB(alpha, 0, 0, 0);
       }
       saveLayer(sortedClip, layerPaint);
       drawParagraph(paragraph, offset);
 
-      final ui.Paint maskPaint = ui.Paint()..blendMode = ui.BlendMode.modulate;
+      final maskPaint = ui.Paint()..blendMode = ui.BlendMode.modulate;
       if (lines.length > 1) {
         final ui.LineMetrics lastLine = lines.last;
         final double lineTop = math.max(
@@ -439,11 +439,11 @@ class EngineCanvas implements LayerCanvas {
         );
         if (lineRight > lineLeft && sortedClip.bottom > lineTop) {
           final double effectiveFade = math.min(fadeWidth * 2.0, lineRight - lineLeft);
-          final bool fadeAtLeft = overflowPosition == 0;
+          final fadeAtLeft = overflowPosition == 0;
           final double fadeStart = fadeAtLeft
               ? math.min(lineRight, lineLeft + effectiveFade)
               : math.max(lineLeft, lineRight - effectiveFade);
-          final double fadeEnd = fadeAtLeft ? lineLeft : lineRight;
+          final fadeEnd = fadeAtLeft ? lineLeft : lineRight;
           maskPaint.shader = ui.Gradient.linear(
             ui.Offset(fadeStart, 0.0),
             ui.Offset(fadeEnd, 0.0),
@@ -473,7 +473,7 @@ class EngineCanvas implements LayerCanvas {
         );
         drawRect(sortedClip, maskPaint);
       } else {
-        final bool fadeAtLeft = overflowPosition == 0;
+        final fadeAtLeft = overflowPosition == 0;
         final double fadeStart = fadeAtLeft
             ? math.min(sortedClip.right, sortedClip.left + fadeWidth)
             : math.max(sortedClip.left, sortedClip.right - fadeWidth);

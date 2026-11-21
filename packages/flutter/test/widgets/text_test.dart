@@ -1978,15 +1978,15 @@ void main() {
       expect(animatedParagraph.overflowPosition, TextOverflowPosition.middle);
       expect(animatedParagraph.scrollOverflow, TextScrollOverflow.fade);
 
-      final animation = AlwaysStoppedAnimation<TextStyle>(const TextStyle(fontSize: 16.0));
+      const animation = AlwaysStoppedAnimation<TextStyle>(TextStyle(fontSize: 16.0));
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: DefaultTextStyleTransition(
             style: animation,
             overflowPosition: TextOverflowPosition.start,
             scrollOverflow: TextScrollOverflow.clip,
-            child: const Text('Transition'),
+            child: Text('Transition'),
           ),
         ),
       );

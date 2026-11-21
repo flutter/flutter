@@ -1778,11 +1778,11 @@ void main() {
       'preserves softWrap for multiline paragraphs when overflowPosition is start or middle',
       () {
         const longText = 'word1 word2 word3 word4 word5 word6 word7 word8 word9 word10';
-        for (final TextOverflowPosition position in <TextOverflowPosition>[
+        for (final position in <TextOverflowPosition>[
           TextOverflowPosition.start,
           TextOverflowPosition.middle,
         ]) {
-          for (final TextOverflow overflow in <TextOverflow>[
+          for (final overflow in <TextOverflow>[
             TextOverflow.clip,
             TextOverflow.fade,
             TextOverflow.ellipsis,

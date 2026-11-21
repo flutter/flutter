@@ -140,6 +140,13 @@ class _TextShrinkState {
 /// The start and end positions for a text boundary.
 typedef _TextBoundaryRecord = ({TextPosition boundaryStart, TextPosition boundaryEnd});
 
+typedef _EllipsisClusterMetrics = ({
+  String fullString,
+  double fullWidth,
+  double ellipsisWidth,
+  List<(TextRange, double)> clusters,
+});
+
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition].
 typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition position);
@@ -692,6 +699,7 @@ class RenderParagraph extends RenderBox
   BoxConstraints? _cachedShrinkLayoutConstraints;
   InlineSpan? _cachedEllipsisSpan;
   double? _cachedEllipsisMaxWidth;
+  _EllipsisClusterMetrics? _cachedEllipsisClusterMetrics;
 
   void _invalidateShrinkAndEllipsisCaches({bool resetShrinkLock = true}) {
     if (resetShrinkLock) {
@@ -700,6 +708,7 @@ class RenderParagraph extends RenderBox
     _cachedShrinkLayoutConstraints = null;
     _cachedEllipsisSpan = null;
     _cachedEllipsisMaxWidth = null;
+    _cachedEllipsisClusterMetrics = null;
     _overflowShaderRect = null;
   }
 
@@ -1176,21 +1185,38 @@ class RenderParagraph extends RenderBox
       return constraints;
     }
     final double incomingMaxWidth = constraints.maxWidth;
-    // Measure single-line intrinsic width when starting in a narrow slot so words
-    // never split mid-word or wrap into vertical stacks before expanding.
-    final List<PlaceholderDimensions> dryPlaceholderDimensions = layoutInlineChildren(
-      double.infinity,
-      ChildLayoutHelper.dryLayoutChild,
-      ChildLayoutHelper.getDryBaseline,
-    );
-    _textIntrinsics
-      ..setPlaceholderDimensions(dryPlaceholderDimensions)
-      ..layout();
-    final double intrinsicMax = _textIntrinsics.maxIntrinsicWidth;
-    final double intrinsicMin = _textIntrinsics.minIntrinsicWidth;
-    final double singleLineOrWordFloor = (maxLines == null || maxLines == 1)
-        ? intrinsicMax
-        : math.max(intrinsicMin, intrinsicMax / maxLines!);
+    final double? existingLock = state.lockedMaxWidth;
+    if (existingLock != null) {
+      // Fast path: high-water mark is already locked, so no intrinsic
+      // dry-layout measurement is needed while shrinking or growing.
+      final double resolvedMaxWidth = math.max(incomingMaxWidth, existingLock);
+      if (updateHighWaterMark) {
+        if (incomingMaxWidth > existingLock) {
+          state.lockedMaxWidth = incomingMaxWidth;
+        }
+        state.currentWidth = incomingMaxWidth;
+      }
+      return constraints.copyWith(maxWidth: resolvedMaxWidth);
+    }
+
+    double? singleLineOrWordFloor = state.fallbackReferenceWidth;
+    if (singleLineOrWordFloor == null) {
+      // Measure single-line intrinsic width once when starting in a narrow slot
+      // so words never split mid-word or wrap into vertical stacks before expanding.
+      final List<PlaceholderDimensions> dryPlaceholderDimensions = layoutInlineChildren(
+        double.infinity,
+        ChildLayoutHelper.dryLayoutChild,
+        ChildLayoutHelper.getDryBaseline,
+      );
+      _textIntrinsics
+        ..setPlaceholderDimensions(dryPlaceholderDimensions)
+        ..layout();
+      final double intrinsicMax = _textIntrinsics.maxIntrinsicWidth;
+      final double intrinsicMin = _textIntrinsics.minIntrinsicWidth;
+      singleLineOrWordFloor = (maxLines == null || maxLines == 1)
+          ? intrinsicMax
+          : math.max(intrinsicMin, intrinsicMax / maxLines!);
+    }
     if (updateHighWaterMark) {
       final double resolvedMaxWidth = state.resolveLayoutMaxWidth(
         incomingMaxWidth,
@@ -1199,10 +1225,7 @@ class RenderParagraph extends RenderBox
       state.currentWidth = incomingMaxWidth;
       return constraints.copyWith(maxWidth: resolvedMaxWidth);
     }
-    final double lockedMaxWidth = math.max(
-      incomingMaxWidth,
-      state.lockedMaxWidth ?? math.max(incomingMaxWidth, singleLineOrWordFloor),
-    );
+    final double lockedMaxWidth = math.max(incomingMaxWidth, singleLineOrWordFloor);
     return constraints.copyWith(maxWidth: lockedMaxWidth);
   }
 
@@ -1242,66 +1265,85 @@ class RenderParagraph extends RenderBox
     if (!maxWidth.isFinite || maxWidth <= 0.0) {
       return _rawText;
     }
-    final String fullString = _rawText.toPlainText(includeSemanticsLabels: false);
-    if (fullString.isEmpty) {
-      return _rawText;
-    }
     final TextStyle? baseStyle = _rawText.style;
-    // Shape the full span and ellipsis once, then query the already-shaped
-    // glyph cluster layout bounds rather than re-shaping candidate substrings.
-    final fullPainter = TextPainter(
-      text: _rawText,
-      textAlign: textAlign,
-      textDirection: textDirection,
-      textScaler: textScaler,
-      locale: locale,
-      strutStyle: strutStyle,
-      textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
-      hyphens: hyphens,
-    )..layout();
-    if (fullPainter.width <= maxWidth) {
+    _EllipsisClusterMetrics? metrics = _cachedEllipsisClusterMetrics;
+    if (metrics == null) {
+      final String fullString = _rawText.toPlainText(includeSemanticsLabels: false);
+      if (fullString.isEmpty) {
+        return _rawText;
+      }
+      // Shape the full span and ellipsis once per text/style change, then cache
+      // glyph cluster widths so subsequent constraint changes avoid re-shaping.
+      final fullPainter = TextPainter(
+        text: _rawText,
+        textAlign: textAlign,
+        textDirection: textDirection,
+        textScaler: textScaler,
+        locale: locale,
+        strutStyle: strutStyle,
+        textWidthBasis: textWidthBasis,
+        textHeightBehavior: textHeightBehavior,
+        hyphens: hyphens,
+      )..layout();
+      final double fullWidth = fullPainter.width;
+      if (fullWidth <= maxWidth) {
+        fullPainter.dispose();
+        return _rawText;
+      }
+
+      final ellipsisPainter = TextPainter(
+        text: TextSpan(style: baseStyle, text: _kEllipsis),
+        textDirection: textDirection,
+        textScaler: textScaler,
+        locale: locale,
+        strutStyle: strutStyle,
+        textHeightBehavior: textHeightBehavior,
+      )..layout();
+      final double ellipsisWidth = ellipsisPainter.width;
+      ellipsisPainter.dispose();
+
+      final clusters = <(TextRange, double)>[];
+      var offset = 0;
+      while (offset < fullString.length) {
+        final GlyphInfo? info = fullPainter.getGlyphInfoAt(offset);
+        if (info == null || info.graphemeClusterCodeUnitRange.end <= offset) {
+          final step =
+              TextPainter.isHighSurrogate(fullString.codeUnitAt(offset)) &&
+                  offset + 1 < fullString.length
+              ? 2
+              : 1;
+          final int nextOffset = offset + step;
+          clusters.add((
+            TextRange(start: offset, end: nextOffset),
+            (fullWidth / fullString.length) * step,
+          ));
+          offset = nextOffset;
+        } else {
+          clusters.add((info.graphemeClusterCodeUnitRange, info.graphemeClusterLayoutBounds.width));
+          offset = info.graphemeClusterCodeUnitRange.end;
+        }
+      }
       fullPainter.dispose();
-      return _rawText;
+
+      metrics = (
+        fullString: fullString,
+        fullWidth: fullWidth,
+        ellipsisWidth: ellipsisWidth,
+        clusters: clusters,
+      );
+      _cachedEllipsisClusterMetrics = metrics;
     }
 
-    final ellipsisPainter = TextPainter(
-      text: TextSpan(style: baseStyle, text: _kEllipsis),
-      textDirection: textDirection,
-      textScaler: textScaler,
-      locale: locale,
-      strutStyle: strutStyle,
-      textHeightBehavior: textHeightBehavior,
-    )..layout();
-    final double availableForGlyphs = maxWidth - ellipsisPainter.width;
-    ellipsisPainter.dispose();
+    if (metrics.fullWidth <= maxWidth) {
+      return _rawText;
+    }
+    final double availableForGlyphs = maxWidth - metrics.ellipsisWidth;
     if (availableForGlyphs <= 0.0) {
-      fullPainter.dispose();
       return TextSpan(style: baseStyle, text: _kEllipsis);
     }
 
-    final clusters = <(TextRange, double)>[];
-    var offset = 0;
-    while (offset < fullString.length) {
-      final GlyphInfo? info = fullPainter.getGlyphInfoAt(offset);
-      if (info == null || info.graphemeClusterCodeUnitRange.end <= offset) {
-        final int step =
-            TextPainter.isHighSurrogate(fullString.codeUnitAt(offset)) &&
-                offset + 1 < fullString.length
-            ? 2
-            : 1;
-        final int nextOffset = offset + step;
-        clusters.add((
-          TextRange(start: offset, end: nextOffset),
-          (fullPainter.width / fullString.length) * step,
-        ));
-        offset = nextOffset;
-      } else {
-        clusters.add((info.graphemeClusterCodeUnitRange, info.graphemeClusterLayoutBounds.width));
-        offset = info.graphemeClusterCodeUnitRange.end;
-      }
-    }
-    fullPainter.dispose();
+    final String fullString = metrics.fullString;
+    final List<(TextRange, double)> clusters = metrics.clusters;
 
     final bool isPlainSingleSpan =
         _rawText is TextSpan &&
@@ -1406,7 +1448,7 @@ class RenderParagraph extends RenderBox
     String? slicedText;
     final String? text = span.text;
     if (text != null && text.isNotEmpty) {
-      final int segStart = cursor;
+      final segStart = cursor;
       final int segEnd = cursor + text.length;
       cursor = segEnd;
       final int overlapStart = math.max(start, segStart);
