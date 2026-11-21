@@ -236,9 +236,17 @@ void ReactorGLES::CollectHandle(HandleGLES handle) {
   if (handle.IsDead()) {
     return;
   }
+  // A thread that can react may still have unflushed commands that use this
+  // object, and a deletion issued from another context is not ordered after
+  // them. Leave the deletion to this thread.
+  std::optional<std::thread::id> collecting_thread;
+  if (CanReactOnCurrentThread()) {
+    collecting_thread = std::this_thread::get_id();
+  }
   if (handle.untracked_id_.has_value()) {
     LiveHandle live_handle(GLStorage{.integer = handle.untracked_id_.value()});
     live_handle.pending_collection = true;
+    live_handle.collecting_thread = collecting_thread;
     WriterLock handles_lock(handles_mutex_);
     handles_[handle] = std::move(live_handle);
   } else {
@@ -246,6 +254,7 @@ void ReactorGLES::CollectHandle(HandleGLES handle) {
     if (auto found = handles_.find(handle); found != handles_.end()) {
       if (!found->second.pending_collection) {
         handles_to_collect_count_ += 1;
+        found->second.collecting_thread = collecting_thread;
       }
       found->second.pending_collection = true;
     }
@@ -311,8 +320,16 @@ bool ReactorGLES::ConsolidateHandles() {
         // Some objects can only be deleted on a specific thread.  Collection
         // of these objects will be deferred until the owner thead executes
         // a reaction and triggers collection of handles.
+        //
+        // Other objects collected by a thread that can react are deleted on
+        // that thread, after the commands its context issued against them.
+        // An owned object ignores its collecting thread, since only its
+        // owner's context can have issued commands against it.
         const auto& owner_thread = handle.first.owner_thread_;
-        if (owner_thread.has_value() && *owner_thread != current_thread) {
+        const auto& deleting_thread = owner_thread.has_value()
+                                          ? owner_thread
+                                          : handle.second.collecting_thread;
+        if (deleting_thread.has_value() && *deleting_thread != current_thread) {
           continue;
         }
         std::optional<GLStorage> storage;

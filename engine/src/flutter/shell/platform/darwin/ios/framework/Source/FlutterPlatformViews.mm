@@ -196,15 +196,16 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
 
 @interface FlutterClippingMaskView ()
 
-// A `CATransform3D` matrix represnts a scale transform that revese UIScreen.scale.
+// A `CATransform3D` matrix that represents a scale transform that reverses the device pixel ratio.
 //
 // The transform matrix passed in clipRect/clipRRect/clipPath methods are in device coordinate
-// space. The transfrom matrix concats `reverseScreenScale` to create a transform matrix in the iOS
-// logical coordinates (points).
+// space. The transfrom matrix concats `reverseDevicePixelRatio` to create a transform matrix in the
+// iOS logical coordinates (points).
 //
-// See https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc for
-// information about screen scale.
-@property(nonatomic) CATransform3D reverseScreenScale;
+// The device pixel ratio is the number of physical pixels per point. See
+// https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc for
+// information about screen scale, which is the device pixel ratio of a screen.
+@property(nonatomic) CATransform3D reverseDevicePixelRatio;
 
 - (fml::CFRef<CGPathRef>)getTransformedPath:(CGPathRef)path matrix:(CATransform3D)matrix;
 
@@ -217,13 +218,14 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
-  return [self initWithFrame:frame screenScale:[UIScreen mainScreen].scale];
+  return [self initWithFrame:frame devicePixelRatio:[UIScreen mainScreen].scale];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
+- (instancetype)initWithFrame:(CGRect)frame devicePixelRatio:(CGFloat)devicePixelRatio {
   if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
-    _reverseScreenScale = CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1);
+    _reverseDevicePixelRatio =
+        CATransform3DMakeScale(1 / devicePixelRatio, 1 / devicePixelRatio, 1);
     rectSoFar_ = self.bounds;
     containsNonRectPath_ = NO;
   }
@@ -291,7 +293,7 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
 - (void)clipRect:(CGRect)clipRect matrix:(CATransform3D)matrix {
   fml::CFRef<CGPathRef> path(CGPathCreateWithRect(clipRect, nil));
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
-  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseScreenScale);
+  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseDevicePixelRatio);
   paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
   CGAffineTransform affine = [self affineWithMatrix:matrixInPoints];
   // Make sure the rect is not rotated (only translated or scaled).
@@ -368,7 +370,7 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
       pathRef.Reset(mutablePathRef);
     }
     // The `matrix` is based on the physical pixels, convert it to UIKit points.
-    CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseScreenScale);
+    CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseDevicePixelRatio);
     // TODO(cyanglaz): iOS does not seem to support hard edge on CAShapeLayer. It clearly stated
     // that the CAShaperLayer will be drawn antialiased. Need to figure out a way to do the hard
     // edge clipping on iOS.
@@ -380,7 +382,7 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
   containsNonRectPath_ = YES;
 
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
-  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseScreenScale);
+  CATransform3D matrixInPoints = CATransform3DConcat(matrix, _reverseDevicePixelRatio);
   paths_.push_back([self getTransformedPath:path matrix:matrixInPoints]);
 }
 
@@ -420,15 +422,17 @@ static BOOL AreAllCornersSame(FlutterPlatformViewCornerRadii radii) {
   return self;
 }
 
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame
+                                devicePixelRatio:(CGFloat)devicePixelRatio {
   FML_DCHECK(self.pool.count <= self.capacity);
   if (self.pool.count == 0) {
     // The pool is empty, alloc a new one.
-    return [[FlutterClippingMaskView alloc] initWithFrame:frame
-                                              screenScale:UIScreen.mainScreen.scale];
+    return [[FlutterClippingMaskView alloc] initWithFrame:frame devicePixelRatio:devicePixelRatio];
   }
   FlutterClippingMaskView* maskView = [self.pool anyObject];
   maskView.frame = frame;
+  maskView.reverseDevicePixelRatio =
+      CATransform3DMakeScale(1 / devicePixelRatio, 1 / devicePixelRatio, 1);
   [maskView reset];
   [self.pool removeObject:maskView];
   return maskView;

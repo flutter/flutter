@@ -31,8 +31,6 @@ struct OverlayLayer {
   UIView* overlay_view_wrapper;
   std::unique_ptr<IOSSurface> ios_surface;
   std::unique_ptr<Surface> surface;
-
-  void UpdateViewState(UIView* flutter_view, DlRect rect, int64_t view_id, int64_t overlay_id);
 };
 
 /// @brief Storage for Overlay layers across frames.
