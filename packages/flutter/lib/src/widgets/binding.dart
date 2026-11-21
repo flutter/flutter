@@ -497,7 +497,6 @@ mixin WidgetsBinding
       return true;
     }());
     platformMenuDelegate = DefaultPlatformMenuDelegate();
-    _windowingOwner = createWindowingOwner();
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -1846,7 +1845,8 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''');
     }
-    return _windowingOwner;
+    _windowingOwner ??= createWindowingOwner();
+    return _windowingOwner!;
   }
 
   /// Sets the [WindowingOwner].
@@ -1875,7 +1875,7 @@ See: https://github.com/flutter/flutter/issues/30701.
     _windowingOwner = owner;
   }
 
-  late WindowingOwner _windowingOwner;
+  WindowingOwner? _windowingOwner;
 }
 
 /// Inflate the given widget and attach it to the view.
