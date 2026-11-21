@@ -309,9 +309,9 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src/BUILD.gn"],
         gn_repository = "@vulkan-headers=//flutter/third_party/vulkan-deps/vulkan-headers/src",
     ),
-    # The Khronos Vulkan loader (libvulkan.so.1 on Linux), which ANGLE and
-    # GLFW open in the GPU suites (build/bazel/gl_wrap's product on Linux),
-    # from the tree's own GN.
+    # The Khronos Vulkan loader (libvulkan.so.1 on Linux, libvulkan.dylib on
+    # a Mac), which ANGLE and GLFW open in the GPU suites (build/bazel/gl_wrap's
+    # product), from the tree's own GN.
     "vulkan-loader": struct(
         path = "engine/src/flutter/third_party/vulkan-deps/vulkan-loader/src",
         build_file = None,
@@ -388,9 +388,10 @@ _SOURCE_REPOSITORIES = {
         ],
         gn_repository = "@swiftshader=//flutter/third_party/swiftshader",
     ),
-    # Trees for the wrapped GN build of the GPU test backends
-    # (build/bazel/gl_wrap): ANGLE and SwiftShader (whose Bazel rules are
-    # @angle's and @swiftshader's), the vulkan-deps directory (over whose
+    # Trees for the wrapped GN build of a Mac's ANGLE (build/bazel/gl_wrap),
+    # the one GPU test backend not taken from a converted tree there: ANGLE
+    # and SwiftShader, whose driver ANGLE's GN builds with it (their Bazel
+    # rules are @angle's and @swiftshader's), the vulkan-deps directory (over whose
     # subdirectories @vulkan-headers, @spirv-tools, ... are separate
     # repositories), abseil-cpp (whose Bazel rules are @abseil-cpp's) and the
     # allocator (whose library is @vulkan_memory_allocator). Each is the

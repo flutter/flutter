@@ -25,7 +25,16 @@ The converter emits it for every shared_library():
 
 As GN's mac toolchain names no install name (its solink tool links with
 `-o ./lib<name>.dylib` and nothing else), neither does this: a dylib's
-install name is the path the link names.
+install name is the path the link names. That path is where dyld looks for
+the library on behalf of whatever linked against it: GN's `./lib<name>.dylib`
+is found by a test started in the build directory, as run_tests.py starts
+them, and the path of a Bazel link (`bazel-out/<configuration>/bin/...`) by
+nothing. A library that other targets of the build link against and run
+with therefore names one (`apple_install_name`, from the converter's
+manifest: the Khronos loader's `@rpath/libvulkan.dylib`, which a dependent's
+rpaths resolve -- Bazel's to the library among its runfiles, and the one to
+the binary's own directory); a GN target that sets an install name itself
+(SwiftShader's driver, ANGLE's libraries) carries it in its link flags.
 
 A library whose GN target sets `output_extension` for Linux (the Khronos
 loader: `so.1`, for libvulkan.so.1, the name its clients open) has a third
@@ -55,7 +64,7 @@ _APPLE = [
 
 _LINUX = "@platforms//os:linux"
 
-def flutter_shared_library(name, output_name, linux_output_extension = None, target_compatible_with = [], visibility = None, testonly = None, interface_deps = [], **kwargs):
+def flutter_shared_library(name, output_name, linux_output_extension = None, apple_install_name = None, target_compatible_with = [], visibility = None, testonly = None, interface_deps = [], **kwargs):
     """GN's shared_library(): see the file's docstring.
 
     Args:
@@ -64,6 +73,9 @@ def flutter_shared_library(name, output_name, linux_output_extension = None, tar
         lib<output_name>.so or lib<output_name>.dylib.
       linux_output_extension: GN's output_extension where the target sets
         one for Linux: the library is lib<output_name>.<extension> there.
+      apple_install_name: the dylib's install name (`@rpath/lib<name>.dylib`),
+        for a library the build's own targets link against and run with;
+        by default the link names none.
       target_compatible_with: the target's own constraints, on top of the
         platform family each library is for.
       visibility: visibility of the alias and the libraries.
@@ -75,11 +87,16 @@ def flutter_shared_library(name, output_name, linux_output_extension = None, tar
     """
 
     # The platform's file, by the select() key it is built under.
-    files = {os: "lib%s.dylib" % output_name for os in _APPLE}
+    dylib = "lib%s.dylib" % output_name
+    files = {os: dylib for os in _APPLE}
     if linux_output_extension:
         files[_LINUX] = "lib%s.%s" % (output_name, linux_output_extension)
     files["//conditions:default"] = "lib%s.so" % output_name
     for file in {file: None for file in files.values()}:
+        attributes = dict(kwargs)
+        if apple_install_name and file == dylib:
+            # The dylib's link alone: -install_name is ld64's word.
+            attributes["linkopts"] = attributes.get("linkopts", []) + ["-Wl,-install_name," + apple_install_name]
         cc_binary(
             name = file,
             linkshared = True,
@@ -89,7 +106,7 @@ def flutter_shared_library(name, output_name, linux_output_extension = None, tar
             }) + target_compatible_with,
             visibility = visibility,
             testonly = testonly,
-            **kwargs
+            **attributes
         )
     native.alias(
         name = name,

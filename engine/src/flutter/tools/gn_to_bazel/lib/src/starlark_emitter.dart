@@ -505,6 +505,7 @@ String emitBuildFile(
   Set<String> linkedStaticLibraries = const <String>{},
   Map<String, List<String>> extraSources = const <String, List<String>>{},
   Map<String, List<String>> interfaceDeps = const <String, List<String>>{},
+  Map<String, String> installNames = const <String, String>{},
 }) {
   final DependencyResolver forwarded =
       forwardedFlags ??
@@ -572,6 +573,15 @@ String emitBuildFile(
       throw GnError(
         GnLocation(evaluation.file, 0, 0),
         'interfaceDeps names $name, which is not a shared_library of the file',
+      );
+    }
+  }
+  emitter.installNames.addAll(installNames);
+  for (final String name in installNames.keys) {
+    if (emitter.localTargets[name]?.rule != 'shared_library') {
+      throw GnError(
+        GnLocation(evaluation.file, 0, 0),
+        'installNames names $name, which is not a shared_library of the file',
       );
     }
   }
@@ -880,6 +890,10 @@ final class _Emitter {
   /// Libraries a shared library's dependents get besides what GN hands them
   /// (the manifest's interfaceDeps), by the shared library's name.
   final Map<String, List<String>> interfaceDeps = <String, List<String>>{};
+
+  /// The install names of shared libraries on the Apple platforms (the
+  /// manifest's installNames), by the shared library's name.
+  final Map<String, String> installNames = <String, String>{};
 
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
@@ -3730,6 +3744,12 @@ final class _Emitter {
           );
         }
         rule.scalars['linux_output_extension'] = '"${value.value}"';
+      }
+      // The dylib's install name where the manifest gives one (installNames:
+      // a library the build's own targets link against and run with).
+      final String? installName = installNames[target.name];
+      if (installName != null) {
+        rule.scalars['apple_install_name'] = '"$installName"';
       }
     }
     if (kind == 'cc_test') {

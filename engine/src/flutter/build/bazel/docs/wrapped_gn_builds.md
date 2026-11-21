@@ -138,19 +138,35 @@ the configuration of CI's `host_debug_unopt_impeller_tests` and, since
 flutter/flutter#196282, of `host_profile_test` and `host_release_test`,
 whose `run_tests.py --type impeller` runs need it for Vulkan validation).
 
-On Linux all four are converted trees, their own GN files turned into BUILD
-files at fetch time like Skia's: ANGLE (`@angle`, seven GN files behind the
-templates and arguments of `gni/angle.gni`: the two static libraries, the
-translator and the preprocessor, the Vulkan and desktop GL backends),
-SwiftShader (`@swiftshader`, eleven GN files: the driver, its pipeline and
-device, the Reactor JIT on Subzero for x64 and on LLVM for arm64, marl, and
+Three of the four are converted trees on Linux and on a Mac, their own GN
+files turned into BUILD files at fetch time like Skia's: SwiftShader
+(`@swiftshader`, eleven GN files: the driver, its pipeline and device, the
+Reactor JIT on Subzero for x64 and on LLVM for arm64, marl, and
 SwiftShader's own SPIRV-Tools and SPIRV-Headers), the loader
 (`@vulkan-loader`) and the layer (`@vulkan_validation_layers`, which the
-Android embedding's debug jar packs for arm64 as well). `gl_wrap`'s `:angle`
-is ANGLE's two libraries; its products of the other three's names are
+Android embedding's debug jar packs for arm64 as well). ANGLE is one on
+Linux (`@angle`, seven GN files behind the templates and arguments of
+`gni/angle.gni`: the two static libraries, the translator and the
+preprocessor, the Vulkan and desktop GL backends); a Mac's is still a
+wrapped GN build (below). `gl_wrap`'s `:angle` is ANGLE's two libraries; its
+products of the other three's names (a Mac's are `libvk_swiftshader.dylib`,
+`libvulkan.dylib` and `libVkLayer_khronos_validation.dylib`) are
 `build_root_binary` targets (//build_defs/gn:build_directory.bzl) over them:
-the file as GN's build root holds it, stripped under `stripped_symbols`,
-which is what a suite loads (the layer is 300 MB with its symbols).
+the file as GN's build root holds it, which is what a suite loads --
+stripped under `stripped_symbols` on Linux (the layer is 300 MB with its
+symbols), as linked on a Mac, whose GN toolchain strips nothing.
+
+One thing differs from GN on a Mac, on purpose: the loader's install name.
+GN's mac toolchain names none, so a dylib's is the path its link wrote
+(`./libvulkan.dylib`), which dyld resolves against the working directory:
+GN's build directory, where `run_tests.py` starts the suites. A Mac's ANGLE
+links the loader directly, and Bazel starts a test in its runfiles tree, so
+the converted loader is linked with `-install_name @rpath/libvulkan.dylib`
+(the converter's manifest, `installNames`; `flutter_shared_library`'s
+`apple_install_name`), which the rpath of the binary's own directory finds
+at the suite's copy. SwiftShader's driver sets its own in GN
+(`@rpath/libvk_swiftshader.dylib`), and the layer is opened by the path its
+manifest names.
 
 The converted trees are evaluated under `tools/gn`'s arguments for a host
 build (the converter's assumptions), and one GN default among them matters
@@ -185,13 +201,15 @@ its reason. Three things in it are not plain compiles:
   the Vulkan headers and the engine's `flutter_vma`, which
   `build_overrides/angle.gni` names as ANGLE's VulkanMemoryAllocator.
 
-On a Mac -- where no run has checked the converted trees' products yet --
-all four are built with their own GN rules in one `gn_build` action
+A Mac's ANGLE is built with its own GN rules in one `gn_build` action
 (`gl_wrap:gl_backends`, which only a macOS platform is compatible with), as
-`dart_wrap/` builds the Dart SDK. When Linux built them this way the pruned
-graph was about 1,100 compiles without the layer and three times the time
-with it (224 s and 669 s of `ninja` on 24 cores); ANGLE alone was 387
-compiles and 149 s.
+`dart_wrap/` builds the Dart SDK: its Metal backend, and the two shared
+libraries the Impeller golden suite loads there, are not converted. The
+action builds SwiftShader's driver and the loader as well, which ANGLE's GN
+targets name as `data_deps`, and keeps neither. When Linux built all four
+this way the pruned graph was about 1,100 compiles without the layer and
+three times the time with it (224 s and 669 s of `ninja` on 24 cores);
+ANGLE alone was 387 compiles and 149 s.
 
 A Mac's `libangle.a` holds the object closure of the two static libraries
 up to the `archive_boundaries` the Bazel side provides -- abseil
@@ -213,8 +231,7 @@ as the Dart SDK's were, and without any `.git`: ANGLE's commit id comes
 from the `DEPS` pin through `ANGLE_UPSTREAM_HASH` there too (the rule's
 `env`). `gn_build` can also leave archives or everything but the archives'
 objects out of a configuration (`omit_archives`, `archives_only`), which is
-how Linux took its backends from the converted trees one at a time, and how
-a Mac can.
+how Linux took its backends from the converted trees one at a time.
 
 At run time the files must sit **next to the test binary**. ANGLE opens
 the loader from, and points it (`VK_ICD_FILENAMES`) at the ICD manifest in,

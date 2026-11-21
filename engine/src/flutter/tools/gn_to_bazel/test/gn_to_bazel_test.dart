@@ -60,6 +60,7 @@ Future<String> convert(
   Set<String> linkedStaticLibraries = const <String>{},
   Map<String, List<String>> extraSources = const <String, List<String>>{},
   Map<String, List<String>> interfaceDeps = const <String, List<String>>{},
+  Map<String, String> installNames = const <String, String>{},
   Map<String, String> uncarriedDataDeps = const <String, String>{},
 }) async {
   return emitBuildFile(
@@ -78,6 +79,7 @@ Future<String> convert(
     linkedStaticLibraries: linkedStaticLibraries,
     extraSources: extraSources,
     interfaceDeps: interfaceDeps,
+    installNames: installNames,
     uncarriedDataDeps: uncarriedDataDeps,
   );
 }
@@ -8711,6 +8713,43 @@ shared_library("x") {
         );
       },
     );
+
+    test("a shared library the build's own targets link names its install name", () async {
+      // GN's mac toolchain gives a dylib no install name, so it is the path
+      // the link wrote (./libvulkan.dylib): found by a test started in GN's
+      // build directory, and by no Bazel test. The manifest's installNames
+      // gives the Khronos loader `@rpath/libvulkan.dylib` (a Mac's ANGLE
+      // links it directly), which the macro passes the dylib's link.
+      const gn = '''
+shared_library("libvulkan") {
+  output_name = "vulkan"
+  sources = [ "loader.c" ]
+}
+source_set("other") {
+  sources = [ "a.cc" ]
+}
+''';
+      final String output = await convert(
+        gn,
+        assumptions: generationAssumptions(),
+        installNames: <String, String>{'libvulkan': '@rpath/libvulkan.dylib'},
+      );
+      expect(output, contains('    apple_install_name = "@rpath/libvulkan.dylib",\n'));
+      // Nothing without the manifest's word.
+      expect(
+        await convert(gn, assumptions: generationAssumptions()),
+        isNot(contains('apple_install_name')),
+      );
+      // The name must be a shared library of the file.
+      await expectLater(
+        convert(
+          gn,
+          assumptions: generationAssumptions(),
+          installNames: <String, String>{'other': '@rpath/libother.dylib'},
+        ),
+        throwsGnError(line: 0, message: 'installNames names other'),
+      );
+    });
 
     test('an include directory outside the package needs a library that carries it', () async {
       // Bazel's `includes` is package-relative: a directory of another

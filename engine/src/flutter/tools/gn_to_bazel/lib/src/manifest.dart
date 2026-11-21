@@ -45,6 +45,7 @@ final class ConvertedFile {
     this.linkedStaticLibraries = const <String>{},
     this.extraSources = const <String, List<String>>{},
     this.interfaceDeps = const <String, List<String>>{},
+    this.installNames = const <String, String>{},
     this.assume = const <String, GnValue>{},
     this.targetConditions = const <String, String>{},
     this.uncarriedDataDeps = const <String, String>{},
@@ -136,6 +137,17 @@ final class ConvertedFile {
   /// headers written in the appendix. By the shared library's name, as
   /// Bazel labels.
   final Map<String, List<String>> interfaceDeps;
+
+  /// The install name of a shared library on the Apple platforms, where the
+  /// build's own targets link against the library and run with it: GN's mac
+  /// toolchain names none, so the name is the path the link wrote
+  /// (`./libvulkan.dylib`), which dyld finds for a test started in the build
+  /// directory and for no Bazel test, started in its runfiles tree. With
+  /// `@rpath/libvulkan.dylib` the dependents' rpaths find it (the Khronos
+  /// loader, which a Mac's ANGLE links directly). By the shared library's
+  /// name; the macro's `apple_install_name`. Not for a library whose GN
+  /// target names one in its own link flags.
+  final Map<String, String> installNames;
 
   /// Assumptions for this file over the generation's (gn_eval's
   /// Assumptions.withValues): a platform whose branches of the file are
@@ -2888,7 +2900,7 @@ cc_library(
   // GN -- the driver, its pipeline and device, the Reactor JIT on Subzero
   // (x64) or LLVM (arm64), marl, and its own SPIRV-Tools and SPIRV-Headers.
   // The engine's labels for it are gl_wrap's facades, which take these
-  // targets on Linux.
+  // targets on Linux and on a Mac.
   ConvertedFile(
     '//flutter/third_party/swiftshader',
     // The root group's data_deps, the driver and its manifest: a group of
@@ -3348,12 +3360,21 @@ exports_files(glob([
 ]))
 ''',
   ),
-  // The Khronos Vulkan loader (libvulkan.so.1 on Linux, which ANGLE and GLFW
-  // open in the GPU suites: gl_wrap's product there), from the tree's own
-  // GN.
+  // The Khronos Vulkan loader (libvulkan.so.1 on Linux, libvulkan.dylib on a
+  // Mac, which ANGLE and GLFW open in the GPU suites: gl_wrap's product),
+  // from the tree's own GN.
   ConvertedFile(
     '//flutter/third_party/vulkan-deps/vulkan-loader/src',
     implicitDeps: <String>['@vulkan-loader//:headers'],
+    // A Mac's ANGLE links the loader directly (angle.gni's
+    // angle_shared_libvulkan is false there), so its users load the dylib by
+    // the name the dylib gives itself: GN's `./libvulkan.dylib`, the path of
+    // its link, which dyld resolves against the working directory -- GN's
+    // build directory, where run_tests.py runs the suites. Bazel runs a test
+    // from its runfiles tree with the loader beside the binary, which
+    // `@rpath/libvulkan.dylib` finds through the binary's @loader_path rpath
+    // (the Mac's T11: `Library not loaded: ./libvulkan.dylib`).
+    installNames: <String, String>{'libvulkan': '@rpath/libvulkan.dylib'},
     // loader.c includes generated/vk_loader_extensions.c, a source no GN
     // list names (ninja finds it through the depfile; a sandboxed compile
     // has to be given it).

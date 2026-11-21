@@ -4,8 +4,8 @@
 
 # Root BUILD file of @vulkan_deps_tree: the vulkan-deps directory -- the
 # Khronos trees (headers, loader, tools, SPIRV-Tools, SPIRV-Headers, glslang,
-# ...) as DEPS lays them out -- as files, for the wrapped GN build of the GPU
-# test backends (//engine/src/flutter/build/bazel/gl_wrap). The repositories
+# ...) as DEPS lays them out -- as files, for the wrapped GN build of a
+# Mac's ANGLE (//engine/src/flutter/build/bazel/gl_wrap). The repositories
 # Bazel builds from the same trees (@vulkan-headers, @spirv-tools, ...) are
 # separate, over the subdirectories.
 

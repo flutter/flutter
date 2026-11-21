@@ -171,10 +171,10 @@ sandbox contribute.
   post-submit they are neither compared nor uploaded under Bazel yet, and
   the Impeller runs compare nothing yet (Gold's Impeller images come from a
   Mac bot alone).
-- The Dart SDK is a GN build wrapped as a single Bazel action, as are the
-  GPU test backends on a Mac (ANGLE, SwiftShader, the Vulkan loader and the
-  validation layer, which Linux builds from converted GN files). An edit
-  inside them reruns the whole wrapped build.
+- The Dart SDK is a GN build wrapped as a single Bazel action, as is ANGLE
+  on a Mac (Linux builds it from converted GN files, as both build the other
+  GPU test backends: SwiftShader, the Vulkan loader and the validation
+  layer). An edit inside them reruns the whole wrapped build.
 - The wrapped Dart SDK build compiles the VM without LTO in every build.
   GN compiles it with the engine's LTO: full in the Android AOT and iOS
   device builds, thin in the Linux profile and release builds.
