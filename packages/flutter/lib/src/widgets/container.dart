@@ -335,11 +335,33 @@ class Container extends StatelessWidget {
   ///
   /// Use the [color] property to specify a simple solid color.
   ///
-  /// The [child] is not clipped to the decoration. To clip a child to the shape
-  /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
+  /// By default, the [child] is not clipped to the decoration. See
+  /// [clipBehavior] to clip to [Decoration.getClipPath], or wrap the child in
+  /// a [ClipPath] widget.
+  ///
+  /// A child that clips itself to the same corner radius as the decoration can
+  /// leave gaps along the inside of a border because [Decoration.padding]
+  /// insets the child. Reducing the child's corner radii by the corresponding
+  /// per-axis padding insets aligns the curves, though anti-aliasing along the
+  /// shared inner edge can still bleed the backdrop when the decoration has no
+  /// background fill. Painting the border in [foregroundDecoration] instead
+  /// avoids both the radius mismatch and the seam, at the cost of no longer
+  /// insetting the child by the border's [Decoration.padding].
+  ///
+  /// {@tool dartpad}
+  /// This example shows the resulting gaps next to an otherwise identical
+  /// child clipped to the corner radius minus the border width, which
+  /// aligns the curves.
+  ///
+  /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
+  /// {@end-tool}
   final Decoration? decoration;
 
   /// The decoration to paint in front of the [child].
+  ///
+  /// Unlike [decoration], this does not add its [Decoration.padding] to
+  /// [padding]. A border in [foregroundDecoration] paints over the outer edge
+  /// of the [child].
   final Decoration? foregroundDecoration;
 
   /// Additional constraints to apply to the child.
@@ -373,6 +395,29 @@ class Container extends StatelessWidget {
   /// for the provided decoration must return a clip path. (This is not
   /// supported by all decorations; the default implementation of that
   /// method throws an [UnsupportedError].)
+  ///
+  /// The clip is applied to the outer edge returned by
+  /// [Decoration.getClipPath], not to the inside of a border that the
+  /// decoration paints. Since [decoration] is painted behind the child, an
+  /// opaque child can cover such a border.
+  ///
+  /// For a border that must remain visible on top of the child, consider
+  /// painting it with a border-only [foregroundDecoration] of the same
+  /// geometry, keeping [decoration] (without the border) to define the clip
+  /// path.
+  ///
+  /// Moving the border out of [decoration] removes its
+  /// [Decoration.padding] inset, so the [child] extends under the foreground
+  /// border. Add padding inside the child if its content must stay clear of
+  /// the border.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a border covered by an opaque child next to the same
+  /// border painted by [foregroundDecoration], which stays visible on top of
+  /// the child.
+  ///
+  /// ** See code in examples/api/lib/widgets/container/container.clip_behavior.0.dart **
+  /// {@end-tool}
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {

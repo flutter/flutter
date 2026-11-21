@@ -713,6 +713,9 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// for the provided decoration must return a clip path. (This is not
   /// supported by all decorations; the default implementation of that
   /// method throws an [UnsupportedError].)
+  ///
+  /// See [Container.clipBehavior] for how clipping interacts with borders on
+  /// [decoration] and [foregroundDecoration].
   final Clip clipBehavior;
 
   @override
