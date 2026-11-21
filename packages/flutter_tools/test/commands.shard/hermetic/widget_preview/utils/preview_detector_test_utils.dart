@@ -119,6 +119,11 @@ void _onPubspecChangeDetectedRoot(String path) {
   _onPubspecChangeDetected?.call(path);
 }
 
+/// Allows tests to register a custom callback for pubspec change events.
+void setOnPubspecChangeDetected(void Function(String path)? callback) {
+  _onPubspecChangeDetected = callback;
+}
+
 void _onPackageConfigChangeDetectedRoot(String path) {
   _onPackageConfigChangeDetected?.call(path);
 }

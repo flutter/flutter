@@ -225,5 +225,40 @@ void main() {
       // There should be no reload timing events for a pubspec change.
       expectNPreviewReloadTimingEvents(previewDetector, 0);
     });
+
+    testPreviewDetector('ignores changes to pubspec.yaml in nested non-project directories', (
+      PreviewDetector previewDetector,
+    ) async {
+      // Create an initial pubspec.
+      project = await BasicProjectWithExhaustivePreviews.create(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[],
+        pathsWithoutPreviews: <String>[],
+      );
+
+      // Initialize the file watcher.
+      final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
+      expect(initialPreviews, isEmpty);
+
+      var pubspecChangeDetected = false;
+      setOnPubspecChangeDetected((String path) {
+        pubspecChangeDetected = true;
+      });
+
+      final File nestedPubspec = previewDetector.fs.file(
+        previewDetector.fs.path.join(
+          previewDetector.projectRoot.path,
+          '.claude',
+          'worktrees',
+          'unrelated',
+          'pubspec.yaml',
+        ),
+      )..createSync(recursive: true);
+
+      nestedPubspec.writeAsStringSync('name: unrelated\n');
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(pubspecChangeDetected, isFalse);
+    });
   });
 }

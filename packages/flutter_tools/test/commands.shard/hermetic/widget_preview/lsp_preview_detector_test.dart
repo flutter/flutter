@@ -136,6 +136,25 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
+    test('ignores changes to pubspec.yaml in nested non-project directories', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedPubspecChanges, isEmpty);
+
+      final String nestedPubspecPath = fs.path.join(
+        _kProjectRootPath,
+        '.claude',
+        'worktrees',
+        'foo',
+        'pubspec.yaml',
+      );
+
+      await emitEvent(WatchEvent(ChangeType.MODIFY, nestedPubspecPath));
+
+      expect(detectedPubspecChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
+
     test('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
@@ -234,7 +253,8 @@ void main() {
       expect(detectedChanges, hasLength(1));
       expect(fakeDtd.waitForAnalysisCallCount, 2);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-    });
+      },
+    );
   });
 }
 
@@ -243,6 +263,12 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   final Directory directory;
+
+  @override
+  File get pubspecFile => directory.childFile('pubspec.yaml');
+
+  @override
+  List<FlutterProject> get workspaceProjects => const <FlutterProject>[];
 
   @override
   void reloadManifest({Logger? logger, FileSystem? fs}) {}
