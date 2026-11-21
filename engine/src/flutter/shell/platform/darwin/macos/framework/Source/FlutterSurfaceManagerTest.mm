@@ -14,6 +14,7 @@
 @interface TestView : NSView <FlutterSurfaceManagerDelegate>
 
 @property(readwrite, nonatomic) CGSize presentedFrameSize;
+@property(readwrite, nonatomic) BOOL didPresentEmptyFrame;
 - (nonnull instancetype)init;
 
 @end
@@ -33,6 +34,11 @@
         withBlock:(nonnull dispatch_block_t)block
             delay:(NSTimeInterval)delay {
   self.presentedFrameSize = frameSize;
+  block();
+}
+
+- (void)onPresentEmptyFrameWithBlock:(nonnull dispatch_block_t)block delay:(NSTimeInterval)delay {
+  self.didPresentEmptyFrame = YES;
   block();
 }
 
@@ -297,6 +303,27 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   [surfaceManager presentSurfaces:@[] atTime:0 notify:nil];
   EXPECT_EQ(testView.layer.sublayers.count, 0ul);
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(0, 0)));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/190075: a frame size of zero never
+// matches the size the platform thread waits for during a window resize.
+TEST(FlutterSurfaceManager, PresentingEmptyFrameReportsNoFrameSize) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView);
+
+  auto surface = [surfaceManager surfaceForSize:CGSizeMake(100, 50)];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surface) ] atTime:0 notify:nil];
+
+  EXPECT_EQ(testView.layer.sublayers.count, 1ul);
+  EXPECT_FALSE(testView.didPresentEmptyFrame);
+  EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(100, 50)));
+
+  [surfaceManager presentEmptyFrameAtTime:0 notify:nil];
+
+  EXPECT_EQ(testView.layer.sublayers.count, 0ul);
+  EXPECT_TRUE(testView.didPresentEmptyFrame);
+  // The last committed frame size is left unchanged.
+  EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(100, 50)));
 }
 
 TEST(FlutterSurfaceManager, WideGamutSurfaceHasCorrectPixelFormat) {
