@@ -710,15 +710,18 @@ def to_gn_args(args):
           'flutter/tools/download_dart_sdk.py manually or compile from '
           'source by setting `--no-prebuilt-dart-sdk` flag to tools/gn'
       )
-  elif is_host_build(args):
-    # If we are building the dart sdk in-tree, exclude the wasm-opt target, as
-    # it doesn't build properly with our gn configuration.
-    gn_args['dart_include_wasm_opt'] = False
 
-    # dart_platform_sdk is only defined for host builds, linux arm/riscv64 host
-    # builds specify target_os=linux.
-    # dart_platform_sdk=True means exclude web-related files, e.g. dart2js,
-    # dartdevc, web SDK kernel and source files.
+  # If we are building the dart sdk in-tree, exclude the wasm-opt target, as
+  # it doesn't build properly with our gn configuration. This covers both
+  # --no-prebuilt-dart-sdk and the fallback when a prebuilt is requested but
+  # no usable one exists for the target (e.g. riscv64 Linux cross builds).
+  #
+  # dart_platform_sdk is only defined for host builds, linux arm/riscv64 host
+  # builds specify target_os=linux.
+  # dart_platform_sdk=True means exclude web-related files, e.g. dart2js,
+  # dartdevc, web SDK kernel and source files.
+  if not gn_args.get('flutter_prebuilt_dart_sdk') and is_host_build(args):
+    gn_args['dart_include_wasm_opt'] = False
     gn_args['dart_platform_sdk'] = not args.full_dart_sdk
 
   if args.build_glfw_shell is not None:
