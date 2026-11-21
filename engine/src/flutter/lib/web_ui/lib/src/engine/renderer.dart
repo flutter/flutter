@@ -47,7 +47,11 @@ abstract class Renderer {
   /// A surface used specifically for `Picture.toImage`.
   Surface get pictureToImageSurface;
 
-  /// Resets the [Rasterizer] to the default value. Used in tests.
+  /// Disposes the current [Rasterizer] and replaces it with the default one.
+  /// Used in tests.
+  ///
+  /// The view rasterizers for registered views are recreated with the new
+  /// [Rasterizer].
   @visibleForTesting
   void debugResetRasterizer();
 
