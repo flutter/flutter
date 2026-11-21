@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,8 +15,8 @@ import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -53,6 +54,7 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -66,22 +68,39 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(directory: fileSystem.currentDirectory, logger: logger),
+        fileSystem: fileSystem,
+        logger: logger,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
+          schemes: <String>['Runner', 'chocolate'],
+        ),
+      ),
+      xcode: Xcode.test(
+        toolContext: FakeToolContext.macosHost(
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
     );
     iosEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testUsingContext('KernelSnapshot throws error if missing build mode', () async {
+  testWithoutContext('KernelSnapshot throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
     expect(
       const KernelSnapshot().build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot handles null result from kernel compilation', () async {
+  testWithoutContext('KernelSnapshot handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -113,6 +132,7 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         exitCode: 1,
@@ -121,9 +141,9 @@ void main() {
 
     await expectLater(() => const KernelSnapshot().build(androidEnvironment), throwsException);
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot does use track widget creation on profile builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on profile builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -155,18 +175,22 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
     await const KernelSnapshot().build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -200,9 +224,13 @@ void main() {
             '--depfile',
             '$build/kernel_snapshot_program.d',
             '--verbosity=error',
+            '--recorded-uses=$build/recorded_uses.json',
             'file:///lib/main.dart',
           ],
           stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+          onRun: (_) {
+            fileSystem.file('$build/recorded_uses.json').createSync();
+          },
         ),
       ]);
 
@@ -210,10 +238,9 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
   );
 
-  testUsingContext('KernelSnapshot correctly forwards FrontendServerStarterPath', () async {
+  testWithoutContext('KernelSnapshot correctly forwards FrontendServerStarterPath', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -245,9 +272,13 @@ void main() {
           '--depfile',
           '$build/kernel_snapshot_program.d',
           '--verbosity=error',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -257,9 +288,9 @@ void main() {
     );
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
+  testWithoutContext('KernelSnapshot correctly forwards ExtraFrontEndOptions', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -293,9 +324,13 @@ void main() {
           '--verbosity=error',
           'foo',
           'bar',
+          '--recorded-uses=$build/recorded_uses.json',
           'file:///lib/main.dart',
         ],
         stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+        onRun: (_) {
+          fileSystem.file('$build/recorded_uses.json').createSync();
+        },
       ),
     ]);
 
@@ -304,9 +339,9 @@ void main() {
     );
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
+  testWithoutContext('KernelSnapshot can disable track-widget-creation on debug builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -351,7 +386,7 @@ void main() {
     );
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
   testUsingContext(
     'KernelSnapshot forces platform linking on debug for darwin target platforms',
@@ -402,49 +437,46 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'KernelSnapshot sets flavor in dartDefines if found in environment variable for non ios/darwin app',
-    () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      final String build = androidEnvironment.buildDir.path;
-      final String flutterPatchedSdkPath = artifacts.getArtifactPath(
-        Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.android,
-        mode: BuildMode.debug,
-      );
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          command: <String>[
-            artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-            artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-            '--sdk-root',
-            '$flutterPatchedSdkPath/',
-            '--target=flutter',
-            '--no-print-incremental-dependencies',
-            '-D$kAppFlavor=strawberry',
-            ...buildModeOptions(BuildMode.debug, <String>[]),
-            '--no-link-platform',
-            '--packages',
-            '/.dart_tool/package_config.json',
-            '--output-dill',
-            '$build/app.dill',
-            '--depfile',
-            '$build/kernel_snapshot_program.d',
-            '--incremental',
-            '--initialize-from-dill',
-            '$build/app.dill',
-            '--verbosity=error',
-            'file:///lib/main.dart',
-          ],
-          stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
-        ),
-      ]);
-    },
-  );
+  testUsingContext('KernelSnapshot sets flavor in dartDefines if found in environment variable for non ios/darwin app', () async {
+    fileSystem.file('.dart_tool/package_config.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    final String build = androidEnvironment.buildDir.path;
+    final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+      Artifact.flutterPatchedSdkPath,
+      platform: TargetPlatform.android,
+      mode: BuildMode.debug,
+    );
+    processManager.addCommands(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+          artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+          '--sdk-root',
+          '$flutterPatchedSdkPath/',
+          '--target=flutter',
+          '--no-print-incremental-dependencies',
+          '-D$kAppFlavor=strawberry',
+          ...buildModeOptions(BuildMode.debug, <String>[]),
+          '--no-link-platform',
+          '--packages',
+          '/.dart_tool/package_config.json',
+          '--output-dill',
+          '$build/app.dill',
+          '--depfile',
+          '$build/kernel_snapshot_program.d',
+          '--incremental',
+          '--initialize-from-dill',
+          '$build/app.dill',
+          '--verbosity=error',
+          'file:///lib/main.dart',
+        ],
+        stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n',
+      ),
+    ]);
+  });
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if ios app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -496,13 +528,9 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
     },
-    overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
-    },
   );
 
-  testUsingContext(
+  testWithoutContext(
     'KernelSnapshot sets flavor in dartDefines from Xcode build configuration if macos app',
     () async {
       fileSystem.file('.dart_tool/package_config.json')
@@ -552,10 +580,6 @@ void main() {
       );
 
       expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'chocolate']),
     },
   );
 
@@ -616,7 +640,7 @@ void main() {
     },
   );
 
-  testUsingContext('KernelSnapshot does use track widget creation on debug builds', () async {
+  testWithoutContext('KernelSnapshot does use track widget creation on debug builds', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
@@ -628,9 +652,11 @@ void main() {
       },
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
     );
+    testEnvironment.buildDir.createSync(recursive: true);
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -669,9 +695,9 @@ void main() {
     await const KernelSnapshot().build(testEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
+  });
 
-  testUsingContext('AotElfProfile Produces correct output directory', () async {
+  testWithoutContext('AotSnapshotProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
@@ -684,7 +710,6 @@ void main() {
           '--deterministic',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],
@@ -693,55 +718,57 @@ void main() {
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
     androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
-    androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
-    final String build = androidEnvironment.buildDir.path;
-    processManager.addCommands(<FakeCommand>[
-      FakeCommand(
-        command: <String>[
-          artifacts.getArtifactPath(
-            Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm,
-            mode: BuildMode.profile,
-          ),
-          '--deterministic',
-          '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
-          '--trace-precompiler-to=code_size_1/trace.android-arm.json',
-          kElfAot,
-          '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
-          '--no-use-integer-division',
-          '$build/app.dill',
-        ],
-      ),
-    ]);
-    androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
-    androidEnvironment.buildDir.childFile('native_assets.json').createSync();
+  testWithoutContext(
+    'AotSnapshotRelease configures gen_snapshot with code size directory',
+    () async {
+      androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
+      final String build = androidEnvironment.buildDir.path;
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.android_arm,
+              mode: BuildMode.profile,
+            ),
+            '--deterministic',
+            '--write-v8-snapshot-profile-to=code_size_1/snapshot.android-arm.json',
+            '--trace-precompiler-to=code_size_1/trace.android-arm.json',
+            kElfAot,
+            '--elf=$build/app.so',
+            '--no-use-integer-division',
+            '$build/app.dill',
+          ],
+        ),
+      ]);
+      androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
+      androidEnvironment.buildDir.childFile('native_assets.json').createSync();
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+      await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
-    expect(processManager, hasNoRemainingExpectations);
-  });
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
 
-  testUsingContext('AotElfProfile throws error if missing build mode', () async {
+  testWithoutContext('AotSnapshotProfile throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
 
-  testUsingContext('AotElfProfile throws error if missing target platform', () async {
+  testWithoutContext('AotSnapshotProfile throws error if missing target platform', () async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(
-      const AotElfProfile(TargetPlatform.android_arm).build(androidEnvironment),
+      const AotSnapshotProfile(TargetPlatform.android_arm).build(androidEnvironment),
       throwsA(isA<MissingDefineException>()),
     );
   });
@@ -857,7 +884,7 @@ void main() {
     },
   );
 
-  testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
+  testWithoutContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
     androidEnvironment.defines[kBuildMode] = BuildMode.profile.cliName;
     final String build = androidEnvironment.buildDir.path;
@@ -876,14 +903,13 @@ void main() {
           'baz=2',
           kElfAot,
           '--elf=$build/app.so',
-          '--no-sim-use-hardfp',
           '--no-use-integer-division',
           '$build/app.dill',
         ],
       ),
     ]);
 
-    await const AotElfRelease(TargetPlatform.android_arm).build(androidEnvironment);
+    await const AotSnapshotRelease(TargetPlatform.android_arm).build(androidEnvironment);
 
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -896,6 +922,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final bool isInstalled;
 
   List<String> schemes;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
   Future<XcodeProjectInfo?> getInfo(

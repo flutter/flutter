@@ -32,6 +32,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool badScroll = false,
   bool? enableImpeller,
   bool forceOpenGLES = false,
+  bool enableFixedPerformanceMode = true,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -40,6 +41,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
+    enableFixedPerformanceMode: enableFixedPerformanceMode,
   ).run;
 }
 
@@ -119,6 +121,8 @@ TaskFunction createAndroidHCPPScrollPerfTest() {
     enableImpeller: true,
     enableHcpp: true,
     enableMergedPlatformThread: true,
+    // TODO(andywolff): Enable once https://github.com/flutter/flutter/issues/196834 is resolved.
+    enableVulkanGPUTracing: false,
   ).run;
 }
 
@@ -129,6 +133,8 @@ TaskFunction createAndroidViewScrollPerfTest() {
     'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
     enableMergedPlatformThread: true,
+    // TODO(andywolff): Enable once https://github.com/flutter/flutter/issues/196834 is resolved.
+    enableVulkanGPUTracing: false,
   ).run;
 }
 
@@ -376,6 +382,21 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+/// Creates a task that runs the text shadow performance benchmark.
+TaskFunction createTextShadowPerfTest({
+  bool? enableImpeller,
+  List<String> createPlatforms = const <String>[],
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'text_shadow_perf',
+    testDriver: 'test_driver/text_shadow_perf_test.dart',
+    enableImpeller: enableImpeller,
+    createPlatforms: createPlatforms,
+  ).run;
+}
+
 TaskFunction createVeryLongPictureScrollingPerfE2ETest({required bool enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -515,13 +536,10 @@ TaskFunction createsScrollSmoothnessPerfTest() {
           deviceId,
         ],
       );
-      final data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
+      final data = json.decode(
+        file('${testOutputDirectory(testDirectory)}/scroll_smoothness_test.json')
+            .readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       final result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
@@ -593,24 +611,29 @@ TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createGradientDynamicPerfE2ETest() {
+TaskFunction createGradientDynamicPerfE2ETest({List<String> createPlatforms = const <String>[]}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_dynamic_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
-TaskFunction createGradientConsistentPerfE2ETest() {
+TaskFunction createGradientConsistentPerfE2ETest({
+  List<String> createPlatforms = const <String>[],
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_consistent_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
-TaskFunction createGradientStaticPerfE2ETest() {
+TaskFunction createGradientStaticPerfE2ETest({List<String> createPlatforms = const <String>[]}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_static_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
@@ -1046,13 +1069,9 @@ class StartupTest {
           );
           timer.cancel();
           if (result == 0) {
-            final data =
-                json.decode(
-                      file(
-                        '${testOutputDirectory(testDirectory)}/start_up_info.json',
-                      ).readAsStringSync(),
-                    )
-                    as Map<String, dynamic>;
+            final data = json.decode(
+              file('${testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
+            ) as Map<String, dynamic>;
             results.add(data);
           } else {
             currentFailures += 1;
@@ -1224,7 +1243,7 @@ class PerfTest {
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
     this.dartDefine = '',
-    String? resultFilename,
+    this._resultFilename,
     this.device,
     this.flutterDriveCallback,
     this.timeoutSeconds,
@@ -1234,8 +1253,10 @@ class PerfTest {
     this.enableMergedPlatformThread = false,
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
+    this.enableVulkanGPUTracing = true,
+    this.enableFixedPerformanceMode = true,
     this.createPlatforms = const <String>[],
-  }) : _resultFilename = resultFilename;
+  });
 
   const PerfTest.e2e(
     this.testDirectory,
@@ -1247,7 +1268,7 @@ class PerfTest {
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
-    String resultFilename = 'e2e_perf_summary',
+    String this._resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
     this.timeoutSeconds,
@@ -1257,10 +1278,11 @@ class PerfTest {
     this.enableMergedPlatformThread = false,
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
+    this.enableVulkanGPUTracing = false,
+    this.enableFixedPerformanceMode = true,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
-       timelineFileName = null,
-       _resultFilename = resultFilename;
+       timelineFileName = null;
 
   /// The directory where the app under test is defined.
   final String testDirectory;
@@ -1319,6 +1341,17 @@ class PerfTest {
   /// Whether to defer construction of all PSO objects in the Impeller backend.
   final bool enableLazyShaderMode;
 
+  /// Whether to enable Vulkan GPU tracing in AndroidManifest.xml when running with Impeller.
+  final bool enableVulkanGPUTracing;
+
+  /// Whether to enable Android's fixed-performance mode while running the test.
+  ///
+  /// Defaults to `true` to pin CPU clocks and reduce benchmark noise. When set
+  /// to `false`, fixed-performance mode is explicitly disabled before running
+  /// the benchmark so that performance is measured under the normal OS CPU
+  /// governor.
+  final bool enableFixedPerformanceMode;
+
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
 
@@ -1361,7 +1394,6 @@ class PerfTest {
       late Device selectedDevice;
       selectedDevice = device ?? await devices.workingDevice;
       await selectedDevice.unlock();
-      await selectedDevice.toggleFixedPerformanceMode(true);
 
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
@@ -1404,20 +1436,37 @@ class PerfTest {
         }
       }
 
+      final bool isAndroidDevice = const <DeviceOperatingSystem>{
+        DeviceOperatingSystem.android,
+        DeviceOperatingSystem.androidArm,
+        DeviceOperatingSystem.androidArm64,
+      }.contains(deviceOperatingSystem);
+      final bool isImpellerEnabled = enableImpeller ?? true;
+      final bool isGlesTracingForced = forceOpenGLES ?? false;
+      final bool shouldTraceVulkanGPU =
+          isAndroidDevice && isImpellerEnabled && enableVulkanGPUTracing && !isGlesTracingForced;
+
+      await selectedDevice.toggleFixedPerformanceMode(enableFixedPerformanceMode);
       try {
-        if (enableImpeller ?? false) {
+        if (shouldTraceVulkanGPU) {
           changedManifest = true;
           _addVulkanGPUTracingToManifest(testDirectory);
-          if (forceOpenGLES ?? false) {
+        }
+        if (isAndroidDevice && (enableImpeller ?? false)) {
+          if (isGlesTracingForced) {
+            changedManifest = true;
             _addOpenGLESToManifest(testDirectory);
           }
           if (enableMergedPlatformThread) {
+            changedManifest = true;
             _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
           if (enableHcpp) {
+            changedManifest = true;
             _addHcppSupportToManifest(testDirectory);
           }
           if (enableLazyShaderMode) {
+            changedManifest = true;
             _addLazyShaderMode(testDirectory);
           }
         }
@@ -1460,16 +1509,14 @@ class PerfTest {
       } finally {
         await resetManifest();
         await resetPlist();
-        await selectedDevice.toggleFixedPerformanceMode(false);
+        if (enableFixedPerformanceMode) {
+          await selectedDevice.toggleFixedPerformanceMode(false);
+        }
       }
 
-      final data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/$resultFilename.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
+      final data = json.decode(
+        file('${testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -1495,6 +1542,11 @@ class PerfTest {
           recordGPU = false;
       }
 
+      // Tracing on Android requires Impeller combined with either Vulkan or forced GLES.
+      final bool isAndroidGPUTracingActive =
+          isImpellerEnabled && (enableVulkanGPUTracing || isGlesTracingForced);
+
+      final bool recordGPUFrameTime = recordGPU && (!isAndroidDevice || isAndroidGPUTracingActive);
       final isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
@@ -1527,7 +1579,7 @@ class PerfTest {
               if (data['120hz_frame_percentage'] != null) '120hz_frame_percentage',
               if (data['illegal_refresh_rate_frame_count'] != null)
                 'illegal_refresh_rate_frame_count',
-              if (recordGPU) ...<String>[
+              if (recordGPUFrameTime) ...<String>[
                 // GPU Frame Time.
                 if (data['average_gpu_frame_time'] != null) 'average_gpu_frame_time',
                 if (data['90th_percentile_gpu_frame_time'] != null)
@@ -1535,12 +1587,19 @@ class PerfTest {
                 if (data['99th_percentile_gpu_frame_time'] != null)
                   '99th_percentile_gpu_frame_time',
                 if (data['worst_gpu_frame_time'] != null) 'worst_gpu_frame_time',
+              ],
+              if (recordGPU) ...<String>[
                 // GPU Memory.
                 if (data['average_gpu_memory_mb'] != null) 'average_gpu_memory_mb',
                 if (data['90th_percentile_gpu_memory_mb'] != null) '90th_percentile_gpu_memory_mb',
                 if (data['99th_percentile_gpu_memory_mb'] != null) '99th_percentile_gpu_memory_mb',
                 if (data['worst_gpu_memory_mb'] != null) 'worst_gpu_memory_mb',
               ],
+              // Impeller shader warmup, reported by the new gallery's transition test.
+              if (data['shader_warmed_draw_percent'] != null) 'shader_warmed_draw_percent',
+              if (data['shader_lazy_variants'] != null) 'shader_lazy_variants',
+              if (data['shader_warmed_never_drawn_variants'] != null)
+                'shader_warmed_never_drawn_variants',
             ],
       );
     });
@@ -1640,7 +1699,7 @@ class WebCompileTest {
     });
   }
 
-  /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
+  /// Obtains the size and gzipped size of the given [files] and [directories].
   static Future<Map<String, int>> getSize({
     /// Mapping of metric key name to file system path for directories to measure
     Map<String, String> directories = const <String, String>{},
@@ -1662,9 +1721,8 @@ class WebCompileTest {
         await Process.run('gzip', <String>['--keep', kGzipCompressionLevel, filePath]);
         // gzip does not provide a CLI option to specify an output file, so
         // instead just move the output file to the temp dir
-        final File compressedFile = File(
-          '$filePath.gz',
-        ).renameSync(path.join(tempDir.absolute.path, '$key.gz'));
+        final File compressedFile = File('$filePath.gz')
+            .renameSync(path.join(tempDir.absolute.path, '$key.gz'));
         sizeMetrics['${metric}_${key}_compressed_bytes'] = compressedFile.lengthSync();
       }
 
@@ -2155,6 +2213,11 @@ class CompileTest {
 class MemoryTest {
   MemoryTest(this.project, this.test, this.package, {this.requiresTapToStart = false});
 
+  static const Duration nextMessageTimeout = Duration(seconds: 60);
+  static const Duration _tapRetryTimeout = Duration(seconds: 1);
+  static const int _maxTapIterations = 10;
+  static const int _tapCoordinate = 100;
+
   final String project;
   final String test;
   final String package;
@@ -2173,6 +2236,18 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
+  /// Completes [receivedNextMessage] if [line] contains the expected
+  /// memory benchmark marker for the last [prepareForNextMessage] call.
+  @visibleForTesting
+  void handleLogcatLine(String line) {
+    if (_nextMessage != null &&
+        line.contains('==== MEMORY BENCHMARK ==== $_nextMessage ====') &&
+        !(_receivedNextMessage?.isCompleted ?? true)) {
+      _nextMessage = null;
+      _receivedNextMessage?.complete();
+    }
+  }
+
   int get iterationCount => 10;
 
   Device? get device => _device;
@@ -2187,11 +2262,7 @@ class MemoryTest {
       await device!.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final StreamSubscription<String> adb = device!.logcat.listen((String data) {
-        if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ====')) {
-          _receivedNextMessage?.complete();
-        }
-      });
+      final StreamSubscription<String> adb = device!.logcat.listen(handleLogcatLine);
 
       for (var iteration = 0; iteration < iterationCount; iteration += 1) {
         print('running memory test iteration $iteration...');
@@ -2238,8 +2309,8 @@ class MemoryTest {
       'run',
       options: <String>['--verbose', '--release', '--no-resident', '-d', device!.deviceId, test],
     );
-    print('awaiting "ready" message...');
-    await receivedNextMessage;
+    print('awaiting "ready" message... (timeout: $nextMessageTimeout)');
+    await receivedNextMessage?.timeout(nextMessageTimeout);
   }
 
   /// Taps the application and looks for acknowledgement.
@@ -2249,29 +2320,19 @@ class MemoryTest {
     // Keep "tapping" the device till it responds with the string we expect,
     // or throw an error instead of tying up the infrastructure for 30 minutes.
     prepareForNextMessage('TAPPED');
-    var tapped = false;
-    var tapCount = 0;
-    await Future.any(<Future<void>>[
-      () async {
-        while (true) {
-          if (tapped) {
-            break;
-          }
-          tapCount += 1;
-          print('tapping device... [$tapCount]');
-          await device!.tap(100, 100);
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+    for (var tapCount = 1; tapCount <= _maxTapIterations; tapCount += 1) {
+      print('tapping device... [$tapCount]');
+      await device!.tap(_tapCoordinate, _tapCoordinate);
+      print('awaiting "tapped" message... (timeout: $_tapRetryTimeout)');
+      try {
+        await receivedNextMessage?.timeout(_tapRetryTimeout);
+        return;
+      } on TimeoutException {
+        if (tapCount == _maxTapIterations) {
+          rethrow;
         }
-      }(),
-      () async {
-        print('awaiting "tapped" message... (timeout: 10 seconds)');
-        try {
-          await receivedNextMessage?.timeout(const Duration(seconds: 10));
-        } finally {
-          tapped = true;
-        }
-      }(),
-    ]);
+      }
+    }
   }
 
   /// To change the behavior of the test, override this.
@@ -2288,8 +2349,8 @@ class MemoryTest {
     }
 
     prepareForNextMessage('DONE');
-    print('awaiting "done" message...');
-    await receivedNextMessage;
+    print('awaiting "done" message... (timeout: $nextMessageTimeout)');
+    await receivedNextMessage?.timeout(nextMessageTimeout);
 
     await recordEnd();
   }
@@ -2386,6 +2447,8 @@ String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
 class ReportedDurationTest {
   ReportedDurationTest(this.flavor, this.project, this.test, this.package, this.durationPattern);
 
+  static const Duration durationTimeout = Duration(seconds: 60);
+
   final ReportedDurationTestFlavor flavor;
   final String project;
   final String test;
@@ -2409,7 +2472,7 @@ class ReportedDurationTest {
       await flutter('packages', options: <String>['get']);
 
       final StreamSubscription<String> adb = device!.logcat.listen((String data) {
-        if (durationPattern.hasMatch(data)) {
+        if (durationPattern.hasMatch(data) && !durationCompleter.isCompleted) {
           durationCompleter.complete(int.parse(durationPattern.firstMatch(data)!.group(1)!));
         }
       });
@@ -2427,7 +2490,7 @@ class ReportedDurationTest {
         ],
       );
 
-      final int duration = await durationCompleter.future;
+      final int duration = await durationCompleter.future.timeout(durationTimeout);
       print('terminating...');
       await device!.stop(package);
       await adb.cancel();

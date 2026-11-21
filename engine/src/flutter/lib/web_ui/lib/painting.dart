@@ -294,7 +294,7 @@ enum BlendMode {
 enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer }
 
 abstract class Paint {
-  factory Paint() => engine.renderer.createPaint();
+  factory Paint() => engine.EnginePaint();
 
   factory Paint.from(Paint other) {
     final paint = Paint();
@@ -367,8 +367,15 @@ abstract class Gradient implements Shader {
     TileMode tileMode = TileMode.clamp,
     Float64List? matrix4,
   ]) {
-    final Float32List? matrix = matrix4 == null ? null : engine.toMatrix32(matrix4);
-    return engine.renderer.createLinearGradient(from, to, colors, colorStops, tileMode, matrix);
+    _validateColorStops(colors, colorStops);
+    return engine.EngineGradient.linear(
+      from,
+      to,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+    );
   }
 
   factory Gradient.radial(
@@ -382,34 +389,18 @@ abstract class Gradient implements Shader {
     double focalRadius = 0.0,
   ]) {
     _validateColorStops(colors, colorStops);
-    // If focal is null or focal radius is null, this should be treated as a regular radial gradient
-    // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
-    final Float32List? matrix32 = matrix4 != null ? engine.toMatrix32(matrix4) : null;
-    if (focal == null || (focal == center && focalRadius == 0.0)) {
-      return engine.renderer.createRadialGradient(
-        center,
-        radius,
-        colors,
-        colorStops,
-        tileMode,
-        matrix32,
-      );
-    } else {
-      assert(
-        center != Offset.zero || focal != Offset.zero,
-      ); // will result in exception(s) in Skia side
-      return engine.renderer.createConicalGradient(
-        focal,
-        focalRadius,
-        center,
-        radius,
-        colors,
-        colorStops,
-        tileMode,
-        matrix32,
-      );
-    }
+    return engine.EngineGradient.radial(
+      center,
+      radius,
+      colors,
+      colorStops,
+      tileMode,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+      focal,
+      focalRadius,
+    );
   }
+
   factory Gradient.sweep(
     Offset center,
     List<Color> colors, [
@@ -418,15 +409,18 @@ abstract class Gradient implements Shader {
     double startAngle = 0.0,
     double endAngle = math.pi * 2,
     Float64List? matrix4,
-  ]) => engine.renderer.createSweepGradient(
-    center,
-    colors,
-    colorStops,
-    tileMode,
-    startAngle,
-    endAngle,
-    matrix4 != null ? engine.toMatrix32(matrix4) : null,
-  );
+  ]) {
+    _validateColorStops(colors, colorStops);
+    return engine.EngineGradient.sweep(
+      center,
+      colors,
+      colorStops,
+      tileMode,
+      startAngle,
+      endAngle,
+      matrix4 != null ? engine.toMatrix32(matrix4) : null,
+    );
+  }
 }
 
 typedef ImageEventCallback = void Function(Image image);
@@ -473,24 +467,12 @@ enum BlurStyle {
   inner,
 }
 
-class MaskFilter {
-  const MaskFilter.blur(this._style, this._sigma);
+abstract class MaskFilter {
+  // ignore: no_leading_underscores_for_local_identifiers
+  const factory MaskFilter.blur(BlurStyle _style, double _sigma) = engine.EngineMaskFilter.blur;
 
-  final BlurStyle _style;
-  final double _sigma;
-  double get webOnlySigma => _sigma;
-  BlurStyle get webOnlyBlurStyle => _style;
-
-  @override
-  bool operator ==(Object other) {
-    return other is MaskFilter && other._style == _style && other._sigma == _sigma;
-  }
-
-  @override
-  int get hashCode => Object.hash(_style, _sigma);
-
-  @override
-  String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
+  double get webOnlySigma;
+  BlurStyle get webOnlyBlurStyle;
 }
 
 abstract class _ColorTransform {
@@ -664,7 +646,7 @@ class ImageFilter {
     double sigmaY = 0.0,
     TileMode? tileMode,
     Rect? bounds,
-  }) => engine.renderer.createBlurImageFilter(
+  }) => engine.EngineImageFilter.blur(
     sigmaX: sigmaX,
     sigmaY: sigmaY,
     tileMode: tileMode,
@@ -672,10 +654,10 @@ class ImageFilter {
   );
 
   factory ImageFilter.dilate({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.erode({double radiusX = 0.0, double radiusY = 0.0}) =>
-      engine.renderer.createErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+      engine.EngineImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
 
   factory ImageFilter.matrix(
     Float64List matrix4, {
@@ -684,11 +666,19 @@ class ImageFilter {
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
-    return engine.renderer.createMatrixImageFilter(matrix4, filterQuality: filterQuality);
+    return engine.EngineImageFilter.matrix(matrix: matrix4, filterQuality: filterQuality);
   }
 
-  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) =>
-      engine.renderer.composeImageFilters(outer: outer, inner: inner);
+  factory ImageFilter.compose({required ImageFilter outer, required ImageFilter inner}) {
+    engine.EngineImageFilter convert(ImageFilter filter) {
+      if (filter is engine.EngineColorFilter) {
+        return engine.EngineColorFilterImageFilter(colorFilter: filter);
+      }
+      return filter as engine.EngineImageFilter;
+    }
+
+    return engine.EngineImageFilter.compose(outer: convert(outer), inner: convert(inner));
+  }
 
   factory ImageFilter.shader(
     // ignore: avoid_unused_constructor_parameters
@@ -733,7 +723,7 @@ Future<Codec> instantiateImageCodec(
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
-}) => engine.renderer.instantiateImageCodec(
+}) => engine.engineInstantiateImageCodec(
   list,
   targetWidth: targetWidth,
   targetHeight: targetHeight,
@@ -747,7 +737,7 @@ Future<Codec> instantiateImageCodecFromBuffer(
   bool allowUpscaling = true,
 }) async {
   try {
-    return await engine.renderer.instantiateImageCodec(
+    return await engine.engineInstantiateImageCodec(
       buffer._list!,
       targetWidth: targetWidth,
       targetHeight: targetHeight,
@@ -766,18 +756,17 @@ Future<Codec> instantiateImageCodecWithSize(
   FrameInfo? info;
   try {
     if (getTargetSize == null) {
-      return await engine.renderer.instantiateImageCodec(buffer._list!);
+      return await engine.engineInstantiateImageCodec(buffer._list!);
     } else {
-      codec = await engine.renderer.instantiateImageCodec(buffer._list!);
+      codec = await engine.engineInstantiateImageCodec(buffer._list!);
       info = await codec.getNextFrame();
       final int width = info.image.width;
       final int height = info.image.height;
       final TargetImageSize targetSize = getTargetSize(width, height);
-      return await engine.renderer.instantiateImageCodec(
+      return await engine.engineInstantiateImageCodec(
         buffer._list!,
         targetWidth: targetSize.width,
         targetHeight: targetSize.height,
-        allowUpscaling: false,
       );
     }
   } finally {
@@ -1006,7 +995,7 @@ abstract class ImageShader implements Shader {
     TileMode tmy,
     Float64List matrix4, {
     FilterQuality? filterQuality,
-  }) => engine.renderer.createImageShader(image, tmx, tmy, matrix4, filterQuality);
+  }) => engine.EngineImageShader(image, tmx, tmy, matrix4, filterQuality: filterQuality);
 
   @override
   void dispose();
@@ -1095,12 +1084,7 @@ class ImageDescriptor {
       throw StateError('Object is disposed');
     }
     if (_width == null) {
-      return instantiateImageCodec(
-        _data!,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        allowUpscaling: false,
-      );
+      return instantiateImageCodec(_data!, targetWidth: targetWidth, targetHeight: targetHeight);
     }
 
     return createBmp(_data!, width, height, _rowBytes ?? width, _format!);
@@ -1197,6 +1181,11 @@ abstract class ImageSamplerSlot {
 }
 
 abstract class FragmentShader implements Shader {
+  @Deprecated(
+    'Use getUniformFloat, getUniformVec2, getUniformVec3, getUniformVec4, or a related method '
+    'to set uniforms by name instead. '
+    'This feature was deprecated after v3.51.0-0.1.pre.',
+  )
   void setFloat(int index, double value);
 
   void setImageSampler(int index, Image image, {FilterQuality filterQuality = FilterQuality.none});

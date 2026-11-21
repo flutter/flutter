@@ -10,8 +10,15 @@ import 'dart:js_interop_unsafe';
 
 import 'package:ui/src/engine.dart';
 
+extension type JSBuildConfig._(JSObject _) implements JSObject {
+  external JSString? get assetManifest;
+  external JSString? get fontManifest;
+  external JSObject? get extraAssets;
+}
+
 extension type FlutterJS._(JSObject _) implements JSObject {
   external FlutterLoader? get loader;
+  external JSBuildConfig? get buildConfig;
 }
 
 // Both `flutter`, `loader`(_flutter.loader), must be checked for null before
@@ -46,10 +53,9 @@ extension type FlutterEngineInitializer._primary(JSObject _) implements JSObject
     required InitializeEngineFn initializeEngine,
     required ImmediateRunAppFn autoStart,
   }) => FlutterEngineInitializer._(
-    initializeEngine:
-        (([JsFlutterConfiguration? config]) =>
-                (initializeEngine(config) as Future<JSObject>).toPromise)
-            .toJS,
+    initializeEngine: (([
+      JsFlutterConfiguration? config,
+    ]) => (initializeEngine(config) as Future<JSObject>).toPromise).toJS,
     autoStart: (() => (autoStart() as Future<JSObject>).toPromise).toJS,
   );
   external factory FlutterEngineInitializer._({

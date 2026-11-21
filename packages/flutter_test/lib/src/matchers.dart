@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart' as flutter_test;
+///
 /// @docImport '_goldens_io.dart';
+/// @docImport 'window.dart';
 library;
 
 import 'dart:convert' show LineSplitter;
@@ -26,7 +29,7 @@ import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
 import 'goldens.dart';
-import 'widget_tester.dart' show WidgetTester;
+import 'widget_tester.dart' show WidgetTester, testWidgets;
 
 /// Asserts that the [FinderBase] matches nothing in the available candidates.
 ///
@@ -645,16 +648,14 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
-/// in order to use this method.
+/// in order to use this method; [testWidgets] enables semantics by default.
 ///
 /// ## Sample code
 ///
 /// ```dart
 /// testWidgets('matchesSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   // ...
 ///   expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
-///   handle.dispose();
 /// });
 /// ```
 ///
@@ -851,7 +852,7 @@ Matcher matchesSemantics({
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
-/// in order to use this method.
+/// in order to use this method; [testWidgets] enables semantics by default.
 ///
 /// See also:
 ///
@@ -1048,16 +1049,14 @@ Matcher containsSemantics({
 ///
 /// To retrieve the semantics data of a widget, use [SemanticsController.find]
 /// with a [FinderBase] that returns a single widget. Semantics must be enabled
-/// in order to use this method.
+/// in order to use this method; [testWidgets] enables semantics by default.
 ///
 /// ## Sample code
 ///
 /// ```dart
 /// testWidgets('isSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
 ///   // ...
 ///   expect(tester.getSemantics(find.text('hello')), isSemantics(label: 'hello'));
-///   handle.dispose();
 /// });
 /// ```
 ///
@@ -1278,16 +1277,14 @@ Matcher isAccessibilityAnnouncement(
 /// `guideline`.
 ///
 /// This matcher requires the result to be awaited and for semantics to be
-/// enabled first.
+/// enabled first. [testWidgets] enables semantics by default.
 ///
 /// ## Sample code
 ///
 /// ```dart
-/// testWidgets('isSemantics', (WidgetTester tester) async {
-///   final SemanticsHandle handle = tester.ensureSemantics();
+/// testWidgets('meetsGuideline', (WidgetTester tester) async {
 ///   // ...
 ///   await expectLater(tester, meetsGuideline(textContrastGuideline));
-///   handle.dispose();
 /// });
 /// ```
 ///
@@ -1562,9 +1559,8 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   static Iterable<String> _normalize(Object value, {bool expected = true}) {
     if (value is String) {
-      return LineSplitter.split(
-        value,
-      ).map<String>((dynamic item) => _normalizeString(item.toString()));
+      return LineSplitter.split(value)
+          .map<String>((dynamic item) => _normalizeString(item.toString()));
     }
     if (value is Iterable<String>) {
       return value.map<String>((dynamic item) => _normalizeString(item.toString()));
@@ -2563,8 +2559,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
-    final bool
-    disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image>) {
       imageFuture = item;
       disposeImage = false;

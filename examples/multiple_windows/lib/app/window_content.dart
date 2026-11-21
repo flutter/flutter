@@ -14,6 +14,7 @@ import 'dialog_window_content.dart';
 import 'models.dart';
 import 'popup_button.dart';
 import 'rotated_wire_cube.dart';
+import 'satellite_window_content.dart';
 import 'tooltip_button.dart';
 
 class WindowContent extends StatefulWidget {
@@ -69,9 +70,7 @@ class _WindowContentState extends State<WindowContent> {
                     Column(
                       mainAxisSize: .min,
                       children: [
-                        _WindowCreationButtons(
-                          windowController: widget.windowController,
-                        ),
+                        _WindowCreationButtons(windowController: widget.windowController),
                         const SizedBox(height: 20),
                         TooltipButton(parentController: widget.windowController),
                         const SizedBox(height: 20),
@@ -125,8 +124,7 @@ class _WindowCreationButtons extends StatelessWidget {
 
             entry = WindowEntry(
               controller: controller,
-              builder: (BuildContext context) =>
-                  WindowContent(windowController: controller),
+              builder: (BuildContext context) => WindowContent(windowController: controller),
             );
             windowRegistry.register(entry);
           },
@@ -153,6 +151,41 @@ class _WindowCreationButtons extends StatelessWidget {
             windowRegistry.register(entry);
           },
           child: const Text('Create Modal Dialog'),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            late final WindowEntry entry;
+            final SatelliteWindowController controller;
+            if (windowSettings.satelliteShrinkWrap) {
+              controller = SatelliteWindowController.shrinkWrap(
+                resizable: windowSettings.satelliteResizable,
+                delegate: CallbackSatelliteWindowControllerDelegate(
+                  onDestroyed: () => windowRegistry.unregister(entry),
+                ),
+                title: 'Satellite',
+                parent: windowController,
+                initialPositioner: windowSettings.positioner,
+              );
+            } else {
+              controller = SatelliteWindowController(
+                delegate: CallbackSatelliteWindowControllerDelegate(
+                  onDestroyed: () => windowRegistry.unregister(entry),
+                ),
+                title: 'Satellite',
+                size: windowSettings.satelliteSize,
+                parent: windowController,
+                initialPositioner: windowSettings.positioner,
+              );
+            }
+
+            entry = WindowEntry(
+              controller: controller,
+              builder: (BuildContext context) => SatelliteWindowContent(controller: controller),
+            );
+            windowRegistry.register(entry);
+          },
+          child: const Text('Create Satellite Window'),
         ),
       ],
     );

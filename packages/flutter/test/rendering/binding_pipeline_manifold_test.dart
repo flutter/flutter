@@ -19,22 +19,19 @@ void main() {
     children.forEach(RendererBinding.instance.rootPipelineOwner.dropChild);
   });
 
-  test(
-    "BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update",
-    () {
-      final child = PipelineOwner();
-      RendererBinding.instance.rootPipelineOwner.adoptChild(child);
+  test("BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update", () {
+    final child = PipelineOwner();
+    RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
-      final RenderObject renderObject = TestRenderObject();
-      child.rootNode = renderObject;
-      renderObject.scheduleInitialLayout();
-      RendererBinding.instance.rootPipelineOwner.flushLayout();
+    final RenderObject renderObject = TestRenderObject();
+    child.rootNode = renderObject;
+    renderObject.scheduleInitialLayout();
+    RendererBinding.instance.rootPipelineOwner.flushLayout();
 
-      MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount = 0;
-      renderObject.markNeedsLayout();
-      expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 1);
-    },
-  );
+    MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount = 0;
+    renderObject.markNeedsLayout();
+    expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 1);
+  });
 
   test('Turning global semantics on/off creates semantics owners in PipelineOwner tree', () {
     final child = PipelineOwner(onSemanticsUpdate: (_) {});

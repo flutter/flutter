@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/precache.dart';
@@ -24,6 +25,7 @@ void main() {
   testUsingContext('precache description explains currently enabled platforms', () {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       platform: FakePlatform(environment: <String, String>{}),
       featureFlags: TestFeatureFlags(),
@@ -38,6 +40,7 @@ void main() {
     final Platform platform = FakePlatform(environment: <String, String>{});
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       platform: platform,
       featureFlags: TestFeatureFlags(),
@@ -54,6 +57,7 @@ void main() {
     );
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: platform,
@@ -68,13 +72,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isWebEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -92,13 +96,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -115,13 +119,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -139,13 +143,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -162,13 +166,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -186,13 +190,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -209,13 +213,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -233,13 +237,13 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -254,15 +258,15 @@ void main() {
   testUsingContext('precache exits if requesting mismatched artifacts.', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
     );
 
     expect(
-      createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--no-android', '--android_gen_snapshot']),
+      createTestCommandRunner(command)
+          .run(const <String>['precache', '--no-android', '--android_gen_snapshot']),
       throwsToolExit(message: '--android_gen_snapshot requires --android'),
     );
   });
@@ -270,6 +274,7 @@ void main() {
   testUsingContext('precache adds artifact flags to requested artifacts', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(
         isWebEnabled: true,
@@ -313,6 +318,7 @@ void main() {
   testUsingContext('precache expands android artifacts when the android flag is used', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
@@ -333,6 +339,7 @@ void main() {
   testUsingContext('precache adds artifact flags to requested android artifacts', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
@@ -360,6 +367,7 @@ void main() {
   testUsingContext('precache downloads iOS and Android artifacts by default', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(),
       platform: FakePlatform(environment: <String, String>{}),
@@ -383,6 +391,7 @@ void main() {
   testUsingContext('precache --all-platforms gets all artifacts', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(
         isWebEnabled: true,
@@ -420,6 +429,7 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
@@ -436,6 +446,7 @@ void main() {
     () async {
       final command = PrecacheCommand(
         cache: cache,
+        toolContext: FakeToolContext(),
         logger: BufferLogger.test(),
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: FakePlatform(
@@ -447,9 +458,8 @@ void main() {
         ),
       );
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--no-ios', '--no-android', '--macos']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--no-ios', '--no-android', '--macos']);
 
       expect(
         cache.artifacts,
@@ -467,6 +477,7 @@ void main() {
     cache.isUpToDateValue = true;
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isMacOSEnabled: true),
       platform: FakePlatform(environment: <String, String>{}),
@@ -479,6 +490,7 @@ void main() {
   testUsingContext('precache downloads all enabled platforms if no flags are provided.', () async {
     final command = PrecacheCommand(
       cache: cache,
+      toolContext: FakeToolContext(),
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(
         isWebEnabled: true,
@@ -503,6 +515,19 @@ void main() {
         // iOS and android specifically excluded
       }),
     );
+  });
+
+  testUsingContext('precache --host-arch overrides cache hostPlatformOverride', () async {
+    final command = PrecacheCommand(
+      cache: cache,
+      toolContext: FakeToolContext(),
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(),
+      platform: FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
+    );
+    await createTestCommandRunner(command).run(const <String>['precache', '--host-arch=x64']);
+
+    expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
   });
 }
 
@@ -540,4 +565,7 @@ class FakeCache extends Fake implements Cache {
 
   @override
   bool includeAllPlatforms = false;
+
+  @override
+  late final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
 }

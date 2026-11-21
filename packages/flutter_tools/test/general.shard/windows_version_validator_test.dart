@@ -5,8 +5,8 @@
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/windows/windows_version_validator.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -71,20 +71,26 @@ ValidationResult invalidWindowsValidationResult = ValidationResult(
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
-ValidationResult ofdFoundRunning =
-    ValidationResult(ValidationType.partial, const <ValidationMessage>[
-      ValidationMessage.hint(
-        'The Topaz OFD Security Module was detected on your machine. '
-        'You may need to disable it to build Flutter applications.',
-      ),
-    ], statusInfo: 'Problem detected with Windows installation');
+ValidationResult ofdFoundRunning = ValidationResult(
+  ValidationType.partial,
+  const <ValidationMessage>[
+    ValidationMessage.hint(
+      'The Topaz OFD Security Module was detected on your machine. '
+      'You may need to disable it to build Flutter applications.',
+    ),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
 
-ValidationResult powershellUnavailableResult =
-    ValidationResult(ValidationType.partial, const <ValidationMessage>[
-      ValidationMessage.hint(
-        'Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH',
-      ),
-    ], statusInfo: 'Problem detected with Windows installation');
+ValidationResult powershellUnavailableResult = ValidationResult(
+  ValidationType.partial,
+  const <ValidationMessage>[
+    ValidationMessage.hint(
+      'Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH',
+    ),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
 
 ValidationResult getProcessFailed = ValidationResult(
   ValidationType.partial,

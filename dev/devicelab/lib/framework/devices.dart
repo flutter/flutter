@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:retry/retry.dart';
 
@@ -765,8 +766,10 @@ class AndroidDevice extends Device {
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
     final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
     final Match? match = RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
-    assert(match != null, 'could not parse dumpsys meminfo output');
-    return <String, dynamic>{'total_kb': int.parse(match!.group(1)!)};
+    if (match == null) {
+      throw DeviceException('could not parse dumpsys meminfo output for $packageName: $meminfo');
+    }
+    return <String, dynamic>{'total_kb': int.parse(match.group(1)!)};
   }
 
   @override
@@ -775,16 +778,16 @@ class AndroidDevice extends Device {
   bool _abortedLogging = false;
   Process? _loggingProcess;
 
+  /// Starts `adb logcat` for this device.
+  @protected
+  Future<Process> startLogcat() => startProcess(adbPath, <String>['-s', deviceId, 'logcat']);
+
   @override
   Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
     if (clear) {
       await adb(<String>['logcat', '--clear'], silent: true, canFail: true);
     }
-    _loggingProcess = await startProcess(
-      adbPath,
-      // Catch the whole log.
-      <String>['-s', deviceId, 'logcat'],
-    );
+    _loggingProcess = await startLogcat();
     _loggingProcess!.stdout.transform<String>(const Utf8Decoder(allowMalformed: true)).listen((
       String line,
     ) {
@@ -993,17 +996,15 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final results =
-        json.decode(
-              await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
-                'devices',
-                '--machine',
-                '--suppress-analytics',
-                '--device-timeout',
-                '5',
-              ]),
-            )
-            as List<dynamic>;
+    final results = json.decode(
+      await eval(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+        'devices',
+        '--machine',
+        '--suppress-analytics',
+        '--device-timeout',
+        '5',
+      ]),
+    ) as List<dynamic>;
 
     // [
     //   {

@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -17,6 +18,8 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart' show utf8;
 import 'plist_parser.dart';
 
@@ -169,14 +172,8 @@ final _certificateCommonNameExtractionPattern = RegExp(r'CN=([a-zA-Z0-9\s:\(\)]+
 /// already set in the Xcode project's build settings.
 Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
   required Map<String, String> buildSettings,
-  required ProcessManager processManager,
-  required Platform platform,
-  required Logger logger,
-  required Config config,
-  required Terminal terminal,
-  required FileSystem fileSystem,
-  required FileSystemUtils fileSystemUtils,
   required PlistParser plistParser,
+  required ToolContext toolContext,
 }) async {
   // If the user already has it set in the project build settings itself,
   // continue with that.
@@ -185,7 +182,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
     // If it's Manual, the signing is not automatic.
     final String? codeSignStyle = buildSettings[_codeSignStyleBuildSettingName];
     if (codeSignStyle != _CodeSigningStyle.manual.label) {
-      logger.printStatus(
+      toolContext.logger.printStatus(
         'Automatically signing iOS for device deployment using specified development '
         'team in Xcode project: ${buildSettings[_developmentTeamBuildSettingName]}',
       );
@@ -197,16 +194,7 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
     return null;
   }
 
-  final settings = XcodeCodeSigningSettings(
-    config: config,
-    logger: logger,
-    platform: platform,
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
-    fileSystem: fileSystem,
-    fileSystemUtils: fileSystemUtils,
-    terminal: terminal,
-    plistParser: plistParser,
-  );
+  final settings = XcodeCodeSigningSettings(plistParser: plistParser, toolContext: toolContext);
 
   return settings._getCodeSigningBuildSettings();
 }
@@ -230,15 +218,15 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
   required FileSystemUtils fileSystemUtils,
   required PlistParser plistParser,
 }) async {
-  final settings = XcodeCodeSigningSettings(
+  final settings = XcodeCodeSigningSettings.fromParameters(
     config: config,
-    logger: logger,
-    platform: platform,
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
     fileSystem: fileSystem,
     fileSystemUtils: fileSystemUtils,
-    terminal: terminal,
+    logger: logger,
+    platform: platform,
     plistParser: plistParser,
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    terminal: terminal,
   );
 
   final Map<String, String>? buildSettings = await settings._getCodeSigningBuildSettings(
@@ -276,23 +264,45 @@ Directory? getProvisioningProfileDirectory({
 }
 
 class XcodeCodeSigningSettings {
-  XcodeCodeSigningSettings({
+  XcodeCodeSigningSettings({required PlistParser plistParser, required ToolContext toolContext})
+    : this.fromParameters(
+        config: toolContext.config,
+        fileSystem: toolContext.fs,
+        fileSystemUtils: toolContext.fileSystemUtils,
+        logger: toolContext.logger,
+        platform: toolContext.platform,
+        plistParser: plistParser,
+        processUtils: toolContext.processUtils,
+        terminal: toolContext.terminal,
+      );
+
+  XcodeCodeSigningSettings.fromContexts({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
+  }) : this(plistParser: appleContext.plistParser, toolContext: toolContext);
+
+  XcodeCodeSigningSettings.fromParameters({
+    required this._config,
+    required this._fileSystem,
+    required this._fileSystemUtils,
+    required this._logger,
+    required this._platform,
+    required this._plistParser,
+    required this._processUtils,
+    required this._terminal,
+  });
+
+  @visibleForTesting
+  factory XcodeCodeSigningSettings.test({
     required Config config,
-    required Logger logger,
-    required Platform platform,
-    required ProcessUtils processUtils,
     required FileSystem fileSystem,
     required FileSystemUtils fileSystemUtils,
-    required Terminal terminal,
+    required Logger logger,
+    required Platform platform,
     required PlistParser plistParser,
-  }) : _config = config,
-       _logger = logger,
-       _platform = platform,
-       _processUtils = processUtils,
-       _fileSystem = fileSystem,
-       _fileSystemUtils = fileSystemUtils,
-       _plistParser = plistParser,
-       _terminal = terminal;
+    required ProcessUtils processUtils,
+    required Terminal terminal,
+  }) = XcodeCodeSigningSettings.fromParameters;
 
   final Config _config;
   final Logger _logger;

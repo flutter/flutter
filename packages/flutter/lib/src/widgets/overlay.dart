@@ -31,13 +31,15 @@ import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
-typedef OverlayChildLayoutBuilder =
-    Widget Function(BuildContext context, OverlayChildLayoutInfo info);
+typedef OverlayChildLayoutBuilder = Widget Function(
+  BuildContext context,
+  OverlayChildLayoutInfo info,
+);
 
 /// The additional layout information available to the
 /// [OverlayPortal.overlayChildLayoutBuilder] callback.
 extension type OverlayChildLayoutInfo._(
-  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info
+  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info,
 ) {
   /// The size of [OverlayPortal.child] in its own coordinates.
   Size get childSize => _info.$1;
@@ -114,11 +116,10 @@ class OverlayEntry implements Listenable {
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
     required this.builder,
-    bool opaque = false,
-    bool maintainState = false,
+    this._opaque = false,
+    this._maintainState = false,
     this.canSizeOverlay = false,
-  }) : _opaque = opaque,
-       _maintainState = maintainState {
+  }) {
     assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
   }
 
@@ -457,6 +458,16 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
 ///
+/// The widget an entry builds, or that [OverlayPortal] shows on this overlay,
+/// can be a [Positioned], in which case it is laid out and placed the way a
+/// positioned child of a [Stack] would be. See [Positioned] for the
+/// restrictions that apply. Where such a child leaves an axis unspecified, it
+/// is aligned on that axis as if [Stack.alignment] were
+/// [AlignmentDirectional.topStart] — this is not configurable. Children that
+/// are not positioned normally fill the overlay, as the children of a [Stack]
+/// with [StackFit.expand] do. See [OverlayEntry.canSizeOverlay] and
+/// [alwaysSizeToContent] for when a child sizes the overlay instead.
+///
 /// For widgets drawn in an [OverlayEntry], do not assume that the size of the
 /// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
 /// have different sizes.
@@ -476,6 +487,8 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 ///  * [MaterialApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [CupertinoApp], which inserts an [Overlay] widget indirectly via its [Navigator].
 ///  * [Stack], which allows directly displaying a stack of widgets.
+///  * [Positioned], which the widget an entry builds can be, to position it
+///    within the overlay the same way it positions a child of a [Stack].
 class Overlay extends StatefulWidget {
   /// Creates an overlay.
   ///
@@ -595,7 +608,7 @@ class Overlay extends StatefulWidget {
             '${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.',
           ),
           ErrorHint(
-            'The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.',
+            'The most common way to add an Overlay to an application is to include a WidgetsApp or Navigator widget in the runApp() call.',
           ),
           if (debugRequiredFor != null)
             DiagnosticsProperty<Widget>(
@@ -1195,15 +1208,12 @@ class _RenderTheater extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
   _RenderTheater({
     List<RenderBox>? children,
-    required TextDirection textDirection,
+    required this._textDirection,
     int skipCount = 0,
-    Clip clipBehavior = Clip.hardEdge,
-    required bool alwaysSizeToContent,
+    this._clipBehavior = Clip.hardEdge,
+    required this._alwaysSizeToContent,
   }) : assert(skipCount >= 0),
-       _textDirection = textDirection,
-       _skipCount = skipCount,
-       _clipBehavior = clipBehavior,
-       _alwaysSizeToContent = alwaysSizeToContent {
+       _skipCount = skipCount {
     addAll(children);
   }
 
@@ -1393,7 +1403,7 @@ class _RenderTheater extends RenderBox
     final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    final dryChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
@@ -1403,7 +1413,7 @@ class _RenderTheater extends RenderBox
           _RenderTheaterMixin.baselineForChild(
             child,
             size,
-            nonPositionedChildConstraints,
+            dryChildConstraints,
             alignment,
             baseline,
           ),
@@ -1462,6 +1472,16 @@ class _RenderTheater extends RenderBox
   bool get sizedByParent => false;
 
   bool _layingOutSizeDeterminingChild = false;
+
+  // The `BoxConstraints` to use for laying out `_DeferredLayoutBox`es and other
+  // non-positioned and non-size-determining children.
+  //
+  // Adding a `_DeferredLayoutBox` child does not trigger a `_RenderTheater`
+  // relayout, so `_RenderTheater` must cache this value for
+  // `_RenderLayoutSurrogateProxyBox.performLayout` to set the correct
+  // `BoxConstraints` on the newly added `_DeferredLayoutBox`.
+  late BoxConstraints _nonPositionedChildConstraints;
+
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
@@ -1476,10 +1496,10 @@ class _RenderTheater extends RenderBox
     }
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
-    final nonPositionedChildConstraints = BoxConstraints.tight(size);
+    _nonPositionedChildConstraints = BoxConstraints.tight(size);
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
-        layoutChild(child, nonPositionedChildConstraints);
+        layoutChild(child, _nonPositionedChildConstraints);
       }
     }
   }
@@ -1685,7 +1705,7 @@ class _RenderTheater extends RenderBox
 class OverlayPortalController {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
-  OverlayPortalController({String? debugLabel}) : _debugLabel = debugLabel;
+  OverlayPortalController({this._debugLabel});
 
   _OverlayPortalState? _attachTarget;
 
@@ -1696,7 +1716,8 @@ class OverlayPortalController {
   int? _zOrderIndex;
   final String? _debugLabel;
 
-  static int _wallTime = kIsWeb
+  // TODO(kevmoo): Use double.minSafeInteger - 1 when the minimum Dart SDK is 3.15, https://github.com/flutter/flutter/issues/195202.
+  static int _wallTime = kIsWeb && !kIsWasm
       ? -9007199254740992 // -2^53
       : -1 << 63;
 
@@ -1790,6 +1811,8 @@ enum OverlayChildLocation {
 }
 
 /// A widget that renders its overlay child on an [Overlay].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=S0Ylpa44OAQ}
 ///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
 /// is called on the associated [controller]. The [OverlayPortal] uses
@@ -2318,7 +2341,7 @@ class _RenderTheaterMarker extends InheritedWidget {
       ErrorHint(
         'To introduce an Overlay widget, you can either directly '
         'include one, or use a widget that contains an Overlay itself, '
-        'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        'such as a Navigator or WidgetsApp.',
       ),
       ...context.describeMissingAncestor(expectedAncestorType: Overlay),
     ]);
@@ -2796,11 +2819,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // constraints of the deferred child and resize / put it in the dirty list if
     // needed.
     if (!theater._layingOutSizeDeterminingChild) {
-      final BoxConstraints theaterConstraints = theater.constraints;
-      final Size boxSize = theaterConstraints.biggest.isFinite
-          ? theaterConstraints.biggest
-          : theater.size;
-      deferredChild._doLayoutFrom(this, constraints: BoxConstraints.tight(boxSize));
+      deferredChild._doLayoutFrom(this, constraints: theater._nonPositionedChildConstraints);
     }
   }
 }

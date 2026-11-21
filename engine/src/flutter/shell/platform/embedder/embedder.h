@@ -31,6 +31,8 @@
 // - Instead of array of structures, prefer array of pointers to structures.
 //   This ensures that array indexing does not break if members are added
 //   to the structure.
+// - Structures documented as frozen must not have members added. Introduce a
+//   new versioned structure instead.
 //
 // These changes are allowed:
 // - Adding new struct members at the end of a structure as long as the struct
@@ -392,6 +394,7 @@ typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 /// opaque to the engine; the engine does not interpret view IDs in any way.
 typedef int64_t FlutterViewId;
 
+// Frozen because adding members would break the ABI of `FlutterSemanticsNode`.
 typedef struct {
   /// horizontal scale factor
   double scaleX;
@@ -645,6 +648,9 @@ typedef struct {
 } FlutterUIntSize;
 
 /// A structure to represent a rectangle.
+///
+// Frozen because adding members would break the ABI of `FlutterSemanticsNode`
+// and `FlutterDamage`.
 typedef struct {
   double left;
   double top;
@@ -653,6 +659,8 @@ typedef struct {
 } FlutterRect;
 
 /// A structure to represent a 2D point.
+///
+// Frozen because adding members would break the ABI of `FlutterLayer`.
 typedef struct {
   double x;
   double y;
@@ -668,6 +676,8 @@ typedef struct {
 } FlutterRoundedRect;
 
 /// A structure to represent a damage region.
+///
+// Frozen because adding members would break the ABI of `FlutterPresentInfo`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterDamage).
   size_t struct_size;
@@ -959,6 +969,38 @@ typedef bool (*FlutterVulkanPresentCallback)(
     const FlutterVulkanImage* /* image */);
 
 typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanExternalTexture).
+  size_t struct_size;
+  /// Handle to the VkImage that is owned by the embedder. The engine will
+  /// sample from this image during composition. The VkImage must be in the
+  /// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout when provided to the
+  /// engine.
+  FlutterVulkanImageHandle image;
+  /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
+  uint32_t format;
+  /// User data to be returned on the invocation of the destruction callback.
+  void* user_data;
+  /// Callback invoked (on an engine managed thread) that asks the embedder to
+  /// collect the texture. This is optional and can be null.
+  VoidCallback destruction_callback;
+  /// Optional parameters for texture height/width, default is 0, non-zero means
+  /// the texture has the specified width/height.
+  /// Physical width of the texture.
+  size_t width;
+  /// Physical height of the texture.
+  size_t height;
+} FlutterVulkanExternalTexture;
+
+/// Callback to provide an external texture for a given texture_id.
+/// See: external_texture_frame_callback.
+typedef bool (*FlutterVulkanTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterVulkanExternalTexture* /* texture out */);
+
+typedef struct {
   /// The size of this struct. Must be sizeof(FlutterVulkanRendererConfig).
   size_t struct_size;
 
@@ -1021,7 +1063,13 @@ typedef struct {
   /// without any additional synchronization.
   /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterVulkanPresentCallback present_image_callback;
-
+  /// When the embedder specifies that a texture has a frame available, the
+  /// engine will call this method (on an internal engine managed thread) so
+  /// that external texture details can be supplied to the engine for subsequent
+  /// composition. Prior to returning from this callback, the embedder must
+  /// perform a host sync, and so the engine can sample the VkImage without any
+  /// additional synchronization.
+  FlutterVulkanTextureFrameCallback external_texture_frame_callback;
 } FlutterVulkanRendererConfig;
 
 typedef struct {
@@ -1586,6 +1634,9 @@ typedef struct {
 ///                 ABI compatibility for existing users, no new fields will be
 ///                 added to this struct. New fields will continue to be added
 ///                 to `FlutterSemanticsNode2`.
+///
+// Frozen because adding members would break the ABI of
+// `FlutterSemanticsUpdate`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSemanticsNode).
   size_t struct_size;
@@ -1793,6 +1844,9 @@ extern const int32_t kFlutterSemanticsCustomActionIdBatchEnd;
 ///                 preserve ABI compatility for existing users, no new fields
 ///                 will be added to this struct. New fields will continue to
 ///                 be added to `FlutterSemanticsCustomAction2`.
+///
+// Frozen because adding members would break the ABI of
+// `FlutterSemanticsUpdate`.
 typedef struct {
   /// The size of the struct. Must be sizeof(FlutterSemanticsCustomAction).
   size_t struct_size;
@@ -2039,17 +2093,36 @@ typedef struct {
   size_t struct_size;
   /// The image that the layer will be rendered to. This image must already be
   /// available for the engine to bind for writing when it's given to the engine
-  /// via the backing store creation callback. The engine will perform a host
-  /// sync for all layers prior to calling the compositor present callback, and
-  /// so the written layer images can be freely bound by the embedder without
-  /// any additional synchronization.
+  /// via the backing store creation callback.
+  ///
+  /// When Impeller is disabled (Skia), the engine will perform a host sync for
+  /// all layers prior to calling the compositor present callback, and so the
+  /// written layer images can be freely bound by the embedder without any
+  /// additional synchronization.
+  ///
+  /// When Impeller is enabled, the engine submits GPU commands without a host
+  /// sync before the present callback, so the embedder must synchronize GPU
+  /// access. For example, it can use a `VkSemaphore` or `VkImageMemoryBarrier`
+  /// from `VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT` /
+  /// `VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT`, holding the queue mutex if
+  /// sharing the engine's queue. The incoming layout is ignored
+  /// (`VK_IMAGE_LAYOUT_UNDEFINED`) and prior contents are discarded. The image
+  /// must be single-sample, single-mip, match `FlutterBackingStoreConfig.size`,
+  /// include `VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT`, and use
+  /// `VK_FORMAT_R8G8B8A8_UNORM` or `VK_FORMAT_B8G8R8A8_UNORM`. The engine
+  /// currently hands the image back in `VK_IMAGE_LAYOUT_GENERAL` (Skia leaves
+  /// it in `VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL`).
   const FlutterVulkanImage* image;
   /// A baton that is not interpreted by the engine in any way. It will be given
   /// back to the embedder in the destruction callback below. Embedder resources
   /// may be associated with this baton.
   void* user_data;
   /// The callback invoked by the engine when it no longer needs this backing
-  /// store.
+  /// store. When Impeller is enabled, this is invoked after GPU work on the
+  /// image completes and may be called on an internal engine thread. GPU
+  /// resources (`VkImage` / memory) must only be freed or reused here rather
+  /// than in `FlutterCompositor.collect_backing_store_callback`, and relative
+  /// callback ordering between the two is unspecified.
   VoidCallback destruction_callback;
 } FlutterVulkanBackingStore;
 
@@ -2273,6 +2346,12 @@ typedef struct {
   /// A callback invoked by the engine to release the backing store. The
   /// embedder may collect any resources associated with the backing store.
   ///
+  /// For `kFlutterBackingStoreTypeVulkan` with Impeller enabled, this callback
+  /// only indicates that the engine has finished submitting to the backing
+  /// store wrapper; GPU work may still be in flight, so the underlying
+  /// `VkImage` and memory must only be destroyed or reused in
+  /// `FlutterVulkanBackingStore.destruction_callback`.
+  ///
   /// The callback should return true if the operation was successful.
   FlutterBackingStoreCollectCallback collect_backing_store_callback;
   /// Callback invoked by the engine to composite the contents of each layer
@@ -2484,7 +2563,8 @@ typedef void (*FlutterNativeThreadCallback)(FlutterNativeThreadType type,
 
 /// AOT data source type.
 typedef enum {
-  kFlutterEngineAOTDataSourceTypeElfPath
+  kFlutterEngineAOTDataSourceTypeElfPath,
+  kFlutterEngineAOTDataSourceTypeDllPath
 } FlutterEngineAOTDataSourceType;
 
 /// This struct specifies one of the various locations the engine can look for
@@ -2494,6 +2574,8 @@ typedef struct {
   union {
     /// Absolute path to an ELF library file.
     const char* elf_path;
+    /// Absolute path to a native dynamic library file.
+    const char* dll_path;
   };
 } FlutterEngineAOTDataSource;
 

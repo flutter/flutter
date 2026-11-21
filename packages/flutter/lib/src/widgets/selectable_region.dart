@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/material.dart' as material;
 /// @docImport 'package:flutter_test/flutter_test.dart';
 ///
 /// @docImport 'editable_text.dart';
@@ -160,7 +161,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
+/// ** See code in examples/api/lib/widgets/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -173,7 +174,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -183,7 +184,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
@@ -331,13 +332,13 @@ class SelectableRegion extends StatefulWidget {
     // known. A button's position in the menu can slightly affect its
     // appearance.
     return <ContextMenuButtonItem>[
-      if (canCopy) ContextMenuButtonItem(onPressed: onCopy, type: ContextMenuButtonType.copy),
+      if (canCopy) ContextMenuButtonItem(onPressed: onCopy, kind: ContextMenuButtonKind.copy),
       if (canShare && showShareBeforeSelectAll)
-        ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
       if (canSelectAll)
-        ContextMenuButtonItem(onPressed: onSelectAll, type: ContextMenuButtonType.selectAll),
+        ContextMenuButtonItem(onPressed: onSelectAll, kind: ContextMenuButtonKind.selectAll),
       if (canShare && !showShareBeforeSelectAll)
-        ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
     ];
   }
 
@@ -447,6 +448,10 @@ class SelectableRegionState extends State<SelectableRegion>
   /// Notifies its listeners when the selection state in this [SelectableRegion] changes.
   final _SelectableRegionSelectionStatusNotifier _selectionStatusNotifier =
       _SelectableRegionSelectionStatusNotifier._();
+
+  /// Preserves the selection status scope and root selection container when the
+  /// desktop web context menu wrapper is added or removed.
+  final GlobalKey _selectionStatusScopeKey = GlobalKey(debugLabel: 'selectionStatusScopeKey');
 
   @protected
   @override
@@ -1959,6 +1964,7 @@ class SelectableRegionState extends State<SelectableRegion>
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     Widget result = SelectableRegionSelectionStatusScope._(
+      key: _selectionStatusScopeKey,
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
@@ -2985,8 +2991,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       'This method should only be given selection events that select text boundaries.',
     );
     final Offset effectiveGlobalPosition = switch (event) {
-      SelectWordSelectionEvent(:final globalPosition) => globalPosition,
-      SelectParagraphSelectionEvent(:final globalPosition) => globalPosition,
+      SelectWordSelectionEvent(:final Offset globalPosition) => globalPosition,
+      SelectParagraphSelectionEvent(:final Offset globalPosition) => globalPosition,
       _ => throw ArgumentError('Unsupported selection event: $event'),
     };
     SelectionResult? lastSelectionResult;
@@ -3439,8 +3445,10 @@ typedef _SelectionInfo = ({int contentLength, SelectedContentRange? range});
 ///
 ///  * [EditableTextContextMenuBuilder], which performs the same role for
 ///    [EditableText].
-typedef SelectableRegionContextMenuBuilder =
-    Widget Function(BuildContext context, SelectableRegionState selectableRegionState);
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);
 
 /// The status of the selection under a [SelectableRegion].
 ///
@@ -3516,6 +3524,7 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier
 /// does not change.
 final class SelectableRegionSelectionStatusScope extends InheritedWidget {
   const SelectableRegionSelectionStatusScope._({
+    super.key,
     required this.selectionStatusNotifier,
     required super.child,
   });
@@ -3619,8 +3628,7 @@ class _SelectionListenerState extends State<SelectionListener> {
 
 final class _SelectionListenerDelegate extends StaticSelectionContainerDelegate
     implements SelectionDetails {
-  _SelectionListenerDelegate({required SelectionListenerNotifier selectionNotifier})
-    : _selectionNotifier = selectionNotifier {
+  _SelectionListenerDelegate({required this._selectionNotifier}) {
     _selectionNotifier._registerSelectionListenerDelegate(this);
   }
 

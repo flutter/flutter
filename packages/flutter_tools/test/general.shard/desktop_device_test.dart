@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -19,9 +21,11 @@ import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('Basic info', () {
@@ -209,35 +213,32 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled',
-    () async {
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['debug'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: const <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
-            'FLUTTER_ENGINE_SWITCHES': '3',
-          },
-        ),
-      ]);
-      final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
-      final package = FakeApplicationPackage();
-      final LaunchResult result = await device.startApp(
-        package,
-        prebuiltApplication: true,
-        platformArgs: <String, Object>{'trace-startup': true},
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
-      );
+  testWithoutContext('startApp supports DebuggingOptions through FLUTTER_ENGINE_SWITCH environment variables when debugging is disabled', () async {
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+        completer: completer,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
+          'FLUTTER_ENGINE_SWITCHES': '3',
+        },
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      platformArgs: <String, Object>{'trace-startup': true},
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug, traceAllowlist: 'foo,bar'),
+    );
 
-      expect(result.started, true);
-    },
-  );
+    expect(result.started, true);
+  });
 
   testWithoutContext('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = setUpDesktopDevice();
@@ -395,15 +396,18 @@ void main() {
     );
   });
 
-  testUsingContext(
+  testWithoutContext(
     'macOS devices print warning if Dart VM not found within timeframe in CI',
     () async {
       final logger = BufferLogger.test();
       final device = FakeMacOSDevice(
-        fileSystem: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: logger,
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       );
 
       final package = FakeApplicationPackage();
@@ -427,6 +431,280 @@ void main() {
       });
     },
   );
+
+  group('DesktopLogReader', () {
+    testWithoutContext('does not close logLines when a process exits', () async {
+      final logReader = DesktopLogReader();
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+      final firstProcess = FakeProcess(
+        stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('first line\n')]),
+      );
+      logReader.listenToProcessOutput(firstProcess);
+      await firstProcess.exitCode;
+      await pumpEventQueue();
+
+      final secondProcess = FakeProcess(
+        stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('second line\n')]),
+      );
+      logReader.listenToProcessOutput(secondProcess);
+      await secondProcess.exitCode;
+      await pumpEventQueue();
+
+      expect(receivedLines, <String>['first line', 'second line']);
+
+      await subscription.cancel();
+      await logReader.dispose();
+    });
+
+    testWithoutContext('dispose does not close logLines', () async {
+      // We should not close loglines on dispose, since Device.dispose() is called
+      // once per launch (e.g. once per integration test file), not once at true end-of-life
+      final logReader = DesktopLogReader();
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+      await logReader.dispose();
+
+      final process = FakeProcess(
+        stdout: Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('still here\n')]),
+      );
+      logReader.listenToProcessOutput(process);
+      await process.exitCode;
+      await pumpEventQueue();
+
+      expect(receivedLines, <String>['still here']);
+
+      await subscription.cancel();
+    });
+  });
+
+  group('SingleLaunchLogReader', () {
+    testWithoutContext('mirrors the source stream until scope completes', () async {
+      final sourceController = StreamController<String>.broadcast();
+      final scopeCompleter = Completer<void>();
+      final reader = SingleLaunchLogReader(sourceController.stream, scopeCompleter.future);
+
+      final receivedLines = <String>[];
+      final StreamSubscription<String> subscription = reader.logLines.listen(receivedLines.add);
+
+      sourceController.add('hello');
+      await pumpEventQueue();
+      expect(receivedLines, <String>['hello']);
+
+      scopeCompleter.complete();
+      await pumpEventQueue();
+
+      // No longer relayed once scope has completed.
+      sourceController.add('goodbye');
+      await pumpEventQueue();
+      expect(receivedLines, <String>['hello']);
+
+      await subscription.cancel();
+      await sourceController.close();
+    });
+
+    testWithoutContext('closes logLines when scope completes without closing the source', () async {
+      final sourceController = StreamController<String>.broadcast();
+      final scopeCompleter = Completer<void>();
+      final reader = SingleLaunchLogReader(sourceController.stream, scopeCompleter.future);
+
+      final Future<void> done = reader.logLines.listen((String _) {}).asFuture<void>();
+      scopeCompleter.complete();
+      await done;
+
+      expect(sourceController.isClosed, false);
+      await sourceController.close();
+    });
+  });
+
+  testWithoutContext('getLogReader() observes multiple launches of startApp', () async {
+    final firstProcessCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout:
+            'The Dart VM service is listening on http://127.0.0.1/0\n'
+            'first app output\n',
+        completer: firstProcessCompleter,
+      ),
+      FakeCommand(
+        command: const <String>['debug'],
+        stdout:
+            'The Dart VM service is listening on http://127.0.0.1/1\n'
+            'second app output\n',
+        completer: Completer<void>(),
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    final package = FakeApplicationPackage();
+
+    // Subscribe to the device's log reader up front, before any launch —
+    // this mirrors how `flutter drive`/`flutter logs` observe device
+    // output, and should keep working across the relaunch below.
+    final logLines = <String>[];
+    final StreamSubscription<String> subscription = device.getLogReader().logLines.listen(
+      logLines.add,
+    );
+
+    final LaunchResult firstResult = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    expect(firstResult.started, true);
+    expect(firstResult.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
+
+    // Regression test for https://github.com/flutter/flutter/issues/135673:
+    // let the first process actually exit before the second launch
+    // begins, which previously crashed with "Bad state: Cannot add new
+    // events after calling close".
+    firstProcessCompleter.complete();
+    await pumpEventQueue();
+
+    // `flutter test`'s IntegrationTestTestDevice calls `device.dispose()`
+    // once per test file, not once at the very end of the whole run —
+    // this must not tear down anything the next launch needs.
+    await device.dispose();
+
+    final LaunchResult secondResult = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    expect(secondResult.started, true);
+    expect(secondResult.vmServiceUri, Uri.parse('http://127.0.0.1/1'));
+
+    await pumpEventQueue();
+    expect(logLines, containsAll(<String>['first app output', 'second app output']));
+
+    await subscription.cancel();
+  });
+
+  testWithoutContext('dispose awaits pending onProcessExited checks', () async {
+    final processExitCompleter = Completer<void>();
+    final exitCheckCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['release'],
+        exitCode: -6,
+        completer: processExitCompleter,
+      ),
+    ]);
+    var exitCheckFinished = false;
+    int? receivedExitCode;
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    device.onProcessExitedCallback = (Process process, int exitCode) async {
+      receivedExitCode = exitCode;
+      await exitCheckCompleter.future;
+      exitCheckFinished = true;
+    };
+
+    final package = FakeApplicationPackage();
+    final LaunchResult result = await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+    );
+    expect(result.started, true);
+
+    var disposeFinished = false;
+    final Future<void> disposeFuture = device.dispose().then((_) {
+      disposeFinished = true;
+    });
+    Timer.run(processExitCompleter.complete);
+    await pumpEventQueue();
+    expect(receivedExitCode, -6);
+    expect(exitCheckFinished, false);
+    expect(disposeFinished, false);
+
+    exitCheckCompleter.complete();
+    await disposeFuture;
+    expect(exitCheckFinished, true);
+    expect(disposeFinished, true);
+  });
+
+  testWithoutContext(
+    'dispose bounds wait on running processes to grace period and disposes portForwarder',
+    () {
+      FakeAsync().run((FakeAsync fakeAsync) {
+        final processCompleter = Completer<void>();
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: const <String>['release'], completer: processCompleter),
+        ]);
+        final portForwarder = _RecordingPortForwarder();
+        final FakeDesktopDevice device = setUpDesktopDevice(
+          processManager: processManager,
+          portForwarder: portForwarder,
+        );
+
+        LaunchResult? launchResult;
+        device
+            .startApp(
+              FakeApplicationPackage(),
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+            )
+            .then((LaunchResult result) {
+              launchResult = result;
+            });
+        fakeAsync.flushMicrotasks();
+        expect(launchResult?.started, true);
+
+        var disposeFinished = false;
+        device.dispose().then((_) {
+          disposeFinished = true;
+        });
+        const oneMillisecond = Duration(milliseconds: 1);
+        fakeAsync.elapse(DesktopDevice.kExitReportGracePeriod - oneMillisecond);
+        expect(disposeFinished, false);
+        expect(portForwarder.disposed, false);
+
+        fakeAsync.elapse(oneMillisecond);
+        expect(disposeFinished, true);
+        expect(portForwarder.disposed, true);
+      });
+    },
+  );
+
+  testWithoutContext('startApp in debug mode awaits onProcessExited before failing when process exits during startup', () async {
+    final exitCheckCompleter = Completer<void>();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>['debug'], exitCode: -6),
+    ]);
+    var exitCheckFinished = false;
+    int? receivedExitCode;
+    final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager);
+    device.onProcessExitedCallback = (Process process, int exitCode) async {
+      receivedExitCode = exitCode;
+      await exitCheckCompleter.future;
+      exitCheckFinished = true;
+    };
+
+    var startAppFinished = false;
+    final Future<LaunchResult> startAppFuture = device
+        .startApp(
+          FakeApplicationPackage(),
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        )
+        .then((LaunchResult result) {
+          startAppFinished = true;
+          return result;
+        });
+
+    await pumpEventQueue();
+    expect(receivedExitCode, -6);
+    expect(exitCheckFinished, false);
+    expect(startAppFinished, false);
+
+    exitCheckCompleter.complete();
+    final LaunchResult result = await startAppFuture;
+    expect(exitCheckFinished, true);
+    expect(startAppFinished, true);
+    expect(result.started, false);
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -434,13 +712,17 @@ FakeDesktopDevice setUpDesktopDevice({
   Logger? logger,
   ProcessManager? processManager,
   OperatingSystemUtils? operatingSystemUtils,
+  DevicePortForwarder? portForwarder,
   bool nullExecutablePathForDevice = false,
 }) {
   return FakeDesktopDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+    toolContext: FakeToolContext(
+      fs: fileSystem ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      os: operatingSystemUtils ?? FakeOperatingSystemUtils(),
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
+    portForwarder: portForwarder ?? const NoOpDevicePortForwarder(),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
   );
 }
@@ -448,10 +730,8 @@ FakeDesktopDevice setUpDesktopDevice({
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
   FakeDesktopDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
+    required super.toolContext,
+    this.portForwarder = const NoOpDevicePortForwarder(),
     this.nullExecutablePathForDevice = false,
   }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
@@ -461,7 +741,17 @@ class FakeDesktopDevice extends DesktopDevice {
   /// The `buildInfo` last passed to [buildForDevice].
   BuildInfo? lastBuildInfo;
 
+  @override
+  final DevicePortForwarder portForwarder;
+
   final bool nullExecutablePathForDevice;
+
+  Future<void> Function(Process, int)? onProcessExitedCallback;
+
+  @override
+  Future<void> onProcessExited(Process process, int exitCode) async {
+    await onProcessExitedCallback?.call(process, exitCode);
+  }
 
   @override
   String get name => 'dummy';
@@ -500,18 +790,28 @@ class FakeDesktopDevice extends DesktopDevice {
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
+class _RecordingPortForwarder extends Fake implements DevicePortForwarder {
+  bool disposed = false;
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+  }
+}
+
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';
 }
 
 class FakeMacOSDevice extends MacOSDevice {
-  FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  });
+  FakeMacOSDevice({required super.toolContext})
+    : super(
+        analytics: const NoOpAnalytics(),
+        appleContext: FakeAppleContext(),
+        featureFlags: TestFeatureFlags(),
+        templateRenderer: FakeTemplateRenderer(),
+      );
 
   @override
   String get name => 'dummy';

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <optional>
+#include <string_view>
+
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/base/validation.h"
@@ -208,6 +211,24 @@ TEST(CapabilitiesVKTest, ContextInitializesWithNoStencilFormat) {
             PixelFormat::kD32FloatS8UInt);
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/189107.
+// The core Vulkan 1.0 block-compression features (ETC2, ASTC LDR, BC) must be
+// explicitly requested in GetEnabledDeviceFeatures so the read-back in
+// SetPhysicalDevice reports real support. The mock device advertises all three
+// as supported, so a device that enables them correctly must report them here.
+TEST(CapabilitiesVKTest, ReportsBlockCompressedTextureSupport) {
+  const std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  ASSERT_NE(context, nullptr);
+  const CapabilitiesVK* capabilities_vk =
+      reinterpret_cast<const CapabilitiesVK*>(context->GetCapabilities().get());
+  EXPECT_TRUE(capabilities_vk->SupportsTextureCompression(
+      CompressedTextureFamily::kETC2));
+  EXPECT_TRUE(capabilities_vk->SupportsTextureCompression(
+      CompressedTextureFamily::kASTC));
+  EXPECT_TRUE(capabilities_vk->SupportsTextureCompression(
+      CompressedTextureFamily::kBC));
+}
+
 // Impeller's 2D renderer relies on hardware support for a combined
 // depth-stencil format (widely supported). So fail initialization if a suitable
 // one couldn't be found. That way we have an opportunity to fallback to
@@ -406,6 +427,69 @@ TEST(ContextVKTest, HashIsUniqueAcrossThreads) {
   thread2.join();
 
   EXPECT_NE(hash1, hash2);
+}
+
+namespace {
+
+constexpr std::string_view kAdreno630Name = "Adreno (TM) 630";
+constexpr uint32_t kQualcommVendorID = 0x5143;
+
+void SetAdreno630Properties(VkPhysicalDevice device,
+                            VkPhysicalDeviceProperties* prop) {
+  prop->vendorID = kQualcommVendorID;
+  kAdreno630Name.copy(prop->deviceName, kAdreno630Name.size());
+  prop->deviceName[kAdreno630Name.size()] = '\0';
+  prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+}
+
+}  // namespace
+
+TEST(ContextVKTest, SelectDeviceExposesDriverInfoBeforeContextCreation) {
+  absl::StatusOr<ContextVK::DeviceSelection> selection =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(SetAdreno630Properties)
+          .SelectDevice();
+
+  ASSERT_TRUE(selection.ok());
+  EXPECT_EQ(selection->driver_info->GetVendor(), VendorVK::kQualcomm);
+  EXPECT_EQ(selection->driver_info->GetAdrenoGPUInfo(), AdrenoGPU::kAdreno630);
+  EXPECT_TRUE(selection->driver_info->IsKnownBadDriver());
+  // Dropping `selection` without calling CreateContext() tears down the Vulkan
+  // instance cleanly (verified by MockVulkanStatePtr's thread-exit leak check).
+}
+
+TEST(ContextVKTest, SelectDeviceCanFinishCreatingContext) {
+  absl::StatusOr<ContextVK::DeviceSelection> selection =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(SetAdreno630Properties)
+          .SelectDevice();
+
+  ASSERT_TRUE(selection.ok());
+  std::shared_ptr<ContextVK> context = selection->CreateContext();
+
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->IsValid());
+  // The same DriverInfoVK inspected on the selection is retained by the
+  // context.
+  EXPECT_EQ(context->GetDriverInfo()->GetAdrenoGPUInfo(),
+            AdrenoGPU::kAdreno630);
+  EXPECT_EQ(context->DescribeGpuModel(), std::string(kAdreno630Name));
+
+  // CreateContext() consumes the selection; calling it again returns nullptr.
+  EXPECT_EQ(selection->CreateContext(), nullptr);
+}
+
+TEST(ContextVKTest, CreateAcceptsKnownBadDriversByDefault) {
+  // ContextVK::Create does not reject known-bad drivers on its own; callers
+  // without a fallback rely on this.
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(SetAdreno630Properties)
+          .Build();
+
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->IsValid());
+  EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
 }
 
 }  // namespace testing

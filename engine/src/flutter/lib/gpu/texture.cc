@@ -5,8 +5,10 @@
 #include "flutter/lib/gpu/texture.h"
 
 #include <cstring>
+#include <limits>
 
 #include "flutter/lib/gpu/formats.h"
+#include "flutter/lib/gpu/replay.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
@@ -24,6 +26,7 @@
 
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/display_list/image/dl_image.h"      // nogncheck
+#include "impeller/display_list/aiks_context.h"       // nogncheck
 #include "impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif
 #include "third_party/tonic/converter/dart_converter.h"
@@ -116,32 +119,18 @@ bool Texture::Overwrite(Context& gpu_context,
       0, 0, MipDimensionAtLevel(base_size.width, mip_level),
       MipDimensionAtLevel(base_size.height, mip_level));
 
-  // For the GLES backend, command queue submission just flushes the reactor,
-  // which needs to happen on the raster thread.
-  if (impeller_context.GetBackendType() ==
-      impeller::Context::BackendType::kOpenGLES) {
-    auto dart_state = flutter::UIDartState::Current();
-    auto& task_runners = dart_state->GetTaskRunners();
-    auto context_shared = gpu_context.GetContextShared();
-    task_runners.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
-        [context_shared, texture = texture_, staging_buffer, length,
-         destination_region, mip_level, slice]() mutable {
-          if (!EncodeAndSubmitOverwrite(*context_shared, texture,
-                                        staging_buffer, length,
-                                        destination_region, mip_level, slice)) {
-            FML_LOG(ERROR) << "Failed to encode texture overwrite blit on the "
-                              "raster thread.";
-          }
-          context_shared->DisposeThreadLocalCachedResources();
-        }));
-    return true;
-  }
-
-  if (!EncodeAndSubmitOverwrite(impeller_context, texture_, staging_buffer,
-                                length, destination_region, mip_level, slice)) {
-    return false;
-  }
-  impeller_context.DisposeThreadLocalCachedResources();
+  // The blit is encoded and submitted where every other Flutter GPU submission
+  // is, so it stays ordered with command buffers submitted around it.
+  gpu_context.GetReplayQueue()->Post(fml::MakeCopyable(
+      [context_shared = gpu_context.GetContextShared(), texture = texture_,
+       staging_buffer, length, destination_region, mip_level, slice]() mutable {
+        if (!EncodeAndSubmitOverwrite(*context_shared, texture, staging_buffer,
+                                      length, destination_region, mip_level,
+                                      slice)) {
+          FML_LOG(ERROR) << "Failed to encode texture overwrite blit.";
+        }
+        context_shared->DisposeThreadLocalCachedResources();
+      }));
   return true;
 }
 
@@ -174,7 +163,8 @@ static std::shared_ptr<impeller::Texture> GetTextureFromImage(
   if (!impeller_image) {
     return nullptr;
   }
-  return impeller_image->GetImpellerTexture(gpu_context->GetContextShared());
+  impeller::AiksContext aiks_context(gpu_context->GetContextShared(), nullptr);
+  return impeller_image->GetImpellerTexture(aiks_context.GetContentContext());
 }
 #endif
 
@@ -184,7 +174,11 @@ Dart_Handle Texture::AsImage() const {
   // out.
 #if IMPELLER_SUPPORTS_RENDERING
   auto image = flutter::CanvasImage::Create();
-  auto dl_image = impeller::DlImageImpeller::Make(texture_);
+  // Flutter GPU writes this texture on the raster thread, so consumers that
+  // read it elsewhere (Image.toByteData encodes on IO) must queue behind
+  // pending submissions there.
+  auto dl_image = impeller::DlImageImpeller::Make(
+      texture_, flutter::DlImage::OwningContext::kRaster);
   image->set_image(dl_image);
   auto wrapped = image->CreateOuterWrapping();
   return wrapped;
@@ -211,15 +205,21 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            bool enable_render_target_usage,
                                            bool enable_shader_read_usage,
                                            bool enable_shader_write_usage,
-                                           int mip_level_count) {
+                                           int mip_level_count,
+                                           int layer_count) {
   if (mip_level_count < 1) {
     return false;
   }
+  if (layer_count < 1) {
+    return false;
+  }
+  FML_DCHECK(layer_count <= std::numeric_limits<uint16_t>::max());
   impeller::TextureDescriptor desc;
   desc.storage_mode = flutter::gpu::ToImpellerStorageMode(storage_mode);
   desc.size = {width, height};
   desc.format = flutter::gpu::ToImpellerPixelFormat(format);
   desc.mip_count = static_cast<size_t>(mip_level_count);
+  desc.array_layer_count = static_cast<uint16_t>(layer_count);
   desc.usage = {};
   if (enable_render_target_usage) {
     desc.usage |= impeller::TextureUsage::kRenderTarget;
@@ -240,7 +240,7 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
     default:
       return false;
   }
-  desc.type = static_cast<impeller::TextureType>(texture_type);
+  desc.type = flutter::gpu::ToImpellerTextureType(texture_type);
   if (!impeller::IsMultisampleCapable(desc.type) &&
       desc.sample_count != impeller::SampleCount::kCount1) {
     return false;
@@ -289,7 +289,7 @@ Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
   const impeller::TextureUsageMask usage = desc.usage;
 
   // Layout must match the parsing in the Dart `Texture._fromImage`.
-  int32_t values[10];
+  int32_t values[11];
   values[0] = static_cast<int32_t>(
       flutter::gpu::FromImpellerStorageMode(desc.storage_mode));
   values[1] =
@@ -297,12 +297,13 @@ Dart_Handle InternalFlutterGpu_Texture_ImageTextureInfo(
   values[2] = static_cast<int32_t>(desc.size.width);
   values[3] = static_cast<int32_t>(desc.size.height);
   values[4] = static_cast<int32_t>(desc.sample_count);
-  // The Flutter GPU `TextureType` enum mirrors `impeller::TextureType`.
-  values[5] = static_cast<int32_t>(desc.type);
+  values[5] =
+      static_cast<int32_t>(flutter::gpu::FromImpellerTextureType(desc.type));
   values[6] = (usage & impeller::TextureUsage::kRenderTarget) ? 1 : 0;
   values[7] = (usage & impeller::TextureUsage::kShaderRead) ? 1 : 0;
   values[8] = (usage & impeller::TextureUsage::kShaderWrite) ? 1 : 0;
   values[9] = static_cast<int32_t>(desc.mip_count);
+  values[10] = static_cast<int32_t>(desc.array_layer_count);
 
   const intptr_t length = sizeof(values) / sizeof(values[0]);
   Dart_Handle list = Dart_NewTypedData(Dart_TypedData_kInt32, length);

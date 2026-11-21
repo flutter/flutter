@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <format>
+#include <string>
 #include <thread>
 
 #include "flutter/flow/frame_timings.h"
@@ -14,6 +14,7 @@
 #include "flutter/fml/time/time_point.h"
 
 #include "gtest/gtest.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace flutter {
 
@@ -131,7 +132,7 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
   const auto build_start = fml::TimePoint::Now();
-  fml::Status status = recorder->RecordBuildStartImpl(build_start);
+  absl::Status status = recorder->RecordBuildStartImpl(build_start);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.message(), "Check failed: state_ == State::kVsync.");
 }
@@ -144,7 +145,7 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordRasterBeforeBuildEnd) {
   recorder->RecordVsync(st, en);
 
   const auto raster_start = fml::TimePoint::Now();
-  fml::Status status = recorder->RecordRasterStartImpl(raster_start);
+  absl::Status status = recorder->RecordRasterStartImpl(raster_start);
   EXPECT_FALSE(status.ok());
   EXPECT_EQ(status.message(), "Check failed: state_ == State::kBuildEnd.");
 }
@@ -291,7 +292,7 @@ TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
   std::string actual_arg =
-      std::format("{}", static_cast<int>(recorder->GetFrameNumber()));
+      absl::StrCat(static_cast<int>(recorder->GetFrameNumber()));
   std::string expected_arg = recorder->GetFrameNumberTraceArg();
 
   ASSERT_EQ(actual_arg, expected_arg);

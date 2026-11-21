@@ -327,5 +327,69 @@ TEST(EntityPassClipStackTest, ClipAndRestoreWithSubpassesNonAA) {
             Rect::MakeLTRB(50, 50, 55, 55));
 }
 
+TEST(EntityPassClipStackTest, RestoringChildClipPreservesParentReplayEntities) {
+  EntityPassClipStack recorder =
+      EntityPassClipStack(Rect::MakeLTRB(0, 0, 100, 100));
+
+  // 1. Record parent clip at height 1.
+  // Non-axis-aligned (modeling e.g. a rounded rect) so RecordClip does not
+  // elide it against the initial (0, 0, 100, 100) pass coverage and records a
+  // replay entity at height 1.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(0, 0, 100, 100),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 0, 100, /*is_aa=*/true);
+  ASSERT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 2. Record a redundant child clip at height 2 that skips replay recording.
+  // Because it is both axis-aligned (no rounded corners cutting inside its
+  // bounds) and contains the parent's (0, 0, 100, 100) coverage, RecordClip
+  // pushes coverage at height 2 and returns early without pushing a replay
+  // entity.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(0, 0, 100, 100),
+                                   /*is_axis_aligned_rect=*/true),
+                      Matrix(), {0, 0}, 1, 100, /*is_aa=*/true);
+  EXPECT_EQ(recorder.GetReplayEntities().size(), 1u);
+  // Restoring to height 1 must NOT pop the parent replay entity, even though
+  // this child clip pushed no replay entity of its own.
+  recorder.RecordRestore({0, 0}, 1);
+  ASSERT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 3. Record a child clip at height 2 that DOES push a replay entity.
+  // Unlike step 2, this clip is non-axis-aligned and narrower than the parent,
+  // so RecordClip records a second replay entity at height 2.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(10, 10, 50, 50),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 2, 100, /*is_aa=*/true);
+  ASSERT_EQ(recorder.GetReplayEntities().size(), 2u);
+  EXPECT_EQ(recorder.GetReplayEntities()[1].clip_height, 2u);
+  // Restoring to height 1 must pop the child replay entity while preserving the
+  // parent replay entity.
+  recorder.RecordRestore({0, 0}, 1);
+  ASSERT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 4. Record two nested rendered clips in a child scope (heights 2 and 3) and
+  // restore directly to height 1; both child clips must be popped while the
+  // parent clip remains.
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(15, 15, 45, 45),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 3, 100, /*is_aa=*/true);
+  recorder.RecordClip(ClipContents(Rect::MakeLTRB(20, 20, 40, 40),
+                                   /*is_axis_aligned_rect=*/false),
+                      Matrix(), {0, 0}, 4, 100, /*is_aa=*/true);
+  ASSERT_EQ(recorder.GetReplayEntities().size(), 3u);
+  EXPECT_EQ(recorder.GetReplayEntities()[1].clip_height, 2u);
+  EXPECT_EQ(recorder.GetReplayEntities()[2].clip_height, 3u);
+  recorder.RecordRestore({0, 0}, 1);
+  ASSERT_EQ(recorder.GetReplayEntities().size(), 1u);
+  EXPECT_EQ(recorder.GetReplayEntities()[0].clip_height, 1u);
+
+  // 5. Restore to height 0 (popping parent clip).
+  recorder.RecordRestore({0, 0}, 0);
+  EXPECT_TRUE(recorder.GetReplayEntities().empty());
+}
+
 }  // namespace testing
 }  // namespace impeller

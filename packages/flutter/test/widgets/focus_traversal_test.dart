@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
 import 'semantics_tester.dart';
+import 'test_page_tester.dart';
 import 'utils.dart';
 
 void main() {
@@ -1196,11 +1197,11 @@ void main() {
             child: Column(
               children: <Widget>[
                 FocusTraversalOrder(
-                  order: const NumericFocusOrder(2),
+                  order: const .numeric(2),
                   child: Focus(child: SizedBox(key: key1, width: 100, height: 100)),
                 ),
                 FocusTraversalOrder(
-                  order: const NumericFocusOrder(1),
+                  order: const .numeric(1),
                   child: Focus(child: SizedBox(key: key2, width: 100, height: 100)),
                 ),
               ],
@@ -1299,7 +1300,7 @@ void main() {
                 children: List<Widget>.generate(
                   nodeCount,
                   (int index) => FocusTraversalOrder(
-                    order: NumericFocusOrder(nodeCount - index.toDouble()),
+                    order: .numeric(nodeCount - index.toDouble()),
                     child: Focus(
                       focusNode: nodes[index],
                       child: const SizedBox(width: 10, height: 10),
@@ -1357,7 +1358,7 @@ void main() {
                 children: List<Widget>.generate(
                   nodeCount,
                   (int index) => FocusTraversalOrder(
-                    order: LexicalFocusOrder(keys[index]),
+                    order: .lexical(keys[index]),
                     child: Focus(
                       focusNode: nodes[index],
                       child: const SizedBox(width: 10, height: 10),
@@ -1413,27 +1414,27 @@ void main() {
                 child: Row(
                   children: <Widget>[
                     FocusTraversalOrder(
-                      order: const NumericFocusOrder(0),
+                      order: const .numeric(0),
                       child: FocusTraversalGroup(
                         policy: WidgetOrderTraversalPolicy(),
                         child: Row(
                           children: <Widget>[
                             FocusTraversalOrder(
-                              order: const NumericFocusOrder(9),
+                              order: const .numeric(9),
                               child: Focus(
                                 focusNode: nodes[9],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const NumericFocusOrder(8),
+                              order: const .numeric(8),
                               child: Focus(
                                 focusNode: nodes[8],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const NumericFocusOrder(7),
+                              order: const .numeric(7),
                               child: Focus(
                                 focusNode: nodes[7],
                                 child: const SizedBox(width: 10, height: 10),
@@ -1444,27 +1445,27 @@ void main() {
                       ),
                     ),
                     FocusTraversalOrder(
-                      order: const NumericFocusOrder(1),
+                      order: const .numeric(1),
                       child: FocusTraversalGroup(
                         policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
                         child: Row(
                           children: <Widget>[
                             FocusTraversalOrder(
-                              order: const NumericFocusOrder(4),
+                              order: const .numeric(4),
                               child: Focus(
                                 focusNode: nodes[4],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const NumericFocusOrder(5),
+                              order: const .numeric(5),
                               child: Focus(
                                 focusNode: nodes[5],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const NumericFocusOrder(6),
+                              order: const .numeric(6),
                               child: Focus(
                                 focusNode: nodes[6],
                                 child: const SizedBox(width: 10, height: 10),
@@ -1475,34 +1476,34 @@ void main() {
                       ),
                     ),
                     FocusTraversalOrder(
-                      order: const NumericFocusOrder(2),
+                      order: const .numeric(2),
                       child: FocusTraversalGroup(
                         policy: OrderedTraversalPolicy(secondary: WidgetOrderTraversalPolicy()),
                         child: Row(
                           children: <Widget>[
                             FocusTraversalOrder(
-                              order: const LexicalFocusOrder('D'),
+                              order: const .lexical('D'),
                               child: Focus(
                                 focusNode: nodes[3],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const LexicalFocusOrder('C'),
+                              order: const .lexical('C'),
                               child: Focus(
                                 focusNode: nodes[2],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const LexicalFocusOrder('B'),
+                              order: const .lexical('B'),
                               child: Focus(
                                 focusNode: nodes[1],
                                 child: const SizedBox(width: 10, height: 10),
                               ),
                             ),
                             FocusTraversalOrder(
-                              order: const LexicalFocusOrder('A'),
+                              order: const .lexical('A'),
                               child: Focus(
                                 focusNode: nodes[0],
                                 child: const SizedBox(width: 10, height: 10),
@@ -1548,7 +1549,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return FocusTraversalOrder(
-                    order: const NumericFocusOrder(0),
+                    order: const .numeric(0),
                     child: TestButton(
                       key: key1,
                       focusNode: testNode1,
@@ -1564,7 +1565,7 @@ void main() {
                                 ) {
                                   return Center(
                                     child: FocusTraversalOrder(
-                                      order: const NumericFocusOrder(0),
+                                      order: const .numeric(0),
                                       child: TestButton(
                                         key: key2,
                                         focusNode: testNode2,
@@ -3108,169 +3109,165 @@ void main() {
       variant: KeySimulatorTransitModeVariant.all(),
     );
 
-    testWidgets(
-      'Arrow focus traversal actions can be re-enabled for text fields.',
-      (WidgetTester tester) async {
-        final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
-        final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
-        final GlobalKey lowerLeftKey = GlobalKey(debugLabel: 'lowerLeftKey');
-        final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
+    testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
+      final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
+      final GlobalKey lowerLeftKey = GlobalKey(debugLabel: 'lowerLeftKey');
+      final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
 
-        final controller1 = TextEditingController();
-        addTearDown(controller1.dispose);
-        final controller2 = TextEditingController();
-        addTearDown(controller2.dispose);
-        final controller3 = TextEditingController();
-        addTearDown(controller3.dispose);
-        final controller4 = TextEditingController();
-        addTearDown(controller4.dispose);
+      final controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
+      final controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
+      final controller3 = TextEditingController();
+      addTearDown(controller3.dispose);
+      final controller4 = TextEditingController();
+      addTearDown(controller4.dispose);
 
-        final focusNodeUpperLeft = FocusNode(debugLabel: 'upperLeft');
-        addTearDown(focusNodeUpperLeft.dispose);
-        final focusNodeUpperRight = FocusNode(debugLabel: 'upperRight');
-        addTearDown(focusNodeUpperRight.dispose);
-        final focusNodeLowerLeft = FocusNode(debugLabel: 'lowerLeft');
-        addTearDown(focusNodeLowerLeft.dispose);
-        final focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
-        addTearDown(focusNodeLowerRight.dispose);
+      final focusNodeUpperLeft = FocusNode(debugLabel: 'upperLeft');
+      addTearDown(focusNodeUpperLeft.dispose);
+      final focusNodeUpperRight = FocusNode(debugLabel: 'upperRight');
+      addTearDown(focusNodeUpperRight.dispose);
+      final focusNodeLowerLeft = FocusNode(debugLabel: 'lowerLeft');
+      addTearDown(focusNodeLowerLeft.dispose);
+      final focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
+      addTearDown(focusNodeLowerRight.dispose);
 
-        Widget generateTestWidgets(bool ignoreTextFields) {
-          final shortcuts = <ShortcutActivator, Intent>{
-            const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
-              TraversalDirection.left,
-              ignoreTextFields: ignoreTextFields,
-            ),
-            const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(
-              TraversalDirection.right,
-              ignoreTextFields: ignoreTextFields,
-            ),
-            const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
-              TraversalDirection.down,
-              ignoreTextFields: ignoreTextFields,
-            ),
-            const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
-              TraversalDirection.up,
-              ignoreTextFields: ignoreTextFields,
-            ),
-          };
+      Widget generateTestWidgets(bool ignoreTextFields) {
+        final shortcuts = <ShortcutActivator, Intent>{
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
+            TraversalDirection.left,
+            ignoreTextFields: ignoreTextFields,
+          ),
+          const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(
+            TraversalDirection.right,
+            ignoreTextFields: ignoreTextFields,
+          ),
+          const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
+            TraversalDirection.down,
+            ignoreTextFields: ignoreTextFields,
+          ),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
+            TraversalDirection.up,
+            ignoreTextFields: ignoreTextFields,
+          ),
+        };
 
-          return TestWidgetsApp(
-            home: Shortcuts(
-              shortcuts: shortcuts,
-              child: FocusScope(
-                debugLabel: 'scope',
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            autofocus: true,
-                            key: upperLeftKey,
-                            controller: controller1,
-                            focusNode: focusNodeUpperLeft,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+        return TestWidgetsApp(
+          home: Shortcuts(
+            shortcuts: shortcuts,
+            child: FocusScope(
+              debugLabel: 'scope',
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          autofocus: true,
+                          key: upperLeftKey,
+                          controller: controller1,
+                          focusNode: focusNodeUpperLeft,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            key: upperRightKey,
-                            controller: controller2,
-                            focusNode: focusNodeUpperRight,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+                      ),
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          key: upperRightKey,
+                          controller: controller2,
+                          focusNode: focusNodeUpperRight,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            key: lowerLeftKey,
-                            controller: controller3,
-                            focusNode: focusNodeLowerLeft,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          key: lowerLeftKey,
+                          controller: controller3,
+                          focusNode: focusNodeLowerLeft,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            key: lowerRightKey,
-                            controller: controller4,
-                            focusNode: focusNodeLowerRight,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+                      ),
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          key: lowerRightKey,
+                          controller: controller4,
+                          focusNode: focusNodeLowerRight,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        }
+          ),
+        );
+      }
 
-        await tester.pumpWidget(generateTestWidgets(false));
+      await tester.pumpWidget(generateTestWidgets(false));
 
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        expect(focusNodeUpperRight.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-        expect(focusNodeLowerRight.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-        expect(focusNodeLowerLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusNodeUpperRight.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusNodeLowerRight.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusNodeLowerLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
 
-        await tester.pumpWidget(generateTestWidgets(true));
+      await tester.pumpWidget(generateTestWidgets(true));
 
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        expect(focusNodeUpperRight.hasPrimaryFocus, isFalse);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-        expect(focusNodeLowerRight.hasPrimaryFocus, isFalse);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-        expect(focusNodeLowerLeft.hasPrimaryFocus, isFalse);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusNodeUpperRight.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusNodeLowerRight.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusNodeLowerLeft.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets(
-      'Focus traversal does not break when no focusable is available on a WidgetsApp',
-      (WidgetTester tester) async {
-        final events = <Object>[];
+    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (
+      WidgetTester tester,
+    ) async {
+      final events = <Object>[];
 
-        await tester.pumpWidget(TestWidgetsApp(home: Container()));
+      await tester.pumpWidget(TestWidgetsApp(home: Container()));
 
-        HardwareKeyboard.instance.addHandler((KeyEvent event) {
-          events.add(event);
-          return true;
-        });
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
+        events.add(event);
+        return true;
+      });
 
-        await tester.idle();
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.idle();
+      await tester.idle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.idle();
 
-        expect(events.length, 2);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      expect(events.length, 2);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Focus traversal does not throw when no focusable is available in a group', (
       WidgetTester tester,
@@ -3286,26 +3283,24 @@ void main() {
       expect(primaryFocus, equals(initialFocus));
     });
 
-    testWidgets(
-      'Focus traversal does not break when no focusable is available on a WidgetsApp',
-      (WidgetTester tester) async {
-        final events = <KeyEvent>[];
+    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (
+      WidgetTester tester,
+    ) async {
+      final events = <KeyEvent>[];
 
-        await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
-        HardwareKeyboard.instance.addHandler((KeyEvent event) {
-          events.add(event);
-          return true;
-        });
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
+        events.add(event);
+        return true;
+      });
 
-        await tester.idle();
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.idle();
+      await tester.idle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.idle();
 
-        expect(events.length, 2);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      expect(events.length, 2);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Custom requestFocusCallback gets called on focusInDirection up/down/left/right.', (
       WidgetTester tester,
@@ -3490,7 +3485,10 @@ void main() {
               // FocusScope above. parentNode reparents it to the root scope.
               child: FocusTraversalGroup(
                 parentNode: FocusManager.instance.rootScope,
-                child: Focus(focusNode: childNode, child: SizedBox(key: key)),
+                child: Focus(
+                  focusNode: childNode,
+                  child: SizedBox(key: key),
+                ),
               ),
             ),
           ),
@@ -3966,7 +3964,9 @@ void main() {
             ScrollPositionAlignmentPolicy? alignmentPolicy,
             Curve? curve,
             Duration? duration,
-          }) => calledCallback = true,
+          }) {
+            calledCallback = true;
+          },
     );
 
     RequestFocusAction().invoke(focusIntentWithCallback);
@@ -4209,25 +4209,6 @@ void main() {
       expect(enabledButton2Node.hasPrimaryFocus, isTrue);
     },
   );
-}
-
-class TestPage<T> extends Page<T> {
-  const TestPage({required this.child, super.key, super.name});
-
-  final Widget child;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    return PageRouteBuilder<T>(
-      settings: this,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => child,
-    );
-  }
 }
 
 /// Used to test removal of nodes while sorting.

@@ -94,8 +94,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
           debugCheckHasDirectionality(
             context,
             why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
-            alternative:
-                "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
+            alternative: "Alternatively, consider specifying the 'anchorPoint' argument on the DisplayFeatureSubScreen.",
           ),
     );
     final MediaQueryData mediaQuery = MediaQuery.of(context);

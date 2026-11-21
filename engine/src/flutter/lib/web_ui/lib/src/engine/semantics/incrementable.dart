@@ -20,9 +20,11 @@ import 'semantics.dart';
 /// events. This is to prevent the browser from taking over drag gestures. Drag
 /// gestures must be interpreted by the Flutter framework.
 class SemanticIncrementable extends SemanticRole {
-  SemanticIncrementable(SemanticsObject semanticsObject)
-    : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-      super.blank(EngineSemanticsRole.incrementable, semanticsObject) {
+  SemanticIncrementable(
+    SemanticsObject semanticsObject, [
+    EngineSemanticsRole kind = EngineSemanticsRole.incrementable,
+  ]) : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
+       super.blank(kind, semanticsObject) {
     // The following generic roles can coexist with incrementables. Generic focus
     // management is not used by this role because the root DOM element is not
     // the one being focused on, but the internal `<input>` element.
@@ -104,12 +106,15 @@ class SemanticIncrementable extends SemanticRole {
   /// [GestureMode.browserGestures].
   late final GestureModeCallback _gestureModeListener;
 
-  /// Whether we forwarded a semantics action to the framework and awaiting an
-  /// update.
+  /// Whether we forwarded a semantics action to the framework and are awaiting
+  /// an update, or the role was newly attached and has not yet synced its
+  /// input values.
   ///
   /// This field is used to determine whether the HTML DOM of the semantics
-  /// tree should be updated.
-  bool _pendingResync = false;
+  /// tree should be updated. It starts out as true so that a newly attached
+  /// role syncs its initial range attributes even when the semantics object's
+  /// value fields are not dirty.
+  bool _pendingResync = true;
 
   @override
   void updateValidationResult() {
@@ -119,6 +124,13 @@ class SemanticIncrementable extends SemanticRole {
   @override
   void update() {
     super.update();
+
+    final String? ariaLabel = element.getAttribute('aria-label');
+    if (ariaLabel != null && ariaLabel.trim().isNotEmpty) {
+      _element.setAttribute('aria-label', ariaLabel);
+    } else {
+      _element.removeAttribute('aria-label');
+    }
 
     switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:

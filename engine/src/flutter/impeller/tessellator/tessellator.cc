@@ -82,11 +82,21 @@ static int kPrecomputedDivisions[kPrecomputedDivisionCount] = {
 };
 
 static size_t ComputeQuadrantDivisions(impeller::Scalar pixel_radius) {
-  if (pixel_radius <= 0.0) {
+  // Written as !(x > 0) rather than x <= 0 so that NaN is caught here too:
+  // every comparison with NaN is false.
+  if (!(pixel_radius > 0.0f)) {
     return 1;
   }
-  int radius_index = ceil(pixel_radius);
-  if (radius_index < kPrecomputedDivisionCount) {
+  // Only +infinity can reach this point as a non-finite value.
+  if (!std::isfinite(pixel_radius)) {
+    return impeller::Tessellator::kMaxQuadrantDivisions;
+  }
+  // Range-check as a float *before* converting to an integer: converting a
+  // float above INT_MAX to int is undefined behaviour (it comes out as
+  // INT_MIN on x86-64, which then crashes as it reads outside the table).
+  impeller::Scalar pixel_radius_ceil = std::ceil(pixel_radius);
+  if (pixel_radius_ceil < kPrecomputedDivisionCount) {
+    int radius_index = pixel_radius_ceil;
     return kPrecomputedDivisions[radius_index];
   }
 
@@ -134,7 +144,13 @@ static size_t ComputeQuadrantDivisions(impeller::Scalar pixel_radius) {
   // Since we have precomputed the divisions for radii up to 1024, we can
   // afford to be more accurate using the acos formula here for larger radii.
   double k = impeller::Tessellator::kCircleTolerance / pixel_radius;
-  return ceil(impeller::kPiOver4 / std::acos(1 - k));
+  double divisions = std::ceil(impeller::kPiOver4 / std::acos(1 - k));
+  // acos(1 - k) can round to 0 for extremely small k, making this inf;
+  // clamp before converting to size_t (out-of-range conversion is UB).
+  if (!(divisions < impeller::Tessellator::kMaxQuadrantDivisions)) {
+    return impeller::Tessellator::kMaxQuadrantDivisions;
+  }
+  return divisions;
 }
 
 template <typename IndexT>
@@ -506,20 +522,24 @@ EllipticalVertexGenerator Tessellator::StrokedCircle(
     const Point& center,
     Scalar radius,
     Scalar half_width) {
-  if (half_width > 0) {
-    auto divisions = ComputeQuadrantDivisions(
-        view_transform.GetMaxBasisLengthXY() * radius + half_width);
-    return EllipticalVertexGenerator(Tessellator::GenerateStrokedCircle,
-                                     GetTrigsForDivisions(divisions),
-                                     PrimitiveType::kTriangleStrip, 8,
-                                     {
-                                         .reference_centers = {center, center},
-                                         .radii = {radius, radius},
-                                         .half_width = half_width,
-                                     });
-  } else {
+  if (half_width <= 0) {
     return FilledCircle(view_transform, center, radius);
   }
+  if (half_width >= radius) {
+    // Identical to a filled circle whose radius reaches the outer edge of the
+    // stroke.
+    return FilledCircle(view_transform, center, radius + half_width);
+  }
+  auto divisions = ComputeQuadrantDivisions(
+      view_transform.GetMaxBasisLengthXY() * (radius + half_width));
+  return EllipticalVertexGenerator(Tessellator::GenerateStrokedCircle,
+                                   GetTrigsForDivisions(divisions),
+                                   PrimitiveType::kTriangleStrip, 8,
+                                   {
+                                       .reference_centers = {center, center},
+                                       .radii = {radius, radius},
+                                       .half_width = half_width,
+                                   });
 }
 
 ArcVertexGenerator ArcVertexGenerator::MakeFilled(
@@ -672,7 +692,7 @@ EllipticalVertexGenerator Tessellator::FilledEllipse(
     return FilledCircle(view_transform, bounds.GetCenter(),
                         bounds.GetWidth() * 0.5f);
   }
-  auto max_radius = bounds.GetSize().MaxDimension();
+  auto max_radius = bounds.GetSize().MaxDimension() * 0.5f;
   auto divisions = ComputeQuadrantDivisions(
       view_transform.GetMaxBasisLengthXY() * max_radius);
   auto center = bounds.GetCenter();
@@ -858,7 +878,12 @@ void Tessellator::GenerateStrokedArc(
     const TessellatedVertexProc& proc) {
   Point center = oval_bounds.GetCenter();
   Size base_radii = oval_bounds.GetSize() * 0.5f;
+
+  // A stroke width wider than the radii would cross the center and
+  // self-intersect. Clamp inner edge to center.
   Size inner_radii = base_radii - Size(half_width, half_width);
+  inner_radii = inner_radii.Max(Size(0.0f, 0.0f));
+
   Size outer_radii = base_radii + Size(half_width, half_width);
 
   // Starting cap

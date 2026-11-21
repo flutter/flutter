@@ -3,22 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 const kModulePubspec = '''
 name: test
@@ -29,7 +27,12 @@ flutter:
 ''';
 
 void main() {
-  Cache.flutterRoot = getFlutterRoot();
+  testWithoutContext('Debug symbol stripping error should end with the issue URL', () {
+    expect(
+      failedToStripDebugSymbolsErrorMessage,
+      endsWith('https://github.com/flutter/flutter/issues'),
+    );
+  });
 
   group('build artifacts', () {
     late FileSystem fileSystem;
@@ -277,45 +280,31 @@ void main() {
   });
 
   group('gradle build', () {
-    testUsingContext('do not crash if there is no Android SDK', () async {
+    testWithoutContext('do not crash if there is no Android SDK', () async {
+      final logger = BufferLogger.test();
       expect(
         () {
           gradle_utils.updateLocalProperties(
-            project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            project: FlutterProject.fromDirectoryTest(MemoryFileSystem.test().currentDirectory),
+            analytics: const NoOpAnalytics(),
+            logger: logger,
           );
         },
         throwsToolExit(
           message:
-              '${globals.logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
+              '${logger.terminal.warningMark} No Android SDK found. Try setting the ANDROID_HOME environment variable.',
         ),
       );
-    }, overrides: <Type, Generator>{AndroidSdk: () => null});
+    });
   });
 
   group('Gradle local.properties', () {
-    late Artifacts localEngineArtifacts;
     late FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem.test();
-      localEngineArtifacts = Artifacts.testLocalEngine(
-        localEngine: 'out/android_arm',
-        localEngineHost: 'out/host_release',
-      );
     });
-
-    void testUsingAndroidContext(String description, dynamic Function() testMethod) {
-      testUsingContext(
-        description,
-        testMethod,
-        overrides: <Type, Generator>{
-          Artifacts: () => localEngineArtifacts,
-          Platform: () => FakePlatform(),
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
-    }
 
     String? propertyFor(String key, File file) {
       final Iterable<String> result = file
@@ -331,22 +320,23 @@ void main() {
       String? expectedBuildName,
       String? expectedBuildNumber,
     }) async {
-      final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
       gradle_utils.updateLocalProperties(
-        project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
       );
 
-      final File localPropertiesFile = globals.fs.file('path/to/project/android/local.properties');
+      final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
       expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
       expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
     }
 
-    testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
+    testWithoutContext('extract build name and number from pubspec.yaml', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -370,7 +360,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('extract build name from pubspec.yaml', () async {
+    testWithoutContext('extract build name from pubspec.yaml', () async {
       const manifest = '''
 name: test
 version: 1.0.0
@@ -388,7 +378,7 @@ flutter:
       await checkBuildVersion(manifest: manifest, buildInfo: buildInfo, expectedBuildName: '1.0.0');
     });
 
-    testUsingAndroidContext('allow build info to override build name', () async {
+    testWithoutContext('allow build info to override build name', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -412,7 +402,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build number', () async {
+    testWithoutContext('allow build info to override build number', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -436,7 +426,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name and number', () async {
+    testWithoutContext('allow build info to override build name and number', () async {
       const manifest = '''
 name: test
 version: 1.0.0+1
@@ -461,7 +451,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name and set number', () async {
+    testWithoutContext('allow build info to override build name and set number', () async {
       const manifest = '''
 name: test
 version: 1.0.0
@@ -486,7 +476,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to set build name and number', () async {
+    testWithoutContext('allow build info to set build name and number', () async {
       const manifest = '''
 name: test
 dependencies:
@@ -510,7 +500,7 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to unset build name and number', () async {
+    testWithoutContext('allow build info to unset build name and number', () async {
       const manifest = '''
 name: test
 dependencies:
@@ -579,82 +569,44 @@ flutter:
       fs = MemoryFileSystem.test();
     });
 
-    testUsingContext(
-      'returns true when the project is using AndroidX',
-      () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns true when the project is using AndroidX', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        androidDirectory
-            .childFile('gradle.properties')
-            .writeAsStringSync('android.useAndroidX=true');
+      androidDirectory.childFile('gradle.properties').writeAsStringSync('android.useAndroidX=true');
 
-        expect(isAppUsingAndroidX(androidDirectory), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isTrue);
+    });
 
-    testUsingContext(
-      'returns false when the project is not using AndroidX',
-      () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns false when the project is not using AndroidX', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        androidDirectory
-            .childFile('gradle.properties')
-            .writeAsStringSync('android.useAndroidX=false');
+      androidDirectory
+          .childFile('gradle.properties')
+          .writeAsStringSync('android.useAndroidX=false');
 
-        expect(isAppUsingAndroidX(androidDirectory), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+    });
 
-    testUsingContext(
-      'returns false when gradle.properties does not exist',
-      () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns false when gradle.properties does not exist', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        expect(isAppUsingAndroidX(androidDirectory), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+    });
 
-    testUsingContext(
-      'returns false for commented-out AndroidX properties',
-      () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
-          'flutter_android.',
-        );
+    testWithoutContext('returns false for commented-out AndroidX properties', () async {
+      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
 
-        androidDirectory
-            .childFile('gradle.properties')
-            .writeAsStringSync('#android.useAndroidX=true');
+      androidDirectory
+          .childFile('gradle.properties')
+          .writeAsStringSync('#android.useAndroidX=true');
 
-        expect(isAppUsingAndroidX(androidDirectory), isFalse);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      },
-    );
+      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'returns true when AndroidX property has spaces around the separator',
       () async {
-        final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync(
+        final Directory androidDirectory = fs.systemTempDirectory.createTempSync(
           'flutter_android.',
         );
 
@@ -663,10 +615,6 @@ flutter:
             .writeAsStringSync('android.useAndroidX = true');
 
         expect(isAppUsingAndroidX(androidDirectory), isTrue);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
       },
     );
   });

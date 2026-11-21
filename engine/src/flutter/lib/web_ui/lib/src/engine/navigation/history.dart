@@ -148,8 +148,8 @@ class MultiEntriesBrowserHistory extends BrowserHistory {
     return 0;
   }
 
-  Object _tagWithSerialCount(Object? originialState, int count) {
-    return <dynamic, dynamic>{'serialCount': count.toDouble(), 'state': originialState};
+  Object _tagWithSerialCount(Object? originalState, int count) {
+    return <dynamic, dynamic>{'serialCount': count.toDouble(), 'state': originalState};
   }
 
   bool _hasSerialCount(Object? state) {

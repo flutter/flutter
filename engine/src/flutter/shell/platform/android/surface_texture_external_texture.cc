@@ -97,10 +97,11 @@ void SurfaceTextureExternalTexture::DrawFrame(
   auto source = DlColorSource::MakeImage(
       dl_image_, DlTileMode::kClamp, DlTileMode::kClamp, sampling, &transform);
 
-  DlPaint paintWithShader;
-  if (context.paint) {
-    paintWithShader = *context.paint;
-  }
+  DlPaint paintWithShader =
+      context.paint ? *context.paint
+                    // Set AA to false to preserve historical behavior. See
+                    // https://github.com/flutter/flutter/pull/193939
+                    : DlPaint().setAntiAlias(false);
   paintWithShader.setColorSource(source);
   context.canvas->DrawRect(DlRect::MakeWH(1, 1), paintWithShader);
 }

@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -13,6 +14,7 @@ import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../device.dart';
 import 'adb.dart';
+import 'android_builder.dart';
 import 'android_device.dart';
 import 'android_sdk.dart';
 import 'android_workflow.dart';
@@ -26,26 +28,32 @@ import 'android_workflow.dart';
 ///   * [AndroidDevice], the type of discovered device.
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices({
-    required AndroidWorkflow androidWorkflow,
-    required ProcessManager processManager,
+    required this._androidWorkflow,
+    required this._fileSystem,
     required Logger logger,
+    required this._platform,
+    required ProcessManager processManager,
+    required this._userMessages,
+    this._androidBuilder,
     AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required UserMessages userMessages,
-  }) : _androidWorkflow = androidWorkflow,
-       _androidSdk = androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
+    this._applicationPackageFactory,
+  }) : assert(
+         androidSdk == null || androidSdkBuilder == null,
+         'Cannot provide both androidSdk and androidSdkBuilder to AndroidDevices.',
+       ),
+       _androidSdkBuilder = androidSdkBuilder ?? (() => androidSdk),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _userMessages = userMessages,
        super('Android devices');
 
+  final AndroidBuilder? _androidBuilder;
   final AndroidWorkflow _androidWorkflow;
+  final ApplicationPackageFactory? _applicationPackageFactory;
   final ProcessUtils _processUtils;
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -199,14 +207,16 @@ class AndroidDevices extends PollingDeviceDiscovery {
             devices?.add(
               AndroidDevice(
                 deviceID,
-                productID: info['product'],
-                modelID: info['model'] ?? deviceID,
-                deviceCodeName: info['device'],
+                androidBuilder: _androidBuilder,
                 androidSdk: _androidSdk!,
+                applicationPackageFactory: _applicationPackageFactory,
+                deviceCodeName: info['device'],
                 fileSystem: _fileSystem,
                 logger: _logger,
+                modelID: info['model'] ?? deviceID,
                 platform: _platform,
                 processManager: _processManager,
+                productID: info['product'],
               ),
             );
         }

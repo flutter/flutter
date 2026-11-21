@@ -5,6 +5,8 @@
 #include "impeller/renderer/backend/metal/context_mtl.h"
 #include <Metal/Metal.h>
 
+#include <array>
+#include <limits>
 #include <memory>
 
 #include "flutter/fml/concurrent_message_loop.h"
@@ -12,6 +14,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#include "flutter/fml/trace_event.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -68,6 +71,25 @@ static bool DeviceSupportsTextureCompressionAstcHdr(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple6];
 }
 
+static ComputeLimits InferMetalComputeLimits(id<MTLDevice> device) {
+  const MTLSize size = device.maxThreadsPerThreadgroup;
+  return ComputeLimits{
+      // The limit on the total number of threads in a threadgroup equals the
+      // x limit on every Metal GPU family (1024, or 512 before A11). A
+      // pipeline can lower it further, which pipeline creation checks.
+      .max_workgroup_invocations = static_cast<uint32_t>(size.width),
+      .max_workgroup_size = {static_cast<uint32_t>(size.width),
+                             static_cast<uint32_t>(size.height),
+                             static_cast<uint32_t>(size.depth)},
+      // Metal does not limit the threadgroup count of a dispatch beyond the
+      // 32-bit grid coordinates a shader sees.
+      .max_workgroup_count = {std::numeric_limits<uint32_t>::max(),
+                              std::numeric_limits<uint32_t>::max(),
+                              std::numeric_limits<uint32_t>::max()},
+      .max_shared_memory_size = device.maxThreadgroupMemoryLength,
+  };
+}
+
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
     PixelFormat color_format) {
@@ -103,6 +125,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsTextureCompression(
           CompressedTextureFamily::kASTCHDR,
           DeviceSupportsTextureCompressionAstcHdr(device))
+      .SetComputeLimits(InferMetalComputeLimits(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else
@@ -458,6 +481,22 @@ void ContextMTL::StoreTaskForGPU(const fml::closure& task,
   }
 }
 
+void ContextMTL::TrackPendingImageUpload(
+    const std::shared_ptr<CommandBufferSchedulingReceipt>& receipt) {
+  pending_image_uploads_.Track(receipt);
+}
+
+void ContextMTL::DrainPendingImageUploads() {
+  const size_t pending_count = pending_image_uploads_.GetPendingCount();
+  if (pending_count == 0u) {
+    return;
+  }
+  const std::string pending_count_string = std::to_string(pending_count);
+  TRACE_EVENT1("impeller", "ImpellerMetalImageUploadScheduleDrain",
+               "PendingCount", pending_count_string.c_str());
+  pending_image_uploads_.WaitUntilScheduled();
+}
+
 void ContextMTL::FlushTasksAwaitingGPU() {
   std::deque<PendingTasks> tasks_awaiting_gpu;
   {
@@ -505,7 +544,9 @@ ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
     : parent_(parent) {}
 
 void ContextMTL::SyncSwitchObserver::OnSyncSwitchUpdate(bool new_is_disabled) {
-  if (!new_is_disabled) {
+  if (new_is_disabled) {
+    parent_.DrainPendingImageUploads();
+  } else {
     parent_.FlushTasksAwaitingGPU();
   }
 }

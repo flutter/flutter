@@ -4,6 +4,7 @@ import static io.flutter.Build.API_LEVELS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24)
@@ -48,18 +50,19 @@ public class ProcessTextPluginTest {
         (ByteBuffer) encodedMethodCall.flip(), mock(BinaryMessenger.BinaryReply.class));
   }
 
-  @SuppressWarnings("deprecation")
-  // setMessageHandler is deprecated.
   @Test
   public void respondsToProcessTextChannelMessage() {
     ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
         ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
-    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    DartExecutor mockDartExecutor = mock(DartExecutor.class);
+    BinaryMessenger mockBinaryMessenger = mock(BinaryMessenger.class);
+    when(mockDartExecutor.getBinaryMessenger()).thenReturn(mockBinaryMessenger);
+    doReturn(null).when(mockBinaryMessenger).makeBackgroundTaskQueue();
     ProcessTextChannel.ProcessTextMethodHandler mockHandler =
         mock(ProcessTextChannel.ProcessTextMethodHandler.class);
     PackageManager mockPackageManager = mock(PackageManager.class);
     ProcessTextChannel processTextChannel =
-        new ProcessTextChannel(mockBinaryMessenger, mockPackageManager);
+        new ProcessTextChannel(mockDartExecutor, mockPackageManager);
 
     processTextChannel.setMethodHandler(mockHandler);
 
@@ -74,14 +77,15 @@ public class ProcessTextPluginTest {
     verify(mockHandler).queryTextActions();
   }
 
-  @SuppressWarnings("deprecation")
-  // setMessageHandler is deprecated.
   @Test
   public void performQueryTextActions() {
-    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    DartExecutor mockDartExecutor = mock(DartExecutor.class);
+    BinaryMessenger mockBinaryMessenger = mock(BinaryMessenger.class);
+    when(mockDartExecutor.getBinaryMessenger()).thenReturn(mockBinaryMessenger);
+    doReturn(null).when(mockBinaryMessenger).makeBackgroundTaskQueue();
     PackageManager mockPackageManager = mock(PackageManager.class);
     ProcessTextChannel processTextChannel =
-        new ProcessTextChannel(mockBinaryMessenger, mockPackageManager);
+        new ProcessTextChannel(mockDartExecutor, mockPackageManager);
 
     // Set up mocked result for PackageManager.queryIntentActivities.
     ResolveInfo action1 = createFakeResolveInfo("Action1", mockPackageManager);
@@ -100,63 +104,15 @@ public class ProcessTextPluginTest {
     assertEquals(textActions, Map.of(action1Id, "Action1", action2Id, "Action2"));
   }
 
-  @SuppressWarnings("deprecation")
-  // setMessageHandler is deprecated.
   @Test
   public void performProcessTextActionWithNoReturnedValue() {
-    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    DartExecutor mockDartExecutor = mock(DartExecutor.class);
+    BinaryMessenger mockBinaryMessenger = mock(BinaryMessenger.class);
+    when(mockDartExecutor.getBinaryMessenger()).thenReturn(mockBinaryMessenger);
+    doReturn(null).when(mockBinaryMessenger).makeBackgroundTaskQueue();
     PackageManager mockPackageManager = mock(PackageManager.class);
     ProcessTextChannel processTextChannel =
-        new ProcessTextChannel(mockBinaryMessenger, mockPackageManager);
-
-    // Set up mocked result for PackageManager.queryIntentActivities.
-    ResolveInfo action1 = createFakeResolveInfo("Action1", mockPackageManager);
-    ResolveInfo action2 = createFakeResolveInfo("Action2", mockPackageManager);
-    List<ResolveInfo> infos = new ArrayList<ResolveInfo>(Arrays.asList(action1, action2));
-    when(mockPackageManager.queryIntentActivities(
-            any(Intent.class), any(PackageManager.ResolveInfoFlags.class)))
-        .thenReturn(infos);
-
-    // ProcessTextPlugin should retrieve the mocked text actions.
-    ProcessTextPlugin processTextPlugin = new ProcessTextPlugin(processTextChannel);
-    Map<String, String> textActions = processTextPlugin.queryTextActions();
-    final String action1Id = "mockActivityName.Action1";
-    final String action2Id = "mockActivityName.Action2";
-    assertEquals(textActions, Map.of(action1Id, "Action1", action2Id, "Action2"));
-
-    // Set up the activity binding.
-    ActivityPluginBinding mockActivityPluginBinding = mock(ActivityPluginBinding.class);
-    Activity mockActivity = mock(Activity.class);
-    when(mockActivityPluginBinding.getActivity()).thenReturn(mockActivity);
-    processTextPlugin.onAttachedToActivity(mockActivityPluginBinding);
-
-    // Execute th first action.
-    String textToBeProcessed = "Flutter!";
-    MethodChannel.Result result = mock(MethodChannel.Result.class);
-    processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
-
-    // Activity.startActivityForResult should have been called.
-    ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-    verify(mockActivity, times(1)).startActivityForResult(intentCaptor.capture(), anyInt());
-    Intent intent = intentCaptor.getValue();
-    assertEquals(textToBeProcessed, intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT));
-
-    // Simulate an Android activity answer which does not return a value.
-    Intent resultIntent = new Intent();
-    processTextPlugin.onActivityResult(result.hashCode(), Activity.RESULT_OK, resultIntent);
-
-    // Success with no returned value is expected.
-    verify(result).success(null);
-  }
-
-  @SuppressWarnings("deprecation")
-  // setMessageHandler is deprecated.
-  @Test
-  public void performProcessTextActionWithReturnedValue() {
-    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
-    PackageManager mockPackageManager = mock(PackageManager.class);
-    ProcessTextChannel processTextChannel =
-        new ProcessTextChannel(mockBinaryMessenger, mockPackageManager);
+        new ProcessTextChannel(mockDartExecutor, mockPackageManager);
 
     // Set up mocked result for PackageManager.queryIntentActivities.
     ResolveInfo action1 = createFakeResolveInfo("Action1", mockPackageManager);
@@ -183,6 +139,58 @@ public class ProcessTextPluginTest {
     String textToBeProcessed = "Flutter!";
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
+    ShadowLooper.runUiThreadTasks();
+
+    // Activity.startActivityForResult should have been called.
+    ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+    verify(mockActivity, times(1)).startActivityForResult(intentCaptor.capture(), anyInt());
+    Intent intent = intentCaptor.getValue();
+    assertEquals(textToBeProcessed, intent.getStringExtra(Intent.EXTRA_PROCESS_TEXT));
+
+    // Simulate an Android activity answer which does not return a value.
+    Intent resultIntent = new Intent();
+    processTextPlugin.onActivityResult(result.hashCode(), Activity.RESULT_OK, resultIntent);
+
+    // Success with no returned value is expected.
+    verify(result).success(null);
+  }
+
+  @Test
+  public void performProcessTextActionWithReturnedValue() {
+    DartExecutor mockDartExecutor = mock(DartExecutor.class);
+    BinaryMessenger mockBinaryMessenger = mock(BinaryMessenger.class);
+    when(mockDartExecutor.getBinaryMessenger()).thenReturn(mockBinaryMessenger);
+    doReturn(null).when(mockBinaryMessenger).makeBackgroundTaskQueue();
+    PackageManager mockPackageManager = mock(PackageManager.class);
+    ProcessTextChannel processTextChannel =
+        new ProcessTextChannel(mockDartExecutor, mockPackageManager);
+
+    // Set up mocked result for PackageManager.queryIntentActivities.
+    ResolveInfo action1 = createFakeResolveInfo("Action1", mockPackageManager);
+    ResolveInfo action2 = createFakeResolveInfo("Action2", mockPackageManager);
+    List<ResolveInfo> infos = new ArrayList<ResolveInfo>(Arrays.asList(action1, action2));
+    when(mockPackageManager.queryIntentActivities(
+            any(Intent.class), any(PackageManager.ResolveInfoFlags.class)))
+        .thenReturn(infos);
+
+    // ProcessTextPlugin should retrieve the mocked text actions.
+    ProcessTextPlugin processTextPlugin = new ProcessTextPlugin(processTextChannel);
+    Map<String, String> textActions = processTextPlugin.queryTextActions();
+    final String action1Id = "mockActivityName.Action1";
+    final String action2Id = "mockActivityName.Action2";
+    assertEquals(textActions, Map.of(action1Id, "Action1", action2Id, "Action2"));
+
+    // Set up the activity binding.
+    ActivityPluginBinding mockActivityPluginBinding = mock(ActivityPluginBinding.class);
+    Activity mockActivity = mock(Activity.class);
+    when(mockActivityPluginBinding.getActivity()).thenReturn(mockActivity);
+    processTextPlugin.onAttachedToActivity(mockActivityPluginBinding);
+
+    // Execute the first action.
+    String textToBeProcessed = "Flutter!";
+    MethodChannel.Result result = mock(MethodChannel.Result.class);
+    processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
+    ShadowLooper.runUiThreadTasks();
 
     // Activity.startActivityForResult should have been called.
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -200,14 +208,15 @@ public class ProcessTextPluginTest {
     verify(result).success(processedText);
   }
 
-  @SuppressWarnings("deprecation")
-  // setMessageHandler is deprecated.
   @Test
   public void doNotCrashOnNonRelatedActivityResult() {
-    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    DartExecutor mockDartExecutor = mock(DartExecutor.class);
+    BinaryMessenger mockBinaryMessenger = mock(BinaryMessenger.class);
+    when(mockDartExecutor.getBinaryMessenger()).thenReturn(mockBinaryMessenger);
+    doReturn(null).when(mockBinaryMessenger).makeBackgroundTaskQueue();
     PackageManager mockPackageManager = mock(PackageManager.class);
     ProcessTextChannel processTextChannel =
-        new ProcessTextChannel(mockBinaryMessenger, mockPackageManager);
+        new ProcessTextChannel(mockDartExecutor, mockPackageManager);
 
     // Set up mocked result for PackageManager.queryIntentActivities.
     ResolveInfo action1 = createFakeResolveInfo("Action1", mockPackageManager);
@@ -234,6 +243,7 @@ public class ProcessTextPluginTest {
     String textToBeProcessed = "Flutter!";
     MethodChannel.Result result = mock(MethodChannel.Result.class);
     processTextPlugin.processTextAction(action1Id, textToBeProcessed, false, result);
+    ShadowLooper.runUiThreadTasks();
 
     // Activity.startActivityForResult should have been called.
     ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);

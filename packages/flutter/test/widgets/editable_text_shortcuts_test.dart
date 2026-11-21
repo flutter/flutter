@@ -75,6 +75,7 @@ void main() {
     TextAlign textAlign = TextAlign.left,
     bool readOnly = false,
     bool obscured = false,
+    int? maxLines,
     TextStyle style = const TextStyle(fontSize: 10.0),
     bool enableInteractiveSelection = true,
   }) {
@@ -98,7 +99,7 @@ void main() {
             backgroundCursorColor: const Color(0xFF9E9E9E),
             selectionControls: emptyTextSelectionControls,
             keyboardType: TextInputType.text,
-            maxLines: obscured ? 1 : null,
+            maxLines: obscured ? 1 : maxLines,
             readOnly: readOnly,
             textAlign: textAlign,
             obscureText: obscured,
@@ -120,31 +121,27 @@ void main() {
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
 
-        testWidgets(
-          'backspace',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            // Move the selection to the beginning of the 2nd line (after the newline
-            // character).
-            controller.selection = const TextSelection.collapsed(
-              offset: 20,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('backspace', (WidgetTester tester) async {
+          controller.text = testText;
+          // Move the selection to the beginning of the 2nd line (after the newline
+          // character).
+          controller.selection = const TextSelection.collapsed(
+            offset: 20,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(
-              controller.text,
-              'Now is the time forall good people\n'
-              'to come to the aid\n'
-              'of their country.',
-            );
+          expect(
+            controller.text,
+            'Now is the time forall good people\n'
+            'to come to the aid\n'
+            'of their country.',
+          );
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 19));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 19));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
         testWidgets('backspace readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -182,68 +179,56 @@ void main() {
           expect(controller.selection, const TextSelection.collapsed(offset: 0));
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets(
-          'backspace at end',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            controller.selection = const TextSelection.collapsed(
-              offset: 72,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('backspace at end', (WidgetTester tester) async {
+          controller.text = testText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 72,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(
-              controller.text,
-              'Now is the time for\n'
-              'all good people\n'
-              'to come to the aid\n'
-              'of their country',
-            );
+          expect(
+            controller.text,
+            'Now is the time for\n'
+            'all good people\n'
+            'to come to the aid\n'
+            'of their country',
+          );
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 71));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 71));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'backspace inside of a cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 1,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('backspace inside of a cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 1,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'backspace at cluster boundary',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 8,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('backspace at cluster boundary', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 8,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
       });
 
       group('delete: ', () {
@@ -272,49 +257,41 @@ void main() {
           expect(controller.selection, const TextSelection.collapsed(offset: 20));
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'delete readonly',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            controller.selection = const TextSelection.collapsed(
-              offset: 20,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('delete readonly', (WidgetTester tester) async {
+          controller.text = testText;
+          controller.selection = const TextSelection.collapsed(
+            offset: 20,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText(readOnly: true));
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText(readOnly: true));
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, testText);
+          expect(controller.text, testText);
 
-            expect(
-              controller.selection,
-              const TextSelection.collapsed(offset: 20, affinity: TextAffinity.upstream),
-            );
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(
+            controller.selection,
+            const TextSelection.collapsed(offset: 20, affinity: TextAffinity.upstream),
+          );
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'delete at start',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            controller.selection = const TextSelection.collapsed(offset: 0);
+        testWidgets('delete at start', (WidgetTester tester) async {
+          controller.text = testText;
+          controller.selection = const TextSelection.collapsed(offset: 0);
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(
-              controller.text,
-              'ow is the time for\n'
-              'all good people\n'
-              'to come to the aid\n'
-              'of their country.',
-            );
+          expect(
+            controller.text,
+            'ow is the time for\n'
+            'all good people\n'
+            'to come to the aid\n'
+            'of their country.',
+          );
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
         testWidgets('delete at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -340,113 +317,89 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets(
-          'delete inside of a cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 1,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('delete inside of a cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 1,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'delete at cluster boundary',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 8,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('delete at cluster boundary', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 8,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 8));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
       });
 
       group('Non-collapsed delete', () {
         // This shares the same logic as backspace.
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets(
-          'inside of a cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection(baseOffset: 9, extentOffset: 12);
+        testWidgets('inside of a cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection(baseOffset: 9, extentOffset: 12);
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 8));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'at the boundaries of a cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection(baseOffset: 8, extentOffset: 16);
+        testWidgets('at the boundaries of a cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection(baseOffset: 8, extentOffset: 16);
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 8));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'cross-cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection(baseOffset: 1, extentOffset: 9);
+        testWidgets('cross-cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection(baseOffset: 1, extentOffset: 9);
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            expect(controller.text, '👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'cross-cluster obscured text',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection(baseOffset: 1, extentOffset: 9);
+        testWidgets('cross-cluster obscured text', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection(baseOffset: 1, extentOffset: 9);
 
-            await tester.pumpWidget(buildEditableText(obscured: true));
-            await sendKeyCombination(tester, const SingleActivator(trigger));
+          await tester.pumpWidget(buildEditableText(obscured: true));
+          await sendKeyCombination(tester, const SingleActivator(trigger));
 
-            // Both emojis that were partially selected are deleted entirely.
-            expect(controller.text, '‍👩‍👦👨‍👩‍👦');
+          // Both emojis that were partially selected are deleted entirely.
+          expect(controller.text, '‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
       });
 
       group('word modifier + backspace', () {
@@ -458,31 +411,27 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets(
-          'WordModifier-backspace',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            // Place the caret before "people".
-            controller.selection = const TextSelection.collapsed(
-              offset: 29,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('WordModifier-backspace', (WidgetTester tester) async {
+          controller.text = testText;
+          // Place the caret before "people".
+          controller.selection = const TextSelection.collapsed(
+            offset: 29,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierBackspace());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierBackspace());
 
-            expect(
-              controller.text,
-              'Now is the time for\n'
-              'all people\n'
-              'to come to the aid\n'
-              'of their country.',
-            );
+          expect(
+            controller.text,
+            'Now is the time for\n'
+            'all people\n'
+            'to come to the aid\n'
+            'of their country.',
+          );
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 24));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 24));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -541,43 +490,35 @@ void main() {
           expect(controller.selection, const TextSelection.collapsed(offset: 64));
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'inside of a cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 1,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('inside of a cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 1,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierBackspace());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierBackspace());
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'at cluster boundary',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 8,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('at cluster boundary', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 8,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierBackspace());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierBackspace());
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
       });
 
       group('word modifier + delete', () {
@@ -589,31 +530,27 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets(
-          'WordModifier-delete',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            // Place the caret after "all".
-            controller.selection = const TextSelection.collapsed(
-              offset: 23,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('WordModifier-delete', (WidgetTester tester) async {
+          controller.text = testText;
+          // Place the caret after "all".
+          controller.selection = const TextSelection.collapsed(
+            offset: 23,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierDelete());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierDelete());
 
-            expect(
-              controller.text,
-              'Now is the time for\n'
-              'all people\n'
-              'to come to the aid\n'
-              'of their country.',
-            );
+          expect(
+            controller.text,
+            'Now is the time for\n'
+            'all people\n'
+            'to come to the aid\n'
+            'of their country.',
+          );
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 23));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 23));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
         testWidgets('readonly', (WidgetTester tester) async {
           controller.text = testText;
@@ -633,27 +570,23 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets(
-          'at start',
-          (WidgetTester tester) async {
-            controller.text = testText;
-            controller.selection = const TextSelection.collapsed(offset: 0);
+        testWidgets('at start', (WidgetTester tester) async {
+          controller.text = testText;
+          controller.selection = const TextSelection.collapsed(offset: 0);
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierDelete());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierDelete());
 
-            expect(
-              controller.text,
-              ' is the time for\n'
-              'all good people\n'
-              'to come to the aid\n'
-              'of their country.',
-            );
+          expect(
+            controller.text,
+            ' is the time for\n'
+            'all good people\n'
+            'to come to the aid\n'
+            'of their country.',
+          );
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
         testWidgets('at end', (WidgetTester tester) async {
           controller.text = testText;
@@ -672,43 +605,35 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets(
-          'inside of a cluster',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 1,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('inside of a cluster', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 1,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierDelete());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierDelete());
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 0));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 0));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
-        testWidgets(
-          'at cluster boundary',
-          (WidgetTester tester) async {
-            controller.text = testCluster;
-            controller.selection = const TextSelection.collapsed(
-              offset: 8,
-              affinity: TextAffinity.upstream,
-            );
+        testWidgets('at cluster boundary', (WidgetTester tester) async {
+          controller.text = testCluster;
+          controller.selection = const TextSelection.collapsed(
+            offset: 8,
+            affinity: TextAffinity.upstream,
+          );
 
-            await tester.pumpWidget(buildEditableText());
-            await sendKeyCombination(tester, wordModifierDelete());
+          await tester.pumpWidget(buildEditableText());
+          await sendKeyCombination(tester, wordModifierDelete());
 
-            expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
+          expect(controller.text, '👨‍👩‍👦👨‍👩‍👦');
 
-            expect(controller.selection, const TextSelection.collapsed(offset: 8));
-          },
-          variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-        );
+          expect(controller.selection, const TextSelection.collapsed(offset: 8));
+        }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
       });
 
       group('line modifier + backspace', () {
@@ -1433,6 +1358,40 @@ void main() {
               controller.selection,
               const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
             );
+          }, variant: TargetPlatformVariant.all());
+
+          // Regression test for https://github.com/flutter/flutter/issues/139201.
+          // A single line field lays the text out with an unbounded width, so the
+          // paint offset of a paragraph that is not left aligned is not zero. That
+          // used to invalidate the vertical caret run as soon as it was created,
+          // which asserted in debug mode and left the caret in place otherwise.
+          testWidgets('run in a single line field that is not left aligned', (
+            WidgetTester tester,
+          ) async {
+            for (final textAlign in <TextAlign>[TextAlign.center, TextAlign.right, TextAlign.end]) {
+              controller.text = 'aaaa';
+              controller.selection = const TextSelection.collapsed(offset: 2);
+              await tester.pumpWidget(buildEditableText(textAlign: textAlign, maxLines: 1));
+              await tester.pump(); // Wait for autofocus to take effect.
+
+              // There is only one line, so moving down goes to the end of the
+              // text and moving back up goes to the beginning of the text.
+              await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+              await tester.pump();
+              expect(
+                controller.selection,
+                const TextSelection.collapsed(offset: 4),
+                reason: '$textAlign',
+              );
+
+              await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
+              await tester.pump();
+              expect(
+                controller.selection,
+                const TextSelection.collapsed(offset: 0),
+                reason: '$textAlign',
+              );
+            }
           }, variant: TargetPlatformVariant.all());
 
           testWidgets(
@@ -2187,47 +2146,43 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets(
-      'select left should not expand selection if selection is disabled',
-      (WidgetTester tester) async {
-        const selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
-        controller.text = 'testing';
-        controller.selection = const TextSelection.collapsed(offset: 5);
+    testWidgets('select left should not expand selection if selection is disabled', (
+      WidgetTester tester,
+    ) async {
+      const selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(offset: 5);
 
-        await tester.pumpWidget(buildEditableText(enableInteractiveSelection: false));
-        await sendKeyCombination(tester, selectLeft);
-        await tester.pump();
+      await tester.pumpWidget(buildEditableText(enableInteractiveSelection: false));
+      await sendKeyCombination(tester, selectLeft);
+      await tester.pump();
 
-        expect(controller.text, 'testing');
-        expect(
-          controller.selection,
-          const TextSelection.collapsed(offset: 4), // should not expand selection
-          reason: selectLeft.toString(),
-        );
-      },
-      variant: TargetPlatformVariant.desktop(),
-    );
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 4), // should not expand selection
+        reason: selectLeft.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets(
-      'select right should not expand selection if selection is disabled',
-      (WidgetTester tester) async {
-        const selectRight = SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
-        controller.text = 'testing';
-        controller.selection = const TextSelection.collapsed(offset: 5);
+    testWidgets('select right should not expand selection if selection is disabled', (
+      WidgetTester tester,
+    ) async {
+      const selectRight = SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(offset: 5);
 
-        await tester.pumpWidget(buildEditableText(enableInteractiveSelection: false));
-        await sendKeyCombination(tester, selectRight);
-        await tester.pump();
+      await tester.pumpWidget(buildEditableText(enableInteractiveSelection: false));
+      await sendKeyCombination(tester, selectRight);
+      await tester.pump();
 
-        expect(controller.text, 'testing');
-        expect(
-          controller.selection,
-          const TextSelection.collapsed(offset: 6), // should not expand selection
-          reason: selectRight.toString(),
-        );
-      },
-      variant: TargetPlatformVariant.desktop(),
-    );
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: 6), // should not expand selection
+        reason: selectRight.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('select all left', (WidgetTester tester) async {
       final isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
@@ -2469,40 +2424,35 @@ void main() {
         expect(scrollController.offset, newOffset);
       }, variant: macOSOnly);
 
-      testWidgets(
-        'home + shift scrolls to the beginning of text field and selects everything',
-        (WidgetTester tester) async {
-          const home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+      testWidgets('home + shift scrolls to the beginning of text field and selects everything', (
+        WidgetTester tester,
+      ) async {
+        const home = SingleActivator(LogicalKeyboardKey.home, shift: true);
 
-          controller.text = longText;
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: controller.text.length);
 
-          await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
-          await tester.pumpAndSettle();
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
 
-          final double initialScrollOffset = scrollController.offset;
+        final double initialScrollOffset = scrollController.offset;
 
-          expect(initialScrollOffset, scrollController.position.maxScrollExtent);
-          await sendKeyCombination(tester, home);
-          await tester.pump();
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, home);
+        await tester.pump();
 
-          expect(controller.text, longText);
-          expect(
-            controller.selection,
-            TextSelection(
-              baseOffset: controller.text.length,
-              extentOffset: 0,
-            ), // selection changes.
-            reason: home.toString(),
-          );
+        expect(controller.text, longText);
+        expect(
+          controller.selection,
+          TextSelection(baseOffset: controller.text.length, extentOffset: 0), // selection changes.
+          reason: home.toString(),
+        );
 
-          // scrolls to beginning.
-          const double newOffset = 0;
+        // scrolls to beginning.
+        const double newOffset = 0;
 
-          expect(scrollController.offset, newOffset);
-        },
-        variant: macOSOnly,
-      );
+        expect(scrollController.offset, newOffset);
+      }, variant: macOSOnly);
     });
 
     group('non-macOS', () {
@@ -2626,32 +2576,30 @@ void main() {
         expect(scrollController.offset, initialScrollOffset); // no scroll.
       }, variant: desktopExceptMacOS);
 
-      testWidgets(
-        'end + shift highlights selection to the end of the line, no scroll',
-        (WidgetTester tester) async {
-          const end = SingleActivator(LogicalKeyboardKey.end, shift: true);
-          const initialSelectionOffset = 0;
+      testWidgets('end + shift highlights selection to the end of the line, no scroll', (
+        WidgetTester tester,
+      ) async {
+        const end = SingleActivator(LogicalKeyboardKey.end, shift: true);
+        const initialSelectionOffset = 0;
 
-          controller.text = longText;
-          controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
+        controller.text = longText;
+        controller.selection = const TextSelection.collapsed(offset: initialSelectionOffset);
 
-          await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
-          await tester.pumpAndSettle();
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
 
-          final double initialScrollOffset = scrollController.offset;
+        final double initialScrollOffset = scrollController.offset;
 
-          expect(initialScrollOffset, 0);
-          await sendKeyCombination(tester, end);
-          await tester.pump();
+        expect(initialScrollOffset, 0);
+        await sendKeyCombination(tester, end);
+        await tester.pump();
 
-          expect(controller.text, longText);
-          expect(controller.selection.isCollapsed, isFalse);
-          expect(controller.selection.baseOffset, initialSelectionOffset);
-          expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
-          expect(scrollController.offset, initialScrollOffset); // no scroll.
-        },
-        variant: desktopExceptMacOS,
-      );
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, greaterThan(initialSelectionOffset));
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
+      }, variant: desktopExceptMacOS);
 
       testWidgets('home moves selection to the beginning of the line, no scroll', (
         WidgetTester tester,
@@ -2677,32 +2625,30 @@ void main() {
         expect(scrollController.offset, initialScrollOffset); // no scroll.
       }, variant: desktopExceptMacOS);
 
-      testWidgets(
-        'home + shift highlights selection to the beginning of the line, no scroll',
-        (WidgetTester tester) async {
-          const home = SingleActivator(LogicalKeyboardKey.home, shift: true);
-          final int initialSelectionOffset = controller.text.length;
+      testWidgets('home + shift highlights selection to the beginning of the line, no scroll', (
+        WidgetTester tester,
+      ) async {
+        const home = SingleActivator(LogicalKeyboardKey.home, shift: true);
+        final int initialSelectionOffset = controller.text.length;
 
-          controller.text = longText;
-          controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
+        controller.text = longText;
+        controller.selection = TextSelection.collapsed(offset: initialSelectionOffset);
 
-          await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
-          await tester.pumpAndSettle();
+        await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 12)));
+        await tester.pumpAndSettle();
 
-          final double initialScrollOffset = scrollController.offset;
+        final double initialScrollOffset = scrollController.offset;
 
-          expect(initialScrollOffset, scrollController.position.maxScrollExtent);
-          await sendKeyCombination(tester, home);
-          await tester.pump();
+        expect(initialScrollOffset, scrollController.position.maxScrollExtent);
+        await sendKeyCombination(tester, home);
+        await tester.pump();
 
-          expect(controller.text, longText);
-          expect(controller.selection.isCollapsed, isFalse);
-          expect(controller.selection.baseOffset, initialSelectionOffset);
-          expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
-          expect(scrollController.offset, initialScrollOffset); // no scroll.
-        },
-        variant: desktopExceptMacOS,
-      );
+        expect(controller.text, longText);
+        expect(controller.selection.isCollapsed, isFalse);
+        expect(controller.selection.baseOffset, initialSelectionOffset);
+        expect(controller.selection.extentOffset, lessThan(initialSelectionOffset));
+        expect(scrollController.offset, initialScrollOffset); // no scroll.
+      }, variant: desktopExceptMacOS);
 
       testWidgets(
         'end + ctrl scrolls to the end of the text field and changes selection on Windows',

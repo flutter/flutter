@@ -22,6 +22,8 @@ import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -53,8 +55,10 @@ void main() {
 
       testWithoutContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
         final xcode = Xcode.test(
-          platform: FakePlatform(operatingSystem: 'windows'),
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(
+            platform: FakePlatform(operatingSystem: 'windows'),
+            processManager: fakeProcessManager,
+          ),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
 
@@ -66,7 +70,7 @@ void main() {
           const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         );
         final xcode = Xcode.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
 
@@ -83,9 +87,11 @@ void main() {
           ),
         );
         final xcode = Xcode.test(
-          processManager: fakeProcessManager,
+          toolContext: FakeToolContext.macosHost(
+            logger: logger,
+            processManager: fakeProcessManager,
+          ),
           xcodeProjectInterpreter: xcodeProjectInterpreter,
-          logger: logger,
         );
 
         expect(xcode.isSimctlInstalled, isFalse);
@@ -104,9 +110,11 @@ void main() {
             ),
           );
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(
+              logger: logger,
+              processManager: fakeProcessManager,
+            ),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
-            logger: logger,
           );
 
           expect(xcode.isSimctlInstalled, isFalse);
@@ -122,9 +130,10 @@ void main() {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version']),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
 
@@ -136,11 +145,14 @@ void main() {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version'], exitCode: 1),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(
+              logger: logger,
+              processManager: fakeProcessManager,
+            ),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
-            logger: logger,
           );
 
           expect(xcode.isDevicectlInstalled, isFalse);
@@ -157,11 +169,14 @@ void main() {
               exception: ProcessException('xcrun', <String>['devicectl']),
             ),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(
+              logger: logger,
+              processManager: fakeProcessManager,
+            ),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
-            logger: logger,
           );
 
           expect(xcode.isDevicectlInstalled, isFalse);
@@ -169,17 +184,6 @@ void main() {
           expect(logger.statusText, isEmpty);
           expect(logger.errorText, isEmpty);
           expect(logger.traceText, contains('ProcessException'));
-        });
-
-        testWithoutContext('is false when Xcode is less than 15', () {
-          xcodeProjectInterpreter.version = Version(14, 0, 0);
-          final xcode = Xcode.test(
-            processManager: fakeProcessManager,
-            xcodeProjectInterpreter: xcodeProjectInterpreter,
-          );
-
-          expect(xcode.isDevicectlInstalled, isFalse);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
       });
 
@@ -192,7 +196,7 @@ void main() {
 
         testWithoutContext('parses correctly', () {
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
 
@@ -209,7 +213,7 @@ void main() {
 
         testWithoutContext('throws error if not found', () {
           final xcode = Xcode.test(
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
 
@@ -218,7 +222,7 @@ void main() {
 
         testWithoutContext('throws error with unexpected outcome', () {
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           );
 
@@ -245,10 +249,12 @@ void main() {
 
         testWithoutContext('returns path when file is found', () {
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(
+              flutterRoot: flutterRoot,
+              fs: fileSystem,
+              processManager: fakeProcessManager,
+            ),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
-            fileSystem: fileSystem,
-            flutterRoot: flutterRoot,
           );
 
           fileSystem
@@ -263,10 +269,12 @@ void main() {
 
         testWithoutContext('throws error when not found', () {
           final xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(
+              flutterRoot: flutterRoot,
+              fs: fileSystem,
+              processManager: fakeProcessManager,
+            ),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
-            fileSystem: fileSystem,
-            flutterRoot: flutterRoot,
           );
 
           expect(() => xcode.xcodeAutomationScriptPath, throwsToolExit());
@@ -281,9 +289,11 @@ void main() {
           xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
           logger = BufferLogger.test();
           xcode = Xcode.test(
-            processManager: fakeProcessManager,
+            toolContext: FakeToolContext.macosHost(
+              logger: logger,
+              processManager: fakeProcessManager,
+            ),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
-            logger: logger,
           );
         });
 
@@ -413,16 +423,13 @@ void main() {
           },
         );
 
-        testWithoutContext(
-          'isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied',
-          () {
-            xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(15, null, null);
+        testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(15, null, null);
 
-            expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
-            expect(fakeProcessManager, hasNoRemainingExpectations);
-          },
-        );
+          expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
 
         testWithoutContext(
           'eulaSigned is false when clang output indicates EULA not yet accepted',
@@ -611,14 +618,16 @@ void main() {
           testWithoutContext('returns DeviceHub.app when it exists', () {
             final fileSystem = MemoryFileSystem.test();
             final xcode = Xcode.test(
-              processManager: FakeProcessManager.list(<FakeCommand>[
-                const FakeCommand(
-                  command: <String>['/usr/bin/xcode-select', '--print-path'],
-                  stdout: xcodePath,
-                ),
-              ]),
+              toolContext: FakeToolContext.macosHost(
+                fs: fileSystem,
+                processManager: FakeProcessManager.list(<FakeCommand>[
+                  const FakeCommand(
+                    command: <String>['/usr/bin/xcode-select', '--print-path'],
+                    stdout: xcodePath,
+                  ),
+                ]),
+              ),
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              fileSystem: fileSystem,
             );
             fileSystem
                 .directory('$xcodeContentsPath/Applications/DeviceHub.app')
@@ -629,14 +638,16 @@ void main() {
           testWithoutContext('falls back to Simulator.app when DeviceHub does not exist', () {
             final fileSystem = MemoryFileSystem.test();
             final xcode = Xcode.test(
-              processManager: FakeProcessManager.list(<FakeCommand>[
-                const FakeCommand(
-                  command: <String>['/usr/bin/xcode-select', '--print-path'],
-                  stdout: xcodePath,
-                ),
-              ]),
+              toolContext: FakeToolContext.macosHost(
+                fs: fileSystem,
+                processManager: FakeProcessManager.list(<FakeCommand>[
+                  const FakeCommand(
+                    command: <String>['/usr/bin/xcode-select', '--print-path'],
+                    stdout: xcodePath,
+                  ),
+                ]),
+              ),
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              fileSystem: fileSystem,
             );
             fileSystem
                 .directory('$xcodePath/Applications/Simulator.app')
@@ -646,28 +657,32 @@ void main() {
 
           testWithoutContext('returns null when neither app directory exists', () {
             final xcode = Xcode.test(
-              processManager: FakeProcessManager.list(<FakeCommand>[
-                const FakeCommand(
-                  command: <String>['/usr/bin/xcode-select', '--print-path'],
-                  stdout: xcodePath,
-                ),
-              ]),
+              toolContext: FakeToolContext.macosHost(
+                fs: MemoryFileSystem.test(),
+                processManager: FakeProcessManager.list(<FakeCommand>[
+                  const FakeCommand(
+                    command: <String>['/usr/bin/xcode-select', '--print-path'],
+                    stdout: xcodePath,
+                  ),
+                ]),
+              ),
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              fileSystem: MemoryFileSystem.test(),
             );
             expect(xcode.getSimulatorPath(), isNull);
           });
 
           testWithoutContext('returns null when xcode-select path is unavailable', () {
             final xcode = Xcode.test(
-              processManager: FakeProcessManager.list(<FakeCommand>[
-                const FakeCommand(
-                  command: <String>['/usr/bin/xcode-select', '--print-path'],
-                  exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
-                ),
-              ]),
+              toolContext: FakeToolContext.macosHost(
+                fs: MemoryFileSystem.test(),
+                processManager: FakeProcessManager.list(<FakeCommand>[
+                  const FakeCommand(
+                    command: <String>['/usr/bin/xcode-select', '--print-path'],
+                    exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
+                  ),
+                ]),
+              ),
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              fileSystem: MemoryFileSystem.test(),
             );
             expect(xcode.getSimulatorPath(), isNull);
           });
@@ -682,26 +697,39 @@ void main() {
 
       setUp(() {
         xcode = Xcode.test(
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-            processManager: FakeProcessManager.any(),
+            toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
             version: null, // Not installed.
           ),
         );
         fileSystem = MemoryFileSystem.test();
         xcdevice = XCDevice(
-          processManager: fakeProcessManager,
-          logger: logger,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: fakeProcessManager,
+            shutdownHooks: FakeShutdownHooks(),
+          ),
           xcode: xcode,
-          platform: FakePlatform(operatingSystem: 'macos'),
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-          fileSystem: fileSystem,
           coreDeviceControl: FakeIOSCoreDeviceControl(),
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: const NoOpAnalytics(),
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+          ),
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
-          shutdownHooks: FakeShutdownHooks(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
         );
       });
 
@@ -723,18 +751,33 @@ void main() {
       final shutdownHooks = ShutdownHooks();
 
       final xcdevice = XCDevice(
-        processManager: FakeProcessManager.any(),
-        logger: logger,
-        xcode: Xcode.test(processManager: FakeProcessManager.any()),
-        platform: FakePlatform(operatingSystem: 'macos'),
-        artifacts: Artifacts.test(),
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
+        xcode: Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        ),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: MemoryFileSystem.test(),
         coreDeviceControl: FakeIOSCoreDeviceControl(),
+        mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+          analytics: const NoOpAnalytics(),
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+        ),
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
-        shutdownHooks: shutdownHooks,
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
+        templateRenderer: FakeTemplateRenderer(),
       );
 
       expect(shutdownHooks.registeredHooks, hasLength(1));
@@ -759,7 +802,9 @@ void main() {
       late FakeIOSCoreDeviceControl coreDeviceControl;
 
       setUp(() {
-        xcode = Xcode.test(processManager: FakeProcessManager.any());
+        xcode = Xcode.test(
+          toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
+        );
         fileSystem = MemoryFileSystem.test();
         coreDeviceControl = FakeIOSCoreDeviceControl();
         fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -767,18 +812,31 @@ void main() {
           fakeFlutterVersion: FakeFlutterVersion(),
         );
         xcdevice = XCDevice(
-          processManager: fakeProcessManager,
-          logger: logger,
+          featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: fakeProcessManager,
+            shutdownHooks: FakeShutdownHooks(),
+          ),
           xcode: xcode,
-          platform: FakePlatform(operatingSystem: 'macos'),
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-          fileSystem: fileSystem,
           coreDeviceControl: coreDeviceControl,
+          mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+            analytics: fakeAnalytics,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+          ),
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
-          shutdownHooks: FakeShutdownHooks(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
+          templateRenderer: FakeTemplateRenderer(),
         );
       });
 
@@ -1600,18 +1658,31 @@ void main() {
               ),
             );
             xcdevice = XCDevice(
-              processManager: fakeProcessManager,
-              logger: logger,
+              featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
+              toolContext: FakeToolContext(
+                artifacts: Artifacts.test(),
+                cache: Cache.test(processManager: FakeProcessManager.any()),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: fakeProcessManager,
+                shutdownHooks: FakeShutdownHooks(),
+              ),
               xcode: xcode,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              artifacts: Artifacts.test(),
-              cache: Cache.test(processManager: FakeProcessManager.any()),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-              fileSystem: fileSystem,
               coreDeviceControl: coreDeviceControl,
+              mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+                analytics: fakeAnalytics,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+              ),
+              templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
               xcodeDebug: FakeXcodeDebug(),
               analytics: fakeAnalytics,
-              shutdownHooks: FakeShutdownHooks(),
+              cocoaPods: FakeCocoaPods(),
+              plistParser: FakePlistParser(),
+              templateRenderer: FakeTemplateRenderer(),
             );
             const devicesOutput = '''
 [
@@ -2022,6 +2093,66 @@ void main() {
           expect(errors, isNot(contains('Xcode will continue')));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
+      });
+    });
+
+    group('environmentTypeFromSdkroot', () {
+      late MemoryFileSystem fileSystem;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      testWithoutContext('returns EnvironmentType.physical for iPhoneOS sdk', () {
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneOS.sdk', fileSystem),
+          EnvironmentType.physical,
+        );
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneOS17.0.sdk', fileSystem),
+          EnvironmentType.physical,
+        );
+      });
+
+      testWithoutContext('returns EnvironmentType.simulator for iPhoneSimulator sdk', () {
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneSimulator.sdk', fileSystem),
+          EnvironmentType.simulator,
+        );
+        expect(
+          environmentTypeFromSdkroot('/path/to/iPhoneSimulator17.0.sdk', fileSystem),
+          EnvironmentType.simulator,
+        );
+      });
+
+      testWithoutContext('throws ToolExit for non-iOS sdk', () {
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem),
+          throwsToolExit(
+            message:
+                'Unsupported iOS SDK root "/path/to/MacOSX.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
+          ),
+        );
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/XROS1.0.sdk', fileSystem),
+          throwsToolExit(
+            message:
+                'Unsupported iOS SDK root "/path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
+          ),
+        );
+        expect(
+          () => environmentTypeFromSdkroot('/path/to/WatchOS.sdk', fileSystem),
+          throwsToolExit(
+            message:
+                'Unsupported iOS SDK root "/path/to/WatchOS.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+                "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+                '(SDKROOT) and Supported Destinations in Xcode.',
+          ),
+        );
       });
     });
   });

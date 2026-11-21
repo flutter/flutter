@@ -15,7 +15,11 @@ import '../../src/common.dart';
 import '../test_utils.dart' show ProcessResultMatcher, fileSystem, flutterBin, platform;
 import '../transition_test_utils.dart';
 
-Future<Directory> createTestProject(String packageName, Directory tempDirectory) async {
+Future<Directory> createTestProject(
+  String packageName,
+  Directory tempDirectory, {
+  bool withProcessGlobalState = false,
+}) async {
   final ProcessResult result = processManager.runSync(<String>[
     flutterBin,
     'create',
@@ -48,6 +52,10 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await addUserDefine(packageName, packageDirectory);
 
   await addDynamicallyLinkedNativeLibrary(packageName, packageDirectory);
+
+  if (withProcessGlobalState) {
+    await addProcessGlobalState(packageName, packageDirectory);
+  }
 
   final ProcessResult result2 = await processManager.run(<String>[
     flutterBin,
@@ -136,6 +144,108 @@ import '${packageName}_bindings_generated.dart' as bindings;
   );
   expect(dartFileNew2, isNot(dartFileNew));
   await dartFile.writeAsString(dartFileNew2);
+}
+
+Future<void> addCodeAssetOpenHelper(String packageName, Directory packageDirectory) async {
+  final File dartFile = packageDirectory.childDirectory('lib').childFile('$packageName.dart');
+  final String dartFileOld = await dartFile.readAsString();
+  final lineEnding = dartFileOld.contains('\r\n') ? '\r\n' : '\n';
+  final String dartFileWithFfiImport = dartFileOld.replaceFirst(
+    "import 'dart:async';",
+    "import 'dart:async';${lineEnding}import 'dart:ffi';",
+  );
+  expect(dartFileWithFfiImport, isNot(dartFileOld));
+
+  const generatedSumDeclaration = 'int sum(int a, int b) => bindings.sum(a, b);';
+  const linkedSumDeclaration =
+      'int sum(int a, int b) => bindings.sum(a, b) + l.difference(2, 1) - 1;';
+  final sumDeclaration = dartFileWithFfiImport.contains(linkedSumDeclaration)
+      ? linkedSumDeclaration
+      : generatedSumDeclaration;
+  final String dartFileNew = dartFileWithFfiImport.replaceFirst(sumDeclaration, '''
+$sumDeclaration
+
+/// Invokes `sum` by explicitly opening the generated code asset.
+int sumWithCodeAsset(int a, int b) {
+  final library = DynamicLibrary.codeAsset(
+    'package:$packageName/${packageName}_bindings_generated.dart',
+  );
+  try {
+    final sum = library.lookupFunction<
+        IntPtr Function(IntPtr, IntPtr), int Function(int, int)>('sum');
+    return sum(a, b);
+  } finally {
+    library.close();
+  }
+}
+''');
+  expect(dartFileNew, isNot(dartFileWithFfiImport));
+  await dartFile.writeAsString(dartFileNew);
+}
+
+Future<void> addCodeAssetCallToExampleApp(String packageName, Directory packageDirectory) async {
+  final File dartFile = packageDirectory
+      .childDirectory('example')
+      .childDirectory('lib')
+      .childFile('main.dart');
+  final String dartFileOld = (await dartFile.readAsString()).replaceAll('\r\n', '\n');
+  final String dartFileWithResultField = dartFileOld.replaceFirst(
+    '''
+  late int sumResult;
+  late Future<int> sumAsyncResult;
+''',
+    '''
+  late int sumResult;
+  late int sumWithCodeAssetResult;
+  late Future<int> sumAsyncResult;
+''',
+  );
+  expect(dartFileWithResultField, isNot(dartFileOld));
+
+  final String dartFileWithCodeAssetCall = dartFileWithResultField.replaceFirst(
+    '''
+    sumResult = $packageName.sum(1, 2);
+    sumAsyncResult = $packageName.sumAsync(3, 4);
+''',
+    '''
+    sumResult = $packageName.sum(1, 2);
+    sumWithCodeAssetResult = $packageName.sumWithCodeAsset(2, 3);
+    if (sumWithCodeAssetResult != 5) {
+      throw StateError(
+        'Expected sumWithCodeAsset(2, 3) to be 5, got \$sumWithCodeAssetResult',
+      );
+    }
+    sumAsyncResult = $packageName.sumAsync(3, 4);
+''',
+  );
+  expect(dartFileWithCodeAssetCall, isNot(dartFileWithResultField));
+
+  final String dartFileNew = dartFileWithCodeAssetCall.replaceFirst(
+    r'''
+                Text(
+                  'sum(1, 2) = $sumResult',
+                  style: textStyle,
+                  textAlign: .center,
+                ),
+                spacerSmall,
+''',
+    r'''
+                Text(
+                  'sum(1, 2) = $sumResult',
+                  style: textStyle,
+                  textAlign: .center,
+                ),
+                spacerSmall,
+                Text(
+                  'sumWithCodeAsset(2, 3) = $sumWithCodeAssetResult',
+                  style: textStyle,
+                  textAlign: .center,
+                ),
+                spacerSmall,
+''',
+  );
+  expect(dartFileNew, isNot(dartFileWithCodeAssetCall));
+  await dartFile.writeAsString(dartFileNew);
 }
 
 /// Adds a user-define to the pubspec of the package and the example project.
@@ -275,10 +385,200 @@ extension on BuildInput {
   await builderFile.writeAsString(builderSource);
 }
 
+/// Links the main library of the package from [addDynamicallyLinkedNativeLibrary]
+/// like a vendor's prebuilt dylib often is: with plain `clang`, a short install
+/// name, and no `-headerpad_max_install_names`, so its header keeps the
+/// default 32 free bytes. (`CBuilder` links with `-encryptable`, which leaves
+/// plenty of room.)
+///
+/// The library depends on `add`, which `CBuilder` links without an install
+/// name, so `add` is referenced by its long path in the hook's output
+/// directory, and rewriting that to the shorter path under `build/` frees
+/// about 40 bytes. The install name is `@rpath/m.dylib`, so short that the
+/// absolute path `flutter test` gives code assets on macOS still does not fit
+/// for any package root. (A vendor's library that references its siblings by
+/// `@rpath/` names grows on that rewrite instead, and fails.) Only works on
+/// macOS.
+Future<void> linkMainLibraryWithoutHeaderRoom(
+  String packageName,
+  Directory packageDirectory,
+) async {
+  const builderSource = r'''
+import 'dart:io';
+
+import 'package:code_assets/code_assets.dart';
+import 'package:hooks/hooks.dart';
+import 'package:logging/logging.dart';
+import 'package:native_toolchain_c/native_toolchain_c.dart';
+
+void main(List<String> args) async {
+  await build(args, (input, output) async {
+    if (!input.config.buildCodeAssets) {
+      return;
+    }
+    final packageName = input.packageName;
+    await CBuilder.library(
+      name: 'add',
+      assetName: 'add',
+      sources: ['src/add.c'],
+    ).run(input: input, output: output, logger: Logger(''));
+
+    final Uri source = input.packageRoot.resolve('src/$packageName.c');
+    final Uri library = input.outputDirectory.resolve('lib$packageName.dylib');
+    final ProcessResult result = await Process.run('xcrun', [
+      'clang',
+      '-arch',
+      switch (input.config.code.targetArchitecture) {
+        Architecture.arm64 => 'arm64',
+        Architecture.x64 => 'x86_64',
+        final architecture => throw UnsupportedError('$architecture'),
+      },
+      '-dynamiclib',
+      '-mmacos-version-min=${input.config.code.macOS.targetVersion}',
+      source.toFilePath(),
+      '-L${input.outputDirectory.toFilePath()}',
+      '-ladd',
+      '-install_name',
+      '@rpath/m.dylib',
+      '-o',
+      library.toFilePath(),
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception('clang failed:\n${result.stdout}\n${result.stderr}');
+    }
+    output.assets.code.add(
+      CodeAsset(
+        package: packageName,
+        name: '${packageName}_bindings_generated.dart',
+        linkMode: DynamicLoadingBundled(),
+        file: library,
+      ),
+    );
+    output.dependencies.add(source);
+  });
+}
+''';
+  final File builderFile = packageDirectory.childDirectory('hook').childFile('build.dart');
+  expect(builderFile, exists);
+  await builderFile.writeAsString(builderSource);
+}
+
+/// Checks that `flutter test` kept the short install name of the main library
+/// from [linkMainLibraryWithoutHeaderRoom], and still pointed the main library
+/// at `add` by its absolute path.
+void expectTesterKeptInstallName(String packageName, Directory packageDirectory) {
+  final Directory assetsDirectory = packageDirectory.childDirectory('build/native_assets/macos');
+  final File mainLibrary = assetsDirectory.childFile('lib$packageName.dylib');
+  final ProcessResult installName = processManager.runSync(<String>[
+    'otool',
+    '-D',
+    mainLibrary.path,
+  ]);
+  expect(installName.stdout.toString(), contains('@rpath/m.dylib'));
+  final ProcessResult dependencies = processManager.runSync(<String>[
+    'otool',
+    '-L',
+    mainLibrary.path,
+  ]);
+  expect(dependencies.stdout.toString(), contains(assetsDirectory.childFile('libadd.dylib').path));
+  final ProcessResult signature = processManager.runSync(<String>[
+    'codesign',
+    '--verify',
+    mainLibrary.path,
+  ]);
+  expect(signature, const ProcessResultMatcher());
+}
+
+/// Adds a pair of native functions that share state through a heap allocation
+/// the native library holds on to.
+///
+/// `storeState` allocates and remembers a value, `loadState` reads it back
+/// through the remembered pointer. Reading it back only works while both calls
+/// land in the same copy of the library, which makes the pair a probe for
+/// whether the code asset was mapped into the process more than once.
+///
+/// `loadState` gets its own binding so that it resolves the asset again on
+/// first use, rather than reusing whatever `storeState` resolved.
+Future<void> addProcessGlobalState(String packageName, Directory packageDirectory) async {
+  final Directory srcDirectory = packageDirectory.childDirectory('src');
+
+  await srcDirectory.childFile('$packageName.h').writeAsString('''
+
+FFI_PLUGIN_EXPORT void store_state(intptr_t value);
+
+FFI_PLUGIN_EXPORT intptr_t load_state(void);
+''', mode: FileMode.append);
+
+  await srcDirectory.childFile('$packageName.c').writeAsString('''
+
+typedef struct {
+  intptr_t value;
+} state_t;
+
+static state_t* state = NULL;
+
+FFI_PLUGIN_EXPORT void store_state(intptr_t value) {
+  state = malloc(sizeof(state_t));
+  state->value = value;
+}
+
+// Reads through `state` without checking it, on purpose. A second copy of this
+// library in the same process gets its own `state`, which no one has stored
+// anything in, and reading through it takes the process down the same way a
+// real code asset does.
+FFI_PLUGIN_EXPORT intptr_t load_state(void) {
+  return state->value;
+}
+''', mode: FileMode.append);
+
+  final Directory libDirectory = packageDirectory.childDirectory('lib');
+
+  await libDirectory.childFile('${packageName}_bindings_generated.dart').writeAsString('''
+
+@ffi.Native<ffi.Void Function(ffi.IntPtr)>()
+external void store_state(int value);
+
+@ffi.Native<ffi.IntPtr Function()>()
+external int load_state();
+''', mode: FileMode.append);
+
+  await libDirectory.childFile('$packageName.dart').writeAsString('''
+
+/// Remembers [value] in an allocation held by the native library.
+void storeState(int value) => bindings.store_state(value);
+
+/// Reads back what [storeState] remembered.
+int loadState() => bindings.load_state();
+''', mode: FileMode.append);
+}
+
+/// The framework binary a macOS app bundle resolves its code asset to.
+File bundledFrameworkBinaryMacOS(Directory appDirectory, String buildMode) {
+  return appDirectory
+      .childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/')
+      .childDirectory('$exampleAppName.app')
+      .childDirectory('Contents/Frameworks')
+      .childDirectory('$packageName.framework')
+      .childDirectory('Versions')
+      .childDirectory('A')
+      .childFile(packageName);
+}
+
+/// Replaces [file] with a byte for byte copy of itself.
+///
+/// The copy occupies a different inode, which is the identity dyld falls back
+/// on for an image it cannot match by install name. Rebuilding a bundle that a
+/// debug instance is still running does the same thing to it.
+void replaceWithCopy(File file) {
+  final File copy = file.parent.childFile('${file.basename}.copy');
+  file.copySync(copy.path);
+  copy.renameSync(file.path);
+}
+
 Future<void> pinDependencies(File pubspecFile) async {
   expect(pubspecFile, exists);
   final String oldPubspec = await pubspecFile.readAsString();
-  final String newPubspec = oldPubspec.replaceAll(RegExp(r':\s*\^'), ': ');
+  final String newPubspec = oldPubspec.replaceAll(RegExp(r'(?<!sdk):\s*\^'), ': ');
   expect(newPubspec, isNot(oldPubspec));
   await pubspecFile.writeAsString(newPubspec);
 }

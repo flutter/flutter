@@ -261,38 +261,35 @@ android {
   // Lab tooling does) configures Gradle without a Flutter compile task: the single
   // `assembleAndroidTest` CLI task makes `shouldConfigureFlutterTask` return false,
   // so `compileFlutterBuild<Variant>` is never registered. The jniLibs copy task
-  // wired via the variant API must tolerate that (absent) compile task rather than
-  // failing with "Task with name 'compileFlutterBuildDebug' not found".
-  testWithoutContext(
-    'app:assembleAndroidTest builds when no Flutter compile task is configured',
-    () async {
-      final Directory appDir = _createApp(tempDir);
+  // is registered only together with the compile task, so the build must not
+  // fail with "Task with name 'compileFlutterBuildDebug' not found".
+  testWithoutContext('app:assembleAndroidTest builds when no Flutter compile task is configured', () async {
+    final Directory appDir = _createApp(tempDir);
 
-      // Configure Gradle without running the Flutter build (no `flutter assemble`).
-      final ProcessResult configResult = processManager.runSync(<String>[
-        flutterBin,
-        'build',
-        'apk',
-        '--debug',
-        '--config-only',
-      ], workingDirectory: appDir.path);
-      expect(configResult, const ProcessResultMatcher());
+    // Configure Gradle without running the Flutter build (no `flutter assemble`).
+    final ProcessResult configResult = processManager.runSync(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--debug',
+      '--config-only',
+    ], workingDirectory: appDir.path);
+    expect(configResult, const ProcessResultMatcher());
 
-      final Directory androidDir = appDir.childDirectory('android');
-      final File gradlew = androidDir.childFile(Platform.isWindows ? 'gradlew.bat' : 'gradlew');
-      final ProcessResult assembleResult = processManager.runSync(<String>[
-        gradlew.path,
-        'app:assembleAndroidTest',
-        '-Pverbose=true',
-      ], workingDirectory: androidDir.path);
-      expect(
-        assembleResult.exitCode,
-        0,
-        reason:
-            'gradlew app:assembleAndroidTest failed:\n${assembleResult.stdout}\n${assembleResult.stderr}',
-      );
-    },
-  );
+    final Directory androidDir = appDir.childDirectory('android');
+    final File gradlew = androidDir.childFile(Platform.isWindows ? 'gradlew.bat' : 'gradlew');
+    final ProcessResult assembleResult = processManager.runSync(<String>[
+      gradlew.path,
+      'app:assembleAndroidTest',
+      '-Pverbose=true',
+    ], workingDirectory: androidDir.path);
+    expect(
+      assembleResult.exitCode,
+      0,
+      reason:
+          'gradlew app:assembleAndroidTest failed:\n${assembleResult.stdout}\n${assembleResult.stderr}',
+    );
+  });
 }
 
 Directory _createApp(Directory workingDir) {
@@ -421,9 +418,8 @@ List<String> _appBundleFileList(Directory appDir, File appBundle) {
     throw StateError('App bundle not found at ${appBundle.path}');
   }
   final File localProperties = appDir.childDirectory('android').childFile('local.properties');
-  final RegExpMatch? match = RegExp(
-    r'sdk\.dir=(.+)',
-  ).firstMatch(localProperties.readAsStringSync());
+  final RegExpMatch? match = RegExp(r'sdk\.dir=(.+)')
+      .firstMatch(localProperties.readAsStringSync());
   final String sdkPath = match?.group(1)?.trim() ?? '';
   if (sdkPath.isEmpty) {
     throw StateError('SDK path not found in ${localProperties.path}');

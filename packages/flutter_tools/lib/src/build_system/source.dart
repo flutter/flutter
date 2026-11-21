@@ -7,6 +7,7 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../project.dart';
 import 'build_system.dart';
+import 'depfile.dart';
 import 'exceptions.dart';
 
 //////////////////////////////////////////////////////////////////////
@@ -44,7 +45,10 @@ class SourceVisitor implements ResolvedFiles {
   final bool inputs;
 
   /// The current project.
-  late final FlutterProject _project = FlutterProject.fromDirectory(environment.projectDir);
+  late final FlutterProject _project = FlutterProject.fromDirectory(
+    environment.projectDir,
+    logger: environment.logger,
+  );
 
   @override
   final sources = <File>[];
@@ -53,47 +57,23 @@ class SourceVisitor implements ResolvedFiles {
   bool get containsNewDepfile => _containsNewDepfile;
   var _containsNewDepfile = false;
 
-  /// Visit a depfile which contains both input and output files.
+  /// Visit a depfile.
   ///
-  /// If the file is missing, this visitor is marked as [containsNewDepfile].
-  /// This is used by the [Node] class to tell the [BuildSystem] to
+  /// If the depfile does not exist, marks [containsNewDepfile] as true and
+  /// returns. This is used by the [Node] class to tell the [BuildSystem] to
   /// defer hash computation until after executing the target.
-  // depfile logic adopted from https://github.com/flutter/flutter/blob/7065e4330624a5a216c8ffbace0a462617dc1bf5/dev/devicelab/lib/framework/apk_utils.dart#L390
   void visitDepfile(String name) {
     final File depfile = environment.buildDir.childFile(name);
     if (!depfile.existsSync()) {
       _containsNewDepfile = true;
       return;
     }
-    final String contents = depfile.readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
-    if (colonSeparated.length != 2) {
-      environment.logger.printError('Invalid depfile: ${depfile.path}');
-      return;
-    }
+    final Depfile parsedDepfile = environment.depFileService.parse(depfile);
     if (inputs) {
-      sources.addAll(_processList(colonSeparated[1].trim()));
+      sources.addAll(parsedDepfile.inputs);
     } else {
-      sources.addAll(_processList(colonSeparated[0].trim()));
+      sources.addAll(parsedDepfile.outputs);
     }
-  }
-
-  final _separatorExpr = RegExp(r'([^\\]) ');
-  final _escapeExpr = RegExp(r'\\(.)');
-
-  Iterable<File> _processList(String rawText) {
-    return rawText
-        // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
-        .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>(
-          (String path) =>
-              path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim(),
-        )
-        .where((String path) => path.isNotEmpty)
-        .toSet()
-        .map(environment.fileSystem.file);
   }
 
   /// Visit a [Source] which contains a file URL.
@@ -236,6 +216,12 @@ class SourceVisitor implements ResolvedFiles {
 
     sources.add(environment.fileSystem.file(path));
   }
+
+  void visitEnvironmentSources(EnvironmentSourceBuilder builder) {
+    for (final Source source in builder(environment)) {
+      source.accept(this);
+    }
+  }
 }
 
 /// A description of an input or output of a [Target].
@@ -271,6 +257,9 @@ abstract class Source {
   /// ```
   const factory Source.fromProject(ProjectSourceBuilder sourceBuilder, {bool optional}) =
       _ProjectSource;
+
+  /// Sources resolved dynamically from the build [Environment].
+  const factory Source.fromEnvironment(EnvironmentSourceBuilder sourceBuilder) = _EnvironmentSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -334,6 +323,20 @@ class _ProjectSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitProjectSource(builder, optional);
+
+  @override
+  bool get implicit => false;
+}
+
+typedef EnvironmentSourceBuilder = List<Source> Function(Environment);
+
+class _EnvironmentSource implements Source {
+  const _EnvironmentSource(this.builder);
+
+  final EnvironmentSourceBuilder builder;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitEnvironmentSources(builder);
 
   @override
   bool get implicit => false;

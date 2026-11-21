@@ -47,5 +47,29 @@ DlCanvas* MockViewEmbedder::CompositeEmbeddedView(int64_t view_id) {
   return canvas;
 }
 
+// |ExternalViewEmbedder|
+void MockViewEmbedder::PushClipRectToVisitedPlatformViews(
+    const DlRect& clip_rect) {
+  pushed_clips_.emplace_back(clip_rect);
+}
+
+// |ExternalViewEmbedder|
+void MockViewEmbedder::PushClipRRectToVisitedPlatformViews(
+    const DlRoundRect& clip_rrect) {
+  pushed_clips_.emplace_back(clip_rrect);
+}
+
+// |ExternalViewEmbedder|
+void MockViewEmbedder::PushClipRSuperellipseToVisitedPlatformViews(
+    const DlRoundSuperellipse& clip_rse) {
+  pushed_clips_.emplace_back(clip_rse);
+}
+
+// |ExternalViewEmbedder|
+void MockViewEmbedder::PushClipPathToVisitedPlatformViews(
+    const DlPath& clip_path) {
+  pushed_clips_.emplace_back(clip_path);
+}
+
 }  // namespace testing
 }  // namespace flutter

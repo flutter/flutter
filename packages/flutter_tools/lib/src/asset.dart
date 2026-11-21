@@ -9,14 +9,12 @@ import 'package:package_config/package_config.dart';
 import 'package:standard_message_codec/standard_message_codec.dart';
 
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -72,8 +70,8 @@ class FlutterHookResult {
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
     for (final uri in uris) {
-      final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
-      if (modified.isAfter(since)) {
+      final FileStat stat = fileSystem.statSync(fileSystem.path.fromUri(uri));
+      if (stat.type == FileSystemEntityType.notFound || stat.modified.isAfter(since)) {
         return true;
       }
     }
@@ -130,17 +128,16 @@ const kMaterialFonts = <Map<String, Object>>[
 
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
-  /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
-
   static AssetBundleFactory defaultInstance({
-    required Logger logger,
     required FileSystem fileSystem,
+    required String flutterRoot,
+    required Logger logger,
     required Platform platform,
     bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(
-    logger: logger,
     fileSystem: fileSystem,
+    flutterRoot: flutterRoot,
+    logger: logger,
     platform: platform,
     splitDeferredAssets: splitDeferredAssets,
   );
@@ -201,18 +198,17 @@ abstract class AssetBundle {
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool splitDeferredAssets = false,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _splitDeferredAssets = splitDeferredAssets;
+    required this._fileSystem,
+    required this._flutterRoot,
+    required this._logger,
+    required this._platform,
+    this._splitDeferredAssets = false,
+  });
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
+  final String _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -220,7 +216,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     logger: _logger,
     fileSystem: _fileSystem,
     platform: _platform,
-    flutterRoot: Cache.flutterRoot!,
+    flutterRoot: _flutterRoot,
     splitDeferredAssets: _splitDeferredAssets,
   );
 }
@@ -230,16 +226,12 @@ class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
   ManifestAssetBundle({
-    required Logger logger,
+    required this._logger,
     required FileSystem fileSystem,
-    required Platform platform,
-    required String flutterRoot,
-    bool splitDeferredAssets = false,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _flutterRoot = flutterRoot,
-       _splitDeferredAssets = splitDeferredAssets,
+    required this._platform,
+    required this._flutterRoot,
+    this._splitDeferredAssets = false,
+  }) : _fileSystem = fileSystem,
        _licenseCollector = LicenseCollector(fileSystem: fileSystem),
        _lastHookResult = FlutterHookResult.empty();
 
@@ -330,7 +322,10 @@ class ManifestAssetBundle implements AssetBundle {
   }) async {
     if (flutterProject == null) {
       try {
-        flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
+        flutterProject = FlutterProject.fromDirectory(
+          _fileSystem.file(manifestPath).parent,
+          logger: _logger,
+        );
       } on Exception catch (e) {
         _logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         _logger.printError('$e');
@@ -344,7 +339,7 @@ class ManifestAssetBundle implements AssetBundle {
     // device.
     _lastBuildTimestamp = DateTime.now();
     _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
-    if (flutterManifest.isEmpty) {
+    if (flutterManifest.isEmpty && (flutterHookResult?.dataAssets.isEmpty ?? true)) {
       final ByteData emptyAssetManifest = const StandardMessageCodec().encodeMessage(
         <dynamic, dynamic>{},
       )!;
@@ -422,10 +417,9 @@ class ManifestAssetBundle implements AssetBundle {
     // dependencies.
     // To avoid bundling assets from dev_dependencies and other pub workspace
     // packages, we compute the set of transitive dependencies.
-    final List<Dependency> transitiveDependencies = computeTransitiveDependencies(
-      flutterProject,
-      packageConfig,
-    );
+    final List<Dependency> transitiveDependencies = flutterManifest.isEmpty
+        ? <Dependency>[]
+        : computeTransitiveDependencies(flutterProject, packageConfig);
     final additionalLicenseFiles = <String, List<File>>{};
     for (final dependency in transitiveDependencies) {
       if (!includeAssetsFromDevDependencies && dependency.isExclusiveDevDependency) {
@@ -458,12 +452,39 @@ class ManifestAssetBundle implements AssetBundle {
           continue;
         }
         // Collect any additional licenses from each package.
+        final isAppItself = packageFlutterManifest.appName == flutterManifest.appName;
         final licenseFiles = <File>[];
-        for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
-          final String absoluteLicensePath = _fileSystem.path.fromUri(
-            package.root.resolve(relativeLicensePath),
-          );
-          licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+        // Most packages declare no additional licenses, so skip all of the work
+        // below (including canonicalization) when there is nothing to collect.
+        if (packageFlutterManifest.additionalLicenses.isNotEmpty) {
+          // The package root is constant for this package, so canonicalize it
+          // once instead of per license path. The app itself is exempt from the
+          // containment check, in which case this stays null.
+          final String? packageRoot = isAppItself
+              ? null
+              : _fileSystem.path.canonicalize(_fileSystem.path.fromUri(package.root));
+          for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
+            final String absoluteLicensePath = _fileSystem.path.fromUri(
+              package.root.resolve(relativeLicensePath),
+            );
+            // A dependency must not declare a license path that escapes its own
+            // package directory (e.g. '../secret'). Otherwise the build would read
+            // an arbitrary file outside the package and bundle its contents into
+            // the app's NOTICES. This mirrors the containment check applied to
+            // dependency-declared asset paths in `_ensureAssetPathIsValid`.
+            if (packageRoot != null) {
+              final String resolvedLicense = _fileSystem.path.canonicalize(absoluteLicensePath);
+              if (packageRoot != resolvedLicense &&
+                  !_fileSystem.path.isWithin(packageRoot, resolvedLicense)) {
+                throwToolExit(
+                  'Package "${packageFlutterManifest.appName}" specified a license path '
+                  '"$relativeLicensePath" that escapes its package directory. License paths '
+                  'declared by a package must stay within that package.',
+                );
+              }
+            }
+            licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+          }
         }
         additionalLicenseFiles[packageFlutterManifest.appName] = licenseFiles;
 
@@ -511,7 +532,7 @@ class ManifestAssetBundle implements AssetBundle {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
 
-      final String filePath = fileUri.toFilePath();
+      final String filePath = _fileSystem.path.fromUri(fileUri);
 
       final asset = _Asset(
         baseDir: _fileSystem.path.dirname(filePath),
@@ -1180,10 +1201,42 @@ class ManifestAssetBundle implements AssetBundle {
   }) {
     final String directoryPath;
     _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri, packageName: packageName);
-    directoryPath = _fileSystem.path.join(
+
+    final String localDirectoryPath = _fileSystem.path.join(
       assetBase,
       assetUri.toFilePath(windows: _platform.isWindows),
     );
+
+    final bool isPackageAsset =
+        assetUri.pathSegments.length >= 2 &&
+        assetUri.pathSegments[1].isNotEmpty &&
+        assetUri.pathSegments.first == 'packages' &&
+        !_fileSystem.directory(localDirectoryPath).existsSync();
+
+    String? packageLibPath;
+    String? resolvedPackageName;
+
+    if (isPackageAsset) {
+      final _Asset? packageAsset = _resolvePackageAsset(
+        assetUri,
+        packageConfig,
+        attributedPackage,
+        flavors: flavors,
+        platforms: platforms,
+        transformers: transformers,
+      );
+      if (packageAsset == null) {
+        return;
+      }
+      directoryPath = _fileSystem.path.join(
+        packageAsset.baseDir,
+        packageAsset.relativeUri.toFilePath(windows: _platform.isWindows),
+      );
+      packageLibPath = packageAsset.baseDir;
+      resolvedPackageName = assetUri.pathSegments[1];
+    } else {
+      directoryPath = localDirectoryPath;
+    }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
       _logger.printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
@@ -1194,8 +1247,15 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<File> files = entities.whereType<File>();
     for (final file in files) {
-      final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
-      final uri = Uri.file(relativePath, windows: _platform.isWindows);
+      final Uri uri;
+      if (isPackageAsset) {
+        final String relativePathToLib = _fileSystem.path.relative(file.path, from: packageLibPath);
+        final List<String> parts = _fileSystem.path.split(relativePathToLib);
+        uri = Uri(pathSegments: <String>['packages', resolvedPackageName!, ...parts]);
+      } else {
+        final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
+        uri = Uri.file(relativePath, windows: _platform.isWindows);
+      }
 
       _parseAssetFromFile(
         packageConfig,
@@ -1398,7 +1458,11 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri, packageName: packageName);
+    _ensureAssetPathIsValid(
+      assetsBaseDir: assetsBaseDir,
+      assetUri: assetUri,
+      packageName: packageName,
+    );
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),

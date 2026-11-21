@@ -104,7 +104,7 @@ ui.Color? parseCssRgb(String rgbString) {
   if ((isRgb && values.length != 3) || (isRgba && values.length != 4)) {
     assert(() {
       print(
-        'Bad CSS color "$rgbString": wrong number of color componets. For ${isRgb ? 'rgb' : 'rgba'} color, expected ${isRgb ? 3 : 4} components, but found ${values.length}.',
+        'Bad CSS color "$rgbString": wrong number of color components. For ${isRgb ? 'rgb' : 'rgba'} color, expected ${isRgb ? 3 : 4} components, but found ${values.length}.',
       );
       return true;
     }());

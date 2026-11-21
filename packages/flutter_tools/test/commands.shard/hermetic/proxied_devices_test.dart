@@ -8,20 +8,25 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 void main() {
   Daemon? daemon;
@@ -68,7 +73,19 @@ void main() {
     });
 
     testUsingContext('can list devices', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: const DelegatingToolContext(),
+        xcode: null,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -86,7 +103,19 @@ void main() {
     });
 
     testUsingContext('calls supportsRuntimeMode', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: const DelegatingToolContext(),
+        xcode: null,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -103,7 +132,19 @@ void main() {
     }, overrides: <Type, Generator>{Java: () => FakeJava()});
 
     testUsingContext('redirects logs', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        analytics: const NoOpAnalytics(),
+        applicationPackageFactory: applicationPackageFactory,
+        assetBundleFactory: _FakeAssetBundleFactory(),
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: const DelegatingToolContext(),
+        xcode: null,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -125,14 +166,26 @@ void main() {
 
       // Now try to stop the log reader
       expect(fakeLogReader.disposeCalled, false);
-      logReader.dispose();
+      await logReader.dispose();
       await pumpEventQueue();
       expect(fakeLogReader.disposeCalled, true);
     });
     testUsingContext(
       'starts and stops app',
       () async {
-        daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: const DelegatingToolContext(),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -180,7 +233,6 @@ void main() {
       },
       overrides: <Type, Generator>{
         Java: () => FakeJava(),
-        ApplicationPackageFactory: () => applicationPackageFactory,
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => fakeProcessManager,
       },
@@ -189,7 +241,19 @@ void main() {
     testUsingContext(
       'takes screenshot',
       () async {
-        daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          serverDaemonConnection,
+          analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: const DelegatingToolContext(),
+          xcode: null,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+        );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -307,8 +371,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   late DeviceLogReader logReader;
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      logReader;
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;
@@ -349,7 +416,7 @@ class FakeDeviceLogReader implements DeviceLogReader {
   Future<void> provideVmService(FlutterVmService? connectedVmService) async {}
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposeCalled = true;
   }
 
@@ -383,3 +450,5 @@ class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplication
   @override
   late File applicationPackage;
 }
+
+class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}

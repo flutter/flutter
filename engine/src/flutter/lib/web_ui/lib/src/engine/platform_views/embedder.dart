@@ -256,13 +256,20 @@ class PlatformViewEmbedder {
     head.style.transform = float64ListToCssTransform(headTransform.storage);
   }
 
-  /// Sets the transform origin to the top-left corner of the element.
+  /// Sets the transform origin and anchors the element to the top-left corner.
   ///
   /// By default, the transform origin is the center of the element, but
   /// Flutter assumes the transform origin is the top-left point.
+  ///
+  /// Without an explicit left/top, a `position: absolute` element falls back
+  /// to its static position, which is at the right edge of its containing
+  /// block in RTL documents (`dir="rtl"`).
   void _resetAnchor(DomElement element) {
-    element.style.transformOrigin = '0 0 0';
-    element.style.position = 'absolute';
+    element.style
+      ..transformOrigin = '0 0 0'
+      ..position = 'absolute'
+      ..top = '0'
+      ..left = '0';
   }
 
   /// Optimizes the scene to use the fewest possible canvases. This sets up
@@ -517,6 +524,10 @@ class PlatformViewEmbedder {
       canvas.displayCanvas!.setIsOverlay(needsOverlayPositioning);
     }
 
+    // Platform views which were disposed while they were still being
+    // composited. They are left out of the DOM.
+    final missingViewIds = <int>{};
+
     // At this point, the DOM contains the static elements and the elements from
     // the previous composition which need to move. We iterate over the static
     // elements and insert the elements which come before them into the DOM.
@@ -524,16 +535,27 @@ class PlatformViewEmbedder {
     var nextCompositionIndex = 0;
     while (staticElementIndex < staticElements.length) {
       final int staticElementIndexInActiveComposition = staticElements[staticElementIndex];
-      final DomElement staticDomElement = _getElement(
+      final DomElement? staticDomElement = _getElement(
         _activeComposition.entities[staticElementIndexInActiveComposition],
       );
+      if (staticDomElement == null) {
+        // This view is not in the DOM, so it can't position other elements.
+        // Use the next static element instead.
+        staticElementIndex++;
+        continue;
+      }
       // Go through next composition elements until we reach the static element.
       while (indexMap[nextCompositionIndex] != staticElementIndexInActiveComposition) {
         final CompositionEntity nextEntity = composition.entities[nextCompositionIndex];
         if (nextEntity is CompositionCanvas) {
           updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
         }
-        sceneHost.insertBefore(_getElement(nextEntity), staticDomElement);
+        final DomElement? nextDomElement = _getElement(nextEntity);
+        if (nextDomElement != null) {
+          sceneHost.insertBefore(nextDomElement, staticDomElement);
+        } else if (nextEntity is CompositionPlatformView) {
+          missingViewIds.add(nextEntity.viewId);
+        }
         nextCompositionIndex++;
       }
       if (composition.entities[nextCompositionIndex] is CompositionCanvas) {
@@ -554,15 +576,35 @@ class PlatformViewEmbedder {
       if (nextEntity is CompositionCanvas) {
         updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
       }
-      sceneHost.append(_getElement(nextEntity));
+      final DomElement? nextDomElement = _getElement(nextEntity);
+      if (nextDomElement != null) {
+        sceneHost.append(nextDomElement);
+      } else if (nextEntity is CompositionPlatformView) {
+        missingViewIds.add(nextEntity.viewId);
+      }
       nextCompositionIndex++;
+    }
+
+    if (missingViewIds.isNotEmpty) {
+      // Drop the skipped views, so the next frame doesn't expect them to be
+      // in the DOM.
+      composition.entities.removeWhere(
+        (CompositionEntity entity) =>
+            entity is CompositionPlatformView && missingViewIds.contains(entity.viewId),
+      );
+      printWarning(
+        'Cannot render platform views: ${missingViewIds.join(', ')}. '
+        'These views were disposed while they were being composited.',
+      );
     }
   }
 
-  DomElement _getElement(CompositionEntity entity) {
+  /// Returns the DOM element for [entity], or null if the platform view no
+  /// longer has a clip chain because it was disposed.
+  DomElement? _getElement(CompositionEntity entity) {
     return switch (entity) {
       CompositionCanvas() => entity.displayCanvas!.hostElement,
-      CompositionPlatformView() => _viewClipChains[entity.viewId]!.root,
+      CompositionPlatformView() => _viewClipChains[entity.viewId]?.root,
     };
   }
 

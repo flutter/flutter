@@ -34,10 +34,6 @@ IOSContextMetalImpeller::IOSContextMetalImpeller(
 
 IOSContextMetalImpeller::~IOSContextMetalImpeller() = default;
 
-IOSRenderingBackend IOSContextMetalImpeller::GetBackend() const {
-  return IOSRenderingBackend::kImpeller;
-}
-
 // |IOSContext|
 std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext() const {
   return darwin_context_metal_impeller_.context;

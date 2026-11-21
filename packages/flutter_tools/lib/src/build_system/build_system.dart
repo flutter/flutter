@@ -10,7 +10,9 @@ import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -18,7 +20,12 @@ import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/android_context.dart' show AndroidSdkProvider;
 import '../convert.dart';
+import '../features.dart';
+import '../macos/xcode.dart';
+import '../project.dart';
+import '../windows/visual_studio.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
@@ -96,12 +103,12 @@ class BuildSystemConfig {
 ///
 /// ### Targets should only depend on files that are provided as inputs
 ///
-/// Example: gen_snapshot must be provided as an input to the aot_elf
+/// Example: gen_snapshot must be provided as an input to the aot_snapshot
 /// build steps, even though it isn't a source file. This ensures that changes
 /// to the gen_snapshot binary (during a local engine build) correctly
 /// trigger a corresponding build update.
 ///
-/// Example: aot_elf has a dependency on the dill and packages file
+/// Example: aot_snapshot has a dependency on the dill and packages file
 /// produced by the kernel_snapshot step.
 ///
 /// ### Targets should declare all outputs produced
@@ -138,6 +145,9 @@ abstract class Target {
   /// The dependencies of this target.
   List<Target> get dependencies;
 
+  /// Resolves the dependencies of this target for the given [environment].
+  List<Target> resolveDependencies(Environment environment) => dependencies;
+
   /// The input [Source]s which are diffed to determine if a target should run.
   List<Source> get inputs;
 
@@ -173,7 +183,9 @@ abstract class Target {
       this,
       inputsFiles.sources,
       outputFiles.sources,
-      <Node>[for (final Target target in dependencies) target._toNode(environment)],
+      <Node>[
+        for (final Target target in resolveDependencies(environment)) target._toNode(environment),
+      ],
       buildKey,
       environment,
       inputsFiles.containsNewDepfile,
@@ -232,7 +244,9 @@ abstract class Target {
     final String? key = buildKey;
     return <String, Object>{
       'name': name,
-      'dependencies': <String>[for (final Target target in dependencies) target.name],
+      'dependencies': <String>[
+        for (final Target target in resolveDependencies(environment)) target.name,
+      ],
       'inputs': <String>[for (final File file in resolveInputs(environment).sources) file.path],
       'outputs': <String>[for (final File file in resolveOutputs(environment).sources) file.path],
       'buildKey': ?key,
@@ -328,7 +342,7 @@ class CompositeTarget extends Target {
 ///        ..writeAsStringSync('non_debug');
 ///    }
 /// ```
-class Environment {
+class Environment implements AndroidSdkProvider {
   /// Create a new [Environment] object.
   ///
   /// [engineVersion] should be set to null for local engine builds.
@@ -344,8 +358,13 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
-    String? engineVersion,
+    required AndroidSdk? Function()? androidSdkBuilder,
+    required FeatureFlags featureFlags,
+    required FlutterProjectFactory projectFactory,
+    required VisualStudio? visualStudio,
+    required Xcode? xcode,
     required bool generateDartPluginRegistry,
+    String? engineVersion,
     Directory? buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
@@ -386,6 +405,11 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      featureFlags: featureFlags,
+      projectFactory: projectFactory,
+      androidSdkBuilder: androidSdkBuilder,
+      visualStudio: visualStudio,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -398,23 +422,29 @@ class Environment {
   @visibleForTesting
   factory Environment.test(
     Directory testDirectory, {
-    Directory? projectDir,
-    String? packageConfigPath,
-    Directory? outputDir,
-    Directory? cacheDir,
-    Directory? flutterRootDir,
-    Directory? buildDir,
-    Map<String, String> defines = const <String, String>{},
-    Map<String, String> inputs = const <String, String>{},
-    String? engineVersion,
-    Platform? platform,
-    Analytics? analytics,
-    bool generateDartPluginRegistry = false,
+    required Artifacts artifacts,
+    required FeatureFlags featureFlags,
     required FileSystem fileSystem,
     required Logger logger,
-    required Artifacts artifacts,
     required ProcessManager processManager,
+    Analytics? analytics,
+    AndroidSdk? androidSdk,
+    Directory? buildDir,
+    Directory? cacheDir,
+    Map<String, String> defines = const <String, String>{},
+    String? engineVersion,
+    Directory? flutterRootDir,
+    bool generateDartPluginRegistry = false,
+    Map<String, String> inputs = const <String, String>{},
+    Directory? outputDir,
+    String? packageConfigPath,
+    Platform? platform,
+    Directory? projectDir,
+    FlutterProjectFactory? projectFactory,
+    VisualStudio? visualStudio,
+    Xcode? xcode,
   }) {
+    final Platform resolvedPlatform = platform ?? FakePlatform();
     return Environment(
       projectDir: projectDir ?? testDirectory,
       packageConfigPath: packageConfigPath ?? '.dart_tool/package_config.json',
@@ -428,8 +458,20 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
-      platform: platform ?? FakePlatform(),
+      platform: resolvedPlatform,
       analytics: analytics ?? const NoOpAnalytics(),
+      featureFlags: featureFlags,
+      projectFactory:
+          projectFactory ??
+          FlutterProjectFactory(
+            config: Config.test(directory: projectDir ?? testDirectory, logger: logger),
+            fileSystem: fileSystem,
+            logger: logger,
+            xcode: xcode,
+          ),
+      androidSdkBuilder: androidSdk != null ? () => androidSdk : null,
+      visualStudio: visualStudio,
+      xcode: xcode,
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -450,12 +492,17 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
-    this.engineVersion,
+    required this.featureFlags,
+    required this._androidSdkBuilder,
+    required this.projectFactory,
+    required this.visualStudio,
+    required this.xcode,
     required this.inputs,
     required this.generateDartPluginRegistry,
+    this.engineVersion,
   });
 
-  Environment copyWith({Directory? outputDir}) {
+  Environment copyWith({FeatureFlags? featureFlags, Directory? outputDir}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -471,6 +518,11 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      featureFlags: featureFlags ?? this.featureFlags,
+      projectFactory: projectFactory,
+      androidSdkBuilder: _androidSdkBuilder,
+      visualStudio: visualStudio,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -565,6 +617,27 @@ class Environment {
 
   final Analytics analytics;
 
+  /// Feature flags active for this build environment.
+  final FeatureFlags featureFlags;
+
+  /// The factory used by build targets to instantiate [FlutterProject]s.
+  final FlutterProjectFactory projectFactory;
+
+  final AndroidSdk? Function()? _androidSdkBuilder;
+
+  /// The [AndroidSdk] used by Android build targets, lazily resolved on first
+  /// access.
+  @override
+  late final AndroidSdk? androidSdk = _androidSdkBuilder?.call();
+
+  /// The [VisualStudio] instance used by Windows build targets, or `null` for
+  /// non-Windows builds that do not run Windows targets.
+  final VisualStudio? visualStudio;
+
+  /// The [Xcode] instance used by Darwin build targets, or `null` for
+  /// non-Darwin builds that do not run Darwin targets.
+  final Xcode? xcode;
+
   /// The version of the current engine, or `null` if built with a local engine.
   final String? engineVersion;
 
@@ -620,12 +693,10 @@ abstract class BuildSystem {
 
 class FlutterBuildSystem extends BuildSystem {
   const FlutterBuildSystem({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -662,7 +733,7 @@ class FlutterBuildSystem extends BuildSystem {
     final fileCache = FileStore(cacheFile: cacheFile, logger: _logger)..initialize();
 
     // Perform sanity checks on build.
-    checkCycles(target);
+    checkCycles(target, environment);
 
     final Set<String> preservedOutputFilePaths = convertSourcesToPaths(
       _preservedOutputSources,
@@ -788,7 +859,6 @@ class FlutterBuildSystem extends BuildSystem {
   /// files, if these were not already covered by the built-in cleanup. This
   /// cleanup is only necessary when multiple different build configurations
   /// output to the same directory.
-  @visibleForTesting
   void trackSharedBuildDirectory(
     Environment environment,
     FileSystem fileSystem,
@@ -830,15 +900,56 @@ class FlutterBuildSystem extends BuildSystem {
     }
     final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
         .cast<String>();
-    for (final lastOutput in lastOutputs) {
-      if (!currentOutputs.containsKey(lastOutput)) {
-        final File lastOutputFile = fileSystem.file(lastOutput);
-        if (preservedOutputFilePaths.contains(lastOutputFile.path)) {
-          continue;
-        }
-        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
-      }
+    _deleteStaleOutputs(
+      currentOutputs: currentOutputs,
+      environment: environment,
+      fileSystem: fileSystem,
+      preservedOutputFilePaths: preservedOutputFilePaths,
+      previousOutputs: lastOutputs,
+    );
+  }
+}
+
+/// Deletes stale output files from previous builds or build stages that are no
+/// longer part of the current build configuration or output graph.
+///
+/// Files located in the shared hooks runner output directory
+/// (`.dart_tool/hooks_runner/shared/`) and files in [preservedOutputFilePaths]
+/// are explicitly spared from deletion. Shared native asset hook outputs manage
+/// their own caching and invalidation lifecycles independently, so cleaning
+/// them up when switching to build configurations or stages that do not invoke
+/// native assets hooks would incorrectly cause subsequent hook-enabled builds
+/// to skip running hooks (due to valid metadata) while failing to locate the
+/// deleted output files.
+void _deleteStaleOutputs({
+  required Map<String, File> currentOutputs,
+  required Environment environment,
+  required FileSystem fileSystem,
+  required Set<String> preservedOutputFilePaths,
+  required Iterable<String> previousOutputs,
+}) {
+  String projectDirPath;
+  try {
+    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
+  } on FileSystemException {
+    projectDirPath = environment.projectDir.absolute.path;
+  }
+  final String sharedHooksPath = fileSystem.path.canonicalize(
+    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
+  );
+  for (final previousOutput in previousOutputs) {
+    if (currentOutputs.containsKey(previousOutput)) {
+      continue;
     }
+    final File previousFile = fileSystem.file(previousOutput);
+    if (preservedOutputFilePaths.contains(previousFile.path) ||
+        fileSystem.path.isWithin(
+          sharedHooksPath,
+          fileSystem.path.canonicalize(previousFile.path),
+        )) {
+      continue;
+    }
+    ErrorHandlingFileSystem.deleteIfExists(previousFile);
   }
 }
 
@@ -953,16 +1064,13 @@ class _BuildInstance {
 
       // Delete outputs from previous stages that are no longer a part of the
       // build.
-      for (final String previousOutput in node.previousOutputs) {
-        if (outputFiles.containsKey(previousOutput)) {
-          continue;
-        }
-        final File previousFile = fileSystem.file(previousOutput);
-        if (preservedOutputFilePaths.contains(previousFile.path)) {
-          continue;
-        }
-        ErrorHandlingFileSystem.deleteIfExists(previousFile);
-      }
+      _deleteStaleOutputs(
+        currentOutputs: outputFiles,
+        environment: environment,
+        fileSystem: fileSystem,
+        preservedOutputFilePaths: preservedOutputFilePaths,
+        previousOutputs: node.previousOutputs,
+      );
     } on Exception catch (exception, stackTrace) {
       node.target.clearStamp(environment);
       succeeded = false;
@@ -1023,7 +1131,7 @@ class PerformanceMeasurement {
 /// Check if there are any dependency cycles in the target.
 ///
 /// Throws a [CycleException] if one is encountered.
-void checkCycles(Target initial) {
+void checkCycles(Target initial, Environment environment) {
   void checkInternal(Target target, Set<Target> visited, Set<Target> stack) {
     if (stack.contains(target)) {
       throw CycleException(stack..add(target));
@@ -1033,33 +1141,13 @@ void checkCycles(Target initial) {
     }
     visited.add(target);
     stack.add(target);
-    for (final Target dependency in target.dependencies) {
+    for (final Target dependency in target.resolveDependencies(environment)) {
       checkInternal(dependency, visited, stack);
     }
     stack.remove(target);
   }
 
   checkInternal(initial, <Target>{}, <Target>{});
-}
-
-/// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
-  final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
-  final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  final missingOutputs = <File>[];
-  for (final sourceFile in outputs) {
-    if (!sourceFile.existsSync()) {
-      missingOutputs.add(sourceFile);
-      continue;
-    }
-    final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
-      throw MisplacedOutputException(path, target.name);
-    }
-  }
-  if (missingOutputs.isNotEmpty) {
-    throw MissingOutputException(missingOutputs, target.name);
-  }
 }
 
 /// A node in the build graph.

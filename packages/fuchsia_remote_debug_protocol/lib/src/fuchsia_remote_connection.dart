@@ -32,13 +32,12 @@ final Logger _log = Logger('FuchsiaRemoteConnection');
 /// Takes a remote `address`, the target device's port, and an optional
 /// `interface` and `configFile`. The config file is used primarily for the
 /// default SSH port forwarding configuration.
-typedef PortForwardingFunction =
-    Future<PortForwarder> Function(
-      String address,
-      int remotePort, [
-      String? interface,
-      String? configFile,
-    ]);
+typedef PortForwardingFunction = Future<PortForwarder> Function(
+  String address,
+  int remotePort, [
+  String? interface,
+  String? configFile,
+]);
 
 /// The function for forwarding the local machine's ports to a remote Fuchsia
 /// device.

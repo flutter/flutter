@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+#include <set>
+
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -19,9 +22,14 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/render_target_cache.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 
@@ -44,12 +52,30 @@ struct TextRenderOptions {
   bool is_subpixel = false;
 };
 
-bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
-                            DisplayListBuilder& canvas,
-                            const std::string& text,
-                            const std::string_view& font_fixture,
-                            const TextRenderOptions& options = {},
-                            const std::optional<SkFont>& font = std::nullopt) {
+std::shared_ptr<TextFrame> RepositionTextFrame(
+    const std::shared_ptr<TextFrame>& original,
+    Point translation) {
+  std::vector<TextRun> repositioned_runs;
+  for (const TextRun& run : original->GetRuns()) {
+    std::vector<TextRun::GlyphPosition> new_positions;
+    for (const TextRun::GlyphPosition& glyph : run.GetGlyphPositions()) {
+      new_positions.emplace_back(glyph.glyph, glyph.position + translation);
+    }
+    repositioned_runs.emplace_back(run.GetFont(), new_positions);
+  }
+  return std::make_shared<TextFrame>(repositioned_runs,
+                                     original->GetBounds().Shift(translation),
+                                     original->HasColor());
+}
+
+bool RenderTextInCanvasSkia(
+    const std::shared_ptr<Context>& context,
+    DisplayListBuilder& canvas,
+    const std::string& text,
+    const std::string_view& font_fixture,
+    const TextRenderOptions& options = {},
+    const std::optional<SkFont>& font = std::nullopt,
+    std::map<std::string, sk_sp<SkTypeface>>* typeface_cache = nullptr) {
   // Draw the baseline.
   DlPaint paint;
   paint.setColor(DlColor::kAqua().withAlpha(255 * 0.25));
@@ -65,13 +91,29 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   SkFont selected_font;
   if (!font.has_value()) {
     auto c_font_fixture = std::string(font_fixture);
-    auto mapping =
-        flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
-    if (!mapping) {
-      return false;
+    sk_sp<SkTypeface> typeface;
+    if (typeface_cache) {
+      auto it = typeface_cache->find(c_font_fixture);
+      if (it != typeface_cache->end()) {
+        typeface = it->second;
+      }
     }
-    sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
-    selected_font = SkFont(font_mgr->makeFromData(mapping), options.font_size);
+    if (!typeface) {
+      auto mapping =
+          flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
+      if (!mapping) {
+        return false;
+      }
+      sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+      typeface = font_mgr->makeFromData(mapping);
+      if (!typeface) {
+        return false;
+      }
+      if (typeface_cache) {
+        (*typeface_cache)[c_font_fixture] = typeface;
+      }
+    }
+    selected_font = SkFont(typeface, options.font_size);
     if (options.is_subpixel) {
       selected_font.setSubpixel(true);
     }
@@ -466,7 +508,7 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
 
   struct {
     DlPoint position;
-    const char* text;
+    const char* text = nullptr;
   } text[] = {{DlPoint(0, 0), "0F0F0F0"},
               {DlPoint(1, 2), "789"},
               {DlPoint(1, 3), "456"},
@@ -850,6 +892,196 @@ TEST_P(AiksTest, TextWithShadowCache) {
             1u);
 }
 
+// Frames that only differ in `color` miss the text shadow cache but need
+// render targets of the same sizes.
+bool RenderShadowedTextFrame(
+    const std::shared_ptr<Context>& context,
+    AiksContext& aiks_context,
+    DlColor color,
+    std::map<std::string, sk_sp<SkTypeface>>* typeface_cache,
+    const std::string& text = "Hello World") {
+  DisplayListBuilder builder;
+  if (!RenderTextInCanvasSkia(
+          context, builder, text, kFontFixture,
+          TextRenderOptions{
+              .color = color,
+              .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+          /*font=*/std::nullopt, typeface_cache)) {
+    return false;
+  }
+  return DisplayListToTexture(builder.Build(), {400, 400}, aiks_context) !=
+         nullptr;
+}
+
+TEST_P(AiksTest, TextShadowCacheMissReusesBlurRenderTargets) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  auto render_target_cache = std::static_pointer_cast<RenderTargetCache>(
+      aiks_context.GetContentContext().GetRenderTargetCache());
+  const TextShadowCache& shadow_cache =
+      aiks_context.GetContentContext().GetTextShadowCache();
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+  auto cached_textures = [&render_target_cache]() {
+    std::set<std::shared_ptr<Texture>> textures;
+    for (auto it = render_target_cache->GetRenderTargetDataBegin();
+         it != render_target_cache->GetRenderTargetDataEnd(); ++it) {
+      textures.insert(it->render_target.GetRenderTargetTexture());
+    }
+    return textures;
+  };
+
+  // A shadow texture left in the render target cache gets overwritten.
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kRed(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 1u);
+
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kGreen(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  // A miss here would replace the blur Y target.
+  std::set<std::shared_ptr<Texture>> before_hit = cached_textures();
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kRed(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(cached_textures(), before_hit);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kBlue(), &typeface_cache));
+  EXPECT_EQ(render_target_cache->CachedTextureCount(), 2u);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 3u);
+}
+
+TEST_P(AiksTest, TextShadowCacheEntrySurvivesKeepAliveFrames) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  TextShadowCache& shadow_cache =
+      aiks_context.GetContentContext().GetTextShadowCache();
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kRed(), &typeface_cache));
+  ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                      DlColor::kGreen(), &typeface_cache));
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  // Rendering green was red's first unused frame.
+  for (int i = 0; i < 239; i++) {
+    shadow_cache.MarkFrameStart();
+    shadow_cache.MarkFrameEnd();
+  }
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 2u);
+
+  shadow_cache.MarkFrameStart();
+  shadow_cache.MarkFrameEnd();
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 1u);
+}
+
+TEST_P(AiksTest, TextShadowCacheHitsCyclingTextOfDifferentSizes) {
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  const ContentContext& content_context = aiks_context.GetContentContext();
+  auto render_target_cache = std::static_pointer_cast<RenderTargetCache>(
+      content_context.GetRenderTargetCache());
+  const TextShadowCache& shadow_cache = content_context.GetTextShadowCache();
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+  // A typing indicator: each state returns after 12 unused frames.
+  const std::array<std::string, 4> states = {"Typing", "Typing.", "Typing..",
+                                             "Typing..."};
+  auto render_cycle = [&](bool expect_hits) {
+    for (const std::string& state : states) {
+      for (int frame = 0; frame < 4; frame++) {
+        ASSERT_TRUE(RenderShadowedTextFrame(GetContext(), aiks_context,
+                                            DlColor::kBlue(), &typeface_cache,
+                                            state));
+        if (!expect_hits) {
+          continue;
+        }
+        // Only a shadow cache miss would use a render target in this frame.
+        for (auto it = render_target_cache->GetRenderTargetDataBegin();
+             it != render_target_cache->GetRenderTargetDataEnd(); ++it) {
+          EXPECT_FALSE(it->used_this_frame) << state;
+        }
+        EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 4u);
+      }
+    }
+  };
+
+  render_cycle(/*expect_hits=*/false);
+  EXPECT_EQ(shadow_cache.GetCacheSizeForTesting(), 4u);
+  const size_t cached_textures_after_first_cycle =
+      render_target_cache->CachedTextureCount();
+
+  render_cycle(/*expect_hits=*/true);
+  EXPECT_LE(render_target_cache->CachedTextureCount(),
+            cached_textures_after_first_cycle);
+}
+
+// Entries with different `hash` values have the same byte size.
+void LookupBlurredRect(TextShadowCache& cache,
+                       const ContentContext& renderer,
+                       size_t hash) {
+  std::unique_ptr<Geometry> geometry =
+      Geometry::MakeRect(Rect::MakeXYWH(10, 10, 100, 100));
+  auto contents = std::make_shared<SolidColorContents>(geometry.get());
+  contents->SetColor(Color::Black());
+  std::shared_ptr<FilterContents> blur = FilterContents::MakeGaussianBlur(
+      FilterInput::Make(contents), Sigma(4), Sigma(4));
+  TextShadowCache::TextShadowCacheKey key(
+      /*p_max_basis=*/1.0f, /*p_sigma=*/Sigma(4), /*p_color=*/Color::Black(),
+      /*p_fingerprint=*/TextFrameFingerprint{.full_hash = hash});
+  ASSERT_TRUE(cache.Lookup(renderer, Entity(), blur, key).has_value());
+  // Outside a Canvas nothing else submits the blur passes.
+  ASSERT_TRUE(renderer.GetContext()->FlushCommandBuffers());
+}
+
+TEST_P(AiksTest, TextShadowCacheEvictsLeastRecentlyUsedOverBudget) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  const ContentContext& renderer = aiks_context.GetContentContext();
+
+  TextShadowCache measure;
+  LookupBlurredRect(measure, renderer, 1);
+  const size_t entry_bytes = measure.GetCacheBytesForTesting();
+  ASSERT_GT(entry_bytes, 0u);
+
+  // Room for two entries.
+  TextShadowCache cache(entry_bytes * 5 / 2);
+  for (size_t hash : {1u, 2u, 3u}) {
+    cache.MarkFrameStart();
+    LookupBlurredRect(cache, renderer, hash);
+    cache.MarkFrameEnd();
+  }
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+
+  cache.MarkFrameStart();
+  LookupBlurredRect(cache, renderer, 2);
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+  LookupBlurredRect(cache, renderer, 1);
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 3u);
+  cache.MarkFrameEnd();
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+}
+
+TEST_P(AiksTest, TextShadowCacheKeepsEntriesUsedThisFrameOverBudget) {
+  AiksContext aiks_context(GetContext(), nullptr);
+  const ContentContext& renderer = aiks_context.GetContentContext();
+  TextShadowCache cache(/*byte_budget=*/0);
+
+  cache.MarkFrameStart();
+  LookupBlurredRect(cache, renderer, 1);
+  LookupBlurredRect(cache, renderer, 2);
+  cache.MarkFrameEnd();
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 2u);
+
+  cache.MarkFrameStart();
+  LookupBlurredRect(cache, renderer, 1);
+  cache.MarkFrameEnd();
+  EXPECT_EQ(cache.GetCacheSizeForTesting(), 1u);
+}
+
 TEST_P(AiksTest, MultipleTextWithShadowCache) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -867,7 +1099,8 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
 
   for (auto i = 0; i < 5; i++) {
     ASSERT_TRUE(RenderTextInCanvasSkia(
-        GetContext(), builder, "Hello World", kFontFixture,
+        GetContext(), builder,
+        (std::string("Hello World ") + std::to_string(i)).c_str(), kFontFixture,
         TextRenderOptions{
             .color = DlColor::kBlue(),
             .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
@@ -875,12 +1108,132 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
 
   DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
 
-  // Text should be cached. Each text gets its own entry as we don't analyze the
-  // strings.
+  // Each distinct text gets its own cache entry.
   EXPECT_EQ(aiks_context.GetContentContext()
                 .GetTextShadowCache()
                 .GetCacheSizeForTesting(),
             5u);
+}
+
+TEST_P(AiksTest, DuplicateTextWithShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  std::map<std::string, sk_sp<SkTypeface>> typeface_cache;
+  for (auto i = 0; i < 5; i++) {
+    ASSERT_TRUE(RenderTextInCanvasSkia(
+        GetContext(), builder, "Hello World", kFontFixture,
+        TextRenderOptions{
+            .color = DlColor::kBlue(),
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+        std::nullopt, &typeface_cache));
+  }
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Duplicate text frames with identical layout share the single cache entry.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            1u);
+}
+
+TEST_P(AiksTest, TextShadowCacheKeyCollisionSafety) {
+  TextFrameFingerprint fp1{
+      .run_count = 1,
+      .total_glyph_count = 6,
+      .first_glyph_id = 10,
+      .last_glyph_id = 20,
+      .full_hash = 12345,
+  };
+
+  TextFrameFingerprint fp2{
+      .run_count = 1,
+      .total_glyph_count = 6,
+      .first_glyph_id = 10,
+      .last_glyph_id = 21,  // Different last glyph ID
+      .full_hash = 12345,   // Simulated hash collision on full_hash!
+  };
+
+  // Construct two keys with the exact same identifier & full_hash (simulating a
+  // hash collision) but with different fingerprints (e.g. different
+  // last_glyph_id).
+  TextShadowCache::TextShadowCacheKey key1(
+      /*p_max_basis=*/1.0f,
+      /*p_sigma=*/Sigma{4.0f},
+      /*p_color=*/Color::Blue(),
+      /*p_fingerprint=*/fp1);
+
+  TextShadowCache::TextShadowCacheKey key2(
+      /*p_max_basis=*/1.0f,
+      /*p_sigma=*/Sigma{4.0f},
+      /*p_color=*/Color::Blue(),
+      /*p_fingerprint=*/fp2);
+
+  TextShadowCache::TextShadowCacheKey::Equal equal;
+  // Key comparison must fail because fingerprints differ despite identical
+  // hash.
+  EXPECT_FALSE(equal(key1, key2));
+
+  TextShadowCache::TextShadowCacheKey key3(
+      /*p_max_basis=*/1.0f,
+      /*p_sigma=*/Sigma{4.0f},
+      /*p_color=*/Color::Blue(),
+      /*p_fingerprint=*/fp1);
+
+  // Key comparison must succeed for identical fingerprints.
+  EXPECT_TRUE(equal(key1, key3));
+}
+
+TEST_P(AiksTest, SingleGlyphTextShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  SkFont font = flutter::testing::CreateTestFontOfSize(12);
+  TextRenderOptions options{
+      .color = DlColor::kBlue(),
+      .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)};
+
+  // Draw single glyph "A".
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "A", kFontFixture,
+                                     options, font));
+
+  // Draw single glyph "B" (different glyph ID, identical font/color/sigma).
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "B", kFontFixture,
+                                     options, font));
+
+  // Draw single glyph "A" again (duplicate glyph ID).
+  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "A", kFontFixture,
+                                     options, font));
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Single glyphs "A" and "B" get distinct entries; duplicate "A" reuses "A".
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            2u);
 }
 
 TEST_P(AiksTest, MultipleColorWithShadowCache) {
@@ -999,7 +1352,7 @@ std::shared_ptr<TextFrame> MakeDefaultTextFrame(const std::string& text,
 
   sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
   SkFont sk_font(font_mgr->makeFromData(mapping), font_size);
-  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString("Hi", sk_font);
+  sk_sp<SkTextBlob> blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrameFromTextBlobSkia(blob);
   return text_frame;
@@ -1163,7 +1516,7 @@ TEST_P(AiksTest, TextWithShadowAndPosition) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Clear(DlColor::kWhite());
 
-  auto frame = MakeDefaultTextFrame("Hello", 25.0f);
+  auto frame = MakeDefaultTextFrame("Hi", 25.0f);
   auto text = DlTextImpeller::Make(frame);
   DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
   DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
@@ -1179,6 +1532,33 @@ TEST_P(AiksTest, TextWithShadowAndPosition) {
 
     builder.DrawText(text, x, 50, shadow_paint_no_ctm);
     builder.DrawText(text, x, 50, paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, SingleGlyphTextWithShadowAndPosition) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Clear(DlColor::kWhite());
+
+  std::shared_ptr<TextFrame> frame = MakeDefaultTextFrame("X", 25.0f);
+
+  DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
+  DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, true));
+
+  builder.Translate(100, 100);
+
+  for (int offset = 10; offset < 300; offset += 40) {
+    std::shared_ptr<DlText> text =
+        DlTextImpeller::Make(RepositionTextFrame(frame, Point(offset, 0)));
+    builder.DrawText(text, 0, offset + 30, paint);
+    builder.DrawText(text, 0, offset + 30, shadow_paint_ctm);
+
+    text = DlTextImpeller::Make(RepositionTextFrame(frame, Point(0, offset)));
+    builder.DrawText(text, offset + 30, 0, paint);
+    builder.DrawText(text, offset + 30, 0, shadow_paint_ctm);
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

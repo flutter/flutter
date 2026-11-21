@@ -41,6 +41,30 @@ void testMain() {
       vertices.dispose();
       expect(vertices.debugDisposed, isTrue);
     });
+
+    test('raw can be empty', () {
+      final vertices = ui.Vertices.raw(ui.VertexMode.triangles, Float32List(0));
+      expect(vertices.debugDisposed, isFalse);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      canvas.drawVertices(vertices, ui.BlendMode.srcOver, ui.Paint());
+      vertices.dispose();
+      expect(vertices.debugDisposed, isTrue);
+    });
+
+    test('drawVertices asserts if used after dispose', () {
+      final ui.Vertices vertices = _testVertices();
+      vertices.dispose();
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, const ui.Rect.fromLTRB(0, 0, 100, 100));
+      // Matches native dart:ui, which asserts `!vertices.debugDisposed`.
+      expect(
+        () => canvas.drawVertices(vertices, ui.BlendMode.srcOver, ui.Paint()),
+        throwsA(isA<AssertionError>()),
+      );
+    });
   });
 
   test('Vertices are not anti-aliased by default', () async {

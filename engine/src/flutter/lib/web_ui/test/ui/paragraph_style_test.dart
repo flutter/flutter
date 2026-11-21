@@ -134,6 +134,12 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsA =
       'locale': (_TestParagraphStyleBuilder builder) {
         builder.locale = const ui.Locale('en', 'US');
       },
+      'hyphens': (_TestParagraphStyleBuilder builder) {
+        builder.hyphens = ui.Hyphens.manual;
+      },
+      'hyphenCharacter': (_TestParagraphStyleBuilder builder) {
+        builder.hyphenCharacter = '-';
+      },
     };
 
 final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
@@ -174,6 +180,12 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
       'locale': (_TestParagraphStyleBuilder builder) {
         builder.locale = const ui.Locale('fr', 'CA');
       },
+      'hyphens': (_TestParagraphStyleBuilder builder) {
+        builder.hyphens = ui.Hyphens.hidden;
+      },
+      'hyphenCharacter': (_TestParagraphStyleBuilder builder) {
+        builder.hyphenCharacter = '\u2010';
+      },
     };
 
 class _TestParagraphStyleBuilder {
@@ -189,6 +201,8 @@ class _TestParagraphStyleBuilder {
   ui.StrutStyle? strutStyle;
   String? ellipsis;
   ui.Locale? locale;
+  ui.Hyphens? hyphens;
+  String? hyphenCharacter;
 
   ui.ParagraphStyle build() {
     return ui.ParagraphStyle(
@@ -204,6 +218,8 @@ class _TestParagraphStyleBuilder {
       strutStyle: strutStyle,
       ellipsis: ellipsis,
       locale: locale,
+      hyphens: hyphens,
+      hyphenCharacter: hyphenCharacter,
     );
   }
 }

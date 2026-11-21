@@ -4,6 +4,7 @@
 
 /// @docImport 'calendar_date_picker.dart';
 /// @docImport 'date_picker.dart';
+/// @docImport 'input_date_picker_form_field.dart';
 /// @docImport 'text_field.dart';
 library;
 

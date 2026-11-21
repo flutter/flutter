@@ -24,12 +24,26 @@ TEST(CommandQueueVKTest, QueueSubmit) {
             called->end());
 }
 
+TEST(CommandQueueVKTest, SubmitWithReceiptUsesVulkanQueue) {
+  const auto context = MockVulkanContextBuilder().Build();
+  auto buffer = context->CreateCommandBuffer();
+
+  CommandQueue::SubmitResult result =
+      context->GetCommandQueue()->SubmitWithReceipt(buffer);
+
+  EXPECT_TRUE(result.status.ok());
+  EXPECT_EQ(result.scheduling_receipt, nullptr);
+  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_NE(std::find(called->begin(), called->end(), "vkQueueSubmit"),
+            called->end());
+}
+
 TEST(CommandQueueVKTest, SubmitAfterFenceWaiterTerminated) {
   const auto context = MockVulkanContextBuilder().Build();
   auto buffer = context->CreateCommandBuffer();
   context->GetFenceWaiter()->Terminate();
   auto status = context->GetCommandQueue()->Submit({buffer});
-  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
+  EXPECT_EQ(status.code(), absl::StatusCode::kCancelled);
 
   // The command buffer should not be submitted to the Vulkan queue if the
   // fence waiter has been terminated.

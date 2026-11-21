@@ -13,7 +13,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import io.flutter.embedding.engine.FlutterEngineCache
 import org.json.JSONObject
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -25,6 +24,14 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+private class BlankScreenshotException(
+    message: String
+) : IllegalStateException(message)
+
+private class EglInitializationException(
+    message: String
+) : IllegalStateException(message)
+
 @RunWith(AndroidJUnit4::class)
 class FlutterActivityTest {
     companion object {
@@ -33,14 +40,97 @@ class FlutterActivityTest {
         private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
         private const val TEST_TIMEOUT_SEC = 60L
 
+        // Keep in sync with _firstFatalGraphicsLogcatError in run_android_hardware_smoke_tests.dart.
+        private val FATAL_GRAPHICS_ERROR_PATTERNS =
+            listOf(
+                "EGL_NOT_INITIALIZED",
+                "EGL_BAD_ALLOC",
+                "EGL_BAD_CONFIG",
+                "EGL_BAD_CONTEXT",
+                "EGL_BAD_DISPLAY",
+                "EGL_BAD_NATIVE_WINDOW",
+                "EGL_BAD_SURFACE",
+                "EGL_CONTEXT_LOST",
+                "Failed to create EGLSurface",
+                "Failed to initialize EGL",
+                "Unable to initialize EGL",
+                "Failed to establish connection with the host",
+                "vulkan: Failed to get host connection",
+                "Could not create Vulkan instance",
+                "Could not create surface from invalid Android context"
+            )
+
         @JvmStatic
         @AfterClass
         fun tearDownClass() {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                val engine = FlutterEngineCache.getInstance().get(MainActivity.CACHED_ENGINE_KEY)
-                engine?.destroy()
-                FlutterEngineCache.getInstance().remove(MainActivity.CACHED_ENGINE_KEY)
+                MainActivity.evictEngineCache()
             }
+        }
+
+        private fun verifyNoGraphicsPipelineErrors(marker: String) {
+            val errors = getGraphicsPipelineErrors(marker)
+            if (errors.isNotEmpty()) {
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    MainActivity.evictEngineCache()
+                }
+                throw EglInitializationException(
+                    "Graphics pipeline/EGL failure detected in process logcat:\n${errors.joinToString("\n")}"
+                )
+            }
+        }
+
+        private fun hasGraphicsPipelineErrors(marker: String): Boolean = getGraphicsPipelineErrors(marker).isNotEmpty()
+
+        private fun isFatalGraphicsPipelineError(line: String): Boolean {
+            if (line.contains("eglInitialize(") && line.contains(") failed (")) {
+                return true
+            }
+            // Android HWUI logs EGL_SWAP_BEHAVIOR_PRESERVED and 101010-2 'error = EGL_SUCCESS' probe
+            // warnings unconditionally during normal startup on SwiftShader and headless emulators.
+            if (line.contains("EGL_SWAP_BEHAVIOR_PRESERVED") || line.contains("error = EGL_SUCCESS")) {
+                return false
+            }
+            return FATAL_GRAPHICS_ERROR_PATTERNS.any { pattern -> line.contains(pattern) }
+        }
+
+        private fun getGraphicsPipelineErrors(marker: String): List<String> {
+            try {
+                val pid = android.os.Process.myPid()
+                val instrumentation = InstrumentationRegistry.getInstrumentation()
+                // Include $TAG:I alongside *:W so the Log.i(TAG, marker) boundary line is present
+                // in the dump, and filter for explicit fatal errors because Android's HWUI
+                // RenderThread runs inside this PID and emits benign warnings (such as Davey!
+                // slow-frame logs and capability probes) that would otherwise preempt
+                // BlankScreenshotException retries.
+                val pfd = instrumentation.uiAutomation.executeShellCommand("logcat -d --pid=$pid $TAG:I *:W")
+                return android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().useLines { lines ->
+                    lines
+                        .dropWhile { line -> !line.contains(marker) }
+                        .filter(::isFatalGraphicsPipelineError)
+                        .toList()
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to self-inspect logcat: ${e.message}")
+                return emptyList()
+            }
+        }
+
+        private fun isBitmapBlank(bitmap: Bitmap): Boolean {
+            val width = bitmap.width
+            val height = bitmap.height
+            val pixels = IntArray(width * height)
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+            val firstPixel = pixels[0]
+            if (firstPixel != android.graphics.Color.TRANSPARENT && firstPixel != android.graphics.Color.BLACK) {
+                return false
+            }
+            for (pixel in pixels) {
+                if (pixel != firstPixel) {
+                    return false
+                }
+            }
+            return true
         }
     }
 
@@ -57,13 +147,62 @@ class FlutterActivityTest {
      * @param testName The descriptive identifier of the test case to render and compare.
      */
     private fun templateTest(testName: String) {
-        Log.d(TAG, "Starting $testName")
-        val future = CompletableFuture<String>()
+        val maxAttempts = 3
+        var lastException: Throwable? = null
 
+        for (currentAttempt in 1..maxAttempts) {
+            val marker = "START_${testName}_attempt${currentAttempt}_${System.currentTimeMillis()}"
+            Log.i(TAG, marker)
+            Log.d(TAG, "Starting $testName (attempt $currentAttempt/$maxAttempts)")
+
+            try {
+                runAttempt(testName, marker)
+                return
+            } catch (e: Throwable) {
+                lastException = e
+                Log.w(TAG, "Attempt $currentAttempt failed: ${e.message}")
+
+                if (e is org.junit.AssumptionViolatedException) {
+                    throw e
+                }
+                // Only BlankScreenshotException is retried via Activity recreation. Process-level
+                // EglInitializationException cannot be recovered via Activity recreation and must
+                // fail immediately, while golden mismatches and assertion errors must also fail on
+                // attempt 1 so real rendering regressions are not masked.
+                if (!isBlankScreenshotException(e)) {
+                    throw RuntimeException(
+                        "Test '$testName' failed on attempt $currentAttempt with a non-retryable error: ${e.message}",
+                        e
+                    )
+                }
+
+                if (currentAttempt < maxAttempts) {
+                    Log.i(TAG, "Recreating activity for next attempt...")
+                    rule.scenario.recreate()
+                }
+            }
+        }
+
+        throw RuntimeException(
+            "Test '$testName' failed to capture a valid screenshot after $maxAttempts attempts.",
+            lastException
+        )
+    }
+
+    private fun isBlankScreenshotException(e: Throwable?): Boolean {
+        if (e == null) return false
+        if (e is BlankScreenshotException) return true
+        return isBlankScreenshotException(e.cause)
+    }
+
+    private fun runAttempt(
+        testName: String,
+        marker: String
+    ) {
+        val future = CompletableFuture<String>()
         rule.scenario.onActivity { activity ->
             // Confirm screen is not locked by checking activity has lifecycle state RESUMED
             assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
-
             try {
                 val isPlatformView = testName.startsWith(Constants.PLATFORM_VIEW_PREFIX)
                 val message =
@@ -73,7 +212,6 @@ class FlutterActivityTest {
                     }
 
                 Log.d(TAG, "Sending '$message' on message channel")
-
                 activity.messageChannel?.send(message) { reply ->
                     try {
                         val replyJson =
@@ -90,7 +228,7 @@ class FlutterActivityTest {
                             val width = replyJson.getInt(Constants.KEY_WIDTH)
                             val height = replyJson.getInt(Constants.KEY_HEIGHT)
 
-                            captureAndSendScreenshot(x, y, width, height, testName, future)
+                            captureAndSendScreenshot(x, y, width, height, testName, marker, future)
                         } else {
                             future.complete(replyMessage)
                         }
@@ -149,8 +287,13 @@ class FlutterActivityTest {
         width: Int,
         height: Int,
         testName: String,
+        marker: String,
         future: CompletableFuture<String>
     ) {
+        if (x < 0 || y < 0 || width <= 0 || height <= 0) {
+            throw IllegalArgumentException("Invalid crop bounds: x=$x, y=$y, width=$width, height=$height")
+        }
+
         // Capture the screenshot on a background thread with a short delay. We must NOT sleep or capture
         // on the Main UI Thread to avoid blocking frame rendering or causing an ANR.
         val screenshotExecutor = Executors.newSingleThreadScheduledExecutor()
@@ -158,26 +301,60 @@ class FlutterActivityTest {
             try {
                 // Capture the true screen output using UiAutomation from this privileged instrumentation runner process.
                 val instrumentation = InstrumentationRegistry.getInstrumentation()
-                val screenshot =
-                    instrumentation.uiAutomation.takeScreenshot()
-                        ?: throw IllegalStateException("UiAutomation.takeScreenshot() returned null")
+                var cropped: Bitmap? = null
+                val maxAttempts = 3
 
-                if (x < 0 ||
-                    y < 0 ||
-                    width <= 0 ||
-                    height <= 0 ||
-                    x + width > screenshot.width ||
-                    y + height > screenshot.height
-                ) {
-                    throw IllegalArgumentException(
-                        "Crop bounds out of range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
-                    )
+                for (attempt in 1..maxAttempts) {
+                    val screenshot = instrumentation.uiAutomation.takeScreenshot()
+                    if (screenshot == null) {
+                        Log.w(TAG, "UiAutomation.takeScreenshot() returned null (attempt $attempt/$maxAttempts)")
+                    } else {
+                        if (x + width > screenshot.width || y + height > screenshot.height) {
+                            screenshot.recycle()
+                            throw IllegalArgumentException(
+                                "Crop bounds out of screen range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
+                            )
+                        }
+
+                        // Crop the full-screen screenshot to the exact widget bounds.
+                        val candidate = Bitmap.createBitmap(screenshot, x, y, width, height)
+                        if (candidate != screenshot) {
+                            screenshot.recycle()
+                        }
+
+                        if (!isBitmapBlank(candidate)) {
+                            cropped = candidate
+                            break
+                        }
+
+                        Log.w(TAG, "Captured screenshot is blank/empty (attempt $attempt/$maxAttempts)")
+                        candidate.recycle()
+                    }
+
+                    // If the graphics pipeline has failed, further screenshot retries in this process
+                    // are futile. Break early so verifyNoGraphicsPipelineErrors aborts immediately.
+                    if (hasGraphicsPipelineErrors(marker)) {
+                        Log.w(TAG, "Graphics pipeline/EGL error detected during screenshot. Short-circuiting retries.")
+                        break
+                    }
+
+                    if (attempt < maxAttempts) {
+                        Thread.sleep(200)
+                    }
                 }
 
-                // Crop the full-screen screenshot to the exact widget bounds.
-                val cropped = Bitmap.createBitmap(screenshot, x, y, width, height)
-                if (cropped != screenshot) {
-                    screenshot.recycle()
+                // Verify logcat first to prioritize EGL diagnostics over generic blank screenshot errors.
+                verifyNoGraphicsPipelineErrors(marker)
+
+                if (cropped == null) {
+                    // Evict engine cache if a screenshot is blank but no logcat EGL error was detected,
+                    // ensuring any subsequent test run attempt starts with a clean engine instance.
+                    InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                        MainActivity.evictEngineCache()
+                    }
+                    throw BlankScreenshotException(
+                        "Captured screenshot is blank/empty after $maxAttempts attempts."
+                    )
                 }
 
                 val stream = ByteArrayOutputStream()

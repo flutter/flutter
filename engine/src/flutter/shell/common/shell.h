@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string_view>
 #include <unordered_map>
 
@@ -20,7 +21,6 @@
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/status.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
@@ -121,7 +121,6 @@ class Shell final : public PlatformView::Delegate,
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
   typedef std::function<std::unique_ptr<Engine>(
       Engine::Delegate& delegate,
-      const PointerDataDispatcherMaker& dispatcher_maker,
       DartVM& vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
@@ -243,6 +242,9 @@ class Shell final : public PlatformView::Delegate,
   /// @brief      Getting the raster thread merger from parent shell, it can be
   ///             a null RefPtr when it's a root Shell or the
   ///             embedder_->SupportsDynamicThreadMerging() returns false.
+  ///             If the parent's `Rasterizer::Setup` was still deferred when
+  ///             `Spawn` ran, the lazy fallback via `parent_rasterizer_`
+  ///             resolves only when called on the raster task runner.
   ///
   /// @return     The raster thread merger used by the parent shell.
   ///
@@ -306,6 +308,11 @@ class Shell final : public PlatformView::Delegate,
   void NotifyLowMemoryWarning() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures on the
+  ///             rasterizer.
+  void ClearRenderTargetCache() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to flush the microtask queue. Required
   ///             when running with merged platform and UI threads, in which
   ///             case the embedder is responsible for flushing the microtask
@@ -339,33 +346,19 @@ class Shell final : public PlatformView::Delegate,
                                     bool base64_encode);
 
   //----------------------------------------------------------------------------
-  /// @brief      Pauses the calling thread until the first frame is presented.
+  /// @brief      Invokes a callback when the first frame has been presented.
   ///
-  /// @param[in]  timeout  The duration to wait before timing out. If this
-  ///                      duration would cause an overflow when added to
-  ///                      std::chrono::steady_clock::now(), this method will
-  ///                      wait indefinitely for the first frame.
+  /// @param[in]  callback  A callback that will be invoked on an arbitrary
+  ///                       thread when the first frame is presented.  The
+  ///                       callback may be run the raster thread, so it should
+  ///                       not do anything expensive.
   ///
-  /// @return     'kOk' when the first frame has been presented before the
-  ///             timeout successfully, 'kFailedPrecondition' if called from the
-  ///             GPU or UI thread, 'kDeadlineExceeded' if there is a timeout.
+  ///                       If the first frame has already been presented,
+  ///                       then the callback will be invoked immediately.
+  ///                       If the first frame is never drawn, then the
+  ///                       callback will not be invoked.
   ///
-  fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Unblocks any call to WaitForFirstFrame(), causing it to
-  ///             immediately return 'kAborted' instead of blocking for the
-  ///             full timeout.
-  ///
-  ///             Embedders that pass a reference to the Shell to a thread they
-  ///             do not otherwise synchronize with the shell's destruction
-  ///             must call this, and wait for that thread to finish with the
-  ///             shell, before destroying it. This method only prevents
-  ///             WaitForFirstFrame() from blocking; it does not by itself
-  ///             make it safe to destroy the Shell out from under a caller
-  ///             that has not yet returned from WaitForFirstFrame().
-  ///
-  void CancelWaitForFirstFrame();
+  void AddFirstFrameCallback(std::function<void()> callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
@@ -486,9 +479,15 @@ class Shell final : public PlatformView::Delegate,
   std::set<std::string> misbehaving_message_channels_;
   const TaskRunners task_runners_;
   const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
+  // Wrapped in `std::optional` because default-constructing
+  // `TaskRunnerAffineWeakPtr` binds its `DebugTaskRunnerChecker` to the
+  // constructing (platform) thread and `FML_DCHECK`s in `operator bool()` on
+  // the raster thread (`fml/memory/weak_ptr.h`).
+  const std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>>
+      parent_rasterizer_;
   std::shared_ptr<ResourceCacheLimitCalculator>
       resource_cache_limit_calculator_;
-  size_t resource_cache_limit_;
+  size_t resource_cache_limit_ = 0;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
@@ -526,17 +525,12 @@ class Shell final : public PlatformView::Delegate,
   // True if a first frame has not yet been rendered.
   //
   // This is read and written lock-free on the raster thread, and read under
-  // waiting_for_first_frame_mutex_ in WaitForFirstFrame.
+  // waiting_for_first_frame_mutex_ in AddFirstFrameCallback.
   std::atomic<bool> waiting_for_first_frame_ = true;
 
-  // True when WaitForFirstFrame has been cancelled because the shell is
-  // shutting down and waiting threads should be unblocked.
-  //
-  // Guarded by waiting_for_first_frame_mutex_.
-  bool wait_for_first_frame_cancelled_ = false;
-
   std::mutex waiting_for_first_frame_mutex_;
-  std::condition_variable waiting_for_first_frame_condition_;
+  // Guarded by waiting_for_first_frame_mutex_.
+  std::vector<std::function<void()>> waiting_for_first_frame_callbacks_;
 
   // Written in the UI thread and read from the raster thread. Hence make it
   // atomic.
@@ -572,17 +566,20 @@ class Shell final : public PlatformView::Delegate,
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 
-  Shell(DartVMRef vm,
-        const TaskRunners& task_runners,
-        fml::RefPtr<fml::RasterThreadMerger> parent_merger,
-        const std::shared_ptr<ResourceCacheLimitCalculator>&
-            resource_cache_limit_calculator,
-        const Settings& settings,
-        bool is_gpu_disabled);
+  Shell(
+      DartVMRef vm,
+      const TaskRunners& task_runners,
+      fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+      std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>> parent_rasterizer,
+      const std::shared_ptr<ResourceCacheLimitCalculator>&
+          resource_cache_limit_calculator,
+      const Settings& settings,
+      bool is_gpu_disabled);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       DartVMRef vm,
       fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+      std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>> parent_rasterizer,
       std::shared_ptr<ShellIOManager> parent_io_manager,
       const std::shared_ptr<ResourceCacheLimitCalculator>&
           resource_cache_limit_calculator,
@@ -599,6 +596,7 @@ class Shell final : public PlatformView::Delegate,
       const PlatformData& platform_data,
       const TaskRunners& task_runners,
       const fml::RefPtr<fml::RasterThreadMerger>& parent_thread_merger,
+      std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>> parent_rasterizer,
       const std::shared_ptr<ShellIOManager>& parent_io_manager,
       const std::shared_ptr<ResourceCacheLimitCalculator>&
           resource_cache_limit_calculator,
@@ -619,6 +617,10 @@ class Shell final : public PlatformView::Delegate,
 
   // |PlatformView::Delegate|
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override;
+
+  // |PlatformView::Delegate|
+  void OnPlatformViewCreatedDeferred(
+      PlatformView::SurfaceFactory surface_factory) override;
 
   // |PlatformView::Delegate|
   void OnPlatformViewDestroyed() override;
@@ -771,6 +773,9 @@ class Shell final : public PlatformView::Delegate,
   // |Engine::Delegate|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
+  // |Engine::Delegate|
+  void OnEngineResetInternalState() override;
+
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;
 
@@ -853,6 +858,14 @@ class Shell final : public PlatformView::Delegate,
   bool OnServiceProtocolGetPipelineUsage(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
+
+  // Creates the "pipelines" array of a `_flutter.getPipelineUsage` response,
+  // with one entry per pipeline in `pipeline_library`: its label, its
+  // specialization constants, the number of times it was bound, and whether it
+  // was created eagerly.
+  static rapidjson::Value MakePipelineUsageJson(
+      const impeller::PipelineLibrary& pipeline_library,
+      rapidjson::Document::AllocatorType& allocator);
 
   // Send a system font change notification.
   void SendFontChangeNotification();

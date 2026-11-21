@@ -75,6 +75,7 @@ source_set("tonic") {
     sources += [
       "file_loader/file_loader_win.cc",
       "filesystem/filesystem/path_win.cc",
+      "filesystem/filesystem/windows_utils.h",
     ]
   } else if (is_fuchsia) {
     sources += [

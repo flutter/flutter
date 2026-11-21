@@ -122,18 +122,6 @@ class StackScope {
     return pointer;
   }
 
-  Pointer<Float> convertRectsToNative(List<ui.Rect> rects) {
-    final Pointer<Float> pointer = allocFloatArray(rects.length * 4);
-    for (var i = 0; i < rects.length; i++) {
-      final ui.Rect rect = rects[i];
-      pointer[i * 4] = rect.left;
-      pointer[i * 4 + 1] = rect.top;
-      pointer[i * 4 + 2] = rect.right;
-      pointer[i * 4 + 3] = rect.bottom;
-    }
-    return pointer;
-  }
-
   ui.Rect convertRectFromNative(Pointer<Float> buffer) {
     return ui.Rect.fromLTRB(buffer[0], buffer[1], buffer[2], buffer[3]);
   }
@@ -176,18 +164,6 @@ class StackScope {
     return pointer;
   }
 
-  Pointer<Float> convertRSTransformsToNative(List<ui.RSTransform> transforms) {
-    final Pointer<Float> pointer = allocFloatArray(transforms.length * 4);
-    for (var i = 0; i < transforms.length; i++) {
-      final ui.RSTransform transform = transforms[i];
-      pointer[i * 4] = transform.scos;
-      pointer[i * 4 + 1] = transform.ssin;
-      pointer[i * 4 + 2] = transform.tx;
-      pointer[i * 4 + 3] = transform.ty;
-    }
-    return pointer;
-  }
-
   Pointer<Float> convertDoublesToNative(List<double> values) {
     final Pointer<Float> pointer = allocFloatArray(values.length);
     for (var i = 0; i < values.length; i++) {
@@ -212,19 +188,27 @@ class StackScope {
     return pointer;
   }
 
+  Pointer<Float> convertFloat32ListToNative(Float32List values) {
+    final Pointer<Float> pointer = allocFloatArray(values.length);
+    for (var i = 0; i < values.length; i++) {
+      pointer[i] = values[i];
+    }
+    return pointer;
+  }
+
+  Pointer<Uint32> convertUint32ListToNative(Uint32List values) {
+    final Pointer<Uint32> pointer = allocUint32Array(values.length);
+    for (var i = 0; i < values.length; i++) {
+      pointer[i] = values[i];
+    }
+    return pointer;
+  }
+
   Pointer<Float> convertPointArrayToNative(List<ui.Offset> points) {
     final Pointer<Float> pointer = allocFloatArray(points.length * 2);
     for (var i = 0; i < points.length; i++) {
       pointer[i * 2] = points[i].dx;
       pointer[i * 2 + 1] = points[i].dy;
-    }
-    return pointer;
-  }
-
-  Pointer<Uint32> convertColorArrayToNative(List<ui.Color> colors) {
-    final Pointer<Uint32> pointer = allocUint32Array(colors.length);
-    for (var i = 0; i < colors.length; i++) {
-      pointer[i] = colors[i].value;
     }
     return pointer;
   }

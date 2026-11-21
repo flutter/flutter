@@ -23,6 +23,9 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
+// Default duration of the radial reaction animation.
+const Duration _kReactionAnimationDuration = Duration(milliseconds: 100);
+
 /// A mixin for [StatefulWidget]s that implement toggleable
 /// controls with toggle animations (e.g. [Switch]es, [CupertinoSwitch]es,
 /// [Checkbox]es, [CupertinoCheckbox]es, [Radio]s, and [CupertinoRadio]s).
@@ -102,8 +105,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// The amount of time a circular ink response should take to expand to its
   /// full size if a radial reaction is drawn using
   /// [ToggleablePainter.paintRadialReaction].
-  Duration? get reactionAnimationDuration => _reactionAnimationDuration;
-  final Duration _reactionAnimationDuration = const Duration(milliseconds: 100);
+  Duration? get reactionAnimationDuration => _kReactionAnimationDuration;
 
   /// Whether [value] of this control can be changed by user interaction.
   ///
@@ -159,7 +161,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       curve: Curves.easeIn,
       reverseCurve: Curves.easeOut,
     );
-    _reactionController = AnimationController(duration: _reactionAnimationDuration, vsync: this);
+    _reactionController = AnimationController(
+      duration: reactionAnimationDuration ?? _kReactionAnimationDuration,
+      vsync: this,
+    );
     _reaction = CurvedAnimation(parent: _reactionController, curve: Curves.fastOutSlowIn);
     _reactionHoverFadeController = AnimationController(
       duration: _kReactionFadeDuration,

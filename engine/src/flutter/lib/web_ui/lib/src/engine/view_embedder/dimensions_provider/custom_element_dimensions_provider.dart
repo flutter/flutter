@@ -56,6 +56,9 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
     _hostElementResizeObserver?.observe(_hostElement);
   }
 
+  /// Limit size of canvas to render into. Anything larger than 16384 breaks rendering
+  static const double _maxElementSize = 16384.0;
+
   // The host element that will be used to retrieve (and observe) app size measurements.
   final DomElement _hostElement;
 
@@ -84,14 +87,31 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
   @override
   ui.Size computePhysicalSize() {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-    return ui.Size(
-      _hostElement.clientWidth * devicePixelRatio,
-      _hostElement.clientHeight * devicePixelRatio,
+    final double width = (_hostElement.clientWidth * devicePixelRatio).clamp(0.0, _maxElementSize);
+    final double height = (_hostElement.clientHeight * devicePixelRatio).clamp(
+      0.0,
+      _maxElementSize,
     );
+    return ui.Size(width, height);
   }
 
   @override
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile) {
+    return const ViewPadding(top: 0, right: 0, bottom: 0, left: 0);
+  }
+
+  @override
+  ViewPadding computeSafeAreaInsets() {
+    // A view embedded in a custom element occupies a region of a page that is
+    // laid out by the host application, so the engine doesn't presume to know
+    // how (or even whether) that region overlaps the obstructions of the device
+    // screen. Keeping the element clear of them, or padding it with the CSS
+    // `env(safe-area-inset-*)` values, is up to the host application for now.
+    //
+    // TODO(diegolopezrm): Derive these from the intersection of the host
+    // element with the `env(safe-area-inset-*)` values of the page, so that
+    // `SafeArea` works the same way in an embedded view as it does in a
+    // full-page one. https://github.com/flutter/flutter/issues/84833
     return const ViewPadding(top: 0, right: 0, bottom: 0, left: 0);
   }
 }

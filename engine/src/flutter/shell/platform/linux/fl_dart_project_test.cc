@@ -80,3 +80,13 @@ TEST_F(FlDartProjectTest, EnableImpeller) {
   fl_dart_project_set_enable_impeller(project, TRUE);
   EXPECT_TRUE(fl_dart_project_get_enable_impeller(project));
 }
+
+TEST_F(FlDartProjectTest, EnableFlutterGpu) {
+  EXPECT_FALSE(fl_dart_project_get_enable_flutter_gpu(project));
+
+  fl_dart_project_set_enable_flutter_gpu(project, TRUE);
+  EXPECT_TRUE(fl_dart_project_get_enable_flutter_gpu(project));
+
+  fl_dart_project_set_enable_flutter_gpu(project, FALSE);
+  EXPECT_FALSE(fl_dart_project_get_enable_flutter_gpu(project));
+}
