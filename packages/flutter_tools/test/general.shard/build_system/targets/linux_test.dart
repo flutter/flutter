@@ -139,6 +139,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{kBuildMode: 'profile'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),

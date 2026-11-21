@@ -319,6 +319,7 @@ flutter:
     final environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
