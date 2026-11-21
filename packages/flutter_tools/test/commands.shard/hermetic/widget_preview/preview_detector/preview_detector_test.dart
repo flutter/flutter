@@ -21,11 +21,12 @@ import 'projects/multipreview_project.dart';
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-typedef PreviewProjectBuilder = Future<ProjectWithPreviews> Function({
-  required Directory projectRoot,
-  required List<String> pathsWithPreviews,
-  required List<String> pathsWithoutPreviews,
-});
+typedef PreviewProjectBuilder =
+    Future<ProjectWithPreviews> Function({
+      required Directory projectRoot,
+      required List<String> pathsWithPreviews,
+      required List<String> pathsWithoutPreviews,
+    });
 
 void main() {
   initializeTestPreviewDetectorState();
@@ -240,10 +241,8 @@ void main() {
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
       expect(initialPreviews, isEmpty);
 
-      var pubspecChangeDetected = false;
-      setOnPubspecChangeDetected((String path) {
-        pubspecChangeDetected = true;
-      });
+      final detectedPubspecPaths = <String>[];
+      setOnPubspecChangeDetected(detectedPubspecPaths.add);
 
       final File nestedPubspec = previewDetector.fs.file(
         previewDetector.fs.path.join(
@@ -255,10 +254,20 @@ void main() {
         ),
       )..createSync(recursive: true);
 
-      nestedPubspec.writeAsStringSync('name: unrelated\n');
-      await Future<void>.delayed(const Duration(milliseconds: 200));
+      // Change the nested (unrelated) pubspec, then change the valid project pubspec.
+      // Because file watcher events are processed sequentially, waiting for the valid
+      // pubspec change ensures that the nested pubspec change has also been processed.
+      final String detectedValidPath = await waitForPubspecChangeDetected(
+        changeOperation: () {
+          nestedPubspec.writeAsStringSync('name: unrelated\n');
+          project.touchPubspec();
+        },
+      );
 
-      expect(pubspecChangeDetected, isFalse);
+      // Only the valid project pubspec should be detected.
+      expect(detectedValidPath, previewDetector.project.pubspecFile.path);
+      expect(detectedPubspecPaths, <String>[previewDetector.project.pubspecFile.path]);
+      expectNPreviewReloadTimingEvents(previewDetector, 0);
     });
   });
 }

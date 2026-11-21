@@ -173,11 +173,12 @@ Future<String> waitForPubspecChangeDetected({
   required FutureOr<void> Function() changeOperation,
 }) async {
   final completer = Completer<String>();
+  final void Function(String path)? previousCallback = _onPubspecChangeDetected;
   _onPubspecChangeDetected = (String path) {
-    if (completer.isCompleted) {
-      return;
+    previousCallback?.call(path);
+    if (!completer.isCompleted) {
+      completer.complete(path);
     }
-    completer.complete(path);
   };
   // Short delay to allow the file watcher (especially FSEvents on macOS) to
   // fully initialize and start listening for events before we trigger the
