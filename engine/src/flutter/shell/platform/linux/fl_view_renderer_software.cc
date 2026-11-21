@@ -230,8 +230,6 @@ static void fl_view_renderer_software_dispose(GObject* object) {
   FlViewRendererSoftware* self = FL_VIEW_RENDERER_SOFTWARE(object);
 
   g_clear_object(&self->engine);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_software_parent_class)->dispose(object);
 }
@@ -246,6 +244,10 @@ static void fl_view_renderer_software_finalize(GObject* object) {
   // presenting.
   g_clear_object(&self->compositor);
   g_clear_pointer(&self->surface, cairo_surface_destroy);
+
+  // Presentation wakes the task runner after releasing the frame mutex.
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_software_parent_class)->finalize(object);
 }

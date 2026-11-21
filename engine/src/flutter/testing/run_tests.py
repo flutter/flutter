@@ -472,6 +472,7 @@ def run_cc_tests(
     capture_core_dump: bool
 ) -> None:
   _logger.info('Running Engine Unit-tests.')
+  wayland_test = 'flutter_linux_wayland_unittests'
 
   if capture_core_dump and is_linux():
     import resource  # pylint: disable=import-outside-toplevel
@@ -553,6 +554,22 @@ def run_cc_tests(
         # https://github.com/flutter/flutter/issues/36296
         make_test('txt_unittests', flags=repeat_flags + ['--'] + icu_flags),
     ]
+    wayland_tests_enabled = (
+        os.path.exists(os.path.join(build_dir, wayland_test)) or
+        os.path.exists(os.path.join(build_dir, 'exe.unstripped', wayland_test))
+    )
+    if (wayland_tests_enabled or
+        (executable_filter is not None and wayland_test in executable_filter)):
+      unittests += [
+          make_test(
+              wayland_test,
+              flags=shuffle_flags + ['--timeout=30'],
+              extra_env={
+                  'G_DEBUG': 'fatal-criticals',
+                  'GDK_BACKEND': 'wayland',
+              }
+          ),
+      ]
   else:
     flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
     unittests += [
@@ -560,8 +577,10 @@ def run_cc_tests(
     ]
 
   build_name = os.path.basename(build_dir)
+  # Mixed selections still need Xvfb for executables that use X11.
+  use_xvfb = is_linux() and executable_filter != [wayland_test]
   try:
-    if is_linux():
+    if use_xvfb:
       xvfb.start_virtual_x(build_name, build_dir)
     for test, flags, extra_env in unittests:
       run_engine_executable(
@@ -571,10 +590,11 @@ def run_cc_tests(
           flags,
           coverage=coverage,
           extra_env=extra_env,
-          gtest=True
+          # Keep Wayland lifecycle cases serial in one process.
+          gtest=test != wayland_test
       )
   finally:
-    if is_linux():
+    if use_xvfb:
       xvfb.stop_virtual_x(build_name)
 
   if is_mac():
