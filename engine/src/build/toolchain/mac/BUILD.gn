@@ -6,6 +6,7 @@ assert(host_os == "mac")
 
 import("//build/config/darwin/darwin_sdk.gni")
 import("//build/config/sysroot.gni")
+import("//build/rust/config.gni")
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
@@ -409,6 +410,42 @@ template("mac_toolchain") {
     tool("copy") {
       command = "ln -f {{source}} {{output}} 2>/dev/null || (rsync -a --delete {{source}} {{output}})"
       description = "COPY {{source}} {{output}}"
+    }
+
+    rustc = rebase_path(rustc_bin, root_build_dir)
+
+    tool("rust_rlib") {
+      depfile = "{{output}}.d"
+      outfile = "{{target_out_dir}}/lib{{crate_name}}.rlib"
+      command = "{{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST $outfile"
+      outputs = [ outfile ]
+    }
+
+    tool("rust_staticlib") {
+      depfile = "{{output}}.d"
+      outfile = "{{target_out_dir}}/{{target_output_name}}{{output_extension}}"
+      command = "{{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST $outfile"
+      outputs = [ outfile ]
+      default_output_extension = ".a"
+      output_prefix = "lib"
+    }
+
+    tool("rust_macro") {
+      depfile = "{{output}}.d"
+      outfile = "{{target_out_dir}}/lib{{crate_name}}.dylib"
+      command = "{{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} -Clinker=$cc --extern proc_macro {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST_MACRO $outfile"
+      outputs = [ outfile ]
+    }
+
+    tool("rust_bin") {
+      depfile = "{{output}}.d"
+      outfile = "{{root_out_dir}}/{{crate_name}}"
+      command = "{{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} -Clinker=$cc {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST_BIN $outfile"
+      outputs = [ outfile ]
     }
 
     toolchain_args = {

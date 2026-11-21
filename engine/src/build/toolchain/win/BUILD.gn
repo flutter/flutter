@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/rust/config.gni")
 import("//build/toolchain/rbe.gni")
 import("//build/toolchain/toolchain.gni")
 import("//build/toolchain/win/win_toolchain_data.gni")
@@ -265,6 +266,41 @@ template("msvc_toolchain") {
     tool("copy") {
       command = "\"$python_path\" $tool_wrapper_path recursive-mirror {{source}} {{output}}"
       description = "COPY {{source}} {{output}}"
+    }
+
+    rustc = rebase_path(rustc_bin, root_build_dir)
+
+    tool("rust_rlib") {
+      depfile = "{{output}}.d"
+      outfile = "{{target_out_dir}}/lib{{crate_name}}.rlib"
+      command = "ninja -t msvc -e $env -- {{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST $outfile"
+      outputs = [ outfile ]
+    }
+
+    tool("rust_staticlib") {
+      depfile = "{{output}}.d"
+      outfile = "{{target_out_dir}}/{{target_output_name}}.lib"
+      command = "ninja -t msvc -e $env -- {{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST $outfile"
+      outputs = [ outfile ]
+      default_output_extension = ".lib"
+    }
+
+    tool("rust_macro") {
+      depfile = "{{output}}.d"
+      outfile = "{{target_out_dir}}/{{crate_name}}.dll"
+      command = "ninja -t msvc -e $env -- {{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} --extern proc_macro {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST_MACRO $outfile"
+      outputs = [ outfile ]
+    }
+
+    tool("rust_bin") {
+      depfile = "{{output}}.d"
+      outfile = "{{root_out_dir}}/{{crate_name}}.exe"
+      command = "ninja -t msvc -e $env -- {{rustenv}} $rustc --crate-name {{crate_name}} {{source}} --crate-type {{crate_type}} --emit=dep-info=$depfile,link -Zdep-info-omit-d-target {{rustflags}} {{externs}} {{rustdeps}} -o $outfile"
+      description = "RUST_BIN $outfile"
+      outputs = [ outfile ]
     }
   }
 }
