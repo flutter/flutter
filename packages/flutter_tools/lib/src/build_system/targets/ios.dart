@@ -403,13 +403,7 @@ class UnpackIosVmService extends UnpackDarwin {
   List<Target> get dependencies => const <Target>[];
 
   @override
-  Future<bool> canSkip(Environment environment) async {
-    final String? buildModeEnvironment = environment.defines[kBuildMode];
-    if (buildModeEnvironment == null) {
-      throw MissingDefineException(kBuildMode, name);
-    }
-    return BuildMode.fromCliName(buildModeEnvironment) != .profile;
-  }
+  Future<bool> canSkip(Environment environment) async => false;
 
   @override
   Future<void> build(Environment environment) async {
@@ -918,9 +912,21 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   List<Target> get dependencies => <Target>[
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
-    const UnpackIosVmService(),
     ...super.dependencies,
   ];
+
+  @override
+  List<Target> resolveDependencies(Environment environment) {
+    final String? buildMode = environment.defines[kBuildMode];
+    return <Target>[
+      ...dependencies,
+      // Simulator builds in profile Add-to-App commands (`ios-framework` and `swift-package`)
+      // run DebugIosApplicationBundle with kBuildMode == 'profile' and need a simulator
+      // stub VMService.framework so VMService.xcframework includes a simulator variant.
+      if (buildMode != null && BuildMode.fromCliName(buildMode) == .profile)
+        const UnpackIosVmService(),
+    ];
+  }
 }
 
 /// IosAssetBundle with debug symbols, used for Profile and Release builds.

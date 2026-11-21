@@ -720,6 +720,40 @@ void main() {
     ]);
   });
 
+  testWithoutContext(
+    'DebugIosApplicationBundle resolves UnpackIosVmService only in profile mode',
+    () {
+      const bundle = DebugIosApplicationBundle();
+      expect(bundle.dependencies, isNot(contains(const UnpackIosVmService())));
+      expect(bundle.resolveDependencies(environment), isNot(contains(const UnpackIosVmService())));
+
+      final debugEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: 'debug'},
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(
+        bundle.resolveDependencies(debugEnvironment),
+        isNot(contains(const UnpackIosVmService())),
+      );
+
+      final profileEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: 'profile'},
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(bundle.resolveDependencies(profileEnvironment), contains(const UnpackIosVmService()));
+    },
+  );
+
   testUsingContext(
     'ReleaseIosApplicationBundle sends archive success event',
     () async {
@@ -1521,18 +1555,7 @@ void main() {
     const target = UnpackIosVmService();
     const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.ios.profile';
 
-    Environment environmentWithDefines(Map<String, String> defines) {
-      return Environment.test(
-        fileSystem.currentDirectory,
-        defines: defines,
-        artifacts: artifacts,
-        processManager: processManager,
-        logger: logger,
-        fileSystem: fileSystem,
-      );
-    }
-
-    testWithoutContext('declares expected inputs and outputs', () {
+    testWithoutContext('declares expected inputs, outputs, and does not skip SwiftPM', () async {
       expect(target.inputs, const <Source>[
         Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
       ]);
@@ -1543,43 +1566,20 @@ void main() {
           environment.outputDir.childFile('VMService.framework/Info.plist').path,
         ]),
       );
-    });
 
-    testWithoutContext('throws MissingDefineException when BuildMode is missing', () async {
-      await expectLater(
-        target.canSkip(environment),
-        throwsA(
-          isA<MissingDefineException>().having(
-            (MissingDefineException e) => e.define,
-            'define',
-            kBuildMode,
-          ),
-        ),
-      );
-    });
+      expect(await target.canSkip(environment), isFalse);
 
-    testWithoutContext('skips non-profile build modes', () async {
-      expect(
-        await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'debug'})),
-        isTrue,
+      final swiftPmEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildSwiftPackage: 'true'},
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
       );
-      expect(
-        await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'release'})),
-        isTrue,
-      );
-      expect(
-        await target.canSkip(environmentWithDefines(<String, String>{kBuildMode: 'profile'})),
-        isFalse,
-      );
-    });
-
-    testWithoutContext('does not skip SwiftPM profile builds', () async {
-      final Environment swiftPmProfileEnvironment = environmentWithDefines(<String, String>{
-        kBuildMode: 'profile',
-        kBuildSwiftPackage: 'true',
-      });
-      expect(await target.canSkip(swiftPmProfileEnvironment), isFalse);
-      expect(await const ProfileUnpackIOS().canSkip(swiftPmProfileEnvironment), isTrue);
+      expect(await target.canSkip(swiftPmEnvironment), isFalse);
+      expect(await const ProfileUnpackIOS().canSkip(swiftPmEnvironment), isTrue);
     });
 
     testWithoutContext(
@@ -1607,6 +1607,7 @@ void main() {
           fileSystem.currentDirectory,
           processManager: processManager,
           artifacts: artifacts,
+          featureFlags: TestFeatureFlags(),
           logger: logger,
           fileSystem: fileSystem,
           outputDir: outputDir,
