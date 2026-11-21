@@ -130,10 +130,8 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[],
                 <String, List<SrvResourceRecord>>{},
@@ -208,10 +206,8 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[],
                 <String, List<SrvResourceRecord>>{},
@@ -292,10 +288,8 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[],
                 <String, List<SrvResourceRecord>>{},
@@ -378,10 +372,8 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 16,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
                 <String, List<SrvResourceRecord>>{
@@ -467,10 +459,8 @@ void main() {
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-foo')],
                 <String, List<SrvResourceRecord>>{
@@ -554,10 +544,8 @@ void main() {
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[
                   PtrResourceRecord('bar', future, domainName: 'srv-bar'),
@@ -654,10 +642,8 @@ void main() {
             majorSdkVersion: 16,
             connectionInterface: DeviceConnectionInterface.wireless,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[
                   PtrResourceRecord('bar', future, domainName: 'srv-bar'),
@@ -936,10 +922,8 @@ void main() {
             portForwarder: portForwarder,
             majorSdkVersion: 12,
             mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
-              mdnsClient: FakeMDnsClient(
-                <PtrResourceRecord>[],
-                <String, List<SrvResourceRecord>>{},
-              ),
+              mdnsClientFactory: () =>
+                  FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
               preliminaryMDnsClient: FakeMDnsClient(
                 <PtrResourceRecord>[],
                 <String, List<SrvResourceRecord>>{},
