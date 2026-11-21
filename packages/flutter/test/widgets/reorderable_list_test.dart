@@ -2157,6 +2157,48 @@ void main() {
     expect(tester.getSize(find.byType(ReorderableDragStartListener)), Size.zero);
   });
 
+  testWidgets('SliverReorderableList drag follows the pointer under a scaled ancestor', (
+    WidgetTester tester,
+  ) async {
+    // Drags item 0 by localDelta in the list's own coordinates with the whole
+    // app, overlay included, scaled by scale, and returns the resulting order.
+    Future<List<int>> dragFirstItem(double localDelta, {required double scale}) async {
+      final items = List<int>.generate(8, (int index) => index);
+      await tester.pumpWidget(
+        Transform.scale(
+          // A fresh tree for each scale, so drags do not share list state.
+          key: ValueKey<double>(scale),
+          scale: scale,
+          alignment: Alignment.topLeft,
+          child: TestList(items: items),
+        ),
+      );
+      final Offset start = tester.getCenter(find.text('item 0'));
+      final TestGesture drag = await tester.startGesture(start);
+      await tester.pump(kPressTimeout);
+      final Offset pointerPosition = start + Offset(0, localDelta * scale);
+      await drag.moveTo(pointerPosition);
+      await tester.pump(kPressTimeout);
+
+      // The drag started at the center of item 0, so the center of the proxy
+      // must stay exactly under the pointer at any scale.
+      final Offset proxyCenter = tester.getCenter(find.text('item 0'));
+      expect(proxyCenter.dx, moreOrLessEquals(pointerPosition.dx));
+      expect(proxyCenter.dy, moreOrLessEquals(pointerPosition.dy));
+
+      await drag.up();
+      await tester.pumpAndSettle();
+      return items;
+    }
+
+    // Without a scale, the drag moves item 0 down the list.
+    final List<int> unscaled = await dragFirstItem(250, scale: 1.0);
+    expect(unscaled, isNot(List<int>.generate(8, (int index) => index)));
+    // The same local drag must give the same order at any scale.
+    expect(await dragFirstItem(250, scale: 0.5), unscaled);
+    expect(await dragFirstItem(250, scale: 1.5), unscaled);
+  });
+
   testWidgets('ReorderableDelayedDragStartListener does not crash at zero area', (
     WidgetTester tester,
   ) async {
