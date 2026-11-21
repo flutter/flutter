@@ -2127,7 +2127,64 @@ void main() {
       expect(LogInvocationContextAction.invokeContext, isNotNull);
       expect(LogInvocationContextAction.invokeContext, invokingContext);
     });
+
+    for (final defaultIsContextAction in <bool>[false, true]) {
+      // Regression test for https://github.com/flutter/flutter/issues/192844.
+      testWidgets('Can be invoked again after the override throws '
+          '(defaultIsContextAction: $defaultIsContextAction)', (WidgetTester tester) async {
+        final overrideAction = ThrowOnFirstInvokeAction();
+        await tester.pumpWidget(
+          Actions(
+            actions: <Type, Action<Intent>>{LogIntent: overrideAction},
+            child: Builder(
+              builder: (BuildContext context1) {
+                return Actions(
+                  actions: <Type, Action<Intent>>{
+                    LogIntent: Action<LogIntent>.overridable(
+                      defaultAction: defaultIsContextAction
+                          ? LogInvocationContextAction(actionName: 'action1')
+                          : LogInvocationAction(actionName: 'action1'),
+                      context: context1,
+                    ),
+                  },
+                  child: Builder(
+                    builder: (BuildContext context2) {
+                      invokingContext = context2;
+                      return const SizedBox();
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+        expect(
+          () => Actions.invoke(invokingContext!, LogIntent(log: invocations)),
+          throwsStateError,
+        );
+        expect(overrideAction.currentCallingAction, isNull);
+
+        Actions.invoke(invokingContext!, LogIntent(log: invocations));
+        expect(invocations, <String>['override.invoke']);
+      });
+    }
   });
+}
+
+class ThrowOnFirstInvokeAction extends Action<LogIntent> {
+  bool _hasThrown = false;
+
+  Action<LogIntent>? get currentCallingAction => callingAction;
+
+  @override
+  void invoke(LogIntent intent) {
+    if (!_hasThrown) {
+      _hasThrown = true;
+      throw StateError('The override failed.');
+    }
+    intent.log.add('override.invoke');
+  }
 }
 
 typedef PostInvokeCallback = void Function({

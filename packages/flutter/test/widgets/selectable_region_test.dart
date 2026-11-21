@@ -3823,6 +3823,43 @@ void main() {
       skip: kIsWeb, // [intended] the web handles this on its own.
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/192844.
+    testWidgets(
+      'vertical caret movement works in a focused TextField',
+      (WidgetTester tester) async {
+        final controller = TextEditingController(text: 'abc\ndef\nghi');
+        addTearDown(controller.dispose);
+        final selectableRegionFocus = FocusNode();
+        addTearDown(selectableRegionFocus.dispose);
+        final textFieldFocus = FocusNode();
+        addTearDown(textFieldFocus.dispose);
+
+        await tester.pumpWidget(
+          TestWidgetsApp(
+            home: _selectableRegion(
+              focusNode: selectableRegionFocus,
+              child: TestTextField(controller: controller, focusNode: textFieldFocus, maxLines: 3),
+            ),
+          ),
+        );
+        textFieldFocus.requestFocus();
+        await tester.pump();
+        controller.selection = const TextSelection.collapsed(offset: 0);
+        await tester.pump();
+
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+        expect(controller.selection, const TextSelection.collapsed(offset: 4));
+
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+        expect(controller.selection, const TextSelection.collapsed(offset: 8));
+
+        await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
+        expect(controller.selection, const TextSelection.collapsed(offset: 4));
+      },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb, // [intended] the web handles this on its own.
+    );
+
     testWidgets(
       'select all',
       (WidgetTester tester) async {
