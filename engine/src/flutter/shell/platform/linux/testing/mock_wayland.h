@@ -9,6 +9,7 @@
 
 #include "gmock/gmock.h"
 
+struct wl_callback;
 struct wl_display;
 struct wl_surface;
 
@@ -59,6 +60,15 @@ struct wl_surface* fl_mock_wayland_get_surface();
 
 // Releases a surface returned by fl_mock_wayland_get_surface().
 void fl_mock_wayland_free_surface(struct wl_surface* surface);
+
+// Gets the wl_callback created by the last wl_surface.frame request, or
+// nullptr if no frame callback has been requested.
+struct wl_callback* fl_mock_wayland_get_last_callback();
+
+// Sends the wl_callback.done event for @callback, as the compositor does when
+// the frame is ready to be repainted.
+void fl_mock_wayland_send_callback_done(struct wl_callback* callback,
+                                        uint32_t callback_data);
 
 }  // namespace testing
 }  // namespace flutter

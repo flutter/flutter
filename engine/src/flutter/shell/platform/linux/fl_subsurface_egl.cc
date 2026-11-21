@@ -32,6 +32,9 @@ struct _FlSubsurfaceEGL {
   // EGL surface that draws onto egl_window.
   EGLSurface egl_surface;
 
+  // Optional presentation feedback for frames committed to the subsurface.
+  FlPresentationTracker* presentation;
+
   // TRUE if glBlitFramebuffer can be used to copy the engine frame to the
   // window surface. When FALSE the frame is drawn with [shader] instead.
   gboolean can_blit;
@@ -202,6 +205,10 @@ static void fl_subsurface_egl_dispose(GObject* object) {
     wl_egl_window_destroy(self->egl_window);
     self->egl_window = nullptr;
   }
+  if (self->presentation != nullptr) {
+    fl_presentation_tracker_reset(self->presentation);
+    g_clear_object(&self->presentation);
+  }
   g_clear_object(&self->shader);
   g_clear_object(&self->subsurface);
   g_clear_object(&self->opengl_manager);
@@ -231,6 +238,13 @@ FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
   setup(self, width, height, scale);
 
   return self;
+}
+
+void fl_subsurface_egl_set_presentation_tracker(
+    FlSubsurfaceEGL* self,
+    FlPresentationTracker* tracker) {
+  g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
+  g_set_object(&self->presentation, tracker);
 }
 
 void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,
@@ -327,6 +341,14 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
     fl_compositor_opengl_shader_set_scale(self->shader, 1, 1);
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+  }
+
+  // Request feedback immediately before the swap that commits the frame. The
+  // earlier swap above only discards an unused buffer and has no content to
+  // report.
+  if (self->presentation != nullptr && self->egl_surface != EGL_NO_SURFACE) {
+    fl_presentation_tracker_record_commit(
+        self->presentation, fl_subsurface_get_surface(self->subsurface));
   }
   eglSwapBuffers(egl_display, self->egl_surface);
   self->buffer_width = self->window_width;
