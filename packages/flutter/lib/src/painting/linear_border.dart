@@ -190,7 +190,7 @@ class LinearBorder extends OutlinedBorder {
 
   @override
   LinearBorder scale(double t) {
-    return LinearBorder(side: side.scale(t));
+    return copyWith(side: side.scale(t));
   }
 
   @override
@@ -299,7 +299,8 @@ class LinearBorder extends OutlinedBorder {
       final double x = rtl ? rect.right - insets.right : rect.left;
       final double width = rtl ? insets.right : insets.left;
       final double height = insetRect.height * start!.size;
-      final double y = (insetRect.height - height) * ((start!.alignment + 1.0) / 2.0);
+      final double y =
+          insetRect.top + (insetRect.height - height) * ((start!.alignment + 1.0) / 2.0);
       final r = Rect.fromLTWH(x, y, width, height);
       drawEdge(r, side.color);
     }
@@ -314,7 +315,7 @@ class LinearBorder extends OutlinedBorder {
       final double x = rtl ? rect.left : rect.right - insets.right;
       final double width = rtl ? insets.left : insets.right;
       final double height = insetRect.height * end!.size;
-      final double y = (insetRect.height - height) * ((end!.alignment + 1.0) / 2.0);
+      final double y = insetRect.top + (insetRect.height - height) * ((end!.alignment + 1.0) / 2.0);
       final r = Rect.fromLTWH(x, y, width, height);
       drawEdge(r, side.color);
     }
@@ -322,7 +323,7 @@ class LinearBorder extends OutlinedBorder {
     if (top != null && top!.size != 0.0 && side.style != BorderStyle.none) {
       final double width = rect.width * top!.size;
       final double startX = (rect.width - width) * ((top!.alignment + 1.0) / 2.0);
-      final double x = rtl ? rect.width - startX - width : startX;
+      final double x = rect.left + (rtl ? rect.width - startX - width : startX);
       final r = Rect.fromLTWH(x, rect.top, width, insets.top);
       drawEdge(r, side.color);
     }
@@ -330,7 +331,7 @@ class LinearBorder extends OutlinedBorder {
     if (bottom != null && bottom!.size != 0.0 && side.style != BorderStyle.none) {
       final double width = rect.width * bottom!.size;
       final double startX = (rect.width - width) * ((bottom!.alignment + 1.0) / 2.0);
-      final double x = rtl ? rect.width - startX - width : startX;
+      final double x = rect.left + (rtl ? rect.width - startX - width : startX);
       final r = Rect.fromLTWH(x, rect.bottom - insets.bottom, width, side.width);
       drawEdge(r, side.color);
     }
