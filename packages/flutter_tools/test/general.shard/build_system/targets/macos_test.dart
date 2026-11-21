@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -63,6 +62,7 @@ void main() {
       },
       inputs: <String, String>{},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       logger: logger,
       fileSystem: fileSystem,
@@ -1011,7 +1011,6 @@ void main() {
         expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
       },
       overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       },
     );
@@ -1041,6 +1040,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildSwiftPackage: 'true'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,
@@ -1058,6 +1058,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kDarwinArchs: 'arm64'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,
@@ -1112,6 +1113,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kDarwinArchs: 'arm64'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,
@@ -1156,6 +1158,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kDarwinArchs: 'arm64'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         logger: logger,
         fileSystem: fileSystem,

@@ -17,6 +17,7 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -31,6 +32,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -82,6 +84,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug'},
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -136,6 +139,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{kBuildMode: 'profile'},
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -161,6 +165,7 @@ void main() {
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'debug', kBuildName: '2.0.0', kBuildNumber: '22'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -205,6 +210,7 @@ void main() {
     final environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -276,6 +282,7 @@ flutter:
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'profile'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -322,6 +329,7 @@ flutter:
         fileSystem.currentDirectory,
         defines: <String, String>{kBuildMode: 'release'},
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
