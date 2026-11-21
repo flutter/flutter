@@ -4,8 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:meta/meta.dart';
+
+import 'provider.dart';
 
 /// Typedef for an extension RPC handler function.
 typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> params);
@@ -48,6 +51,15 @@ abstract base class ToolExtensionService {
       );
     }
     sender(method, params);
+  }
+
+  /// Sends a structured log notification to the host tool over
+  /// [ToolExtensionEntryPoint.logNotificationMethod].
+  void log(String message, {ExtensionLogLevel level = .info, DateTime? timestamp}) {
+    sendNotification(
+      ToolExtensionEntryPoint.logNotificationMethod,
+      ExtensionLogMessage(level: level, message: message, timestamp: timestamp).toMap(),
+    );
   }
 
   /// Cleans up resources held by the service when the extension is shut down.
