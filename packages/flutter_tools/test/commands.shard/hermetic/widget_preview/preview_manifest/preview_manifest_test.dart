@@ -12,10 +12,10 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
-import 'package:test/test.dart';
 
 import '../../../../src/common.dart';
 import '../../../../src/context.dart';
+import '../utils/preview_project.dart';
 
 void main() {
   group('$PreviewManifest', () {
@@ -115,6 +115,103 @@ void main() {
       // no longer need to regenerate the pubspec.
       previewManifest.updatePubspecHash();
       expect(previewManifest.shouldRegeneratePubspec(), false);
+    });
+  });
+
+  group('$PreviewManifest - Workspace', () {
+    const fakeSdkVersion = '2.1.0-dev.8.0.flutter-4312ae32';
+
+    late MemoryFileSystem fs;
+    late BufferLogger logger;
+    late Directory workspaceDir;
+    late WidgetPreviewWorkspace workspace;
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      logger = BufferLogger.test();
+      workspaceDir = fs.directory('/workspace')..createSync();
+      workspace = WidgetPreviewWorkspace(workspaceRoot: workspaceDir);
+    });
+
+    PreviewManifest createWorkspaceManifest() {
+      final FlutterProject rootProject = FlutterProject.fromDirectory(workspaceDir, logger: logger);
+      return PreviewManifest(
+        logger: logger,
+        rootProject: rootProject,
+        fs: fs,
+        cache: Cache.test(
+          processManager: FakeProcessManager.any(),
+          fileSystem: fs,
+          platform: FakePlatform(version: fakeSdkVersion),
+        ),
+      );
+    }
+
+    testWithoutContext('can handle workspace entries that do not exist', () async {
+      await workspace.createWorkspaceProject(name: 'foo');
+      await workspace.createWorkspaceProject(name: 'bar');
+
+      final PreviewManifest manifest = createWorkspaceManifest()..generate();
+      final Set<String> originalWorkspacePubspecPaths = workspace.workspacePubspecPaths;
+      expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
+
+      // Add a new workspace project to the workspace pubspec without creating the project yet.
+      await workspace.updatePubspec(injectNonExistentProject: 'baz');
+      manifest.updatePubspecHash(updatedPubspecPath: workspace.pubspecAbsolutePath);
+      expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
+
+      // Create the newly added workspace project and verify its pubspec hash is recorded.
+      final WidgetPreviewProject baz = await workspace.createWorkspaceProject(
+        name: 'baz',
+        updateWorkspacePubspec: false,
+      );
+      manifest.updatePubspecHash(updatedPubspecPath: baz.pubspecAbsolutePath);
+      expect(manifest.pubspecHashes.keys, workspace.workspacePubspecPaths);
+    });
+
+    testWithoutContext(
+      'can handle the addition of new workspace projects before the workspace pubspec is updated',
+      () async {
+        await workspace.createWorkspaceProject(name: 'foo');
+        await workspace.createWorkspaceProject(name: 'bar');
+
+        final PreviewManifest manifest = createWorkspaceManifest()..generate();
+        final Set<String> originalWorkspacePubspecPaths = workspace.workspacePubspecPaths;
+        expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
+
+        // Create a subproject before adding it to the root workspace pubspec.
+        final WidgetPreviewProject baz = await workspace.createWorkspaceProject(
+          name: 'baz',
+          updateWorkspacePubspec: false,
+        );
+        manifest.updatePubspecHash(updatedPubspecPath: baz.pubspecAbsolutePath);
+        expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
+
+        // Update the root workspace pubspec to include the new project.
+        await workspace.updatePubspec();
+        manifest.updatePubspecHash(updatedPubspecPath: workspace.pubspecAbsolutePath);
+        expect(manifest.pubspecHashes.keys, workspace.workspacePubspecPaths);
+      },
+    );
+
+    testWithoutContext('can handle the removal of workspace projects', () async {
+      await workspace.createWorkspaceProject(name: 'foo');
+      final WidgetPreviewProject bar = await workspace.createWorkspaceProject(name: 'bar');
+      final String barPubspecPath = bar.pubspecAbsolutePath;
+
+      final PreviewManifest manifest = createWorkspaceManifest()..generate();
+      final Set<String> originalWorkspacePubspecPaths = workspace.workspacePubspecPaths;
+      expect(manifest.pubspecHashes.keys, originalWorkspacePubspecPaths);
+
+      // Delete the subproject directory before updating the workspace pubspec.
+      await workspace.deleteWorkspaceProject(name: 'bar', updateWorkspacePubspec: false);
+      manifest.updatePubspecHash(updatedPubspecPath: barPubspecPath);
+      expect(manifest.pubspecHashes.keys, workspace.workspacePubspecPaths);
+
+      // Update the workspace pubspec to remove the deleted project.
+      await workspace.updatePubspec();
+      manifest.updatePubspecHash(updatedPubspecPath: workspace.pubspecAbsolutePath);
+      expect(manifest.pubspecHashes.keys, workspace.workspacePubspecPaths);
     });
   });
 }

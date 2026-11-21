@@ -16,7 +16,6 @@ import '../context/tool_context.dart';
 import '../dart/analysis.dart';
 import '../project.dart';
 import 'analytics.dart';
-import 'dependency_graph.dart';
 import 'dtd_services.dart';
 import 'dtd_types.dart';
 import 'utils.dart';
@@ -38,9 +37,8 @@ class LspPreviewDetector {
     required this.toolContext,
     this.analysisServerFactory,
     this.onNonDartFileChangeDetected,
-    @visibleForTesting this.onPackageConfigChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
-  }) : projectRoot = project.directory;
+  }) : projectRoot = resolveDirectoryLinks(project.directory);
 
   final ToolContext toolContext;
   final WidgetPreviewAnalytics previewAnalytics;
@@ -49,8 +47,6 @@ class LspPreviewDetector {
   final void Function(FlutterWidgetPreviews) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
   final void Function(String path)? onNonDartFileChangeDetected;
-  @visibleForTesting
-  final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
   final WidgetPreviewDtdServices dtd;
   final bool suppressAnalytics;
@@ -74,11 +70,17 @@ class LspPreviewDetector {
   @visibleForTesting
   final mutex = PreviewDetectorMutex();
 
+  late final _ephemeralDirectoryPaths = <String>{
+    for (final Directory dir in project.ephemeralDirectories) ...<String>[
+      dir.path,
+      resolveDirectoryLinks(dir).path,
+    ],
+  };
+
   var _disposed = false;
   bool _initialized = false;
 
-  /// Starts listening for changes to Dart sources under [projectRoot] and returns
-  /// the initial [PreviewDependencyGraph] for the project.
+  /// Starts listening for changes to Dart sources under [projectRoot].
   Future<void> initialize() async {
     return mutex.runGuarded(() async {
       if (_initialized) {
@@ -145,8 +147,8 @@ class LspPreviewDetector {
       return;
     }
     _disposed = true;
-    // Guard disposal behind a mutex to make sure the analyzer has finished
-    // processing the latest file updates to avoid throwing an exception.
+    // Guard disposal behind a mutex so any in-flight file system event finishes
+    // before canceling the watcher and shutting down the analysis server.
     await mutex.runGuarded(() async {
       await _fileWatcher?.cancel();
       _fileWatcher = null;
@@ -156,15 +158,15 @@ class LspPreviewDetector {
   }
 
   Future<void> _onFileSystemEvent(WatchEvent event) async {
-    // Only process one FileSystemEntity at a time so we don't invalidate an AnalysisSession that's
-    // in use when we call context.changeFile(...).
+    // Serialize file system events so concurrent updates do not race with
+    // preview reload requests or detector shutdown.
     await mutex.runGuarded(() async {
       final String eventPath = event.path;
       // Ignore any files under .dart_tool, .widget_preview, or ephemeral directories created by
       // the tool (e.g., build/, plugin directories, etc.).
       if (eventPath.doesContainDartTool ||
           eventPath.doesContainWidgetPreview ||
-          project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
+          _ephemeralDirectoryPaths.any(eventPath.contains)) {
         return;
       }
       await _fileAddedOrUpdated(filePath: eventPath);
