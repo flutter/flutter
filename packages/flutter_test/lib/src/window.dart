@@ -1293,6 +1293,9 @@ class TestFlutterView implements FlutterView {
       // platformDispatcher, or a fake TestPlatformDispatcher.
     } on NoSuchMethodError {
       // A test double that forwards them to noSuchMethod.
+    } on TypeError {
+      // A mock that returns null for them, as it does for a member it was not
+      // told how to answer.
     }
     return _platformDispatcher;
   }

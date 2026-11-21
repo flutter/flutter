@@ -522,6 +522,13 @@ void main() {
     );
     addTearDown(() => tester.platformDispatcher.removeTestView(added));
     expect(added.platformDispatcher, same(tester.platformDispatcher));
+
+    // The mock view returns null for platformDispatcher.
+    final TestFlutterView mocked = tester.platformDispatcher.addTestView(
+      _NullReturningFlutterView(viewId: 101),
+    );
+    addTearDown(() => tester.platformDispatcher.removeTestView(mocked));
+    expect(mocked.platformDispatcher, same(tester.platformDispatcher));
   });
 
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
@@ -810,6 +817,18 @@ class _FakeFlutterView extends Fake implements FlutterView {
 
   @override
   final int viewId;
+}
+
+/// A [FlutterView] that returns null from every member other than [viewId],
+/// as a mock does from a member it was not told how to answer.
+class _NullReturningFlutterView implements FlutterView {
+  _NullReturningFlutterView({required this.viewId});
+
+  @override
+  final int viewId;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
