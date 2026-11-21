@@ -279,5 +279,40 @@ void main() {
     test('Satellite window is not destroyed until closed', () async {
       await _expectIsDestroyedTransition(driver, 'satellite');
     }, timeout: Timeout.none);
+
+    test(
+      'Activating a nested popup does not close its parent popup',
+      () async {
+        final String createResponse = await _requestDataWithRetry(
+          driver,
+          jsonEncode({'type': 'create_nested_popups'}),
+        );
+        if ((jsonDecode(createResponse) as Map<String, Object?>)['result'] == 'unsupported') {
+          markTestSkipped('Popup windows are not supported on this platform.');
+          return;
+        }
+
+        try {
+          String response = await _requestDataWithRetry(
+            driver,
+            jsonEncode({'type': 'activate_inner_popup'}),
+          );
+          expect((jsonDecode(response) as Map<String, Object?>)['isActivated'], true);
+
+          response = await _requestDataWithRetry(
+            driver,
+            jsonEncode({'type': 'are_nested_popups_destroyed'}),
+          );
+          final data = jsonDecode(response) as Map<String, Object?>;
+          expect(data['outer'], false);
+          expect(data['inner'], false);
+        } finally {
+          await _requestDataWithRetry(driver, jsonEncode({'type': 'destroy_nested_popups'}));
+        }
+      },
+      timeout: Timeout.none,
+      // TODO(mattkae): Enable on other platforms once nested popup activation is supported there.
+      skip: !Platform.isWindows,
+    );
   });
 }
