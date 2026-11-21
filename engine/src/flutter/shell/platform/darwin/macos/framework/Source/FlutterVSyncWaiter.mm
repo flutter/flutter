@@ -39,6 +39,9 @@
 // It's preferable to fire the timers slightly early than too late due to scheduling latency.
 // 1ms before vsync should be late enough for all events to be processed.
 static const CFTimeInterval kTimerLatencyCompensation = 0.001;
+// CoreVideo recreates its I/O thread when a display link restarts. Eight idle
+// ticks cover normal frame-request gaps while pausing within 133 ms at 60 Hz.
+static const NSUInteger kIdleDisplayLinkTicksBeforePause = 8;
 
 @implementation FlutterVSyncWaiter {
   std::optional<std::uintptr_t> _pendingBaton;
@@ -46,6 +49,7 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
   void (^_block)(CFTimeInterval, CFTimeInterval, uintptr_t);
   CFTimeInterval _lastTargetTimestamp;
   BOOL _warmUpFrame;
+  NSUInteger _idleDisplayLinkTicks;
 }
 
 - (instancetype)initWithDisplayLink:(FlutterDisplayLink*)displayLink
@@ -78,29 +82,29 @@ static const CFTimeInterval kTimerLatencyCompensation = 0.001;
     // timestamp. That can cause frame-pacing issues if the frame is rendered too early,
     // it may also trigger frame start before events are processed.
     CFTimeInterval minStart = targetTimestamp - _displayLink.nominalOutputRefreshPeriod;
-    CFTimeInterval current = CACurrentMediaTime();
-    CFTimeInterval remaining = std::max(minStart - current - kTimerLatencyCompensation, 0.0);
-
     TRACE_VSYNC("DisplayLinkCallback-Original", _pendingBaton.value_or(0));
 
-    [FlutterRunLoop.mainRunLoop
-        performAfterDelay:remaining
-                    block:^{
-                      if (!_pendingBaton.has_value()) {
-                        TRACE_VSYNC("DisplayLinkPaused", size_t(0));
-                        _displayLink.paused = YES;
-                        return;
-                      }
-                      TRACE_VSYNC("DisplayLinkCallback-Delayed", _pendingBaton.value_or(0));
-                      _block(minStart, targetTimestamp, *_pendingBaton);
-                      _pendingBaton = std::nullopt;
-                    }];
+    // Return the future interval now. The engine schedules its UI task for
+    // minStart, avoiding a second platform-run-loop timer that can fire late.
+    if (!_pendingBaton.has_value()) {
+      _idleDisplayLinkTicks++;
+      if (_idleDisplayLinkTicks >= kIdleDisplayLinkTicksBeforePause) {
+        TRACE_VSYNC("DisplayLinkPaused", size_t(0));
+        _displayLink.paused = YES;
+      }
+      return;
+    }
+    _idleDisplayLinkTicks = 0;
+    TRACE_VSYNC("DisplayLinkCallback-Delivered", _pendingBaton.value_or(0));
+    _block(minStart, targetTimestamp, *_pendingBaton);
+    _pendingBaton = std::nullopt;
   }
 }
 
 // Called from UI thread.
 - (void)waitForVSync:(uintptr_t)baton {
   FML_DCHECK([NSThread isMainThread]);
+  _idleDisplayLinkTicks = 0;
   // CVDisplayLink start -> callback latency is two frames, there is
   // no need to delay the warm-up frame.
   if (_warmUpFrame) {
