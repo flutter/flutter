@@ -1118,10 +1118,11 @@ bool debugClearViewMetricsOverrides() {
 /// [BindingBase.platformDispatcher] applies this to
 /// [ui.PlatformDispatcher.instance], which is what makes overrides visible to
 /// the framework; see [DebugViewMetricsOverride]. A binding that overrides
-/// that getter to supply a different dispatcher should wrap it the same way,
-/// or overrides never reach the framework running on it. A change of an
-/// override is announced through the callbacks registered on every dispatcher
-/// wrapped this way.
+/// that getter to supply a different dispatcher should wrap it the same way.
+/// Otherwise the framework running on it sees only the overrides that a view
+/// applies itself, as a [TestFlutterView] does, and is not told when one
+/// changes. A change of an override is announced through the callbacks
+/// registered on every dispatcher wrapped this way.
 ///
 /// Returns the same wrapper every time it is called with the same
 /// [dispatcher], so that the views it reports keep a stable identity, and

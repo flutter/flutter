@@ -386,6 +386,42 @@ void main() {
       debugClearViewMetricsOverrides();
       expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(40, 0, 60, 200));
     });
+
+    testWidgets('views of a dispatcher that was not wrapped apply their entries, unannounced', (
+      WidgetTester tester,
+    ) async {
+      // Unlike the binding's, this dispatcher was not wrapped by
+      // debugApplyViewMetricsOverrides, which is what applies the implicit
+      // view's entry to the platform-wide metrics and announces a change. The
+      // views still apply their entries to everything else.
+      final dispatcher = TestPlatformDispatcher(platformDispatcher: _TwoViewPlatformDispatcher());
+      var metricsChanged = 0;
+      dispatcher.onMetricsChanged = () => metricsChanged += 1;
+      final TestFlutterView implicitView = dispatcher.implicitView!;
+      final TestFlutterView secondView = dispatcher.view(
+        id: _TwoViewPlatformDispatcher.secondViewId,
+      )!;
+
+      debugSetViewMetricsOverride(
+        implicitView.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 4.0, textScaling: <Offset>[Offset(1, 3)]),
+      );
+      debugSetViewMetricsOverride(
+        secondView.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 5.0, textScaling: <Offset>[Offset(1, 2)]),
+      );
+      final double implicitRatio = implicitView.devicePixelRatio;
+      final double implicitTextScale = implicitView.platformDispatcher.textScaleFactor;
+      final double secondRatio = secondView.devicePixelRatio;
+      final double secondTextScale = secondView.platformDispatcher.textScaleFactor;
+      debugClearViewMetricsOverrides();
+
+      expect(implicitRatio, 4.0);
+      expect(implicitTextScale, 1.0);
+      expect(secondRatio, 5.0);
+      expect(secondTextScale, 2.0);
+      expect(metricsChanged, 0);
+    });
   });
 }
 
@@ -583,4 +619,51 @@ class _HingeView extends Fake implements FlutterView {
       state: DisplayFeatureState.postureFlat,
     ),
   ];
+}
+
+/// A [PlatformDispatcher] with an implicit view and a second view, that
+/// reports a text scale factor of 1 and no displays.
+class _TwoViewPlatformDispatcher extends Fake implements PlatformDispatcher {
+  static const int implicitViewId = 400;
+  static const int secondViewId = 401;
+
+  late final Map<int, FlutterView> _views = <int, FlutterView>{
+    implicitViewId: _PlainView(this, implicitViewId),
+    secondViewId: _PlainView(this, secondViewId),
+  };
+
+  @override
+  FlutterView? get implicitView => _views[implicitViewId];
+
+  @override
+  Iterable<FlutterView> get views => _views.values;
+
+  @override
+  FlutterView? view({required int id}) => _views[id];
+
+  @override
+  Iterable<Display> get displays => const <Display>[];
+
+  @override
+  double get textScaleFactor => 1.0;
+
+  @override
+  VoidCallback? onMetricsChanged;
+
+  @override
+  ViewFocusChangeCallback? onViewFocusChange;
+}
+
+/// A [FlutterView] of [platformDispatcher] at a device pixel ratio of 2.
+class _PlainView extends Fake implements FlutterView {
+  _PlainView(this.platformDispatcher, this.viewId);
+
+  @override
+  final PlatformDispatcher platformDispatcher;
+
+  @override
+  final int viewId;
+
+  @override
+  double get devicePixelRatio => 2.0;
 }

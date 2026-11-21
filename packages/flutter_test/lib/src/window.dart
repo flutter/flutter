@@ -1241,7 +1241,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 /// precedence over an override, and an override over what the wrapped view
 /// reports, including the entry that view applies. A subclass that wraps
 /// another [TestFlutterView] and keeps its id reports that view's metrics as
-/// they are.
+/// they are. See [platformDispatcher] for the platform-wide metrics.
+///
+/// The test binding's [TestPlatformDispatcher] wraps a dispatcher from
+/// [debugApplyViewMetricsOverrides]. That dispatcher applies the implicit
+/// view's entry to the platform-wide metrics, and tells the framework when an
+/// entry changes. A [TestPlatformDispatcher] over a dispatcher that was not
+/// wrapped this way does neither, but its views still apply the entries of
+/// their ids to everything else.
 ///
 /// See also:
 ///
@@ -1271,11 +1278,23 @@ class TestFlutterView implements FlutterView {
   ///
   /// For the implicit view, this is the dispatcher that holds the test values.
   /// In debug mode, any other view has a dispatcher of its own. It shares the
-  /// test values, views, displays and focus of that one, and resolves the
-  /// platform-wide metrics it has no test value for, such as
-  /// [PlatformDispatcher.textScaleFactor], from the [debugViewMetricsOverrides]
-  /// entry registered for this view's [viewId], and otherwise from the
-  /// dispatcher of the view it wraps.
+  /// test values, views, displays and focus of that one. It reports a
+  /// platform-wide metric, such as [PlatformDispatcher.textScaleFactor], from
+  /// the first of these that sets it:
+  ///
+  ///  1. A test value.
+  ///  2. The [debugViewMetricsOverrides] entry registered for this view's
+  ///     [viewId].
+  ///  3. The dispatcher of the view this one wraps.
+  ///
+  /// When the wrapped view reports the binding's dispatcher, as the views of
+  /// test windows and of test doubles that wrap [WidgetTester.view] do, the
+  /// last step reports the implicit view's metrics, including its entry. When
+  /// the platform reports the wrapped view, the last step reports the
+  /// platform's metrics, as for a second view of an app. The metric getters
+  /// that a [TestPlatformDispatcher] subclass overrides take part only in the
+  /// last step, and only when the wrapped view reports that subclass as its
+  /// dispatcher.
   @override
   late final TestPlatformDispatcher platformDispatcher = _createPlatformDispatcher();
   final TestPlatformDispatcher _platformDispatcher;
