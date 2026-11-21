@@ -310,7 +310,7 @@ static void fl_accessible_node_get_extents(AtkComponent* component,
   *x = 0;
   *y = 0;
   g_autoptr(AtkObject) parent = ATK_OBJECT(g_weak_ref_get(&priv->parent));
-  if (parent != nullptr) {
+  if (coord_type != ATK_XY_PARENT && parent != nullptr) {
     atk_component_get_extents(ATK_COMPONENT(parent), x, y, nullptr, nullptr,
                               coord_type);
   }
