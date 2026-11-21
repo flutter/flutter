@@ -35,7 +35,7 @@ a.txt: b.txt
       ..writeAsStringSync('''
 relative/a.txt: relative/b.txt
 ''');
-    final Depfile depfile = depfileService.parse(depfileSource, baseDirectory);
+    final Depfile depfile = depfileService.parse(depfileSource, baseDirectory: baseDirectory);
 
     expect(depfile.inputs.single.path, fileSystem.path.join('project', 'relative', 'b.txt'));
     expect(depfile.outputs.single.path, fileSystem.path.join('project', 'relative', 'a.txt'));
@@ -240,6 +240,18 @@ a.text b.txt
 
     expect(depfile.inputs, isEmpty);
     expect(depfile.outputs, isEmpty);
+  });
+
+  testWithoutContext('Throws FormatException on malformed file when allowMalformed is false', () {
+    final logger = BufferLogger.test();
+    final service = DepfileService(logger: logger, fileSystem: fileSystem);
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
+a.text b.txt
+''');
+
+    expect(() => service.parse(depfileSource, allowMalformed: false), throwsFormatException);
+    expect(logger.errorText, isEmpty);
   });
 
   testWithoutContext('Can parse dart2js output format', () {

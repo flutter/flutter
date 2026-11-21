@@ -50,8 +50,7 @@ final class _TestBuildTarget extends BuildTarget {
     this.executableUri,
     super.outputDir = '${BuiltInPlaceholders.outputDir}/custom',
     this.shouldSucceed = true,
-    super.targetPlatform = 'linux-x64',
-  });
+  }) : super(targetPlatform: 'linux-x64');
 
   @override
   final String name;
