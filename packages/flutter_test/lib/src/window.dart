@@ -196,6 +196,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   final PlatformDispatcher _platformDispatcher;
 
   // The dispatcher whose state this one shares, or null if it holds its own.
+  // Every test value is read and written through [_root], so a test value
+  // added to this class has to be too, or the dispatchers of the views other
+  // than the implicit view do not share it.
   final TestPlatformDispatcher? _owner;
 
   TestPlatformDispatcher get _root => _owner ?? this;

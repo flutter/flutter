@@ -503,6 +503,161 @@ void main() {
     },
   );
 
+  testWidgets('the dispatcher of a view other than the implicit view shares every test value', (
+    WidgetTester tester,
+  ) async {
+    // A test value added to TestPlatformDispatcher belongs here too.
+    final TestPlatformDispatcher owner = tester.platformDispatcher;
+    final TestPlatformDispatcher dispatcher = FakeView(tester.view).platformDispatcher;
+    expect(dispatcher, isNot(same(owner)));
+    addTearDown(owner.clearAllTestValues);
+    final Brightness otherBrightness = switch (owner.platformBrightness) {
+      Brightness.light => Brightness.dark,
+      Brightness.dark => Brightness.light,
+    };
+    final bool otherUse24Hour = !owner.alwaysUse24HourFormat;
+    final bool otherSpellCheck = !owner.nativeSpellCheckServiceDefined;
+    final bool otherContextMenu = !owner.supportsShowingSystemContextMenu;
+    final bool otherShowPassword = !owner.brieflyShowPassword;
+    final bool otherSemantics = !owner.semanticsEnabled;
+    const accessibilityFeatures = FakeAccessibilityFeatures(boldText: true, highContrast: true);
+
+    final testValues = <String, _TestValue>{
+      'locale': (
+        write: (TestPlatformDispatcher d) => d.localeTestValue = const Locale('fr', 'CA'),
+        clear: (TestPlatformDispatcher d) => d.clearLocaleTestValue(),
+        read: (TestPlatformDispatcher d) => d.locale,
+        value: const Locale('fr', 'CA'),
+      ),
+      'locales': (
+        write: (TestPlatformDispatcher d) =>
+            d.localesTestValue = const <Locale>[Locale('fr', 'CA'), Locale('de')],
+        clear: (TestPlatformDispatcher d) => d.clearLocalesTestValue(),
+        read: (TestPlatformDispatcher d) => d.locales,
+        value: const <Locale>[Locale('fr', 'CA'), Locale('de')],
+      ),
+      'initialLifecycleState': (
+        write: (TestPlatformDispatcher d) => d.initialLifecycleStateTestValue = 'paused',
+        clear: (TestPlatformDispatcher d) => d.resetInitialLifecycleState(),
+        read: (TestPlatformDispatcher d) => d.initialLifecycleState,
+        value: 'paused',
+      ),
+      'textScaleFactor': (
+        write: (TestPlatformDispatcher d) => d.textScaleFactorTestValue = 2.5,
+        clear: (TestPlatformDispatcher d) => d.clearTextScaleFactorTestValue(),
+        read: (TestPlatformDispatcher d) => d.textScaleFactor,
+        value: 2.5,
+      ),
+      'scaleFontSize': (
+        write: (TestPlatformDispatcher d) => d.textScaleFactorTestValue = 2.5,
+        clear: (TestPlatformDispatcher d) => d.clearTextScaleFactorTestValue(),
+        read: (TestPlatformDispatcher d) => d.scaleFontSize(10),
+        value: 25.0,
+      ),
+      'platformBrightness': (
+        write: (TestPlatformDispatcher d) => d.platformBrightnessTestValue = otherBrightness,
+        clear: (TestPlatformDispatcher d) => d.clearPlatformBrightnessTestValue(),
+        read: (TestPlatformDispatcher d) => d.platformBrightness,
+        value: otherBrightness,
+      ),
+      'alwaysUse24HourFormat': (
+        write: (TestPlatformDispatcher d) => d.alwaysUse24HourFormatTestValue = otherUse24Hour,
+        clear: (TestPlatformDispatcher d) => d.clearAlwaysUse24HourTestValue(),
+        read: (TestPlatformDispatcher d) => d.alwaysUse24HourFormat,
+        value: otherUse24Hour,
+      ),
+      'nativeSpellCheckServiceDefined': (
+        write: (TestPlatformDispatcher d) =>
+            d.nativeSpellCheckServiceDefinedTestValue = otherSpellCheck,
+        clear: (TestPlatformDispatcher d) => d.clearNativeSpellCheckServiceDefined(),
+        read: (TestPlatformDispatcher d) => d.nativeSpellCheckServiceDefined,
+        value: otherSpellCheck,
+      ),
+      'supportsShowingSystemContextMenu': (
+        write: (TestPlatformDispatcher d) => d.supportsShowingSystemContextMenu = otherContextMenu,
+        clear: (TestPlatformDispatcher d) => d.resetSupportsShowingSystemContextMenu(),
+        read: (TestPlatformDispatcher d) => d.supportsShowingSystemContextMenu,
+        value: otherContextMenu,
+      ),
+      'brieflyShowPassword': (
+        write: (TestPlatformDispatcher d) => d.brieflyShowPasswordTestValue = otherShowPassword,
+        clear: (TestPlatformDispatcher d) => d.resetBrieflyShowPassword(),
+        read: (TestPlatformDispatcher d) => d.brieflyShowPassword,
+        value: otherShowPassword,
+      ),
+      'lineHeightScaleFactorOverride': (
+        write: (TestPlatformDispatcher d) => d.lineHeightScaleFactorOverrideTestValue = 1.5,
+        clear: (TestPlatformDispatcher d) => d.clearLineHeightScaleFactorOverrideTestValue(),
+        read: (TestPlatformDispatcher d) => d.lineHeightScaleFactorOverride,
+        value: 1.5,
+      ),
+      'letterSpacingOverride': (
+        write: (TestPlatformDispatcher d) => d.letterSpacingOverrideTestValue = 2.0,
+        clear: (TestPlatformDispatcher d) => d.clearLetterSpacingOverrideTestValue(),
+        read: (TestPlatformDispatcher d) => d.letterSpacingOverride,
+        value: 2.0,
+      ),
+      'wordSpacingOverride': (
+        write: (TestPlatformDispatcher d) => d.wordSpacingOverrideTestValue = 3.0,
+        clear: (TestPlatformDispatcher d) => d.clearWordSpacingOverrideTestValue(),
+        read: (TestPlatformDispatcher d) => d.wordSpacingOverride,
+        value: 3.0,
+      ),
+      'paragraphSpacingOverride': (
+        write: (TestPlatformDispatcher d) => d.paragraphSpacingOverrideTestValue = 4.0,
+        clear: (TestPlatformDispatcher d) => d.clearParagraphSpacingOverrideTestValue(),
+        read: (TestPlatformDispatcher d) => d.paragraphSpacingOverride,
+        value: 4.0,
+      ),
+      'defaultRouteName': (
+        write: (TestPlatformDispatcher d) => d.defaultRouteNameTestValue = '/shared',
+        clear: (TestPlatformDispatcher d) => d.clearDefaultRouteNameTestValue(),
+        read: (TestPlatformDispatcher d) => d.defaultRouteName,
+        value: '/shared',
+      ),
+      'semanticsEnabled': (
+        write: (TestPlatformDispatcher d) => d.semanticsEnabledTestValue = otherSemantics,
+        clear: (TestPlatformDispatcher d) => d.clearSemanticsEnabledTestValue(),
+        read: (TestPlatformDispatcher d) => d.semanticsEnabled,
+        value: otherSemantics,
+      ),
+      'applicationLocale': (
+        write: (TestPlatformDispatcher d) => d.setApplicationLocale(const Locale('de')),
+        clear: (TestPlatformDispatcher d) => d.resetApplicationLocale(),
+        read: (TestPlatformDispatcher d) => d.applicationLocale,
+        value: const Locale('de'),
+      ),
+      'accessibilityFeatures': (
+        write: (TestPlatformDispatcher d) =>
+            d.accessibilityFeaturesTestValue = accessibilityFeatures,
+        clear: (TestPlatformDispatcher d) => d.clearAccessibilityFeaturesTestValue(),
+        read: (TestPlatformDispatcher d) => d.accessibilityFeatures,
+        value: accessibilityFeatures,
+      ),
+      'systemFontFamily': (
+        write: (TestPlatformDispatcher d) => d.systemFontFamily = 'SharedFamily',
+        clear: (TestPlatformDispatcher d) => d.resetSystemFontFamily(),
+        read: (TestPlatformDispatcher d) => d.systemFontFamily,
+        value: 'SharedFamily',
+      ),
+    };
+
+    for (final MapEntry<String, _TestValue>(key: name, value: testValue) in testValues.entries) {
+      final Object? real = testValue.read(owner);
+      expect(real, isNot(testValue.value), reason: '$name has to change');
+
+      testValue.write(dispatcher);
+      expect(testValue.read(owner), testValue.value, reason: '$name set through the view');
+      testValue.clear(owner);
+      expect(testValue.read(dispatcher), real, reason: '$name cleared through the owner');
+
+      testValue.write(owner);
+      expect(testValue.read(dispatcher), testValue.value, reason: '$name set through the owner');
+      testValue.clear(dispatcher);
+      expect(testValue.read(owner), real, reason: '$name cleared through the view');
+    }
+  });
+
   testWidgets('a view of a fake that lacks what a view dispatcher needs keeps its dispatcher', (
     WidgetTester tester,
   ) async {
@@ -771,6 +926,15 @@ void main() {
     expect(tester.platformDispatcher.onViewFocusChange, initialCallback);
   });
 }
+
+/// A test value of a [TestPlatformDispatcher]: how to set it, how to clear it,
+/// how to read it, and what it reads as while it is set.
+typedef _TestValue = ({
+  void Function(TestPlatformDispatcher dispatcher) write,
+  void Function(TestPlatformDispatcher dispatcher) clear,
+  Object? Function(TestPlatformDispatcher dispatcher) read,
+  Object? value,
+});
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
