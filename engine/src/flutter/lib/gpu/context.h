@@ -99,6 +99,11 @@ extern int InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment(
     flutter::gpu::Context* wrapper);
 
 FLUTTER_GPU_EXPORT
+extern uint32_t InternalFlutterGpu_Context_GetMaximumRenderTargetSize(
+    flutter::gpu::Context* wrapper,
+    int dimension);
+
+FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Context_GetSupportsCompute(
     flutter::gpu::Context* wrapper);
 
