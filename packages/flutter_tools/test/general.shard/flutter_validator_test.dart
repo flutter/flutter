@@ -5,10 +5,13 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
+import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
@@ -304,6 +307,96 @@ void main() {
         ]),
       ),
     );
+  });
+
+  testWithoutContext('FlutterValidator evaluates feature flags for refreshed version', () async {
+    final staleMasterVersion = FakeFlutterVersion(frameworkVersion: '3.50.0');
+    final refreshedStableVersion = FakeFlutterVersion(frameworkVersion: '3.50.0', branch: 'stable');
+    final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
+    final featureFlags = FlutterFeatureFlags(
+      flutterVersion: staleMasterVersion,
+      featuresConfig: FlutterFeaturesConfig(
+        globalConfig: Config.test(),
+        platform: platform,
+        projectManifest: null,
+      ),
+      platform: platform,
+    );
+    final flutterValidator = FlutterValidator(
+      platform: platform,
+      flutterVersion: () => refreshedStableVersion,
+      devToolsVersion: () => '2.8.0',
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+      flutterRoot: () => '/sdk/flutter',
+      featureFlags: featureFlags,
+    );
+
+    final ValidationResult result = await flutterValidator.validate();
+    expect(result.type, ValidationType.success);
+    expect(result.statusInfo, 'Channel stable, 3.50.0, on Windows, locale en_US.UTF-8');
+    final ValidationMessage featureFlagsMessage = result.messages.singleWhere(
+      (ValidationMessage m) => m.message.startsWith('Feature flags: '),
+    );
+    final List<String> reportedFlags = featureFlagsMessage.message
+        .substring('Feature flags: '.length)
+        .split(', ');
+    expect(reportedFlags, contains('enable-web'));
+    // These flags default on for master and off for stable; update if they
+    // graduate to enabled-by-default on stable.
+    expect(hcpp.master.enabledByDefault, isTrue);
+    expect(hcpp.stable.enabledByDefault, isFalse);
+    expect(riscv64.master.enabledByDefault, isTrue);
+    expect(riscv64.stable.enabledByDefault, isFalse);
+    expect(reportedFlags, isNot(contains('enable-hcpp')));
+    expect(reportedFlags, isNot(contains('no-enable-hcpp')));
+    expect(reportedFlags, isNot(contains('enable-riscv64')));
+    expect(reportedFlags, isNot(contains('no-enable-riscv64')));
+  });
+
+  testWithoutContext('FlutterValidator preserves config overrides for refreshed version', () async {
+    final staleMasterVersion = FakeFlutterVersion(frameworkVersion: '3.50.0');
+    final refreshedStableVersion = FakeFlutterVersion(frameworkVersion: '3.50.0', branch: 'stable');
+    final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
+    final config = Config.test()
+      ..setValue('enable-hcpp', true)
+      ..setValue('enable-web', false)
+      ..setValue('enable-fuchsia', true);
+    final featureFlags = FlutterFeatureFlags(
+      flutterVersion: staleMasterVersion,
+      featuresConfig: FlutterFeaturesConfig(
+        globalConfig: config,
+        platform: platform,
+        projectManifest: null,
+      ),
+      platform: platform,
+    );
+    final flutterValidator = FlutterValidator(
+      platform: platform,
+      flutterVersion: () => refreshedStableVersion,
+      devToolsVersion: () => '2.8.0',
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Windows'),
+      flutterRoot: () => '/sdk/flutter',
+      featureFlags: featureFlags,
+    );
+
+    final ValidationResult result = await flutterValidator.validate();
+    final ValidationMessage featureFlagsMessage = result.messages.singleWhere(
+      (ValidationMessage m) => m.message.startsWith('Feature flags: '),
+    );
+    final List<String> reportedFlags = featureFlagsMessage.message
+        .substring('Feature flags: '.length)
+        .split(', ');
+    expect(reportedFlags, contains('enable-hcpp'));
+    expect(reportedFlags, contains('no-enable-web'));
+    expect(reportedFlags, isNot(contains('enable-web')));
+    expect(reportedFlags, isNot(contains('enable-fuchsia')));
+    expect(reportedFlags, isNot(contains('enable-riscv64')));
   });
 
   testWithoutContext(

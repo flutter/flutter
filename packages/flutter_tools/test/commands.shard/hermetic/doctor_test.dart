@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -22,6 +23,8 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/flutter_features.dart';
+import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
@@ -657,6 +660,65 @@ void main() {
         Platform: () => FakePlatform(),
         ProcessManager: () => fakeProcessManager,
         TestFeatureFlags: () => featureFlags,
+      },
+    );
+
+    testWithoutContext(
+      'reports feature flags for fresh channel from fetchTagsAndGetVersion',
+      () async {
+        final Directory devtoolsDir = fs.directory(
+          '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
+        )..createSync(recursive: true);
+        fs.directory('/path/to/flutter/bin/cache/artifacts').createSync(recursive: true);
+        devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
+        final refreshedStableVersion = FakeFlutterVersion(
+          frameworkRevisionShort: '222',
+          branch: 'stable',
+        );
+        final staleMasterVersion = FakeFlutterVersion(
+          frameworkRevisionShort: '111',
+          nextFlutterVersion: refreshedStableVersion,
+        );
+        final platform = FakePlatform();
+        final flags = FlutterFeatureFlags(
+          flutterVersion: staleMasterVersion,
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: Config.test(),
+            platform: platform,
+            projectManifest: null,
+          ),
+          platform: platform,
+        );
+        final List<DoctorValidator> validators = DoctorValidatorsProvider.create(
+          androidContext: FakeAndroidContext(),
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => null, featureFlags: flags),
+          appleContext: FakeAppleContext(),
+          featureFlags: flags,
+          toolContext: FakeToolContext(
+            cache: Cache.test(
+              rootOverride: fs.directory('/path/to/flutter'),
+              fileSystem: fs,
+              processManager: fakeProcessManager,
+            ),
+            flutterVersion: staleMasterVersion,
+            fs: fs,
+            platform: platform,
+            processManager: fakeProcessManager,
+          ),
+          windowsWorkflow: WindowsWorkflow(featureFlags: flags, platform: platform),
+        ).validators;
+        final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
+        final ValidationResult result = await flutterValidator.validate();
+        expect(result.statusInfo, contains('Channel stable'));
+        final ValidationMessage featureFlagsMessage = result.messages.singleWhere(
+          (ValidationMessage msg) => msg.message.startsWith('Feature flags: '),
+        );
+        final List<String> reportedFlags = featureFlagsMessage.message
+            .substring('Feature flags: '.length)
+            .split(', ');
+        expect(reportedFlags, contains('enable-web'));
+        expect(reportedFlags, isNot(contains('enable-hcpp')));
+        expect(reportedFlags, isNot(contains('enable-riscv64')));
       },
     );
   });
