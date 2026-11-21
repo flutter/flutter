@@ -10,6 +10,7 @@
 
 #include "flutter/fml/closure.h"
 #include "impeller/base/thread.h"
+#include "impeller/core/gpu_submission_tracker.h"
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_texture_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/external_semaphore_vk.h"
@@ -31,10 +32,15 @@ struct AHBFrameSynchronizerVK {
   bool acquire_fence_pending = false;
   vk::UniqueSemaphore render_ready = {};
   std::shared_ptr<ExternalSemaphoreVK> present_ready;
+  std::shared_ptr<GpuSubmissionTracker> submission_tracker;
+  PendingGpuSubmission pending_submission;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
+  bool has_onscreen = false;
   bool is_valid = false;
 
-  explicit AHBFrameSynchronizerVK(const vk::Device& device);
+  AHBFrameSynchronizerVK(
+      const vk::Device& device,
+      std::shared_ptr<GpuSubmissionTracker> submission_tracker);
 
   ~AHBFrameSynchronizerVK();
 
@@ -143,7 +149,8 @@ class AHBSwapchainImplVK final
       const ISize& size,
       bool enable_msaa);
 
-  bool Present(const std::shared_ptr<AHBTextureSourceVK>& texture);
+  bool Present(const std::shared_ptr<AHBTextureSourceVK>& texture,
+               size_t frame_index);
 
   void WaitIdle() const;
 
@@ -155,7 +162,8 @@ class AHBSwapchainImplVK final
       const std::shared_ptr<AHBTextureSourceVK>& texture);
 
   std::shared_ptr<ExternalSemaphoreVK> SubmitSignalForPresentReady(
-      const std::shared_ptr<AHBTextureSourceVK>& texture) const;
+      const std::shared_ptr<AHBTextureSourceVK>& texture,
+      size_t frame_index) const;
 
   void OnTextureUpdatedOnSurfaceControl(
       std::shared_ptr<AHBTextureSourceVK> texture,
