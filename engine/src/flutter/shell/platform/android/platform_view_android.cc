@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/platform_view_android.h"
 
+#include "flutter/shell/platform/android/vsync_waiter_android.h"
+
 #include <android/api-level.h>
 #include <sys/system_properties.h>
 #include <memory>
@@ -594,6 +596,7 @@ void PlatformViewAndroid::InstallFirstFrameCallback() {
 }
 
 void PlatformViewAndroid::FireFirstFrameCallback() {
+  VsyncWaiterAndroid::YieldNextVsyncForFirstWindowDraw();
   jni_facade_->FlutterViewOnFirstFrame();
 }
 

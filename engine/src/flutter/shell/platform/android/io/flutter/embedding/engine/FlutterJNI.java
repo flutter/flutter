@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -338,6 +339,18 @@ public class FlutterJNI {
   }
 
   private native void nativeOnVsync(long frameDelayNanos, long refreshPeriodNanos, long cookie);
+
+  private static native void nativeRunDeferredVsync(long callbackPtr);
+
+  // Called by native to yield one vsync to Android's ViewRootImpl traversal after the first frame.
+  @SuppressWarnings("unused")
+  private static void postVsyncToMainLooper(final long callbackPtr) {
+    if (Looper.myLooper() == Looper.getMainLooper()) {
+      new Handler(Looper.getMainLooper()).post(() -> nativeRunDeferredVsync(callbackPtr));
+    } else {
+      nativeRunDeferredVsync(callbackPtr);
+    }
+  }
 
   /**
    * Notifies the engine that the Choreographer has signaled a vsync.

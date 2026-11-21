@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
+#include <atomic>
 #include <cmath>
 #include <utility>
 
@@ -18,7 +19,15 @@ namespace flutter {
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
+static jmethodID g_post_vsync_to_main_looper_method_ = nullptr;
 static std::atomic_uint g_refresh_rate_ = 60;
+static std::atomic<bool> g_yield_after_first_frame_{false};
+
+struct DeferredVsyncCallback {
+  std::weak_ptr<VsyncWaiter>* weak_this;
+  fml::TimePoint frame_start_time;
+  fml::TimePoint frame_target_time;
+};
 
 VsyncWaiterAndroid::VsyncWaiterAndroid(const flutter::TaskRunners& task_runners)
     : VsyncWaiter(task_runners) {}
@@ -61,6 +70,11 @@ void VsyncWaiterAndroid::AwaitVSync() {
 }
 
 // static
+void VsyncWaiterAndroid::YieldNextVsyncForFirstWindowDraw() {
+  g_yield_after_first_frame_.store(true, std::memory_order_release);
+}
+
+// static
 void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
   auto frame_time = fml::TimePoint::FromEpochDelta(
       fml::TimeDelta::FromNanoseconds(frame_nanos));
@@ -77,6 +91,16 @@ void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
                    target_time.ToEpochDelta().ToMicroseconds());
 
   auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(data);
+  if (g_yield_after_first_frame_.exchange(false, std::memory_order_acq_rel) &&
+      g_post_vsync_to_main_looper_method_ != nullptr) {
+    auto* deferred =
+        new DeferredVsyncCallback{weak_this, frame_time, target_time};
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),
+                              g_post_vsync_to_main_looper_method_,
+                              reinterpret_cast<jlong>(deferred));
+    return;
+  }
   ConsumePendingCallback(weak_this, frame_time, target_time);
 }
 
@@ -122,6 +146,16 @@ void VsyncWaiterAndroid::OnUpdateRefreshRate(JNIEnv* env,
 }
 
 // static
+void VsyncWaiterAndroid::RunDeferredVsync(JNIEnv* env,
+                                          jclass jcaller,
+                                          jlong callback_ptr) {
+  auto* deferred = reinterpret_cast<DeferredVsyncCallback*>(callback_ptr);
+  ConsumePendingCallback(deferred->weak_this, deferred->frame_start_time,
+                         deferred->frame_target_time);
+  delete deferred;
+}
+
+// static
 bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {
       {
@@ -133,6 +167,11 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
           .name = "nativeUpdateRefreshRate",
           .signature = "(F)V",
           .fnPtr = reinterpret_cast<void*>(&OnUpdateRefreshRate),
+      },
+      {
+          .name = "nativeRunDeferredVsync",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&RunDeferredVsync),
       }};
 
   jclass clazz = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
@@ -147,6 +186,10 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   g_async_wait_for_vsync_method_ = env->GetStaticMethodID(
       g_vsync_waiter_class->obj(), "asyncWaitForVsync", "(J)V");
   FML_CHECK(g_async_wait_for_vsync_method_ != nullptr);
+
+  g_post_vsync_to_main_looper_method_ = env->GetStaticMethodID(
+      g_vsync_waiter_class->obj(), "postVsyncToMainLooper", "(J)V");
+  FML_CHECK(g_post_vsync_to_main_looper_method_ != nullptr);
 
   return env->RegisterNatives(clazz, methods, std::size(methods)) == 0;
 }

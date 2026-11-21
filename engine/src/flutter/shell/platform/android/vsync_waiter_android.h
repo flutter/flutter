@@ -20,6 +20,11 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
  public:
   static bool Register(JNIEnv* env);
 
+  // Defers the next NDK AChoreographer vsync callback via a synchronous
+  // main-looper Handler message so Android's ViewRootImpl first-frame traversal
+  // can run ahead of Frame 2.
+  static void YieldNextVsyncForFirstWindowDraw();
+
   explicit VsyncWaiterAndroid(const flutter::TaskRunners& task_runners);
 
   ~VsyncWaiterAndroid() override;
@@ -43,6 +48,8 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
   static void OnUpdateRefreshRate(JNIEnv* env,
                                   jclass jcaller,
                                   jfloat refresh_rate);
+
+  static void RunDeferredVsync(JNIEnv* env, jclass jcaller, jlong callback_ptr);
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterAndroid);
 };

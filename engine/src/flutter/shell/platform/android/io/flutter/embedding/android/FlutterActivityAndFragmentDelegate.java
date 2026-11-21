@@ -104,9 +104,12 @@ import java.util.List;
       new FlutterUiDisplayListener() {
         @Override
         public void onFlutterUiDisplayed() {
-          host.onFlutterUiDisplayed();
           isFlutterUiDisplayed = true;
           isFirstFrameRendered = true;
+          if (flutterView != null && activePreDrawListener != null) {
+            flutterView.invalidate();
+          }
+          host.onFlutterUiDisplayed();
         }
 
         @Override
