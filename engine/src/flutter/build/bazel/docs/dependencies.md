@@ -124,6 +124,18 @@ roll of their pin (a tree at a time; the Dart tree with everything nested in
 it). `--repository_cache` does not hold them, since git is not Bazel's
 downloader.
 
+**A roll.** A tree whose pin changed is fetched again, into the same
+directory, by the next build that reads it. What was made from the old tree
+is made again with it: every fetch writes a `fetched.stamp` beside the tree,
+and a repository that reads a fetched tree -- its `synced_repository`, a GN
+conversion that imports from it, `@engine_package_config` -- watches that
+file (`fetched_tree_directory`). Bazel brings a watched repository up to
+date before it decides about the watcher, so the reader waits for the new
+tree and is then evaluated again. (Before the stamp, the package
+configuration resolved over the old Dart tree stayed as it was after a Dart
+roll, and a conversion that ran while the tree was being fetched found half
+of it.)
+
 **What it does not do.**
 
 - The web engine: the Emscripten SDK is installed by a hook of `DEPS`

@@ -19,7 +19,7 @@ pin changes; with its sha256 known, the download also comes from Bazel's
 repository cache.
 """
 
-load(":git_deps.bzl", "FETCHED_TREE_DIRECTORY")
+load(":git_deps.bzl", "FETCHED_STAMP", "FETCHED_TREE_DIRECTORY", "fetch_stamp")
 
 def _fetched_archive_impl(rctx):
     # Noted, since it is the build that downloads here and not gclient.
@@ -41,6 +41,9 @@ def _fetched_archive_impl(rctx):
     rctx.delete(FETCHED_TREE_DIRECTORY + "/.cipdpkg")
     rctx.file("BUILD.bazel", "# A tool of DEPS downloaded by Bazel (build_defs/repositories/fetched_archive.bzl): %s/.\n" % FETCHED_TREE_DIRECTORY)
     rctx.file("REPO.bazel", "")
+
+    # For what reads the tool, as a fetched tree's (git_deps.bzl).
+    rctx.file(FETCHED_STAMP, fetch_stamp(rctx, rctx.attr.url))
     if rctx.attr.sha256:
         return None
 

@@ -29,6 +29,15 @@ repository's own BUILD and REPO files then sit beside the tree's files and
 not among them (abseil's root has a BUILD.bazel of its own, which its
 synced_repository reads).
 
+A tree is fetched again when its pin rolls, into the same directory. What
+was made from the old tree -- a synced_repository's links and converted GN
+files, the engine's package configuration resolved over the fetched
+packages -- has to be made again then, and only once the new tree is there.
+Each fetch therefore writes FETCHED_STAMP beside the tree, and whatever reads
+the tree watches that file (repositories.bzl's fetched_tree_directory): Bazel
+brings a watched repository up to date before it decides whether the watcher
+is, so the watcher waits for the new tree and is then evaluated again.
+
 The rule is in a file of its own, which loads no other: a repository is
 fetched again when the file that defines its rule changes, or one that file
 loads, and these are the expensive ones (the Dart tree alone is well over
@@ -37,6 +46,10 @@ a gigabyte).
 
 # The directory of a fetched_tree's repository that holds the tree.
 FETCHED_TREE_DIRECTORY = "tree"
+
+# The file of a fetched_tree's or a fetched_archive's repository, beside its
+# BUILD file, that no two fetches write alike.
+FETCHED_STAMP = "fetched.stamp"
 
 _TIMEOUT = 3600
 
@@ -66,6 +79,17 @@ def _execute(rctx, arguments, what, environment = {}, working_directory = ""):
             result.stdout,
             result.stderr,
         ))
+
+def fetch_stamp(rctx, pin):
+    """What a fetch writes into FETCHED_STAMP: its pin, and when it ran.
+
+    The time tells apart two fetches of one pin (after an edit to the rule,
+    whose hooks may then leave a different tree); without `date` the pin
+    alone does.
+    """
+    date = rctx.which("date")
+    now = rctx.execute([date, "+%s"]).stdout.strip() if date != None else ""
+    return "%s fetched at %s\n" % (pin, now)
 
 def _fetch_git(rctx, git, directory, url, revision):
     """One commit of `url` checked out into `directory`, as a shallow clone.
@@ -171,6 +195,7 @@ def _fetched_tree_impl(rctx):
 
     rctx.file("BUILD.bazel", "# A tree of DEPS fetched by Bazel (build_defs/repositories/git_deps.bzl): %s/.\n" % FETCHED_TREE_DIRECTORY)
     rctx.file("REPO.bazel", "")
+    rctx.file(FETCHED_STAMP, fetch_stamp(rctx, "%s@%s" % (rctx.attr.url, rctx.attr.revision)))
 
 fetched_tree = repository_rule(
     implementation = _fetched_tree_impl,

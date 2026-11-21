@@ -37,7 +37,7 @@ revision and content hash are fixed words unless the build is stamped
 (`--config=stamp`), which reads them from git at fetch time as `tools/gn` does.
 """
 
-load(":git_deps.bzl", "FETCHED_TREE_DIRECTORY")
+load(":git_deps.bzl", "FETCHED_STAMP", "FETCHED_TREE_DIRECTORY")
 
 _BUILD_FILE_NAMES = ("BUILD", "BUILD.bazel")
 _BOUNDARY_FILE_NAMES = ("MODULE.bazel", "REPO.bazel", "WORKSPACE", "WORKSPACE.bazel")
@@ -211,8 +211,9 @@ def _link_tree(rctx, source, overlaying, exclude, links, packages = [], director
         # readdir() also registers a watch on the directory's entries, so adding
         # or removing one (for example after a roll) refreshes the repository
         # (except under an excluded entry's ancestors, see above, and inside
-        # a fetched tree, which does not change). Changes inside the entries
-        # are tracked like any source file.
+        # a fetched tree, which changes only by being fetched anew, and that
+        # the repository watches: fetched_tree_directory). Changes inside the
+        # entries are tracked like any source file.
         for child in directory.readdir(watch = "no" if fetched or relative in unwatched else "auto"):
             name = child.basename
             if name in _BOUNDARY_FILE_NAMES:
@@ -270,6 +271,14 @@ def in_checkout(rctx, path, marker = "", source_tree = True):
 def fetched_tree_directory(rctx, build_file):
     """The tree of a fetched_tree or fetched_archive, which this fetches if need be.
 
+    The repository that asks watches the fetch (git_deps.bzl's
+    FETCHED_STAMP): when the tree's pin rolls, Bazel fetches the tree again
+    before it looks at this repository, and then evaluates this one again --
+    its links into the tree, what it converted or resolved from the tree's
+    files. Without the watch a repository made from the old tree stood as it
+    was, and one that was being evaluated meanwhile read a tree that was
+    half there.
+
     Args:
       rctx: the repository context.
       build_file: the label of the BUILD file of the fetched repository.
@@ -277,6 +286,7 @@ def fetched_tree_directory(rctx, build_file):
     Returns:
       The tree's directory.
     """
+    rctx.watch(build_file.same_package_label(FETCHED_STAMP))
     return rctx.path(build_file).dirname.get_child(FETCHED_TREE_DIRECTORY)
 
 def _within(path, trees):
@@ -504,7 +514,8 @@ def _convert_gn(rctx, fetched):
             continue
         if line.startswith(prefix):
             # A file read through the view: the checkout's own (watched
-            # where it is), or a fetched tree's, which does not change.
+            # where it is), or a fetched tree's, whose fetch is watched
+            # (fetched_tree_directory).
             relative = line[len(prefix):]
             if _within(relative, trees):
                 continue
