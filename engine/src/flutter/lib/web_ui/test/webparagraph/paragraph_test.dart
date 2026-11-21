@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -499,6 +500,422 @@ Future<void> testMain() async {
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph.multidecoration.png', region: region);
+  });
+
+  test('Draw WebParagraph decorations below the glyph ink of the last line', () async {
+    final builder = WebParagraphBuilder(
+      WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40, color: const Color(0xFF000000)),
+    );
+    builder.pushStyle(
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        decoration: TextDecoration.underline,
+        decorationStyle: TextDecorationStyle.double,
+        decorationColor: _decorationColor,
+      ),
+    );
+    // The last line has no descenders, so its glyph ink ends at the baseline.
+    builder.addText('Hello\nworld');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final List<LineMetrics> lines = paragraph.computeLineMetrics();
+    expect(lines, hasLength(2));
+    for (final line in lines) {
+      expect(
+        pixels.covers(
+          Rect.fromLTRB(
+            line.left,
+            line.baseline,
+            line.left + line.width,
+            line.baseline + line.descent,
+          ),
+        ),
+        isTrue,
+        reason: 'No decoration below line ${line.lineNumber}',
+      );
+    }
+  });
+
+  test('Draw WebParagraph overline above the glyph ink without the first ascent height', () async {
+    final builder = WebParagraphBuilder(
+      WebParagraphStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        height: 2,
+        textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
+        color: const Color(0xFF000000),
+      ),
+    );
+    builder.pushStyle(
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        height: 2,
+        decoration: TextDecoration.overline,
+        decorationStyle: TextDecorationStyle.solid,
+        decorationColor: _decorationColor,
+      ),
+    );
+    builder.addText('world');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final LineMetrics line = paragraph.computeLineMetrics().single;
+    expect(pixels.covers(Rect.fromLTRB(0, 0, line.width, line.baseline)), isTrue);
+  });
+
+  test('Draw WebParagraph decorations without the trailing spaces of an LTR line', () async {
+    final WebParagraph paragraph = _decoratedParagraph('Hello world');
+    paragraph.layout(const ParagraphConstraints(width: 150));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final LineMetrics line = paragraph.computeLineMetrics().first;
+    final TextBox word = paragraph.getBoxesForRange(0, 5).single;
+    expect(paragraph.computeLineMetrics(), hasLength(2));
+    expect(
+      pixels.covers(
+        Rect.fromLTRB(word.left, line.baseline, word.right, line.baseline + line.descent),
+      ),
+      isTrue,
+    );
+    // One pixel of slack for antialiasing at the end of the word.
+    expect(
+      pixels.hasColor(
+        Rect.fromLTRB(word.right + 1, line.baseline, paragraph.width, line.baseline + line.descent),
+      ),
+      isFalse,
+    );
+  });
+
+  test('Draw WebParagraph background without the trailing spaces of a line', () async {
+    const backgroundColor = Color(0xFF00FF00);
+    final builder = WebParagraphBuilder(
+      WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40, color: const Color(0xFF000000)),
+    );
+    builder.pushStyle(
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        color: const Color(0xFF000000),
+        background: Paint()..color = backgroundColor,
+      ),
+    );
+    builder.addText('Hello world');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 150));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final LineMetrics line = paragraph.computeLineMetrics().first;
+    final TextBox word = paragraph.getBoxesForRange(0, 5).single;
+    expect(paragraph.computeLineMetrics(), hasLength(2));
+    final double top = line.baseline - line.ascent;
+    final double bottom = line.baseline + line.descent;
+    expect(
+      pixels.covers(Rect.fromLTRB(word.left, top, word.right, bottom), backgroundColor),
+      isTrue,
+    );
+    // One pixel of slack for snapping the background to physical pixels.
+    expect(
+      pixels.hasColor(Rect.fromLTRB(word.right + 1, top, paragraph.width, bottom), backgroundColor),
+      isFalse,
+    );
+  });
+
+  test('Draw WebParagraph background and decorations without the trailing spaces of RTL', () async {
+    const backgroundColor = Color(0xFF00FF00);
+    final WebParagraph paragraph = _decoratedParagraph(
+      '\u05D0\u05D1\u05D2 \u05D3\u05D4\u05D5',
+      textDirection: TextDirection.rtl,
+      background: backgroundColor,
+    );
+    final double wordWidth = (_decoratedParagraph(
+      '\u05D0\u05D1\u05D2',
+    )..layout(const ParagraphConstraints(width: double.infinity))).maxIntrinsicWidth;
+    // Leaves room for the first word and its trailing space but not for the second word.
+    paragraph.layout(ParagraphConstraints(width: wordWidth * 1.5));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final LineMetrics line = paragraph.computeLineMetrics().first;
+    final TextBox word = paragraph.getBoxesForRange(0, 3).single;
+    expect(paragraph.computeLineMetrics(), hasLength(2));
+    expect(
+      pixels.covers(
+        Rect.fromLTRB(word.left, line.baseline, word.right, line.baseline + line.descent),
+      ),
+      isTrue,
+    );
+    final double top = line.baseline - line.ascent;
+    final double bottom = line.baseline + line.descent;
+    expect(
+      pixels.covers(Rect.fromLTRB(word.left, top, word.right, line.baseline), backgroundColor),
+      isTrue,
+    );
+    // One pixel of slack for antialiasing and snapping at the end of the word, which is on the
+    // left in RTL.
+    final trailingSpace = Rect.fromLTRB(0, top, word.left - 1, bottom);
+    expect(pixels.hasColor(trailingSpace), isFalse);
+    expect(pixels.hasColor(trailingSpace, backgroundColor), isFalse);
+  });
+
+  test('Draw WebParagraph overline and line-through without the height multiplier', () {
+    WebParagraph build({double? height}) {
+      final builder = WebParagraphBuilder(
+        WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40, color: const Color(0xFF000000)),
+      );
+      builder.pushStyle(
+        WebTextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 40,
+          height: height,
+          decoration: TextDecoration.combine(<TextDecoration>[
+            TextDecoration.underline,
+            TextDecoration.overline,
+            TextDecoration.lineThrough,
+          ]),
+          decorationStyle: TextDecorationStyle.solid,
+          decorationColor: _decorationColor,
+        ),
+      );
+      builder.addText('Hello');
+      return builder.build()..layout(const ParagraphConstraints(width: 400));
+    }
+
+    final LineMetrics raw = build().computeLineMetrics().single;
+    final WebParagraph paragraph = build(height: 2);
+    final LineMetrics line = paragraph.computeLineMetrics().single;
+    final canvas = _RecordingCanvas();
+    paragraph.paint(canvas, Offset.zero);
+
+    const double thickness = 40 / 14;
+    final List<double> centers = canvas.rects.map((Rect rect) => rect.center.dy).toList()..sort();
+    expect(centers, hasLength(3));
+    expect(centers[0], closeTo(line.baseline - raw.ascent, 1e-3));
+    expect(centers[1], closeTo(line.baseline + (raw.descent - raw.ascent) / 2, 1e-3));
+    expect(centers[2], closeTo(line.baseline + thickness, 1e-3));
+  });
+
+  test('Draw WebParagraph decorations as solid lines in the text color by default', () async {
+    final builder = WebParagraphBuilder(
+      WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40, color: const Color(0xFF000000)),
+    );
+    builder.pushStyle(
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        color: const Color(0xFF0000FF),
+        decoration: TextDecoration.underline,
+      ),
+    );
+    // No descenders, so text colored pixels below the baseline can only come from the underline.
+    builder.addText('world');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final LineMetrics line = paragraph.computeLineMetrics().single;
+    expect(
+      pixels.covers(
+        Rect.fromLTRB(0, line.baseline + 2, line.width, line.baseline + line.descent),
+        const Color(0xFF0000FF),
+      ),
+      isTrue,
+    );
+  });
+
+  test('Draw WebParagraph decorations on the pixel grid of the text', () {
+    final WebParagraph paragraph = _decoratedParagraph('Hello');
+    paragraph.layout(const ParagraphConstraints(width: 400));
+
+    Offset underlineFromText(Offset offset) {
+      final canvas = _RecordingCanvas();
+      paragraph.paint(canvas, offset);
+      return canvas.rects.single.centerLeft - canvas.imageTargets.single.topLeft;
+    }
+
+    final Offset underline = underlineFromText(Offset.zero);
+    final Offset shiftedUnderline = underlineFromText(const Offset(10.4, 20.4));
+    expect(shiftedUnderline.dx, closeTo(underline.dx, 1e-6));
+    expect(shiftedUnderline.dy, closeTo(underline.dy, 1e-6));
+  });
+
+  test('Draw WebParagraph decorations finer than a physical pixel as lines', () {
+    _RecordingCanvas paintDecorated(
+      TextDecorationStyle style, {
+      double thickness = 1,
+      double fontSize = 40,
+    }) {
+      final WebParagraph paragraph = _decoratedParagraph(
+        'Hello',
+        style: style,
+        thickness: thickness,
+        fontSize: fontSize,
+      );
+      paragraph.layout(const ParagraphConstraints(width: 400));
+      final canvas = _RecordingCanvas();
+      paragraph.paint(canvas, Offset.zero);
+      return canvas;
+    }
+
+    expect(paintDecorated(TextDecorationStyle.dotted).paths, hasLength(1));
+    expect(paintDecorated(TextDecorationStyle.wavy).paths, hasLength(1));
+    // A dot period of 2.5 * fontSize / 14 is below one pixel at a font size of 1.
+    final _RecordingCanvas tinyDots = paintDecorated(TextDecorationStyle.dotted, fontSize: 1);
+    expect(tinyDots.paths, isEmpty);
+    expect(tinyDots.rects, hasLength(1));
+    final _RecordingCanvas tinyWaves = paintDecorated(TextDecorationStyle.wavy, thickness: 0.001);
+    expect(tinyWaves.paths, isEmpty);
+    expect(tinyWaves.rects, hasLength(1));
+    final _RecordingCanvas flatWaves = paintDecorated(TextDecorationStyle.wavy, thickness: 0);
+    expect(flatWaves.paths, isEmpty);
+    expect(flatWaves.rects, hasLength(1));
+  });
+
+  test('Draw WebParagraph decorations with zero thickness like SkParagraph', () {
+    for (final style in <TextDecorationStyle>[
+      TextDecorationStyle.solid,
+      TextDecorationStyle.double,
+    ]) {
+      final WebParagraph paragraph = _decoratedParagraph('Hello', style: style, thickness: 0);
+      paragraph.layout(const ParagraphConstraints(width: 400));
+      final canvas = _RecordingCanvas();
+      paragraph.paint(canvas, Offset.zero);
+      // SkParagraph fills a rect as high as the thickness for these styles.
+      expect(canvas.rects, isNotEmpty, reason: '$style');
+      expect(canvas.rects.every((Rect rect) => rect.isEmpty), isTrue, reason: '$style');
+      expect(canvas.paths, isEmpty, reason: '$style');
+    }
+  });
+
+  test('Draw WebParagraph decoration patterns like SkParagraph', () {
+    const fontSize = 40.0;
+    const double scale = fontSize / 14;
+    _RecordingCanvas paintDecorated(TextDecorationStyle style) {
+      // A thickness multiplier of 2 must not change the dash intervals.
+      final WebParagraph paragraph = _decoratedParagraph('Hello', style: style, thickness: 2);
+      paragraph.layout(const ParagraphConstraints(width: 400));
+      final canvas = _RecordingCanvas();
+      paragraph.paint(canvas, Offset.zero);
+      return canvas;
+    }
+
+    final LineMetrics line = (_decoratedParagraph(
+      'Hello',
+    )..layout(const ParagraphConstraints(width: 400))).computeLineMetrics().single;
+    const double thickness = 2 * scale;
+    final double underline = line.baseline + thickness;
+
+    final List<PathMetric> dots = paintDecorated(TextDecorationStyle.dotted).paths.single
+        .computeMetrics()
+        .toList();
+    expect(dots.first.length, closeTo(1.0 * scale, 1e-3));
+    expect(dots.first.getTangentForOffset(0)!.position.dx, closeTo(0, 1e-3));
+    expect(dots[1].getTangentForOffset(0)!.position.dx, closeTo(2.5 * scale, 1e-3));
+
+    final List<PathMetric> dashes = paintDecorated(TextDecorationStyle.dashed).paths.single
+        .computeMetrics()
+        .toList();
+    expect(dashes.first.length, closeTo(4.0 * scale, 1e-3));
+    expect(dashes[1].getTangentForOffset(0)!.position.dx, closeTo(6.0 * scale, 1e-3));
+
+    final _RecordingCanvas doubled = paintDecorated(TextDecorationStyle.double);
+    expect(doubled.rects, hasLength(2));
+    expect(doubled.rects[1].center.dy - doubled.rects[0].center.dy, closeTo(3.0, 1e-6));
+
+    // The wave starts on the underline position and its first lobe goes up.
+    final Path wave = paintDecorated(TextDecorationStyle.wavy).paths.single;
+    final Tangent waveStart = wave.computeMetrics().first.getTangentForOffset(0)!;
+    expect(waveStart.position.dy, closeTo(underline, 1e-3));
+    expect(waveStart.vector.dy, lessThan(0));
+    expect(wave.getBounds().center.dy, closeTo(underline, thickness / 4));
+  });
+
+  test('Draw WebParagraph decorations with a transparent color in the text color', () async {
+    final builder = WebParagraphBuilder(
+      WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40, color: const Color(0xFF000000)),
+    );
+    builder.pushStyle(
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        color: const Color(0xFF0000FF),
+        decoration: TextDecoration.underline,
+        decorationColor: const Color(0x00000000),
+      ),
+    );
+    builder.addText('world');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 1.0);
+    final LineMetrics line = paragraph.computeLineMetrics().single;
+    expect(
+      pixels.covers(
+        Rect.fromLTRB(0, line.baseline + 2, line.width, line.baseline + line.descent),
+        const Color(0xFF0000FF),
+      ),
+      isTrue,
+    );
+  });
+
+  test('Draw WebParagraph decorations without gaps before an ellipsis', () {
+    final WebParagraph paragraph = _decoratedParagraph(
+      'Hello world foo',
+      maxLines: 1,
+      ellipsis: '\u2026',
+    );
+    paragraph.layout(const ParagraphConstraints(width: 150));
+    final canvas = _RecordingCanvas();
+    paragraph.paint(canvas, Offset.zero);
+
+    expect(canvas.rects.length, greaterThan(1));
+    for (var i = 1; i < canvas.rects.length; i++) {
+      expect(canvas.rects[i].left, closeTo(canvas.rects[i - 1].right, 1e-3), reason: '$i');
+    }
+  });
+
+  test('Draw WebParagraph decorations within the block advance at DPR 2', () async {
+    final builder = WebParagraphBuilder(
+      WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40, color: const Color(0xFF000000)),
+    );
+    builder.pushStyle(
+      WebTextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 40,
+        decoration: TextDecoration.underline,
+        decorationStyle: TextDecorationStyle.solid,
+        decorationColor: _decorationColor,
+      ),
+    );
+    // Descenders keep the underline inside the glyph ink, so only its width is checked.
+    builder.addText('Happy');
+    builder.pop();
+    builder.addText(' days');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400));
+
+    final _Pixels pixels = await _paintToPixels(paragraph, 2.0);
+    final TextBox underlined = paragraph.getBoxesForRange(0, 5).single;
+    final LineMetrics line = paragraph.computeLineMetrics().single;
+    expect(
+      pixels.covers(
+        Rect.fromLTRB(
+          underlined.left,
+          line.baseline,
+          underlined.right,
+          line.baseline + line.descent,
+        ),
+      ),
+      isTrue,
+    );
+    // One pixel of slack for antialiasing at the end of the line.
+    expect(
+      pixels.hasColor(Rect.fromLTRB(underlined.right + 1, 0, paragraph.width, paragraph.height)),
+      isFalse,
+    );
   });
 
   test('Draw WebParagraph multiple fonts text', () async {
@@ -1306,4 +1723,136 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
   });
+}
+
+const Color _decorationColor = Color(0xFFFF0000);
+
+/// The RGBA pixels of a paragraph painted over white, in logical pixels.
+class _Pixels {
+  _Pixels(this.bytes, this.width, this.height);
+
+  final ByteData bytes;
+  final int width;
+  final int height;
+
+  /// Whether at least 90% of the pixel columns in [rect] have a pixel close to [color], so a
+  /// decoration or background clipped to a few stray pixels does not count.
+  bool covers(Rect rect, [Color color = _decorationColor]) {
+    final int left = math.max(rect.left.floor(), 0);
+    final int right = math.min(rect.right.ceil(), width);
+    var coveredColumns = 0;
+    for (var x = left; x < right; x++) {
+      if (hasColor(Rect.fromLTRB(x.toDouble(), rect.top, x + 1.0, rect.bottom), color)) {
+        coveredColumns++;
+      }
+    }
+    return right > left && coveredColumns >= 0.9 * (right - left);
+  }
+
+  /// Whether any pixel in [rect] is close to [color] in every channel.
+  bool hasColor(Rect rect, [Color color = _decorationColor]) {
+    const tolerance = 80;
+    final target = <int>[(color.r * 255).round(), (color.g * 255).round(), (color.b * 255).round()];
+    for (int y = math.max(rect.top.floor(), 0); y < math.min(rect.bottom.ceil(), height); y++) {
+      for (int x = math.max(rect.left.floor(), 0); x < math.min(rect.right.ceil(), width); x++) {
+        final int offset = (y * width + x) * 4;
+        if ((bytes.getUint8(offset) - target[0]).abs() < tolerance &&
+            (bytes.getUint8(offset + 1) - target[1]).abs() < tolerance &&
+            (bytes.getUint8(offset + 2) - target[2]).abs() < tolerance) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}
+
+Future<_Pixels> _paintToPixels(WebParagraph paragraph, double devicePixelRatio) async {
+  final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+  EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(devicePixelRatio);
+  try {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+    paragraph.paint(canvas, Offset.zero);
+    final int width = paragraph.width.ceil();
+    final int height = paragraph.height.ceil();
+    final Image image = await recorder.endRecording().toImage(width, height);
+    try {
+      return _Pixels((await image.toByteData())!, width, height);
+    } finally {
+      image.dispose();
+    }
+  } finally {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+  }
+}
+
+/// A paragraph of [text] fully underlined in [_decorationColor].
+WebParagraph _decoratedParagraph(
+  String text, {
+  TextDirection textDirection = TextDirection.ltr,
+  TextDecorationStyle style = TextDecorationStyle.solid,
+  double thickness = 1,
+  double fontSize = 40,
+  int? maxLines,
+  String? ellipsis,
+  Color? background,
+}) {
+  final builder = WebParagraphBuilder(
+    WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: fontSize,
+      color: const Color(0xFF000000),
+      textDirection: textDirection,
+      maxLines: maxLines,
+      ellipsis: ellipsis,
+    ),
+  );
+  builder.pushStyle(
+    WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: fontSize,
+      decoration: TextDecoration.underline,
+      decorationStyle: style,
+      decorationThickness: thickness,
+      decorationColor: _decorationColor,
+      background: background == null ? null : (Paint()..color = background),
+    ),
+  );
+  builder.addText(text);
+  return builder.build();
+}
+
+/// Records where the paragraph image and the decorations land on the output canvas.
+class _RecordingCanvas implements Canvas {
+  final List<Rect> imageTargets = <Rect>[];
+
+  /// The rects filled with [_decorationColor], which are the solid decorations.
+  final List<Rect> rects = <Rect>[];
+  final List<Path> paths = <Path>[];
+
+  @override
+  Float64List getTransform() => Matrix4.identity().toFloat64();
+
+  @override
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    imageTargets.add(dst);
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    // Backgrounds are rects too; only the decoration color counts.
+    if (paint.color == _decorationColor) {
+      rects.add(rect);
+    }
+  }
+
+  @override
+  void drawPath(Path path, Paint paint) {
+    paths.add(path);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
