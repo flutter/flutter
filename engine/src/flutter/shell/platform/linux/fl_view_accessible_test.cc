@@ -160,3 +160,61 @@ TEST_F(FlViewAccessibleTest, AddRemoveChildren) {
 
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 0);
 }
+
+TEST_F(FlViewAccessibleTest, ParentRectOriginDoesNotOffsetChildExtents) {
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
+
+  int32_t root_children[] = {1};
+  int32_t group_children[] = {2};
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root_node = {
+      .id = 0,
+      .label = "root",
+      .rect = {0, 0, 800, 600},
+      .transform = {1, 0, 0, 0, 1, 0, 0, 0, 1},
+      .child_count = 1,
+      .children_in_traversal_order = root_children,
+      .flags2 = &flags,
+      .identifier = ""};
+  FlutterSemanticsNode2 group_node = {
+      .id = 1,
+      .label = "group",
+      .rect = {0, 50, 200, 250},
+      .transform = {1, 0, 0, 0, 1, 100, 0, 0, 1},
+      .child_count = 1,
+      .children_in_traversal_order = group_children,
+      .flags2 = &flags,
+      .identifier = ""};
+  FlutterSemanticsNode2 child_node = {
+      .id = 2,
+      .label = "child",
+      .rect = {0, 0, 200, 100},
+      .transform = {1, 0, 0, 0, 1, 100, 0, 0, 1},
+      .flags2 = &flags,
+      .identifier = ""};
+  FlutterSemanticsNode2* nodes[3] = {&root_node, &group_node, &child_node};
+  FlutterSemanticsUpdate2 update = {.node_count = 3, .nodes = nodes};
+  fl_view_accessible_handle_update_semantics(accessible, &update);
+
+  g_autoptr(AtkObject) root_object =
+      atk_object_ref_accessible_child(ATK_OBJECT(accessible), 0);
+  g_autoptr(AtkObject) group_object =
+      atk_object_ref_accessible_child(root_object, 0);
+  g_autoptr(AtkObject) child_object =
+      atk_object_ref_accessible_child(group_object, 0);
+
+  gint x = 0, y = 0, width = 0, height = 0;
+  atk_component_get_extents(ATK_COMPONENT(group_object), &x, &y, &width,
+                            &height, ATK_XY_WINDOW);
+  EXPECT_EQ(x, 0);
+  EXPECT_EQ(y, 150);
+  EXPECT_EQ(width, 200);
+  EXPECT_EQ(height, 200);
+
+  atk_component_get_extents(ATK_COMPONENT(child_object), &x, &y, &width,
+                            &height, ATK_XY_WINDOW);
+  EXPECT_EQ(x, 0);
+  EXPECT_EQ(y, 200);
+  EXPECT_EQ(width, 200);
+  EXPECT_EQ(height, 100);
+}

@@ -4,6 +4,7 @@
 
 #include "accessibility_bridge.h"
 
+#include <algorithm>
 #include <functional>
 #include <utility>
 
@@ -687,11 +688,129 @@ gfx::NativeViewAccessible AccessibilityBridge::GetNativeAccessibleFromId(
   return platform_node_delegate->GetNativeViewAccessible();
 }
 
+namespace {
+
+// Marks `offscreen` if non-empty `bounds` lies outside `container_bounds`, and
+// clips `bounds` to `container_bounds` when `clip_bounds` is true.
+void ClipToContainerBounds(gfx::RectF& bounds,
+                           const gfx::RectF& container_bounds,
+                           bool clip_bounds,
+                           bool& offscreen) {
+  if (bounds.IsEmpty() || container_bounds.IsEmpty()) {
+    return;
+  }
+  gfx::RectF intersection = bounds;
+  intersection.Intersect(container_bounds);
+  if (intersection.IsEmpty()) {
+    offscreen = true;
+  }
+  if (!clip_bounds) {
+    return;
+  }
+  if (!intersection.IsEmpty()) {
+    bounds = intersection;
+    return;
+  }
+  // Totally offscreen: clamp to a 1px rect at the nearest container edge.
+  if (bounds.x() >= container_bounds.right()) {
+    bounds.set_x(std::max(container_bounds.x(), container_bounds.right() - 1));
+    bounds.set_width(1);
+  } else if (bounds.right() <= container_bounds.x()) {
+    bounds.set_x(container_bounds.x());
+    bounds.set_width(1);
+  } else {
+    float left = std::max(bounds.x(), container_bounds.x());
+    float right = std::min(bounds.right(), container_bounds.right());
+    bounds.set_x(left);
+    bounds.set_width(right - left);
+  }
+  if (bounds.y() >= container_bounds.bottom()) {
+    bounds.set_y(std::max(container_bounds.y(), container_bounds.bottom() - 1));
+    bounds.set_height(1);
+  } else if (bounds.bottom() <= container_bounds.y()) {
+    bounds.set_y(container_bounds.y());
+    bounds.set_height(1);
+  } else {
+    float top = std::max(bounds.y(), container_bounds.y());
+    float bottom = std::min(bounds.bottom(), container_bounds.bottom());
+    bounds.set_y(top);
+    bounds.set_height(bottom - top);
+  }
+}
+
+gfx::RectF RelativeToGlobalBoundsInternal(const ui::AXNode* node,
+                                          bool& offscreen,
+                                          bool clip_bounds,
+                                          bool allow_recursion) {
+  gfx::RectF bounds = node->data().relative_bounds.bounds;
+
+  // If the node has empty bounds, try to compute bounds from its children.
+  if (bounds.IsEmpty() && allow_recursion) {
+    for (const ui::AXNode* child : node->children()) {
+      bool ignore_offscreen = false;
+      gfx::RectF child_bounds = RelativeToGlobalBoundsInternal(
+          child, ignore_offscreen, clip_bounds, /*allow_recursion=*/false);
+      bounds.Union(child_bounds);
+    }
+    if (bounds.width() > 0 && bounds.height() > 0) {
+      return bounds;
+    }
+  }
+
+  const ui::AXNode* current = node;
+  while (current != nullptr) {
+    if (current->data().relative_bounds.transform) {
+      current->data().relative_bounds.transform->TransformRect(&bounds);
+    }
+    const ui::AXNode* parent = current->parent();
+    if (!parent) {
+      break;
+    }
+
+    // In Flutter's semantics tree, a child's rect and transform are in its
+    // parent's coordinate space (relative to (0, 0)), so the parent's rect
+    // origin does not offset its children. Unlike AXTree::RelativeToTreeBounds,
+    // do not add parent_bounds.x()/y() here.
+    if (parent->data().GetBoolAttribute(
+            ax::mojom::BoolAttribute::kClipsChildren)) {
+      ClipToContainerBounds(bounds, parent->data().relative_bounds.bounds,
+                            clip_bounds, offscreen);
+    }
+    current = parent;
+  }
+
+  // If bounds are still empty, fall back to the nearest ancestor with bounds.
+  if (bounds.width() == 0 && bounds.height() == 0 && allow_recursion) {
+    const ui::AXNode* ancestor = node->parent();
+    while (ancestor != nullptr) {
+      if (!ancestor->data().relative_bounds.bounds.IsEmpty()) {
+        bool ignore_offscreen = false;
+        gfx::RectF ancestor_bounds = RelativeToGlobalBoundsInternal(
+            ancestor, ignore_offscreen, clip_bounds,
+            /*allow_recursion=*/false);
+        if (ancestor_bounds.width() > 0 && ancestor_bounds.height() > 0) {
+          offscreen = true;
+          return ancestor_bounds;
+        }
+      }
+      ancestor = ancestor->parent();
+    }
+  }
+
+  return bounds;
+}
+
+}  // namespace
+
 gfx::RectF AccessibilityBridge::RelativeToGlobalBounds(const ui::AXNode* node,
                                                        bool& offscreen,
                                                        bool clip_bounds) {
-  return tree_->RelativeToTreeBounds(node, gfx::RectF(), &offscreen,
-                                     clip_bounds);
+  offscreen = false;
+  if (!node) {
+    return gfx::RectF();
+  }
+  return RelativeToGlobalBoundsInternal(node, offscreen, clip_bounds,
+                                        /*allow_recursion=*/true);
 }
 
 ui::AXNode* AccessibilityBridge::GetNodeFromTree(

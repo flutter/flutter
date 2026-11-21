@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
+
+#include <algorithm>
+#include <cmath>
+
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
 // Maps Flutter semantics actions to ATK actions.
@@ -57,6 +61,7 @@ struct FlAccessibleNodePrivate {
   gchar* name;
   gint index;
   gint x, y, width, height;
+  FlutterTransformation transform;
   GPtrArray* actions;
   gsize actions_length;
   GPtrArray* children;
@@ -298,6 +303,44 @@ static AtkStateSet* fl_accessible_node_ref_state_set(AtkObject* accessible) {
   return state_set;
 }
 
+// Applies 2D projective `transform` to the axis-aligned rectangle `[left, top,
+// right, bottom]` and stores the resulting axis-aligned bounding box.
+static void transform_rect(gdouble* left,
+                           gdouble* top,
+                           gdouble* right,
+                           gdouble* bottom,
+                           const FlutterTransformation& transform) {
+  const gdouble xs[4] = {*left, *right, *left, *right};
+  const gdouble ys[4] = {*top, *top, *bottom, *bottom};
+  gdouble min_x = 0;
+  gdouble min_y = 0;
+  gdouble max_x = 0;
+  gdouble max_y = 0;
+  for (int i = 0; i < 4; i++) {
+    const gdouble w =
+        transform.pers0 * xs[i] + transform.pers1 * ys[i] + transform.pers2;
+    const gdouble tx = (transform.scaleX * xs[i] + transform.skewX * ys[i] +
+                        transform.transX) /
+                       (w != 0 ? w : 1.0);
+    const gdouble ty = (transform.skewY * xs[i] + transform.scaleY * ys[i] +
+                        transform.transY) /
+                       (w != 0 ? w : 1.0);
+    if (i == 0) {
+      min_x = max_x = tx;
+      min_y = max_y = ty;
+    } else {
+      min_x = std::min(min_x, tx);
+      min_y = std::min(min_y, ty);
+      max_x = std::max(max_x, tx);
+      max_y = std::max(max_y, ty);
+    }
+  }
+  *left = min_x;
+  *top = min_y;
+  *right = max_x;
+  *bottom = max_y;
+}
+
 // Implements AtkComponent::get_extents.
 static void fl_accessible_node_get_extents(AtkComponent* component,
                                            gint* x,
@@ -307,18 +350,63 @@ static void fl_accessible_node_get_extents(AtkComponent* component,
                                            AtkCoordType coord_type) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(component);
 
-  *x = 0;
-  *y = 0;
-  g_autoptr(AtkObject) parent = ATK_OBJECT(g_weak_ref_get(&priv->parent));
-  if (parent != nullptr) {
-    atk_component_get_extents(ATK_COMPONENT(parent), x, y, nullptr, nullptr,
-                              coord_type);
+  gdouble left = priv->x;
+  gdouble top = priv->y;
+  gdouble right = priv->x + priv->width;
+  gdouble bottom = priv->y + priv->height;
+
+  // Walk up the ancestor chain applying each node's transform without adding
+  // ancestors' rect origins, since Flutter child coordinates are relative to
+  // the parent's (0, 0) origin.
+  g_autoptr(AtkObject) current_ref = nullptr;
+  FlAccessibleNode* current = FL_ACCESSIBLE_NODE(component);
+  while (current != nullptr) {
+    FlAccessibleNodePrivate* current_priv =
+        FL_ACCESSIBLE_NODE_GET_PRIVATE(current);
+    transform_rect(&left, &top, &right, &bottom, current_priv->transform);
+
+    if (coord_type == ATK_XY_PARENT) {
+      break;
+    }
+
+    g_autoptr(AtkObject) parent =
+        ATK_OBJECT(g_weak_ref_get(&current_priv->parent));
+    if (parent == nullptr) {
+      break;
+    }
+    if (FL_IS_ACCESSIBLE_NODE(parent)) {
+      g_clear_object(&current_ref);
+      current_ref = g_steal_pointer(&parent);
+      current = FL_ACCESSIBLE_NODE(current_ref);
+    } else if (ATK_IS_COMPONENT(parent)) {
+      gint parent_x = 0;
+      gint parent_y = 0;
+      atk_component_get_extents(ATK_COMPONENT(parent), &parent_x, &parent_y,
+                                nullptr, nullptr, coord_type);
+      left += parent_x;
+      top += parent_y;
+      right += parent_x;
+      bottom += parent_y;
+      break;
+    } else {
+      break;
+    }
   }
 
-  *x += priv->x;
-  *y += priv->y;
-  *width = priv->width;
-  *height = priv->height;
+  const gint out_x = static_cast<gint>(std::round(left));
+  const gint out_y = static_cast<gint>(std::round(top));
+  if (x != nullptr) {
+    *x = out_x;
+  }
+  if (y != nullptr) {
+    *y = out_y;
+  }
+  if (width != nullptr) {
+    *width = static_cast<gint>(std::round(right)) - out_x;
+  }
+  if (height != nullptr) {
+    *height = static_cast<gint>(std::round(bottom)) - out_y;
+  }
 }
 
 // Implements AtkComponent::get_layer.
@@ -382,6 +470,14 @@ static void fl_accessible_node_set_extents_impl(FlAccessibleNode* self,
   priv->y = y;
   priv->width = width;
   priv->height = height;
+}
+
+// Implements FlAccessibleNode::set_transform.
+static void fl_accessible_node_set_transform_impl(
+    FlAccessibleNode* self,
+    const FlutterTransformation* transform) {
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
+  priv->transform = *transform;
 }
 
 // Check two boolean flags are different, in a way that handles true values
@@ -505,6 +601,8 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_name = fl_accessible_node_set_name_impl;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_extents =
       fl_accessible_node_set_extents_impl;
+  FL_ACCESSIBLE_NODE_CLASS(klass)->set_transform =
+      fl_accessible_node_set_transform_impl;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_flags =
       fl_accessible_node_set_flags_impl;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_actions =
@@ -715,6 +813,7 @@ static void fl_accessible_node_init(FlAccessibleNode* self) {
   FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(self);
   g_weak_ref_init(&priv->engine, nullptr);
   g_weak_ref_init(&priv->parent, nullptr);
+  priv->transform = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   priv->actions = g_ptr_array_new();
   priv->children = g_ptr_array_new_with_free_func(g_object_unref);
 }
@@ -779,6 +878,14 @@ void fl_accessible_node_set_extents(FlAccessibleNode* self,
 
   return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_extents(self, x, y, width,
                                                          height);
+}
+
+void fl_accessible_node_set_transform(FlAccessibleNode* self,
+                                      const FlutterTransformation* transform) {
+  g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
+  g_return_if_fail(transform != nullptr);
+
+  return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_transform(self, transform);
 }
 
 void fl_accessible_node_set_flags(FlAccessibleNode* self,
