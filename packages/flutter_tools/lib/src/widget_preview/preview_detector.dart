@@ -185,7 +185,9 @@ class PreviewDetector {
       // If the pubspec has changed, new dependencies or assets could have been added, requiring
       // the preview scaffold's pubspec to be updated.
       if (eventPath.isPubspec) {
-        onPubspecChangeDetected(eventPath);
+        if (project.isPubspecForProject(pubspecPath: eventPath, fs: fs)) {
+          onPubspecChangeDetected(eventPath);
+        }
         return;
       }
       // Only trigger a preview analysis reload when changes to Dart sources are detected.

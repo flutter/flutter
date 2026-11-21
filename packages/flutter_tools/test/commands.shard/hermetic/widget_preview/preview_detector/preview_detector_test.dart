@@ -21,11 +21,12 @@ import 'projects/multipreview_project.dart';
 // directories for changes. This can be slow on heavily loaded machines and cause
 // flaky failures.
 
-typedef PreviewProjectBuilder = Future<ProjectWithPreviews> Function({
-  required Directory projectRoot,
-  required List<String> pathsWithPreviews,
-  required List<String> pathsWithoutPreviews,
-});
+typedef PreviewProjectBuilder =
+    Future<ProjectWithPreviews> Function({
+      required Directory projectRoot,
+      required List<String> pathsWithPreviews,
+      required List<String> pathsWithoutPreviews,
+    });
 
 void main() {
   initializeTestPreviewDetectorState();
@@ -223,6 +224,49 @@ void main() {
       await waitForPubspecChangeDetected(changeOperation: () => project.touchPubspec());
 
       // There should be no reload timing events for a pubspec change.
+      expectNPreviewReloadTimingEvents(previewDetector, 0);
+    });
+
+    testPreviewDetector('ignores changes to pubspec.yaml in nested non-project directories', (
+      PreviewDetector previewDetector,
+    ) async {
+      // Create an initial pubspec.
+      project = await BasicProjectWithExhaustivePreviews.create(
+        projectRoot: previewDetector.projectRoot,
+        pathsWithPreviews: <String>[],
+        pathsWithoutPreviews: <String>[],
+      );
+
+      // Initialize the file watcher.
+      final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
+      expect(initialPreviews, isEmpty);
+
+      final detectedPubspecPaths = <String>[];
+      setOnPubspecChangeDetected(detectedPubspecPaths.add);
+
+      final File nestedPubspec = previewDetector.fs.file(
+        previewDetector.fs.path.join(
+          previewDetector.projectRoot.path,
+          '.claude',
+          'worktrees',
+          'unrelated',
+          'pubspec.yaml',
+        ),
+      )..createSync(recursive: true);
+
+      // Change the nested (unrelated) pubspec, then change the valid project pubspec.
+      // Because file watcher events are processed sequentially, waiting for the valid
+      // pubspec change ensures that the nested pubspec change has also been processed.
+      final String detectedValidPath = await waitForPubspecChangeDetected(
+        changeOperation: () {
+          nestedPubspec.writeAsStringSync('name: unrelated\n');
+          project.touchPubspec();
+        },
+      );
+
+      // Only the valid project pubspec should be detected.
+      expect(detectedValidPath, previewDetector.project.pubspecFile.path);
+      expect(detectedPubspecPaths, <String>[previewDetector.project.pubspecFile.path]);
       expectNPreviewReloadTimingEvents(previewDetector, 0);
     });
   });
