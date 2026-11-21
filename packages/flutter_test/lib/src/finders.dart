@@ -192,6 +192,10 @@ class CommonFinders {
   /// Finds [Image] and [FadeInImage] widgets containing `image` equal to the
   /// `image` argument.
   ///
+  /// An [Image] inside a [FadeInImage] with the same target provider is not a
+  /// separate match, including when this finder is combined with [descendant].
+  /// Use [byWidgetPredicate] to match that specific [Image] directly.
+  ///
   /// ## Sample code
   ///
   /// ```dart
@@ -1654,8 +1658,17 @@ class _ImageWidgetFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
-    if (widget is Image) {
-      return widget.image == image;
+    if (widget is Image && widget.image == image) {
+      var isSeparateImage = true;
+      candidate.visitAncestorElements((Element ancestor) {
+        final Widget ancestorWidget = ancestor.widget;
+        if (ancestorWidget is FadeInImage) {
+          isSeparateImage = ancestorWidget.image != image;
+          return false;
+        }
+        return true;
+      });
+      return isSeparateImage;
     } else if (widget is FadeInImage) {
       return widget.image == image;
     }
