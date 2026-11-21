@@ -22,20 +22,23 @@ std::shared_ptr<HostBuffer> HostBuffer::Create(
     const std::shared_ptr<Allocator>& allocator,
     const std::shared_ptr<const IdleWaiter>& idle_waiter,
     size_t minimum_uniform_alignment,
-    std::shared_ptr<const GpuSubmissionTracker> submission_tracker) {
+    std::shared_ptr<const GpuSubmissionTracker> submission_tracker,
+    Lifetime lifetime) {
   return std::shared_ptr<HostBuffer>(
       new HostBuffer(allocator, idle_waiter, minimum_uniform_alignment,
-                     std::move(submission_tracker)));
+                     std::move(submission_tracker), lifetime));
 }
 
 HostBuffer::HostBuffer(
     const std::shared_ptr<Allocator>& allocator,
     const std::shared_ptr<const IdleWaiter>& idle_waiter,
     size_t minimum_uniform_alignment,
-    std::shared_ptr<const GpuSubmissionTracker> submission_tracker)
+    std::shared_ptr<const GpuSubmissionTracker> submission_tracker,
+    Lifetime lifetime)
     : allocator_(allocator),
       idle_waiter_(idle_waiter),
       submission_tracker_(std::move(submission_tracker)),
+      lifetime_(lifetime),
       minimum_uniform_alignment_(minimum_uniform_alignment) {
   DeviceBufferDescriptor desc;
   desc.size = kAllocatorBlockSize;
@@ -48,7 +51,7 @@ HostBuffer::HostBuffer(
 }
 
 HostBuffer::~HostBuffer() {
-  if (idle_waiter_) {
+  if (idle_waiter_ && lifetime_ == Lifetime::kWaitForIdle) {
     // Since we hold on to DeviceBuffers we should make sure they aren't being
     // used while we are deleting the HostBuffer.
     idle_waiter_->WaitIdle();
@@ -165,6 +168,9 @@ HostBuffer::EmplaceInternal(size_t length,
   current_buffer->Flush(output_range);
 
   offset_ += length;
+  if (lifetime_ == Lifetime::kRetainInCommandBuffer) {
+    return std::make_tuple(output_range, current_buffer, nullptr);
+  }
   return std::make_tuple(output_range, nullptr, current_buffer.get());
 }
 
@@ -205,6 +211,9 @@ HostBuffer::EmplaceInternal(const void* buffer, size_t length) {
     current_buffer->Flush(Range{old_length, length});
   }
   offset_ += length;
+  if (lifetime_ == Lifetime::kRetainInCommandBuffer) {
+    return std::make_tuple(Range{old_length, length}, current_buffer, nullptr);
+  }
   return std::make_tuple(Range{old_length, length}, nullptr,
                          current_buffer.get());
 }

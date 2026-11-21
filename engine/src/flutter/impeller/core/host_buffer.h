@@ -34,11 +34,20 @@ static const constexpr size_t kHostBufferArenaSize = 4u;
 /// kept alive off to the side and replaced with fresh allocations.
 class HostBuffer {
  public:
+  enum class Lifetime {
+    /// The arena owns its allocations and waits for idle before destruction.
+    kWaitForIdle,
+    /// Consumers of every BufferView must retain its buffer until the GPU
+    /// finishes using it. The arena can be destroyed without waiting.
+    kRetainInCommandBuffer,
+  };
+
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator,
       const std::shared_ptr<const IdleWaiter>& idle_waiter,
       size_t minimum_uniform_alignment,
-      std::shared_ptr<const GpuSubmissionTracker> submission_tracker = nullptr);
+      std::shared_ptr<const GpuSubmissionTracker> submission_tracker = nullptr,
+      Lifetime lifetime = Lifetime::kWaitForIdle);
 
   ~HostBuffer();
 
@@ -171,7 +180,8 @@ class HostBuffer {
       const std::shared_ptr<Allocator>& allocator,
       const std::shared_ptr<const IdleWaiter>& idle_waiter,
       size_t minimum_uniform_alignment,
-      std::shared_ptr<const GpuSubmissionTracker> submission_tracker);
+      std::shared_ptr<const GpuSubmissionTracker> submission_tracker,
+      Lifetime lifetime);
 
   HostBuffer(const HostBuffer&) = delete;
 
@@ -180,6 +190,7 @@ class HostBuffer {
   std::shared_ptr<Allocator> allocator_;
   std::shared_ptr<const IdleWaiter> idle_waiter_;
   std::shared_ptr<const GpuSubmissionTracker> submission_tracker_;
+  const Lifetime lifetime_;
   std::array<std::vector<std::shared_ptr<DeviceBuffer>>, kHostBufferArenaSize>
       device_buffers_;
   // Per-entry id of the last GPU submission that may reference the entry's
