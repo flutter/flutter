@@ -1486,6 +1486,48 @@ Information about project "Runner":
       null,
     );
   });
+  group('substituteXcodeVariables', () {
+    const buildSettings = <String, String>{
+      'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+      'SUFFIX': 'suffix',
+    };
+
+    testWithoutContext('substitutes variables in parentheses', () {
+      expect(
+        substituteXcodeVariables(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)', buildSettings),
+        'io.flutter.someProject.suffix',
+      );
+    });
+
+    testWithoutContext('substitutes variables in braces', () {
+      expect(
+        substituteXcodeVariables(r'${PRODUCT_BUNDLE_IDENTIFIER}.${SUFFIX}', buildSettings),
+        'io.flutter.someProject.suffix',
+      );
+    });
+
+    testWithoutContext('substitutes a mix of parentheses and braces', () {
+      expect(
+        substituteXcodeVariables(r'${PRODUCT_BUNDLE_IDENTIFIER}.$(SUFFIX)', buildSettings),
+        'io.flutter.someProject.suffix',
+      );
+    });
+
+    testWithoutContext('leaves unknown variables unchanged', () {
+      expect(
+        substituteXcodeVariables(r'$(UNKNOWN).${UNKNOWN}.$(SUFFIX)', buildSettings),
+        r'$(UNKNOWN).${UNKNOWN}.suffix',
+      );
+    });
+
+    testWithoutContext('returns the string unchanged when there are no variables', () {
+      expect(
+        substituteXcodeVariables('io.flutter.someProject', buildSettings),
+        'io.flutter.someProject',
+      );
+    });
+  });
+
   group('environmentVariablesAsXcodeBuildSettings', () {
     late FakePlatform platform;
 
