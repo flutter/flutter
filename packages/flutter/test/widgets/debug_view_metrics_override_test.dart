@@ -1064,7 +1064,8 @@ void main() {
 
       expect(
         announced,
-        'metrics: 1, accessibilityFeatures: 1, textScaleFactor: 1, platformBrightness: 0',
+        'metrics: 1, accessibilityFeatures: 1, textScaleFactor: 1, platformBrightness: 0, '
+        'alwaysUse24HourFormat: 0',
       );
     });
   });
