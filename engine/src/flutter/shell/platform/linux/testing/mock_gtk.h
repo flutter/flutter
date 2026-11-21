@@ -10,6 +10,9 @@
 #include <atk/atk.h>
 #include <gtk/gtk.h>
 
+struct wl_display;
+struct wl_surface;
+
 namespace flutter {
 namespace testing {
 
@@ -57,6 +60,13 @@ class MockGtk {
                gint* dest_y));
   MOCK_METHOD(GtkWidget*, gtk_widget_get_toplevel, (GtkWidget * widget));
   MOCK_METHOD(GdkWindow*, gtk_widget_get_window, (GtkWidget * widget));
+  MOCK_METHOD(GdkDisplay*, gtk_widget_get_display, (GtkWidget * widget));
+  MOCK_METHOD(struct wl_display*,
+              gdk_wayland_display_get_wl_display,
+              (GdkDisplay * display));
+  MOCK_METHOD(struct wl_surface*,
+              gdk_wayland_window_get_wl_surface,
+              (GdkWindow * window));
   MOCK_METHOD(void,
               gtk_im_context_set_client_window,
               (GtkIMContext * context, GdkWindow* window));

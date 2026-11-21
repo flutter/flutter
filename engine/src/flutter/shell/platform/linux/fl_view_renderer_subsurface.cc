@@ -63,6 +63,10 @@ struct _FlViewRendererSubsurface {
   // the handler connected to it. NULL and zero when not synchronized.
   GdkFrameClock* frame_clock;
   gulong after_paint_handler;
+
+  // Idle source that retries updating the parent surface after GTK has mapped
+  // the window. Zero when no retry is pending.
+  guint update_idle_id;
 };
 
 G_DEFINE_TYPE(FlViewRendererSubsurface,
@@ -236,10 +240,27 @@ static void create_subsurface(FlViewRendererSubsurface* self,
       allocation.width, allocation.height, gtk_widget_get_scale_factor(widget));
 }
 
+// Releases the Wayland objects used to present frames. Must be called with the
+// frame mutex held so the raster thread cannot be using them.
+static void release_subsurface_locked(FlViewRendererSubsurface* self) {
+  g_clear_object(&self->egl);
+  g_clear_object(&self->subsurface);
+  self->parent_surface = nullptr;
+  self->parent_surface_id = 0;
+}
+
+// Releases the current subsurface and forgets which parent surface it was
+// created on. This is safe to call when no subsurface exists.
+static void drop_subsurface(FlViewRendererSubsurface* self) {
+  end_synchronized_resize(self);
+  g_mutex_lock(&self->frame_mutex);
+  release_subsurface_locked(self);
+  g_mutex_unlock(&self->frame_mutex);
+}
+
 // GTK destroys the window's Wayland surface when it is hidden and makes a new
 // one if it is shown again. The subsurface belongs to the old surface, so it is
-// never shown again and using it is a protocol error. Detect this and move to
-// the new surface.
+// never shown again. Detect this and move to the new surface.
 static void update_parent_surface(FlViewRendererSubsurface* self) {
   // Nothing to do before the widget is realized or after it is unrealized.
   if (self->compositor == nullptr) {
@@ -258,8 +279,7 @@ static void update_parent_surface(FlViewRendererSubsurface* self) {
   // shown again.
   end_synchronized_resize(self);
   g_mutex_lock(&self->frame_mutex);
-  g_clear_object(&self->egl);
-  g_clear_object(&self->subsurface);
+  release_subsurface_locked(self);
   self->parent_surface = parent_surface;
   self->parent_surface_id = parent_surface_id;
   if (parent_surface != nullptr) {
@@ -274,6 +294,51 @@ static void update_parent_surface(FlViewRendererSubsurface* self) {
   // The new subsurface has nothing in it, so ask for the frame to be rendered
   // again.
   fl_engine_schedule_frame(self->engine);
+}
+
+// Run update_parent_surface() after GTK has finished mapping the window.
+// The GTK map signal can run before a replacement Wayland toplevel surface
+// exists, so the first update sees no parent surface. A second pass once the
+// main loop is idle reliably picks up the new surface and recreates the
+// subsurface.
+static gboolean update_parent_surface_idle_cb(gpointer user_data) {
+  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(user_data);
+  self->update_idle_id = 0;
+  // The window may be hidden again before this idle callback runs. In that
+  // case the toplevel Wayland surface is going away and must not be used to
+  // create another subsurface.
+  if (gtk_widget_get_mapped(GTK_WIDGET(self))) {
+    update_parent_surface(self);
+  }
+  return G_SOURCE_REMOVE;
+}
+
+// Releases the reference held by a pending update idle source.
+static void update_parent_surface_idle_destroy(gpointer user_data) {
+  g_object_unref(user_data);
+}
+
+// Removes a pending update idle source, if any. The destroy notify releases
+// the reference the source holds on the renderer.
+static void remove_update_idle(FlViewRendererSubsurface* self) {
+  if (self->update_idle_id != 0) {
+    guint update_idle_id = self->update_idle_id;
+    self->update_idle_id = 0;
+    g_source_remove(update_idle_id);
+  }
+}
+
+// Schedules a single retry of update_parent_surface() after the main loop is
+// idle. Repeated map signals share the pending retry rather than queuing one
+// per map.
+static void schedule_update_parent_surface(FlViewRendererSubsurface* self) {
+  if (self->update_idle_id != 0) {
+    return;
+  }
+
+  self->update_idle_id =
+      g_idle_add_full(G_PRIORITY_DEFAULT_IDLE, update_parent_surface_idle_cb,
+                      g_object_ref(self), update_parent_surface_idle_destroy);
 }
 
 // Handle a presented frame on the GTK thread. The frame was shown by the
@@ -335,6 +400,7 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
 static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
+  remove_update_idle(self);
   end_synchronized_resize(self);
 
   // Hold frame_mutex while releasing these objects so the raster thread cannot
@@ -346,20 +412,39 @@ static void fl_view_renderer_subsurface_unrealize(GtkWidget* widget) {
 
   // The EGL context and surface are released here; the EGL display is owned by
   // the engine and is left untouched by FlSubsurfaceEGL.
-  g_clear_object(&self->egl);
-  g_clear_object(&self->subsurface);
-  self->parent_surface = nullptr;
-  self->parent_surface_id = 0;
+  release_subsurface_locked(self);
   g_mutex_unlock(&self->frame_mutex);
 
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unrealize(widget);
+}
+
+// Implements GtkWidget::unmap.
+static void fl_view_renderer_subsurface_unmap(GtkWidget* widget) {
+  GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->unmap(widget);
+
+  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
+
+  // The window is no longer visible. Its toplevel Wayland surface may be
+  // destroyed while hidden, so release the subsurface and its EGL resources
+  // now instead of keeping objects that can no longer be shown. Recreate them
+  // when the widget is mapped again.
+  //
+  // GtkWidget::unmap also runs when only this widget is hidden while the
+  // toplevel remains mapped, for example when a GtkStack page is switched.
+  // Releasing here is intentional: the subsurface is attached to the toplevel
+  // surface, not clipped to this widget, so keeping it would leave the last
+  // Flutter frame visible on top of the new page.
+  remove_update_idle(self);
+  drop_subsurface(self);
 }
 
 // Implements GtkWidget::map.
 static void fl_view_renderer_subsurface_map(GtkWidget* widget) {
   GTK_WIDGET_CLASS(fl_view_renderer_subsurface_parent_class)->map(widget);
 
-  update_parent_surface(FL_VIEW_RENDERER_SUBSURFACE(widget));
+  FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
+  update_parent_surface(self);
+  schedule_update_parent_surface(self);
 }
 
 // Implements GtkWidget::draw.
@@ -384,7 +469,11 @@ static void fl_view_renderer_subsurface_size_allocate(
 
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(widget);
 
-  update_parent_surface(self);
+  // Don't create a subsurface on a hidden window. If the widget is mapped
+  // later, the map handler and its idle retry will do it.
+  if (gtk_widget_get_mapped(widget)) {
+    update_parent_surface(self);
+  }
   update_subsurface_position(self);
 
   // Keep the frame of the new size back until GTK has committed the resized
@@ -527,6 +616,7 @@ static void fl_view_renderer_subsurface_present_layers(
 static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
+  remove_update_idle(self);
   end_synchronized_resize(self);
   g_clear_object(&self->engine);
   g_clear_object(&self->task_runner);
@@ -559,6 +649,7 @@ static void fl_view_renderer_subsurface_class_init(
   widget_class->realize = fl_view_renderer_subsurface_realize;
   widget_class->unrealize = fl_view_renderer_subsurface_unrealize;
   widget_class->map = fl_view_renderer_subsurface_map;
+  widget_class->unmap = fl_view_renderer_subsurface_unmap;
   widget_class->draw = fl_view_renderer_subsurface_draw;
   widget_class->size_allocate = fl_view_renderer_subsurface_size_allocate;
 
