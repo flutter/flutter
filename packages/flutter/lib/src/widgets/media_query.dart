@@ -179,10 +179,10 @@ enum _MediaQueryAspect {
 /// that might not be completely visible, like the display "notch" on the iPhone
 /// X. The viewInsets value defines areas reserved for system UI, typically the
 /// device's keyboard (which may be translucent or have rounded corners, leaving
-/// what is painted there visible). Similar to viewInsets,
-/// viewPadding does not differentiate padding in areas that may be obscured.
-/// For example, by using the viewPadding property, padding would defer to the
-/// iPhone "safe area" regardless of whether a keyboard is showing.
+/// what is painted behind it visible). Unlike padding, viewPadding is not
+/// reduced when the viewInsets overlap it. For example, viewPadding still
+/// includes the iPhone "safe area" at the bottom of the screen while a keyboard
+/// is showing, whereas padding does not.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
 ///
@@ -510,10 +510,43 @@ class MediaQueryData {
   /// When a mobile device's keyboard is visible, `viewInsets.bottom`
   /// corresponds to the top of the keyboard. Because the keyboard or other
   /// system UI may be translucent or have rounded corners, what is painted
-  /// behind it can remain visible. Consider keeping content and controls out of
-  /// the inset area while continuing to paint backgrounds behind it (for
-  /// example, by applying `viewInsets` as padding inside a background surface
-  /// rather than outside it).
+  /// behind it can remain visible. It is typically not interactive, however,
+  /// because the system UI receives the pointer events in the inset area.
+  /// Consider keeping content and controls out of the inset area while
+  /// continuing to paint backgrounds behind the system UI (for example, by
+  /// applying `viewInsets` as padding inside a background surface rather than
+  /// outside it).
+  ///
+  /// {@tool snippet}
+  /// This widget paints its color behind the keyboard and keeps its child above
+  /// the keyboard. The [ColoredBox] is outside the [Padding], so it fills the
+  /// inset area. The child is inside the [Padding], so it does not.
+  ///
+  /// ```dart
+  /// class KeyboardAwareSurface extends StatelessWidget {
+  ///   const KeyboardAwareSurface({super.key, required this.child});
+  ///
+  ///   final Widget child;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return ColoredBox(
+  ///       color: const Color(0xFFFFFFFF),
+  ///       child: Padding(
+  ///         padding: EdgeInsets.only(
+  ///           bottom: MediaQuery.viewInsetsOf(context).bottom,
+  ///         ),
+  ///         child: MediaQuery.removeViewInsets(
+  ///           context: context,
+  ///           removeBottom: true,
+  ///           child: child,
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// This value is independent of the [padding] and [viewPadding]. viewPadding
   /// is measured from the edges of the [MediaQuery] widget's bounds. Padding is

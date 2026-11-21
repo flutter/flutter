@@ -56,7 +56,7 @@ class Display {
 /// when visible.
 ///
 /// The [viewInsets] are the physical pixels which the operating
-/// system reserves for system UI, such as the keyboard. That system UI may be
+/// system reserves for system UI, such as the keyboard. The system UI may be
 /// translucent or have rounded corners, so content drawn in this area can
 /// remain visible.
 ///
