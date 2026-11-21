@@ -37,6 +37,30 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(
 }
 
 void main() {
+  testWidgets('RenderParagraph relayouts in the frame receiving a font change', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Text('text widget')));
+    final RenderObject renderObject = tester.renderObject(find.text('text widget'));
+    bool? neededLayoutBeforeRendering;
+
+    tester.binding.scheduleFrameCallback((Duration timeStamp) {
+      final Future<void> dispatch = tester.binding.handleSystemMessage(const <String, dynamic>{
+        'type': 'fontsChange',
+      });
+      unawaited(
+        dispatch.then((_) {
+          neededLayoutBeforeRendering = renderObject.debugNeedsLayout;
+        }),
+      );
+    });
+
+    await tester.pump();
+    expect(neededLayoutBeforeRendering, isTrue);
+    expect(renderObject.debugNeedsLayout, isFalse);
+    await tester.pump();
+  });
+
   testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('text widget')));
     final RenderObject renderObject = tester.renderObject(find.text('text widget'));

@@ -4700,10 +4700,9 @@ mixin ContainerRenderObjectMixin<
 mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
   /// A callback that is called when system fonts have changed.
   ///
-  /// The framework defers the invocation of the callback to the
-  /// [SchedulerPhase.transientCallbacks] phase to ensure that the
-  /// [RenderObject]'s text layout is still valid when user interactions are in
-  /// progress (which usually take place during the [SchedulerPhase.idle] phase).
+  /// The framework can invoke this callback during [SchedulerPhase.transientCallbacks]
+  /// or [SchedulerPhase.midFrameMicrotasks], before layout. Notifications at
+  /// other times are deferred to keep text layout valid during user interactions.
   ///
   /// By default, [markNeedsLayout] is called on the [RenderObject]
   /// implementing this mixin.
@@ -4721,6 +4720,17 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
     if (_hasPendingSystemFontsDidChangeCallBack) {
       return;
     }
+    final SchedulerBinding scheduler = SchedulerBinding.instance;
+    switch (scheduler.schedulerPhase) {
+      case SchedulerPhase.transientCallbacks:
+      case SchedulerPhase.midFrameMicrotasks:
+        systemFontsDidChange();
+        return;
+      case SchedulerPhase.idle:
+      case SchedulerPhase.persistentCallbacks:
+      case SchedulerPhase.postFrameCallbacks:
+        break;
+    }
     _hasPendingSystemFontsDidChangeCallBack = true;
 
     // The system fonts notification can arrive during any scheduler phase
@@ -4728,7 +4738,7 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
     // scheduleFrameCallback is safe to call during any phase; if called
     // mid-frame, the callback runs in the next frame's transient callback
     // phase since handleBeginFrame snapshots and replaces _transientCallbacks.
-    SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
+    scheduler.scheduleFrameCallback((Duration timeStamp) {
       assert(_hasPendingSystemFontsDidChangeCallBack);
       _hasPendingSystemFontsDidChangeCallBack = false;
       assert(
