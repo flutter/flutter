@@ -183,7 +183,9 @@ class LspPreviewDetector {
 
   Future<void> _fileAddedOrUpdated({required String filePath}) async {
     if (filePath.isPubspec) {
-      onPubspecChangeDetected(filePath);
+      if (project.isPubspecForProject(pubspecPath: filePath, fs: fs)) {
+        onPubspecChangeDetected(filePath);
+      }
       return;
     }
     if (!filePath.isDartFile) {

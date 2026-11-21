@@ -139,20 +139,45 @@ void main() {
       },
     );
 
-    testWithoutContext('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
-      expectNPreviewReloadTimingEvents(0);
-      expect(detectedChanges, isEmpty);
-      expect(detectedPubspecChanges, isEmpty);
-      expect(detectedNonDartFileChanges, isEmpty);
+    testWithoutContext(
+      'ignores changes to pubspec.yaml in nested non-project directories',
+      () async {
+        expectNPreviewReloadTimingEvents(0);
+        expect(detectedPubspecChanges, isEmpty);
 
-      await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
+        final String nestedPubspecPath = fs.path.join(
+          _kProjectRootPath,
+          '.claude',
+          'worktrees',
+          'foo',
+          'pubspec.yaml',
+        );
 
-      expect(detectedChanges, isEmpty);
-      expect(detectedPubspecChanges, isEmpty);
-      expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
-      expectNPreviewReloadTimingEvents(0);
-      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-    });
+        await emitEvent(WatchEvent(ChangeType.MODIFY, nestedPubspecPath));
+
+        expect(detectedPubspecChanges, isEmpty);
+        expectNPreviewReloadTimingEvents(0);
+        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      },
+    );
+
+    testWithoutContext(
+      'notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified',
+      () async {
+        expectNPreviewReloadTimingEvents(0);
+        expect(detectedChanges, isEmpty);
+        expect(detectedPubspecChanges, isEmpty);
+        expect(detectedNonDartFileChanges, isEmpty);
+
+        await emitEvent(WatchEvent(ChangeType.MODIFY, _kNonDartFilePath));
+
+        expect(detectedChanges, isEmpty);
+        expect(detectedPubspecChanges, isEmpty);
+        expect(detectedNonDartFileChanges, <String>[_kNonDartFilePath]);
+        expectNPreviewReloadTimingEvents(0);
+        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      },
+    );
 
     testWithoutContext('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
@@ -204,43 +229,46 @@ void main() {
       },
     );
 
-    testWithoutContext('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
-      await detector.dispose();
+    testWithoutContext(
+      'does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance',
+      () async {
+        await detector.dispose();
 
-      fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
-      detector = LspPreviewDetector(
-        dtd: fakeDtd,
-        onChangeDetected: detectedChanges.add,
-        onPubspecChangeDetected: detectedPubspecChanges.add,
-        previewAnalytics: previewAnalytics,
-        project: project,
-        suppressAnalytics: false,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          fs: fs,
-          logger: logger,
-          platform: platform,
-          processManager: FakeProcessManager.any(),
-          shutdownHooks: shutdownHooks,
-        ),
-        analysisServerFactory: () async => fakeAnalysisServer,
-        watcherBuilder: (_) => fakeWatcher,
-      );
-      await detector.initialize();
+        fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');
+        detector = LspPreviewDetector(
+          dtd: fakeDtd,
+          onChangeDetected: detectedChanges.add,
+          onPubspecChangeDetected: detectedPubspecChanges.add,
+          previewAnalytics: previewAnalytics,
+          project: project,
+          suppressAnalytics: false,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            fs: fs,
+            logger: logger,
+            platform: platform,
+            processManager: FakeProcessManager.any(),
+            shutdownHooks: shutdownHooks,
+          ),
+          analysisServerFactory: () async => fakeAnalysisServer,
+          watcherBuilder: (_) => fakeWatcher,
+        );
+        await detector.initialize();
 
-      expect(detector.analysisServer, isNull);
-      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      expect(fakeDtd.waitForAnalysisCallCount, 0);
+        expect(detector.analysisServer, isNull);
+        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+        expect(fakeDtd.waitForAnalysisCallCount, 0);
 
-      await detector.waitForAnalysis();
-      expect(fakeDtd.waitForAnalysisCallCount, 1);
-      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+        await detector.waitForAnalysis();
+        expect(fakeDtd.waitForAnalysisCallCount, 1);
+        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
 
-      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
-      expect(detectedChanges, hasLength(1));
-      expect(fakeDtd.waitForAnalysisCallCount, 2);
-      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-    });
+        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+        expect(detectedChanges, hasLength(1));
+        expect(fakeDtd.waitForAnalysisCallCount, 2);
+        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+      },
+    );
   });
 }
 
@@ -249,6 +277,12 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   final Directory directory;
+
+  @override
+  File get pubspecFile => directory.childFile('pubspec.yaml');
+
+  @override
+  List<FlutterProject> get workspaceProjects => const <FlutterProject>[];
 
   @override
   void reloadManifest({Logger? logger, FileSystem? fs}) {}

@@ -11,6 +11,8 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
 
+import '../base/file_system.dart';
+import '../project.dart';
 import 'dependency_graph.dart';
 
 extension TokenExtension on Token {
@@ -124,4 +126,20 @@ class PreviewDetectorMutex {
 
   var _locked = false;
   final _outstandingRequests = Queue<Completer<void>>();
+}
+
+/// Convenience extensions for examining [FlutterProject] in widget preview context.
+extension FlutterProjectPreviewExtension on FlutterProject {
+  /// Returns whether [pubspecPath] corresponds to the `pubspec.yaml` of this
+  /// project or one of its workspace projects.
+  bool isPubspecForProject({required String pubspecPath, required FileSystem fs}) {
+    final String canonicalPubspecPath = fs.path.canonicalize(pubspecPath);
+    if (fs.path.canonicalize(pubspecFile.path) == canonicalPubspecPath) {
+      return true;
+    }
+    return workspaceProjects.any(
+      (FlutterProject project) =>
+          fs.path.canonicalize(project.pubspecFile.path) == canonicalPubspecPath,
+    );
+  }
 }
