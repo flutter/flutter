@@ -309,6 +309,12 @@ abstract class RenderSliverPersistentHeader extends RenderSliver
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return geometry?.visible ?? false;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
       offset += switch (applyGrowthDirectionToAxisDirection(

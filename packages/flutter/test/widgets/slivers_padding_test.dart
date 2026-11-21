@@ -62,6 +62,40 @@ void verify(WidgetTester tester, List<Rect> answerKey) {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('SliverPadding does not report the child as painted when it is not visible', (
+    WidgetTester tester,
+  ) async {
+    Widget buildPadding(double top) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: EdgeInsets.only(top: top),
+                  sliver: const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildPadding(200));
+    RenderSliverPadding padding = tester.renderObject(find.byType(SliverPadding));
+    expect(padding.paintsChild(padding.child!), isFalse);
+
+    await tester.pumpWidget(buildPadding(50));
+    padding = tester.renderObject(find.byType(SliverPadding));
+    expect(padding.paintsChild(padding.child!), isTrue);
+  });
+
   testWidgets('Viewport+SliverPadding basic test (VISUAL)', (WidgetTester tester) async {
     const padding = EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);

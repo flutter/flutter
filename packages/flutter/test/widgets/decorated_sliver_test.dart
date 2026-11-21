@@ -12,6 +12,43 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('DecoratedSliver does not report the child as painted when it is not visible', (
+    WidgetTester tester,
+  ) async {
+    Widget buildDecoratedSliver({required double leadingExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: leadingExtent)),
+                const DecoratedSliver(
+                  decoration: BoxDecoration(),
+                  sliver: SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildDecoratedSliver(leadingExtent: 200));
+    RenderDecoratedSliver decoratedSliver = tester.renderObject(
+      find.byType(DecoratedSliver, skipOffstage: false),
+    );
+    expect(decoratedSliver.paintsChild(decoratedSliver.child!), isFalse);
+
+    await tester.pumpWidget(buildDecoratedSliver(leadingExtent: 50));
+    decoratedSliver = tester.renderObject(find.byType(DecoratedSliver));
+    expect(decoratedSliver.paintsChild(decoratedSliver.child!), isTrue);
+  });
+
   testWidgets('DecoratedSliver creates, paints, and disposes BoxPainter', (
     WidgetTester tester,
   ) async {

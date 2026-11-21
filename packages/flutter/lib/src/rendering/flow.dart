@@ -150,6 +150,7 @@ abstract class FlowDelegate {
 /// of the [FlowDelegate.paintChildren] function.
 class FlowParentData extends ContainerBoxParentData<RenderBox> {
   Matrix4? _transform;
+  bool _skippedInLastPaint = false;
 }
 
 /// Implements the flow layout algorithm.
@@ -198,6 +199,7 @@ class RenderFlow extends RenderBox
     final ParentData? childParentData = child.parentData;
     if (childParentData is FlowParentData) {
       childParentData._transform = null;
+      childParentData._skippedInLastPaint = false;
     } else {
       child.parentData = FlowParentData();
     }
@@ -370,6 +372,7 @@ class RenderFlow extends RenderBox
     if (opacity == 0.0) {
       return;
     }
+    childParentData._skippedInLastPaint = false;
 
     void painter(PaintingContext context, Offset offset) {
       context.paintChild(child, offset);
@@ -394,6 +397,7 @@ class RenderFlow extends RenderBox
     for (final RenderBox child in _randomAccessChildren) {
       final childParentData = child.parentData! as FlowParentData;
       childParentData._transform = null;
+      childParentData._skippedInLastPaint = true;
     }
     try {
       _delegate.paintChildren(this);
@@ -449,6 +453,13 @@ class RenderFlow extends RenderBox
       }
     }
     return false;
+  }
+
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    final childParentData = child.parentData! as FlowParentData;
+    return !childParentData._skippedInLastPaint;
   }
 
   @override

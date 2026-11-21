@@ -21,6 +21,62 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('Overlay only reports onstage entries as painted', (WidgetTester tester) async {
+    const offstageKey = Key('offstage');
+    const onstageKey = Key('onstage');
+    const offstagePortalKey = Key('offstage portal');
+    const onstagePortalKey = Key('onstage portal');
+    final offstagePortalController = OverlayPortalController()..show();
+    final onstagePortalController = OverlayPortalController()..show();
+    final offstageEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) => OverlayPortal(
+        controller: offstagePortalController,
+        overlayChildBuilder: (BuildContext context) => const SizedBox(key: offstagePortalKey),
+        child: const SizedBox(key: offstageKey),
+      ),
+    );
+    final onstageEntry = OverlayEntry(
+      opaque: true,
+      builder: (BuildContext context) => OverlayPortal(
+        controller: onstagePortalController,
+        overlayChildBuilder: (BuildContext context) => const SizedBox(key: onstagePortalKey),
+        child: const SizedBox(key: onstageKey),
+      ),
+    );
+    addTearDown(
+      () => offstageEntry
+        ..remove()
+        ..dispose(),
+    );
+    addTearDown(
+      () => onstageEntry
+        ..remove()
+        ..dispose(),
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[offstageEntry, onstageEntry]),
+      ),
+    );
+
+    bool paintsChild(Key key) {
+      final RenderObject theater = tester.renderObject(find.byType(Overlay));
+      RenderObject child = tester.renderObject(find.byKey(key, skipOffstage: false));
+      while (child.parent != theater) {
+        child = child.parent!;
+      }
+      return theater.paintsChild(child);
+    }
+
+    expect(paintsChild(offstageKey), isFalse);
+    expect(paintsChild(onstageKey), isTrue);
+    expect(paintsChild(offstagePortalKey), isFalse);
+    expect(paintsChild(onstagePortalKey), isTrue);
+  });
+
   testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
     var didBuild = false;

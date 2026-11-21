@@ -767,9 +767,100 @@ void main() {
       expect(find.byType(SliverOffstage), paints..paragraph());
       semantics.dispose();
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    testWidgets('paintsChild', (WidgetTester tester) async {
+      Widget buildOffstage(bool offstage) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverOffstage(
+                offstage: offstage,
+                sliver: const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildOffstage(true));
+      RenderSliverOffstage renderOffstage = tester.renderObject(
+        find.byType(SliverOffstage, skipOffstage: false),
+      );
+      expect(renderOffstage.paintsChild(renderOffstage.child!), isFalse);
+
+      await tester.pumpWidget(buildOffstage(false));
+      renderOffstage = tester.renderObject(find.byType(SliverOffstage));
+      expect(renderOffstage.paintsChild(renderOffstage.child!), isTrue);
+    });
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/196649.
+  testWidgets('RenderSliverToBoxAdapter.paintsChild', (WidgetTester tester) async {
+    Widget buildViewport({required double leadingExtent}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: leadingExtent)),
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The second sliver is in the cache extent below the viewport.
+    await tester.pumpWidget(buildViewport(leadingExtent: 200));
+    RenderSliverToBoxAdapter adapter = tester.renderObject(
+      find.byType(SliverToBoxAdapter, skipOffstage: false).last,
+    );
+    expect(adapter.paintsChild(adapter.child!), isFalse);
+
+    await tester.pumpWidget(buildViewport(leadingExtent: 50));
+    adapter = tester.renderObject(find.byType(SliverToBoxAdapter).last);
+    expect(adapter.paintsChild(adapter.child!), isTrue);
   });
 
   group('SliverOpacity - ', () {
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    testWidgets('paintsChild', (WidgetTester tester) async {
+      Widget buildOpacity(double opacity, {double leadingExtent = 0}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: leadingExtent)),
+              SliverOpacity(
+                opacity: opacity,
+                sliver: const SliverToBoxAdapter(child: SizedBox(height: 100)),
+              ),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildOpacity(0.0));
+      RenderSliverOpacity renderOpacity = tester.renderObject(find.byType(SliverOpacity));
+      expect(renderOpacity.paintsChild(renderOpacity.child!), isFalse);
+
+      await tester.pumpWidget(buildOpacity(0.5));
+      renderOpacity = tester.renderObject(find.byType(SliverOpacity));
+      expect(renderOpacity.paintsChild(renderOpacity.child!), isTrue);
+
+      // The child is in the cache extent below the viewport.
+      await tester.pumpWidget(buildOpacity(0.5, leadingExtent: 600));
+      renderOpacity = tester.renderObject(find.byType(SliverOpacity, skipOffstage: false));
+      expect(renderOpacity.paintsChild(renderOpacity.child!), isFalse);
+    });
+
     testWidgets('painting & semantics', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
 

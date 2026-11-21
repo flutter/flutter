@@ -5,6 +5,7 @@
 import 'object.dart';
 import 'proxy_box.dart';
 import 'proxy_sliver.dart';
+import 'sliver.dart';
 
 /// Paints a [Decoration] either before or after its child paints.
 ///
@@ -86,6 +87,12 @@ class RenderDecoratedSliver extends RenderProxySliver {
     _painter?.dispose();
     _painter = null;
     super.dispose();
+  }
+
+  @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return child.geometry?.visible ?? false;
   }
 
   @override

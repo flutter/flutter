@@ -2065,6 +2065,12 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    return geometry?.visible ?? false;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
       final childParentData = child!.parentData! as SliverPhysicalParentData;

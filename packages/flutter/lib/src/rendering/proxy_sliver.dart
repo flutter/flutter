@@ -171,6 +171,12 @@ class RenderSliverOpacity extends RenderProxySliver {
   }
 
   @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return _alpha != 0 && (child.geometry?.visible ?? false);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
       if (_alpha == 0) {
@@ -336,6 +342,12 @@ class RenderSliverOffstage extends RenderProxySliver {
           mainAxisPosition: mainAxisPosition,
           crossAxisPosition: crossAxisPosition,
         );
+  }
+
+  @override
+  bool paintsChild(RenderSliver child) {
+    assert(child.parent == this);
+    return !offstage;
   }
 
   @override

@@ -2671,6 +2671,15 @@ class RenderEditable extends RenderBox
   }
 
   @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    if (child == _foregroundRenderObject || child == _backgroundRenderObject) {
+      return true;
+    }
+    return (child.parentData! as TextParentData).offset != null;
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {

@@ -1656,6 +1656,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
   }
 
+  @override
+  bool paintsChild(RenderBox child) {
+    assert(child.parent == this);
+    final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
+    // Kept alive children stay in _children with the paint extent of their
+    // last layout pass, so check the children laid out in the last layout pass.
+    return _activeChildrenForLayoutPass[childParentData.vicinity] == child &&
+        childParentData.isVisible;
+  }
+
   void _paintChildren(PaintingContext context, Offset offset) {
     RenderBox? child = _firstChild;
     while (child != null) {

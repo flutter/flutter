@@ -1620,6 +1620,52 @@ void main() {
       expect(composingRect, const Rect.fromLTRB(0.0, 14.0, 14.0, 28.0));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/196649.
+    test('does not report WidgetSpans beyond maxLines as painted', () {
+      final TextSelectionDelegate delegate = _FakeEditableTextState();
+      final renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+      ];
+      final viewportOffset = ViewportOffset.zero();
+      final editable = RenderEditable(
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
+        textDirection: TextDirection.ltr,
+        cursorColor: _red,
+        offset: viewportOffset,
+        textSelectionDelegate: delegate,
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        text: const TextSpan(
+          style: TextStyle(height: 1.0, fontSize: 10.0),
+          children: <InlineSpan>[
+            WidgetSpan(child: Text('b')),
+            TextSpan(text: '\n'),
+            WidgetSpan(child: Text('c')),
+          ],
+        ),
+        children: renderBoxes,
+      );
+
+      _applyParentData(renderBoxes, editable.text!);
+      layout(editable, constraints: const BoxConstraints(maxWidth: 100));
+
+      // The second WidgetSpan is on a line that a single line editable omits.
+      expect(editable.paintsChild(renderBoxes[0]), isTrue);
+      expect(editable.paintsChild(renderBoxes[1]), isFalse);
+
+      // The foreground and background painters are always painted.
+      final painters = <RenderBox>[];
+      editable.visitChildren((RenderObject child) {
+        if (!renderBoxes.contains(child)) {
+          painters.add(child as RenderBox);
+        }
+      });
+      expect(painters, hasLength(2));
+      expect(painters.map(editable.paintsChild), everyElement(isTrue));
+    });
+
     test('able to render WidgetSpans with line wrap alternating spans', () async {
       final TextSelectionDelegate delegate = _FakeEditableTextState()
         ..textEditingValue = const TextEditingValue(
