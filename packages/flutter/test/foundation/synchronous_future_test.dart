@@ -61,4 +61,15 @@ void main() {
     }
     expect(exception, isArgumentError);
   });
+
+  test('SynchronousFuture.catchError preserves synchronous completion', () {
+    final Future<int> future = SynchronousFuture<int>(42);
+    final Future<int> recovered = future.catchError(
+      (Object error) => throw StateError('Unexpected error: $error'),
+      test: (Object error) => throw StateError('Unexpected error test: $error'),
+    );
+    int? result;
+    unawaited(recovered.then<void>((int value) => result = value));
+    expect(result, 42);
+  });
 }
