@@ -2,7 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# The Emscripten (wasm32) toolchain over the synced SDK (@emsdk): GN's
+# The Emscripten (wasm32) toolchain over the SDK (@emsdk: the checkout's, or
+# the one Bazel fetches for the first build that selects this toolchain): GN's
 # build/toolchain/wasm:wasm, which builds the web engine's modules. The
 # toolchain is registered in the root MODULE.bazel; wasm_module (wasm.bzl)
 # selects it through the platform below.
@@ -103,8 +104,9 @@ cc_toolchain(
 
 filegroup(name = "empty")
 
-# The toolchain runs on the host that synced the SDK (@emsdk is
-# prebuilts/emsdk, which gclient's hook fills for this machine; @cpython3 and
+# The toolchain runs on the host that installed the SDK (@emsdk is
+# prebuilts/emsdk, which gclient's hook fills for this machine, or the
+# fetched tree, which the same installer fills for it; @cpython3 and
 # the esbuild beside it are the host's too), so its execution platform is
 # the host's -- a Linux x64 or an Apple-silicon Mac alike (the Mac's T41:
 # the web SDK in the tool tests' facsimile could not build there with the

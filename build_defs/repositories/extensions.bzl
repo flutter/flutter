@@ -43,9 +43,6 @@ _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 #                   directory holding the GN file over a synced subdirectory.
 #   exclude:        entries of the tree left out of the repository (paths
 #                   relative to `path`): what another build writes into it.
-#   unfetched:      why a checkout without the tree cannot have Bazel fetch
-#                   it (the error then says so); every other tree is fetched
-#                   where the checkout lacks it (git_deps.bzl).
 #   links:          directories of other repositories put at paths of the
 #                   tree (the emsdk's LTO system libraries).
 _SOURCE_REPOSITORIES = {
@@ -86,7 +83,10 @@ _SOURCE_REPOSITORIES = {
     # The Emscripten SDK (GN's wasm toolchain, build/toolchain/wasm.gni),
     # a git dependency whose compiler and Node.js tools/activate_emsdk.py
     # installs into it under `download_emsdk`; consumed in place by
-    # build/bazel/toolchains/emscripten (see the overlay). The repository is
+    # build/bazel/toolchains/emscripten (see the overlay). Where the checkout
+    # has none, the fetched tree runs the same installation
+    # (_emsdk_hooks). Only a build that selects the wasm toolchain reads the
+    # repository, so only such a build fetches it. The repository is
     # the SDK as synced: the Bazel toolchain runs emcc with the SDK's cache
     # frozen and its Python without bytecode files, while GN's toolchain
     # leaves the cache writable, so a GN build on the same checkout adds
@@ -96,12 +96,6 @@ _SOURCE_REPOSITORIES = {
     "emsdk": struct(
         path = "engine/src/flutter/prebuilts/emsdk",
         build_file = _OVERLAYS + ":emsdk/BUILD.emsdk.bazel",
-        # The git dependency is the SDK's installer; the SDK itself is what
-        # DEPS' "Activate Emscripten SDK" hook downloads with it
-        # (tools/activate_emsdk.py), which no fetched tree runs.
-        unfetched = "`gclient sync` with download_emsdk among the .gclient's custom_vars: the Emscripten " +
-                    "SDK is installed by a hook of DEPS, which Bazel does not run, so a checkout without " +
-                    "`gclient sync` has no web engine build",
         exclude = [
             "upstream/emscripten/cache/build",  # system libraries being built
             "upstream/emscripten/cache/cache.lock",
@@ -540,8 +534,9 @@ _GN_TREES = {
 # tree, by the tree: what a fetched tree runs once it is fetched
 # (git_deps.bzl), in DEPS' order. DEPS' other hooks write elsewhere: the
 # sysroots (_SYSROOT_REPOSITORIES), the engine's package configuration
-# (engine_packages.bzl), the Emscripten SDK's activation (not fetched: the
-# emsdk's `unfetched`), and what no Linux or macOS build under Bazel reads.
+# (engine_packages.bzl), the Emscripten SDK's installation (a script of the
+# engine with the SDK's version in it: _emsdk_hooks), and what no Linux or
+# macOS build under Bazel reads.
 _FETCHED_TREE_HOOKS = {
     _THIRD_PARTY + "dart": [
         # "Generate .dart_tool/package_confg.json" and "Generate sdk/version".
@@ -840,8 +835,31 @@ def _fetched_name(path):
 def _fetched_build_file(path):
     return "@%s//:BUILD.bazel" % _fetched_name(path)
 
-def _fetched_trees(platform):
-    """A fetched_tree for every git dependency of DEPS; returns {BUILD file label: path}."""
+def _emsdk_hooks(mctx):
+    """What DEPS' "Activate Emscripten SDK" hook does, as hooks of the SDK's fetched tree.
+
+    The hook is tools/activate_emsdk.py, a script of the engine that runs
+    the SDK's own `emsdk.py install` and `emsdk.py activate` on the synced
+    tree, with the version it names (EMSDK_VERSION: lib/web_ui/README.md
+    says how it is rolled). A fetched tree runs the same two commands in
+    itself, with the version read from that script, which stays the one
+    place it is written.
+    """
+    script = Label("//engine/src/flutter:tools/activate_emsdk.py")
+    version = ""
+    for line in mctx.read(script).splitlines():
+        if line.startswith("EMSDK_VERSION") and "=" in line:
+            version = line.partition("=")[2].strip().strip("'\"")
+    if not version or " " in version:
+        fail("synced_deps: no EMSDK_VERSION = '<version>' in %s" % script)
+    return ["emsdk.py install " + version, "emsdk.py activate " + version]
+
+def _fetched_trees(platform, hooks):
+    """A fetched_tree for every git dependency of DEPS; returns {BUILD file label: path}.
+
+    `hooks` are the trees' hooks, by path (the scripts and arguments a
+    fetched tree runs once it is fetched).
+    """
     names = {}
     for path, pin in GIT_DEPS.items():
         name = _fetched_name(path)
@@ -867,7 +885,7 @@ def _fetched_trees(platform):
         # fetched trees (those directly inside; what is nested in one of
         # those comes with it).
         inside = [inner for inner in GIT_DEPS if inner.startswith(prefix)]
-        hooks = _FETCHED_TREE_HOOKS.get(path, [])
+        tree_hooks = hooks.get(path, [])
         fetched_tree(
             name = name,
             path = path,
@@ -876,8 +894,8 @@ def _fetched_trees(platform):
             nested = {
                 inner[len(prefix):]: "%s@%s" % (GIT_DEPS[inner]["url"], GIT_DEPS[inner]["revision"])
                 for inner in inside
-            } if hooks else {},
-            linked = {} if hooks else {
+            } if tree_hooks else {},
+            linked = {} if tree_hooks else {
                 _fetched_build_file(inner): inner[len(prefix):]
                 for inner in inside
                 if not [outer for outer in inside if inner.startswith(outer + "/")]
@@ -885,7 +903,7 @@ def _fetched_trees(platform):
             cipd = cipd,
             cipd_sha256 = cipd_sha256,
             files = {GCLIENT_GN_ARGS_FILE[len(prefix):]: _gclient_gn_args()} if GCLIENT_GN_ARGS_FILE.startswith(prefix) else {},
-            hooks = hooks,
+            hooks = tree_hooks,
         )
     return {_fetched_build_file(path): path for path in GIT_DEPS}
 
@@ -897,8 +915,6 @@ def _fetched_members(spec):
     own tree when it is a dependency of DEPS (what DEPS nests in it comes
     with it), else those of the dependencies inside it (`synced`).
     """
-    if getattr(spec, "unfetched", ""):
-        return {}
     if spec.path in GIT_DEPS:
         return {_fetched_build_file(spec.path): "."}
     prefix = spec.path + "/"
@@ -915,7 +931,8 @@ def _synced_deps_impl(mctx):
 
     # What a checkout without `gclient sync` reads in place of its synced
     # trees (git_deps.bzl), none of it fetched where the checkout has them.
-    fetchable = _fetched_trees(platform)
+    emsdk = _SOURCE_REPOSITORIES["emsdk"].path
+    fetchable = _fetched_trees(platform, _FETCHED_TREE_HOOKS | {emsdk: _emsdk_hooks(mctx)})
     engine_package_config(name = "engine_package_config", trees = fetchable)
 
     for name, spec in _SOURCE_REPOSITORIES.items():
@@ -932,7 +949,6 @@ def _synced_deps_impl(mctx):
             gn_secondary_dir = getattr(spec, "gn_secondary_dir", ""),
             exclude = getattr(spec, "exclude", []),
             links = getattr(spec, "links", {}),
-            missing_hint = getattr(spec, "unfetched", ""),
             fetched = _fetched_members(spec),
             source_tree = True,
             # The fetch-time GN conversion's tools and, for a checkout
@@ -948,7 +964,8 @@ def _synced_deps_impl(mctx):
     # repository's view links into the SDK's cache.
     emsdk_lto_libraries(
         name = "emsdk_lto",
-        emsdk_path = _SOURCE_REPOSITORIES["emsdk"].path,
+        emsdk_path = emsdk,
+        fetched = _fetched_build_file(emsdk),
     )
 
     fetch = _fetch_toolchains(mctx)

@@ -136,6 +136,25 @@ configuration resolved over the old Dart tree stayed as it was after a Dart
 roll, and a conversion that ran while the tree was being fetched found half
 of it.)
 
+**The Emscripten SDK.** The web engine's toolchain is a git dependency of
+`DEPS` under `download_emsdk`, the SDK's installer, and a hook,
+`tools/activate_emsdk.py`, which runs it for the version it names
+(`emsdk.py install`, then `activate`: the compiler and Node.js, downloaded
+into the tree). Where the checkout has no SDK, its fetched tree runs the
+same two commands, with the version read from that script, which stays the
+one place it is written (`_emsdk_hooks` in `extensions.bzl`). `@emsdk_lto`,
+the LTO system libraries built at fetch time, reads whichever SDK `@emsdk`
+does. Neither is fetched until a build selects the wasm toolchain: the
+toolchain is registered for every build, but registering it reads only its
+own BUILD file, where the SDK is a label. So a host, Android or iOS build
+downloads none of it, and a web build downloads it once per output base.
+Measured on Linux x64 in a checkout that never ran `gclient sync`: an
+analysis of the host engine leaves both unfetched; the analysis of
+`ci/wasm_release`'s install fetches the installer, installs the SDK (1.4 GB)
+and builds the twelve LTO libraries, 83 s in all; and the SDK it installs is
+the synced checkout's file for file, bytecode caches and the working files
+of earlier builds aside.
+
 **`et`.** The engine tool checks for gclient only when it builds with GN.
 Where `gclient sync` has run, `bin/et` starts as it always did, on the
 checkout's prebuilt Dart SDK and package resolution. Where it has not, the
@@ -154,9 +173,6 @@ unchanged; there is no Bazel build on a Windows host.
 
 **What it does not do.**
 
-- The web engine: the Emscripten SDK is installed by a hook of `DEPS`
-  (`download_emsdk`), which no fetched tree runs; `@emsdk` says so when a
-  build asks for it.
 - Windows hosts. On macOS (arm64) `flutter_tester`, nineteen of the host's
   test targets and `et` have been built and run this way; an Android or iOS
   build from a Mac has not.

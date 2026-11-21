@@ -5,8 +5,9 @@
 # The emsdk spike (phased_plan.md, Phase 0 metric 0.6): one embind module
 # and one Skia translation unit compiled and linked by the Emscripten
 # toolchain with the flags of GN's wasm toolchain, the module run in
-# headless Chrome. Manual: the SDK is in the checkout only under
-# `download_emsdk`, and the browser is the host's (Chrome for Testing 145,
+# headless Chrome. Manual: a build of it brings the Emscripten SDK (a synced
+# checkout has it only under `download_emsdk`; elsewhere Bazel downloads it
+# for the build), and the test's browser is the host's (Chrome for Testing 145,
 # @chrome, never returns from --dump-dom here). The module builds for a
 # variant of the web build (wasm.bzl: the module_platform flag) -- CanvasKit's,
 # an embind module without LTO like this one:

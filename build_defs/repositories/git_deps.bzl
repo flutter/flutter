@@ -186,7 +186,7 @@ def _fetched_tree_impl(rctx):
             rctx.report_progress("Running %s/%s" % (rctx.attr.path, hook))
             _execute(
                 rctx,
-                [python, hook],
+                [python] + hook.split(" "),
                 hook,
                 environment = {"HOME": str(home), "PUB_CACHE": _PUB_CACHE},
                 working_directory = str(tree),
@@ -236,7 +236,8 @@ fetched_tree = repository_rule(
         ),
         "hooks": attr.string_list(
             doc = "Python scripts of the tree that DEPS runs as hooks after a sync, relative to the tree, " +
-                  "run in order from the tree's root once everything is fetched.",
+                  "run in order from the tree's root once everything is fetched. A script's arguments " +
+                  "follow it, separated by spaces (the Emscripten SDK's `emsdk.py install <version>`).",
         ),
         "_python": attr.label(
             default = "@cpython3//:bin/python3",

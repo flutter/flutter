@@ -4,7 +4,9 @@
 
 # Root BUILD file of @emsdk: engine/src/flutter/prebuilts/emsdk, the
 # Emscripten SDK checkout that `gclient sync` populates under
-# `download_emsdk` and tools/activate_emsdk.py activates -- `upstream/` (the
+# `download_emsdk` and tools/activate_emsdk.py activates -- or, in a
+# checkout without it, the same tree as Bazel fetches and installs it, when
+# a build first selects the wasm toolchain (extensions.bzl) -- `upstream/` (the
 # emscripten compiler scripts, their clang and binaryen under `bin/`, the
 # prebuilt sysroot and libraries under `emscripten/cache/`) and `node/`
 # (the Node.js emcc runs its JavaScript tools with). GN's wasm toolchain

@@ -276,11 +276,12 @@ joins, which the recipe does not publish).
 
 `toolchains/emscripten/` is GN's `build/toolchain/wasm:wasm` -- the
 toolchain that builds the web engine's modules (skwasm, CanvasKit) -- over
-the synced SDK, `@emsdk` (`engine/src/flutter/prebuilts/emsdk`, which
+the SDK, `@emsdk` (`engine/src/flutter/prebuilts/emsdk`, which
 `gclient sync` populates under `download_emsdk`: the git dependency is the
-SDK's installer and a hook of `DEPS` runs it, so this is the one source
-tree a checkout without `gclient sync` does not get from Bazel -- there is
-no web engine build there). Its tools are three
+SDK's installer and a hook of `DEPS` runs it; a checkout without `gclient
+sync` gets the same from Bazel, which fetches the installer and runs it for
+the first build that selects this toolchain, `docs/dependencies.md`). Its
+tools are three
 wrapper scripts (`emcc.sh`, `em++.sh`, `emar.sh`) that run the SDK's
 Python drivers under the engine's `@cpython3` with the SDK's paths taken
 from the action's environment (`EM_BIN_PATH`, `EM_CONFIG_PATH`, ...,

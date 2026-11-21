@@ -24,7 +24,7 @@ with emcc's "FROZEN_CACHE is set, but cache file is missing", which names
 the library to add.
 """
 
-load("//build_defs/repositories:repositories.bzl", "checkout_root")
+load("//build_defs/repositories:repositories.bzl", "checkout_root", "fetched_tree_directory", "in_checkout")
 
 # The variants the skwasm modules' links need (wasm workers, no exceptions,
 # WebGL 2 with getProcAddress), by their embuilder names.
@@ -72,12 +72,17 @@ def _node(emsdk):
     fail("emsdk_lto_libraries: no node/*/bin/node under %s" % emsdk)
 
 def _emsdk_lto_libraries_impl(rctx):
-    emsdk = checkout_root(rctx).get_child(rctx.attr.emsdk_path)
+    # The SDK the @emsdk repository reads: the checkout's, or the one Bazel
+    # fetched and installed where the checkout has none (extensions.bzl).
+    if in_checkout(rctx, rctx.attr.emsdk_path):
+        emsdk = checkout_root(rctx).get_child(rctx.attr.emsdk_path)
+    else:
+        emsdk = fetched_tree_directory(rctx, rctx.attr.fetched)
     emscripten = emsdk.get_child("upstream/emscripten")
     if not emscripten.get_child("embuilder.py").exists:
         fail(
-            "emsdk_lto_libraries: %s is not an activated Emscripten SDK. It is populated by " % emsdk +
-            "`gclient sync`; run it from the repository root (see DEPS).",
+            "emsdk_lto_libraries: %s is not an installed Emscripten SDK (tools/activate_emsdk.py " % emsdk +
+            "installs it: DEPS' hook under download_emsdk, or the fetched tree's own).",
         )
 
     # A roll of the SDK re-fetches; nothing else about the tree is watched
@@ -101,6 +106,10 @@ def _emsdk_lto_libraries_impl(rctx):
         ] + rctx.attr.libraries + ["--lto"],
         environment = {
             "EM_CONFIG": str(rctx.path("em_config.py")),
+            # embuilder runs emcc through the SDK's launchers, which take
+            # the interpreter this names before they look for a python3 on
+            # PATH: the same one as embuilder's own, not the machine's.
+            "EMSDK_PYTHON": str(rctx.path(rctx.attr._python)),
             "PYTHONDONTWRITEBYTECODE": "1",
         },
         timeout = 1800,
@@ -122,11 +131,15 @@ def _emsdk_lto_libraries_impl(rctx):
 
 emsdk_lto_libraries = repository_rule(
     implementation = _emsdk_lto_libraries_impl,
-    doc = "The LTO variants of emscripten's system libraries, built by the synced SDK's embuilder.",
+    doc = "The LTO variants of emscripten's system libraries, built by the SDK's embuilder.",
     attrs = {
         "emsdk_path": attr.string(
             mandatory = True,
             doc = "The activated SDK, relative to the repository root (engine/src/flutter/prebuilts/emsdk).",
+        ),
+        "fetched": attr.label(
+            mandatory = True,
+            doc = "The BUILD file of the SDK's fetched tree, which is read where the checkout has no SDK.",
         ),
         "libraries": attr.string_list(
             default = LTO_LIBRARIES,

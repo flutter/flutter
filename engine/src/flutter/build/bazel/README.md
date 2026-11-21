@@ -35,8 +35,10 @@ listed at the end.
 - On Linux: `Xvfb` for the suites that open a window; `dbus` and
   `at-spi2-core` for the GTK shell's suite.
 - On a Mac: Xcode.
-- For the web targets: a synced checkout, with the gclient variable
-  `download_emsdk` (the Emscripten SDK is not among what Bazel fetches).
+- For the web targets: nothing more. A synced checkout has the Emscripten
+  SDK when the gclient variable `download_emsdk` is set; where the checkout
+  has none, Bazel fetches and installs it for the first build that needs
+  the wasm toolchain, and for no other (`docs/dependencies.md`).
 - Disk and memory: see "How long it takes, and how much room".
 
 ## Quick start for an engine developer
@@ -157,10 +159,9 @@ sandbox contribute.
 ## Known gaps
 
 - No Windows, Fuchsia or riscv64 Linux build.
-- Without `gclient sync` there is no web engine build (the Emscripten SDK
-  is installed by a hook of `DEPS`). On a Mac, `flutter_tester`, nineteen of
-  the host's test targets and `et` have been built and run that way; an
-  Android or iOS build from a Mac has not.
+- Without `gclient sync`, on a Mac, `flutter_tester`, nineteen of the
+  host's test targets and `et` have been built and run; an Android, iOS or
+  web build from a Mac has not.
 - Golden images are compared with what was fetched from Flutter Gold
   beforehand (`docs/framework_tests.md`, "Golden files"): the tests run
   with the network blocked. Off a bot an image that does not match fails
