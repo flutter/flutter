@@ -59,48 +59,35 @@ enum TextOverflow {
   visible,
 }
 
-/// Where within the text visual overflow truncation or fading should occur.
-///
-/// Used by [Text.overflowPosition], [RichText.overflowPosition], and
-/// [DefaultTextStyle.overflowPosition].
+/// Where within the text visual overflow truncation or fading occurs.
 ///
 /// With [TextOverflow.ellipsis], [start] and [middle] apply to single-line text
-/// without inline [PlaceholderSpan]s (such as [WidgetSpan]); multiline text or
-/// spans containing inline placeholders fall back to trailing ellipsis ([end]).
+/// without inline [PlaceholderSpan]s; multiline text or spans with inline
+/// placeholders fall back to [end].
 ///
 /// See also:
 ///
 ///  * [TextOverflow], which defines the visual effect applied at this position.
 enum TextOverflowPosition {
-  /// Truncate or fade the leading (start) edge of the text, keeping the
-  /// trailing end visible (for example, `...packages/flutter/lib/text.dart`).
+  /// Truncate or fade the start of the text, keeping the end visible.
   start,
 
-  /// Truncate or fade the middle of the text, keeping both the leading prefix
-  /// and trailing suffix visible (for example, `user...@flutter.dev`).
+  /// Truncate or fade the middle of the text, keeping the start and end visible.
   middle,
 
-  /// Truncate or fade the trailing (end) edge of the text, keeping the leading
-  /// start visible. This is the default behavior.
+  /// Truncate or fade the end of the text, keeping the start visible.
   end,
 }
 
-/// How a [Text] or [RichText] widget behaves when its incoming layout
-/// constraints dynamically shrink below its expanded dimensions during
-/// scrolling, drag gestures, or layout transitions.
+/// How text responds when its layout constraints shrink below its laid-out size.
 enum TextScrollOverflow {
-  /// Standard layout behavior: re-wrap lines to fit the shrinking width on
-  /// every frame. This is the default when [Text.scrollOverflow] is not set.
+  /// Re-wrap lines to fit the incoming constraints.
   wrap,
 
-  /// Lock the expanded layout dimensions (`high-water mark`) so lines do not
-  /// re-wrap or jump while the available space shrinks, and smoothly fade text
-  /// opacity out as the container contracts.
+  /// Keep the laid-out line breaks and fade the text out as available space shrinks.
   fade,
 
-  /// Lock the expanded layout dimensions (`high-water mark`) so lines do not
-  /// re-wrap or jump while the available space shrinks, clipping the
-  /// overflowing edge without fading the overall paragraph opacity.
+  /// Keep the laid-out line breaks and clip the overflowing edge without fading.
   clip,
 }
 
@@ -1450,12 +1437,12 @@ class TextPainter {
     canvas.drawParagraph(layoutCache.paragraph, offset + layoutCache.paintOffset);
   }
 
-  /// Paints the text onto the given [canvas] at the given [offset], clipped to
-  /// [clipRect] (in canvas coordinates) and composited with [opacity]
-  /// (`0.0` to `1.0`), without re-running [layout].
+  /// Paints the text onto [canvas] at [offset], clipped to [clipRect] and
+  /// composited with [opacity].
   ///
-  /// Valid only after [layout] has been called. If [opacity] is `0.0`, this
-  /// method returns immediately without recording any draw operations.
+  /// Valid only after [layout] has been called. Values of [opacity] are clamped
+  /// to the range `0.0` to `1.0`; if the resulting opacity is `0.0` or
+  /// [clipRect] is empty, nothing is painted.
   void paintMasked(Canvas canvas, Offset offset, {required Rect clipRect, double opacity = 1.0}) {
     if (_layoutCache == null) {
       throw StateError(
@@ -1808,9 +1795,9 @@ class TextPainter {
         : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
   }
 
-  /// Returns the [GlyphInfo] of the glyph cluster containing the given UTF-16
-  /// `codeUnitOffset` in the paragraph coordinate system, or null if the offset
-  /// is out of bounds or the glyph is not laid out.
+  /// Returns the [GlyphInfo] of the grapheme cluster containing the UTF-16
+  /// [codeUnitOffset] in the paragraph coordinate system, or null if the offset
+  /// is out of bounds or not laid out.
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);

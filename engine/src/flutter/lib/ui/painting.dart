@@ -7360,13 +7360,16 @@ abstract class Canvas {
   /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
   void drawParagraph(Paragraph paragraph, Offset offset);
 
-  /// Draws the text in the given [Paragraph] into this canvas at the given
-  /// [Offset], clipped to [clipRect], modulated by [opacity] (`0.0..1.0`), and
-  /// optionally applying a horizontal overflow fade at [overflowPosition]
-  /// (`0` = start, `1` = middle, `2` = end).
+  /// Draws the text in [paragraph] onto this canvas at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
   ///
-  /// The [Paragraph] object must have had [Paragraph.layout] called on it
-  /// first. If [opacity] is less than or equal to `0.0`, nothing is drawn.
+  /// The [paragraph] must have had [Paragraph.layout] called on it first.
+  /// Values of [opacity] are clamped to `0.0..1.0`; if [opacity] is less than
+  /// or equal to `0.0` or `NaN`, nothing is drawn.
+  ///
+  /// When [fadeHorizontal] is true, applies a horizontal overflow fade
+  /// controlled by [overflowPosition] (`0` for start, `1` for middle, `2` for
+  /// end).
   void drawParagraphMasked(
     Paragraph paragraph,
     Offset offset, {

@@ -165,15 +165,10 @@ class DefaultTextStyle extends InheritedTheme {
   /// will not be rendered. Otherwise, it will be shown with the given overflow option.
   final TextOverflow overflow;
 
-  /// Where within the text visual overflow truncation or fading should occur.
-  ///
-  /// Defaults to [TextOverflowPosition.end].
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
   final TextOverflowPosition overflowPosition;
 
-  /// How descendant [Text] widgets behave when their enclosing container
-  /// dynamically shrinks during scrolling or layout transitions.
-  ///
-  /// Defaults to [TextScrollOverflow.wrap].
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
   final TextScrollOverflow scrollOverflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
@@ -683,25 +678,14 @@ class Text extends StatelessWidget {
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
-  /// Where within the text visual overflow truncation or fading should occur.
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
   ///
-  /// If this is null, the value from the nearest [DefaultTextStyle] ancestor
-  /// will be used (which defaults to [TextOverflowPosition.end]).
-  ///
-  /// With [TextOverflow.ellipsis], [TextOverflowPosition.start] and
-  /// [TextOverflowPosition.middle] apply to single-line text without inline
-  /// [WidgetSpan]s; multiline text or spans with inline widgets fall back to
-  /// trailing ellipsis.
+  /// If null, the value from the nearest [DefaultTextStyle] ancestor is used.
   final TextOverflowPosition? overflowPosition;
 
-  /// How this text behaves when its incoming layout constraints dynamically
-  /// shrink during scrolling, drag gestures, or layout transitions.
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
   ///
-  /// If null, the value from the nearest [DefaultTextStyle] ancestor is used
-  /// (which defaults to [TextScrollOverflow.wrap]).
-  /// Set to [TextScrollOverflow.fade] to keep lines unwrapped at their expanded
-  /// width and fade out smoothly, or [TextScrollOverflow.clip] to keep lines
-  /// unwrapped and clip without fading.
+  /// If null, the value from the nearest [DefaultTextStyle] ancestor is used.
   final TextScrollOverflow? scrollOverflow;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use

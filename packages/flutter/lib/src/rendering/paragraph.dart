@@ -35,97 +35,82 @@ import 'object.dart';
 import 'selection.dart';
 
 class _TextShrinkState {
+  static const double _fadeEndFraction = 0.5;
+
   final LayerHandle<OpacityLayer> opacityLayer = LayerHandle<OpacityLayer>();
   double? lockedMaxWidth;
-  double? fallbackReferenceWidth;
+  double? minimumReferenceWidth;
   double? currentWidth;
   double? lockedMaxHeight;
   double? currentHeight;
   int lastAlpha = 255;
 
-  double effectiveReferenceWidth(double intrinsicMaxWidth) {
-    final double locked = lockedMaxWidth ?? 0.0;
-    if (locked > 0.0) {
-      return locked;
+  static double _axisOpacity(double? current, double? locked, double naturalExtent) {
+    if (current == null || !current.isFinite) {
+      return 1.0;
     }
-    final double fallback = fallbackReferenceWidth ?? intrinsicMaxWidth;
-    return fallback.isFinite && fallback > 0.0 ? fallback : 0.0;
-  }
-
-  double effectiveReferenceHeight(double textHeight) {
-    final double locked = lockedMaxHeight ?? 0.0;
-    if (locked > 0.0) {
-      return locked;
+    final double reference = switch ((locked, naturalExtent)) {
+      (final double locked?, final double natural)
+          when locked > 0.0 && natural.isFinite && natural > 0.0 =>
+        math.min(locked, natural),
+      (final double locked?, _) when locked > 0.0 => locked,
+      (_, final double natural) when natural.isFinite && natural > 0.0 => natural,
+      _ => 0.0,
+    };
+    if (reference <= 0.0 || current >= reference) {
+      return 1.0;
     }
-    return textHeight.isFinite && textHeight > 0.0 ? textHeight : 0.0;
+    final double shrinkRatio = clampDouble((reference - current) / reference, 0.0, 1.0);
+    return clampDouble(1.0 - shrinkRatio / _fadeEndFraction, 0.0, 1.0);
   }
 
   int computeAlpha(double intrinsicMaxWidth, double textHeight) {
-    const fadeEndFraction = 0.5;
-    var opacity = 1.0;
-
-    final double? curW = currentWidth;
-    final double rawRefW = effectiveReferenceWidth(intrinsicMaxWidth);
-    final double refW = (intrinsicMaxWidth.isFinite && intrinsicMaxWidth > 0.0 && rawRefW > 0.0)
-        ? math.min(rawRefW, intrinsicMaxWidth)
-        : rawRefW;
-    if (curW != null && refW > 0.0 && curW.isFinite && curW < refW) {
-      final double widthProgress = clampDouble((refW - curW) / refW, 0.0, 1.0);
-      opacity = math.min(opacity, clampDouble(1.0 - (widthProgress / fadeEndFraction), 0.0, 1.0));
-    }
-
-    final double? curH = currentHeight;
-    final double rawRefH = effectiveReferenceHeight(textHeight);
-    final double refH = (textHeight.isFinite && textHeight > 0.0 && rawRefH > 0.0)
-        ? math.min(rawRefH, textHeight)
-        : rawRefH;
-    if (curH != null && refH > 0.0 && curH.isFinite && curH < refH) {
-      final double heightProgress = clampDouble((refH - curH) / refH, 0.0, 1.0);
-      opacity = math.min(opacity, clampDouble(1.0 - (heightProgress / fadeEndFraction), 0.0, 1.0));
-    }
-
-    return lastAlpha = ui.Color.getAlphaFromOpacity(opacity);
+    final double? widthReference = (lockedMaxWidth != null && lockedMaxWidth! > 0.0)
+        ? lockedMaxWidth
+        : minimumReferenceWidth;
+    final double widthOpacity = _axisOpacity(currentWidth, widthReference, intrinsicMaxWidth);
+    final double heightOpacity = _axisOpacity(currentHeight, lockedMaxHeight, textHeight);
+    return lastAlpha = ui.Color.getAlphaFromOpacity(math.min(widthOpacity, heightOpacity));
   }
 
-  void updateVerticalConstraints(double incomingMaxHeight) {
-    if (!incomingMaxHeight.isFinite) {
+  void updateVerticalConstraints(double maxHeight) {
+    if (!maxHeight.isFinite) {
       currentHeight = null;
       return;
     }
-    currentHeight = incomingMaxHeight;
-    final double? locked = lockedMaxHeight;
-    if (locked == null || incomingMaxHeight > locked) {
-      lockedMaxHeight = incomingMaxHeight;
+    currentHeight = maxHeight;
+    if (lockedMaxHeight == null || maxHeight > lockedMaxHeight!) {
+      lockedMaxHeight = maxHeight;
     }
   }
 
-  double resolveLayoutMaxWidth(double incomingMaxWidth, double minIntrinsicLineExtent) {
-    if (!incomingMaxWidth.isFinite) {
-      return incomingMaxWidth;
+  double resolveLayoutMaxWidth(double maxWidth, double minimumWidth) {
+    if (!maxWidth.isFinite) {
+      return maxWidth;
     }
-    if (minIntrinsicLineExtent.isFinite && minIntrinsicLineExtent > 0.0) {
-      fallbackReferenceWidth = minIntrinsicLineExtent;
+    if (minimumWidth.isFinite && minimumWidth > 0.0) {
+      minimumReferenceWidth = minimumWidth;
     }
-    final double? locked = lockedMaxWidth;
-    if (locked != null) {
-      if (incomingMaxWidth > locked) {
-        lockedMaxWidth = incomingMaxWidth;
-        return incomingMaxWidth;
+    if (lockedMaxWidth case final double locked?) {
+      if (maxWidth > locked) {
+        lockedMaxWidth = maxWidth;
+        return maxWidth;
       }
       return locked;
     }
-    if (minIntrinsicLineExtent.isFinite && incomingMaxWidth >= minIntrinsicLineExtent) {
-      lockedMaxWidth = incomingMaxWidth;
-      return incomingMaxWidth;
+    if (!minimumWidth.isFinite) {
+      return maxWidth;
     }
-    return minIntrinsicLineExtent.isFinite
-        ? math.max(incomingMaxWidth, minIntrinsicLineExtent)
-        : incomingMaxWidth;
+    if (maxWidth >= minimumWidth) {
+      lockedMaxWidth = maxWidth;
+      return maxWidth;
+    }
+    return minimumWidth;
   }
 
   void reset() {
     lockedMaxWidth = null;
-    fallbackReferenceWidth = null;
+    minimumReferenceWidth = null;
     currentWidth = null;
     lockedMaxHeight = null;
     currentHeight = null;
@@ -140,9 +125,9 @@ class _TextShrinkState {
 /// The start and end positions for a text boundary.
 typedef _TextBoundaryRecord = ({TextPosition boundaryStart, TextPosition boundaryEnd});
 
-typedef _EllipsisClusterMetrics = ({
-  String fullString,
-  double fullWidth,
+typedef _EllipsisMetrics = ({
+  String text,
+  double width,
   double ellipsisWidth,
   List<(TextRange, double)> clusters,
 });
@@ -550,12 +535,12 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.metadata:
         _textPainter.text = value;
-        _invalidateShrinkAndEllipsisCaches(resetShrinkLock: false);
+        _resetOverflowCaches(resetShrinkLock: false);
         _cachedCombinedSemanticsInfos = null;
         markNeedsSemanticsUpdate();
       case RenderComparison.paint:
         _textPainter.text = value;
-        _invalidateShrinkAndEllipsisCaches(resetShrinkLock: false);
+        _resetOverflowCaches(resetShrinkLock: false);
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         markNeedsPaint();
@@ -563,7 +548,7 @@ class RenderParagraph extends RenderBox
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
-        _invalidateShrinkAndEllipsisCaches();
+        _resetOverflowCaches();
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         markNeedsLayout();
@@ -682,33 +667,33 @@ class RenderParagraph extends RenderBox
   @override
   bool get alwaysNeedsCompositing =>
       (_lastSelectableFragments?.isNotEmpty ?? false) ||
-      (_shrinkFadesOpacity && _effectiveShrinkAlpha > 0 && _effectiveShrinkAlpha < 255);
+      (_fadesOnShrink && _effectiveShrinkAlpha > 0 && _effectiveShrinkAlpha < 255);
 
-  bool get _shrinkFreezesLayout => _scrollOverflow != TextScrollOverflow.wrap;
+  bool get _locksLayoutOnShrink => _scrollOverflow != TextScrollOverflow.wrap;
 
-  bool get _shrinkFadesOpacity => _scrollOverflow == TextScrollOverflow.fade;
+  bool get _fadesOnShrink => _scrollOverflow == TextScrollOverflow.fade;
 
   int get _effectiveShrinkAlpha {
-    if (!_shrinkFadesOpacity || _shrinkState == null) {
+    if (!_fadesOnShrink || _shrinkState == null) {
       return 255;
     }
     return _shrinkState!.lastAlpha;
   }
 
   _TextShrinkState? _shrinkState;
-  BoxConstraints? _cachedShrinkLayoutConstraints;
+  BoxConstraints? _cachedShrinkConstraints;
   InlineSpan? _cachedEllipsisSpan;
   double? _cachedEllipsisMaxWidth;
-  _EllipsisClusterMetrics? _cachedEllipsisClusterMetrics;
+  _EllipsisMetrics? _cachedEllipsisMetrics;
 
-  void _invalidateShrinkAndEllipsisCaches({bool resetShrinkLock = true}) {
+  void _resetOverflowCaches({bool resetShrinkLock = true}) {
     if (resetShrinkLock) {
       _shrinkState?.reset();
     }
-    _cachedShrinkLayoutConstraints = null;
+    _cachedShrinkConstraints = null;
     _cachedEllipsisSpan = null;
     _cachedEllipsisMaxWidth = null;
-    _cachedEllipsisClusterMetrics = null;
+    _cachedEllipsisMetrics = null;
     _overflowShaderRect = null;
   }
 
@@ -766,7 +751,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     _textPainter.textDirection = value;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -785,7 +770,7 @@ class RenderParagraph extends RenderBox
       return;
     }
     _softWrap = value;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -803,13 +788,20 @@ class RenderParagraph extends RenderBox
         ? _kEllipsis
         : null;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
-  /// Where within the text visual overflow truncation or fading should occur.
+  /// {@template flutter.rendering.RenderParagraph.overflowPosition}
+  /// Where within the text visual overflow truncation or fading occurs.
   ///
   /// Defaults to [TextOverflowPosition.end].
+  ///
+  /// With [TextOverflow.ellipsis], [TextOverflowPosition.start] and
+  /// [TextOverflowPosition.middle] apply to single-line text without inline
+  /// [PlaceholderSpan]s; multiline text or spans with inline placeholders fall
+  /// back to [TextOverflowPosition.end].
+  /// {@endtemplate}
   TextOverflowPosition get overflowPosition => _overflowPosition;
   TextOverflowPosition _overflowPosition;
 
@@ -822,14 +814,16 @@ class RenderParagraph extends RenderBox
         ? _kEllipsis
         : null;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
-  /// How this paragraph behaves when its incoming layout constraints shrink
-  /// below its expanded width during scrolling or layout transitions.
+  /// {@template flutter.rendering.RenderParagraph.scrollOverflow}
+  /// How this text responds when its layout constraints shrink below its
+  /// laid-out size.
   ///
   /// Defaults to [TextScrollOverflow.wrap].
+  /// {@endtemplate}
   TextScrollOverflow get scrollOverflow => _scrollOverflow;
   TextScrollOverflow _scrollOverflow;
 
@@ -846,7 +840,7 @@ class RenderParagraph extends RenderBox
     } else {
       _shrinkState ??= _TextShrinkState();
     }
-    _invalidateShrinkAndEllipsisCaches(resetShrinkLock: false);
+    _resetOverflowCaches(resetShrinkLock: false);
     final int newAlpha = _effectiveShrinkAlpha;
     if (didNeedCompositing != alwaysNeedsCompositing) {
       markNeedsCompositingBitsUpdate();
@@ -890,7 +884,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.textScaler = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -927,7 +921,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.maxLines = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -947,7 +941,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.locale = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -961,7 +955,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.strutStyle = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -974,7 +968,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.textWidthBasis = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -987,7 +981,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     markNeedsLayout();
   }
 
@@ -1000,7 +994,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.hyphens = value;
     _overflowShader = null;
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     // The rendered hyphen doesn't change where lines break, but it makes its
     // line wider, which changes the paragraph's longest line and so its size
     // with TextWidthBasis.longestLine. Hence markNeedsLayout, not markNeedsPaint.
@@ -1067,7 +1061,7 @@ class RenderParagraph extends RenderBox
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _computeIntrinsicHeight(double width) {
-    final double effectiveWidth = (_shrinkFreezesLayout && _shrinkState != null && width.isFinite)
+    final double effectiveWidth = (_locksLayoutOnShrink && _shrinkState != null && width.isFinite)
         ? math.max(width, _shrinkState!.lockedMaxWidth ?? width)
         : width;
     return (_textIntrinsics
@@ -1150,7 +1144,7 @@ class RenderParagraph extends RenderBox
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
-    _invalidateShrinkAndEllipsisCaches();
+    _resetOverflowCaches();
     _textPainter.markNeedsLayout();
   }
 
@@ -1172,61 +1166,54 @@ class RenderParagraph extends RenderBox
 
   BoxConstraints _resolveShrinkConstraints(
     BoxConstraints constraints, {
-    bool updateHighWaterMark = false,
+    bool updateLockedExtent = false,
   }) {
-    if (!_shrinkFreezesLayout) {
+    if (!_locksLayoutOnShrink) {
       return constraints;
     }
     final _TextShrinkState state = _shrinkState ??= _TextShrinkState();
-    if (updateHighWaterMark) {
+    if (updateLockedExtent) {
       state.updateVerticalConstraints(constraints.maxHeight);
     }
     if (!constraints.hasBoundedWidth) {
       return constraints;
     }
-    final double incomingMaxWidth = constraints.maxWidth;
-    final double? existingLock = state.lockedMaxWidth;
-    if (existingLock != null) {
-      // Fast path: high-water mark is already locked, so no intrinsic
-      // dry-layout measurement is needed while shrinking or growing.
-      final double resolvedMaxWidth = math.max(incomingMaxWidth, existingLock);
-      if (updateHighWaterMark) {
-        if (incomingMaxWidth > existingLock) {
-          state.lockedMaxWidth = incomingMaxWidth;
+    final double incomingWidth = constraints.maxWidth;
+    if (state.lockedMaxWidth case final double lockedWidth?) {
+      final double resolvedWidth = math.max(incomingWidth, lockedWidth);
+      if (updateLockedExtent) {
+        if (incomingWidth > lockedWidth) {
+          state.lockedMaxWidth = incomingWidth;
         }
-        state.currentWidth = incomingMaxWidth;
+        state.currentWidth = incomingWidth;
       }
-      return constraints.copyWith(maxWidth: resolvedMaxWidth);
+      return constraints.copyWith(maxWidth: resolvedWidth);
     }
 
-    double? singleLineOrWordFloor = state.fallbackReferenceWidth;
-    if (singleLineOrWordFloor == null) {
-      // Measure single-line intrinsic width once when starting in a narrow slot
-      // so words never split mid-word or wrap into vertical stacks before expanding.
-      final List<PlaceholderDimensions> dryPlaceholderDimensions = layoutInlineChildren(
+    double? minimumWidth = state.minimumReferenceWidth;
+    if (minimumWidth == null) {
+      // Measure intrinsic width once when initially constrained below natural width
+      // so words do not wrap into narrow stacks before expanding.
+      final List<PlaceholderDimensions> dryPlaceholders = layoutInlineChildren(
         double.infinity,
         ChildLayoutHelper.dryLayoutChild,
         ChildLayoutHelper.getDryBaseline,
       );
       _textIntrinsics
-        ..setPlaceholderDimensions(dryPlaceholderDimensions)
+        ..setPlaceholderDimensions(dryPlaceholders)
         ..layout();
       final double intrinsicMax = _textIntrinsics.maxIntrinsicWidth;
       final double intrinsicMin = _textIntrinsics.minIntrinsicWidth;
-      singleLineOrWordFloor = (maxLines == null || maxLines == 1)
+      minimumWidth = (maxLines == null || maxLines == 1)
           ? intrinsicMax
           : math.max(intrinsicMin, intrinsicMax / maxLines!);
     }
-    if (updateHighWaterMark) {
-      final double resolvedMaxWidth = state.resolveLayoutMaxWidth(
-        incomingMaxWidth,
-        singleLineOrWordFloor,
-      );
-      state.currentWidth = incomingMaxWidth;
-      return constraints.copyWith(maxWidth: resolvedMaxWidth);
+    if (updateLockedExtent) {
+      final double resolvedWidth = state.resolveLayoutMaxWidth(incomingWidth, minimumWidth);
+      state.currentWidth = incomingWidth;
+      return constraints.copyWith(maxWidth: resolvedWidth);
     }
-    final double lockedMaxWidth = math.max(incomingMaxWidth, singleLineOrWordFloor);
-    return constraints.copyWith(maxWidth: lockedMaxWidth);
+    return constraints.copyWith(maxWidth: math.max(incomingWidth, minimumWidth));
   }
 
   double _computeShrinkAlignmentOffset() {
@@ -1240,7 +1227,7 @@ class RenderParagraph extends RenderBox
         TextDirection.rtl => 0.0,
       };
     }
-    if (!_shrinkFreezesLayout) {
+    if (!_locksLayoutOnShrink) {
       return 0.0;
     }
     return switch ((textAlign, textDirection)) {
@@ -1254,120 +1241,110 @@ class RenderParagraph extends RenderBox
     };
   }
 
-  InlineSpan _resolveEffectiveSpanForConstraints(BoxConstraints layoutConstraints) {
-    if (_overflow != TextOverflow.ellipsis ||
-        _overflowPosition == TextOverflowPosition.end ||
-        firstChild != null ||
-        (maxLines != 1 && softWrap)) {
-      return _rawText;
+  _EllipsisMetrics? _computeEllipsisMetrics(double maxWidth) {
+    if (_cachedEllipsisMetrics case final _EllipsisMetrics cached?) {
+      return cached;
     }
-    final double maxWidth = layoutConstraints.maxWidth;
-    if (!maxWidth.isFinite || maxWidth <= 0.0) {
-      return _rawText;
+    final String plainText = _rawText.toPlainText(includeSemanticsLabels: false);
+    if (plainText.isEmpty) {
+      return null;
     }
-    final TextStyle? baseStyle = _rawText.style;
-    _EllipsisClusterMetrics? metrics = _cachedEllipsisClusterMetrics;
-    if (metrics == null) {
-      final String fullString = _rawText.toPlainText(includeSemanticsLabels: false);
-      if (fullString.isEmpty) {
-        return _rawText;
-      }
-      // Shape the full span and ellipsis once per text/style change, then cache
-      // glyph cluster widths so subsequent constraint changes avoid re-shaping.
-      final fullPainter = TextPainter(
-        text: _rawText,
-        textAlign: textAlign,
-        textDirection: textDirection,
-        textScaler: textScaler,
-        locale: locale,
-        strutStyle: strutStyle,
-        textWidthBasis: textWidthBasis,
-        textHeightBehavior: textHeightBehavior,
-        hyphens: hyphens,
-      )..layout();
-      final double fullWidth = fullPainter.width;
-      if (fullWidth <= maxWidth) {
-        fullPainter.dispose();
-        return _rawText;
-      }
-
-      final ellipsisPainter = TextPainter(
-        text: TextSpan(style: baseStyle, text: _kEllipsis),
-        textDirection: textDirection,
-        textScaler: textScaler,
-        locale: locale,
-        strutStyle: strutStyle,
-        textHeightBehavior: textHeightBehavior,
-      )..layout();
-      final double ellipsisWidth = ellipsisPainter.width;
-      ellipsisPainter.dispose();
-
-      final clusters = <(TextRange, double)>[];
-      var offset = 0;
-      while (offset < fullString.length) {
-        final GlyphInfo? info = fullPainter.getGlyphInfoAt(offset);
-        if (info == null || info.graphemeClusterCodeUnitRange.end <= offset) {
-          final step =
-              TextPainter.isHighSurrogate(fullString.codeUnitAt(offset)) &&
-                  offset + 1 < fullString.length
-              ? 2
-              : 1;
-          final int nextOffset = offset + step;
-          clusters.add((
-            TextRange(start: offset, end: nextOffset),
-            (fullWidth / fullString.length) * step,
-          ));
-          offset = nextOffset;
-        } else {
-          clusters.add((info.graphemeClusterCodeUnitRange, info.graphemeClusterLayoutBounds.width));
-          offset = info.graphemeClusterCodeUnitRange.end;
-        }
-      }
+    final fullPainter = TextPainter(
+      text: _rawText,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      textScaler: textScaler,
+      locale: locale,
+      strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
+      textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
+    )..layout();
+    final double fullWidth = fullPainter.width;
+    if (fullWidth <= maxWidth) {
       fullPainter.dispose();
-
-      metrics = (
-        fullString: fullString,
-        fullWidth: fullWidth,
-        ellipsisWidth: ellipsisWidth,
-        clusters: clusters,
-      );
-      _cachedEllipsisClusterMetrics = metrics;
+      return null;
     }
 
-    if (metrics.fullWidth <= maxWidth) {
+    final ellipsisPainter = TextPainter(
+      text: TextSpan(style: _rawText.style, text: _kEllipsis),
+      textDirection: textDirection,
+      textScaler: textScaler,
+      locale: locale,
+      strutStyle: strutStyle,
+      textHeightBehavior: textHeightBehavior,
+    )..layout();
+    final double ellipsisWidth = ellipsisPainter.width;
+    ellipsisPainter.dispose();
+
+    final clusters = <(TextRange, double)>[];
+    var offset = 0;
+    while (offset < plainText.length) {
+      final GlyphInfo? glyph = fullPainter.getGlyphInfoAt(offset);
+      if (glyph == null || glyph.graphemeClusterCodeUnitRange.end <= offset) {
+        final step =
+            TextPainter.isHighSurrogate(plainText.codeUnitAt(offset)) &&
+                offset + 1 < plainText.length
+            ? 2
+            : 1;
+        final int nextOffset = offset + step;
+        clusters.add((
+          TextRange(start: offset, end: nextOffset),
+          (fullWidth / plainText.length) * step,
+        ));
+        offset = nextOffset;
+      } else {
+        clusters.add((glyph.graphemeClusterCodeUnitRange, glyph.graphemeClusterLayoutBounds.width));
+        offset = glyph.graphemeClusterCodeUnitRange.end;
+      }
+    }
+    fullPainter.dispose();
+
+    return _cachedEllipsisMetrics = (
+      text: plainText,
+      width: fullWidth,
+      ellipsisWidth: ellipsisWidth,
+      clusters: clusters,
+    );
+  }
+
+  InlineSpan _truncateSpanForEllipsis(double maxWidth) {
+    if (!_usesCustomEllipsisPosition || !maxWidth.isFinite || maxWidth <= 0.0) {
       return _rawText;
     }
-    final double availableForGlyphs = maxWidth - metrics.ellipsisWidth;
-    if (availableForGlyphs <= 0.0) {
+    final _EllipsisMetrics? metrics = _computeEllipsisMetrics(maxWidth);
+    if (metrics == null || metrics.width <= maxWidth) {
+      return _rawText;
+    }
+
+    final TextStyle? baseStyle = _rawText.style;
+    final double availableWidth = maxWidth - metrics.ellipsisWidth;
+    if (availableWidth <= 0.0) {
       return TextSpan(style: baseStyle, text: _kEllipsis);
     }
 
-    final String fullString = metrics.fullString;
+    final String plainText = metrics.text;
     final List<(TextRange, double)> clusters = metrics.clusters;
-
-    final bool isPlainSingleSpan =
-        _rawText is TextSpan &&
-        (_rawText as TextSpan).children == null &&
-        (_rawText as TextSpan).recognizer == null;
+    final bool isPlainTextSpan = switch (_rawText) {
+      TextSpan(children: null, recognizer: null) => true,
+      _ => false,
+    };
 
     if (_overflowPosition == TextOverflowPosition.start) {
       var usedWidth = 0.0;
-      int keepStartIndex = fullString.length;
+      int tailStart = plainText.length;
       for (int i = clusters.length - 1; i >= 0; i--) {
         final (TextRange range, double clusterWidth) = clusters[i];
-        if (usedWidth + clusterWidth > availableForGlyphs) {
+        if (usedWidth + clusterWidth > availableWidth) {
           break;
         }
         usedWidth += clusterWidth;
-        keepStartIndex = range.start;
+        tailStart = range.start;
       }
-      if (isPlainSingleSpan) {
-        return TextSpan(
-          style: baseStyle,
-          text: '$_kEllipsis${fullString.substring(keepStartIndex)}',
-        );
+      if (isPlainTextSpan) {
+        return TextSpan(style: baseStyle, text: '$_kEllipsis${plainText.substring(tailStart)}');
       }
-      final InlineSpan? tail = _sliceInlineSpan(_rawText, keepStartIndex, fullString.length);
+      final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStart, plainText.length);
       return TextSpan(
         style: baseStyle,
         children: <InlineSpan>[
@@ -1377,43 +1354,39 @@ class RenderParagraph extends RenderBox
       );
     }
 
-    // TextOverflowPosition.middle: accumulate glyph clusters alternately from
-    // start and end using already-shaped cluster widths.
+    // Alternate taking clusters from the start and end until availableWidth is filled.
     var usedWidth = 0.0;
-    var leftClusterIdx = 0;
-    int rightClusterIdx = clusters.length - 1;
-    var headEndOffset = 0;
-    int tailStartOffset = fullString.length;
-    var takeFromLeft = true;
-    while (leftClusterIdx <= rightClusterIdx) {
-      if (takeFromLeft) {
-        final (TextRange range, double w) = clusters[leftClusterIdx];
-        if (usedWidth + w > availableForGlyphs) {
-          break;
-        }
-        usedWidth += w;
-        headEndOffset = range.end;
-        leftClusterIdx += 1;
-      } else {
-        final (TextRange range, double w) = clusters[rightClusterIdx];
-        if (usedWidth + w > availableForGlyphs) {
-          break;
-        }
-        usedWidth += w;
-        tailStartOffset = range.start;
-        rightClusterIdx -= 1;
+    var leftIndex = 0;
+    int rightIndex = clusters.length - 1;
+    var headEnd = 0;
+    int tailStart = plainText.length;
+    var takeFromStart = true;
+    while (leftIndex <= rightIndex) {
+      final (TextRange range, double clusterWidth) = takeFromStart
+          ? clusters[leftIndex]
+          : clusters[rightIndex];
+      if (usedWidth + clusterWidth > availableWidth) {
+        break;
       }
-      takeFromLeft = !takeFromLeft;
+      usedWidth += clusterWidth;
+      if (takeFromStart) {
+        headEnd = range.end;
+        leftIndex += 1;
+      } else {
+        tailStart = range.start;
+        rightIndex -= 1;
+      }
+      takeFromStart = !takeFromStart;
     }
-    if (isPlainSingleSpan) {
+
+    if (isPlainTextSpan) {
       return TextSpan(
         style: baseStyle,
-        text:
-            '${fullString.substring(0, headEndOffset)}$_kEllipsis${fullString.substring(tailStartOffset)}',
+        text: '${plainText.substring(0, headEnd)}$_kEllipsis${plainText.substring(tailStart)}',
       );
     }
-    final InlineSpan? head = _sliceInlineSpan(_rawText, 0, headEndOffset);
-    final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStartOffset, fullString.length);
+    final InlineSpan? head = _sliceInlineSpan(_rawText, 0, headEnd);
+    final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStart, plainText.length);
     return TextSpan(
       style: baseStyle,
       children: <InlineSpan>[
@@ -1428,10 +1401,10 @@ class RenderParagraph extends RenderBox
     if (start >= end) {
       return null;
     }
-    return _sliceInlineSpanRecursive(span, start, end, 0).span;
+    return _sliceSpan(span, start, end, 0).span;
   }
 
-  static ({InlineSpan? span, int length}) _sliceInlineSpanRecursive(
+  static ({InlineSpan? span, int length}) _sliceSpan(
     InlineSpan span,
     int start,
     int end,
@@ -1448,29 +1421,24 @@ class RenderParagraph extends RenderBox
     String? slicedText;
     final String? text = span.text;
     if (text != null && text.isNotEmpty) {
-      final segStart = cursor;
-      final int segEnd = cursor + text.length;
-      cursor = segEnd;
-      final int overlapStart = math.max(start, segStart);
-      final int overlapEnd = math.min(end, segEnd);
+      final segmentStart = cursor;
+      final int segmentEnd = cursor + text.length;
+      cursor = segmentEnd;
+      final int overlapStart = math.max(start, segmentStart);
+      final int overlapEnd = math.min(end, segmentEnd);
       if (overlapStart < overlapEnd) {
-        slicedText = text.substring(overlapStart - segStart, overlapEnd - segStart);
+        slicedText = text.substring(overlapStart - segmentStart, overlapEnd - segmentStart);
       }
     }
     List<InlineSpan>? slicedChildren;
     final List<InlineSpan>? children = span.children;
     if (children != null) {
       for (final InlineSpan child in children) {
-        final ({InlineSpan? span, int length}) childResult = _sliceInlineSpanRecursive(
-          child,
-          start,
-          end,
-          cursor,
-        );
-        if (childResult.span != null) {
-          (slicedChildren ??= <InlineSpan>[]).add(childResult.span!);
+        final ({InlineSpan? span, int length}) slicedChild = _sliceSpan(child, start, end, cursor);
+        if (slicedChild.span != null) {
+          (slicedChildren ??= <InlineSpan>[]).add(slicedChild.span!);
         }
-        cursor += childResult.length;
+        cursor += slicedChild.length;
       }
     }
     final int totalLength = cursor - offset;
@@ -1512,8 +1480,8 @@ class RenderParagraph extends RenderBox
     bool updateEllipsisCache = false,
   }) {
     final BoxConstraints layoutConstraints = useCachedShrinkConstraints
-        ? (_shrinkFreezesLayout
-              ? (_cachedShrinkLayoutConstraints ?? _resolveShrinkConstraints(constraints))
+        ? (_locksLayoutOnShrink
+              ? (_cachedShrinkConstraints ?? _resolveShrinkConstraints(constraints))
               : constraints)
         : constraints;
     final String? desiredEllipsis = _effectiveEllipsis;
@@ -1526,7 +1494,7 @@ class RenderParagraph extends RenderBox
         _cachedEllipsisMaxWidth == layoutConstraints.maxWidth) {
       effectiveSpan = _cachedEllipsisSpan!;
     } else {
-      effectiveSpan = _resolveEffectiveSpanForConstraints(layoutConstraints);
+      effectiveSpan = _truncateSpanForEllipsis(layoutConstraints.maxWidth);
       _cachedEllipsisSpan = effectiveSpan;
       _cachedEllipsisMaxWidth = layoutConstraints.maxWidth;
     }
@@ -1546,7 +1514,7 @@ class RenderParagraph extends RenderBox
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     final BoxConstraints layoutConstraints = _resolveShrinkConstraints(constraints);
-    final InlineSpan effectiveSpan = _resolveEffectiveSpanForConstraints(layoutConstraints);
+    final InlineSpan effectiveSpan = _truncateSpanForEllipsis(layoutConstraints.maxWidth);
     final Size size =
         (_textIntrinsics
               ..text = effectiveSpan
@@ -1584,9 +1552,10 @@ class RenderParagraph extends RenderBox
   double computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(constraints.debugAssertIsValid());
     final BoxConstraints layoutConstraints = _resolveShrinkConstraints(constraints);
-    final InlineSpan effectiveSpan = _resolveEffectiveSpanForConstraints(layoutConstraints);
+    final InlineSpan effectiveSpan = _truncateSpanForEllipsis(layoutConstraints.maxWidth);
     _textIntrinsics
       ..text = effectiveSpan
+      ..ellipsis = _effectiveEllipsis
       ..setPlaceholderDimensions(
         layoutInlineChildren(
           layoutConstraints.maxWidth,
@@ -1611,9 +1580,9 @@ class RenderParagraph extends RenderBox
     final int oldAlpha = _effectiveShrinkAlpha;
     final BoxConstraints layoutConstraints = _resolveShrinkConstraints(
       constraints,
-      updateHighWaterMark: true,
+      updateLockedExtent: true,
     );
-    _cachedShrinkLayoutConstraints = _shrinkFreezesLayout ? layoutConstraints : null;
+    _cachedShrinkConstraints = _locksLayoutOnShrink ? layoutConstraints : null;
     _placeholderDimensions = layoutInlineChildren(
       layoutConstraints.maxWidth,
       ChildLayoutHelper.layoutChild,
@@ -1710,16 +1679,13 @@ class RenderParagraph extends RenderBox
             }
           } else {
             final List<ui.LineMetrics> lines = _textPainter.computeLineMetrics();
-            final bool canApplyMultilineHorizontalFade =
+            final bool useHorizontalLastLineFade =
                 maxLines != null &&
                 maxLines! > 1 &&
                 lines.length > 1 &&
                 _textPainter.didExceedMaxLines &&
                 size.height >= textSize.height;
-            if (canApplyMultilineHorizontalFade) {
-              // When an explicit maxLines > 1 truncates the paragraph without
-              // vertical box clipping, fade the trailing horizontal end of the
-              // last visible line instead of fading the entire bottom line vertically.
+            if (useHorizontalLastLineFade) {
               final ui.LineMetrics lastLine = lines.last;
               final double lineLeft = math.max(0.0, lastLine.left);
               final double lineRight = math.min(size.width, lastLine.left + lastLine.width);
@@ -1755,8 +1721,6 @@ class RenderParagraph extends RenderBox
                 _overflowShader = null;
               }
             } else {
-              // When vertical height constraints (or maxLines == 1 with softWrap)
-              // cause vertical overflow, apply the vertical bottom (or top) fade shader.
               final (double fadeStart, double fadeEnd) = switch (_overflowPosition) {
                 TextOverflowPosition.start => (fadeSizePainter.height / 2.0, 0.0),
                 TextOverflowPosition.end || TextOverflowPosition.middle => (
@@ -1791,7 +1755,7 @@ class RenderParagraph extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     final _TextShrinkState? shrinkState = _shrinkState;
-    if (shrinkState != null && _shrinkFadesOpacity) {
+    if (shrinkState != null && _fadesOnShrink) {
       final int alpha = _effectiveShrinkAlpha;
       if (alpha == 0) {
         shrinkState.opacityLayer.layer = null;

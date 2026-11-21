@@ -2102,19 +2102,14 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// This property takes effect immediately when changed, it is not animated.
   final TextOverflow overflow;
 
-  /// Where within the text visual overflow truncation or fading should occur.
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
   ///
   /// This property takes effect immediately when changed, it is not animated.
-  ///
-  /// See [DefaultTextStyle.overflowPosition] for more details.
   final TextOverflowPosition overflowPosition;
 
-  /// How descendant [Text] widgets behave when their enclosing container
-  /// dynamically shrinks during scrolling or layout transitions.
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
   ///
   /// This property takes effect immediately when changed, it is not animated.
-  ///
-  /// See [DefaultTextStyle.scrollOverflow] for more details.
   final TextScrollOverflow scrollOverflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.

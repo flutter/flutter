@@ -1047,15 +1047,10 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   ///
   final TextOverflow overflow;
 
-  /// Where within the text visual overflow truncation or fading should occur.
-  ///
-  /// See [DefaultTextStyle.overflowPosition] for more details.
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
   final TextOverflowPosition overflowPosition;
 
-  /// How descendant [Text] widgets behave when their enclosing container
-  /// dynamically shrinks during scrolling or layout transitions.
-  ///
-  /// See [DefaultTextStyle.scrollOverflow] for more details.
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
   final TextScrollOverflow scrollOverflow;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.

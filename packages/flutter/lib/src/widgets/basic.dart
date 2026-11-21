@@ -6644,15 +6644,10 @@ class RichText extends MultiChildRenderObjectWidget {
   /// How visual overflow should be handled.
   final TextOverflow overflow;
 
-  /// Where within the text visual overflow truncation or fading should occur.
-  ///
-  /// Defaults to [TextOverflowPosition.end].
+  /// {@macro flutter.rendering.RenderParagraph.overflowPosition}
   final TextOverflowPosition overflowPosition;
 
-  /// How this text behaves when its enclosing container dynamically shrinks
-  /// during scrolling, drag gestures, or layout transitions.
-  ///
-  /// Defaults to [TextScrollOverflow.wrap].
+  /// {@macro flutter.rendering.RenderParagraph.scrollOverflow}
   final TextScrollOverflow scrollOverflow;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
