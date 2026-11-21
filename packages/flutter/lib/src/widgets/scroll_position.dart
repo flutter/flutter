@@ -442,10 +442,18 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Apply a layout-time correction to the scroll offset.
   ///
   /// This method should change the [pixels] value by `correction`, but without
-  /// calling [notifyListeners]. It is called during layout by the
-  /// [RenderViewport], before [applyContentDimensions]. After this method is
-  /// called, the layout will be recomputed and that may result in this method
-  /// being called again, though this should be very rare.
+  /// calling [notifyListeners]. It is called during layout, before
+  /// [applyContentDimensions]. When a [RenderViewport] or a
+  /// [RenderShrinkWrappingViewport] calls this method, it then recomputes its
+  /// layout, which may result in this method being called again, though this
+  /// should be very rare.
+  ///
+  /// This method also passes the correction to the current [activity] through
+  /// [ScrollActivity.correctBy], so that an activity that holds absolute scroll
+  /// offsets, such as the target offset of an animation, can shift them too.
+  ///
+  /// Overrides of this method must call `super.correctBy`, which also makes
+  /// sure that [applyNewDimensions] is called after the correction.
   ///
   /// See also:
   ///
@@ -455,6 +463,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///    set the offset initially during construction or after
   ///    [applyViewportDimension] or [applyContentDimensions] is called.
   @override
+  @mustCallSuper
   void correctBy(double correction) {
     assert(
       hasPixels,
@@ -462,6 +471,23 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     );
     _pixels = _pixels! + correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;
+
+    late double debugPreviousPixels;
+    late ScrollActivity? debugPreviousActivity;
+    assert(() {
+      debugPreviousPixels = _pixels!;
+      debugPreviousActivity = activity;
+      return true;
+    }());
+    activity?.correctBy(correction);
+    assert(
+      _pixels == debugPreviousPixels,
+      '${debugPreviousActivity.runtimeType}.correctBy() changed the scroll offset.',
+    );
+    assert(
+      identical(activity, debugPreviousActivity),
+      '${debugPreviousActivity.runtimeType}.correctBy() started another activity.',
+    );
   }
 
   /// Change the value of [pixels] to the new value, and notify any customers,
@@ -717,9 +743,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Called after [applyViewportDimension] or [applyContentDimensions] have
   /// changed the [minScrollExtent], the [maxScrollExtent], or the
-  /// [viewportDimension]. When this method is called, it should be called
-  /// _after_ any corrections are applied to [pixels] using [correctPixels], not
-  /// before.
+  /// [viewportDimension], and after [correctBy] has corrected the scroll
+  /// offset. When this method is called, it should be called _after_ any
+  /// corrections are applied to [pixels] using [correctPixels], not before.
   ///
   /// The default implementation informs the [activity] of the new dimensions by
   /// calling its [ScrollActivity.applyNewDimensions] method.
@@ -913,8 +939,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// beyond the extents, then going beyond the extents will not interrupt the
   /// animation.)
   ///
-  /// The animation is indifferent to changes to the viewport or content
-  /// dimensions.
+  /// {@template flutter.widgets.ScrollPosition.animateTo.corrections}
+  /// The animation keeps its target unless a correction shifts the scroll
+  /// offset while it runs, for example because content before the viewport has
+  /// changed size. The target then moves by the same amount, so the animation
+  /// can end at a different offset from the given value. For example, an
+  /// animation to the start of a list can stop short of it. See
+  /// [ScrollActivity.correctBy] for more on scroll offset corrections.
+  /// {@endtemplate}
   ///
   /// Once the animation has completed, the scroll position will attempt to
   /// begin a ballistic activity in case its value is not stable (for example,
