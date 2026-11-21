@@ -788,6 +788,14 @@ class ToolDependencies {
           featureFlags: finalFeatureFlags,
         );
 
+    final extensionManager = ExtensionManager(
+      entryPoints: extensionEntryPoints,
+      featureFlags: finalFeatureFlags,
+      hostPlatform: finalOS.hostPlatform,
+      logger: finalLogger,
+    );
+    finalShutdownHooks.addShutdownHook(extensionManager.dispose);
+
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
@@ -797,6 +805,7 @@ class ToolDependencies {
           toolContext: finalToolContext,
           xcode: finalXcode,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          extensionManager: extensionManager,
         );
 
     final MacOSWorkflow finalMacOSWorkflow =
@@ -805,14 +814,6 @@ class ToolDependencies {
     final WindowsWorkflow finalWindowsWorkflow =
         windowsWorkflow ??
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
-
-    final extensionManager = ExtensionManager(
-      entryPoints: extensionEntryPoints,
-      featureFlags: finalFeatureFlags,
-      hostPlatform: finalOS.hostPlatform,
-      logger: finalLogger,
-    );
-    finalShutdownHooks.addShutdownHook(extensionManager.dispose);
 
     final appleContext = AppleContext(
       cocoaPodsBuilder: () => finalCocoaPods,

@@ -67,6 +67,7 @@ class DaemonCommand extends FlutterCommand {
     this._androidWorkflow,
     super.applicationPackages,
     this._deviceManager,
+    this._emulatorManager,
     this._flutterHookRunner,
     this.hidden = false,
     this._webRunnerFactory,
@@ -88,6 +89,7 @@ class DaemonCommand extends FlutterCommand {
   final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
+  final EmulatorManager? _emulatorManager;
 
   AndroidSdk? get _androidSdk => _androidContext.androidSdk;
   Java? get _java => _androidContext.java;
@@ -131,6 +133,7 @@ class DaemonCommand extends FlutterCommand {
         buildTargets: _buildTargets,
         deviceManager: _deviceManager,
         devtoolsLauncher: _devtoolsLauncher,
+        emulatorManager: _emulatorManager,
         featureFlags: runner!.featureFlags,
         flutterHookRunner: _flutterHookRunner,
         java: _java,
@@ -161,6 +164,7 @@ class DaemonCommand extends FlutterCommand {
       buildTargets: _buildTargets,
       deviceManager: _deviceManager,
       devtoolsLauncher: _devtoolsLauncher,
+      emulatorManager: _emulatorManager,
       featureFlags: runner!.featureFlags,
       flutterHookRunner: _flutterHookRunner,
       java: _java,
@@ -195,6 +199,7 @@ class DaemonServer {
     this.androidWorkflow,
     @visibleForTesting this._bind = ServerSocket.bind,
     this.deviceManager,
+    this.emulatorManager,
     this.flutterHookRunner,
     this.java,
     this.notifyingLogger,
@@ -221,6 +226,7 @@ class DaemonServer {
 
   final Analytics analytics;
   final DeviceManager? deviceManager;
+  final EmulatorManager? emulatorManager;
   final Java? java;
   final AndroidSdk? androidSdk;
   final FeatureFlags featureFlags;
@@ -267,6 +273,7 @@ class DaemonServer {
         buildTargets: buildTargets,
         deviceManager: deviceManager,
         devtoolsLauncher: devtoolsLauncher,
+        emulatorManager: emulatorManager,
         featureFlags: featureFlags,
         flutterHookRunner: flutterHookRunner,
         java: java,
@@ -309,6 +316,7 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
+    EmulatorManager? emulatorManager,
     FileTransfer fileTransfer = const FileTransfer(),
     FlutterHookRunner? flutterHookRunner,
     Java? java,
@@ -354,6 +362,7 @@ class Daemon {
         iosWorkflow: iosWorkflow,
         xcode: xcode,
         androidSdk: androidSdk,
+        emulatorManager: emulatorManager,
         java: java,
       ),
     );
@@ -385,6 +394,7 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
+    EmulatorManager? emulatorManager,
     FlutterHookRunner? flutterHookRunner,
     Java? java,
     WebRunnerFactory? webRunnerFactory,
@@ -404,6 +414,7 @@ class Daemon {
       buildTargets: buildTargets,
       deviceManager: deviceManager,
       devtoolsLauncher: devtoolsLauncher,
+      emulatorManager: emulatorManager,
       featureFlags: featureFlags,
       flutterHookRunner: flutterHookRunner,
       java: java,

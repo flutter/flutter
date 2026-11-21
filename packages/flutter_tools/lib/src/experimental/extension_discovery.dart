@@ -147,6 +147,8 @@ class ExtensionConnection {
     } on json_rpc.RpcException catch (error) {
       if (error.code == ToolExtensionException.domainErrorCode) {
         throw ToolExtensionException(error.message);
+      } else if (error.code == ToolExtensionException.unsupportedCapabilityErrorCode) {
+        throw UnsupportedError(error.message);
       }
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;

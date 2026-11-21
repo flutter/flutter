@@ -27,6 +27,10 @@ class ToolExtensionException implements Exception {
   /// exception in the extension isolate.
   static const int domainErrorCode = -32001;
 
+  /// JSON-RPC 2.0 error code returned when an optional capability is not
+  /// supported by the extension.
+  static const int unsupportedCapabilityErrorCode = -32002;
+
   /// Human-readable error message surfaced by the Flutter Tool.
   final String message;
 

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -1610,6 +1612,93 @@ void main() {
         expect(listenerFired, isFalse);
       },
     );
+
+    testWithoutContext(
+      'EmulatorDomain uses injected EmulatorManager and keeps create Android-only',
+      () async {
+        addTearDown(daemonStreams.dispose);
+        var launchedColdBoot = false;
+        final emulatorManager = FakeEmulatorManager(
+          availableCreatePlatforms: const <String>['android', 'custom_os'],
+          createResult: CreateEmulatorResult('created_avd', success: true),
+          emulators: <Emulator>[
+            _FakeCustomEmulator(
+              'ext_sim_1',
+              onLaunch: (bool coldBoot) => launchedColdBoot = coldBoot,
+            ),
+            _FakeCustomEmulator(
+              'failing_sim',
+              onLaunch: (bool _) => throwToolExit('Failed to launch emulator "failing_sim".'),
+            ),
+          ],
+        );
+
+        daemon = Daemon(
+          daemonConnection,
+          analytics: const NoOpAnalytics(),
+          applicationPackageFactory: applicationPackageFactory,
+          assetBundleFactory: _FakeAssetBundleFactory(),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          emulatorManager: emulatorManager,
+          featureFlags: TestFeatureFlags(),
+          notifyingLogger: notifyingLogger,
+          toolContext: FakeToolContext(logger: BufferLogger.test()),
+          xcode: null,
+        );
+
+        final Stream<DaemonMessage> responses = daemonStreams.outputs.stream
+            .asBroadcastStream()
+            .where(_notEvent);
+        Future<DaemonMessage> send(int id, String method, [Map<String, Object?>? params]) {
+          daemonStreams.inputs.add(
+            DaemonMessage(<String, Object?>{'id': id, 'method': method, 'params': ?params}),
+          );
+          return responses.firstWhere((DaemonMessage m) => m.data['id'] == id);
+        }
+
+        final DaemonMessage listResp = await send(1, 'emulator.getEmulators');
+        expect(listResp.data['result'], <Object?>[
+          <String, Object?>{
+            'id': 'ext_sim_1',
+            'name': 'Custom Extension Simulator',
+            'category': 'mobile',
+            'platformType': 'custom',
+          },
+          <String, Object?>{
+            'id': 'failing_sim',
+            'name': 'Custom Extension Simulator',
+            'category': 'mobile',
+            'platformType': 'custom',
+          },
+        ]);
+
+        final DaemonMessage launchResp = await send(2, 'emulator.launch', <String, Object?>{
+          'emulatorId': 'ext_sim_1',
+          'coldBoot': true,
+        });
+        expect(launchResp.data['error'], isNull);
+        expect(launchedColdBoot, isTrue);
+
+        final DaemonMessage launchErrResp = await send(3, 'emulator.launch', <String, Object?>{
+          'emulatorId': 'failing_sim',
+        });
+        expect(launchErrResp.data['error'], contains('Failed to launch emulator "failing_sim".'));
+
+        final DaemonMessage createResp = await send(4, 'emulator.create', <String, Object?>{
+          'name': 'created_avd',
+          'platform': 'custom_os',
+        });
+        expect(emulatorManager.lastCreatedName, 'created_avd');
+        expect(emulatorManager.lastCreatedPlatform, EmulatorManager.androidPlatform);
+        expect(createResp.data['result'], <String, Object?>{
+          'success': true,
+          'emulatorName': 'created_avd',
+          'error': null,
+        });
+      },
+    );
   });
 
   group('notifyingLogger', () {
@@ -1780,6 +1869,29 @@ void main() {
       expect(hiddenCommand.hidden, true);
     });
   });
+}
+
+class _FakeCustomEmulator extends Emulator {
+  const _FakeCustomEmulator(String id, {required this.onLaunch}) : super(id, true);
+
+  final void Function(bool coldBoot) onLaunch;
+
+  @override
+  String get name => 'Custom Extension Simulator';
+
+  @override
+  String? get manufacturer => 'Acme';
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.custom;
+
+  @override
+  Future<void> launch({bool coldBoot = false}) async {
+    onLaunch(coldBoot);
+  }
 }
 
 bool _notEvent(DaemonMessage message) => message.data['event'] == null;

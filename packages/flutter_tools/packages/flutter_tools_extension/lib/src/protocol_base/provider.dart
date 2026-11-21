@@ -140,6 +140,15 @@ class ToolExtensionEntryPoint {
             '${error.message}',
           );
           throw json_rpc.RpcException(ToolExtensionException.domainErrorCode, error.message);
+        } on UnsupportedError catch (error) {
+          logger?.call(
+            '[ToolExtensionIsolate] RPC request "$fullMethod" threw UnsupportedError: '
+            '${error.message}',
+          );
+          throw json_rpc.RpcException(
+            ToolExtensionException.unsupportedCapabilityErrorCode,
+            error.message ?? '',
+          );
         } on Object catch (error, stackTrace) {
           logger?.call(
             '[ToolExtensionIsolate] RPC request "$fullMethod" failed: $error\n$stackTrace',

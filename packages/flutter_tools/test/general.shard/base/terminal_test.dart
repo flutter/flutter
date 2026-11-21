@@ -247,6 +247,60 @@ void main() {
 
       expect(() => ansiTerminal.singleCharMode = true, returnsNormally);
     });
+
+    testWithoutContext(
+      'promptForNumberedChoice uses single-char input for fewer than 10 options',
+      () async {
+        final bufferLogger = BufferLogger(
+          terminal: terminalUnderTest,
+          outputPreferences: OutputPreferences.test(),
+        );
+        mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
+          Future<String>.value('9'), // Out of range for 2 options.
+          Future<String>.value('2'),
+        ]).asBroadcastStream();
+
+        final String choice = await terminalUnderTest.promptForNumberedChoice(
+          logger: bufferLogger,
+          optionCount: 2,
+        );
+
+        expect(terminalUnderTest.usesTerminalUi, isTrue);
+        expect(choice, '2');
+        expect(
+          bufferLogger.statusText,
+          'Please choose one (or "q" to quit): 9\n'
+          'Please choose one (or "q" to quit): 2\n',
+        );
+      },
+    );
+
+    testWithoutContext(
+      'promptForNumberedChoice uses line input for 10 or more options and invokes onInvalidInput',
+      () async {
+        final stdio = FakeStdio()
+          .._stdin = Stream<List<int>>.fromIterable(<List<int>>[
+            '0\n'.codeUnits,
+            '11\n'.codeUnits,
+            '10\n'.codeUnits,
+          ]);
+        terminalUnderTest = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+        final bufferLogger = BufferLogger(
+          terminal: terminalUnderTest,
+          outputPreferences: OutputPreferences.test(),
+        );
+        var invalidCount = 0;
+
+        final String choice = await terminalUnderTest.promptForNumberedChoice(
+          logger: bufferLogger,
+          onInvalidInput: () => invalidCount++,
+          optionCount: 10,
+        );
+
+        expect(choice, '10');
+        expect(invalidCount, 2);
+      },
+    );
   });
 
   testWithoutContext('AnsiTerminal.preferredStyle', () {

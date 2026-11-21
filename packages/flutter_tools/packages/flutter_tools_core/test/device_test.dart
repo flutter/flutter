@@ -153,4 +153,70 @@ void main() {
       );
     });
   });
+
+  group('TargetEmulator', () {
+    test('serializes and deserializes with full and minimal fields', () {
+      const full = TargetEmulator(
+        id: 'custom_emulator_1',
+        name: 'Custom Emulator 1',
+        category: Category.mobile,
+        manufacturer: 'Custom Vendor',
+      );
+      final Map<String, Object?> fullMap = full.toMap();
+      expect(fullMap, <String, Object?>{
+        TargetEmulator.idKey: 'custom_emulator_1',
+        TargetEmulator.nameKey: 'Custom Emulator 1',
+        TargetEmulator.categoryKey: 'mobile',
+        TargetEmulator.manufacturerKey: 'Custom Vendor',
+      });
+      final parsedFull = TargetEmulator.fromJson(fullMap);
+      expect(parsedFull, equals(full));
+      expect(parsedFull.hashCode, equals(full.hashCode));
+      expect(
+        parsedFull.toString(),
+        'TargetEmulator(id: custom_emulator_1, name: Custom Emulator 1, '
+        'category: mobile, manufacturer: Custom Vendor)',
+      );
+
+      const minimal = TargetEmulator(id: 'minimal_emulator', name: 'Minimal Emulator');
+      final Map<String, Object?> minimalMap = minimal.toMap();
+      expect(minimalMap, <String, Object?>{
+        TargetEmulator.idKey: 'minimal_emulator',
+        TargetEmulator.nameKey: 'Minimal Emulator',
+      });
+      expect(TargetEmulator.fromJson(minimalMap), equals(minimal));
+    });
+
+    test('listFromJson and fromJson throw FormatException on invalid payloads', () {
+      final List<TargetEmulator> emulators = TargetEmulator.listFromJson(const <Object?>[
+        <String, Object?>{TargetEmulator.idKey: 'emu_1', TargetEmulator.nameKey: 'Emulator 1'},
+      ]);
+      expect(emulators, const <TargetEmulator>[TargetEmulator(id: 'emu_1', name: 'Emulator 1')]);
+
+      for (final invalidList in const <Object?>[
+        null,
+        'invalid',
+        <Object?>['not_a_map'],
+      ]) {
+        expect(() => TargetEmulator.listFromJson(invalidList), throwsFormatException);
+      }
+      for (final invalidMap in const <Map<String, Object?>>[
+        <String, Object?>{TargetEmulator.nameKey: 'Name'},
+        <String, Object?>{TargetEmulator.idKey: '', TargetEmulator.nameKey: 'Name'},
+        <String, Object?>{TargetEmulator.idKey: 'id', TargetEmulator.nameKey: ''},
+        <String, Object?>{
+          TargetEmulator.idKey: 'id',
+          TargetEmulator.nameKey: 'Name',
+          TargetEmulator.categoryKey: 'unknown_category',
+        },
+        <String, Object?>{
+          TargetEmulator.idKey: 'id',
+          TargetEmulator.nameKey: 'Name',
+          TargetEmulator.manufacturerKey: 42,
+        },
+      ]) {
+        expect(() => TargetEmulator.fromJson(invalidMap), throwsFormatException);
+      }
+    });
+  });
 }
