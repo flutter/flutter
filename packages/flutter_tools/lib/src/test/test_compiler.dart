@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -325,7 +326,10 @@ class TestCompiler {
             if (!testCache.parent.existsSync()) {
               testCache.parent.createSync(recursive: true);
             }
-            await outputFile.copy(testFilePath);
+            // Copy to a temporary file and rename it into place, so that a
+            // concurrent `flutter test` never reads a partially copied cache.
+            final File tempCache = await outputFile.copy('$testFilePath.$pid');
+            await tempCache.rename(testFilePath);
           }
           request._result.complete(
             TestCompilerComplete(outputPath: kernelReadyToRun.path, mainUri: request.mainUri),

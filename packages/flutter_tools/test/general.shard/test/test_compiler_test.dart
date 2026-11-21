@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -97,6 +99,35 @@ name: foo
         await testCompiler.compile(input),
         TestCompilerComplete(outputPath: 'abc.dill', mainUri: input),
       );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/196379.
+  testUsingContext(
+    'TestCompiler renames the cached dill into place instead of copying onto it',
+    () async {
+      residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+      final recordingFileSystem = _CopyRecordingFileSystem(fileSystem);
+      final testCompiler = FakeTestCompiler(
+        debugBuild,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        residentCompiler,
+        fileSystem: recordingFileSystem,
+      );
+
+      await testCompiler.compile(Uri.parse('test/foo.dart'));
+
+      final File testCache = fileSystem.file(testCompiler.testFilePath);
+      expect(testCache, exists);
+      expect(testCache.parent.listSync(), hasLength(1));
+      expect(recordingFileSystem.copyTargets, isNot(contains(testCache.path)));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -476,5 +507,40 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   Future<Object> shutdown() async {
     didShutdown = true;
     return Object();
+  }
+}
+
+/// Records the destination of every [File.copy] made through this file system.
+class _CopyRecordingFileSystem extends ForwardingFileSystem {
+  _CopyRecordingFileSystem(super.delegate);
+
+  final copyTargets = <String>[];
+
+  @override
+  File file(dynamic path) => _CopyRecordingFile(this, delegate.file(path));
+}
+
+class _CopyRecordingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
+  _CopyRecordingFile(this.fileSystem, this.delegate);
+
+  @override
+  final _CopyRecordingFileSystem fileSystem;
+
+  @override
+  final io.File delegate;
+
+  @override
+  File wrapFile(io.File delegate) => _CopyRecordingFile(fileSystem, delegate);
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => delegate as Directory;
+
+  @override
+  Link wrapLink(io.Link delegate) => delegate as Link;
+
+  @override
+  Future<File> copy(String newPath) {
+    fileSystem.copyTargets.add(newPath);
+    return super.copy(newPath);
   }
 }
