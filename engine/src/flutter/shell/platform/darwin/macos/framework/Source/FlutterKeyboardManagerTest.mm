@@ -203,6 +203,9 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 // Set text calls to respond with the given response.
 - (void)respondTextInputWith:(BOOL)response;
 
+// Set whether the event context reports an active IME composition.
+- (void)respondComposingWith:(BOOL)response;
+
 // At the start of any kind of call, record the call type to the given storage.
 //
 // Only calls that are included in `typeMask` will be added. Options are
@@ -238,6 +241,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   AsyncEmbedderCallbackHandler _embedderHandler;
   AsyncKeyCallbackHandler _channelHandler;
   TextInputCallback _textCallback;
+  BOOL _isComposing;
 
   NSMutableArray<NSNumber*>* _typeStorage;
   uint32_t _typeStorageMask;
@@ -262,6 +266,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   [self respondChannelCallsWith:FALSE];
   [self respondEmbedderCallsWith:FALSE];
   [self respondTextInputWith:FALSE];
+  [self respondComposingWith:FALSE];
 
   _currentLayout = &kUsLayout;
 
@@ -287,6 +292,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   OCMStub([_eventContextMock nextResponder]).andReturn(_nextResponder);
   OCMStub([_eventContextMock onTextInputKeyEvent:[OCMArg any]])
       .andCall(self, @selector(handleTextInputKeyEvent:));
+  OCMStub([_eventContextMock isComposing]).andCall(self, @selector(isComposing));
 
   id keyboardLayoutMock = OCMStrictClassMock([FlutterKeyboardLayout class]);
   OCMStub([keyboardLayoutMock lookUpLayoutForKeyCode:0 shift:false])
@@ -347,6 +353,14 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
   _textCallback = ^(NSEvent* event) {
     return response;
   };
+}
+
+- (void)respondComposingWith:(BOOL)response {
+  _isComposing = response;
+}
+
+- (BOOL)isComposing {
+  return _isComposing;
 }
 
 - (void)recordCallTypesTo:(nonnull NSMutableArray<NSNumber*>*)typeStorage
@@ -432,6 +446,7 @@ void clearEvents(std::vector<FlutterKeyEvent>& events) {
 - (bool)getPressedState;
 - (bool)keyboardChannelGetPressedState;
 - (bool)racingConditionBetweenKeyAndText;
+- (bool)composingRoutesKeyDownsToTextInputFirst;
 - (bool)correctLogicalKeyForLayouts;
 - (bool)shouldNotHoldStrongReferenceToDelegate;
 @end
@@ -464,6 +479,10 @@ TEST(FlutterKeyboardManagerUnittests, KeyboardChannelGetPressedState) {
 
 TEST(FlutterKeyboardManagerUnittests, RacingConditionBetweenKeyAndText) {
   ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] racingConditionBetweenKeyAndText]);
+}
+
+TEST(FlutterKeyboardManagerUnittests, ComposingRoutesKeyDownsToTextInputFirst) {
+  ASSERT_TRUE([[FlutterKeyboardManagerUnittestsObjC alloc] composingRoutesKeyDownsToTextInputFirst]);
 }
 
 TEST(FlutterKeyboardManagerUnittests, CorrectLogicalKeyForLayouts) {
@@ -731,6 +750,39 @@ TEST(FlutterKeyboardManagerUnittests, ShouldNotHoldStrongReferenceToDelegate) {
   // Finish up callbacks.
   keyCallbacks[2](false);
   keyCallbacks[3](false);
+
+  return true;
+}
+
+- (bool)composingRoutesKeyDownsToTextInputFirst {
+  KeyboardTester* tester = [[KeyboardTester alloc] init];
+  NSMutableArray<NSNumber*>* callTypes = [NSMutableArray<NSNumber*> array];
+  [tester recordCallTypesTo:callTypes forTypes:kEmbedderCall | kChannelCall | kTextCall];
+
+  // A key-down consumed by the composing IME reaches the text input plugin
+  // only.
+  [tester respondComposingWith:true];
+  [tester respondTextInputWith:true];
+  [tester.manager handleEvent:keyDownEvent(0x50) withContext:tester.eventContextMock];
+  EXPECT_EQ([callTypes count], 1u);
+  EXPECT_EQ([callTypes[0] unsignedIntValue], kTextCall);
+  [callTypes removeAllObjects];
+
+  // Its key-up is swallowed, even though the composition has ended by then.
+  [tester respondComposingWith:false];
+  [tester.manager handleEvent:keyUpEvent(0x50) withContext:tester.eventContextMock];
+  EXPECT_EQ([callTypes count], 0u);
+
+  // A key-down the IME declines goes through the responders as usual, and is
+  // not offered to the text input plugin a second time.
+  [tester respondComposingWith:true];
+  [tester respondTextInputWith:false];
+  [tester.manager handleEvent:keyDownEvent(0x51) withContext:tester.eventContextMock];
+  EXPECT_EQ([callTypes count], 3u);
+  EXPECT_EQ([callTypes[0] unsignedIntValue], kTextCall);
+  EXPECT_EQ([callTypes[1] unsignedIntValue], kEmbedderCall);
+  EXPECT_EQ([callTypes[2] unsignedIntValue], kChannelCall);
+  OCMVerify([tester.nextResponder keyDown:checkKeyDownEvent(0x51)]);
 
   return true;
 }
