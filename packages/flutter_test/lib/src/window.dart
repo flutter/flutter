@@ -991,7 +991,12 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestFlutterView> get views => _owner?.views ?? _testViews.values;
 
   @override
-  TestFlutterView? view({required int id}) => _owner?.view(id: id) ?? _testViews[id];
+  TestFlutterView? view({required int id}) {
+    if (_owner case final TestPlatformDispatcher owner) {
+      return owner.view(id: id);
+    }
+    return _testViews[id];
+  }
 
   @override
   Iterable<TestDisplay> get displays => _owner?.displays ?? _testDisplays.values;
