@@ -30,6 +30,244 @@ TEST(MockWindow, GetDpiAfterCreate) {
   ASSERT_TRUE(window.GetDpi() > 0);
 }
 
+TEST(MockWindow, DirectManipulationDoesNotCreateAnIdleTimer) {
+  auto windows_proc_table =
+      std::make_unique<::testing::StrictMock<MockWindowsProcTable>>();
+  EXPECT_CALL(*windows_proc_table, SetTimer(_, _, _, _)).Times(0);
+  EXPECT_CALL(*windows_proc_table, KillTimer(_, _)).Times(0);
+  MockWindow window(std::move(windows_proc_table), nullptr);
+  ASSERT_NE(window.GetWindowHandle(), nullptr);
+}
+
+// Exercise interaction callbacks and timer message dispatch with mocked timer
+// calls. The strict mock also rejects timer calls during window creation.
+class DirectManipulationPollingTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    ASSERT_NE(window_.GetWindowHandle(), nullptr);
+    auto owner = std::make_unique<MockDirectManipulationOwner>(&window_);
+    owner_ = owner.get();
+    handler_ = fml::MakeRefCounted<DirectManipulationEventHandler>(owner_);
+    window_.SetDirectManipulationOwner(std::move(owner));
+  }
+
+  void Interact(DIRECTMANIPULATION_INTERACTION_TYPE interaction) {
+    EXPECT_EQ(handler_->OnInteraction(nullptr, interaction), S_OK);
+  }
+
+  // The timer ID is part of FlutterWindow's WM_TIMER dispatch contract.
+  static constexpr UINT_PTR kTimerId = 1;
+  MockWindowsProcTable* windows_proc_table_ = nullptr;
+  MockWindow window_{CreateWindowsProcTable(), nullptr};
+  MockDirectManipulationOwner* owner_ = nullptr;
+  fml::RefPtr<DirectManipulationEventHandler> handler_;
+
+ private:
+  std::unique_ptr<WindowsProcTable> CreateWindowsProcTable() {
+    auto windows_proc_table =
+        std::make_unique<::testing::StrictMock<MockWindowsProcTable>>();
+    windows_proc_table_ = windows_proc_table.get();
+    return windows_proc_table;
+  }
+};
+
+TEST_F(DirectManipulationPollingTest, InitiallyIdleHasNoTimer) {
+  EXPECT_CALL(*windows_proc_table_, SetTimer(_, _, _, _)).Times(0);
+  EXPECT_CALL(*windows_proc_table_, KillTimer(_, _)).Times(0);
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       DispatchesUpdatesOnlyDuringAnInteraction) {
+  EXPECT_CALL(*windows_proc_table_,
+              SetTimer(window_.GetWindowHandle(), kTimerId, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{1}));
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_CALL(*owner_, Update()).Times(1);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_));
+
+  EXPECT_CALL(*owner_, Update()).Times(1);
+  Interact(DIRECTMANIPULATION_INTERACTION_TYPE_MANIPULATION);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_));
+
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  EXPECT_CALL(*windows_proc_table_,
+              KillTimer(window_.GetWindowHandle(), kTimerId))
+      .WillOnce(Return(TRUE));
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  // KillTimer does not remove WM_TIMER messages that were already queued.
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest, CanStartAnotherInteraction) {
+  InSequence sequence;
+  for (int i = 0; i < 2; ++i) {
+    EXPECT_CALL(*windows_proc_table_,
+                SetTimer(window_.GetWindowHandle(), kTimerId, 14, nullptr))
+        .WillOnce(Return(UINT_PTR{1}));
+    EXPECT_CALL(*windows_proc_table_,
+                KillTimer(window_.GetWindowHandle(), kTimerId))
+        .WillOnce(Return(TRUE));
+    Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+    Interact(DIRECTMANIPULATION_INTERACTION_END);
+    ASSERT_TRUE(
+        ::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+  }
+}
+
+TEST_F(DirectManipulationPollingTest,
+       FailedTimerCreationDoesNotPollAndCanRetry) {
+  EXPECT_CALL(*windows_proc_table_,
+              SetTimer(window_.GetWindowHandle(), kTimerId, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{0}));
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_));
+
+  EXPECT_CALL(*windows_proc_table_,
+              SetTimer(window_.GetWindowHandle(), kTimerId, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{1}));
+  EXPECT_CALL(*owner_, Update()).Times(1);
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_));
+
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  EXPECT_CALL(*windows_proc_table_,
+              KillTimer(window_.GetWindowHandle(), kTimerId))
+      .WillOnce(Return(TRUE));
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       ManipulationAndUnmatchedEndDoNotStartPolling) {
+  EXPECT_CALL(*windows_proc_table_, SetTimer(_, _, _, _)).Times(0);
+  EXPECT_CALL(*windows_proc_table_, KillTimer(_, _)).Times(0);
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  Interact(DIRECTMANIPULATION_INTERACTION_TYPE_MANIPULATION);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+}
+
+TEST_F(DirectManipulationPollingTest, UnrelatedTimerDoesNotPoll) {
+  EXPECT_CALL(*windows_proc_table_,
+              SetTimer(window_.GetWindowHandle(), kTimerId, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{1}));
+  EXPECT_CALL(*windows_proc_table_,
+              KillTimer(window_.GetWindowHandle(), kTimerId))
+      .WillOnce(Return(TRUE));
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId + 1, 0);
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+}
+
+TEST_F(DirectManipulationPollingTest,
+       ParentVisibilityChangesDoNotStartPolling) {
+  HWND parent =
+      CreateWindowEx(0, L"STATIC", L"", WS_OVERLAPPED, 0, 0, 100, 100, nullptr,
+                     nullptr, GetModuleHandle(nullptr), nullptr);
+  ASSERT_NE(parent, nullptr);
+  HWND child = window_.GetWindowHandle();
+  SetParent(child, parent);
+  EXPECT_EQ(GetParent(child), parent);
+  EXPECT_FALSE(IsWindowVisible(child));
+
+  ShowWindow(parent, SW_SHOWNOACTIVATE);
+  EXPECT_TRUE(IsWindowVisible(child));
+  ShowWindow(parent, SW_HIDE);
+  EXPECT_FALSE(IsWindowVisible(child));
+  ShowWindow(parent, SW_SHOWNOACTIVATE);
+  EXPECT_TRUE(IsWindowVisible(child));
+
+  EXPECT_CALL(*windows_proc_table_, SetTimer(child, kTimerId, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{1}));
+  EXPECT_CALL(*windows_proc_table_, KillTimer(child, kTimerId))
+      .WillOnce(Return(TRUE));
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  Interact(DIRECTMANIPULATION_INTERACTION_END);
+  EXPECT_TRUE(::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+  SetParent(child, HWND_MESSAGE);
+  DestroyWindow(parent);
+}
+
+TEST_F(DirectManipulationPollingTest,
+       OwnerShutdownStopsPollingAndPreventsRestart) {
+  EXPECT_CALL(*windows_proc_table_,
+              SetTimer(window_.GetWindowHandle(), kTimerId, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{1}));
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+  EXPECT_CALL(*windows_proc_table_,
+              KillTimer(window_.GetWindowHandle(), kTimerId))
+      .WillOnce(Return(TRUE));
+  owner_->Destroy();
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+  EXPECT_CALL(*owner_, Update()).Times(0);
+  window_.InjectWindowMessage(WM_TIMER, kTimerId, 0);
+  // This separately constructed handler still references the live owner, but
+  // the owner must no longer forward requests after releasing its OS resources.
+  Interact(DIRECTMANIPULATION_INTERACTION_BEGIN);
+}
+
+TEST(MockWindow, StopsPollingAndShutsDownOwnerBeforeDestroyingWindow) {
+  class CheckingOwner : public MockDirectManipulationOwner {
+   public:
+    CheckingOwner(FlutterWindow* window,
+                  MockWindowsProcTable* windows_proc_table)
+        : MockDirectManipulationOwner(window),
+          hwnd_(window->GetWindowHandle()),
+          windows_proc_table_(windows_proc_table) {}
+
+    ~CheckingOwner() override {
+      EXPECT_TRUE(IsWindow(hwnd_));
+      // Verify that KillTimer was called before destroying the owner.
+      EXPECT_TRUE(
+          ::testing::Mock::VerifyAndClearExpectations(windows_proc_table_));
+      // Destroy must also sever the owner's link to the still-live window.
+      // The strict mock rejects any timer calls after verification.
+      SetNeedsUpdate(true);
+    }
+
+   private:
+    HWND hwnd_;
+    MockWindowsProcTable* windows_proc_table_;
+  };
+
+  auto windows_proc_table =
+      std::make_unique<::testing::StrictMock<MockWindowsProcTable>>();
+  auto* proc_table = windows_proc_table.get();
+  MockWindow window(std::move(windows_proc_table), nullptr);
+  ASSERT_NE(window.GetWindowHandle(), nullptr);
+  auto owner = std::make_unique<CheckingOwner>(&window, proc_table);
+  EXPECT_CALL(*proc_table, SetTimer(window.GetWindowHandle(), 1, 14, nullptr))
+      .WillOnce(Return(UINT_PTR{1}));
+  EXPECT_CALL(*owner, Update()).Times(1);
+  auto* owner_ptr = owner.get();
+  window.SetDirectManipulationOwner(std::move(owner));
+  window.SetDirectManipulationNeedsUpdate(true);
+  window.InjectWindowMessage(WM_TIMER, 1, 0);
+  ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(owner_ptr));
+  EXPECT_CALL(*owner_ptr, Update()).Times(0);
+  EXPECT_CALL(*proc_table, KillTimer(window.GetWindowHandle(), 1))
+      .WillOnce(Return(TRUE));
+}
+
 TEST(MockWindow, VerticalScroll) {
   MockWindow window;
   const int scroll_amount = 10;

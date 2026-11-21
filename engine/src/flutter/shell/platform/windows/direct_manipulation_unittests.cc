@@ -138,6 +138,22 @@ class MockIDirectManipulationContent : public IDirectManipulationContent {
   FML_DISALLOW_COPY_AND_ASSIGN(MockIDirectManipulationContent);
 };
 
+TEST(DirectManipulationTest, HandlerWithoutOwnerIgnoresCallbacks) {
+  // Exercise the ownerless state used after detachment, without requiring COM
+  // registration. This does not test that Destroy detaches a registered
+  // handler.
+  auto handler = fml::MakeRefCounted<DirectManipulationEventHandler>(nullptr);
+  EXPECT_EQ(
+      handler->OnInteraction(nullptr, DIRECTMANIPULATION_INTERACTION_BEGIN),
+      S_OK);
+  EXPECT_EQ(handler->OnInteraction(nullptr, DIRECTMANIPULATION_INTERACTION_END),
+            S_OK);
+  EXPECT_EQ(handler->OnViewportStatusChanged(
+                nullptr, DIRECTMANIPULATION_RUNNING, DIRECTMANIPULATION_READY),
+            S_OK);
+  EXPECT_EQ(handler->OnContentUpdated(nullptr, nullptr), S_OK);
+}
+
 TEST(DirectManipulationTest, TestGesture) {
   MockIDirectManipulationContent content;
   MockWindowBindingHandlerDelegate delegate;
