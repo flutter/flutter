@@ -102,8 +102,6 @@ TaskRunnerWindow::TaskRunnerWindow() : timer_thread_([this]() { OnTimer(); }) {
     OutputDebugString(message);
     LocalFree(message);
   }
-
-  thread_id_ = GetCurrentThreadId();
 }
 
 TaskRunnerWindow::~TaskRunnerWindow() {
