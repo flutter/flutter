@@ -41,7 +41,8 @@
                 "--no-rbe",
                 "--target-dir",
                 "ci/host_debug_desktop",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug_desktop",
             "timeout": 240,
@@ -83,7 +84,8 @@
                 "--no-rbe",
                 "--target-dir",
                 "ci/host_profile_desktop",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_profile_desktop",
             "timeout": 240,
@@ -125,7 +127,8 @@
                 "--no-rbe",
                 "--target-dir",
                 "ci/host_release_desktop",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_release_desktop",
             "timeout": 240,

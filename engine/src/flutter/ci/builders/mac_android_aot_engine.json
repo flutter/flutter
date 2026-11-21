@@ -41,7 +41,8 @@
                 "--android",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile",
             "timeout": 240,
@@ -101,7 +102,8 @@
                 "--android-cpu=arm64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile_arm64",
             "timeout": 240,
@@ -162,7 +164,8 @@
                 "--android-cpu=x64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile_x64",
             "timeout": 240,
@@ -222,7 +225,8 @@
                 "--android",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release",
             "timeout": 240,
@@ -282,7 +286,8 @@
                 "--android-cpu=arm64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_arm64",
             "timeout": 240,
@@ -343,7 +348,8 @@
                 "--android-cpu=x64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_x64",
             "timeout": 240,

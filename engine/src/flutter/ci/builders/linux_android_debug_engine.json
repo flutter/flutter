@@ -45,7 +45,8 @@
                 "--android-cpu=arm",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug",
             "timeout": 240,
@@ -94,7 +95,8 @@
                 "--android-cpu=arm64",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_arm64",
             "timeout": 240,
@@ -140,7 +142,8 @@
                 "--android-cpu=x64",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_x64",
             "timeout": 240,
@@ -186,7 +189,8 @@
                 "--android-cpu=riscv64",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_riscv64",
             "timeout": 240,

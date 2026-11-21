@@ -32,7 +32,8 @@
                 "--no-lto",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug_sim",
             "timeout": 240,
@@ -81,7 +82,8 @@
                 "--no-lto",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug_sim_arm64",
             "timeout": 240,
@@ -128,7 +130,8 @@
                 "debug",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug",
             "timeout": 240,
@@ -176,7 +179,8 @@
                 "profile",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_profile",
             "timeout": 240,
@@ -224,7 +228,8 @@
                 "release",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_release",
             "timeout": 240,
@@ -275,7 +280,8 @@
                 "--darwin-extension-safe",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug_sim_extension_safe",
             "timeout": 240,
@@ -326,7 +332,8 @@
                 "--darwin-extension-safe",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug_sim_arm64_extension_safe",
             "timeout": 240,
@@ -375,7 +382,8 @@
                 "--darwin-extension-safe",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug_extension_safe",
             "timeout": 240,
@@ -425,7 +433,8 @@
                 "--darwin-extension-safe",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_profile_extension_safe",
             "timeout": 240,
@@ -475,7 +484,8 @@
                 "--darwin-extension-safe",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_release_extension_safe",
             "timeout": 240,

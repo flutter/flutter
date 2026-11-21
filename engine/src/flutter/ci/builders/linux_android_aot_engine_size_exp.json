@@ -44,7 +44,8 @@
                 "arm64",
                 "--no-dart-secure-socket",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_arm64_size_exp",
             "timeout": 240,
@@ -98,7 +99,8 @@
                 "--no-lto",
                 "--no-dart-secure-socket",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_arm64_size_exp",
             "timeout": 240,

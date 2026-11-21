@@ -28,7 +28,8 @@
                 "--asan",
                 "--dart-debug",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug_unopt",
             "description": "Builds a debug mode unopt Linux engine. Builds and runs many tests and lints.",
@@ -138,7 +139,8 @@
                 "ci/host_debug_unopt_impeller_tests",
                 "--no-rbe",
                 "--use-glfw-swiftshader",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug_unopt_impeller_tests",
             "timeout": 240,
@@ -195,7 +197,8 @@
                 "ci/android_embedder_debug_unopt",
                 "--unoptimized",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_embedder_debug_unopt",
             "timeout": 240,
@@ -225,7 +228,8 @@
                 "--no-lto",
                 "--enable-vulkan-validation-layers",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
             "timeout": 240,
@@ -259,7 +263,8 @@
                 "--android",
                 "--unoptimized",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_unopt",
             "timeout": 240,
@@ -305,7 +310,8 @@
                 "release",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_release_licenses",
             "timeout": 240,
@@ -348,7 +354,8 @@
                 "--android-cpu=arm",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_test",
             "timeout": 240,

@@ -1321,8 +1321,10 @@ def parse_args(args):
       default=None,
       action='store_true',
       help="With --bazel: run the build's actions on Flutter's RBE instance (the root "
-      ".bazelrc's build:rbe; Linux hosts only), which is a Linux bot's default. Off a bot "
-      'it is build:rbe_dev: the links stay on the machine.',
+      ".bazelrc's build:rbe, a Mac's build:rbe_mac), as --rbe does, without the reclient "
+      'proxy the recipe starts for --rbe. Off a bot it is build:rbe_dev: the links stay on '
+      'the machine. The last of --rbe, --no-rbe, --bazel-rbe and --no-bazel-rbe decides; '
+      'with none of them the build runs on this machine.',
   )
   parser.add_argument(
       '--no-bazel-rbe',
@@ -1368,7 +1370,12 @@ def bazel_main(argv, args):
     print(error, file=sys.stderr)
     return 1
   out_dir = os.path.join(SRC_ROOT, get_out_dir(args))
-  written = bazel_ci.write_build_directory(SRC_ROOT, build, out_dir, bazelisk, args.bazel_rbe)
+  # RBE as the flags say, in their order (--rbe and --bazel-rbe are one say,
+  # and the parser keeps each pair's last alone): the recipe's --no-rbe
+  # after a builder file's --bazel-rbe is an official build, off RBE.
+  written = bazel_ci.write_build_directory(
+      SRC_ROOT, build, out_dir, bazelisk, bazel_ci.rbe_flag(argv[1:])
+  )
   print(
       'Generating Bazel build files in: %s (%s, --config=%s, %s)' %
       (out_dir, build['file'], build['config'], build['install'])

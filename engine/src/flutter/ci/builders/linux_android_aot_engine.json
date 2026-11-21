@@ -43,7 +43,8 @@
                 "--android-cpu",
                 "arm",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile",
             "timeout": 240,
@@ -90,7 +91,8 @@
                 "--android-cpu",
                 "arm",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release",
             "timeout": 240,
@@ -138,7 +140,8 @@
                 "--android-cpu",
                 "arm64",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_arm64",
             "timeout": 240,
@@ -201,7 +204,8 @@
                 "--android-cpu",
                 "arm64",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile_arm64",
             "timeout": 240,
@@ -249,7 +253,8 @@
                 "--android-cpu",
                 "x64",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile_x64",
             "timeout": 240,
@@ -297,7 +302,8 @@
                 "--android-cpu",
                 "x64",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_x64",
             "timeout": 240,
@@ -345,7 +351,8 @@
                 "--android-cpu",
                 "riscv64",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_profile_riscv64",
             "timeout": 240,
@@ -393,7 +400,8 @@
                 "--android-cpu",
                 "riscv64",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_riscv64",
             "timeout": 240,

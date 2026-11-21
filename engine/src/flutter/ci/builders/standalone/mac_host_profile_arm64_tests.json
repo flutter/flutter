@@ -22,7 +22,8 @@
         "--build-embedder-examples",
         "--no-rbe",
         "--xcode-symlinks",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
     ],
     "name": "ci/host_profile_arm64_tests",
     "description": "Produces profile mode arm64 macOS host-side tooling and builds host-side unit tests for arm64 macOS.",

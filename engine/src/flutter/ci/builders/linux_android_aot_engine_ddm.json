@@ -44,7 +44,8 @@
                 "arm64",
                 "--gn-args=dart_dynamic_modules=true",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_arm64_ddm",
             "timeout": 240,
@@ -102,7 +103,8 @@
                 "x64",
                 "--gn-args=dart_dynamic_modules=true",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_release_x64_ddm",
             "timeout": 240,

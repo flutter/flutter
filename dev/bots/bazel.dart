@@ -171,7 +171,8 @@ List<String> bazelTestOptions() {
 const bool kBazelRbeOnBots = true;
 
 /// The environment variable that turns remote execution off for a run on a
-/// bot: `FLUTTER_BAZEL_RBE=0` (bazel_ci.py's RBE_ENV).
+/// bot: `FLUTTER_BAZEL_RBE=0`. (The engine's builds follow their flags alone:
+/// bazel_ci.py's rbe_flag.)
 const String kBazelRbeEnvironmentVariable = 'FLUTTER_BAZEL_RBE';
 
 bool? _bazelRbe;

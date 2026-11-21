@@ -45,7 +45,8 @@
                 "--prebuilt-dart-sdk",
                 "--no-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug",
             "timeout": 240,
@@ -97,7 +98,8 @@
                 "--prebuilt-dart-sdk",
                 "--thin-lto",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_release",
             "timeout": 240,

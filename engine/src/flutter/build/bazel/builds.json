@@ -14,7 +14,8 @@
           "--android-cpu",
           "arm",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile",
         "config": "android_profile",
@@ -48,7 +49,8 @@
           "--android-cpu",
           "arm",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release",
         "config": "android_release",
@@ -82,7 +84,8 @@
           "--android-cpu",
           "arm64",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_arm64",
         "config": "ci_android_release_arm64",
@@ -116,7 +119,8 @@
           "--android-cpu",
           "arm64",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile_arm64",
         "config": "ci_android_profile_arm64",
@@ -150,7 +154,8 @@
           "--android-cpu",
           "x64",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile_x64",
         "config": "android_profile_x64",
@@ -184,7 +189,8 @@
           "--android-cpu",
           "x64",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_x64",
         "config": "android_release_x64",
@@ -218,7 +224,8 @@
           "--android-cpu",
           "riscv64",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile_riscv64",
         "config": "android_profile_riscv64",
@@ -252,7 +259,8 @@
           "--android-cpu",
           "riscv64",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_riscv64",
         "config": "android_release_riscv64",
@@ -287,7 +295,8 @@
           "arm64",
           "--gn-args=dart_dynamic_modules=true",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_arm64_ddm",
         "config": "android_release_arm64_ddm",
@@ -321,7 +330,8 @@
           "x64",
           "--gn-args=dart_dynamic_modules=true",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_x64_ddm",
         "config": "android_release_x64_ddm",
@@ -355,7 +365,8 @@
           "arm64",
           "--no-dart-secure-socket",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_arm64_size_exp",
         "config": "android_release_arm64_size_exp",
@@ -387,7 +398,8 @@
           "--no-lto",
           "--no-dart-secure-socket",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_arm64_size_exp",
         "config": "android_debug_arm64_size_exp",
@@ -416,7 +428,8 @@
           "--android-cpu=arm",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug",
         "config": "android_debug",
@@ -451,7 +464,8 @@
           "--android-cpu=arm64",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_arm64",
         "config": "android_debug_arm64",
@@ -483,7 +497,8 @@
           "--android-cpu=x64",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_x64",
         "config": "android_debug_x64",
@@ -515,7 +530,8 @@
           "--android-cpu=riscv64",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_riscv64",
         "config": "android_debug_riscv64",
@@ -548,7 +564,8 @@
           "--no-lto",
           "--gn-args=dart_dynamic_modules=true",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_arm64_ddm",
         "config": "android_debug_arm64_ddm",
@@ -578,7 +595,8 @@
           "--no-lto",
           "--gn-args=dart_dynamic_modules=true",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_x64_ddm",
         "config": "android_debug_x64_ddm",
@@ -607,7 +625,8 @@
           "--no-rbe",
           "--target-dir",
           "ci/android_emulator_debug_x64",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_emulator_debug_x64",
         "config": "android_emulator_debug_x64",
@@ -653,7 +672,8 @@
           "ci/linux_debug_arm64_desktop",
           "--target-os=linux",
           "--linux-cpu=arm64",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/linux_debug_arm64_desktop",
         "config": "linux_debug_arm64_desktop",
@@ -686,7 +706,8 @@
           "ci/linux_profile_arm64_desktop",
           "--target-os=linux",
           "--linux-cpu=arm64",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/linux_profile_arm64_desktop",
         "config": "linux_profile_arm64_desktop",
@@ -719,7 +740,8 @@
           "ci/linux_release_arm64_desktop",
           "--target-os=linux",
           "--linux-cpu=arm64",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/linux_release_arm64_desktop",
         "config": "linux_release_arm64_desktop",
@@ -751,7 +773,8 @@
           "--prebuilt-dart-sdk",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/linux_debug_arm64",
         "config": "linux_debug_arm64",
@@ -835,7 +858,8 @@
           "--target-dir",
           "ci/android_debug_arm64_clang_tidy",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_arm64_clang_tidy",
         "config": "android_debug_arm64_clang_tidy",
@@ -863,7 +887,8 @@
           "--target-dir",
           "ci/host_debug_clang_tidy",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_clang_tidy",
         "config": "host_debug_clang_tidy",
@@ -923,7 +948,8 @@
           "--no-rbe",
           "--target-dir",
           "ci/host_debug_desktop",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_desktop",
         "config": "host_debug_desktop",
@@ -954,7 +980,8 @@
           "--no-rbe",
           "--target-dir",
           "ci/host_profile_desktop",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_profile_desktop",
         "config": "host_profile_desktop",
@@ -985,7 +1012,8 @@
           "--no-rbe",
           "--target-dir",
           "ci/host_release_desktop",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_desktop",
         "config": "host_release_desktop",
@@ -1015,7 +1043,8 @@
           "--prebuilt-dart-sdk",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug",
         "config": "ci_host_debug",
@@ -1050,7 +1079,8 @@
           "--prebuilt-dart-sdk",
           "--thin-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release",
         "config": "ci_host_release",
@@ -1081,7 +1111,8 @@
           "--no-lto",
           "--no-rbe",
           "--gn-args=dart_dynamic_modules=true",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_ddm",
         "config": "host_debug_ddm",
@@ -1112,7 +1143,8 @@
           "--build-embedder-examples",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_test",
         "config": "host_debug_test",
@@ -1156,7 +1188,8 @@
           "--thin-lto",
           "--use-glfw-swiftshader",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_profile_test",
         "config": "host_profile_test",
@@ -1232,7 +1265,8 @@
           "--thin-lto",
           "--use-glfw-swiftshader",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_test",
         "config": "host_release_test",
@@ -1363,7 +1397,8 @@
           "--asan",
           "--dart-debug",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_unopt",
         "config": "ci_host_debug_unopt",
@@ -1454,7 +1489,8 @@
           "ci/host_debug_unopt_impeller_tests",
           "--no-rbe",
           "--use-glfw-swiftshader",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_unopt_impeller_tests",
         "config": "host_debug_unopt_impeller_tests",
@@ -1491,7 +1527,8 @@
           "ci/android_embedder_debug_unopt",
           "--unoptimized",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_embedder_debug_unopt",
         "config": "android_embedder_debug_unopt",
@@ -1521,7 +1558,8 @@
           "--no-lto",
           "--enable-vulkan-validation-layers",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_arm64_validation_layers",
         "config": "android_debug_arm64_validation_layers",
@@ -1550,7 +1588,8 @@
           "--android",
           "--unoptimized",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_unopt",
         "config": "android_debug_unopt",
@@ -1584,7 +1623,8 @@
           "release",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_licenses",
         "config": "host_release_licenses",
@@ -1618,7 +1658,8 @@
           "--android-cpu=arm",
           "--no-lto",
           "--no-rbe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_debug_test",
         "config": "android_debug_test",
@@ -2006,7 +2047,8 @@
           "--android",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile",
         "config": "mac_android_profile",
@@ -2038,7 +2080,8 @@
           "--android-cpu=arm64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile_arm64",
         "config": "mac_android_profile_arm64",
@@ -2070,7 +2113,8 @@
           "--android-cpu=x64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_profile_x64",
         "config": "mac_android_profile_x64",
@@ -2101,7 +2145,8 @@
           "--android",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release",
         "config": "mac_android_release",
@@ -2133,7 +2178,8 @@
           "--android-cpu=arm64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_arm64",
         "config": "mac_android_release_arm64",
@@ -2165,7 +2211,8 @@
           "--android-cpu=x64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/android_release_x64",
         "config": "mac_android_release_x64",
@@ -2199,7 +2246,8 @@
           "arm64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_clang_tidy",
         "config": "mac_host_debug_clang_tidy",
@@ -2230,7 +2278,8 @@
           "arm64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_host_debug_clang_tidy_1",
         "config": "mac_host_debug_clang_tidy_1",
@@ -2262,7 +2311,8 @@
           "arm64",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim_clang_tidy",
         "config": "ios_debug_sim_clang_tidy",
@@ -2329,7 +2379,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_arm64_tests",
         "config": "host_debug_arm64_tests",
@@ -2409,7 +2460,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--use-glfw-swiftshader",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_unopt_arm64",
         "config": "host_debug_unopt_arm64",
@@ -2489,7 +2541,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_framework",
         "config": "host_debug_framework",
@@ -2523,7 +2576,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug",
         "config": "ci_mac_host_debug",
@@ -2558,7 +2612,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_debug_gen_snapshot",
         "config": "host_debug_gen_snapshot",
@@ -2590,7 +2645,8 @@
           "--build-embedder-examples",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_profile",
         "config": "ci_mac_host_profile",
@@ -2622,7 +2678,8 @@
           "--build-embedder-examples",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_profile_framework",
         "config": "host_profile_framework",
@@ -2654,7 +2711,8 @@
           "--build-embedder-examples",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_profile_gen_snapshot",
         "config": "host_profile_gen_snapshot",
@@ -2687,7 +2745,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release",
         "config": "ci_mac_host_release",
@@ -2721,7 +2780,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_framework",
         "config": "host_release_framework",
@@ -2754,7 +2814,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_gen_snapshot",
         "config": "host_release_gen_snapshot",
@@ -2788,7 +2849,8 @@
           "--prebuilt-dart-sdk",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_debug_arm64",
         "config": "mac_debug_arm64",
@@ -2824,7 +2886,8 @@
           "--prebuilt-dart-sdk",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_debug_framework_arm64",
         "config": "mac_debug_framework_arm64",
@@ -2859,7 +2922,8 @@
           "--prebuilt-dart-sdk",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_debug_gen_snapshot_arm64",
         "config": "mac_debug_gen_snapshot_arm64",
@@ -2893,7 +2957,8 @@
           "--prebuilt-dart-sdk",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_profile_arm64",
         "config": "mac_profile_arm64",
@@ -2927,7 +2992,8 @@
           "--prebuilt-dart-sdk",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_profile_framework_arm64",
         "config": "mac_profile_framework_arm64",
@@ -2961,7 +3027,8 @@
           "--prebuilt-dart-sdk",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_profile_gen_snapshot_arm64",
         "config": "mac_profile_gen_snapshot_arm64",
@@ -2996,7 +3063,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--use-glfw-swiftshader",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_release_arm64",
         "config": "mac_release_arm64",
@@ -3032,7 +3100,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--use-glfw-swiftshader",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_release_framework_arm64",
         "config": "mac_release_framework_arm64",
@@ -3067,7 +3136,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--use-glfw-swiftshader",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_release_gen_snapshot_arm64",
         "config": "mac_release_gen_snapshot_arm64",
@@ -3101,7 +3171,8 @@
           "--build-embedder-examples",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_profile_arm64_tests",
         "config": "host_profile_arm64_tests",
@@ -3175,7 +3246,8 @@
           "--no-lto",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_arm64_licenses",
         "config": "host_release_arm64_licenses",
@@ -3215,7 +3287,8 @@
           "--use-glfw-swiftshader",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/host_release_arm64_tests",
         "config": "host_release_arm64_tests",
@@ -3292,7 +3365,8 @@
           "--xcode-symlinks",
           "--target-dir",
           "ci/ios_debug_unopt_sim_arm64",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_unopt_sim_arm64",
         "config": "ios_debug_unopt_sim_arm64",
@@ -3335,7 +3409,8 @@
           "--xcode-symlinks",
           "--target-dir",
           "ci/ios_debug_unopt_sim_arm64_extension_safe",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_unopt_sim_arm64_extension_safe",
         "config": "ios_debug_unopt_sim_arm64_extension_safe",
@@ -3374,7 +3449,8 @@
           "--no-lto",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim",
         "config": "ci_ios_debug_sim",
@@ -3405,7 +3481,8 @@
           "--no-lto",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim_arm64",
         "config": "ios_debug_sim_arm64",
@@ -3433,7 +3510,8 @@
           "debug",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug",
         "config": "ci_ios_debug",
@@ -3464,7 +3542,8 @@
           "profile",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_profile",
         "config": "ci_ios_profile",
@@ -3495,7 +3574,8 @@
           "release",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_release",
         "config": "ci_ios_release",
@@ -3529,7 +3609,8 @@
           "--darwin-extension-safe",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim_extension_safe",
         "config": "ios_debug_sim_extension_safe",
@@ -3561,7 +3642,8 @@
           "--darwin-extension-safe",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim_arm64_extension_safe",
         "config": "ios_debug_sim_arm64_extension_safe",
@@ -3590,7 +3672,8 @@
           "--darwin-extension-safe",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_extension_safe",
         "config": "ios_debug_extension_safe",
@@ -3622,7 +3705,8 @@
           "--darwin-extension-safe",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_profile_extension_safe",
         "config": "ios_profile_extension_safe",
@@ -3654,7 +3738,8 @@
           "--darwin-extension-safe",
           "--no-rbe",
           "--xcode-symlinks",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_release_extension_safe",
         "config": "ios_release_extension_safe",
@@ -3688,7 +3773,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--gn-args=dart_dynamic_modules=true",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim_ddm",
         "config": "ios_debug_sim_ddm",
@@ -3720,7 +3806,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--gn-args=dart_dynamic_modules=true",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_sim_arm64_ddm",
         "config": "ios_debug_sim_arm64_ddm",
@@ -3749,7 +3836,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--gn-args=dart_dynamic_modules=true",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_debug_ddm",
         "config": "ios_debug_ddm",
@@ -3781,7 +3869,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--gn-args=dart_dynamic_modules=true",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/ios_release_ddm",
         "config": "ios_release_ddm",
@@ -3817,7 +3906,8 @@
           "--no-rbe",
           "--xcode-symlinks",
           "--use-glfw-swiftshader",
-          "--bazel"
+          "--bazel",
+          "--bazel-rbe"
         ],
         "build_directory": "ci/mac_release_arm64_tests",
         "config": "mac_release_arm64_tests",

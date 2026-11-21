@@ -26,7 +26,8 @@
                 "--no-rbe",
                 "--target-dir",
                 "ci/android_emulator_debug_x64",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "dependencies": [
                 {

@@ -41,7 +41,8 @@
                 "--no-lto",
                 "--no-rbe",
                 "--gn-args=dart_dynamic_modules=true",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug_ddm",
             "timeout": 240,

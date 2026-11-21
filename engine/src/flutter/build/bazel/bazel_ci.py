@@ -43,11 +43,13 @@ import urllib.parse
 # `--xcode-symlinks` is how a Mac build under reclient reaches Xcode (the
 # Mac builder files carry it in presubmit and not in their
 # postsubmit_overrides, which otherwise name the same build); `--bazel` is
-# this mode's own, and so are `--bazel-rbe` and `--no-bazel-rbe` (RBE_FLAGS:
-# whether the Bazel build's actions run on Flutter's RBE instance,
-# rbe_options). They are left out when a flag list is matched against the
-# builder files'.
-RBE_FLAGS = {'--bazel-rbe': True, '--no-bazel-rbe': False}
+# this mode's own, and so are `--bazel-rbe` and `--no-bazel-rbe`. They are
+# left out when a flag list is matched against the builder files'.
+#
+# RBE_FLAGS are the ones that say whether the Bazel build's actions run on
+# Flutter's RBE instance (rbe_flag): tools/gn's own pair and this mode's,
+# one say between the four.
+RBE_FLAGS = {'--rbe': True, '--no-rbe': False, '--bazel-rbe': True, '--no-bazel-rbe': False}
 INFRA_FLAGS = frozenset([
     '--bazel', '--rbe', '--no-rbe', '--goma', '--no-goma', '--xcode-symlinks',
     '--no-xcode-symlinks', *RBE_FLAGS
@@ -295,8 +297,8 @@ def build_options(engine_src, rbe=None):
   with it, bounded -- serves every such repeat; the root .bazelrc's
   home-directory cache is the developer's own builds'. A bot builds one
   build per task from nothing and keeps nothing (bazel_home): no disk cache;
-  a Linux bot runs on RBE instead (rbe_options; `rbe` is the flags' say,
-  rbe_flag).
+  it runs on RBE instead when its flags say so (rbe_options; `rbe` is the
+  flags' say, rbe_flag).
   """
   if on_bot():
     return rbe_options(rbe) + bot_sandbox_options()
@@ -306,26 +308,41 @@ def build_options(engine_src, rbe=None):
   ]
 
 
-# A Linux bot's builds run their actions on Flutter's RBE instance (the
-# root .bazelrc's build:rbe: the reclient instance of the GN builds, its
-# debian11 image, 200 jobs, the bot's GCE credentials) and so share their
-# results: a build repeats nothing another bot has done since the inputs
-# changed. The wrapped GN builds and the engine's tests (TEST_OPTIONS) stay
-# on the bot. A Mac bot sends its C/C++/Objective-C compiles to the same
-# workers (build:rbe_mac, the Apple toolchains' remote mode) and keeps the
-# rest on the machine. Three ways to
-# say otherwise, for a comparison of the two: `--no-bazel-rbe` among a
-# build's tools/gn flags (a builder file can carry it per build;
-# `--bazel-rbe` asks for RBE anywhere, a developer's checkout included,
-# given credentials for the instance), FLUTTER_BAZEL_RBE=0 in the
-# environment for a run, and RBE_ON_BOTS, the default a bot gets without
-# either.
-RBE_ON_BOTS = True
-RBE_ENV = 'FLUTTER_BAZEL_RBE'
+# A Bazel build runs its actions on Flutter's RBE instance when its flags
+# say so, as a GN build does (rbe_flag). A Linux host's are then the root
+# .bazelrc's build:rbe -- the reclient instance of the GN builds, its
+# debian11 image, 200 jobs, the bot's GCE credentials -- and the build
+# shares its results: it repeats nothing another bot has done since the
+# inputs changed. The wrapped GN builds' compiles go there too
+# (WRAP_RBE_FLAG); the engine's tests stay on the bot (TEST_OPTIONS). A
+# Mac's are build:rbe_mac: its C/C++/Objective-C compiles on the same
+# workers (the Apple toolchains' remote mode), the rest on the machine.
+#
+# Nothing but its flags makes a bot's build remote, so the builds the
+# infrastructure wants off RBE are off it, and off the remote cache with it:
+#
+# * A builder file's Bazel build carries `--no-rbe` where upstream's GN
+#   build carries `--rbe` -- the recipe starts its reclient proxy around
+#   ninja unless the flags hold `--no-rbe`, and this ninja runs Bazel --
+#   and `--bazel-rbe` after it when the build is to run on RBE:
+#   `... --no-rbe --bazel --bazel-rbe`.
+# * To an official build's flags the recipe appends `--no-goma --no-rbe`
+#   ("Goma/RBE is not supported for official builds"): the last say.
+# * A build's postsubmit_overrides name its flags again for the prod
+#   builds. Upstream's Mac ones say `--no-rbe` (the Mac artifacts are built
+#   without RBE); so do the Bazel builds', without `--bazel-rbe`.
+# * A build upstream runs with `--no-rbe` (ci/wasm_release, the license and
+#   the clangd builds) carries no `--bazel-rbe`.
 
 
 def rbe_flag(flags):
-  """What the tools/gn flags say about RBE: True (--bazel-rbe), False (--no-bazel-rbe), None."""
+  """What a flag list says about RBE: True, False, or None when it says nothing.
+
+  The last of RBE_FLAGS in the list, tools/gn's own pair and this mode's
+  alike: `--no-rbe --bazel --bazel-rbe` is a build on RBE whose recipe
+  starts no proxy, and the same list with the recipe's `--no-rbe` after it
+  (an official build) is a build on the machine.
+  """
   value = None
   for flag in flags:
     value = RBE_FLAGS.get(flag, value)
@@ -370,17 +387,12 @@ def rbe_config():
 
 
 def rbe_options(rbe=None):
-  """This host's RBE options (rbe_config) as the flags say (`rbe`), else a bot's.
+  """This host's RBE options (rbe_config) if the flags say RBE (`rbe`, rbe_flag), else none.
 
-  A bot's default is RBE_ON_BOTS unless FLUTTER_BAZEL_RBE=0; a developer's
-  is off. Never on a host without workers for it (Windows).
+  A build whose flags say nothing about it runs on the machine, a bot's as
+  a developer's. Never RBE on a host without workers for it (Windows).
   """
-  config = rbe_config()
-  if not config:
-    return []
-  if rbe is None:
-    rbe = on_bot() and RBE_ON_BOTS and os.environ.get(RBE_ENV, '1') not in ('0', 'false', 'no')
-  return config if rbe else []
+  return rbe_config() if rbe else []
 
 
 # Where a bot's sandboxes go when the machine has the memory for it: a

@@ -100,10 +100,27 @@ class NormalizedFlagsTest(unittest.TestCase):
     )
 
   def test_the_rbe_flags_are_read_and_the_last_wins(self):
-    self.assertIsNone(bazel_ci.rbe_flag(['--bazel', '--target-dir', 'ci/x', '--no-rbe']))
+    self.assertIsNone(bazel_ci.rbe_flag(['--bazel', '--target-dir', 'ci/x', '--no-goma']))
+    self.assertIs(bazel_ci.rbe_flag(['--bazel', '--target-dir', 'ci/x', '--no-rbe']), False)
+    self.assertIs(bazel_ci.rbe_flag(['--rbe', '--bazel']), True)
     self.assertIs(bazel_ci.rbe_flag(['--bazel', '--no-bazel-rbe']), False)
     self.assertIs(bazel_ci.rbe_flag(['--bazel', '--bazel-rbe']), True)
     self.assertIs(bazel_ci.rbe_flag(['--no-bazel-rbe', '--bazel-rbe']), True)
+    self.assertIs(bazel_ci.rbe_flag(['--bazel-rbe', '--no-bazel-rbe']), False)
+
+  def test_the_recipes_no_rbe_takes_a_build_off_rbe(self):
+    # A builder file's build on RBE: --no-rbe for the recipe (no reclient
+    # proxy around ninja), then --bazel-rbe for the build.
+    build = ['--target-dir', 'ci/x', '--no-rbe', '--xcode-symlinks', '--bazel', '--bazel-rbe']
+    self.assertIs(bazel_ci.rbe_flag(build), True)
+    # An official build: the recipe appends these to the same flags.
+    official = build + ['--no-goma', '--no-rbe', '--gn-args=engine_version="abc"']
+    self.assertIs(bazel_ci.rbe_flag(official), False)
+    # A prod build of a Mac: the file's postsubmit_overrides, upstream's
+    # --no-rbe and no --bazel-rbe.
+    self.assertIs(bazel_ci.rbe_flag(['--target-dir', 'ci/x', '--no-rbe', '--bazel']), False)
+    # The say is not among the flags a build is matched by.
+    self.assertEqual(bazel_ci.normalized_flags(official), ['--target-dir', 'ci/x'])
 
   def test_other_gn_args_stay(self):
     self.assertEqual(
@@ -261,7 +278,9 @@ class BuildDirectoryTest(unittest.TestCase):
     with unittest.mock.patch.dict(
         os.environ,
         {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json', 'TMPDIR': '/b/s/w/ir/tmp/t'}):
-      bazel_ci.write_build_directory(self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk')
+      bazel_ci.write_build_directory(
+          self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk', rbe=True
+      )
       description = bazel_ci.read_build_directory(out_dir)
       rbe = bazel_ci.rbe_config()
       if sys.platform.startswith('linux'):
@@ -272,26 +291,25 @@ class BuildDirectoryTest(unittest.TestCase):
         self.assertEqual(rbe, [])
       self.assertEqual(
           description['build_options'],
-          bazel_ci.rbe_options() + bazel_ci.bot_sandbox_options()
+          bazel_ci.rbe_options(True) + bazel_ci.bot_sandbox_options()
       )
       self.assertIn(description['build_options'], [rbe, rbe + ['--sandbox_base=/dev/shm']])
-      # RBE is a bot's default (RBE_ON_BOTS) on Linux and on a Mac, each
-      # with its own config, never elsewhere; the environment and the flags
-      # switch it for a run.
-      with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '0'}):
+      # RBE is what the build's flags say (rbe_flag), on Linux and on a Mac
+      # each with its own config, never elsewhere. A bot's build whose flags
+      # say no, or nothing, runs on the bot: nothing but the flags makes it
+      # remote, and the environment has no say.
+      self.assertEqual(bazel_ci.rbe_options(True), rbe)
+      self.assertEqual(bazel_ci.rbe_options(False), [])
+      self.assertEqual(bazel_ci.rbe_options(), [])
+      with unittest.mock.patch.dict(os.environ, {'FLUTTER_BAZEL_RBE': '1'}):
         self.assertEqual(bazel_ci.rbe_options(), [])
-        self.assertEqual(bazel_ci.rbe_options(True), rbe)
-      with unittest.mock.patch.dict(os.environ, {bazel_ci.RBE_ENV: '1'}):
-        self.assertEqual(bazel_ci.rbe_options(), rbe)
-        self.assertEqual(bazel_ci.rbe_options(False), [])
-      with unittest.mock.patch.object(bazel_ci, 'RBE_ON_BOTS', False):
-        self.assertEqual(bazel_ci.rbe_options(), [])
-        self.assertEqual(bazel_ci.rbe_options(True), rbe)
-      # --no-bazel-rbe among a build's flags reaches the description.
-      bazel_ci.write_build_directory(
-          self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk', rbe=False
-      )
-      self.assertNotIn('--config=rbe', bazel_ci.read_build_directory(out_dir)['build_options'])
+      for say in (False, None):
+        bazel_ci.write_build_directory(
+            self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk', rbe=say
+        )
+        local = bazel_ci.read_build_directory(out_dir)['build_options']
+        self.assertEqual(local, bazel_ci.bot_sandbox_options())
+        self.assertFalse([option for option in local if 'rbe' in option])
     self.assertEqual(
         description['startup_options'],
         ['--output_user_root=/b/s/w/ir/tmp/t/bazel_ci/output', '--max_idle_secs=300']
@@ -704,6 +722,32 @@ class RealTableTest(unittest.TestCase):
                        build['name'])
       checked += 1
     self.assertGreater(checked, 10)
+
+  def test_every_bazel_build_says_where_it_runs(self):
+    # ... and with what the recipe appends to an official build's flags,
+    # every one of them runs on the bot.
+    this = os.path.abspath(__file__)
+    engine_src = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(this))))
+    if not os.path.isfile(bazel_ci.builds_table(engine_src)):
+      self.skipTest('no builds.json beside the module')
+    remote = local = 0
+    for host in ('linux', 'mac'):
+      for build in bazel_ci.load_builds(engine_src, host):
+        flags = build['gn']
+        if '--bazel' not in flags:
+          continue
+        # The file's own say: --no-rbe for the recipe, --bazel-rbe after it
+        # for a build on RBE.
+        self.assertIn('--no-rbe', flags, build['name'])
+        self.assertNotIn('--rbe', flags, build['name'])
+        say = bazel_ci.rbe_flag(flags)
+        self.assertIsNotNone(say, build['name'])
+        remote += say
+        local += not say
+        # With what the recipe appends to an official build's flags.
+        self.assertIs(bazel_ci.rbe_flag(flags + ['--no-goma', '--no-rbe']), False, build['name'])
+    self.assertGreater(remote, 10)
+    self.assertGreater(local, 0)
 
 
 if __name__ == '__main__':

@@ -23,7 +23,8 @@
         "--no-rbe",
         "--xcode-symlinks",
         "--use-glfw-swiftshader",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
     ],
     "name": "ci/host_debug_unopt_arm64",
     "description": "Builds a debug mode unopt arm64 macOS engine and runs host-side tests.",

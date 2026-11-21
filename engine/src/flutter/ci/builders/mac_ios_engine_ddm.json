@@ -33,7 +33,8 @@
         "--no-rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
       ],
       "name": "ci/ios_debug_sim_ddm",
       "timeout": 240,
@@ -84,7 +85,8 @@
         "--no-rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
       ],
       "name": "ci/ios_debug_sim_arm64_ddm",
       "timeout": 240,
@@ -133,7 +135,8 @@
         "--no-rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
       ],
       "name": "ci/ios_debug_ddm",
       "timeout": 240,
@@ -183,7 +186,8 @@
         "--no-rbe",
         "--xcode-symlinks",
         "--gn-args=dart_dynamic_modules=true",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
       ],
       "name": "ci/ios_release_ddm",
       "timeout": 240,

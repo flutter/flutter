@@ -23,7 +23,8 @@
         "--use-glfw-swiftshader",
         "--no-rbe",
         "--xcode-symlinks",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
     ],
     "name": "ci/host_release_arm64_tests",
     "description": "Produces release mode arm64 macOS host-side tooling and builds host-side unit tests for arm64 macOS.",

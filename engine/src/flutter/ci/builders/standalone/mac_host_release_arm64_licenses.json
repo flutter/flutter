@@ -20,7 +20,8 @@
         "--no-lto",
         "--no-rbe",
         "--xcode-symlinks",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
     ],
     "name": "ci/host_release_arm64_licenses",
     "description": "Runs the license_cpp script.",

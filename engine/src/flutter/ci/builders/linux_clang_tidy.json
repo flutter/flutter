@@ -30,7 +30,8 @@
                 "--target-dir",
                 "ci/android_debug_arm64_clang_tidy",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_arm64_clang_tidy",
             "description": "A debug mode arm64 Android build used only as the basis for a clang-tidy run, which runs as its test step.",
@@ -69,7 +70,8 @@
                 "--target-dir",
                 "ci/host_debug_clang_tidy",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug_clang_tidy",
             "description": "A debug mode Linux host build used only as the basis for a clang-tidy run, which runs as its test step.",

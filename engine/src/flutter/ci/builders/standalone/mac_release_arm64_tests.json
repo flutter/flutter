@@ -29,7 +29,8 @@
         "--no-rbe",
         "--xcode-symlinks",
         "--use-glfw-swiftshader",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
     ],
     "name": "ci/mac_release_arm64_tests",
     "description": "Produces release mode arm64 macOS host-side tooling.",

@@ -43,7 +43,8 @@
                 "ci/linux_debug_arm64_desktop",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/linux_debug_arm64_desktop",
             "timeout": 240,
@@ -87,7 +88,8 @@
                 "ci/linux_profile_arm64_desktop",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/linux_profile_arm64_desktop",
             "timeout": 240,
@@ -131,7 +133,8 @@
                 "ci/linux_release_arm64_desktop",
                 "--target-os=linux",
                 "--linux-cpu=arm64",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/linux_release_arm64_desktop",
             "timeout": 240,

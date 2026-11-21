@@ -23,7 +23,8 @@
         "--xcode-symlinks",
         "--target-dir",
         "ci/ios_debug_unopt_sim_arm64",
-        "--bazel"
+        "--bazel",
+        "--bazel-rbe"
     ],
     "name": "ci/ios_debug_unopt_sim_arm64",
     "description": "Builds a debug mode engine for arm64 iOS simulator. Runs unit tests and the scenario app tests.",

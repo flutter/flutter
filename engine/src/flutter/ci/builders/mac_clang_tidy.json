@@ -38,7 +38,8 @@
                 "arm64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/host_debug_clang_tidy",
             "description": "A debug mode macOS host build used only as the basis for a clang-tidy run, which runs as its test step.",
@@ -88,7 +89,8 @@
                 "arm64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/mac_host_debug_clang_tidy_1",
             "description": "A debug mode macOS host build (the second of two drones) used only as the basis for a clang-tidy run, which runs as its test step.",
@@ -139,7 +141,8 @@
                 "arm64",
                 "--no-rbe",
                 "--xcode-symlinks",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/ios_debug_sim_clang_tidy",
             "description": "A debug mode iOS simulator build used only as the basis for a clang-tidy run, which runs as its test step.",

@@ -40,7 +40,8 @@
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_arm64_ddm",
             "timeout": 240,
@@ -81,7 +82,8 @@
                 "--no-lto",
                 "--gn-args=dart_dynamic_modules=true",
                 "--no-rbe",
-                "--bazel"
+                "--bazel",
+                "--bazel-rbe"
             ],
             "name": "ci/android_debug_x64_ddm",
             "timeout": 240,

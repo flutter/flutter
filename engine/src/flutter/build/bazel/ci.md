@@ -58,7 +58,8 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   copy.
 - **The builder files** carry `--bazel` among each build's flags (and
   `--no-rbe` in place of `--rbe`, so the recipe starts no reproxy -- Bazel
-  speaks to RBE itself -- with `use_rbe: true` kept among the gclient
+  speaks to RBE itself, for a build whose flags then say `--bazel-rbe`
+  (below) -- with `use_rbe: true` kept among the gclient
   variables for the reclient and cfgs the wrapped GN builds' compiles use,
   and `download_bazelisk: true`). The Linux engine builders build this way
   themselves, in
@@ -294,18 +295,26 @@ the test for real, and so does the command from `engine/src`.
   properties, their `rbe_jobs` as `--jobs=200`,
   `--google_default_credentials`: the emulated GCE metadata server every
   LUCI bot has, which is how reclient authenticates there too), which
-  bazel_ci.py adds to every build on a Linux bot (a Mac sends its compiles
-  alone, below: the workers are Linux x64). Three ways to turn it off, so that the two
-  can be compared on the bots: `--no-bazel-rbe` among a build's `gn` flags
-  in its builder file (an infrastructure flag like `--bazel`, matched away;
-  `--bazel-rbe` asks for RBE anywhere, a developer's Linux checkout
-  included, given `gcloud auth application-default login`; off a bot that
-  is `build:rbe_dev`, the same with the links on the machine, where an
-  edit's link takes a few seconds instead of a minute),
-  `FLUTTER_BAZEL_RBE=0` in the environment of a run, and `RBE_ON_BOTS` in
-  bazel_ci.py, the default a Linux bot gets without either; test.dart's
-  shards have the same three (`--bazel-rbe` / `--no-bazel-rbe`, the
-  variable, `kBazelRbeOnBots` in dev/bots/bazel.dart). The compiles,
+  bazel_ci.py adds to a build whose flags say RBE (a Mac sends its compiles
+  alone, below: the workers are Linux x64). The flags say it as they say
+  it for a GN build, and the last one decides: `--rbe` and `--no-rbe`,
+  tools/gn's own, and `--bazel-rbe` and `--no-bazel-rbe`, which ask the
+  same of the Bazel build without the recipe's reclient proxy (the recipe
+  starts one around ninja unless the flags hold `--no-rbe`). A builder
+  file's Bazel build that upstream runs with `--rbe` is `... --no-rbe
+  --bazel --bazel-rbe`. Nothing else makes a bot's build remote, so the
+  builds the infrastructure wants off RBE are off it, and off the remote
+  cache with it: an official build, to whose flags the recipe appends
+  `--no-goma --no-rbe`; a prod build whose `postsubmit_overrides` say
+  `--no-rbe` (upstream's Mac ones: the Mac artifacts are built without
+  RBE); and a build upstream runs with `--no-rbe` (`ci/wasm_release`, the
+  license and the clangd builds), which carries no `--bazel-rbe`. Off a
+  bot `--bazel-rbe` is `build:rbe_dev`, given `gcloud auth
+  application-default login`: the same with the links on the machine,
+  where an edit's link takes a few seconds instead of a minute.
+  test.dart's shards, which build no artifact, have three switches of
+  their own (`--bazel-rbe` / `--no-bazel-rbe`, `FLUTTER_BAZEL_RBE=0` in
+  the environment, `kBazelRbeOnBots` in dev/bots/bazel.dart). The compiles,
   links, kernel compiles and snapshots run on the
   workers, 200 at a time where a try bot has 8 cores, and their results
   stay in the instance's cache for every later build, so a bot's build
@@ -452,8 +461,8 @@ the test for real, and so does the command from `engine/src`.
   `flutter/prebuilts/SDKs/`, where GN's own symlinks go, named to GN as
   `mac_sdk_path` and the iOS SDK paths so that `-isysroot` is a path under
   the exec root. bazel_ci.py adds `--config=rbe_mac` and the wrap flag on
-  a Mac bot as it adds `--config=rbe` on a Linux one (the same three
-  switches), and the Mac Bazel builders' files say `use_rbe: true` again
+  a Mac bot as it adds `--config=rbe` on a Linux one (for the same
+  flags), and the Mac Bazel builders' files say `use_rbe: true` again
   for the sync (reclient, the cfgs, the Linux clang; `--no-rbe` stays, the
   recipe starts no proxy). The bot's emulated metadata server is the same
   on a Mac ("in all environments for uniformity", the rbe recipe module).
