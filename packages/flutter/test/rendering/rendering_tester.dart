@@ -189,6 +189,10 @@ class TestRenderingFlutterBinding extends BindingBase
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
     FlutterError.onError = _errors.add;
     try {
+      if (phase == EnginePhase.sendSemanticsUpdate) {
+        super.drawFrame();
+        return;
+      }
       rootPipelineOwner.flushLayout();
       if (phase == EnginePhase.layout) {
         return;
@@ -204,14 +208,14 @@ class TestRenderingFlutterBinding extends BindingBase
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame();
       }
+      if (shouldFlushHitTestRegions) {
+        rootPipelineOwner.flushHitTestRegions();
+      }
       if (phase == EnginePhase.composite) {
         return;
       }
+      assert(phase == EnginePhase.flushSemantics);
       rootPipelineOwner.flushSemantics();
-      if (phase == EnginePhase.flushSemantics) {
-        return;
-      }
-      assert(phase == EnginePhase.flushSemantics || phase == EnginePhase.sendSemanticsUpdate);
     } finally {
       FlutterError.onError = oldErrorHandler;
       if (_errors.isNotEmpty) {
