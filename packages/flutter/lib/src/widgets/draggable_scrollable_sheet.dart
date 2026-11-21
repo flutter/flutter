@@ -58,6 +58,16 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// be used to control one sheet at a time. A controller can be reused with a
 /// new sheet if the previous sheet has been disposed.
 ///
+/// A sheet detaches from its controller when it is removed from the tree, and
+/// attaches again if it is reinserted, for example when it is moved with a
+/// [GlobalKey]. So a sheet that is recreated instead of updated, for example
+/// because an un-keyed sibling was inserted before it, can attach its new
+/// [State] to the same controller. When the sheet's key, or the key of one of
+/// its ancestors in a [Row], [Column], [Stack] or similar, changes, the new
+/// sheet is created before the old one is removed, and attaching throws. Keep
+/// those keys stable, or give the sheet a [GlobalKey] so that its [State] is
+/// reused.
+///
 /// The controller's methods cannot be used until after the controller has been
 /// passed into a [DraggableScrollableSheet] and the sheet has run initState.
 ///
@@ -207,33 +217,65 @@ class DraggableScrollableController extends ChangeNotifier {
   }
 
   void _attach(_DraggableScrollableSheetScrollController scrollController) {
-    assert(
-      _attachedController == null,
-      'Draggable scrollable controller is already attached to a sheet.',
-    );
+    assert(() {
+      // A sheet detaches when it is deactivated, so a controller that is still
+      // attached here belongs to another sheet that is in the tree.
+      if (_attachedController != null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('DraggableScrollableController is already attached to a sheet.'),
+          ErrorDescription(
+            'A DraggableScrollableController can only be attached to one '
+            'DraggableScrollableSheet at a time, but it was given to a new sheet while '
+            'it was still attached to another one.',
+          ),
+          ErrorDescription(
+            'This can also happen when a single DraggableScrollableSheet is recreated '
+            'instead of updated because its key, or the key of one of its ancestors in a '
+            'Row, Column, Stack or similar, changed. The new sheet attaches to the '
+            'controller before the old sheet is removed from the tree.',
+          ),
+          ErrorHint(
+            'Use a separate DraggableScrollableController for each sheet. If a single '
+            'sheet is being recreated, keep its key and the keys of its ancestors stable, '
+            'or, as a last resort, give the sheet a GlobalKey so that its State is reused '
+            'when it moves.',
+          ),
+        ]);
+      }
+      return true;
+    }());
     _attachedController = scrollController;
     _attachedController!.extent._currentSize.addListener(notifyListeners);
     _attachedController!.onPositionDetached = _disposeAnimationControllers;
   }
 
-  void _onExtentReplaced(_DraggableSheetExtent previousExtent) {
+  void _onExtentReplaced(
+    _DraggableScrollableSheetScrollController scrollController,
+    _DraggableSheetExtent previousExtent,
+  ) {
+    // Only the sheet that is currently attached is listened to.
+    if (_attachedController != scrollController) {
+      return;
+    }
     // When the extent has been replaced, the old extent is already disposed and
     // the controller will point to a new extent. We have to add our listener to
     // the new extent.
-    _attachedController!.extent._currentSize.addListener(notifyListeners);
-    if (previousExtent.currentSize != _attachedController!.extent.currentSize) {
+    scrollController.extent._currentSize.addListener(notifyListeners);
+    if (previousExtent.currentSize != scrollController.extent.currentSize) {
       // The listener won't fire for a change in size between two extent
       // objects so we have to fire it manually here.
       notifyListeners();
     }
   }
 
-  void _detach({bool disposeExtent = false}) {
-    if (disposeExtent) {
-      _attachedController?.extent.dispose();
-    } else {
-      _attachedController?.extent._currentSize.removeListener(notifyListeners);
+  void _detach(_DraggableScrollableSheetScrollController scrollController) {
+    // Only the sheet that is currently attached can detach, so a sheet that is
+    // not attached can never detach another one.
+    if (_attachedController != scrollController) {
+      return;
     }
+    scrollController.extent._currentSize.removeListener(notifyListeners);
+    scrollController.onPositionDetached = null;
     _disposeAnimationControllers();
     _attachedController = null;
   }
@@ -694,7 +736,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   void didUpdateWidget(covariant DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?._detach();
+      oldWidget.controller?._detach(_scrollController);
       widget.controller?._attach(_scrollController);
     }
     _replaceExtent(oldWidget);
@@ -728,12 +770,23 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   }
 
   @override
+  void activate() {
+    super.activate();
+    // The sheet was reinserted into the tree, for example with a GlobalKey.
+    widget.controller?._attach(_scrollController);
+  }
+
+  @override
+  void deactivate() {
+    // Detach as soon as the sheet leaves the tree, so that a sheet that replaces
+    // this one can attach to the same controller.
+    widget.controller?._detach(_scrollController);
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    if (widget.controller == null) {
-      _extent.dispose();
-    } else {
-      widget.controller!._detach(disposeExtent: true);
-    }
+    _extent.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -754,7 +807,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     _scrollController.extent = _extent;
     // If an external facing controller was provided, let it know that the
     // extent has been replaced.
-    widget.controller?._onExtentReplaced(previousExtent);
+    widget.controller?._onExtentReplaced(_scrollController, previousExtent);
     previousExtent.dispose();
     if (widget.snap &&
         (widget.snap != oldWidget.snap || widget.snapSizes != oldWidget.snapSizes) &&
