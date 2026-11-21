@@ -422,6 +422,35 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isTrue);
     }, variant: TargetPlatformVariant.desktop());
 
+    testWidgets('restores primary focus before any microtask runs when resumed.', (
+      WidgetTester tester,
+    ) async {
+      final FocusLifecyclePolicy oldPolicy = tester.binding.focusManager.lifecyclePolicy;
+      addTearDown(() => tester.binding.focusManager.lifecyclePolicy = oldPolicy);
+      tester.binding.focusManager.lifecyclePolicy = FocusLifecyclePolicy.automatic;
+      final BuildContext context = await setupWidget(tester);
+      final scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.inactive);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      // With merged UI and platform threads, a key event can be dispatched
+      // right after the lifecycle message, before its microtasks have run.
+      // Focus has to be back on the node by then.
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    }, variant: TargetPlatformVariant.desktop());
+
     testWidgets(
       'automatic lifecycle policy does not restore a node that was detached while paused.',
       (WidgetTester tester) async {
