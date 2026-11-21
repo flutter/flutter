@@ -12,7 +12,6 @@ import 'package:process/process.dart';
 
 import '../base/bot_detector.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
@@ -22,13 +21,11 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../git.dart';
 import '../project.dart';
 import '../version.dart';
 import 'package_map.dart';
-
-/// The [Pub] instance.
-Pub get pub => context.get<Pub>()!;
 
 /// The console environment key used by the pub tool.
 const _kPubEnvironmentKey = 'PUB_ENVIRONMENT';
@@ -110,7 +107,11 @@ enum PubOutputMode {
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
-  factory Pub({required ToolContext toolContext, Stdio? stdio}) {
+  factory Pub({
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
+    Stdio? stdio,
+  }) {
     final ToolContext(
       :BotDetector botDetector,
       :Cache cache,
@@ -125,6 +126,7 @@ abstract class Pub {
         cache: cache,
         fileSystem: fileSystem,
         flutterRoot: cache.flutterRoot,
+        isOmitLegacyVersionFileEnabled: () => featureFlags.isOmitLegacyVersionFileEnabled,
         logger: logger,
         platform: platform,
         processManager: processManager,
@@ -136,6 +138,7 @@ abstract class Pub {
       cache: cache,
       fileSystem: fileSystem,
       flutterRoot: cache.flutterRoot,
+      isOmitLegacyVersionFileEnabled: () => featureFlags.isOmitLegacyVersionFileEnabled,
       logger: logger,
       platform: platform,
       processManager: processManager,
@@ -153,6 +156,7 @@ abstract class Pub {
     required ProcessManager processManager,
     required Stdio stdio,
     Cache? cache,
+    bool Function()? isOmitLegacyVersionFileEnabled,
   }) {
     return _DefaultPub.test(
       botDetector: botDetector,
@@ -166,6 +170,8 @@ abstract class Pub {
           ),
       fileSystem: fileSystem,
       flutterRoot: flutterRoot,
+      isOmitLegacyVersionFileEnabled:
+          isOmitLegacyVersionFileEnabled ?? () => omitLegacyVersionFile.master.enabledByDefault,
       logger: logger,
       platform: platform,
       processManager: processManager,
@@ -248,6 +254,7 @@ class _DefaultPub implements Pub {
     required this._cache,
     required this._fileSystem,
     required this._flutterRoot,
+    required this._isOmitLegacyVersionFileEnabled,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
@@ -265,6 +272,7 @@ class _DefaultPub implements Pub {
     required this._cache,
     required this._fileSystem,
     required this._flutterRoot,
+    required this._isOmitLegacyVersionFileEnabled,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
@@ -282,6 +290,7 @@ class _DefaultPub implements Pub {
   final Platform _platform;
   final BotDetector _botDetector;
   final Cache _cache;
+  final bool Function() _isOmitLegacyVersionFileEnabled;
   final ProcessManager _processManager;
   final Stdio? _stdio;
   final String _flutterRoot;
@@ -353,6 +362,7 @@ class _DefaultPub implements Pub {
         flutterRoot: _flutterRoot,
         fs: _fileSystem,
         git: _git,
+        isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled,
         logger: _logger,
         platform: _platform,
       );
@@ -420,7 +430,7 @@ class _DefaultPub implements Pub {
       _fileSystem.path.relative(directory),
       'check-resolution-up-to-date',
     ];
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+    final Map<String, String> pubEnvironment = _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
     );
@@ -457,7 +467,7 @@ class _DefaultPub implements Pub {
     int exitCode;
 
     final pubCommand = <String>[..._pubCommand, ...arguments];
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+    final Map<String, String> pubEnvironment = _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
       summaryOnly: outputMode == PubOutputMode.summaryOnly,
@@ -591,7 +601,7 @@ class _DefaultPub implements Pub {
     String failureMessage = 'pub failed',
     String? flutterRootOverride,
   }) async {
-    final bool showTraceForErrors = await _botDetector.isRunningOnBot;
+    final bool showTraceForErrors = _botDetector.isRunningOnBot;
 
     var lastPubMessage = 'no message';
     String? filterWrapper(String line) {
@@ -605,7 +615,7 @@ class _DefaultPub implements Pub {
     if (showTraceForErrors) {
       arguments.insert(0, '--trace');
     }
-    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+    final Map<String, String> pubEnvironment = _createPubEnvironment(
       context: context,
       flutterRootOverride: flutterRootOverride,
     );
@@ -678,13 +688,13 @@ class _DefaultPub implements Pub {
   //
   // [context] provides extra information to package server requests to
   // understand usage.
-  Future<String> _getPubEnvironmentValue(PubContext pubContext) async {
+  String _getPubEnvironmentValue(PubContext pubContext) {
     // DO NOT update this function without contacting kevmoo.
     // We have server-side tooling that assumes the values are consistent.
     final String? existing = _platform.environment[_kPubEnvironmentKey];
     final values = <String>[
       if (existing != null && existing.isNotEmpty) existing,
-      if (await _botDetector.isRunningOnBot) 'flutter_bot',
+      if (_botDetector.isRunningOnBot) 'flutter_bot',
       'flutter_cli',
       ...pubContext._values,
     ];
@@ -742,14 +752,14 @@ class _DefaultPub implements Pub {
   ///
   /// [context] provides extra information to package server requests to
   /// understand usage.
-  Future<Map<String, String>> _createPubEnvironment({
+  Map<String, String> _createPubEnvironment({
     required PubContext context,
     String? flutterRootOverride,
     bool? summaryOnly = false,
-  }) async {
+  }) {
     final environment = <String, String>{
       'FLUTTER_ROOT': flutterRootOverride ?? _flutterRoot,
-      _kPubEnvironmentKey: await _getPubEnvironmentValue(context),
+      _kPubEnvironmentKey: _getPubEnvironmentValue(context),
       if (summaryOnly ?? false) 'PUB_SUMMARY_ONLY': '1',
     };
     final String? pubCache = _getPubCacheIfAvailable();
@@ -779,6 +789,7 @@ class _DefaultPub implements Pub {
       flutterRoot: _flutterRoot,
       fs: _fileSystem,
       git: _git,
+      isOmitLegacyVersionFileEnabled: _isOmitLegacyVersionFileEnabled,
       logger: _logger,
       platform: _platform,
     );
