@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -955,6 +957,90 @@ void testMain() {
         expect(() => parentElement.dispatchEvent(atEvent), returnsNormally);
         expect(parentElement.isConnected, isTrue);
         expect(childElement.isConnected, isTrue);
+      });
+    });
+
+    group('flutter-tester emulation (ignorePlatformMessages)', () {
+      setUp(() {
+        ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment(ignorePlatformMessages: true));
+      });
+
+      tearDown(() {
+        ui_web.TestEnvironment.tearDown();
+      });
+
+      test('replies null asynchronously to an unhandled channel', () async {
+        var called = false;
+        final completer = Completer<ByteData?>();
+        ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/test-unhandled', null, (
+          ByteData? reply,
+        ) {
+          called = true;
+          completer.complete(reply);
+        });
+        expect(called, isFalse);
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(called, isTrue);
+        expect(reply, isNull);
+      });
+
+      test('replies null to flutter/assets without fetching', () async {
+        final warnings = <String>[];
+        final void Function(String) oldPrintWarning = printWarning;
+        printWarning = warnings.add;
+        addTearDown(() {
+          printWarning = oldPrintWarning;
+        });
+
+        final completer = Completer<ByteData?>();
+        ui.PlatformDispatcher.instance.sendPlatformMessage(
+          'flutter/assets',
+          ByteData.sublistView(utf8.encode('does-not-exist')),
+          completer.complete,
+        );
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(reply, isNull);
+        expect(warnings, isEmpty);
+      });
+
+      test('invokes the callback in the registration zone', () async {
+        Object? callbackMarker;
+        final completer = Completer<ByteData?>();
+        runZoned(() {
+          ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/test-unhandled', null, (
+            ByteData? reply,
+          ) {
+            callbackMarker = Zone.current[#marker];
+            completer.complete(reply);
+          });
+        }, zoneValues: <Object?, Object?>{#marker: 'x'});
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(callbackMarker, 'x');
+        expect(reply, isNull);
+      });
+
+      test('does not create FakeAsync timers', () async {
+        var called = false;
+        final completer = Completer<ByteData?>();
+        FakeAsync().run((FakeAsync async) {
+          ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/test-unhandled', null, (
+            ByteData? reply,
+          ) {
+            called = true;
+            completer.complete(reply);
+          });
+          expect(async.nonPeriodicTimerCount, 0);
+          expect(async.microtaskCount, 0);
+          async.elapse(const Duration(seconds: 1));
+          expect(called, isFalse);
+        });
+
+        final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+        expect(called, isTrue);
+        expect(reply, isNull);
       });
     });
   }, skip: ui_web.browser.isFirefox);
