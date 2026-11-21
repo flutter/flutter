@@ -243,6 +243,66 @@ void testMain() {
     // Releasing the canvas still ran to completion.
     expect(surface.glContext, -1);
   });
+
+  test('synchronous context loss during canvas acquisition replaces the lost canvas', () async {
+    // Synchronous context loss during initial offscreen surface creation.
+    final offscreenProvider = _SyncContextLossOffscreenCanvasProvider(
+      remainingSyncContextLosses: 1,
+    );
+    final CkOffscreenSurface offscreen = await createOffscreenSurface(offscreenProvider);
+    expect(offscreenProvider.acquiredCanvases, hasLength(2));
+    expect(offscreenProvider.releasedCanvases, <DomOffscreenCanvas>[
+      offscreenProvider.acquiredCanvases.first,
+    ]);
+    expect(_isSameJsObject(offscreen.canvas, offscreenProvider.acquiredCanvases.last), isTrue);
+    expect(offscreen.supportsWebGl, isTrue);
+    offscreen.setSize(const BitmapSize(60, 60));
+    await offscreen.rasterizeToCanvas(_greenSquare());
+    expect(_pixelOnCanvas(offscreen.canvas), _green);
+
+    // Synchronous context loss during context-loss recovery preserves size and WebGL.
+    final canvasBeforeRecovery = offscreen.canvas as DomOffscreenCanvas;
+    offscreenProvider.remainingSyncContextLosses = 1;
+    offscreen.onContextLost();
+    expect(offscreenProvider.acquiredCanvases, hasLength(4));
+    expect(offscreenProvider.releasedCanvases, <DomOffscreenCanvas>[
+      offscreenProvider.acquiredCanvases[0],
+      offscreenProvider.acquiredCanvases[2],
+      canvasBeforeRecovery,
+    ]);
+    expect(_isSameJsObject(offscreen.canvas, offscreenProvider.acquiredCanvases.last), isTrue);
+    expect(offscreen.supportsWebGl, isTrue);
+    expect(_canvasSizeOf(offscreen.canvas), const BitmapSize(60, 60));
+    expect(_skSurfaceSizeOf(offscreen), const BitmapSize(60, 60));
+
+    // Synchronous context loss during initial onscreen surface creation attaches only one canvas.
+    final onscreenProvider = _SyncContextLossOnscreenCanvasProvider(remainingSyncContextLosses: 1);
+    final CkOnscreenSurface onscreen = await createOnscreenSurface(onscreenProvider);
+    expect(onscreenProvider.acquiredCanvases, hasLength(2));
+    expect(onscreenProvider.releasedCanvases, <DomHTMLCanvasElement>[
+      onscreenProvider.acquiredCanvases.first,
+    ]);
+    expect(onscreen.hostElement.children.toList(), <DomElement>[
+      onscreen.canvas as DomHTMLCanvasElement,
+    ]);
+    expect(onscreen.supportsWebGl, isTrue);
+
+    // Repeated synchronous context losses terminate and fall back to software rendering.
+    final persistentLossProvider = _SyncContextLossOffscreenCanvasProvider(
+      remainingSyncContextLosses: 10,
+    );
+    final CkOffscreenSurface fallback = await createOffscreenSurface(persistentLossProvider);
+    expect(persistentLossProvider.acquiredCanvases, hasLength(3));
+    expect(persistentLossProvider.releasedCanvases, <DomOffscreenCanvas>[
+      persistentLossProvider.acquiredCanvases[0],
+      persistentLossProvider.acquiredCanvases[1],
+    ]);
+    expect(fallback.supportsWebGl, isFalse);
+    expect(fallback.skSurface, isNotNull);
+    fallback.setSize(const BitmapSize(20, 20));
+    await fallback.rasterizeToCanvas(_greenSquare());
+    expect(_pixelOnCanvas(fallback.canvas), _green);
+  });
 }
 
 /// Wraps the current `SkSurface.dispose` of [surface] to count calls and,
@@ -272,6 +332,60 @@ typedef _SetSizeFailureKind = ({
   Matcher error,
   void Function(_InstrumentedOffscreenCanvasProvider) arm,
 });
+
+/// An [OnscreenCanvasProvider] that can fire `onContextLost` synchronously
+/// inside `acquireCanvas`.
+class _SyncContextLossOnscreenCanvasProvider extends OnscreenCanvasProvider {
+  _SyncContextLossOnscreenCanvasProvider({this.remainingSyncContextLosses = 0});
+
+  int remainingSyncContextLosses;
+  final List<DomHTMLCanvasElement> acquiredCanvases = <DomHTMLCanvasElement>[];
+  final List<DomHTMLCanvasElement> releasedCanvases = <DomHTMLCanvasElement>[];
+
+  @override
+  DomHTMLCanvasElement acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomHTMLCanvasElement canvas = super.acquireCanvas(size, onContextLost: onContextLost);
+    acquiredCanvases.add(canvas);
+    if (remainingSyncContextLosses > 0) {
+      remainingSyncContextLosses--;
+      onContextLost();
+    }
+    return canvas;
+  }
+
+  @override
+  void releaseCanvas(DomHTMLCanvasElement canvas) {
+    releasedCanvases.add(canvas);
+    super.releaseCanvas(canvas);
+  }
+}
+
+/// An [OffscreenCanvasProvider] that can fire `onContextLost` synchronously
+/// inside `acquireCanvas`.
+class _SyncContextLossOffscreenCanvasProvider extends OffscreenCanvasProvider {
+  _SyncContextLossOffscreenCanvasProvider({this.remainingSyncContextLosses = 0});
+
+  int remainingSyncContextLosses;
+  final List<DomOffscreenCanvas> acquiredCanvases = <DomOffscreenCanvas>[];
+  final List<DomOffscreenCanvas> releasedCanvases = <DomOffscreenCanvas>[];
+
+  @override
+  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomOffscreenCanvas canvas = super.acquireCanvas(size, onContextLost: onContextLost);
+    acquiredCanvases.add(canvas);
+    if (remainingSyncContextLosses > 0) {
+      remainingSyncContextLosses--;
+      onContextLost();
+    }
+    return canvas;
+  }
+
+  @override
+  void releaseCanvas(DomOffscreenCanvas canvas) {
+    releasedCanvases.add(canvas);
+    super.releaseCanvas(canvas);
+  }
+}
 
 /// An [OnscreenCanvasProvider] whose next resize can be made to throw before
 /// touching the canvas.

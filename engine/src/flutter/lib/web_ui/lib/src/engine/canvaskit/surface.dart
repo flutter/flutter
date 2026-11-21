@@ -19,7 +19,7 @@ const bool _kUsingMSAA = bool.fromEnvironment('flutter.canvaskit.msaa');
 /// management and Skia object creation.
 abstract class CkSurface extends Surface {
   CkSurface(this._canvasProvider) {
-    _canvas = _canvasProvider.acquireCanvas(_initialCanvasSize, onContextLost: onContextLost);
+    _canvas = _acquireCanvas(_initialCanvasSize);
     _maybeAttachCanvasToDom();
     _initialize();
   }
@@ -90,6 +90,47 @@ abstract class CkSurface extends Surface {
   /// this is true.
   bool _canvasHasWebGlContext = false;
 
+  bool _acquiringCanvas = false;
+  bool _contextLostDuringAcquire = false;
+
+  /// Acquires a canvas of [size], replacing it if `onContextLost` fires
+  /// synchronously before `acquireCanvas` returns.
+  DomEventTarget _acquireCanvas(BitmapSize size) {
+    assert(!_acquiringCanvas);
+    _acquiringCanvas = true;
+    try {
+      _contextLostDuringAcquire = false;
+      final DomEventTarget canvas = _canvasProvider.acquireCanvas(
+        size,
+        onContextLost: onContextLost,
+      );
+      if (!_contextLostDuringAcquire || !supportsWebGl) {
+        return canvas;
+      }
+      // `onContextLost` fired synchronously during `acquireCanvas`, before
+      // [canvas] could be installed on this surface. Release the lost canvas
+      // and acquire a replacement at the same [size].
+      _canvasProvider.releaseCanvas(canvas);
+      _contextLostDuringAcquire = false;
+      final DomEventTarget replacement = _canvasProvider.acquireCanvas(
+        size,
+        onContextLost: onContextLost,
+      );
+      if (!_contextLostDuringAcquire) {
+        return replacement;
+      }
+      // A second synchronous context loss indicates WebGL contexts cannot be
+      // sustained; fall back to software rendering on a fresh untainted canvas.
+      _canvasProvider.releaseCanvas(replacement);
+      _markWebGlFailed('WebGL context was lost during canvas creation.');
+      _contextLostDuringAcquire = false;
+      return _canvasProvider.acquireCanvas(size, onContextLost: onContextLost);
+    } finally {
+      _acquiringCanvas = false;
+      _contextLostDuringAcquire = false;
+    }
+  }
+
   void _maybeAttachCanvasToDom();
 
   /// Returns the WebGL context for [canvas].
@@ -131,15 +172,16 @@ abstract class CkSurface extends Surface {
     if (isDisposed) {
       return;
     }
+    if (_acquiringCanvas) {
+      _contextLostDuringAcquire = true;
+      return;
+    }
     assert(!isSoftware, 'Received a webglcontextlost event while in software rendering mode.');
     // Recover at the lost canvas's size, which may differ from the last
     // requested size if a resize failed.
     final BitmapSize size = _canvasSize;
-    final DomEventTarget newCanvas = _canvasProvider.acquireCanvas(
-      size,
-      onContextLost: onContextLost,
-    );
     try {
+      final DomEventTarget newCanvas = _acquireCanvas(size);
       _replaceCanvas(newCanvas);
     } catch (e, s) {
       printWarning('Error recovering from context loss: $e\n$s');
@@ -302,7 +344,7 @@ abstract class CkSurface extends Surface {
     // Read the size before releasing the current canvas.
     final BitmapSize size = _canvasSize;
     _releaseCanvas();
-    _canvas = _canvasProvider.acquireCanvas(size, onContextLost: onContextLost);
+    _canvas = _acquireCanvas(size);
     _maybeAttachCanvasToDom();
   }
 
@@ -675,7 +717,7 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   void _replaceCanvasWithSize(BitmapSize size) {
     _releaseCanvas();
 
-    _canvas = _canvasProvider.acquireCanvas(size, onContextLost: onContextLost);
+    _canvas = _acquireCanvas(size);
     _maybeAttachCanvasToDom();
     _createSkiaObjects();
   }
