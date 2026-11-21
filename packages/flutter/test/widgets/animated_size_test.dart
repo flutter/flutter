@@ -501,4 +501,53 @@ void main() {
     );
     expect(tester.getSize(find.byType(AnimatedSize)), Size.zero);
   });
+
+  testWidgets('AnimatedSize clips the semantics rect of an overflowing child', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    Widget buildAnimatedSize({required bool grown, required Clip clipBehavior}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: AnimatedSize(
+            duration: const Duration(seconds: 1),
+            alignment: Alignment.topLeft,
+            clipBehavior: clipBehavior,
+            child: grown
+                ? Semantics(
+                    label: 'target',
+                    container: true,
+                    child: const SizedBox(width: 100, height: 100),
+                  )
+                : const SizedBox(width: 100),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAnimatedSize(grown: false, clipBehavior: Clip.hardEdge));
+    // Grow from 0 to 100 high, so that the AnimatedSize is 50 high halfway
+    // through the animation.
+    await tester.pumpWidget(buildAnimatedSize(grown: true, clipBehavior: Clip.hardEdge));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.getSize(find.byType(AnimatedSize)), const Size(100, 50));
+
+    // Only the top half of the target is inside the clip.
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    // Without clipping, the whole target is visible.
+    await tester.pumpWidget(buildAnimatedSize(grown: true, clipBehavior: Clip.none));
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('target')).rect,
+      const Rect.fromLTRB(0, 0, 100, 100),
+    );
+
+    handle.dispose();
+  });
 }
