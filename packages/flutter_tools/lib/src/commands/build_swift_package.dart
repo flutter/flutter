@@ -1406,13 +1406,14 @@ class AppFrameworkAndNativeAssetsDependencies {
             sdk.sdkType,
             artifacts,
           ).map((CpuArch e) => e.darwinArchName).join(' '),
-          kSdkRoot: await _utils.xcode.sdkLocation(sdk.sdkType),
+          kSdkRoot: await _utils.xcode.sdkLocation(sdk),
         };
       case FlutterDarwinPlatform.macos:
         return <String, String>{
           kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
               .map((CpuArch e) => e.darwinArchName)
               .join(' '),
+          kSdkRoot: await _utils.xcode.sdkLocation(sdk),
         };
     }
   }

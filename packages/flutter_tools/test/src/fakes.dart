@@ -1060,7 +1060,8 @@ class FakeXcode extends Fake implements Xcode {
   }) async => <String>[...xcrunCommand(), 'xcodebuild'];
 
   @override
-  Future<String> sdkLocation(EnvironmentType environmentType) async => '/fake/sdk/path';
+  Future<String> sdkLocation(XcodeSdk sdk) async =>
+      sdk == XcodeSdk.MacOSX ? '/fake/macos/sdk/path' : '/fake/sdk/path';
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];

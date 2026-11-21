@@ -79,9 +79,7 @@ or
     'bin',
     if (Platform.isWindows) 'flutter.bat' else 'flutter',
   ]);
-  final target = targetPlatform.startsWith('darwin')
-      ? '${buildMode}_macos_bundle_flutter_assets'
-      : '${buildMode}_bundle_${targetPlatform}_assets';
+  final target = '${buildMode}_bundle_${targetPlatform}_assets';
   final Process assembleProcess = await Process.start(flutterExecutable, <String>[
     if (verbose) '--verbose',
     if (prefixedErrors) '--prefixed-errors',

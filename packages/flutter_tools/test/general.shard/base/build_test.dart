@@ -174,6 +174,24 @@ void main() {
       );
     });
 
+    testWithoutContext('throws if sdkRoot is missing for macOS', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+
+      await expectLater(
+        snapshotter.build(
+          platform: TargetPlatform.darwin,
+          cpuArch: CpuArch.arm64,
+          buildMode: BuildMode.release,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          dartObfuscation: false,
+          quiet: true,
+        ),
+        throwsArgumentError,
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
     testWithoutContext('builds iOS snapshot with dwarfStackTraces', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
@@ -183,6 +201,12 @@ void main() {
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
+          stdout: '27.0',
+        ),
         FakeCommand(
           command: <String>[
             genSnapshotPath,
@@ -191,6 +215,7 @@ void main() {
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=27.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--dwarf-stack-traces',
@@ -199,8 +224,6 @@ void main() {
             'main.dill',
           ],
         ),
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -245,6 +268,12 @@ void main() {
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
+          stdout: '27.0',
+        ),
         FakeCommand(
           command: <String>[
             genSnapshotPath,
@@ -253,14 +282,13 @@ void main() {
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=27.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--obfuscate',
             'main.dill',
           ],
         ),
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -304,6 +332,12 @@ void main() {
         mode: BuildMode.release,
       );
       processManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'path/to/sdk', '--show-sdk-version'],
+          stdout: '27.0',
+        ),
         FakeCommand(
           command: <String>[
             genSnapshotPath,
@@ -312,13 +346,12 @@ void main() {
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=27.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             'main.dill',
           ],
         ),
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',

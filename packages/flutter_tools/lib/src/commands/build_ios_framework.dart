@@ -839,9 +839,9 @@ end
 
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
-        final Directory outputBuildDirectory = switch (sdkType) {
-          EnvironmentType.physical => iPhoneBuildOutput,
-          EnvironmentType.simulator => simulatorBuildOutput,
+        final (Directory outputBuildDirectory, XcodeSdk sdk) = switch (sdkType) {
+          EnvironmentType.physical => (iPhoneBuildOutput, XcodeSdk.IPhoneOS),
+          EnvironmentType.simulator => (simulatorBuildOutput, XcodeSdk.IPhoneSimulator),
         };
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
         final environment = Environment(
@@ -858,7 +858,7 @@ end
               sdkType,
               artifacts,
             ).map((CpuArch e) => e.darwinArchName).join(' '),
-            kSdkRoot: await xcode.sdkLocation(sdkType),
+            kSdkRoot: await xcode.sdkLocation(sdk),
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: artifacts,

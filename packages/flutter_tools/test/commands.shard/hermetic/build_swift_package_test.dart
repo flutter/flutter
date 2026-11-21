@@ -44,6 +44,8 @@ const _flutterRoot = '/path/to/flutter';
 const String _engineVersion = '1234567890abcdef1234567890abcdef12345678';
 const String _iosSdkRoot =
     '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.2.sdk';
+const String _macosSdkRoot =
+    '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk';
 const _flutterCachePath = '/path/to/flutter/bin/cache';
 const _engineArtifactPath = '$_flutterCachePath/artifacts/engine/ios/Flutter.xcframework';
 
@@ -714,6 +716,7 @@ let package = Package(
                   'TargetFile': 'lib/main.dart',
                   'TargetPlatform': 'darwin',
                   'DarwinArchs': 'x86_64 arm64',
+                  'SdkRoot': _macosSdkRoot,
                   'BuildMode': 'debug',
                   'DartObfuscation': 'false',
                   'TrackWidgetCreation': 'true',
@@ -813,6 +816,7 @@ let package = Package(
                   'TargetFile': 'lib/main.dart',
                   'TargetPlatform': 'darwin',
                   'DarwinArchs': 'x86_64 arm64',
+                  'SdkRoot': _macosSdkRoot,
                   'BuildMode': 'release',
                   'DartObfuscation': 'false',
                   'TrackWidgetCreation': 'false',
@@ -930,6 +934,7 @@ let package = Package(
                   'TargetFile': 'lib/main.dart',
                   'TargetPlatform': 'darwin',
                   'DarwinArchs': 'x86_64 arm64',
+                  'SdkRoot': _macosSdkRoot,
                   'BuildMode': 'release',
                   'DartObfuscation': 'false',
                   'TrackWidgetCreation': 'false',
@@ -3446,8 +3451,8 @@ class FakeXcode extends Fake implements Xcode {
   Version get currentVersion => Version(15, 0, 0);
 
   @override
-  Future<String> sdkLocation(EnvironmentType environmentType) async {
-    return _iosSdkRoot;
+  Future<String> sdkLocation(XcodeSdk sdk) async {
+    return sdk == XcodeSdk.MacOSX ? _macosSdkRoot : _iosSdkRoot;
   }
 
   @override
