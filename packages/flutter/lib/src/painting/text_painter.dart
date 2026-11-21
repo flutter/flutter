@@ -64,6 +64,10 @@ enum TextOverflow {
 /// Used by [Text.overflowPosition], [RichText.overflowPosition], and
 /// [DefaultTextStyle.overflowPosition].
 ///
+/// With [TextOverflow.ellipsis], [start] and [middle] apply to single-line text
+/// without inline [PlaceholderSpan]s (such as [WidgetSpan]); multiline text or
+/// spans containing inline placeholders fall back to trailing ellipsis ([end]).
+///
 /// See also:
 ///
 ///  * [TextOverflow], which defines the visual effect applied at this position.
@@ -1802,6 +1806,24 @@ class TextPainter {
     return offset == Offset.zero
         ? boxes
         : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
+  }
+
+  /// Returns the [GlyphInfo] of the glyph cluster containing the given UTF-16
+  /// `codeUnitOffset` in the paragraph coordinate system, or null if the offset
+  /// is out of bounds or the glyph is not laid out.
+  ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
+    assert(_debugAssertTextLayoutIsValid);
+    assert(!_debugNeedsRelayout);
+    final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
+    final ui.GlyphInfo? rawGlyphInfo = cachedLayout.paragraph.getGlyphInfoAt(codeUnitOffset);
+    if (rawGlyphInfo == null || cachedLayout.paintOffset == Offset.zero) {
+      return rawGlyphInfo;
+    }
+    return ui.GlyphInfo(
+      rawGlyphInfo.graphemeClusterLayoutBounds.shift(cachedLayout.paintOffset),
+      rawGlyphInfo.graphemeClusterCodeUnitRange,
+      rawGlyphInfo.writingDirection,
+    );
   }
 
   /// Returns the [GlyphInfo] of the glyph closest to the given `offset` in the

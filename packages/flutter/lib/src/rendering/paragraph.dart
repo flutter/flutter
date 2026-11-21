@@ -1283,7 +1283,7 @@ class RenderParagraph extends RenderBox
     final clusters = <(TextRange, double)>[];
     var offset = 0;
     while (offset < fullString.length) {
-      final GlyphInfo? info = _getGlyphClusterAt(fullPainter, offset);
+      final GlyphInfo? info = fullPainter.getGlyphInfoAt(offset);
       if (info == null || info.graphemeClusterCodeUnitRange.end <= offset) {
         final int step =
             TextPainter.isHighSurrogate(fullString.codeUnitAt(offset)) &&
@@ -1325,7 +1325,7 @@ class RenderParagraph extends RenderBox
           text: '$_kEllipsis${fullString.substring(keepStartIndex)}',
         );
       }
-      final InlineSpan? tail = _sliceInlineSpan(_rawText, keepStartIndex, fullString.length, 0);
+      final InlineSpan? tail = _sliceInlineSpan(_rawText, keepStartIndex, fullString.length);
       return TextSpan(
         style: baseStyle,
         children: <InlineSpan>[
@@ -1370,8 +1370,8 @@ class RenderParagraph extends RenderBox
             '${fullString.substring(0, headEndOffset)}$_kEllipsis${fullString.substring(tailStartOffset)}',
       );
     }
-    final InlineSpan? head = _sliceInlineSpan(_rawText, 0, headEndOffset, 0);
-    final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStartOffset, fullString.length, 0);
+    final InlineSpan? head = _sliceInlineSpan(_rawText, 0, headEndOffset);
+    final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStartOffset, fullString.length);
     return TextSpan(
       style: baseStyle,
       children: <InlineSpan>[
@@ -1382,9 +1382,25 @@ class RenderParagraph extends RenderBox
     );
   }
 
-  static InlineSpan? _sliceInlineSpan(InlineSpan span, int start, int end, int offset) {
-    if (start >= end || span is! TextSpan) {
+  static InlineSpan? _sliceInlineSpan(InlineSpan span, int start, int end) {
+    if (start >= end) {
       return null;
+    }
+    return _sliceInlineSpanRecursive(span, start, end, 0).span;
+  }
+
+  static ({InlineSpan? span, int length}) _sliceInlineSpanRecursive(
+    InlineSpan span,
+    int start,
+    int end,
+    int offset,
+  ) {
+    if (span is PlaceholderSpan) {
+      final bool keep = offset >= start && offset + 1 <= end;
+      return (span: keep ? span : null, length: 1);
+    }
+    if (span is! TextSpan) {
+      return (span: null, length: 0);
     }
     var cursor = offset;
     String? slicedText;
@@ -1403,47 +1419,48 @@ class RenderParagraph extends RenderBox
     final List<InlineSpan>? children = span.children;
     if (children != null) {
       for (final InlineSpan child in children) {
-        final int childLen = child.toPlainText(includeSemanticsLabels: false).length;
-        if (cursor < end && cursor + childLen > start) {
-          final InlineSpan? slicedChild = _sliceInlineSpan(child, start, end, cursor);
-          if (slicedChild != null) {
-            (slicedChildren ??= <InlineSpan>[]).add(slicedChild);
-          }
+        final ({InlineSpan? span, int length}) childResult = _sliceInlineSpanRecursive(
+          child,
+          start,
+          end,
+          cursor,
+        );
+        if (childResult.span != null) {
+          (slicedChildren ??= <InlineSpan>[]).add(childResult.span!);
         }
-        cursor += childLen;
-        if (cursor >= end) {
-          break;
-        }
+        cursor += childResult.length;
       }
     }
+    final int totalLength = cursor - offset;
     if (slicedText == null && (slicedChildren == null || slicedChildren.isEmpty)) {
-      return null;
+      return (span: null, length: totalLength);
     }
-    return TextSpan(
-      text: slicedText,
-      children: slicedChildren,
-      style: span.style,
-      recognizer: span.recognizer,
-      mouseCursor: span.mouseCursor,
-      onEnter: span.onEnter,
-      onExit: span.onExit,
-      semanticsLabel: span.semanticsLabel,
-      semanticsIdentifier: span.semanticsIdentifier,
-      locale: span.locale,
-      spellOut: span.spellOut,
+    return (
+      span: TextSpan(
+        text: slicedText,
+        children: slicedChildren,
+        style: span.style,
+        recognizer: span.recognizer,
+        mouseCursor: span.mouseCursor,
+        onEnter: span.onEnter,
+        onExit: span.onExit,
+        semanticsLabel: span.semanticsLabel,
+        semanticsIdentifier: span.semanticsIdentifier,
+        locale: span.locale,
+        spellOut: span.spellOut,
+      ),
+      length: totalLength,
     );
   }
 
-  GlyphInfo? _getGlyphClusterAt(TextPainter painter, int codeUnitOffset) {
-    final List<ui.TextBox> boxes = painter.getBoxesForSelection(
-      TextSelection(baseOffset: codeUnitOffset, extentOffset: codeUnitOffset + 1),
-    );
-    if (boxes.isEmpty) {
-      return null;
-    }
-    final Rect rect = boxes.first.toRect();
-    return painter.getClosestGlyphForOffset(rect.center);
-  }
+  bool get _usesCustomEllipsisPosition =>
+      _overflow == TextOverflow.ellipsis &&
+      _overflowPosition != TextOverflowPosition.end &&
+      firstChild == null &&
+      (maxLines == 1 || !softWrap);
+
+  String? get _effectiveEllipsis =>
+      _overflow == TextOverflow.ellipsis && !_usesCustomEllipsisPosition ? _kEllipsis : null;
 
   bool _didTruncateWithEllipsisPosition = false;
 
@@ -1457,6 +1474,10 @@ class RenderParagraph extends RenderBox
               ? (_cachedShrinkLayoutConstraints ?? _resolveShrinkConstraints(constraints))
               : constraints)
         : constraints;
+    final String? desiredEllipsis = _effectiveEllipsis;
+    if (_textPainter.ellipsis != desiredEllipsis) {
+      _textPainter.ellipsis = desiredEllipsis;
+    }
     final InlineSpan effectiveSpan;
     if (!updateEllipsisCache &&
         _cachedEllipsisSpan != null &&
@@ -1487,6 +1508,7 @@ class RenderParagraph extends RenderBox
     final Size size =
         (_textIntrinsics
               ..text = effectiveSpan
+              ..ellipsis = _effectiveEllipsis
               ..setPlaceholderDimensions(
                 layoutInlineChildren(
                   layoutConstraints.maxWidth,
@@ -1803,7 +1825,11 @@ class RenderParagraph extends RenderBox
       context.canvas.save();
       context.canvas.clipRect(Rect.fromLTWH(offset.dx, offset.dy, halfWidth, size.height));
       _textPainter.paint(context.canvas, offset);
-      paintInlineChildren(context, offset);
+      _paintInlineChildrenFiltered(
+        context,
+        offset,
+        (Offset childOffset, Size childSize) => childOffset.dx < halfWidth,
+      );
       context.canvas.restore();
 
       context.canvas.save();
@@ -1812,7 +1838,13 @@ class RenderParagraph extends RenderBox
       );
       final Offset trailingOffset = offset - Offset(overflowWidth, 0.0);
       _textPainter.paint(context.canvas, trailingOffset);
-      paintInlineChildren(context, trailingOffset);
+      _paintInlineChildrenFiltered(
+        context,
+        trailingOffset,
+        (Offset childOffset, Size childSize) =>
+            childOffset.dx >= halfWidth &&
+            childOffset.dx + childSize.width - overflowWidth > halfWidth,
+      );
       context.canvas.restore();
     } else {
       _textPainter.paint(context.canvas, alignedOffset);
@@ -1834,6 +1866,25 @@ class RenderParagraph extends RenderBox
       for (final _SelectableFragment fragment in _lastSelectableFragments!) {
         fragment.paintHandles(context, alignedOffset);
       }
+    }
+  }
+
+  void _paintInlineChildrenFiltered(
+    PaintingContext context,
+    Offset offset,
+    bool Function(Offset childOffset, Size childSize) predicate,
+  ) {
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final childParentData = child.parentData! as TextParentData;
+      final Offset? childOffset = childParentData.offset;
+      if (childOffset == null) {
+        return;
+      }
+      if (predicate(childOffset, child.size)) {
+        context.paintChild(child, childOffset + offset);
+      }
+      child = childAfter(child);
     }
   }
 

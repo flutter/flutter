@@ -2132,6 +2132,20 @@ void main() {
       'restore',
     ]);
   });
+
+  test('TextPainter.getGlyphInfoAt returns cluster info and handles out-of-bounds', () {
+    final painter = TextPainter(
+      text: const TextSpan(text: 'Hello', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    addTearDown(painter.dispose);
+
+    final ui.GlyphInfo? first = painter.getGlyphInfoAt(0);
+    expect(first, isNotNull);
+    expect(first!.graphemeClusterCodeUnitRange, const TextRange(start: 0, end: 1));
+    expect(first.graphemeClusterLayoutBounds.width, 10.0);
+    expect(painter.getGlyphInfoAt(99), isNull);
+  });
 }
 
 class _RecordingMaskedCanvas extends Fake implements Canvas {

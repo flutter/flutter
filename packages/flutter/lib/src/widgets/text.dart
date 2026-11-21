@@ -687,6 +687,11 @@ class Text extends StatelessWidget {
   ///
   /// If this is null, the value from the nearest [DefaultTextStyle] ancestor
   /// will be used (which defaults to [TextOverflowPosition.end]).
+  ///
+  /// With [TextOverflow.ellipsis], [TextOverflowPosition.start] and
+  /// [TextOverflowPosition.middle] apply to single-line text without inline
+  /// [WidgetSpan]s; multiline text or spans with inline widgets fall back to
+  /// trailing ellipsis.
   final TextOverflowPosition? overflowPosition;
 
   /// How this text behaves when its incoming layout constraints dynamically

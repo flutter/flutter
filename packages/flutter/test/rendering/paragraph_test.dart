@@ -1870,6 +1870,51 @@ void main() {
       expect(rtlContext.operations, contains('shaderRect'));
       expect(rtlContext.canvas.drawnParagraphOffsets.single.dx, 0.0);
     });
+
+    test('paints each inline child at most once in middle overflow and falls back to ellipsis with placeholders', () {
+      var leadingPaintCount = 0;
+      var trailingPaintCount = 0;
+      final leadingChild = _CountingRenderBox(
+        const Size(12.0, 12.0),
+        onPaint: () => leadingPaintCount += 1,
+      );
+      final trailingChild = _CountingRenderBox(
+        const Size(12.0, 12.0),
+        onPaint: () => trailingPaintCount += 1,
+      );
+      const span = TextSpan(
+        style: TextStyle(fontSize: 14.0),
+        children: <InlineSpan>[
+          WidgetSpan(child: SizedBox.shrink()),
+          TextSpan(text: '0x71C95823F4B9E1029384756ABCDEF01239B8F'),
+          WidgetSpan(child: SizedBox.shrink()),
+        ],
+      );
+      final inlineChildren = <RenderBox>[leadingChild, trailingChild];
+      final paragraph = RenderParagraph(
+        span,
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+        overflowPosition: TextOverflowPosition.middle,
+        softWrap: false,
+        children: inlineChildren,
+      );
+      _applyParentData(inlineChildren, span);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(leadingPaintCount, 1);
+      expect(trailingPaintCount, 1);
+
+      // With inline children and TextOverflow.ellipsis + start, falls back to
+      // trailing ellipsis instead of silently dropping ellipsis.
+      paragraph
+        ..overflow = TextOverflow.ellipsis
+        ..overflowPosition = TextOverflowPosition.start;
+      pumpFrame();
+      expect(paragraph.didExceedMaxLines, isTrue);
+    });
   });
 
   group('multiline TextOverflow.fade', () {
@@ -2096,6 +2141,28 @@ class MockPaintingContext extends Fake implements PaintingContext {
   }) {
     operations.add('pushLayer');
     pushedLayers.add(childLayer);
+  }
+
+  @override
+  void paintChild(RenderObject child, Offset offset) {
+    child.paint(this, offset);
+  }
+}
+
+class _CountingRenderBox extends RenderBox {
+  _CountingRenderBox(this._preferredSize, {required this.onPaint});
+
+  final Size _preferredSize;
+  final VoidCallback onPaint;
+
+  @override
+  void performLayout() {
+    size = constraints.constrain(_preferredSize);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    onPaint();
   }
 }
 
