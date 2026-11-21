@@ -352,6 +352,12 @@ abstract mixin class WidgetsBindingObserver {
   /// changed. For example, if the user changes the system language
   /// settings.
   ///
+  /// On iOS, the system typically terminates the app when the user changes the
+  /// device language or the app's preferred language in the Settings app, so
+  /// this method is not guaranteed to be called for those changes. The new
+  /// locales are available from [dart:ui.PlatformDispatcher.locales] when the
+  /// app starts again.
+  ///
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onLocaleChanged].
   void didChangeLocales(List<Locale>? locales) {}
