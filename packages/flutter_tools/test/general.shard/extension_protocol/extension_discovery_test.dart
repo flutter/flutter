@@ -1106,6 +1106,19 @@ dependencies:
       expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
       expect(logger.traceText, contains('failed to parse "/workspace/app/pubspec.yaml"'));
 
+      for (final invalidManifest in const <String>[
+        'Not a map',
+        'name: app\nflutter: invalid_scalar\n',
+      ]) {
+        logger.clear();
+        projectDir.childFile('pubspec.yaml').writeAsStringSync(invalidManifest);
+        expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
+        expect(logger.traceText, contains('invalid manifest "/workspace/app/pubspec.yaml":'));
+        expect(logger.errorText, isEmpty);
+        expect(logger.warningText, isEmpty);
+        expect(logger.statusText, isEmpty);
+      }
+
       failRead = true;
       expect(await finder.findProjectExtensions(startDirectory: projectDir), isEmpty);
       expect(logger.traceText, contains('failed to read "/workspace/app/pubspec.yaml"'));
@@ -1345,12 +1358,13 @@ dependencies:
           .createSync(outsideExtDir.parent.path, recursive: true);
 
       // 5. Broken symlink at extension/flutter_tools/extension.dart.
-      tempDir
-          .childDirectory('broken_symlink_ext')
-          .childDirectory('extension')
-          .childDirectory('flutter_tools')
-          .childLink('extension.dart')
-          .createSync(tempDir.childFile('nonexistent_target.dart').path, recursive: true);
+      final Link brokenSymlinkEntrypoint =
+          tempDir
+              .childDirectory('broken_symlink_ext')
+              .childDirectory('extension')
+              .childDirectory('flutter_tools')
+              .childLink('extension.dart')
+            ..createSync(tempDir.childFile('nonexistent_target.dart').path, recursive: true);
 
       // 6. Transitive extension package.
       _writeExtensionPackage(tempDir.childDirectory('transitive_ext'), name: 'transitive_ext');
@@ -1389,9 +1403,13 @@ dependencies:
           'resolves outside package root',
         ),
       );
+      expect(logger.warningText, isNot(contains('broken_symlink_ext')));
       expect(
-        logger.warningText,
-        contains('Skipping extension "broken_symlink_ext": broken symlink at'),
+        logger.traceText,
+        contains(
+          'ProjectExtensionFinder: no entrypoint at '
+          '"${brokenSymlinkEntrypoint.path}" for "broken_symlink_ext".',
+        ),
       );
     });
   });
