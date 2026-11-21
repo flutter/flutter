@@ -3002,18 +3002,51 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     expect(tester.takeException(), isNull);
     await tester.pumpAndSettle();
+    // A layout overflow in the opened menu is reported as an exception.
+    expect(tester.takeException(), isNull);
 
     Finder findMenuItemText(String label) {
       final labelText = '$label $longText';
       return find.descendant(of: findMenuItemButton(labelText), matching: find.byType(Text)).last;
     }
 
-    // Actual size varies a little on web platforms.
-    final Matcher closeTo300 = closeTo(300, 0.25);
-    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo300);
-    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo300);
-    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo300);
-    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo300);
+    // Each label must wrap inside the 100px menu instead of overflowing it.
+    // The line count is up to the text engine's line breaker (words wider than
+    // the line, like "eleven", are split inside the word), so this checks that
+    // every glyph is shown inside the label rather than pinning a height.
+    void expectLabelWrapsInsideMenu(String label) {
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: findMenuItemText(label), matching: find.byType(RichText)),
+      );
+      final String text = paragraph.text.toPlainText();
+      final List<TextBox> boxes = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: 0, extentOffset: text.length),
+      );
+      final lineTops = <double>{for (final TextBox box in boxes) box.top};
+      expect(lineTops.length, greaterThan(1), reason: '$label should wrap');
+      expect(paragraph.size.width, lessThanOrEqualTo(100), reason: label);
+      expect(paragraph.didExceedMaxLines, isFalse, reason: label);
+      for (var i = 0; i < text.length; i++) {
+        // A trailing space may hang past the line end; it draws nothing.
+        if (text[i] == ' ') {
+          continue;
+        }
+        final List<TextBox> glyphBoxes = paragraph.getBoxesForSelection(
+          TextSelection(baseOffset: i, extentOffset: i + 1),
+        );
+        // Actual size varies a little on web platforms.
+        for (final box in glyphBoxes) {
+          final reason = '$label: "${text[i]}" at $i';
+          expect(box.right, lessThanOrEqualTo(paragraph.size.width + 0.25), reason: reason);
+          expect(box.bottom, lessThanOrEqualTo(paragraph.size.height + 0.25), reason: reason);
+        }
+      }
+    }
+
+    expectLabelWrapsInsideMenu('Item 0');
+    expectLabelWrapsInsideMenu('Menu 1');
+    expectLabelWrapsInsideMenu('Item 2');
+    expectLabelWrapsInsideMenu('Item 3');
 
     await tester.tap(findMenuItemText('Item 0'));
     await tester.pumpAndSettle();
