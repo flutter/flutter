@@ -277,12 +277,24 @@ what Gold accepts is fetched beforehand:
   `FLUTTER_GOLD_EXPECTATIONS` names that file, passes an image whose digest
   is positive for its test: `goldctl`'s decision, made in the test. A
   digest is the MD5 of the image's pixels (`goldDigest`), so no image has
-  to be fetched to decide. An image that fails is written to the test's
-  outputs (`engine/src/out/bazel-testlogs/<package>/<test>/test.outputs/goldens/`),
-  and the failure gives that path, the image's digest and a link to an
+  to be fetched to decide. An image that is not accepted is written to the
+  test's outputs (`engine/src/out/bazel-testlogs/<package>/<test>/test.outputs/goldens/`),
+  and the message gives that path, the image's digest and a link to an
   accepted image; it shows no difference between the two. A test Gold does not
   know is taken for a new one, as `flutter test` takes it: it passes, and
   its image is written out too.
+
+What an image Gold does not accept does to its test is a flag,
+`--//build_defs/dart:golden_mismatch`:
+
+- `fail`, the default, fails the test. Nothing is sent to Gold from a
+  developer's run, so the test is where the verdict has to be.
+- `pass` passes it, with the same message as a note in the test's log
+  (`FLUTTER_GOLD_MISMATCH=pass` for the comparator). It is for a run that
+  sends the images to Gold afterwards and leaves the verdict to Gold: a
+  pull request's presubmit, below.
+
+The image is written to the test's outputs either way.
 
 What Gold accepts is the state of the main branch's head and changes with
 every triage, so there is nothing to pin. The fetch is repeated when HEAD
@@ -305,8 +317,9 @@ leave in the tests' outputs is sent to Gold once `bazelisk test` is over:
 - the expectations are the pull request's
   (`--repo_env=FLUTTER_GOLD_CHANGELIST=<number>`): the main branch's with
   the triage done on the pull request;
-- an image Gold does not accept fails its test, as off a bot, and is sent;
-  the image of a test Gold does not know passes, and is sent too;
+- an image Gold does not accept passes its test there
+  (`--//build_defs/dart:golden_mismatch=pass`) and is sent; the image of a
+  test Gold does not know passes, and is sent too;
 - `packages/flutter_goldens/bin/upload_tryjob_images.dart` sends them with
   flutter_goldens' own client, as results of the pull request's tryjob and
   with the keys `flutter test` uploads with, so that Gold shows each beside
@@ -314,13 +327,12 @@ leave in the tests' outputs is sent to Gold once `bazelisk test` is over:
   request waits for the triage. The shard's log ends with Gold's link for
   each image and for the pull request
   (`https://flutter-gold.skia.org/cl/github/<number>`);
-- once the images are triaged there, the run made again fetches the pull
-  request's expectations and passes.
+- once the images are triaged there, a run made again fetches the pull
+  request's expectations and has nothing to send.
 
-This differs from `flutter test` in presubmit in two ways: only the images
-that do not match are sent, not every image; and a mismatch fails the test,
-where `flutter test` passes every comparison and leaves the verdict to
-Gold's check.
+As with `flutter test` in presubmit, every comparison passes and the verdict
+is Gold's check on the pull request. The one difference: only the images
+that do not match are sent, not every image.
 
 Not compared: the Impeller runs (the one bot that runs them is a Mac, so
 Gold's Impeller images are macOS renderings and a Linux host has none to

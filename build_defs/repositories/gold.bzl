@@ -33,7 +33,7 @@ For a pull request's run, FLUTTER_GOLD_CHANGELIST (`--repo_env`) is the pull
 request's number: Gold then answers with the main branch's expectations and
 the triage done on that pull request, so that an image accepted there passes
 when the run is made again. dev/bots/bazel.dart sets it in a LUCI presubmit,
-where the images a run fails are sent to Gold for that triage.
+where the images Gold does not accept are sent to Gold for that triage.
 
 Without the network the file holds no test, and a comparison then passes
 with a note, which is what the tests did under Bazel before there was this.

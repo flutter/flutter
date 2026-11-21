@@ -37,6 +37,7 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldExpectationsKey = 'FLUTTER_GOLD_EXPECTATIONS';
 const String _kGoldFailuresKey = 'FLUTTER_GOLD_FAILURES';
 const String _kGoldFailuresLocationKey = 'FLUTTER_GOLD_FAILURES_LOCATION';
+const String _kGoldMismatchKey = 'FLUTTER_GOLD_MISMATCH';
 
 bool _isMainBranch(String? branch) {
   return branch == 'main' || branch == 'master';
@@ -572,18 +573,24 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
 ///
 /// This comparator is for runners that give a test no network and fetch what
 /// it needs beforehand, such as a build system that runs tests in a sandbox.
-/// The test uploads nothing: an image Gold has not seen fails here, where
+/// The test uploads nothing: an image Gold does not accept fails here, where
 /// the [FlutterPreSubmitFileComparator] would have sent it for triage. The
 /// runner can send the images this comparator writes out once the tests are
 /// over ([SkiaGoldClient.tryjobAddDirectory]).
+///
+/// A runner that does send them, and leaves the verdict to Gold as the
+/// [FlutterPreSubmitFileComparator] does, sets the `FLUTTER_GOLD_MISMATCH`
+/// environment variable to `pass` ([passMismatches]): an image Gold does not
+/// accept is then written out and noted, and its comparison passes. Without
+/// the variable, or with `fail`, the comparison fails.
 ///
 /// A test without an entry in the file is taken for a new one, as the
 /// [FlutterLocalFileComparator] takes a test Gold has no baseline for: its
 /// image is written out and the comparison passes.
 ///
-/// The images that fail, and those of new tests, are written to the directory
-/// named by the `FLUTTER_GOLD_FAILURES` environment variable, or to
-/// `failures` under [basedir] without it. A runner that moves that directory
+/// The images Gold does not accept, and those of new tests, are written to
+/// the directory named by the `FLUTTER_GOLD_FAILURES` environment variable, or
+/// to `failures` under [basedir] without it. A runner that moves that directory
 /// once the test is over (one that collects a test's outputs) says where it
 /// will be found in `FLUTTER_GOLD_FAILURES_LOCATION`, which is then the place
 /// the messages name.
@@ -610,6 +617,7 @@ class FlutterOfflineFileComparator extends FlutterGoldenFileComparator {
     this.expectations, {
     this.failures,
     this.failuresLocation,
+    this.passMismatches = false,
     super.namePrefix,
     required super.fs,
     required super.platform,
@@ -628,9 +636,21 @@ class FlutterOfflineFileComparator extends FlutterGoldenFileComparator {
   /// while the test runs.
   final String? failuresLocation;
 
+  /// Whether an image that is none of those Gold accepts passes its
+  /// comparison instead of failing it.
+  ///
+  /// The image is written out and noted either way. Passing is for a runner
+  /// that sends the images to Gold once the tests are over and leaves the
+  /// verdict to it.
+  final bool passMismatches;
+
   /// Creates a new [FlutterOfflineFileComparator] that mirrors the
   /// relative path resolution of the given [localFileComparator], with the
-  /// expectations and the directory for failures that the environment names.
+  /// expectations and the directory for failures that the environment names,
+  /// and with what the environment says an image Gold does not accept does
+  /// (`FLUTTER_GOLD_MISMATCH`: `fail`, which is the default, or `pass`).
+  ///
+  /// Throws an [ArgumentError] if `FLUTTER_GOLD_MISMATCH` is anything else.
   static FlutterOfflineFileComparator fromLocalFileComparator({
     required LocalFileComparator localFileComparator,
     required Platform platform,
@@ -651,6 +671,15 @@ class FlutterOfflineFileComparator extends FlutterGoldenFileComparator {
     );
     final String? failures = platform.environment[_kGoldFailuresKey];
     final String? failuresLocation = platform.environment[_kGoldFailuresLocationKey];
+    final bool passMismatches = switch (platform.environment[_kGoldMismatchKey]) {
+      null || '' || 'fail' => false,
+      'pass' => true,
+      final String value => throw ArgumentError.value(
+        value,
+        _kGoldMismatchKey,
+        'must be "fail" or "pass"',
+      ),
+    };
     return FlutterOfflineFileComparator(
       basedir,
       skiaClient,
@@ -659,6 +688,7 @@ class FlutterOfflineFileComparator extends FlutterGoldenFileComparator {
       failuresLocation: failuresLocation == null || failuresLocation.isEmpty
           ? null
           : failuresLocation,
+      passMismatches: passMismatches,
       namePrefix: namePrefix,
       platform: platform,
       log: log,
@@ -710,13 +740,17 @@ class FlutterOfflineFileComparator extends FlutterGoldenFileComparator {
     }
 
     final String image = await _writeImage(golden, imageBytes);
-    throw FlutterError(
-      'Golden "$golden": the image is not one that Flutter Gold accepts for this test.\n'
-      'Its digest is $digest; Gold holds ${positives.length} positive '
-      '${positives.length == 1 ? 'digest' : 'digests'} for the test, for example '
-      'https://flutter-gold.skia.org/img/images/${positives.first}.png\n'
-      'The image was written to $image',
-    );
+    final description =
+        'Golden "$golden": the image is not one that Flutter Gold accepts for this test.\n'
+        'Its digest is $digest; Gold holds ${positives.length} positive '
+        '${positives.length == 1 ? 'digest' : 'digests'} for the test, for example '
+        'https://flutter-gold.skia.org/img/images/${positives.first}.png\n'
+        'The image was written to $image';
+    if (passMismatches) {
+      log('$description\nThe comparison passes: this run leaves the verdict to Flutter Gold.');
+      return true;
+    }
+    throw FlutterError(description);
   }
 
   /// Decides, based on the current environment, if this comparator should be
