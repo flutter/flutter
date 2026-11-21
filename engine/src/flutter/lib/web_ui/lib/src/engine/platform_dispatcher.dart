@@ -476,7 +476,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
   ) {
-    // In widget tests we want to bypass processing of platform messages.
+    // In widget tests (ignorePlatformMessages), outgoing platform messages are
+    // not processed by engine handlers and instead receive an asynchronous null
+    // reply.
     var returnImmediately = false;
     assert(() {
       if (ui_web.TestEnvironment.instance.ignorePlatformMessages) {
@@ -486,6 +488,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     }());
 
     if (returnImmediately) {
+      // Emulate flutter_tester: platform messages get an empty (null) reply,
+      // as unhandled channels do on native. Schedule it on the root zone so the
+      // real event loop delivers it and it never becomes a FakeAsync timer;
+      // `callback` is already wrapped (_zonedPlatformMessageResponseCallback)
+      // to run in its registration zone.
+      if (callback != null) {
+        Zone.root.createTimer(Duration.zero, () => callback(null));
+      }
       return;
     }
 
