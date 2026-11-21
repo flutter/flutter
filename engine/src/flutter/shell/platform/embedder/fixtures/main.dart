@@ -52,6 +52,28 @@ void implicitViewNotNull() {
   notifyBoolValue(PlatformDispatcher.instance.implicitView != null);
 }
 
+@pragma('vm:entry-point')
+void reportViewDisplayId() {
+  // Report once; a second report would race the test's read of the value.
+  bool reported = false;
+  PlatformDispatcher.instance.onMetricsChanged = () {
+    final FlutterView? view = PlatformDispatcher.instance.implicitView;
+    if (reported ||
+        view == null ||
+        view.physicalSize.isEmpty ||
+        PlatformDispatcher.instance.displays.isEmpty) {
+      return;
+    }
+    reported = true;
+    // The view's display id comes from the window metrics; looking it up in
+    // the display list crosses the display update path. Both must carry the
+    // id intact.
+    signalNativeCount(view.display.id);
+  };
+  // Signal after the handler is registered.
+  signalNativeTest();
+}
+
 @ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'NotifyStringValue')
 external void notifyStringValue(String value);
 @ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifyBoolValue')
