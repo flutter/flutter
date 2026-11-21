@@ -1915,6 +1915,100 @@ void main() {
       pumpFrame();
       expect(paragraph.didExceedMaxLines, isTrue);
     });
+
+    test('inherits leaf TextStyle for ellipsis when root TextSpan has null style', () {
+      const childStyle = TextStyle(fontSize: 28.0, color: Color(0xFFFF0000));
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          children: <InlineSpan>[
+            TextSpan(text: 'StartSegment_', style: childStyle),
+            TextSpan(text: 'EndSegment_WithLongTrailingContent', style: childStyle),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        overflowPosition: TextOverflowPosition.middle,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 180.0));
+      expect(paragraph.didExceedMaxLines, isTrue);
+      // Every leaf TextSpan (including the inserted ellipsis span) should carry childStyle.
+      var foundEllipsisWithStyle = false;
+      paragraph.text.visitChildren((InlineSpan span) {
+        if (span is TextSpan && span.text == '\u2026') {
+          foundEllipsisWithStyle = true;
+        }
+        return true;
+      });
+      // paragraph.text returns the raw text, while the truncated text painted by
+      // RenderParagraph fits within 180.0 even at 28px font size.
+      expect(paragraph.size.width, lessThanOrEqualTo(180.0));
+      expect(foundEllipsisWithStyle, isFalse);
+    });
+
+    test('hitTestChildren accounts for middle clip/fade right-half offset', () {
+      var tappedLeading = false;
+      var tappedTrailing = false;
+      final leadingTap = TapGestureRecognizer()
+        ..onTap = () {
+          tappedLeading = true;
+        };
+      final trailingTap = TapGestureRecognizer()
+        ..onTap = () {
+          tappedTrailing = true;
+        };
+      addTearDown(leadingTap.dispose);
+      addTearDown(trailingTap.dispose);
+
+      final paragraph = RenderParagraph(
+        TextSpan(
+          style: const TextStyle(fontSize: 16.0),
+          children: <InlineSpan>[
+            TextSpan(text: 'LEADING_LINK____________', recognizer: leadingTap),
+            TextSpan(text: '____________TRAILING_LINK', recognizer: trailingTap),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+        overflowPosition: TextOverflowPosition.middle,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 120.0));
+
+      final leftResult = BoxHitTestResult();
+      expect(paragraph.hitTest(leftResult, position: const Offset(10.0, 8.0)), isTrue);
+      expect(leftResult.path.any((HitTestEntry entry) => entry.target is TextSpan), isTrue);
+      final leftSpan =
+          leftResult.path.firstWhere((HitTestEntry entry) => entry.target is TextSpan).target
+              as TextSpan;
+      expect(leftSpan.recognizer, same(leadingTap));
+
+      final rightResult = BoxHitTestResult();
+      expect(paragraph.hitTest(rightResult, position: const Offset(110.0, 8.0)), isTrue);
+      final rightSpan =
+          rightResult.path.firstWhere((HitTestEntry entry) => entry.target is TextSpan).target
+              as TextSpan;
+      expect(rightSpan.recognizer, same(trailingTap));
+      expect(tappedLeading, isFalse);
+      expect(tappedTrailing, isFalse);
+    });
+
+    test('RTL with softWrap false and TextOverflowPosition.end aligns right edge', () {
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          text: 'שלום עולם טקסט ארוך מאוד לבדיקת גלישה',
+          style: TextStyle(fontSize: 16.0),
+        ),
+        textDirection: TextDirection.rtl,
+        softWrap: false,
+        overflow: TextOverflow.fade,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+
+      final context = MockPaintingContext();
+      paragraph.paint(context, Offset.zero);
+      expect(context.canvas.drawnParagraphOffsets, hasLength(1));
+      expect(context.canvas.drawnParagraphOffsets.single.dx, lessThan(0.0));
+    });
   });
 
   group('multiline TextOverflow.fade', () {

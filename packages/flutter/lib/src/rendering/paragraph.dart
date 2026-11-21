@@ -129,7 +129,9 @@ typedef _EllipsisMetrics = ({
   String text,
   double width,
   double ellipsisWidth,
-  List<(TextRange, double)> clusters,
+  double scannedBudgetWidth,
+  List<(TextRange, double)> leadingClusters,
+  List<(TextRange, double)> trailingClusters,
 });
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
@@ -684,6 +686,7 @@ class RenderParagraph extends RenderBox
   BoxConstraints? _cachedShrinkConstraints;
   InlineSpan? _cachedEllipsisSpan;
   double? _cachedEllipsisMaxWidth;
+  double? _cachedFullTextWidth;
   _EllipsisMetrics? _cachedEllipsisMetrics;
 
   void _resetOverflowCaches({bool resetShrinkLock = true}) {
@@ -693,6 +696,7 @@ class RenderParagraph extends RenderBox
     _cachedShrinkConstraints = null;
     _cachedEllipsisSpan = null;
     _cachedEllipsisMaxWidth = null;
+    _cachedFullTextWidth = null;
     _cachedEllipsisMetrics = null;
     _overflowShaderRect = null;
   }
@@ -1100,7 +1104,8 @@ class RenderParagraph extends RenderBox
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    final Offset adjustedPosition = position - Offset(_computeShrinkAlignmentOffset(), 0.0);
+    final Offset adjustedPosition =
+        position - Offset(_computeHitTestAlignmentOffset(position), 0.0);
     final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(adjustedPosition);
     // The hit-test can't fall through the horizontal gaps between visually
     // adjacent characters on the same line, even with a large letter-spacing or
@@ -1228,6 +1233,9 @@ class RenderParagraph extends RenderBox
       };
     }
     if (!_locksLayoutOnShrink) {
+      if (_overflowPosition == TextOverflowPosition.end && textDirection == TextDirection.rtl) {
+        return -overflowWidth;
+      }
       return 0.0;
     }
     return switch ((textAlign, textDirection)) {
@@ -1241,9 +1249,81 @@ class RenderParagraph extends RenderBox
     };
   }
 
+  double _computeHitTestAlignmentOffset(Offset position) {
+    final double overflowWidth = _textPainter.width - size.width;
+    if (_overflowPosition == TextOverflowPosition.middle &&
+        _overflow != TextOverflow.ellipsis &&
+        _overflow != TextOverflow.visible &&
+        overflowWidth > 0.0) {
+      return position.dx >= size.width / 2.0 ? -overflowWidth : 0.0;
+    }
+    return _computeShrinkAlignmentOffset();
+  }
+
+  static TextStyle? _styleAtOffset(InlineSpan span, int targetOffset) {
+    final int clampedOffset = math.max(0, targetOffset);
+    var offset = 0;
+    TextStyle? matchedStyle;
+    TextStyle? lastStyle = span.style;
+    span.visitChildren((InlineSpan child) {
+      if (child is PlaceholderSpan) {
+        if (clampedOffset == offset) {
+          matchedStyle = child.style ?? lastStyle;
+          return false;
+        }
+        offset += 1;
+        return true;
+      }
+      if (child is TextSpan) {
+        if (child.style != null) {
+          lastStyle = child.style;
+        }
+        final String? text = child.text;
+        if (text != null && text.isNotEmpty) {
+          final int end = offset + text.length;
+          if (clampedOffset < end) {
+            matchedStyle = child.style ?? lastStyle;
+            return false;
+          }
+          offset = end;
+        }
+      }
+      return true;
+    });
+    return matchedStyle ?? lastStyle;
+  }
+
+  static (TextRange, double) _measureClusterAt(
+    TextPainter painter,
+    String plainText,
+    double fullWidth,
+    int offset,
+  ) {
+    final GlyphInfo? glyph = painter.getGlyphInfoAt(offset);
+    if (glyph != null && glyph.graphemeClusterCodeUnitRange.end > offset) {
+      return (glyph.graphemeClusterCodeUnitRange, glyph.graphemeClusterLayoutBounds.width);
+    }
+    final bool isSurrogatePair =
+        TextPainter.isHighSurrogate(plainText.codeUnitAt(offset)) && offset + 1 < plainText.length;
+    final step = isSurrogatePair ? 2 : 1;
+    final int start =
+        !isSurrogatePair &&
+            offset > 0 &&
+            TextPainter.isLowSurrogate(plainText.codeUnitAt(offset)) &&
+            TextPainter.isHighSurrogate(plainText.codeUnitAt(offset - 1))
+        ? offset - 1
+        : offset;
+    final int end = math.min(plainText.length, start + (start < offset ? 2 : step));
+    return (TextRange(start: start, end: end), (fullWidth / plainText.length) * (end - start));
+  }
+
   _EllipsisMetrics? _computeEllipsisMetrics(double maxWidth) {
-    if (_cachedEllipsisMetrics case final _EllipsisMetrics cached?) {
+    if (_cachedEllipsisMetrics case final _EllipsisMetrics cached?
+        when maxWidth <= cached.scannedBudgetWidth) {
       return cached;
+    }
+    if (_cachedFullTextWidth case final double cachedFullWidth? when cachedFullWidth <= maxWidth) {
+      return null;
     }
     final String plainText = _rawText.toPlainText(includeSemanticsLabels: false);
     if (plainText.isEmpty) {
@@ -1261,13 +1341,15 @@ class RenderParagraph extends RenderBox
       hyphens: hyphens,
     )..layout();
     final double fullWidth = fullPainter.width;
+    _cachedFullTextWidth = fullWidth;
     if (fullWidth <= maxWidth) {
       fullPainter.dispose();
       return null;
     }
 
+    final TextStyle? ellipsisStyle = _rawText.style ?? _styleAtOffset(_rawText, 0);
     final ellipsisPainter = TextPainter(
-      text: TextSpan(style: _rawText.style, text: _kEllipsis),
+      text: TextSpan(style: ellipsisStyle, text: _kEllipsis),
       textDirection: textDirection,
       textScaler: textScaler,
       locale: locale,
@@ -1277,25 +1359,53 @@ class RenderParagraph extends RenderBox
     final double ellipsisWidth = ellipsisPainter.width;
     ellipsisPainter.dispose();
 
-    final clusters = <(TextRange, double)>[];
-    var offset = 0;
-    while (offset < plainText.length) {
-      final GlyphInfo? glyph = fullPainter.getGlyphInfoAt(offset);
-      if (glyph == null || glyph.graphemeClusterCodeUnitRange.end <= offset) {
-        final step =
-            TextPainter.isHighSurrogate(plainText.codeUnitAt(offset)) &&
-                offset + 1 < plainText.length
-            ? 2
-            : 1;
-        final int nextOffset = offset + step;
-        clusters.add((
-          TextRange(start: offset, end: nextOffset),
-          (fullWidth / plainText.length) * step,
-        ));
-        offset = nextOffset;
-      } else {
-        clusters.add((glyph.graphemeClusterCodeUnitRange, glyph.graphemeClusterLayoutBounds.width));
-        offset = glyph.graphemeClusterCodeUnitRange.end;
+    // For short or medium texts, collect all clusters once so subsequent width
+    // increases can reuse the cache; for very long strings, only scan enough
+    // leading and trailing clusters to fill maxWidth.
+    final bool scanFullText = plainText.length <= 256;
+    final scannedBudgetWidth = scanFullText ? fullWidth : maxWidth;
+    final leadingClusters = <(TextRange, double)>[];
+    final trailingClusters = <(TextRange, double)>[];
+
+    if (scanFullText || _overflowPosition == TextOverflowPosition.middle) {
+      var leadingOffset = 0;
+      var leadingWidth = 0.0;
+      while (leadingOffset < plainText.length && (scanFullText || leadingWidth <= maxWidth)) {
+        final (TextRange range, double clusterWidth) = _measureClusterAt(
+          fullPainter,
+          plainText,
+          fullWidth,
+          leadingOffset,
+        );
+        leadingClusters.add((range, clusterWidth));
+        leadingWidth += clusterWidth;
+        leadingOffset = range.end;
+      }
+    }
+
+    if (scanFullText) {
+      trailingClusters.addAll(leadingClusters.reversed);
+    } else {
+      final int minTrailingOffset = leadingClusters.isNotEmpty ? leadingClusters.last.$1.end : 0;
+      int trailingCursor = plainText.length;
+      var trailingWidth = 0.0;
+      while (trailingCursor > minTrailingOffset && trailingWidth <= maxWidth) {
+        final int probeOffset =
+            trailingCursor >= 2 &&
+                TextPainter.isLowSurrogate(plainText.codeUnitAt(trailingCursor - 1)) &&
+                TextPainter.isHighSurrogate(plainText.codeUnitAt(trailingCursor - 2))
+            ? trailingCursor - 2
+            : trailingCursor - 1;
+        final (TextRange range, double clusterWidth) = _measureClusterAt(
+          fullPainter,
+          plainText,
+          fullWidth,
+          probeOffset,
+        );
+        final int nextCursor = range.start < trailingCursor ? range.start : probeOffset;
+        trailingClusters.add((range, clusterWidth));
+        trailingWidth += clusterWidth;
+        trailingCursor = nextCursor;
       }
     }
     fullPainter.dispose();
@@ -1304,7 +1414,9 @@ class RenderParagraph extends RenderBox
       text: plainText,
       width: fullWidth,
       ellipsisWidth: ellipsisWidth,
-      clusters: clusters,
+      scannedBudgetWidth: scannedBudgetWidth,
+      leadingClusters: leadingClusters,
+      trailingClusters: trailingClusters,
     );
   }
 
@@ -1320,11 +1432,12 @@ class RenderParagraph extends RenderBox
     final TextStyle? baseStyle = _rawText.style;
     final double availableWidth = maxWidth - metrics.ellipsisWidth;
     if (availableWidth <= 0.0) {
-      return TextSpan(style: baseStyle, text: _kEllipsis);
+      return TextSpan(style: baseStyle ?? _styleAtOffset(_rawText, 0), text: _kEllipsis);
     }
 
     final String plainText = metrics.text;
-    final List<(TextRange, double)> clusters = metrics.clusters;
+    final List<(TextRange, double)> leadingClusters = metrics.leadingClusters;
+    final List<(TextRange, double)> trailingClusters = metrics.trailingClusters;
     final bool isPlainTextSpan = switch (_rawText) {
       TextSpan(children: null, recognizer: null) => true,
       _ => false,
@@ -1333,8 +1446,7 @@ class RenderParagraph extends RenderBox
     if (_overflowPosition == TextOverflowPosition.start) {
       var usedWidth = 0.0;
       int tailStart = plainText.length;
-      for (int i = clusters.length - 1; i >= 0; i--) {
-        final (TextRange range, double clusterWidth) = clusters[i];
+      for (final (TextRange range, double clusterWidth) in trailingClusters) {
         if (usedWidth + clusterWidth > availableWidth) {
           break;
         }
@@ -1345,10 +1457,13 @@ class RenderParagraph extends RenderBox
         return TextSpan(style: baseStyle, text: '$_kEllipsis${plainText.substring(tailStart)}');
       }
       final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStart, plainText.length);
+      final TextStyle? ellipsisStyle = baseStyle == null
+          ? _styleAtOffset(_rawText, tailStart)
+          : null;
       return TextSpan(
         style: baseStyle,
         children: <InlineSpan>[
-          const TextSpan(text: _kEllipsis),
+          TextSpan(style: ellipsisStyle, text: _kEllipsis),
           if (tail != null) tail,
         ],
       );
@@ -1356,25 +1471,39 @@ class RenderParagraph extends RenderBox
 
     // Alternate taking clusters from the start and end until availableWidth is filled.
     var usedWidth = 0.0;
-    var leftIndex = 0;
-    int rightIndex = clusters.length - 1;
+    var leadingIndex = 0;
+    var trailingIndex = 0;
     var headEnd = 0;
     int tailStart = plainText.length;
     var takeFromStart = true;
-    while (leftIndex <= rightIndex) {
+    while (headEnd < tailStart) {
+      if (takeFromStart && leadingIndex >= leadingClusters.length) {
+        if (trailingIndex >= trailingClusters.length) {
+          break;
+        }
+        takeFromStart = false;
+      } else if (!takeFromStart && trailingIndex >= trailingClusters.length) {
+        if (leadingIndex >= leadingClusters.length) {
+          break;
+        }
+        takeFromStart = true;
+      }
       final (TextRange range, double clusterWidth) = takeFromStart
-          ? clusters[leftIndex]
-          : clusters[rightIndex];
+          ? leadingClusters[leadingIndex]
+          : trailingClusters[trailingIndex];
+      if (range.end > tailStart || range.start < headEnd) {
+        break;
+      }
       if (usedWidth + clusterWidth > availableWidth) {
         break;
       }
       usedWidth += clusterWidth;
       if (takeFromStart) {
         headEnd = range.end;
-        leftIndex += 1;
+        leadingIndex += 1;
       } else {
         tailStart = range.start;
-        rightIndex -= 1;
+        trailingIndex += 1;
       }
       takeFromStart = !takeFromStart;
     }
@@ -1387,11 +1516,14 @@ class RenderParagraph extends RenderBox
     }
     final InlineSpan? head = _sliceInlineSpan(_rawText, 0, headEnd);
     final InlineSpan? tail = _sliceInlineSpan(_rawText, tailStart, plainText.length);
+    final TextStyle? ellipsisStyle = baseStyle == null
+        ? _styleAtOffset(_rawText, headEnd > 0 ? headEnd - 1 : tailStart)
+        : null;
     return TextSpan(
       style: baseStyle,
       children: <InlineSpan>[
         if (head != null) head,
-        const TextSpan(text: _kEllipsis),
+        TextSpan(style: ellipsisStyle, text: _kEllipsis),
         if (tail != null) tail,
       ],
     );
@@ -1626,8 +1758,10 @@ class RenderParagraph extends RenderBox
           _overflowShader = null;
         case TextOverflow.fade:
           _needsClipping = true;
+          final TextStyle? effectiveFadeStyle =
+              _textPainter.text!.style ?? _styleAtOffset(_rawText, 0);
           final fadeSizePainter = TextPainter(
-            text: TextSpan(style: _textPainter.text!.style, text: '\u2026'),
+            text: TextSpan(style: effectiveFadeStyle, text: '\u2026'),
             textDirection: textDirection,
             textScaler: textScaler,
             locale: locale,
