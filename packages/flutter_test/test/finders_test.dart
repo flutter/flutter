@@ -30,6 +30,32 @@ void main() {
       );
       expect(find.widgetWithImage(TestButton, FileImage(File('test'))), findsOneWidget);
     });
+
+    testWidgets('widgetWithImage can find an offstage button', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
+      final image = FileImage(File('test'));
+      await tester.pumpWidget(
+        _boilerplate(
+          Offstage(
+            child: TestButton(child: Image(image: image)),
+          ),
+        ),
+      );
+
+      expect(find.widgetWithImage(TestButton, image), findsNothing);
+      expect(find.widgetWithImage(TestButton, image, skipOffstage: false), findsOneWidget);
+    });
+  });
+
+  group('icon', () {
+    testWidgets('widgetWithIcon can find an offstage button', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _boilerplate(const Offstage(child: TestButton(child: Icon(Icons.add)))),
+      );
+
+      expect(find.widgetWithIcon(TestButton, Icons.add), findsNothing);
+      expect(find.widgetWithIcon(TestButton, Icons.add, skipOffstage: false), findsOneWidget);
+    });
   });
 
   group('text', () {

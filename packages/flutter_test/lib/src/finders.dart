@@ -289,7 +289,10 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder widgetWithIcon(Type widgetType, IconData icon, {bool skipOffstage = true}) {
-    return find.ancestor(of: find.byIcon(icon), matching: find.byType(widgetType));
+    return find.ancestor(
+      of: find.byIcon(icon, skipOffstage: skipOffstage),
+      matching: find.byType(widgetType, skipOffstage: skipOffstage),
+    );
   }
 
   /// Looks for widgets that contain an [Image] descendant displaying
@@ -310,7 +313,10 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder widgetWithImage(Type widgetType, ImageProvider image, {bool skipOffstage = true}) {
-    return find.ancestor(of: find.image(image), matching: find.byType(widgetType));
+    return find.ancestor(
+      of: find.image(image, skipOffstage: skipOffstage),
+      matching: find.byType(widgetType, skipOffstage: skipOffstage),
+    );
   }
 
   /// Finds widgets by searching for elements with a particular type.
