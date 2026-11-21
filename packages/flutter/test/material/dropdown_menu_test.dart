@@ -3740,7 +3740,6 @@ void main() {
           : matchesSemantics(
               isButton: true,
               hasExpandedState: true,
-              hasFocusAction: true,
               isTextField: true,
               isFocusable: true,
               hasEnabledState: true,
@@ -4428,10 +4427,7 @@ void main() {
                               SemanticsFlag.isButton,
                               SemanticsFlag.hasExpandedState,
                             ],
-                            actions: <SemanticsAction>[
-                              SemanticsAction.focus,
-                              SemanticsAction.expand,
-                            ],
+                            actions: <SemanticsAction>[SemanticsAction.expand],
                             textDirection: TextDirection.ltr,
                             currentValueLength: 0,
                           ),

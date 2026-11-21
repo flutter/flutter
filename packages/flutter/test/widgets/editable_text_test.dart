@@ -4921,6 +4921,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.setSelection,
@@ -4938,6 +4940,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
@@ -4957,6 +4961,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
@@ -4992,6 +4998,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
         ],
@@ -5019,6 +5027,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
@@ -5055,6 +5065,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
         ],
@@ -5098,6 +5110,8 @@ void main() {
       includesNodeWith(
         value: 'test for words',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
         ],
@@ -5125,6 +5139,8 @@ void main() {
       includesNodeWith(
         value: 'test for words',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
@@ -5159,6 +5175,8 @@ void main() {
       includesNodeWith(
         value: 'test for words',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
         ],
@@ -5213,6 +5231,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
         ],
@@ -5240,6 +5260,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
@@ -5276,6 +5298,8 @@ void main() {
       includesNodeWith(
         value: 'test',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
         ],
@@ -5330,6 +5354,8 @@ void main() {
       includesNodeWith(
         value: 'test for words',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
         ],
@@ -5357,6 +5383,8 @@ void main() {
       includesNodeWith(
         value: 'test for words',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
@@ -5391,6 +5419,8 @@ void main() {
       includesNodeWith(
         value: 'test for words',
         actions: <SemanticsAction>[
+          SemanticsAction.tap,
+          SemanticsAction.focus,
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
         ],
@@ -5458,6 +5488,7 @@ void main() {
                             SemanticsFlag.isFocusable,
                             SemanticsFlag.isObscured,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           value: expectedValue,
                           inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
@@ -5518,6 +5549,7 @@ void main() {
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isFocusable,
                           ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                           value: originalText,
                           inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
@@ -5574,6 +5606,8 @@ void main() {
                             SemanticsFlag.isFocused,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                            SemanticsAction.focus,
                             SemanticsAction.moveCursorBackwardByCharacter,
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
@@ -5710,6 +5744,8 @@ void main() {
         includesNodeWith(
           value: 'test',
           actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -5725,6 +5761,8 @@ void main() {
         includesNodeWith(
           value: 'test',
           actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -5743,6 +5781,8 @@ void main() {
         includesNodeWith(
           value: 'test',
           actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -5760,6 +5800,8 @@ void main() {
         includesNodeWith(
           value: 'test',
           actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -5778,6 +5820,8 @@ void main() {
         includesNodeWith(
           value: 'test',
           actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.focus,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
@@ -5827,6 +5871,8 @@ void main() {
                               SemanticsFlag.isFocused,
                             ],
                             actions: <SemanticsAction>[
+                              SemanticsAction.tap,
+                              SemanticsAction.focus,
                               SemanticsAction.moveCursorBackwardByCharacter,
                               SemanticsAction.moveCursorBackwardByWord,
                               SemanticsAction.setSelection,
@@ -6007,6 +6053,8 @@ void main() {
                             SemanticsFlag.isFocused,
                           ],
                           actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                            SemanticsAction.focus,
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                           ],
@@ -6032,6 +6080,121 @@ void main() {
     expect(controller.text, 'how are you');
 
     semantics.dispose();
+  });
+
+  group('a11y tap and focus', () {
+    Widget buildEditableText({bool readOnly = false}) {
+      return TestWidgetsApp(
+        home: EditableText(
+          backgroundCursorColor: const Color(0xFF9E9E9E),
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          readOnly: readOnly,
+        ),
+      );
+    }
+
+    SemanticsNode findTextFieldNode() {
+      return find.semantics.byFlag(SemanticsFlag.isTextField).evaluate().single;
+    }
+
+    testWidgets('tap focuses the field and places the cursor at the end', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      controller.value = const TextEditingValue(text: 'hello');
+      await tester.pumpWidget(buildEditableText());
+
+      expect(focusNode.hasFocus, isFalse);
+      expect(controller.selection.isValid, isFalse);
+      expect(
+        findTextFieldNode(),
+        containsSemantics(isTextField: true, hasTapAction: true, hasFocusAction: true),
+      );
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        findTextFieldNode().id,
+        SemanticsAction.tap,
+      );
+      await tester.pump();
+
+      expect(focusNode.hasFocus, isTrue);
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+      expect(controller.selection, const TextSelection.collapsed(offset: 5));
+
+      handle.dispose();
+    });
+
+    testWidgets('focus action focuses the field', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(buildEditableText());
+
+      expect(focusNode.hasFocus, isFalse);
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        findTextFieldNode().id,
+        SemanticsAction.focus,
+      );
+      await tester.pump();
+
+      expect(focusNode.hasFocus, isTrue);
+
+      handle.dispose();
+    });
+
+    testWidgets('focus action on a focused field requests the keyboard', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(buildEditableText());
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+      tester.testTextInput.log.clear();
+
+      tester.binding.pipelineOwner.semanticsOwner!.performAction(
+        findTextFieldNode().id,
+        SemanticsAction.focus,
+      );
+      await tester.pump();
+
+      expect(
+        tester.testTextInput.log.map((MethodCall call) => call.method),
+        contains('TextInput.show'),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('read-only field has no tap action', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(buildEditableText(readOnly: true));
+
+      expect(
+        findTextFieldNode(),
+        containsSemantics(isTextField: true, hasTapAction: false, hasFocusAction: true),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('field whose focus node cannot request focus has no tap or focus action', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      focusNode.canRequestFocus = false;
+      await tester.pumpWidget(buildEditableText());
+
+      expect(
+        findTextFieldNode(),
+        containsSemantics(isTextField: true, hasTapAction: false, hasFocusAction: false),
+      );
+
+      handle.dispose();
+    });
   });
 
   testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {
