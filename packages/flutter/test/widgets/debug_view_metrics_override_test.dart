@@ -403,35 +403,31 @@ void main() {
       expect(data.systemGestureInsets, EdgeInsets.zero);
     });
 
-    testWidgets('yields platformBrightness to debugBrightnessOverride', (
+    testWidgets('debugBrightnessOverride reaches MediaQuery and yields to a test value', (
       WidgetTester tester,
     ) async {
-      // debugBrightnessOverride is applied by MediaQuery after the data has
-      // been built, so it wins there. Pinned because the two mechanisms
-      // overlap, and because everything that reads the dispatcher rather than
-      // MediaQuery still sees the view override.
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
+      final ui.Brightness platform = data.platformBrightness;
 
-      debugSetViewMetricsOverride(
-        tester.view.viewId,
-        const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
-      );
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      debugBrightnessOverride = _otherBrightness;
+      expect(tester.binding.hasScheduledFrame, isTrue);
       await tester.pump();
-      expect(data.platformBrightness, ui.Brightness.dark);
+      final ui.Brightness overridden = data.platformBrightness;
 
-      debugBrightnessOverride = ui.Brightness.light;
-      await tester.pumpWidget(
-        _capture((MediaQueryData value) => data = value, child: const SizedBox()),
-      );
-      final ui.Brightness withBoth = data.platformBrightness;
-      final ui.Brightness fromDispatcher = tester.binding.platformDispatcher.platformBrightness;
+      // Like any override, it yields to a value a test sets explicitly.
+      tester.platformDispatcher.platformBrightnessTestValue = platform;
+      await tester.pump();
+      final ui.Brightness withTestValue = data.platformBrightness;
 
+      tester.platformDispatcher.clearPlatformBrightnessTestValue();
       debugBrightnessOverride = null;
-      debugClearViewMetricsOverrides();
+      await tester.pump();
 
-      expect(withBoth, ui.Brightness.light);
-      expect(fromDispatcher, ui.Brightness.dark);
+      expect(overridden, _otherBrightness);
+      expect(withTestValue, platform);
+      expect(data.platformBrightness, platform);
     });
 
     testWidgets('an override for another view leaves this one alone', (WidgetTester tester) async {
@@ -860,26 +856,44 @@ void main() {
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
 
-      for (final MapEntry<String, (DebugViewMetricsOverride, _MetricReader, Object?)> entry
-          in _surfacedMetrics.entries) {
-        final (DebugViewMetricsOverride override, _MetricReader read, Object? expected) =
-            entry.value;
-        final Object? reported = read(data);
-        debugSetViewMetricsOverride(tester.view.viewId, override);
-        await tester.pump();
-        final Object? overridden = read(data);
-        debugSetViewMetricsOverride(tester.view.viewId, null);
-        await tester.pump();
+      // Each metric is installed as the view's entry, and as the override for
+      // every view beneath an entry that sets only a metric MediaQuery does not
+      // surface, so that a metric left out of their merge is caught.
+      final installers = <String, void Function(DebugViewMetricsOverride? override)>{
+        "the view's entry": (DebugViewMetricsOverride? override) {
+          debugSetViewMetricsOverride(tester.view.viewId, override);
+        },
+        'the override for every view': (DebugViewMetricsOverride? override) {
+          debugAllViewsMetricsOverride = override;
+          debugSetViewMetricsOverride(
+            tester.view.viewId,
+            override == null ? null : const DebugViewMetricsOverride(autoPlayVideos: false),
+          );
+        },
+      };
+      for (final MapEntry<String, void Function(DebugViewMetricsOverride?)> install
+          in installers.entries) {
+        for (final MapEntry<String, (DebugViewMetricsOverride, _MetricReader, Object?)> entry
+            in _surfacedMetrics.entries) {
+          final (DebugViewMetricsOverride override, _MetricReader read, Object? expected) =
+              entry.value;
+          final Object? reported = read(data);
+          install.value(override);
+          await tester.pump();
+          final Object? overridden = read(data);
+          install.value(null);
+          await tester.pump();
 
-        expect(overridden, expected, reason: '${entry.key} was not honored');
-        expect(
-          reported,
-          isNot(expected),
-          reason:
-              '${entry.key} would read the same without the override, so the '
-              'test cannot tell whether it was honored',
-        );
-        expect(read(data), reported, reason: '${entry.key} was not restored');
+          expect(overridden, expected, reason: '${entry.key} in ${install.key} was not honored');
+          expect(
+            reported,
+            isNot(expected),
+            reason:
+                '${entry.key} would read the same without the override, so the '
+                'test cannot tell whether it was honored',
+          );
+          expect(read(data), reported, reason: '${entry.key} in ${install.key} was not restored');
+        }
       }
       debugClearViewMetricsOverrides();
       await tester.pump();
