@@ -86,6 +86,7 @@ class SwiftPackageManagerUtils {
     required List<String> options,
     List<Pattern>? expectedLines,
     List<String>? unexpectedLines,
+    bool expectFailure = false,
   }) async {
     final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
     final List<String> allUnexpectedLines = unexpectedLines ?? <String>[];
@@ -122,9 +123,9 @@ class SwiftPackageManagerUtils {
     }
     expect(
       result.exitCode,
-      0,
+      expectFailure ? isNot(0) : 0,
       reason:
-          'Failed to build app for "${command.join(' ')}":\n'
+          '${expectFailure ? 'Expected build to fail' : 'Failed to build app'} for "${command.join(' ')}":\n'
           'stdout: \n${result.stdout}\n'
           'stderr: \n${result.stderr}\n',
     );
@@ -345,6 +346,50 @@ class SwiftPackageManagerUtils {
       );
       podspec.writeAsStringSync(podspecContent);
     }
+  }
+
+  /// Moves a SwiftPM plugin's sources to `<platform>/Classes` (the legacy CocoaPods location) and
+  /// points its Package.swift target at them with `path: "../Classes"`.
+  ///
+  /// This is an invalid Swift package because the target is outside of the package root. It's
+  /// used to test the error shown for this misconfiguration.
+  ///
+  /// See https://github.com/flutter/flutter/issues/184021.
+  static void moveSourcesOutsidePackageRoot(
+    SwiftPackageManagerPlugin plugin, {
+    required String platform,
+  }) {
+    final Directory platformDir = fileSystem.directory(plugin.pluginPath).childDirectory(platform);
+    final Directory spmPluginDir = platformDir.childDirectory(plugin.pluginName);
+
+    // Move sources from Sources/<pluginName> to Classes.
+    final Directory sourcesDir = spmPluginDir.childDirectory('Sources');
+    final Directory pluginSourcesDir = sourcesDir.childDirectory(plugin.pluginName);
+    final Directory classesDir = platformDir.childDirectory('Classes');
+    classesDir.createSync(recursive: true);
+    for (final File file in pluginSourcesDir.listSync().whereType<File>()) {
+      file.renameSync(classesDir.childFile(file.basename).path);
+    }
+    sourcesDir.deleteSync(recursive: true);
+
+    // Point the target at ../Classes, which is outside of the package root.
+    final File manifest = spmPluginDir.childFile('Package.swift');
+    final String manifestContent = manifest.readAsStringSync();
+    final String updatedManifestContent = manifestContent.replaceFirst(
+      '            resources: [',
+      '            path: "../Classes",\n            resources: [',
+    );
+    expect(updatedManifestContent, isNot(manifestContent));
+    manifest.writeAsStringSync(updatedManifestContent);
+
+    // Update podspec to point to Classes/ instead of Sources/.
+    final File podspec = platformDir.childFile('${plugin.pluginName}.podspec');
+    podspec.writeAsStringSync(
+      podspec.readAsStringSync().replaceAll(
+        '${plugin.pluginName}/Sources/${plugin.pluginName}/',
+        'Classes/',
+      ),
+    );
   }
 
   static String _capitalize(String str) {

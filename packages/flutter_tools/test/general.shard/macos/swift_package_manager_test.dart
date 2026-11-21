@@ -1036,6 +1036,69 @@ let package = Package(
         });
       });
     }
+
+    group('parsePluginError', () {
+      testWithoutContext('returns null for empty or null message', () {
+        expect(
+          SwiftPackageManager.parsePluginError(null, pluginNames: <String>['plugin_1']),
+          isNull,
+        );
+        expect(SwiftPackageManager.parsePluginError('', pluginNames: <String>['plugin_1']), isNull);
+      });
+
+      testWithoutContext('returns null for unknown error', () {
+        expect(
+          SwiftPackageManager.parsePluginError(
+            'xcodebuild: error: some random error',
+            pluginNames: <String>['plugin_1'],
+          ),
+          isNull,
+        );
+      });
+
+      testWithoutContext('returns guided message for target outside the package root', () {
+        const message =
+            'xcodebuild: error: Could not resolve package dependencies:\n'
+            "  target 'plugin_1' in package 'plugin_1' is outside the package root";
+        final String? result = SwiftPackageManager.parsePluginError(
+          message,
+          pluginNames: <String>['plugin_1'],
+        );
+        expect(
+          result,
+          startsWith(
+            'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file: '
+            'target "plugin_1" uses a path outside of the package root.',
+          ),
+        );
+        expect(result, contains(kDisableSwiftPMInstructions));
+      });
+
+      testWithoutContext(
+        'returns guided message for target outside the package root when target name differs '
+        'from plugin name',
+        () {
+          const message =
+              'xcodebuild: error: Could not resolve package dependencies:\n'
+              "  target 'plugin_1_helper' in package 'plugin_1' is outside the package root";
+          expect(
+            SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
+            startsWith(
+              'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file: '
+              'target "plugin_1_helper" uses a path outside of the package root.',
+            ),
+          );
+        },
+      );
+
+      testWithoutContext('returns null if target outside the package root is not a plugin', () {
+        const message = "target 'other' in package 'other' is outside the package root";
+        expect(
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
+          isNull,
+        );
+      });
+    });
   });
 }
 

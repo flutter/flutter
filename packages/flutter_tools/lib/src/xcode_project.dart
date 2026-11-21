@@ -456,7 +456,19 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
         await _swiftPackageFetchStderrSubscription?.cancel();
       });
       if (exitCode != 0) {
-        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
+        final stderrString = stderrBuffer.toString();
+
+        final List<Plugin> plugins = await getPlugins();
+        final String? pluginError = SwiftPackageManager.parsePluginError(
+          stderrString,
+          pluginNames: plugins.map((p) => p.name),
+        );
+
+        if (pluginError != null) {
+          logger.printError(stderrString);
+          throwToolExit(pluginError);
+        }
+        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrString');
       }
     } finally {
       status?.cancel();
