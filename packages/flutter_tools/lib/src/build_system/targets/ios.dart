@@ -369,6 +369,58 @@ class DebugUnpackIOS extends UnpackIOS {
   BuildMode get buildMode => BuildMode.debug;
 }
 
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+/// Unpack the profile prebuilt VM service framework.
+class UnpackIosVmService extends UnpackDarwin {
+  const UnpackIosVmService();
+
+  @override
+  String get name => 'unpack_ios_vm_service';
+
+  @override
+  FlutterDarwinPlatform get darwinPlatform => .ios;
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/$_kVmServiceExecutableName'),
+    Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Info.plist'),
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final String? archs = environment.defines[kIosArchs];
+    if (archs == null) {
+      throw MissingDefineException(kIosArchs, name);
+    }
+
+    await copyFramework(
+      environment,
+      buildMode: .profile,
+      framework: .vmserviceFramework,
+      targetPlatform: .ios,
+    );
+
+    final File frameworkBinary = environment.outputDir
+        .childDirectory(_kVmServiceFrameworkName)
+        .childFile(_kVmServiceExecutableName);
+    if (!frameworkBinary.existsSync()) {
+      throw Exception('Binary ${frameworkBinary.path} does not exist, cannot thin');
+    }
+    await thinFramework(environment, frameworkBinary.path, archs);
+    await _signFramework(environment, frameworkBinary, .profile);
+  }
+}
+
 // TODO(gaaclarke): Remove this after a reasonable amount of time where the
 // UISceneDelegate migration being on stable. This incurs a minor build time
 // cost.
@@ -687,6 +739,14 @@ abstract class IosAssetBundle extends Target {
       environment.fileSystem
           .file(isolateSnapshotData)
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+      final String vmserviceDill = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceKernelDill,
+        mode: BuildMode.debug,
+      );
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
     } else {
       environment.buildDir
           .childDirectory('App.framework')
@@ -764,6 +824,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
   List<Source> get inputs => <Source>[
     const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
     const Source.pattern('{BUILD_DIR}/app.dill'),
     ...super.inputs,
   ];
@@ -773,6 +834,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vm_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/App.framework/flutter_assets/vmservice_snapshot.dill'),
     ...super.outputs,
   ];
 
@@ -809,7 +871,11 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    AotAssemblyProfile(),
+    InstallCodeAssets(),
+    UnpackIosVmService(),
+  ];
 }
 
 /// Build a release iOS application bundle.
