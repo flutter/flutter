@@ -67,7 +67,7 @@ void VsyncWaiterIOS::AwaitVSync() {
     [client_ setMaxRefreshRate:max_refresh_rate_];
   }
 
-  if (client_.displayLink.paused) {
+  if (client_.isPaused) {
     [client_ await];
     if (dispatching_event_) {
       // This vsync request came synchronously while dispatching UIKit event and

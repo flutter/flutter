@@ -148,4 +148,25 @@ flutter::TaskRunners CreateTestTaskRunners() {
   XCTAssertTrue(fired);
 }
 
+- (void)testDisplayLinkIsScheduledWhenCreated {
+  // The display link must be added to the run loop in the same call that creates it. Otherwise iOS
+  // can retarget the app's display links to another display in between (e.g. when a foldable
+  // iPhone launches unfolded) and skip the not-yet-scheduled link, leaving it bound to a display
+  // that no longer refreshes. See https://github.com/flutter/flutter/issues/195401.
+  id mockDisplayLink = OCMClassMock([CADisplayLink class]);
+  [self addTeardownBlock:^{
+    [mockDisplayLink stopMocking];
+  }];
+  OCMStub(ClassMethod([mockDisplayLink displayLinkWithTarget:[OCMArg any]
+                                                    selector:sel_registerName("onDisplayLink:")]))
+      .andReturn(mockDisplayLink);
+
+  flutter::TaskRunners taskRunners = CreateTestTaskRunners();
+  auto waiter =
+      std::make_unique<flutter::VsyncWaiterIOS>(taskRunners, [FlutterDisplayLinkManager shared]);
+
+  // No pending tasks have run yet, so the link must have been scheduled during construction.
+  OCMVerify([mockDisplayLink addToRunLoop:[OCMArg any] forMode:NSRunLoopCommonModes]);
+}
+
 @end
