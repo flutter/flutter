@@ -102,6 +102,48 @@ void main() {
         expect(infoPlistContents, contains(engineVersion));
         expect(infoPlistContents, contains(buildMode.cliName));
 
+        final Directory vmServiceFrameworkArtifact = fileSystem.directory(
+          fileSystem.path.join(
+            flutterRoot,
+            'bin',
+            'cache',
+            'artifacts',
+            'engine',
+            artifactDir,
+            'VMService.framework',
+          ),
+        );
+        if (buildMode == .profile) {
+          expect(vmServiceFrameworkArtifact, exists);
+          expect(vmServiceFrameworkArtifact.statSync().mode.toRadixString(8), '40755');
+
+          final File vmServiceInfoPlist = fileSystem.file(
+            fileSystem.path.joinAll(<String>[
+              vmServiceFrameworkArtifact.path,
+              'Versions',
+              'A',
+              'Resources',
+              'Info.plist',
+            ]),
+          );
+          expect(vmServiceInfoPlist, exists);
+          final String vmServiceInfoPlistContents = vmServiceInfoPlist.readAsStringSync();
+          expect(vmServiceInfoPlistContents, contains(engineVersion));
+          expect(vmServiceInfoPlistContents, contains(buildMode.cliName));
+
+          final File vmServiceBinary = fileSystem.file(
+            fileSystem.path.joinAll(<String>[
+              vmServiceFrameworkArtifact.path,
+              'Versions',
+              'A',
+              'VMService',
+            ]),
+          );
+          _checkFatBinary(vmServiceBinary, buildMode.cliName, 'dynamically linked shared library');
+        } else {
+          expect(vmServiceFrameworkArtifact, isNot(exists));
+        }
+
         if (buildMode == BuildMode.release) {
           final Directory dsymArtifact = fileSystem.directory(
             fileSystem.path.joinAll(<String>[
@@ -121,7 +163,7 @@ void main() {
       });
     }
 
-    for (final buildMode in <String>['Debug', 'Release']) {
+    for (final buildMode in <String>['Debug', 'Profile', 'Release']) {
       final String buildModeLower = buildMode.toLowerCase();
 
       testWithoutContext('flutter build macos --$buildModeLower builds a valid app', () {
@@ -202,8 +244,13 @@ void main() {
           expect(libDsymBinary.existsSync(), isFalse);
           expect(libSymbols, isEmpty);
         } else {
-          // Check framework dSYM file copied.
-          _checkFatBinary(frameworkDsymBinary, buildModeLower, 'dSYM companion file');
+          if (buildMode == 'Release') {
+            // Check framework dSYM file copied.
+            _checkFatBinary(frameworkDsymBinary, buildModeLower, 'dSYM companion file');
+          } else {
+            // Framework dSYM is only copied for release builds.
+            expect(frameworkDsymBinary.existsSync(), isFalse);
+          }
 
           // Check extracted dSYM file.
           _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
@@ -230,6 +277,20 @@ void main() {
         );
 
         expect(vmSnapshot.existsSync(), buildMode == 'Debug');
+
+        final File vmServiceSnapshot = fileSystem.file(
+          fileSystem.path.join(
+            outputApp.path,
+            'Contents',
+            'Frameworks',
+            'App.framework',
+            'Resources',
+            'flutter_assets',
+            'vmservice_snapshot.dill',
+          ),
+        );
+
+        expect(vmServiceSnapshot.existsSync(), buildMode == 'Debug');
 
         final Directory outputFlutterFramework = fileSystem.directory(
           fileSystem.path.join(outputApp.path, 'Contents', 'Frameworks', 'FlutterMacOS.framework'),
@@ -270,6 +331,45 @@ void main() {
         );
 
         expect(topLevelPrivacy.existsSync() || resourcesLevelPrivacy.existsSync(), isTrue);
+
+        final Directory outputVmServiceFramework = fileSystem.directory(
+          fileSystem.path.join(outputApp.path, 'Contents', 'Frameworks', 'VMService.framework'),
+        );
+        if (buildMode == 'Profile') {
+          expect(outputVmServiceFramework, exists);
+          expect(outputVmServiceFramework.statSync().mode.toRadixString(8), '40755');
+
+          final Link vmServiceCurrent = outputVmServiceFramework
+              .childDirectory('Versions')
+              .childLink('Current');
+          expect(vmServiceCurrent.targetSync(), 'A');
+          expect(
+            outputVmServiceFramework.childLink('VMService').targetSync(),
+            fileSystem.path.join('Versions', 'Current', 'VMService'),
+          );
+          expect(outputVmServiceFramework.childLink('Resources'), exists);
+          expect(
+            outputVmServiceFramework.childLink('Resources').targetSync(),
+            fileSystem.path.join('Versions', 'Current', 'Resources'),
+          );
+          expect(
+            fileSystem.file(
+              fileSystem.path.join(outputVmServiceFramework.path, 'Resources', 'Info.plist'),
+            ),
+            exists,
+          );
+          expect(outputVmServiceFramework.childLink('Headers'), isNot(exists));
+          expect(outputVmServiceFramework.childDirectory('Headers'), isNot(exists));
+          expect(outputVmServiceFramework.childLink('Modules'), isNot(exists));
+          expect(outputVmServiceFramework.childDirectory('Modules'), isNot(exists));
+          _checkFatBinary(
+            outputVmServiceFramework.childFile('VMService'),
+            buildModeLower,
+            'dynamically linked shared library',
+          );
+        } else {
+          expect(outputVmServiceFramework, isNot(exists));
+        }
 
         // Build again without cleaning.
         final ProcessResult secondBuild = processManager.runSync(

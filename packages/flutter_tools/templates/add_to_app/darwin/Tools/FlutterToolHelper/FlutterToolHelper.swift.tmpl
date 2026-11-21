@@ -72,6 +72,43 @@ public class FlutterToolHelper {
     return filenameWithExtension.contains("simulator")
   }
 
+  /// Updates the `FlutterPluginRegistrant` symbolic link during the Xcode prebuild phase,
+  /// deferring transitions away from `Profile` until `FlutterAssembleTool` runs.
+  ///
+  /// Xcode resolves SwiftPM package dependencies before running scheme pre-actions. Because
+  /// `VMService.xcframework` only exists in `Profile`, switching the symlink away from
+  /// `./Profile` here causes `CreateBuildDescription` to fail looking for `VMService.xcframework`
+  /// before `FlutterAssembleTool` can update artifacts and report actionable guidance.
+  ///
+  /// - Parameters:
+  ///   - targetBuildMode: The build mode the app is being built for and the destination the link
+  ///     should point to.
+  ///   - integrationPackagePath: The path to the FlutterNativeIntegration.
+  ///   - fileManager: The file manager to use for file operations.
+  /// - Throws: `XcodeErrorAndExit.error` if the update fails.
+  public static func updateSymlinkForPrebuild(
+    targetBuildMode: String,
+    integrationPackagePath: String,
+    fileManager: FlutterToolsFileManager
+  ) throws {
+    let currentLinkPath = "\(integrationPackagePath)/FlutterPluginRegistrant"
+    let currentLinkTarget = try? fileManager.destinationOfSymbolicLink(
+      atPath: currentLinkPath
+    )
+    if currentLinkTarget == "./Profile" && targetBuildMode.lowercased() != "profile" {
+      FlutterToolHelper.xcodeNote(
+        message:
+          "Deferring FlutterPluginRegistrant symlink update from ./Profile to ./\(targetBuildMode) until FlutterAssembleTool runs."
+      )
+      return
+    }
+    try updateSymlink(
+      targetBuildMode: targetBuildMode,
+      integrationPackagePath: integrationPackagePath,
+      fileManager: fileManager
+    )
+  }
+
   /// Updates the `FlutterPluginRegistrant` symbolic link within the `FlutterNativeIntegration`
   /// package.
   ///
@@ -233,24 +270,27 @@ public protocol FlutterProcessRunner {
   ///   - arguments: The arguments to pass to the executable.
   ///   - env: An optional dictionary of environment variables.
   ///   - failOnError: Whether to throw an error if the process fails.
+  /// - Returns: The combined standard output and error of the process.
+  @discardableResult
   func run(
     executableURL: URL,
     arguments: [String],
     env: [String: String]?,
     failOnError: Bool
-  ) throws
+  ) throws -> String
 }
 
 /// A concrete implementation of `FlutterProcessRunner` using `Process`.
 public class FlutterProcessManager: FlutterProcessRunner {
   public init() {}
 
+  @discardableResult
   public func run(
     executableURL: URL,
     arguments: [String],
     env: [String: String]? = nil,
     failOnError: Bool
-  ) throws {
+  ) throws -> String {
     #if os(macOS)
       do {
         let process = Process()
@@ -273,6 +313,7 @@ public class FlutterProcessManager: FlutterProcessRunner {
             "\(executableURL) returned non-zero exit code: \(process.terminationStatus)"
           ])
         }
+        return output
       } catch let error as XcodeErrorAndExit {
         throw error
       } catch {
@@ -280,6 +321,8 @@ public class FlutterProcessManager: FlutterProcessRunner {
           "Failed to run \(executableURL): \(error.localizedDescription)"
         ])
       }
+    #else
+      return ""
     #endif
   }
 }

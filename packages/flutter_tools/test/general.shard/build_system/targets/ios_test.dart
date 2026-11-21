@@ -14,7 +14,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -243,6 +245,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem
@@ -323,6 +328,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
@@ -384,6 +392,7 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), exists);
       expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+      expect(assetDirectory.childFile('vmservice_snapshot.dill'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -424,6 +433,9 @@ void main() {
           .createSync();
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
           .createSync();
       // Project info
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
@@ -515,6 +527,9 @@ void main() {
           .createSync();
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
           .createSync();
       // Project info
       fileSystem
@@ -687,12 +702,55 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+      expect(assetDirectory.childFile('vmservice_snapshot.dill'), isNot(exists));
       expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
+    },
+  );
+
+  testWithoutContext('ProfileIosApplicationBundle depends on UnpackIosVmService', () {
+    expect(const ProfileIosApplicationBundle().dependencies, const <Target>[
+      AotAssemblyProfile(),
+      InstallCodeAssets(),
+      UnpackIosVmService(),
+    ]);
+  });
+
+  testWithoutContext(
+    'DebugIosApplicationBundle resolves UnpackIosVmService only in profile mode',
+    () {
+      const bundle = DebugIosApplicationBundle();
+      expect(bundle.dependencies, isNot(contains(const UnpackIosVmService())));
+      expect(bundle.resolveDependencies(environment), isNot(contains(const UnpackIosVmService())));
+
+      final debugEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: 'debug'},
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(
+        bundle.resolveDependencies(debugEnvironment),
+        isNot(contains(const UnpackIosVmService())),
+      );
+
+      final profileEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildMode: 'profile'},
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(bundle.resolveDependencies(profileEnvironment), contains(const UnpackIosVmService()));
     },
   );
 
@@ -1489,6 +1547,364 @@ void main() {
       ]);
       await const DebugUnpackIOS().build(environment);
 
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  });
+
+  group('UnpackIosVmService', () {
+    const target = UnpackIosVmService();
+    const vmServiceArtifact = 'Artifact.vmserviceFramework.TargetPlatform.ios.profile';
+
+    testWithoutContext('declares expected inputs, outputs, and does not skip SwiftPM', () async {
+      expect(target.inputs, const <Source>[
+        Source.artifact(Artifact.vmserviceFramework, platform: .ios, mode: .profile),
+      ]);
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          environment.outputDir.childFile('VMService.framework/VMService').path,
+          environment.outputDir.childFile('VMService.framework/Info.plist').path,
+        ]),
+      );
+
+      expect(await target.canSkip(environment), isFalse);
+
+      final swiftPmEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{kBuildSwiftPackage: 'true'},
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+      expect(await target.canSkip(swiftPmEnvironment), isFalse);
+      expect(await const ProfileUnpackIOS().canSkip(swiftPmEnvironment), isTrue);
+    });
+
+    testWithoutContext(
+      'creates simulator stub VMService.framework when sdkRoot is simulator',
+      () async {
+        final Directory outputDir = fileSystem.directory('output');
+        final Directory vmServiceFrameworkDirectory = outputDir.childDirectory(
+          'VMService.framework',
+        );
+        final File staleDeviceFile = vmServiceFrameworkDirectory.childFile('stale_device_file')
+          ..createSync(recursive: true);
+        final File vmServiceBinary = vmServiceFrameworkDirectory.childFile('VMService');
+        final File vmServiceInfoPlist = vmServiceFrameworkDirectory.childFile('Info.plist');
+
+        final String vmServiceFrameworkArtifactPath = artifacts.getArtifactPath(
+          Artifact.vmserviceFramework,
+          platform: .ios,
+          mode: .profile,
+        );
+        fileSystem.directory(vmServiceFrameworkArtifactPath).childFile('Info.plist')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('<string>iPhoneOS</string>');
+
+        final testEnvironment = Environment.test(
+          fileSystem.currentDirectory,
+          processManager: processManager,
+          artifacts: artifacts,
+          featureFlags: TestFeatureFlags(),
+          logger: logger,
+          fileSystem: fileSystem,
+          outputDir: outputDir,
+          xcode: environment.xcode,
+          defines: <String, String>{
+            kBuildMode: 'profile',
+            kSdkRoot: 'path/to/iPhoneSimulator.sdk',
+            kIosArchs: 'x86_64 arm64',
+            kCodesignIdentity: 'ABC123',
+          },
+        );
+
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'clang',
+              '-x',
+              'c',
+              '-arch',
+              'x86_64',
+              '-arch',
+              'arm64',
+              fileSystem.path.join(
+                '/.tmp_rand0',
+                'flutter_tools_stub_source.rand0',
+                'debug_app.cc',
+              ),
+              '-dynamiclib',
+              '-miphonesimulator-version-min=15.0',
+              '-Xlinker',
+              '-rpath',
+              '-Xlinker',
+              '@executable_path/Frameworks',
+              '-Xlinker',
+              '-rpath',
+              '-Xlinker',
+              '@loader_path/Frameworks',
+              '-fapplication-extension',
+              '-install_name',
+              '@rpath/VMService.framework/VMService',
+              '-isysroot',
+              'path/to/iPhoneSimulator.sdk',
+              '-o',
+              vmServiceBinary.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
+          ),
+          FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.provenance', vmServiceBinary.path],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--sign',
+              'ABC123',
+              '--timestamp=none',
+              vmServiceBinary.path,
+            ],
+          ),
+        ]);
+
+        await target.build(testEnvironment);
+
+        expect(processManager, hasNoRemainingExpectations);
+        expect(staleDeviceFile, isNot(exists));
+        expect(vmServiceBinary, exists);
+        expect(vmServiceInfoPlist, exists);
+        final String plistContents = vmServiceInfoPlist.readAsStringSync();
+        expect(plistContents, contains('<string>io.flutter.flutter.vmservice</string>'));
+        expect(plistContents, contains('<string>VMService</string>'));
+        expect(plistContents, contains('<string>iPhoneSimulator</string>'));
+        expect(plistContents, contains('<string>15.0</string>'));
+        expect(plistContents, contains('<string>profile</string>'));
+        expect(plistContents, isNot(contains('iPhoneOS')));
+      },
+    );
+
+    testWithoutContext(
+      'copies, updates permissions, skips lipo for single-arch, and codesigns',
+      () async {
+        final Directory outputDir = fileSystem.directory('output');
+        final File vmServiceBinary = outputDir
+            .childDirectory('VMService.framework')
+            .childFile('VMService');
+        final testEnvironment = Environment.test(
+          fileSystem.currentDirectory,
+          processManager: processManager,
+          artifacts: artifacts,
+          featureFlags: TestFeatureFlags(),
+          logger: logger,
+          fileSystem: fileSystem,
+          outputDir: outputDir,
+          defines: <String, String>{kIosArchs: 'arm64', kCodesignIdentity: 'ABC123'},
+        );
+
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store/',
+              '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+              vmServiceArtifact,
+              outputDir.path,
+            ],
+            onRun: (_) => vmServiceBinary.createSync(recursive: true),
+          ),
+          FakeCommand(
+            command: <String>[
+              'chmod',
+              '-R',
+              'u+w',
+              outputDir.childDirectory(vmServiceArtifact).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>['lipo', '-info', vmServiceBinary.path],
+            stdout: 'Non-fat file:',
+          ),
+          FakeCommand(command: <String>['lipo', vmServiceBinary.path, '-verify_arch', 'arm64']),
+          FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
+          ),
+          FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.provenance', vmServiceBinary.path],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--sign',
+              'ABC123',
+              '--timestamp=none',
+              vmServiceBinary.path,
+            ],
+          ),
+        ]);
+
+        await target.build(testEnvironment);
+
+        expect(
+          logger.traceText,
+          contains('Skipping lipo for non-fat file output/VMService.framework/VMService'),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'copies, updates permissions, thins fat framework, and ad-hoc codesigns',
+      () async {
+        final Directory outputDir = fileSystem.directory('output');
+        final File vmServiceBinary = outputDir
+            .childDirectory('VMService.framework')
+            .childFile('VMService');
+        final testEnvironment = Environment.test(
+          fileSystem.currentDirectory,
+          processManager: processManager,
+          artifacts: artifacts,
+          featureFlags: TestFeatureFlags(),
+          logger: logger,
+          fileSystem: fileSystem,
+          outputDir: outputDir,
+          defines: <String, String>{kIosArchs: 'arm64'},
+        );
+
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'rsync',
+              '-av',
+              '--delete',
+              '--filter',
+              '- .DS_Store/',
+              '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+              vmServiceArtifact,
+              outputDir.path,
+            ],
+            onRun: (_) => vmServiceBinary.createSync(recursive: true),
+          ),
+          FakeCommand(
+            command: <String>[
+              'chmod',
+              '-R',
+              'u+w',
+              outputDir.childDirectory(vmServiceArtifact).path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>['lipo', '-info', vmServiceBinary.path],
+            stdout: 'Architectures in the fat file: arm64 x86_64',
+          ),
+          FakeCommand(command: <String>['lipo', vmServiceBinary.path, '-verify_arch', 'arm64']),
+          FakeCommand(
+            command: <String>[
+              'lipo',
+              '-output',
+              vmServiceBinary.path,
+              '-extract',
+              'arm64',
+              vmServiceBinary.path,
+            ],
+          ),
+          FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
+          ),
+          FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.provenance', vmServiceBinary.path],
+          ),
+          FakeCommand(
+            command: <String>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              vmServiceBinary.path,
+            ],
+          ),
+        ]);
+
+        await target.build(testEnvironment);
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext('throws MissingDefineException when kIosArchs is missing', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final missingIosArchsEnv = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+      );
+      await expectLater(
+        target.build(missingIosArchsEnv),
+        throwsA(
+          isA<MissingDefineException>().having(
+            (MissingDefineException e) => e.define,
+            'define',
+            kIosArchs,
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('throws Exception when binary does not exist', () async {
+      final Directory outputDir = fileSystem.directory('output');
+      final testEnvironment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: processManager,
+        artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
+        logger: logger,
+        fileSystem: fileSystem,
+        outputDir: outputDir,
+        defines: <String, String>{kIosArchs: 'arm64'},
+      );
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'rsync',
+            '-av',
+            '--delete',
+            '--filter',
+            '- .DS_Store/',
+            '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+            vmServiceArtifact,
+            outputDir.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>['chmod', '-R', 'u+w', outputDir.childDirectory(vmServiceArtifact).path],
+        ),
+      ]);
+
+      await expectLater(
+        target.build(testEnvironment),
+        throwsA(
+          isException.having(
+            (Exception exception) => exception.toString(),
+            'description',
+            contains('output/VMService.framework/VMService does not exist, cannot thin'),
+          ),
+        ),
+      );
       expect(processManager, hasNoRemainingExpectations);
     });
   });

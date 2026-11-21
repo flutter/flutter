@@ -26,6 +26,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -895,13 +896,14 @@ void main() {
 
     testWithoutContext('created with symbols', () async {
       final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
-      final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
+      final Directory dSYMA = parentA.childDirectory('FrameworkA.framework.dSYM')..createSync();
       final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
-      // Flutter.framework.dSYM should be correctly filtered out.
-      parentA.childFile('Flutter.framework.dSYM').createSync();
+      // Flutter.framework.dSYM and App.framework.dSYM should be correctly filtered out.
+      parentA.childDirectory('Flutter.framework.dSYM').createSync();
+      parentA.childDirectory('App.framework.dSYM').createSync();
 
       final Directory parentB = fileSystem.directory('FrameworkB')..createSync();
-      final File dSYMB = parentB.childFile('FrameworkB.framework.dSYM')..createSync();
+      final Directory dSYMB = parentB.childDirectory('FrameworkB.framework.dSYM')..createSync();
       final Directory frameworkB = parentB.childDirectory('FrameworkB.framework')..createSync();
       final Directory output = fileSystem.directory('output');
 
@@ -934,6 +936,300 @@ void main() {
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
+  });
+
+  group('VMService.xcframework', () {
+    (FakeFlutterVersion, Cache, Directory) setUpFrameworkTest({
+      required FlutterDarwinPlatform platform,
+      required String artifactPrefix,
+    }) {
+      final fakeFlutterVersion = FakeFlutterVersion(
+        frameworkVersion: '1.13.11',
+        gitTagVersion: const GitTagVersion(
+          x: 1,
+          y: 13,
+          z: 11,
+          commits: 0,
+          hash: 'abcdef',
+          gitTag: '1.13.11',
+        ),
+      );
+      final cache = Cache.test(
+        rootOverride: memoryFileSystem.directory('cache'),
+        platform: fakePlatform,
+        fileSystem: memoryFileSystem,
+        processManager: FakeProcessManager.any(),
+      );
+      final Directory projectDir = memoryFileSystem.directory('project')..createSync();
+      projectDir.childDirectory(platform.name).createSync(recursive: true);
+      if (platform == .ios) {
+        final Directory ephemeral = projectDir
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral');
+        ephemeral.childFile('flutter_lldbinit').createSync(recursive: true);
+        ephemeral.childFile('flutter_lldb_helper.py').createSync(recursive: true);
+      }
+      projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+      writePackageConfigFiles(directory: projectDir, mainLibName: 'project');
+      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: project');
+      projectDir.childFile('.metadata').createSync();
+      memoryFileSystem.currentDirectory = projectDir;
+
+      for (final mode in const <String>['debug', 'profile', 'release']) {
+        memoryFileSystem.directory('$artifactPrefix.$mode').createSync(recursive: true);
+      }
+      return (fakeFlutterVersion, cache, memoryFileSystem.directory('/output'));
+    }
+
+    testWithoutContext(
+      'build ios-framework produces VMService.xcframework only in profile mode',
+      () async {
+        final (
+          FakeFlutterVersion fakeFlutterVersion,
+          Cache cache,
+          Directory frameworkOutput,
+        ) = setUpFrameworkTest(
+          platform: .ios,
+          artifactPrefix: 'Artifact.flutterXcframework.TargetPlatform.ios',
+        );
+
+        final fakeProcessManager = FakeProcessManager.empty();
+        for (final mode in const <String>['Debug', 'Profile', 'Release']) {
+          final Directory modeDir = frameworkOutput.childDirectory(mode);
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-create-xcframework',
+                '-framework',
+                modeDir.childDirectory('iphoneos').childDirectory('App.framework').path,
+                if (mode == 'Profile') ...<String>[
+                  '-debug-symbols',
+                  modeDir.childDirectory('iphoneos').childDirectory('App.framework.dSYM').path,
+                ],
+                '-framework',
+                modeDir.childDirectory('iphonesimulator').childDirectory('App.framework').path,
+                '-output',
+                modeDir.childDirectory('App.xcframework').path,
+              ],
+              onRun: (_) {
+                modeDir.childDirectory('App.xcframework').createSync(recursive: true);
+              },
+            ),
+          );
+          if (mode == 'Profile') {
+            fakeProcessManager.addCommand(
+              FakeCommand(
+                command: <String>[
+                  'xcrun',
+                  'xcodebuild',
+                  '-create-xcframework',
+                  '-framework',
+                  modeDir.childDirectory('iphoneos').childDirectory('VMService.framework').path,
+                  '-framework',
+                  modeDir
+                      .childDirectory('iphonesimulator')
+                      .childDirectory('VMService.framework')
+                      .path,
+                  '-output',
+                  modeDir.childDirectory('VMService.xcframework').path,
+                ],
+                onRun: (_) {
+                  modeDir.childDirectory('VMService.xcframework').createSync(recursive: true);
+                },
+              ),
+            );
+          }
+        }
+
+        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          processManager: fakeProcessManager,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            final Directory output = environment.outputDir;
+            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+            if (environment.defines[kBuildMode] == 'profile') {
+              if (target.name == 'profile_ios_bundle_flutter_assets') {
+                output.childDirectory('App.framework.dSYM').createSync(recursive: true);
+              }
+              output
+                  .childDirectory('VMService.framework')
+                  .childFile('VMService')
+                  .createSync(recursive: true);
+            }
+          }),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        await createTestCommandRunner(command).run(<String>[
+          'ios-framework',
+          '--no-pub',
+          '--no-plugins',
+          '--output=${frameworkOutput.path}',
+        ]);
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(
+          frameworkOutput
+              .childDirectory('Profile')
+              .childDirectory('VMService.xcframework')
+              .existsSync(),
+          isTrue,
+        );
+        expect(
+          frameworkOutput
+              .childDirectory('Debug')
+              .childDirectory('VMService.xcframework')
+              .existsSync(),
+          isFalse,
+        );
+        expect(
+          frameworkOutput
+              .childDirectory('Release')
+              .childDirectory('VMService.xcframework')
+              .existsSync(),
+          isFalse,
+        );
+      },
+    );
+
+    testWithoutContext(
+      'build macos-framework produces VMService.xcframework only in profile mode',
+      () async {
+        final (
+          FakeFlutterVersion fakeFlutterVersion,
+          Cache cache,
+          Directory frameworkOutput,
+        ) = setUpFrameworkTest(
+          platform: .macos,
+          artifactPrefix: 'Artifact.flutterMacOSXcframework.TargetPlatform.darwin',
+        );
+
+        final fakeProcessManager = FakeProcessManager.empty();
+        for (final mode in const <String>['Debug', 'Profile', 'Release']) {
+          final Directory modeDir = frameworkOutput.childDirectory(mode);
+          fakeProcessManager.addCommand(
+            FakeCommand(
+              command: <String>[
+                'xcrun',
+                'xcodebuild',
+                '-create-xcframework',
+                '-framework',
+                modeDir.childDirectory('macos').childDirectory('App.framework').path,
+                if (mode == 'Profile') ...<String>[
+                  '-debug-symbols',
+                  modeDir.childDirectory('macos').childDirectory('App.framework.dSYM').path,
+                ],
+                '-output',
+                modeDir.childDirectory('App.xcframework').path,
+              ],
+              onRun: (_) {
+                modeDir.childDirectory('App.xcframework').createSync(recursive: true);
+              },
+            ),
+          );
+          if (mode == 'Profile') {
+            fakeProcessManager.addCommand(
+              FakeCommand(
+                command: <String>[
+                  'xcrun',
+                  'xcodebuild',
+                  '-create-xcframework',
+                  '-framework',
+                  modeDir.childDirectory('macos').childDirectory('VMService.framework').path,
+                  '-output',
+                  modeDir.childDirectory('VMService.xcframework').path,
+                ],
+                onRun: (_) {
+                  modeDir.childDirectory('VMService.xcframework').createSync(recursive: true);
+                },
+              ),
+            );
+          }
+        }
+
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          artifacts: Artifacts.test(fileSystem: memoryFileSystem),
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          processManager: fakeProcessManager,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            final Directory output = environment.outputDir;
+            output.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+            if (target.name == 'profile_macos_bundle_flutter_assets') {
+              output.childDirectory('App.framework.dSYM').createSync(recursive: true);
+              final Directory vmServiceFramework = output.childDirectory('VMService.framework');
+              final Directory versionADir = vmServiceFramework
+                  .childDirectory('Versions')
+                  .childDirectory('A');
+              versionADir.childFile('VMService').createSync(recursive: true);
+              versionADir
+                  .childDirectory('Resources')
+                  .childFile('Info.plist')
+                  .createSync(recursive: true);
+              vmServiceFramework.childDirectory('Versions').childLink('Current').createSync('A');
+              vmServiceFramework.childLink('VMService').createSync('Versions/Current/VMService');
+              vmServiceFramework.childLink('Resources').createSync('Versions/Current/Resources');
+            }
+          }),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        await createTestCommandRunner(command).run(<String>[
+          'macos-framework',
+          '--no-pub',
+          '--no-plugins',
+          '--output=${frameworkOutput.path}',
+        ]);
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(
+          frameworkOutput
+              .childDirectory('Profile')
+              .childDirectory('VMService.xcframework')
+              .existsSync(),
+          isTrue,
+        );
+        expect(
+          frameworkOutput
+              .childDirectory('Profile')
+              .childDirectory('macos')
+              .childDirectory('VMService.framework')
+              .existsSync(),
+          isFalse,
+        );
+        expect(
+          frameworkOutput
+              .childDirectory('Debug')
+              .childDirectory('VMService.xcframework')
+              .existsSync(),
+          isFalse,
+        );
+        expect(
+          frameworkOutput
+              .childDirectory('Release')
+              .childDirectory('VMService.xcframework')
+              .existsSync(),
+          isFalse,
+        );
+      },
+    );
   });
 
   group('findCodeAssetFrameworkNames', () {

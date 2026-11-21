@@ -134,3 +134,42 @@ func updateSymlinkThrowsIfNewLinkDoesNotExist() async throws {
     )
   }
 }
+
+@Test(
+  "Prebuild defers leaving Profile and delegates other symlink transitions",
+  arguments: [
+    ("./Profile", "Debug", false),
+    ("./Profile", "Release", false),
+    ("./Debug", "Release", true),
+    ("./Debug", "Profile", true),
+    ("./Release", "Profile", true),
+    ("./Profile", "Profile", false),
+  ]
+)
+func updateSymlinkForPrebuild(
+  currentTarget: String,
+  targetBuildMode: String,
+  expectsUpdate: Bool
+) async throws {
+  let fileManager = MockFileManager()
+  let integrationPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+  let currentLinkPath = "\(integrationPackagePath)/FlutterPluginRegistrant"
+  let expectedLink = "./\(targetBuildMode)"
+  fileManager.symlinkDestinations[currentLinkPath] = currentTarget
+  fileManager.filesExist[currentLinkPath] = true
+  fileManager.filesExist["\(integrationPackagePath)/\(expectedLink)"] = true
+
+  try FlutterToolHelper.updateSymlinkForPrebuild(
+    targetBuildMode: targetBuildMode,
+    integrationPackagePath: integrationPackagePath,
+    fileManager: fileManager
+  )
+
+  if expectsUpdate {
+    #expect(fileManager.filesRemoved == [currentLinkPath])
+    #expect(fileManager.symlinksCreated == [currentLinkPath: expectedLink])
+  } else {
+    #expect(fileManager.filesRemoved.isEmpty)
+    #expect(fileManager.symlinksCreated.isEmpty)
+  }
+}
