@@ -240,6 +240,156 @@ void main() {
           expect(initialPoint, finalPoint);
         },
       );
+
+      testWidgets('Nested SafeArea does not apply bottom viewPadding twice when keyboard opens', (
+        WidgetTester tester,
+      ) async {
+        late MediaQueryData innerMediaQuery;
+        final Widget child = boilerplate(
+          SafeArea(
+            top: false,
+            left: false,
+            right: false,
+            maintainBottomViewPadding: true,
+            child: SafeArea(
+              top: false,
+              left: false,
+              right: false,
+              maintainBottomViewPadding: true,
+              child: Builder(
+                builder: (BuildContext context) {
+                  innerMediaQuery = MediaQuery.of(context);
+                  return const Placeholder();
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(bottom: 24.0),
+              viewPadding: EdgeInsets.only(bottom: 24.0),
+            ),
+            child: child,
+          ),
+        );
+        expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 576.0));
+        expect(innerMediaQuery.padding.bottom, 0.0);
+        expect(innerMediaQuery.viewPadding.bottom, 0.0);
+
+        // Consume bottom padding - as if by the keyboard opening.
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: 24.0),
+              viewInsets: EdgeInsets.only(bottom: 336.0),
+            ),
+            child: child,
+          ),
+        );
+        expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 576.0));
+        expect(innerMediaQuery.padding.bottom, 0.0);
+        expect(innerMediaQuery.viewPadding.bottom, 0.0);
+        expect(innerMediaQuery.viewInsets.bottom, 336.0);
+      });
+
+      testWidgets(
+        'Nested SafeArea with partial ViewInsets does not apply bottom viewPadding twice',
+        (WidgetTester tester) async {
+          final Widget child = boilerplate(
+            const SafeArea(
+              top: false,
+              left: false,
+              right: false,
+              maintainBottomViewPadding: true,
+              child: SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                maintainBottomViewPadding: true,
+                child: Placeholder(),
+              ),
+            ),
+          );
+
+          await tester.pumpWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.only(bottom: 14.0),
+                viewPadding: EdgeInsets.only(bottom: 24.0),
+                viewInsets: EdgeInsets.only(bottom: 10.0),
+              ),
+              child: child,
+            ),
+          );
+          expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 576.0));
+        },
+      );
+
+      testWidgets('Outer SafeArea with bottom: false does not consume bottom viewPadding', (
+        WidgetTester tester,
+      ) async {
+        final Widget child = boilerplate(
+          const SafeArea(
+            top: false,
+            left: false,
+            right: false,
+            bottom: false,
+            maintainBottomViewPadding: true,
+            child: SafeArea(
+              top: false,
+              left: false,
+              right: false,
+              maintainBottomViewPadding: true,
+              child: Placeholder(),
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              viewPadding: EdgeInsets.only(bottom: 24.0),
+              viewInsets: EdgeInsets.only(bottom: 336.0),
+            ),
+            child: child,
+          ),
+        );
+        expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 576.0));
+      });
+
+      testWidgets(
+        'Outer SafeArea with maintainBottomViewPadding: false leaves bottom viewPadding for inner SafeArea',
+        (WidgetTester tester) async {
+          final Widget child = boilerplate(
+            const SafeArea(
+              top: false,
+              left: false,
+              right: false,
+              child: SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                maintainBottomViewPadding: true,
+                child: Placeholder(),
+              ),
+            ),
+          );
+
+          await tester.pumpWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                viewPadding: EdgeInsets.only(bottom: 24.0),
+                viewInsets: EdgeInsets.only(bottom: 336.0),
+              ),
+              child: child,
+            ),
+          );
+          expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 576.0));
+        },
+      );
     });
 
     testWidgets('SafeArea does not crash at zero area', (WidgetTester tester) async {
