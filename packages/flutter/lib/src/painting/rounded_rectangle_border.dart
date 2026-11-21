@@ -470,7 +470,7 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: borderRadius,
         circularity: circularity + (1.0 - circularity) * (1.0 - t),
-        eccentricity: a.eccentricity,
+        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t),
       );
     }
     if (a is _ShapeToCircleBorder<T>) {
@@ -478,7 +478,7 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
         circularity: ui.lerpDouble(a.circularity, circularity, t),
-        eccentricity: eccentricity,
+        eccentricity: ui.lerpDouble(a.eccentricity, eccentricity, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -499,7 +499,7 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: borderRadius,
         circularity: circularity + (1.0 - circularity) * t,
-        eccentricity: b.eccentricity,
+        eccentricity: ui.lerpDouble(eccentricity, b.eccentricity, t),
       );
     }
     if (b is _ShapeToCircleBorder<T>) {
@@ -507,7 +507,7 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
         circularity: ui.lerpDouble(circularity, b.circularity, t),
-        eccentricity: eccentricity,
+        eccentricity: ui.lerpDouble(eccentricity, b.eccentricity, t),
       );
     }
     return super.lerpTo(b, t);
@@ -627,11 +627,12 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
     return other is _ShapeToCircleBorder<T> &&
         other.side == side &&
         other.borderRadius == borderRadius &&
-        other.circularity == circularity;
+        other.circularity == circularity &&
+        other.eccentricity == eccentricity;
   }
 
   @override
-  int get hashCode => Object.hash(side, borderRadius, circularity);
+  int get hashCode => Object.hash(side, borderRadius, circularity, eccentricity);
 
   @override
   String toString() {
