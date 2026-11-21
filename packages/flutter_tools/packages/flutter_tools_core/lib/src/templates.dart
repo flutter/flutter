@@ -2,164 +2,85 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
-/// A template representation used to generate an entire Flutter project.
-///
-/// Extensions implement this class to define custom project templates.
-abstract base class ProjectTemplate {
-  /// Map key for [hidden].
-  static const String hiddenKey = 'hidden';
+const String _packageScheme = 'package';
 
-  /// Map key for [name].
-  static const String nameKey = 'name';
+/// Project template archetype being scaffolded by `flutter create`.
+enum ExtensionTemplateType {
+  /// A standard Flutter application (`flutter create -t app`).
+  app,
 
-  /// Map key for [templateDependencies].
-  static const String templateDependenciesKey = 'templateDependencies';
+  /// A Flutter FFI plugin (`flutter create -t plugin_ffi`).
+  ffiPlugin,
 
-  /// Map key for [templatePath].
-  static const String templatePathKey = 'templatePath';
-
-  /// Map key for [templateSources].
-  static const String templateSourcesKey = 'templateSources';
-
-  /// The name of this project template.
-  String get name;
-
-  /// Whether this template is hidden from help displays.
-  bool get hidden;
-
-  /// Template names (e.g. 'app' or 'plugin') whose sources this template depends on.
-  Set<String> get templateDependencies;
-
-  /// The template source files, relative to [templatePath].
-  Set<String> get templateSources;
-
-  /// The package URI string or directory path to the template sources.
-  ///
-  /// For example: `package:my_custom_extension/templates/`
-  String get templatePath;
-
-  /// Generates the variable mappings for the template.
-  Future<Map<String, Object?>> generateTemplateParameters(Map<String, Object?> toolParameters);
-
-  /// Serializes the template metadata into a JSON-compatible map.
-  Map<String, Object?> toMap() {
-    return <String, Object?>{
-      nameKey: name,
-      hiddenKey: hidden,
-      templateDependenciesKey: templateDependencies.toList(),
-      templateSourcesKey: templateSources.toList(),
-      templatePathKey: templatePath,
-    };
-  }
+  /// A Flutter platform channel plugin (`flutter create -t plugin`).
+  plugin,
 }
 
-/// A concrete implementation of [ProjectTemplate] that can be parsed from a JSON map.
-///
-/// This represents an extension's template on the host side. Its
-/// [generateTemplateParameters] method throws an [UnimplementedError] because
-/// parameter generation must be delegated to the extension isolate via RPC.
+/// Descriptor for a resolved platform template returned by
+/// `TemplateService.resolvePlatformTemplate`.
 @immutable
-final class ExtensionProjectTemplate extends ProjectTemplate {
-  ExtensionProjectTemplate({
-    required this.hidden,
-    required this.name,
-    required this.templateDependencies,
-    required this.templatePath,
-    required this.templateSources,
-  });
-
-  factory ExtensionProjectTemplate.fromJson(Map<String, Object?> json) {
-    return ExtensionProjectTemplate(
-      hidden: json.optionalField<bool>(ProjectTemplate.hiddenKey, defaultValue: false),
-      name: json.optionalField<String>(ProjectTemplate.nameKey, defaultValue: ''),
-      templateDependencies: json.stringIterable(ProjectTemplate.templateDependenciesKey).toSet(),
-      templatePath: json.optionalField<String>(ProjectTemplate.templatePathKey, defaultValue: ''),
-      templateSources: json.stringIterable(ProjectTemplate.templateSourcesKey).toSet(),
-    );
-  }
-
-  @override
-  final String name;
-
-  @override
-  final bool hidden;
-
-  @override
-  final Set<String> templateDependencies;
-
-  @override
-  final Set<String> templateSources;
-
-  @override
-  final String templatePath;
-
-  @override
-  Future<Map<String, Object?>> generateTemplateParameters(
-    Map<String, Object?> toolParameters,
-  ) async {
-    throw UnimplementedError(
-      'ExtensionProjectTemplate.generateTemplateParameters should not be called directly on host representation.',
-    );
-  }
-
-  /// Deserializes a list of [ExtensionProjectTemplate] from RPC response data.
-  static List<ExtensionProjectTemplate> listFromJson(Object? rpcResult) {
-    if (rpcResult is! List<Object?>) {
-      return const <ExtensionProjectTemplate>[];
+final class ExtensionPlatformTemplate {
+  /// Creates a platform template descriptor pointing to [templateUri], throwing
+  /// an [ArgumentError] if [templateUri] is not a valid
+  /// `package:<package>/<path>` directory URI without a trailing slash.
+  ExtensionPlatformTemplate({required this.templateUri}) {
+    if (!_isValidTemplateUri(templateUri)) {
+      throw ArgumentError.value(
+        templateUri,
+        'templateUri',
+        'Expected a package:<package>/<path> directory URI without a trailing slash.',
+      );
     }
-    return <ExtensionProjectTemplate>[
-      for (final Object? item in rpcResult)
-        if (item is Map<String, Object?>)
-          ExtensionProjectTemplate.fromJson(item)
-        else if (item is Map)
-          ExtensionProjectTemplate.fromJson(item.cast<String, Object?>()),
-    ];
   }
 
+  /// Deserializes an [ExtensionPlatformTemplate] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if [templateUriKey] is missing, not a [String],
+  /// or not a valid `package:<package>/<path>` URI without a trailing slash.
+  factory ExtensionPlatformTemplate.fromJson(Map<String, Object?> json) {
+    final String rawUri = json.requiredField<String>(templateUriKey);
+    final Uri? templateUri = Uri.tryParse(rawUri);
+    if (templateUri == null || !_isValidTemplateUri(templateUri)) {
+      throw FormatException(
+        'Invalid "$templateUriKey" in ExtensionPlatformTemplate '
+        '(expected package:<package>/<path> URI): "$rawUri".',
+      );
+    }
+    return ExtensionPlatformTemplate(templateUri: templateUri);
+  }
+
+  /// JSON map key for [templateUri].
+  @visibleForTesting
+  static const String templateUriKey = 'templateUri';
+
+  static bool _isValidTemplateUri(Uri uri) =>
+      uri.isScheme(_packageScheme) &&
+      !uri.hasAuthority &&
+      !uri.hasQuery &&
+      !uri.hasFragment &&
+      !uri.path.startsWith('/') &&
+      uri.pathSegments.length >= 2 &&
+      uri.pathSegments.every((String segment) => segment.isNotEmpty);
+
+  /// `package:` URI pointing to the Mustache template directory to render.
+  final Uri templateUri;
+
+  /// Serializes this [ExtensionPlatformTemplate] to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{templateUriKey: templateUri.toString()};
+
   @override
-  String toString() =>
-      'ExtensionProjectTemplate(name: $name, hidden: $hidden, templateDependencies: $templateDependencies, templateSources: $templateSources, templatePath: $templatePath)';
+  String toString() => 'ExtensionPlatformTemplate(templateUri: $templateUri)';
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other is! ExtensionProjectTemplate) {
-      return false;
-    }
-    if (name != other.name ||
-        hidden != other.hidden ||
-        templatePath != other.templatePath ||
-        templateDependencies.length != other.templateDependencies.length ||
-        templateSources.length != other.templateSources.length) {
-      return false;
-    }
-    for (final String dep in templateDependencies) {
-      if (!other.templateDependencies.contains(dep)) {
-        return false;
-      }
-    }
-    for (final String src in templateSources) {
-      if (!other.templateSources.contains(src)) {
-        return false;
-      }
-    }
-    return true;
+    return identical(this, other) ||
+        (other is ExtensionPlatformTemplate && other.templateUri == templateUri);
   }
 
   @override
-  int get hashCode => Object.hash(
-    name,
-    hidden,
-    templatePath,
-    Object.hashAllUnordered(templateDependencies),
-    Object.hashAllUnordered(templateSources),
-  );
+  int get hashCode => templateUri.hashCode;
 }

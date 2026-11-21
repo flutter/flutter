@@ -6,89 +6,58 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Template Core Models', () {
-    test('ExtensionProjectTemplate serializes and deserializes correctly', () {
-      final template = ExtensionProjectTemplate(
-        hidden: false,
-        name: 'custom-linux-app',
-        templateDependencies: const <String>{'app'},
-        templatePath: 'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
-        templateSources: const <String>{
-          'pubspec.yaml.tmpl',
-          'lib/main.dart.tmpl',
-          '.custom_device_extension_info.copy.tmpl',
-        },
-      );
-
+  group('ExtensionPlatformTemplate', () {
+    test('round-trips JSON serialization and equality', () {
+      final Uri uri = Uri.parse('package:my_ext/templates/app');
+      final template = ExtensionPlatformTemplate(templateUri: uri);
       final Map<String, Object?> map = template.toMap();
-      expect(map['name'], 'custom-linux-app');
-      expect(map['hidden'], isFalse);
-      expect(map['templateDependencies'], <String>['app']);
+
+      expect(map, equals(<String, Object?>{'templateUri': 'package:my_ext/templates/app'}));
+      final deserialized = ExtensionPlatformTemplate.fromJson(map);
+      expect(deserialized, equals(template));
+      expect(deserialized.hashCode, equals(template.hashCode));
       expect(
-        map['templateSources'],
-        unorderedEquals(<String>[
-          'pubspec.yaml.tmpl',
-          'lib/main.dart.tmpl',
-          '.custom_device_extension_info.copy.tmpl',
-        ]),
-      );
-      expect(
-        map['templatePath'],
-        'package:flutter_tools_extension_linux_prototype/templates/custom-linux-app',
-      );
-
-      final parsed = ExtensionProjectTemplate.fromJson(map);
-      expect(parsed, equals(template));
-      expect(parsed.hashCode, equals(template.hashCode));
-      expect(parsed.toString(), contains('custom-linux-app'));
-    });
-
-    test('ExtensionProjectTemplate.listFromJson handles valid and invalid lists', () {
-      final templateMap = <String, Object?>{
-        'name': 'custom-app',
-        'hidden': true,
-        'templateDependencies': <String>['module'],
-        'templateSources': <String>['pubspec.yaml.tmpl'],
-        'templatePath': 'path/to/template',
-      };
-
-      final List<ExtensionProjectTemplate> list = ExtensionProjectTemplate.listFromJson(<Object?>[
-        templateMap,
-      ]);
-      expect(list, hasLength(1));
-      expect(list.first.name, 'custom-app');
-      expect(list.first.hidden, isTrue);
-      expect(list.first.templateDependencies, <String>{'module'});
-
-      expect(ExtensionProjectTemplate.listFromJson(null), isEmpty);
-      expect(ExtensionProjectTemplate.listFromJson('invalid'), isEmpty);
-    });
-
-    test('ExtensionProjectTemplate.generateTemplateParameters throws UnimplementedError', () {
-      final template = ExtensionProjectTemplate(
-        name: 'custom-app',
-        hidden: false,
-        templateDependencies: const <String>{},
-        templateSources: const <String>{},
-        templatePath: 'path',
-      );
-
-      expect(
-        () => template.generateTemplateParameters(const <String, Object?>{}),
-        throwsUnimplementedError,
+        deserialized.toString(),
+        equals('ExtensionPlatformTemplate(templateUri: package:my_ext/templates/app)'),
       );
     });
 
-    test('ExtensionProjectTemplate.fromJson throws FormatException on invalid field types', () {
+    test('rejects invalid templateUri in constructor and fromJson', () {
+      const invalidUris = <String>[
+        'file:///tmp/templates/app',
+        'https://example.com/templates/app',
+        'package:my_ext',
+        'package:my_ext/',
+        'package:my_ext/templates/app/',
+        'package:/my_ext/templates',
+        'package://host/my_ext/templates',
+        'package:my_ext//templates',
+        'package:my_ext/../templates',
+        'package:my_ext/templates?foo=bar',
+        'package:my_ext/templates#frag',
+      ];
+      for (final raw in invalidUris) {
+        expect(
+          () => ExtensionPlatformTemplate(templateUri: Uri.parse(raw)),
+          throwsArgumentError,
+          reason: 'Constructor should reject "$raw"',
+        );
+        expect(
+          () => ExtensionPlatformTemplate.fromJson(<String, Object?>{
+            ExtensionPlatformTemplate.templateUriKey: raw,
+          }),
+          throwsFormatException,
+          reason: 'fromJson should reject "$raw"',
+        );
+      }
+
       expect(
-        () => ExtensionProjectTemplate.fromJson(const <String, Object?>{
-          ProjectTemplate.nameKey: 123,
-        }),
+        () => ExtensionPlatformTemplate.fromJson(const <String, Object?>{}),
         throwsFormatException,
       );
       expect(
-        () => ExtensionProjectTemplate.fromJson(const <String, Object?>{
-          ProjectTemplate.templateDependenciesKey: <Object?>['app', 42],
+        () => ExtensionPlatformTemplate.fromJson(const <String, Object?>{
+          ExtensionPlatformTemplate.templateUriKey: 123,
         }),
         throwsFormatException,
       );

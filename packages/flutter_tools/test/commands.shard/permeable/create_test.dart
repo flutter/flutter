@@ -35,7 +35,6 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
@@ -863,11 +862,7 @@ void main() {
     // .metadata is a YAML file, so read it back through FlutterProjectMetadata.
     // Besides the requested platforms it always tracks a 'root' entry that
     // records the revisions for the project itself.
-    final initialMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final initialMetadata = FlutterProjectMetadata(metadataFile, logger);
     const initialRevision = 'abcdef1234567890abcdef1234567890abcdef12';
     expect(
       initialMetadata.migrateConfig.platformConfigs.keys,
@@ -890,11 +885,7 @@ void main() {
     mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
     await runner.run(<String>['create', '--no-pub', '--platforms=ios', projectDir.path]);
 
-    final updatedMetadata = FlutterProjectMetadata(
-      metadataFile,
-      logger,
-      extensionTemplateManager: null,
-    );
+    final updatedMetadata = FlutterProjectMetadata(metadataFile, logger);
     expect(
       updatedMetadata.migrateConfig.platformConfigs.keys,
       unorderedEquals(<SupportedPlatform>[
@@ -5026,7 +5017,6 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
 CreateCommand createCreateCommand({
   AndroidContext? androidContext,
   AppleContext? appleContext,
-  ExtensionTemplateManager? extensionTemplateManager,
   FeatureFlags? featureFlags,
   Java? java,
   Net? net,
@@ -5065,7 +5055,6 @@ CreateCommand createCreateCommand({
     templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
     templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext: resolvedToolContext,
-    extensionTemplateManager: extensionTemplateManager,
     net:
         net ??
         Net(
