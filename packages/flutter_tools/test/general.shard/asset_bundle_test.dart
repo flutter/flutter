@@ -26,7 +26,7 @@ import '../src/fakes.dart';
 import '../src/package_config.dart';
 
 void main() {
-  const shaderLibDir = '/./shader_lib';
+  const shaderLibDir = 'HostArtifact.shaderLib';
 
   group('AssetBundle.build (using context)', () {
     late FileSystem testFileSystem;

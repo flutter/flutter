@@ -1,0 +1,275 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @icu: Chromium's ICU fork pinned in DEPS. Mirrors
+# //flutter/third_party/icu/BUILD.gn (the targets the engine uses, as a static
+# library with icu_use_data_file = true and icu_use_stub_data = true on the
+# host, where binaries load icudtl.dat at runtime, and icu_use_data_file =
+# false on the web -- tools/gn's --web -- where the data is compiled in).
+#
+# Upstream ships BUILD.bazel files under source/ for its own data-generation
+# tools only; they do not build the libraries and are hidden by the
+# synced_repository rule in favor of this file.
+#
+# The source lists are globs. They are identical to the icuuc_sources and
+# icu18n_sources lists in sources.gni, which is generated from the
+# source/*/sources.txt manifests and therefore also covers every .cpp file in
+# those directories.
+
+# This file is loaded as the root of @icu, so the main module is named.
+load("@flutter//build_defs/cc:copts.bzl", "FLUTTER_THIRD_PARTY_COPTS")
+load("@flutter//build_defs/gn:gn_action.bzl", "gn_action", "gn_copy")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# icu_use_data_file, by target OS.
+_WEB = "@platforms//os:emscripten"
+
+# config("icu_config"): what every user of ICU compiles with.
+_ICU_CONFIG_DEFINES = [
+    # Tell ICU to not insert |using namespace icu;| into its headers, so that
+    # engine sources explicitly have to use |icu::|.
+    "U_USING_ICU_NAMESPACE=0",
+    # We don't use ICU plugins and dyload is only necessary for them.
+    "U_ENABLE_DYLOAD=0",
+    # v8/Blink need to know whether Chromium's copy of ICU is used or not.
+    "USE_CHROMIUM_ICU=1",
+    # Enable tracing to connect to UMA but disable tracing of resource to
+    # avoid performance issues.
+    "U_ENABLE_TRACING=1",
+    "U_ENABLE_RESOURCE_TRACING=0",
+    # !is_component_build
+    "U_STATIC_IMPLEMENTATION",
+] + select({
+    # icu_use_data_file
+    _WEB: ["ICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_STATIC"],
+    "//conditions:default": ["ICU_UTIL_DATA_IMPL=ICU_UTIL_DATA_FILE"],
+})
+
+# config("icu_code"): what ICU itself compiles with.
+_ICU_CODE_DEFINES = [
+    "HAVE_DLOPEN=0",
+    # Only build encoding coverters and detectors necessary for HTML5.
+    "UCONFIG_ONLY_HTML_CONVERSION=1",
+    "UCONFIG_USE_ML_PHRASE_BREAKING=1",
+    "UCONFIG_USE_WINDOWS_LCID_MAPPING_API=0",
+    # No dependency on the default platform encoding. Will cut down the code
+    # size.
+    "U_CHARSET_IS_UTF8=1",
+] + select({
+    # Tell ICU that we are a 32 bit platform, otherwise,
+    # double-conversion-utils.h doesn't know how to operate (BUILD.gn,
+    # current_cpu == "wasm").
+    _WEB: ["__i386__"],
+    "//conditions:default": [],
+})
+
+_ICU_COPTS = FLUTTER_THIRD_PARTY_COPTS + [
+    # ICU uses RTTI; BUILD.gn swaps the default no_rtti config for rtti.
+    "-frtti",
+    # ICU has some code with the pattern:
+    #   if (found = uprv_getWindowsTimeZoneInfo(...))
+    "-Wno-parentheses",
+    # ucnv2022.cpp contains three functions that are only used when certain
+    # preprocessor defines are set. unistr.cpp also has an unused function
+    # for non-component builds.
+    "-Wno-unused-function",
+    # putil.cpp contains unused variables when building for iOS simulators.
+    "-Wno-unused-variable",
+    # Required for uversion.h putting a using namespace directive in the
+    # header.
+    "-Wno-header-hygiene",
+    # ICU has decided not to fix this warning as doing so would break its
+    # stable API.
+    "-Wno-ambiguous-reversed-operator",
+    # ICU uses its own deprecated functions.
+    "-Wno-deprecated-declarations",
+]
+
+# Meta target that includes both icuuc and icui18n. Most targets want both.
+cc_library(
+    name = "icu",
+    deps = [
+        ":icui18n",
+        ":icuuc",
+    ],
+)
+
+# The public headers under the engine's root-relative spelling,
+# "third_party/icu/source/{common,i18n}/unicode/<name>.h", which GN's root
+# include directory (-I../..) resolves beside the canonical "unicode/<name>.h":
+# a view of the same files under that prefix, so that no engine include
+# changes for Bazel. icuuc and icui18n carry it to their dependents.
+cc_library(
+    name = "root_includes",
+    hdrs = glob([
+        "source/common/unicode/*.h",
+        "source/i18n/unicode/*.h",
+    ]),
+    include_prefix = "third_party/icu",
+)
+
+# generate_icuuc("icuuc_private") plus the icuuc_public headers. Private
+# headers are exported too: icui18n includes them, as GN allows through the
+# source/common include directory. Its `deps = [ ":icudata" ]` is the data
+# compiled in on the web (icudata_static, below); on the host the data is a
+# file loaded at runtime and the stub data is compiled instead -- and the
+# same edge reaches copy("copy_icudata") (below), which lays the file at the
+# root of the build directory.
+cc_library(
+    name = "icuuc",
+    srcs = glob(["source/common/*.cpp"]) + select({
+        _WEB: [],
+        "//conditions:default": [
+            # icu_use_data_file && icu_use_stub_data
+            "source/stubdata/stubdata.cpp",
+            "source/stubdata/stubdata.h",
+        ],
+    }),
+    hdrs = glob([
+        "source/common/*.h",
+        "source/common/unicode/*.h",
+    ]),
+    copts = _ICU_COPTS,
+    defines = _ICU_CONFIG_DEFINES,
+    includes = ["source/common"],
+    linkstatic = True,
+    local_defines = _ICU_CODE_DEFINES + [
+        "U_COMMON_IMPLEMENTATION",
+        "U_ICUDATAENTRY_IN_COMMON",
+    ],
+    deps = [":root_includes"] + select({
+        _WEB: [":icudata_static"],
+        # bundle_data("icudata"): the file goes inside the framework.
+        "@platforms//os:ios": [],
+        "//conditions:default": [":copy_icudata"],
+    }),
+)
+
+# copy("copy_icudata"), icu_copy_icudata_to_root_build_dir being true
+# (config.gni): the data file for the target OS at the root of the build
+# directory, as icudtl.dat. group("icudata") has it as public_deps and
+# generate_icuuc's `deps = [ ":icudata" ]` reaches it from every target that
+# links ICU, so GN's build directory holds icudtl.dat whatever ninja built,
+# and a binary that initializes ICU without --icu-data-file-path
+# (flutter_tester, run from the directory as the service protocol test runs
+# it) finds it beside itself. install lays it the same way, over icuuc's
+# edge (build_directory_aspect) -- the first end-to-end run of the recipe's
+# sequence found ci/host_debug_unopt's install without it (10-31).
+gn_copy(
+    name = "copy_icudata",
+    srcs = [":icudata"],
+    outputs = ["$root_out_dir/icudtl.dat"],
+)
+
+# The web's data: action("make_data_assembly") with current_cpu == "wasm"
+# turns the trimmed data file (data_dir = "flutter") into a C++ array with
+# scripts/make_data_cpp.py (emcc takes neither data files at runtime nor the
+# assembly the other platforms use), and source_set("icudata") compiles it.
+gn_action(
+    name = "make_data_assembly",
+    args = [
+        "$(execpath flutter/icudtl.dat)",
+        "$(gen icudtl_dat.cpp)",
+    ],
+    inputs = ["flutter/icudtl.dat"],
+    outputs = ["icudtl_dat.cpp"],
+    script = "scripts/make_data_cpp.py",
+)
+
+# The data symbol is referenced by udata.cpp, so the archive's one object is
+# linked (GN's source_set links it unconditionally).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "icudata_static",
+    srcs = [":make_data_assembly"],
+    copts = FLUTTER_THIRD_PARTY_COPTS,
+    linkstatic = True,
+    local_defines = ["U_HIDE_DATA_SYMBOL"],
+    target_compatible_with = [_WEB],
+)
+
+# generate_icui18n("icui18n").
+cc_library(
+    name = "icui18n",
+    srcs = glob(["source/i18n/*.cpp"]),
+    hdrs = glob([
+        "source/i18n/*.h",
+        "source/i18n/unicode/*.h",
+    ]),
+    copts = _ICU_COPTS,
+    defines = _ICU_CONFIG_DEFINES,
+    includes = ["source/i18n"],
+    linkstatic = True,
+    local_defines = _ICU_CODE_DEFINES + ["U_I18N_IMPLEMENTATION"],
+    deps = [
+        ":icuuc",
+        ":root_includes",
+    ],
+)
+
+# source_set("headers"): the public and private headers of both libraries
+# with their include directories, for a target that compiles ICU sources of
+# its own (Skia's client-ICU bidi library, //flutter/third_party/canvaskit/
+# icu_bidi, which builds a few of source/common's files under its own
+# library suffix) or includes them without linking the libraries.
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "source/common/*.h",
+        "source/common/unicode/*.h",
+        "source/i18n/*.h",
+        "source/i18n/unicode/*.h",
+    ]),
+    includes = [
+        "source/common",
+        "source/i18n",
+    ],
+    deps = [":root_includes"],
+)
+
+# The sources a target of another repository compiles (icu_bidi, above).
+exports_files(glob(["source/common/*.cpp"]))
+
+# The data file (copy("copy_icudata") puts it at the root of the GN output
+# directory as icudtl.dat). Binaries that initialize ICU load it at runtime;
+# list it in their `data`.
+filegroup(
+    name = "icudata",
+    # BUILD.gn's data_dir: android/ for Android, common/ elsewhere.
+    srcs = select({
+        "@platforms//os:android": ["android/icudtl.dat"],
+        "//conditions:default": ["common/icudtl.dat"],
+    }),
+)
+
+# The two data files by name: the full one and the trimmed one Flutter ships
+# (flutter/icudtl.dat), which the interop toolkit embeds.
+exports_files([
+    "common/icudtl.dat",
+    "flutter/icudtl.dat",
+])
+
+# What the GN build of this tree reads (BUILD.gn, the sources it lists and
+# the data files its copy targets install), for rules that wrap a GN build.
+filegroup(
+    name = "build_tree",
+    srcs = [
+        "BUILD.gn",
+        # The data files GN copies by target OS: the host's (common/), the
+        # engine's trimmed one (flutter/), Android's, iOS's (the Mac's T26:
+        # the Dart wrap's iOS build names it).
+        "android/icudtl.dat",
+        "common/icudtl.dat",
+        "config.gni",
+        "flutter/icudtl.dat",
+        "ios/icudtl.dat",
+        "sources.gni",
+    ] + glob([
+        "source/common/**",
+        "source/i18n/**",
+        "source/stubdata/**",
+    ]),
+)

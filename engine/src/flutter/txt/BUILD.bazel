@@ -1,0 +1,392 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/txt/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "txt_config",
+    includes = ["src"],
+)
+
+cc_library(
+    name = "allow_posix_names",
+)
+
+# The Objective-C(++) sources of txt, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); txt links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "txt_objc",
+    srcs = select({
+        "@platforms//os:macos": [
+            "src/txt/platform_mac.mm",  # is_mac || is_ios
+        ],
+        "@platforms//os:ios": [
+            "src/txt/platform_mac.mm",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        "src/skia/paragraph_builder_skia.h",
+        "src/skia/paragraph_skia.h",
+        "src/txt/asset_font_manager.h",
+        "src/txt/font_asset_provider.h",
+        "src/txt/font_collection.h",
+        "src/txt/font_features.h",
+        "src/txt/font_style.h",
+        "src/txt/font_weight.h",
+        "src/txt/line_metrics.h",
+        "src/txt/paragraph.h",
+        "src/txt/paragraph_builder.h",
+        "src/txt/paragraph_style.h",
+        "src/txt/placeholder_run.h",
+        "src/txt/platform.h",
+        "src/txt/run_metrics.h",
+        "src/txt/test_font_manager.h",
+        "src/txt/text_baseline.h",
+        "src/txt/text_decoration.h",
+        "src/txt/text_shadow.h",
+        "src/txt/text_style.h",
+        "src/txt/typeface_font_asset_provider.h",
+    ] + select({
+        "@platforms//os:macos": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
+        "@platforms//os:ios": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":txt_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "@googletest//:gtest_prod",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+        "@harfbuzz",
+        "@icu",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "txt",
+    srcs = [
+        "src/skia/paragraph_builder_skia.cc",
+        "src/skia/paragraph_skia.cc",
+        "src/txt/asset_font_manager.cc",
+        "src/txt/font_asset_provider.cc",
+        "src/txt/font_collection.cc",
+        "src/txt/font_features.cc",
+        "src/txt/paragraph_builder.cc",
+        "src/txt/paragraph_style.cc",
+        "src/txt/placeholder_run.cc",
+        "src/txt/test_font_manager.cc",
+        "src/txt/text_decoration.cc",
+        "src/txt/text_shadow.cc",
+        "src/txt/text_style.cc",
+        "src/txt/typeface_font_asset_provider.cc",
+    ] + select({
+        "@platforms//os:android": [
+            "src/txt/platform_android.cc",  # !(is_mac || is_ios) && is_android
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": [
+            "src/txt/platform_linux.cc",  # !(is_mac || is_ios) && !(is_android) && is_linux
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "@platforms//os:ios": [],
+        "@platforms//os:android": [],
+        "@platforms//os:linux": [],
+        "//conditions:default": [
+            "src/txt/platform.cc",  # !(is_mac || is_ios) && !(is_android) && !(is_linux) && !(is_fuchsia) && !(is_win)
+        ],
+    }),
+    hdrs = [
+        "src/skia/paragraph_builder_skia.h",
+        "src/skia/paragraph_skia.h",
+        "src/txt/asset_font_manager.h",
+        "src/txt/font_asset_provider.h",
+        "src/txt/font_collection.h",
+        "src/txt/font_features.h",
+        "src/txt/font_style.h",
+        "src/txt/font_weight.h",
+        "src/txt/line_metrics.h",
+        "src/txt/paragraph.h",
+        "src/txt/paragraph_builder.h",
+        "src/txt/paragraph_style.h",
+        "src/txt/placeholder_run.h",
+        "src/txt/platform.h",
+        "src/txt/run_metrics.h",
+        "src/txt/test_font_manager.h",
+        "src/txt/text_baseline.h",
+        "src/txt/text_decoration.h",
+        "src/txt/text_shadow.h",
+        "src/txt/text_style.h",
+        "src/txt/typeface_font_asset_provider.h",
+    ] + select({
+        "@platforms//os:macos": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
+        "@platforms//os:ios": [
+            "src/txt/platform_mac.h",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = select({
+        "//engine/src/flutter/txt:fontconfig": [
+            "-lfontconfig",  # flutter_use_fontconfig
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":txt_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "@googletest//:gtest_prod",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+        "@harfbuzz",
+        "@icu",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [":txt_objc"],
+        "@platforms//os:ios": [":txt_objc"],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "txt_fixtures",
+    fixtures = [
+        "third_party/fonts/NotoColorEmoji.ttf",
+        "third_party/fonts/Roboto-Regular.ttf",
+    ] + select({
+        "//engine/src/flutter/build/bazel:host_os_is_mac": [
+            "@host_files//:System/Library/Fonts/Apple Color Emoji.ttc",  # host_os == "mac"
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_test(
+    name = "txt_benchmarks",
+    size = "medium",
+    srcs = [
+        "benchmarks/skparagraph_benchmarks.cc",
+        "benchmarks/txt_run_all_benchmarks.cc",
+        "tests/txt_test_utils.cc",
+        "tests/txt_test_utils.h",
+    ],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "//conditions:default": [],
+    }),
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":txt",
+        ":txt_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/testing:testing_lib",
+        "@benchmark",
+        "@skia//modules/skparagraph",
+        "@skia//modules/skparagraph:utils",
+    ],
+)
+
+flutter_cc_test(
+    name = "txt_unittests",
+    size = "small",
+    srcs = [
+        "tests/font_collection_tests.cc",
+        "tests/paragraph_builder_skia_tests.cc",
+        "tests/paragraph_unittests.cc",
+        "tests/txt_run_all_unittests.cc",
+    ] + select({
+        "@platforms//os:macos": [
+            "tests/platform_mac_tests.cc",  # is_mac || is_ios
+        ],
+        "@platforms//os:ios": [
+            "tests/platform_mac_tests.cc",  # is_mac || is_ios
+        ],
+        "//conditions:default": [],
+    }),
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :txt
+        ],
+        "//conditions:default": [],
+    }),
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":txt",
+        ":txt_config",
+        ":txt_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/runtime:test_font",
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:testing_lib",
+        "@skia//modules/skparagraph",
+    ],
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(glob(["third_party/fonts/*"]))
+
+# tools/gn's --enable-fontconfig: flutter_use_fontconfig (this file's
+# argument) and skia_use_fontconfig at once. Off, as in every host build; the
+# Linux desktop builders turn it on (ci/builders/configs.bazelrc), and with
+# it txt's Linux font manager is Skia's fontconfig one (SkFontMgr_fontconfig,
+# SK_FONTMGR_FONTCONFIG_AVAILABLE) over the sysroot's libfontconfig.
+bool_flag(
+    name = "use_fontconfig",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "fontconfig",
+    flag_values = {":use_fontconfig": "True"},
+)

@@ -1,0 +1,11 @@
+InheritParentConfig: true
+
+# The static analyzer's ArrayBound check reports an out-of-bounds write inside
+# rapidjson's GenericValue::AddMember (document.h, a vendored header) on the
+# paths from json_message_codec_unittests.cc's AddMember calls when it analyzes
+# an arm64 build; the x64 analysis reports nothing, and the write is not out
+# of bounds. The report's location is the header, where no NOLINT of ours
+# reaches, and the header filter keeps it because the path starts in our code;
+# the check is off for this directory.
+Checks: >-
+  -clang-analyzer-security.ArrayBound

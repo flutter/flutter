@@ -16,7 +16,7 @@
 #include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/modules/skparagraph/include/Paragraph.h"  // nogncheck
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 #include "third_party/skia/src/core/SkStrikeSpec.h"    // nogncheck
 #include "third_party/skia/src/core/SkTextBlobPriv.h"  // nogncheck
 

@@ -1,0 +1,112 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The emsdk spike (phased_plan.md, Phase 0 metric 0.6): one embind module
+# and one Skia translation unit compiled and linked by the Emscripten
+# toolchain with the flags of GN's wasm toolchain, the module run in
+# headless Chrome. Manual: the SDK is in the checkout only under
+# `download_emsdk`, and the browser is the host's (Chrome for Testing 145,
+# @chrome, never returns from --dump-dom here). The module builds for a
+# variant of the web build (wasm.bzl: the module_platform flag) -- CanvasKit's,
+# an embind module without LTO like this one:
+#
+#   bazel build -c opt --//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:canvaskit //engine/src/flutter/build/bazel/toolchains/emscripten/spike:all
+#   bazel test -c opt --//engine/src/flutter/build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:canvaskit //engine/src/flutter/build/bazel/toolchains/emscripten/spike:spike_test
+#
+# The flags per target are what GN attaches to the counterpart target in
+# out/wasm_release (its compile_commands.json and skwasm's link rule): the
+# module's are skwasm's, the Skia unit's are the skia source_set's.
+
+load("//build_defs/web:wasm.bzl", "wasm_module", "wasm_objects")
+
+package(default_visibility = ["//visibility:private"])
+
+# skwasm's compile flags (flutter/skwasm/BUILD.gn, the chromium_code
+# -Werror) and CanvasKit's link flags (skia/modules/canvaskit/BUILD.gn: the
+# embind runtime, no main, -Oz with the closure compiler, no LTO -- the
+# SDK's prebuilt cache has no LTO variant of libembind, and the cache is
+# frozen); ENVIRONMENT, MODULARIZE and the rest come from the toolchain.
+# The module is an ES module like the web engine's.
+wasm_module(
+    name = "spike_module",
+    srcs = ["spike_module.cc"],
+    copts = [
+        "-mreference-types",
+        "-Werror",
+    ],
+    # CanvasKit's: embind under -fno-rtti needs the type names unbound.
+    defines = ["EMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0"],
+    linkopts = [
+        "-std=c++20",
+        "-sALLOW_MEMORY_GROWTH",
+        "-sALLOW_TABLE_GROWTH",
+        "-sUSE_ES6_IMPORT_META=0",
+        # CanvasKit's: the bindings, no main, the no-RTTI embind runtime.
+        "--bind",
+        "--no-entry",
+        "-fno-rtti",
+        "--closure=1",
+        "-Oz",
+    ],
+    tags = ["manual"],
+)
+
+# One Skia translation unit as the wasm_release's skia source_set compiles
+# it: its defines and the Skia root as include directory (out/wasm_release's
+# compile line for src/core/SkPath.cpp, minus the GN root and the
+# generated-files directory, which that unit does not read), -O3 from the
+# toolchain's opt mode.
+wasm_objects(
+    name = "skia_unit",
+    srcs = ["@skia//:src/core/SkPath.cpp"],
+    hdrs = ["@skia//:headers"],
+    copts = ["-Werror"],
+    defines = [
+        "SK_DISABLE_LEGACY_INIT_DECODERS",
+        "SK_ENABLE_DUMP_GPU",
+        "SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER",
+        "SK_DISABLE_LEGACY_MOCK_BACKENDSURFACE",
+        "SK_DISABLE_LEGACY_SHADERCONTEXT",
+        "SK_DISABLE_LOWP_RASTER_PIPELINE",
+        "SK_FORCE_RASTER_PIPELINE_BLITTER",
+        "SK_METAL_WAIT_UNTIL_SCHEDULED",
+        "SK_DISABLE_EFFECT_DESERIALIZATION",
+        "SK_ENABLE_PRECOMPILE",
+        "SKVX_DISABLE_SIMD",
+        "SK_FORCE_8_BYTE_ALIGNMENT",
+        "SK_DISABLE_TRACING",
+        "SK_ASSUME_WEBGL=1",
+        "SK_USE_WEBGL",
+        "SK_GANESH",
+        "SK_GAMMA_APPLY_TO_A8",
+        "SKIA_IMPLEMENTATION=1",
+        "SK_GL",
+        "SK_CODEC_ENCODES_PNG",
+        "SK_CODEC_ENCODES_PNG_WITH_LIBPNG",
+        "SK_HAS_WUFFS_LIBRARY",
+        "SK_CODEC_DECODES_GIF",
+    ],
+    include_markers = ["@skia//:BUILD.bazel"],
+    tags = ["manual"],
+)
+
+sh_test(
+    name = "spike_test",
+    srcs = ["spike_test.sh"],
+    args = [
+        "$(rootpath @cpython3//:bin/python3)",
+        "$(rootpath spike.html)",
+    ],
+    data = [
+        "spike.html",
+        ":spike_module",
+        "@cpython3//:bin/python3",
+        "@cpython3//:runtime",
+    ],
+    tags = [
+        "manual",
+        # Chrome and a local HTTP server.
+        "requires-network",
+    ],
+)

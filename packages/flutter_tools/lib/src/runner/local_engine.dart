@@ -39,7 +39,14 @@ class LocalEngineLocator {
   final UserMessages _userMessages;
 
   String _runnerNoEngineBuild(String engineBuildPath) =>
-      'No Flutter engine build found at $engineBuildPath.';
+      'No Flutter engine build found at $engineBuildPath, and no Bazel build directory under '
+      '${_fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), 'bazel-out')} '
+      'whose ${LocalEngineLayout.manifestFileName} names it.';
+
+  String _runnerSeveralBazelBuilds(String name, List<String> directories) =>
+      '$name is the name of several Bazel build directories:\n'
+      '${directories.map((String d) => '  $d').join('\n')}\n'
+      'Pass the directory you mean as --local-engine or --local-engine-host.';
 
   String get _runnerHostEngineRequiresLocalEngine =>
       'You must specify --local-engine if you are using --local-engine-host.';
@@ -213,22 +220,23 @@ class LocalEngineLocator {
     String? engineBuildPath;
     String? engineHostBuildPath;
     if (localEngine != null) {
-      engineBuildPath = _fileSystem.path.normalize(
-        _fileSystem.path.join(engineSourcePath, 'out', localEngine),
+      engineBuildPath = _engineBuildDirectory(
+        _fileSystem.path.join(engineSourcePath, 'out'),
+        localEngine,
       );
-      if (!_fileSystem.isDirectorySync(engineBuildPath)) {
-        throwToolExit(_runnerNoEngineBuild(engineBuildPath), exitCode: 2);
-      }
 
       if (localHostEngine == null) {
         throwToolExit(_runnerLocalEngineRequiresHostEngine);
       }
-      engineHostBuildPath = _fileSystem.path.normalize(
-        _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), localHostEngine),
-      );
-      if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
-        throwToolExit(_runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
-      }
+      // The host build beside the target's: in the target's out directory
+      // when the target is GN's `out/<name>` (another checkout's, maybe),
+      // else -- a Bazel directory's parent is no out directory -- the
+      // source's, where the Bazel directories are.
+      final String targetOut = _fileSystem.path.dirname(engineBuildPath);
+      final String outDirectory = _fileSystem.path.basename(targetOut) == 'out'
+          ? targetOut
+          : _fileSystem.path.join(engineSourcePath, 'out');
+      engineHostBuildPath = _engineBuildDirectory(outDirectory, localHostEngine);
     }
 
     String? webSdkPath;
@@ -246,6 +254,63 @@ class LocalEngineLocator {
       webSdk: webSdkPath,
       hostEngine: engineHostBuildPath,
     );
+  }
+
+  /// The engine build directory [nameOrPath] names: a directory under GN's
+  /// [outDirectory] (or an absolute path, a Bazel build directory's among
+  /// them), or else the Bazel build directory of that name -- the one under
+  /// `<out>/bazel-out/<configuration>/bin/engine/src/flutter` whose
+  /// local_engine.json names it (`host_debug_unopt`, GN's name for the
+  /// configuration's build directory; LocalEngineLayout), so that
+  /// `--local-engine=host_debug_unopt` finds a Bazel build as it finds GN's.
+  String _engineBuildDirectory(String outDirectory, String nameOrPath) {
+    final String path = _fileSystem.path.normalize(_fileSystem.path.join(outDirectory, nameOrPath));
+    if (_fileSystem.isDirectorySync(path)) {
+      return path;
+    }
+    final List<String> bazel = _bazelBuildDirectories(outDirectory, nameOrPath);
+    if (bazel.length == 1) {
+      _logger.printTrace('Local engine $nameOrPath is the Bazel build directory ${bazel.single}.');
+      return bazel.single;
+    }
+    if (bazel.length > 1) {
+      throwToolExit(_runnerSeveralBazelBuilds(nameOrPath, bazel), exitCode: 2);
+    }
+    throwToolExit(_runnerNoEngineBuild(path), exitCode: 2);
+  }
+
+  /// The Bazel build directories under [outDirectory]'s bazel-out whose
+  /// manifest names the build [name], each once (bazel-bin is a link to one
+  /// of them, and is not read).
+  List<String> _bazelBuildDirectories(String outDirectory, String name) {
+    final Directory bazelOut = _fileSystem.directory(
+      _fileSystem.path.join(outDirectory, 'bazel-out'),
+    );
+    if (!bazelOut.existsSync()) {
+      return const <String>[];
+    }
+    final found = <String>[];
+    final List<Directory> configurations = bazelOut.listSync().whereType<Directory>().toList()
+      ..sort((Directory a, Directory b) => a.path.compareTo(b.path));
+    for (final configuration in configurations) {
+      final String directory = _fileSystem.path.join(
+        configuration.path,
+        'bin',
+        'engine',
+        'src',
+        'flutter',
+      );
+      if (!_fileSystem
+          .file(_fileSystem.path.join(directory, LocalEngineLayout.manifestFileName))
+          .existsSync()) {
+        continue;
+      }
+      final layout = LocalEngineLayout.of(directory, fileSystem: _fileSystem);
+      if (layout.name == name) {
+        found.add(directory);
+      }
+    }
+    return found;
   }
 
   String? _tryEnginePath(String enginePath) {

@@ -1,0 +1,50 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:engine_build_configs: the reader of ci/builders/*.json and .ci.yaml.
+# A Dart package with no GN build file; its tests are run_tests.py's
+# (--type dart-host).
+
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# The library and the in-tree package it imports.
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources",
+    ],
+)
+
+# The tests load the real builder configurations and .ci.yaml.
+dart_package_test(
+    name = "tests",
+    data = [
+        "//engine/src/flutter:.ci.yaml",
+        "//engine/src/flutter/ci:builder_configs",
+    ],
+    deps = [
+        ":dart_sources",
+        "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
+    ],
+)
+
+# ci/host_debug_unopt's "Check build configs" (linux_unopt.json):
+# ci/check_build_configs.sh runs bin/check.dart over the builder files of the
+# checkout (`--engine-src-path=<engine/src>`), the same package's check that
+# `tests` above exercises on fixtures.
+dart_package_test(
+    name = "check_build_configs",
+    data = [
+        "//engine/src/flutter:.ci.yaml",
+        "//engine/src/flutter/ci:builder_configs",
+    ],
+    script = "bin/check.dart",
+    script_args = ["--engine-src-path={engine_src}"],
+    deps = [
+        ":dart_sources",
+        "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
+    ],
+)

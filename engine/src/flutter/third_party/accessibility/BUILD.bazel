@@ -1,0 +1,195 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/accessibility/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "accessibility_config",
+    includes = ["."],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "accessibility",
+    linkopts = [
+        "-framework",
+        "AppKit",  # is_mac
+        "-framework",
+        "CoreFoundation",  # is_mac
+        "-framework",
+        "CoreGraphics",  # is_mac
+        "-framework",
+        "CoreText",  # is_mac
+        "-framework",
+        "IOSurface",  # is_mac
+    ],
+    target_compatible_with = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":accessibility_config",
+        "//engine/src/flutter/third_party/accessibility/ax",
+        "//engine/src/flutter/third_party/accessibility/ax_build",
+        "//engine/src/flutter/third_party/accessibility/base",
+        "//engine/src/flutter/third_party/accessibility/gfx",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "accessibility_fixtures",
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# The Objective-C(++) sources of accessibility_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); accessibility_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "accessibility_unittests_objc",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_mac_unittest.mm",  # is_mac || is_win && is_mac
+    ],
+    hdrs = [
+        # ax_node_position_unittest.cc includes it on every platform
+        # (the Windows code path it tests is header-only).
+        "//engine/src/flutter/fml:platform/win/wstring_conversion.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_mac_unittest.h",  # is_mac || is_win && is_mac
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_unittest.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/test_ax_node_wrapper.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:test_ax_node_helper.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:test_ax_tree_manager.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:test/gfx_util.h",  # is_mac || is_win
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ] + select({
+        ":when_is_mac_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:dart
+        ],
+        "//conditions:default": [],
+    }) + MACOS_CFLAGS_OBJC,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":accessibility",  # is_mac || is_win
+        ":accessibility_config",
+        ":accessibility_fixtures",  # is_mac || is_win
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",  # is_mac || is_win
+        "//engine/src/flutter/testing:dart",  # is_mac || is_win
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "accessibility_unittests",
+    size = "small",
+    srcs = [
+        # ax_node_position_unittest.cc includes it on every platform
+        # (the Windows code path it tests is header-only).
+        "//engine/src/flutter/fml:platform/win/wstring_conversion.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_enum_util_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_event_generator_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_node_data_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_node_position_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_range_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_role_properties_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_table_info_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:ax_tree_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_base_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_mac_unittest.h",  # is_mac || is_win && is_mac
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_platform_node_unittest.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/ax_unique_id_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/test_ax_node_wrapper.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:platform/test_ax_node_wrapper.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:test_ax_node_helper.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:test_ax_node_helper.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:test_ax_tree_manager.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/ax:test_ax_tree_manager.h",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/base:logging_unittests.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/base:string_utils_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:geometry/insets_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:geometry/point_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:geometry/rect_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:geometry/size_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:geometry/vector2d_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:range/range_unittest.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:test/gfx_util.cc",  # is_mac || is_win
+        "//engine/src/flutter/third_party/accessibility/gfx:test/gfx_util.h",  # is_mac || is_win
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ] + select({
+        ":when_is_mac_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/testing:dart
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = [
+        "-ObjC",  # is_mac || is_win && is_mac
+        "-framework",
+        "AppKit",  # is_mac || is_win && is_mac
+        "-framework",
+        "CoreFoundation",  # is_mac || is_win && is_mac
+        "-framework",
+        "CoreGraphics",  # is_mac || is_win && is_mac
+        "-framework",
+        "CoreText",  # is_mac || is_win && is_mac
+        "-framework",
+        "IOSurface",  # is_mac || is_win && is_mac
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":accessibility",  # is_mac || is_win
+        ":accessibility_config",
+        ":accessibility_fixtures",  # is_mac || is_win
+        ":accessibility_unittests_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",  # is_mac || is_win
+        "//engine/src/flutter/testing:dart",  # is_mac || is_win
+    ],
+)
+
+# `is_mac && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_shell_enable_vulkan",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)

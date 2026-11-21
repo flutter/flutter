@@ -1,0 +1,52 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's GN build configuration (//build in GN). Nothing here is used
+# by Bazel's own toolchains; the files are inputs of the rules that wrap a GN
+# build of part of the tree. The Debian sysroots that live under linux/ are
+# repositories of their own and are listed in .bazelignore.
+
+filegroup(
+    name = "gn_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            # Bazel's own files are not GN inputs.
+            "**/BUILD.bazel",
+            "**/*.bzl",
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ),
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)
+
+# The Android build scripts GN's android toolchain inherited from Chromium
+# (android/gyp), which the Android embedding's actions run
+# (shell/platform/android/BUILD.gn): the Java compile and jar packaging.
+exports_files([
+    "android/gyp/create_flutter_jar.py",
+    "android/gyp/javac.py",
+])
+
+# GN's Swift tool (build/toolchain/mac/BUILD.gn's tool("swift")): the script
+# and the protocol list it passes the compiler, which flutter_swift_library
+# (build_defs/cc/swift_library.bzl) runs as GN does.
+exports_files([
+    "toolchain/darwin/swift_const_gather_protocols.json",
+    "toolchain/darwin/swiftc.py",
+])
+
+# The macOS framework bundles' symlinks (the embedder's and the macOS
+# shell's `generate_symlinks` actions), which framework_symlinks
+# (build_defs/dist/framework.bzl) runs as GN does.
+exports_files(["config/mac/package_framework.py"])
+
+# What the scripts of android/gyp import (their util/ package, jar.py,
+# md5_check.py), for the actions that run them.
+filegroup(
+    name = "android_gyp_scripts",
+    srcs = glob(["android/gyp/**/*.py"]),
+    visibility = ["//visibility:public"],
+)

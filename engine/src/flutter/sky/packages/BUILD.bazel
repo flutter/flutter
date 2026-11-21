@@ -1,0 +1,13 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/sky/packages/BUILD.gn by gn_to_bazel; do not edit.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "packages",
+    testonly = True,
+    srcs = ["//engine/src/flutter/sky/packages/sky_engine"],
+)

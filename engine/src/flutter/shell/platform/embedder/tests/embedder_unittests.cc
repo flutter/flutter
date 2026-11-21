@@ -2853,11 +2853,21 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
   engine.reset();
 }
 
+// The build defines these (embedder_jit_snapshot_setup); the analyzer may
+// run without them, and must not redefine them when it has them.
 #if defined(__clang_analyzer__)
+#ifndef TEST_VM_SNAPSHOT_DATA
 #define TEST_VM_SNAPSHOT_DATA "vm_data"
+#endif
+#ifndef TEST_VM_SNAPSHOT_INSTRUCTIONS
 #define TEST_VM_SNAPSHOT_INSTRUCTIONS "vm_instructions"
+#endif
+#ifndef TEST_ISOLATE_SNAPSHOT_DATA
 #define TEST_ISOLATE_SNAPSHOT_DATA "isolate_data"
+#endif
+#ifndef TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS
 #define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS "isolate_instructions"
+#endif
 #endif
 
 //------------------------------------------------------------------------------

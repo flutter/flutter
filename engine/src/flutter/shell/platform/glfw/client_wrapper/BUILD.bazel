@@ -1,0 +1,188 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/glfw/client_wrapper/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+# This code will be merged into .../common/cpp/client_wrapper for client use,
+# so uses header paths that assume the merged state. Include the header
+# directory of the core wrapper files so these includes will work.
+cc_library(
+    name = "relative_core_wrapper_headers",
+    deps = ["//engine/src/flutter/shell/platform/common/client_wrapper:relative_core_wrapper_headers"],
+)
+
+# GLFW client wrapper build for internal use by the shell implementation.
+cc_library(
+    name = "client_wrapper_glfw",
+    srcs = [
+        "flutter_engine.cc",
+        "flutter_window_controller.cc",
+    ],
+    hdrs = [
+        "include/flutter/flutter_engine.h",
+        "include/flutter/flutter_window.h",
+        "include/flutter/flutter_window_controller.h",
+        "include/flutter/plugin_registrar_glfw.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    implementation_deps = ["//engine/src/flutter/shell/platform/common:desktop_library_implementation"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":relative_core_wrapper_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/common:common_cpp_library_headers",
+        "//engine/src/flutter/shell/platform/common:relative_flutter_library_headers",
+        "//engine/src/flutter/shell/platform/common/client_wrapper",
+        "//engine/src/flutter/shell/platform/glfw:flutter_glfw_headers",
+        "//engine/src/flutter/shell/platform/glfw:relative_flutter_glfw_headers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "publish_wrapper_glfw_core",
+    data = [
+        ":publish_wrapper_glfw_core_publish_includes",
+        ":publish_wrapper_glfw_core_publish_sources",
+    ],
+)
+
+gn_copy(
+    name = "publish_wrapper_glfw_core_publish_includes",
+    srcs = [
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/basic_message_channel.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/binary_messenger.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/byte_streams.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/encodable_value.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/engine_method_result.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/event_channel.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/event_sink.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/event_stream_handler.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/event_stream_handler_functions.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/message_codec.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/method_call.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/method_channel.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/method_codec.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/method_result.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/method_result_functions.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/plugin_registrar.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/plugin_registry.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/standard_codec_serializer.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/standard_message_codec.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/standard_method_codec.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:include/flutter/texture_registrar.h",
+    ],
+    outputs = ["$root_out_dir/cpp_client_wrapper_glfw/include/flutter/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "publish_wrapper_glfw_core_publish_sources",
+    srcs = [
+        "//engine/src/flutter/shell/platform/common/client_wrapper:README",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:binary_messenger_impl.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:byte_buffer_streams.h",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:core_implementations.cc",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:engine_method_result.cc",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:plugin_registrar.cc",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:standard_codec.cc",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:texture_registrar_impl.h",
+    ],
+    outputs = ["$root_out_dir/cpp_client_wrapper_glfw/{{source_file_part}}"],
+    # GN on Windows appears to do #include checks even for copy
+    # targets, so add the dependency to the headers to satisfy
+    # the check.
+    deps = [":publish_wrapper_glfw_core_publish_includes"],
+)
+
+cc_library(
+    name = "publish_wrapper_glfw",
+    data = [
+        ":publish_wrapper_glfw_publish_includes",
+        ":publish_wrapper_glfw_publish_sources",
+    ],
+    deps = [":publish_wrapper_glfw_core"],
+)
+
+gn_copy(
+    name = "publish_wrapper_glfw_publish_includes",
+    srcs = [
+        "include/flutter/flutter_engine.h",
+        "include/flutter/flutter_window.h",
+        "include/flutter/flutter_window_controller.h",
+        "include/flutter/plugin_registrar_glfw.h",
+    ],
+    outputs = ["$root_out_dir/cpp_client_wrapper_glfw/include/flutter/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "publish_wrapper_glfw_publish_sources",
+    srcs = [
+        "flutter_engine.cc",
+        "flutter_window_controller.cc",
+    ],
+    outputs = ["$root_out_dir/cpp_client_wrapper_glfw/{{source_file_part}}"],
+    # GN on Windows appears to do #include checks even for copy
+    # targets, so add the dependency to the headers to satisfy
+    # the check.
+    deps = [":publish_wrapper_glfw_publish_includes"],
+)
+
+cc_library(
+    name = "client_wrapper_library_stubs_glfw",
+    srcs = ["testing/stub_flutter_glfw_api.cc"],
+    hdrs = ["testing/stub_flutter_glfw_api.h"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/glfw:flutter_glfw_headers",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "client_wrapper_glfw_fixtures",
+)
+
+flutter_cc_test(
+    name = "client_wrapper_glfw_unittests",
+    size = "small",
+    srcs = [
+        "flutter_engine_unittests.cc",
+        "flutter_window_controller_unittests.cc",
+        "flutter_window_unittests.cc",
+        "plugin_registrar_glfw_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/testing
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
+    deps = [
+        ":client_wrapper_glfw",
+        ":client_wrapper_glfw_fixtures",
+        ":client_wrapper_library_stubs_glfw",
+        "//engine/src:include_root",
+        # TODO(chunhtai): Consider refactoring flutter_root/testing so that there's
+        # a testing target that doesn't require a Dart runtime to be linked in.
+        # https://github.com/flutter/flutter/issues/41414.
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
+        "//engine/src/flutter/testing",
+    ],
+)

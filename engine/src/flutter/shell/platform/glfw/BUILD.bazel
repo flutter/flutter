@@ -1,0 +1,123 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/glfw/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+# Any files that are built by clients (client_wrapper code, library headers for
+# implementations using this shared code, etc.) include the public headers
+# assuming they are in the include path. This configuration should be added to
+# any such code that is also built by GN to make the includes work.
+cc_library(
+    name = "relative_flutter_glfw_headers",
+    includes = ["public"],
+)
+
+# The headers are a separate source set since the client wrapper is allowed
+# to depend on the public headers, but none of the rest of the code.
+cc_library(
+    name = "flutter_glfw_headers",
+    hdrs = ["public/flutter_glfw.h"],
+    implementation_deps = ["//engine/src/flutter/shell/platform/common:desktop_library_implementation"],
+    deps = [
+        "//engine/src/flutter/shell/platform/common:common_cpp_library_headers",
+        "//engine/src/flutter/shell/platform/common:relative_flutter_library_headers",
+    ],
+)
+
+cc_library(
+    name = "flutter_glfw",
+    srcs = [
+        "event_loop.cc",
+        "event_loop.h",
+        "flutter_glfw.cc",
+        "glfw_event_loop.cc",
+        "glfw_event_loop.h",
+        "headless_event_loop.cc",
+        "headless_event_loop.h",
+        "key_event_handler.cc",
+        "key_event_handler.h",
+        "keyboard_hook_handler.h",
+        "platform_handler.cc",
+        "platform_handler.h",
+        "system_utils.cc",
+        "text_input_plugin.cc",
+        "text_input_plugin.h",
+    ],
+    hdrs = ["system_utils.h"],
+    copts = FLUTTER_COPTS,
+    cxxopts = ["-Wno-deprecated-declarations"],
+    implementation_deps = [
+        "//engine/src/flutter/shell/platform/common:desktop_library_implementation",
+        "//engine/src/flutter/shell/platform/linux/config:x11",  # is_linux
+    ],
+    linkopts = [
+        "-lGL",  # is_linux
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_glfw_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/shell/platform/common:common_cpp",
+        "//engine/src/flutter/shell/platform/common:common_cpp_input",
+        "//engine/src/flutter/shell/platform/common/client_wrapper",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "//engine/src/flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
+        "@glfw",
+        "@rapidjson",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "flutter_glfw_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+flutter_cc_test(
+    name = "flutter_glfw_unittests",
+    size = "small",
+    srcs = ["system_utils_test.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_glfw",
+        ":flutter_glfw_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/shell/platform/embedder:embedder_headers",
+        "//engine/src/flutter/testing",
+    ],
+)
+
+gn_copy(
+    name = "publish_headers_glfw",
+    srcs = ["public/flutter_glfw.h"],
+    outputs = ["$root_out_dir/{{source_file_part}}"],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    # The GLFW header assumes the presence of the common headers.
+    deps = ["//engine/src/flutter/shell/platform/common:publish_headers"],
+)

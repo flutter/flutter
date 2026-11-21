@@ -1,0 +1,89 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/flutter_vma/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "flutter_vma",
+    srcs = ["flutter_vma.cc"],
+    hdrs = ["flutter_vma.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-deprecated-copy",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-implicit-fallthrough",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-nullability-completeness",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-suggest-destructor-override",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-suggest-override",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-unused-private-field",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-unused-variable",  # from //flutter/third_party/vulkan_memory_allocator
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "//engine/src/flutter/flutter_vma:without_stl_shared_mutex": [
+            "VMA_USE_STL_SHARED_MUTEX=0",  # disable_vma_stl_shared_mutex
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/vulkan/procs",
+        "@vulkan-headers//:vulkan_headers",
+        "@vulkan_deps_tree//:root_includes",
+        "@vulkan_memory_allocator",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_skia_vma",
+    srcs = ["flutter_skia_vma.cc"],
+    hdrs = ["flutter_skia_vma.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :flutter_vma
+        "-Wno-c++98-compat-extra-semi",  # from :flutter_vma
+        "-Wno-deprecated-copy",  # from :flutter_vma
+        "-Wno-implicit-fallthrough",  # from :flutter_vma
+        "-Wno-nullability-completeness",  # from :flutter_vma
+        "-Wno-suggest-destructor-override",  # from :flutter_vma
+        "-Wno-suggest-override",  # from :flutter_vma
+        "-Wno-unused-private-field",  # from :flutter_vma
+        "-Wno-unused-variable",  # from :flutter_vma
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/skia
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":flutter_vma",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/vulkan/procs",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+selects.config_setting_group(
+    name = "without_stl_shared_mutex",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:windows",
+    ],
+)

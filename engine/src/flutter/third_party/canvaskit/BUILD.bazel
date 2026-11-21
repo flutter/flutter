@@ -1,0 +1,192 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/canvaskit/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/web:wasm.bzl", "wasm_platform")
+
+package(default_visibility = ["//visibility:public"])
+
+# This toolchain is only to be used by canvaskit_group below.
+wasm_platform(
+    name = "canvaskit",
+    extra_toolchain_args = {
+        "skia_use_icu": True,
+        "skia_use_client_icu": False,
+        "skia_use_libjpeg_turbo_decode": True,
+        "skia_use_libpng_decode": True,
+        "skia_use_libwebp_decode": True,
+        "enable_lto": False,
+    },
+)
+
+gn_copy(
+    name = "canvaskit_group",
+    srcs = ["@skia//modules/canvaskit"],
+    files = [
+        "canvaskit.js",
+        "canvaskit.js.symbols",
+        "canvaskit.wasm",
+    ],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":canvaskit",
+)
+
+# This toolchain is only to be used by canvaskit_chromium_group below.
+wasm_platform(
+    name = "canvaskit_chromium",
+    extra_toolchain_args = {
+        "skia_use_icu": False,
+        "skia_use_client_icu": True,
+        "skia_icu_bidi_third_party_dir": "//flutter/third_party/canvaskit/icu_bidi",
+        "skia_use_libjpeg_turbo_decode": False,
+        "skia_use_libpng_decode": False,
+        "skia_use_libwebp_decode": False,
+        "enable_lto": False,
+    },
+)
+
+gn_copy(
+    name = "canvaskit_chromium_group",
+    srcs = ["@skia//modules/canvaskit"],
+    files = [
+        "canvaskit.js",
+        "canvaskit.js.symbols",
+        "canvaskit.wasm",
+    ],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/chromium/{{source_file_part}}"],
+    platform = ":canvaskit_chromium",
+)
+
+# This toolchain is only to be used by canvaskit_webparagraph_group below.
+wasm_platform(
+    name = "canvaskit_webparagraph",
+    extra_toolchain_args = {
+        "skia_use_icu": False,
+        "skia_use_client_icu": False,
+        "skia_use_bidi": True,
+        "skia_canvaskit_enable_bidi": True,
+        "skia_icu_bidi_third_party_dir": "//flutter/third_party/canvaskit/icu_bidi",
+        "skia_enable_skparagraph": False,
+        "skia_canvaskit_enable_paragraph": False,
+        "skia_enable_skshaper": False,
+        "skia_use_harfbuzz": False,
+        "skia_use_freetype": False,
+        "flutter_use_freetype_woff2": False,
+        "skia_enable_fontmgr_custom_embedded": False,
+        "skia_enable_fontmgr_custom_empty": False,
+        "skia_canvaskit_enable_font": False,
+        "skia_canvaskit_enable_alias_font": False,
+        "skia_use_libjpeg_turbo_decode": False,
+        "skia_use_libpng_decode": False,
+        "skia_use_libwebp_decode": False,
+        "enable_lto": False,
+    },
+)
+
+gn_copy(
+    name = "canvaskit_webparagraph_group",
+    srcs = ["@skia//modules/canvaskit"],
+    files = [
+        "canvaskit.js",
+        "canvaskit.js.symbols",
+        "canvaskit.wasm",
+    ],
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/webparagraph/{{source_file_part}}"],
+    platform = ":canvaskit_webparagraph",
+)
+
+wasm_platform(
+    name = "skwasm",
+    extra_toolchain_args = {
+        "skia_use_icu": False,
+        "skia_use_client_icu": True,
+        "skia_icu_bidi_third_party_dir": "//flutter/third_party/canvaskit/icu_bidi",
+        "skia_use_libjpeg_turbo_decode": False,
+        "skia_use_libpng_decode": False,
+        "skia_use_libwebp_decode": False,
+        "skia_use_no_png_encode": True,
+        "skia_use_libpng_encode": False,
+        "skia_enable_threadlocal_strikecache": True,
+        "wasm_use_workers": True,
+        "wasm_prioritize_size": True,
+    },
+)
+
+wasm_platform(
+    name = "skwasm_heavy",
+    extra_toolchain_args = {
+        "skia_use_icu": True,
+        "skia_use_client_icu": False,
+        "skia_use_libjpeg_turbo_decode": True,
+        "skia_use_libpng_decode": True,
+        "skia_use_libwebp_decode": True,
+        "skia_use_no_png_encode": True,
+        "skia_use_libpng_encode": False,
+        "skia_enable_threadlocal_strikecache": True,
+        "wasm_use_workers": True,
+        "wasm_prioritize_size": True,
+    },
+)
+
+gn_copy(
+    name = "skwasm_group",
+    srcs = ["//engine/src/flutter/skwasm"],
+    files = [
+        "skwasm.js",
+        "skwasm.js.symbols",
+        "skwasm.wasm",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": ["skwasm.wasm.map"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm",
+)
+
+gn_copy(
+    name = "skwasm_heavy_group",
+    srcs = ["//engine/src/flutter/skwasm:skwasm_heavy"],
+    files = [
+        "skwasm_heavy.js",
+        "skwasm_heavy.js.symbols",
+        "skwasm_heavy.wasm",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": ["skwasm_heavy.wasm.map"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm_heavy",
+)
+
+gn_copy(
+    name = "wimp_group",
+    srcs = ["//engine/src/flutter/skwasm:wimp"],
+    files = [
+        "wimp.js",
+        "wimp.js.symbols",
+        "wimp.wasm",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": ["wimp.wasm.map"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm",
+)
+
+gn_copy(
+    name = "wimp_heavy_group",
+    srcs = ["//engine/src/flutter/skwasm:wimp_heavy"],
+    files = [
+        "wimp_heavy.js",
+        "wimp_heavy.js.symbols",
+        "wimp_heavy.wasm",
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": ["wimp_heavy.wasm.map"],
+        "//conditions:default": [],
+    }),
+    outputs = ["$root_out_dir/flutter_web_sdk/canvaskit/{{source_file_part}}"],
+    platform = ":skwasm_heavy",
+)

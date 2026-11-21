@@ -320,5 +320,6 @@ impeller_component("entity_unittests") {
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:testing_lib",
     "//flutter/txt",
+    "//third_party/abseil-cpp/absl/status:status_matchers",
   ]
 }

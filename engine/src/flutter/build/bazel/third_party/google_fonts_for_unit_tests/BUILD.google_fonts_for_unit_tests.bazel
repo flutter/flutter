@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @google_fonts_for_unit_tests: the Noto fonts of DEPS'
+# flutter/flutter_font_fallbacks CIPD package, which the web engine's unit
+# tests load as their fallback fonts (felt's copy_artifacts_step lays the
+# tree as out/web_tests/artifacts/assets/fallback_fonts; web_ui_tests.bzl
+# lays it the same in a test's runfiles).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "fonts",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "cipd.*.yaml",
+        ],
+    ),
+)

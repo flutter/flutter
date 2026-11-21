@@ -482,6 +482,116 @@ void main() {
     },
   );
 
+  testWithoutContext('finds a Bazel build directory by the name its manifest carries', () async {
+    // `bazel build --config=host_debug_unopt //engine/src/flutter:local_engine`
+    // writes local_engine.json, naming GN's build directory, under
+    // out/bazel-out/<configuration>/bin/engine/src/flutter; --local-engine
+    // and --local-engine-host find it by that name as they find GN's out/<name>.
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final String out = fileSystem.path.join(kArbitraryEngineRoot, 'src', 'out');
+    void bazelBuild(String configuration, String name) {
+      final Directory directory = fileSystem.directory(
+        fileSystem.path.join(out, 'bazel-out', configuration, 'bin', 'engine', 'src', 'flutter'),
+      )..createSync(recursive: true);
+      directory
+          .childFile('local_engine.json')
+          .writeAsStringSync('{"name": "$name", "entries": {}}');
+    }
+
+    bazelBuild('linux_x64_debug-dbg', 'host_debug_unopt');
+    bazelBuild('android_arm64_debug-opt', 'android_debug_arm64');
+    // A configuration directory without a manifest (another build's) is skipped.
+    fileSystem
+        .directory(fileSystem.path.join(out, 'bazel-out', 'k8-opt', 'bin'))
+        .createSync(recursive: true);
+    // GN's own directory of another name beside them.
+    fileSystem.directory(fileSystem.path.join(out, 'host_debug')).createSync(recursive: true);
+
+    final logger = BufferLogger.test();
+    final localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(
+        environment: <String, String>{'FLUTTER_ENGINE': '$kArbitraryEngineRoot/src'},
+      ),
+    );
+
+    final String bazelHost = fileSystem.path.join(
+      out,
+      'bazel-out',
+      'linux_x64_debug-dbg',
+      'bin',
+      'engine',
+      'src',
+      'flutter',
+    );
+    final String bazelAndroid = fileSystem.path.join(
+      out,
+      'bazel-out',
+      'android_arm64_debug-opt',
+      'bin',
+      'engine',
+      'src',
+      'flutter',
+    );
+    expect(
+      await localEngineLocator.findEnginePath(
+        localEngine: 'android_debug_arm64',
+        localHostEngine: 'host_debug_unopt',
+      ),
+      matchesEngineBuildPaths(hostEngine: bazelHost, targetEngine: bazelAndroid),
+    );
+    expect(
+      logger.traceText,
+      contains('Local engine host_debug_unopt is the Bazel build directory'),
+    );
+    // A Bazel directory given by path, its host by name.
+    expect(
+      await localEngineLocator.findEnginePath(
+        localEngine: bazelAndroid,
+        localHostEngine: 'host_debug_unopt',
+      ),
+      matchesEngineBuildPaths(hostEngine: bazelHost, targetEngine: bazelAndroid),
+    );
+    // GN's directory still wins by name.
+    expect(
+      await localEngineLocator.findEnginePath(
+        localEngine: 'android_debug_arm64',
+        localHostEngine: 'host_debug',
+      ),
+      matchesEngineBuildPaths(
+        hostEngine: fileSystem.path.join(out, 'host_debug'),
+        targetEngine: bazelAndroid,
+      ),
+    );
+    // A name no directory carries.
+    await expectToolExitLater(
+      localEngineLocator.findEnginePath(
+        localEngine: 'android_debug_arm64',
+        localHostEngine: 'host_release',
+      ),
+      allOf(
+        contains('No Flutter engine build found at /arbitrary/engine/src/out/host_release'),
+        contains('no Bazel build directory under /arbitrary/engine/src/out/bazel-out'),
+      ),
+    );
+    // Two configurations with one name are ambiguous.
+    bazelBuild('linux_x64_debug-fastbuild', 'host_debug_unopt');
+    await expectToolExitLater(
+      localEngineLocator.findEnginePath(
+        localEngine: 'android_debug_arm64',
+        localHostEngine: 'host_debug_unopt',
+      ),
+      allOf(
+        contains('host_debug_unopt is the name of several Bazel build directories'),
+        contains('linux_x64_debug-dbg'),
+        contains('linux_x64_debug-fastbuild'),
+      ),
+    );
+  });
+
   testWithoutContext('fails if --local-engine-host is used without --local-engine', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem.directory(

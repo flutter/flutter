@@ -1,0 +1,27 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:integration_test's sources, for the tests Bazel compiles and runs
+# on flutter_tester (build_defs/dart/flutter_test.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "lib/**",
+        # The package is a plugin: when a project that depends on it resolves,
+        # flutter_tools reads the Android embedding's main class
+        # (platform_plugins.dart) to write the plugin registrant, and an iOS
+        # app's CocoaPods and Swift Package Manager builds read its podspec
+        # and Swift package (a plugin's example app depends on it), and a
+        # macOS app's the integration_test_macos package's beside it.
+        "android/**",
+        "integration_test_macos/**",
+        "ios/**",
+    ]) + ["pubspec.yaml"],
+)
+
+# The tests run from the package's directory (test/BUILD.bazel).
+exports_files(["pubspec.yaml"])

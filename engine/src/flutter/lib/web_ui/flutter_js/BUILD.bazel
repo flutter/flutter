@@ -1,0 +1,47 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/web_ui/flutter_js/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/web:esbuild.bzl", "esbuild")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "flutter_js",
+    data = [
+        ":flutter_js_bundle",
+        ":flutter_js_sources",
+    ],
+)
+
+gn_copy(
+    name = "flutter_js_sources",
+    srcs = [
+        "src/browser_environment.js",
+        "src/canvaskit_loader.js",
+        "src/entrypoint_loader.js",
+        "src/flutter.js",
+        "src/instantiate_wasm.js",
+        "src/loader.js",
+        "src/skwasm_loader.js",
+        "src/supports_dart2wasm.js",
+        "src/trusted_types.js",
+        "src/types.d.ts",
+        "src/utils.js",
+    ],
+    outputs = ["$root_out_dir/flutter_web_sdk/flutter_js/{{source_target_relative}}"],
+)
+
+esbuild(
+    name = "flutter_js_bundle",
+    srcs = [":flutter_js_sources"],
+    bundle = True,
+    entry_point = "$root_out_dir/flutter_web_sdk/flutter_js/src/flutter.js",
+    minify = True,
+    output_bundle = "$root_out_dir/flutter_web_sdk/flutter_js",
+    sourcemap = True,
+)

@@ -1,0 +1,126 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/tools/licenses_cpp/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "licenses",
+    srcs = [
+        "src/catalog.cc",
+        "src/comments.cc",
+        "src/comments_util.cc",
+        "src/data.cc",
+        "src/deps_parser.cc",
+        "src/filter.cc",
+        "src/license_checker.cc",
+        "src/mmap_file.cc",
+    ],
+    hdrs = [
+        "src/catalog.h",
+        "src/comments.h",
+        "src/comments_util.h",
+        "src/data.h",
+        "src/deps_parser.h",
+        "src/filter.h",
+        "src/license_checker.h",
+        "src/mmap_file.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "@abseil-cpp//absl/container:btree",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:initialize",
+        "@abseil-cpp//absl/log:vlog_is_on",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+        "@re2",
+    ],
+    alwayslink = True,
+)
+
+cc_binary(
+    name = "licenses_cpp",
+    srcs = ["src/main.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":licenses",
+        "//engine/src:include_root",
+        "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/flags:parse",
+        "@abseil-cpp//absl/flags:usage",
+        "@abseil-cpp//absl/log:globals",
+        "@abseil-cpp//absl/log:initialize",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+)
+
+cc_binary(
+    name = "license_file_compare",
+    srcs = [
+        "src/license_file_compare.cc",
+        "src/mmap_file.cc",
+        "src/mmap_file.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/flags:flag",
+        "@abseil-cpp//absl/flags:parse",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/log:globals",
+        "@abseil-cpp//absl/log:initialize",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+        "@re2",
+    ],
+)
+
+cc_test(
+    name = "licenses_cpp_testrunner",
+    size = "large",
+    srcs = [
+        "src/catalog_unittests.cc",
+        "src/comments_unittests.cc",
+        "src/deps_parser_unittests.cc",
+        "src/filter_unittests.cc",
+        "src/license_checker_unittests.cc",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    env = {
+        "GIT_AUTHOR_NAME": "licenses_cpp_testrunner",
+        "GIT_AUTHOR_EMAIL": "licenses_cpp_testrunner@example.com",
+        "GIT_COMMITTER_NAME": "licenses_cpp_testrunner",
+        "GIT_COMMITTER_EMAIL": "licenses_cpp_testrunner@example.com",
+    },
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":licenses",
+        "//engine/src:include_root",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil_cpp_tree//:root_includes",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ],
+)

@@ -1,0 +1,100 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/testing/ios_scenario_app/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("//build_defs/dart:flutter_snapshot.bzl", "flutter_snapshot")
+load("//build_defs/gn:gn_action.bzl", "gn_copy")
+load("//build_defs/testing:ios_xctest.bzl", "ios_xctest")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_snapshot(
+    name = "ios_scenario_app_snapshot",
+    dart_packages = {"@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math"},
+    main_dart = "lib/main.dart",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+gn_copy(
+    name = "copy_jit_assets",
+    srcs = [
+        "isolate_snapshot_data",
+        "isolate_snapshot_instr",
+        "kernel_blob.bin",
+    ],
+    outputs = ["$root_out_dir/ios_scenario_app/Scenarios/App.framework/flutter_assets/{{source_file_part}}"],
+    target_compatible_with = select({
+        ":when_is_ios_and_not_is_aot": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":ios_scenario_app_snapshot"],
+)
+
+# `is_ios && !is_aot`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_not_is_aot",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/testing:aot_disabled",
+    ],
+)
+
+filegroup(
+    name = "ios_scenario_app",
+    srcs = [
+        ":ios_scenario_app_snapshot",
+        "//engine/src/flutter/testing/ios_scenario_app/ios",  # is_ios
+    ] + select({
+        "//engine/src/flutter/testing:aot_enabled": [],
+        "//conditions:default": [
+            ":copy_jit_assets",  # !is_aot
+        ],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# run_ios_tests.sh (bin/run_ios_tests.dart): `xcodebuild -project
+# <build directory>/ios_scenario_app/Scenarios/Scenarios.xcodeproj -sdk
+# iphonesimulator -scheme Scenarios -destination <an iPhone SE (3rd
+# generation) simulator of the iOS 26.2 runtime> clean test
+# FLUTTER_ENGINE=<variant>`, after `defaults write com.apple.iphonesimulator
+# RotateWindowWhenSignaledByGuest -int 1` for the platform view rotation
+# test; the project embeds ../../Flutter.xcframework and App.framework out of
+# the build directory, which the view copies. The simulator's runtime and
+# device type can be overridden through the environment
+# (--test_env=IOS_SIMULATOR_RUNTIME=..., IOS_SIMULATOR_DEVICE_TYPE=...) where
+# Xcode has other runtimes installed.
+#
+#   bazel test --config=ios_debug_unopt_sim_arm64 //engine/src/flutter/testing/ios_scenario_app:ios_scenario_tests
+ios_xctest(
+    name = "ios_scenario_tests",
+    actions = [
+        "clean",
+        "test",
+    ],
+    build_directory_project = "ios_scenario_app/Scenarios/Scenarios.xcodeproj",
+    device_type = "com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation",
+    # The app's group reaches Flutter.xcframework through ios/BUILD.gn's.
+    engine = [":ios_scenario_app"],
+    result_bundle = "ios_scenario",
+    runtime = "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
+    scheme = "Scenarios",
+    setup = ["defaults write com.apple.iphonesimulator RotateWindowWhenSignaledByGuest -int 1"],
+    simulator_name = "iPhone SE (3rd generation)",
+    target_compatible_with = select({
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)

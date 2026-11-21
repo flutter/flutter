@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:flutter_frontend_server: the engine's additions to the Dart
+# frontend server (the toString transformer), run from the
+# frontend_server_aot.dart.snapshot of the prebuilt SDK -- or of the Dart
+# SDK the wrapped build compiles, in the build without the prebuilt one
+# (build/bazel/dart_wrap's flutter_prebuilt_dart_sdk setting; tools/gn
+# --no-prebuilt-dart-sdk). Hand-written: the GN file's one target copies
+# that snapshot into the build directory (copy("frontend_server")), which
+# the kernel compiles here take through dart_wrap's engine_frontend_server
+# alias (build_defs/dart/kernel.bzl); its tests are run_tests.py's
+# (--type dart-host).
+
+load("@host_platform//:host.bzl", "HOST_DART_SDK")
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# copy("frontend_server"): the prebuilt SDK's frontend_server_aot.dart.snapshot
+# -- or, without the prebuilt SDK, the release-mode one kernel-service's
+# frontend_server_aot writes at the wrapped build's root (GN's source for
+# the copy; not the product snapshot the kernel compiles run, which is the
+# built SDK's own) -- as $root_gen_dir/frontend_server_aot.dart.snapshot,
+# which artifacts.zip ships (build/archives); the file as it is, under the
+# GN target's name.
+filegroup(
+    name = "frontend_server",
+    srcs = select({
+        "//engine/src/flutter/build/bazel/dart_wrap:dart_sdk_from_source": [
+            "//engine/src/flutter/build/bazel/dart_wrap:frontend_server_aot.dart.snapshot",
+        ],
+        "//conditions:default": [HOST_DART_SDK + "//:frontend_server"],
+    }),
+)
+
+# The test compiles its fixture with the frontend server out of
+# FLUTTER_BUILD_DIRECTORY -- gen/frontend_server_aot.dart.snapshot against
+# flutter_patched_sdk/, as GN's build directory lays them out -- and runs
+# the kernel on the SDK's VM; its expected output follows the directory's
+# name (a product platform in a `release` build). The prebuilt SDK's
+# snapshot whatever the setting: the test runs it on the prebuilt SDK's
+# runtime (dart_package_test stages that SDK), which the wrapped build's
+# snapshot would not run on, and the one builder without the prebuilt SDK
+# runs no tests.
+dart_package_test(
+    name = "tests",
+    build_directory = {
+        HOST_DART_SDK + "//:frontend_server": "gen",
+        "//engine/src/flutter/lib/snapshot:strong_platform": "flutter_patched_sdk",
+    },
+    deps = ["//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources"],
+)

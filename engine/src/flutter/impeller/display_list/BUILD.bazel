@@ -1,0 +1,458 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/display_list/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "skia_conversions",
+    srcs = ["skia_conversions.cc"],
+    hdrs = ["skia_conversions.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "display_list",
+    srcs = [
+        "aiks_context.cc",
+        "canvas.cc",
+        "color_filter.cc",
+        "dl_atlas_geometry.cc",
+        "dl_dispatcher.cc",
+        "dl_image_impeller.cc",
+        "dl_runtime_effect_impeller.cc",
+        "dl_text_impeller.cc",
+        "dl_vertices_geometry.cc",
+        "image_filter.cc",
+        "nine_patch_converter.cc",
+        "paint.cc",
+    ],
+    hdrs = [
+        "aiks_context.h",
+        "canvas.h",
+        "color_filter.h",
+        "dl_atlas_geometry.h",
+        "dl_dispatcher.h",
+        "dl_image_impeller.h",
+        "dl_runtime_effect_impeller.h",
+        "dl_text_impeller.h",
+        "dl_vertices_geometry.h",
+        "image_filter.h",
+        "nine_patch_converter.h",
+        "paint.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :skia_conversions
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :skia_conversions
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":skia_conversions",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "@abseil-cpp//absl/hash",
+        "@abseil_cpp_tree//:root_includes",
+        "@skia",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:metal": [
+            "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        ],
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "display_list_unittests",
+    testonly = True,
+    srcs = [
+        "aiks_dl_atlas_unittests.cc",
+        "aiks_dl_basic_unittests.cc",
+        "aiks_dl_blend_unittests.cc",
+        "aiks_dl_blur_unittests.cc",
+        "aiks_dl_clip_unittests.cc",
+        "aiks_dl_gradient_unittests.cc",
+        "aiks_dl_opacity_unittests.cc",
+        "aiks_dl_path_unittests.cc",
+        "aiks_dl_primitive_shape_unittests.cc",
+        "aiks_dl_runtime_effect_unittests.cc",
+        "aiks_dl_shadow_unittests.cc",
+        "aiks_dl_text_unittests.cc",
+        "aiks_dl_unittests.cc",
+        "aiks_dl_vertices_unittests.cc",
+        "dl_golden_blur_unittests.cc",
+        "dl_golden_unittests.cc",
+        "dl_playground.cc",
+        "dl_unittests.cc",
+        "paint_unittests.cc",
+        "testing/render_text_in_canvas.cc",
+        "testing/rmse.cc",
+    ],
+    hdrs = [
+        "dl_golden_unittests.h",
+        "dl_playground.h",
+        "testing/render_text_in_canvas.h",
+        "testing/rmse.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":aiks_unittests",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "display_list_unittests_golden",
+    testonly = True,
+    srcs = [
+        "aiks_dl_atlas_unittests.cc",
+        "aiks_dl_basic_unittests.cc",
+        "aiks_dl_blend_unittests.cc",
+        "aiks_dl_blur_unittests.cc",
+        "aiks_dl_clip_unittests.cc",
+        "aiks_dl_gradient_unittests.cc",
+        "aiks_dl_opacity_unittests.cc",
+        "aiks_dl_path_unittests.cc",
+        "aiks_dl_primitive_shape_unittests.cc",
+        "aiks_dl_runtime_effect_unittests.cc",
+        "aiks_dl_shadow_unittests.cc",
+        "aiks_dl_text_unittests.cc",
+        "aiks_dl_unittests.cc",
+        "aiks_dl_vertices_unittests.cc",
+        "dl_golden_blur_unittests.cc",
+        "dl_golden_unittests.cc",
+        "dl_playground.cc",
+        "dl_unittests.cc",
+        "paint_unittests.cc",
+        "testing/render_text_in_canvas.cc",
+        "testing/rmse.cc",
+    ],
+    hdrs = [
+        "dl_golden_unittests.h",
+        "dl_playground.h",
+        "testing/render_text_in_canvas.h",
+        "testing/rmse.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :display_list
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "IMPELLER_GOLDEN_TESTS",
+        "IMPELLER_ENABLE_VALIDATION=1",
+        "_USE_MATH_DEFINES",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":aiks_unittests_golden",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "skia_conversions_unittests",
+    testonly = True,
+    srcs = ["skia_conversions_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :skia_conversions
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :skia_conversions
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":skia_conversions",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "aiks_playground",
+    testonly = True,
+    srcs = ["aiks_playground.cc"],
+    hdrs = ["aiks_playground.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :display_list
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :display_list
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "aiks_unittests",
+    testonly = True,
+    srcs = [
+        "aiks_unittests.cc",
+        "canvas_unittests.cc",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "canvas_gles_unittests.cc",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
+    hdrs = ["aiks_unittests.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ] + select({
+        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from //flutter/impeller/renderer/backend/gles:mock_gles
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :aiks_playground
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :aiks_playground
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":aiks_playground",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
+    ] + select({
+        "//engine/src/flutter/impeller/tools:opengles": [
+            "//engine/src/flutter/impeller/renderer/backend/gles:mock_gles",  # impeller_enable_opengles
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+cc_library(
+    name = "aiks_unittests_golden",
+    testonly = True,
+    srcs = ["aiks_unittests.cc"],
+    hdrs = ["aiks_unittests.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ] + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from :aiks_playground
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from :aiks_playground
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "IMPELLER_GOLDEN_TESTS",
+        "IMPELLER_ENABLE_VALIDATION=1",
+        "_USE_MATH_DEFINES",
+    ],
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":aiks_playground",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil_cpp_tree//:root_includes",
+    ],
+    alwayslink = True,
+)
+
+# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+    match_any = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `is_mac || is_ios`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_or_is_ios",
+    match_any = [
+        "@platforms//os:macos",
+        "@platforms//os:ios",
+    ],
+)
+
+# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
+    match_all = [
+        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
+        ":when_is_mac_or_is_ios",
+    ],
+)
+
+# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        ":when_is_mac_or_is_ios",
+    ],
+)

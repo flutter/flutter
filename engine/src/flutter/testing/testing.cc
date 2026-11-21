@@ -4,12 +4,52 @@
 
 #include "testing.h"
 
+#include <cstdlib>
 #include <utility>
 
 #include "flutter/fml/file.h"
 #include "flutter/fml/paths.h"
 
 namespace flutter::testing {
+
+namespace {
+
+// Returns the value of the environment variable `env_var` if it is set and
+// non-empty, and `default_path` otherwise.
+std::string PathFromEnvironmentOrDefault(const char* env_var,
+                                         const char* default_path) {
+  const char* value = std::getenv(env_var);
+  if (value == nullptr || value[0] == '\0') {
+    return default_path;
+  }
+  return value;
+}
+
+}  // namespace
+
+const char* GetSourcePath() {
+  static const std::string path = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_SOURCE_DIR", GetCompiledInSourcePath());
+  return path.c_str();
+}
+
+const char* GetFixturesPath() {
+  static const std::string path = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_FIXTURES_DIR", GetCompiledInFixturesPath());
+  return path.c_str();
+}
+
+const char* GetTestingAssetsPath() {
+  static const std::string path = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_TESTING_ASSETS_DIR", GetCompiledInTestingAssetsPath());
+  return path.c_str();
+}
+
+std::string GetSourceUri(std::string_view relative_path) {
+  static const std::string prefix = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_SOURCE_URI_PREFIX", GetCompiledInSourceUriPrefix());
+  return prefix + std::string(relative_path);
+}
 
 std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();
@@ -58,21 +98,6 @@ fml::UniqueFD OpenFixture(const std::string& fixture_name) {
 std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(
     const std::string& fixture_name) {
   return fml::FileMapping::CreateReadOnly(OpenFixture(fixture_name));
-}
-
-sk_sp<SkData> OpenFixtureAsSkData(const std::string& fixture_name) {
-  auto mapping = flutter::testing::OpenFixtureAsMapping(fixture_name);
-  if (!mapping) {
-    return nullptr;
-  }
-  auto data = SkData::MakeWithProc(
-      mapping->GetMapping(), mapping->GetSize(),
-      [](const void* ptr, void* context) {
-        delete reinterpret_cast<fml::Mapping*>(context);
-      },
-      mapping.get());
-  mapping.release();
-  return data;
 }
 
 bool MemsetPatternSetOrCheck(uint8_t* buffer, size_t size, MemsetPatternOp op) {

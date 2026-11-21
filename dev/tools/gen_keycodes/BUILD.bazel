@@ -1,0 +1,32 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# gen_keycodes' sources and its tests under Bazel: each test compiled by
+# the frontend server for the VM and run by package:test's precompiled
+# runner (build_defs/dart/dart_test.bzl; research/15).
+#
+#   bazel test //dev/tools/gen_keycodes:tests
+
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "bin/**",
+        "lib/**",
+    ]) + ["pubspec.yaml"],
+)
+
+dart_package_tests(
+    name = "tests",
+    size = "small",
+    # The key data the test reads, found from the script's location four
+    # directories below the repository's root (lib/utils.dart's flutterRoot),
+    # which the runfiles tree reproduces.
+    data = glob(["data/**"]),
+    package = "gen_keycodes",
+    tests = glob(["test/**/*_test.dart"]),
+)

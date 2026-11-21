@@ -1,0 +1,59 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/tonic/tests/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_test_fixtures(
+    name = "tonic_fixtures",
+    dart_main = "fixtures/tonic_test.dart",
+)
+
+flutter_cc_test(
+    name = "tonic_unittests",
+    size = "small",
+    srcs = [
+        "dart_persistent_handle_unittest.cc",
+        "dart_state_unittest.cc",
+        "dart_weak_persistent_handle_unittest.cc",
+        "ffi_native_unittest.cc",
+        "//engine/src/flutter/third_party/tonic:file_loader/file_loader_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ] + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/runtime:runtime
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from //flutter/runtime:runtime
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from //flutter/runtime:runtime
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":tonic_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/third_party/tonic",
+        "@dart//:dart_api_headers",
+        "@googletest//:gtest",
+        "@googletest_tree//:root_includes",
+        "@googletest_tree//:third_party_dir_includes",
+    ],
+)

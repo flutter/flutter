@@ -1,0 +1,58 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's source root (GN's `//`).
+
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# Puts this directory on the include path. Engine code includes its own
+# headers and most dependencies relative to it ("flutter/fml/...",
+# "third_party/skia/..."). This is GN's
+# //build/config/compiler:default_include_dirs (`-I//`), which
+# BUILDCONFIG.gn applies to every target; the generated BUILD files depend
+# on it from every target that compiles, and //engine/src/flutter:config
+# (GN's //flutter:config, `include_dirs = [ "..", "." ]`) reaches it too.
+#
+# The trees gclient syncs are external repositories here, not directories
+# under this root, so the one that engine code includes by its path under
+# the root ("flutter/third_party/skia/...") is carried along under that
+# path.
+cc_library(
+    name = "include_root",
+    includes = ["."],
+    visibility = ["//engine/src/flutter:__subpackages__"],
+    deps = ["@skia//:engine_root_headers"],
+)
+
+# The engine's AUTHORS, which sky/packages/sky_engine copies into the
+# sky_engine package (copy("copy_sky_engine_authors"): `//AUTHORS`), and its
+# LICENSE, which the macOS shell copies beside FlutterMacOS.framework
+# (copy("copy_license"): `//LICENSE`).
+exports_files([
+    "AUTHORS",
+    "LICENSE",
+])
+
+# GN's root files: the dotfile and the build_overrides it names. Inputs of
+# the rules that wrap a GN build of part of this tree.
+filegroup(
+    name = "gn_root_files",
+    srcs = [".gn"] + glob(["build_overrides/**"]),
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)
+
+# Under the runfiles root a test runs from, this directory is where GN's
+# root_gen_dir sits (generated files at their source paths below it). GN's
+# //flutter/testing/dart writes its kernels at that root, and spawn_test
+# loads spawn_helper's from there (`kFlutterBuildDirectory/spawn_helper.dart.dill`);
+# the one kernel a test names by that path is copied here.
+copy_file(
+    name = "spawn_helper_kernel",
+    testonly = True,
+    src = "//engine/src/flutter/testing/dart:spawn_helper.dart.dill",
+    out = "spawn_helper.dart.dill",
+    allow_symlink = True,
+    visibility = ["//engine/src/flutter/testing/dart:__pkg__"],
+)

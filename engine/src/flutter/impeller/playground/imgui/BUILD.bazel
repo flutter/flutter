@@ -1,0 +1,40 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/playground/imgui/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/impeller:shaders.bzl", "impeller_shaders")
+
+package(default_visibility = ["//visibility:public"])
+
+impeller_shaders(
+    name = "imgui_shaders",
+    analyze = False,
+    entry_point_prefix = "",
+    library_name = "imgui",
+    shaders = [
+        "imgui_raster.vert",
+        "imgui_raster.frag",
+    ],
+)
+
+cc_library(
+    name = "imgui_impeller_backend",
+    srcs = ["imgui_impl_impeller.cc"],
+    hdrs = ["imgui_impl_impeller.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":imgui_shaders",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer",
+        "@imgui",
+    ],
+    alwayslink = True,
+)

@@ -9,8 +9,16 @@ import os
 import subprocess
 import sys
 
-# This script parses the JSON output produced by malioc about GPU cores,
-# and outputs it in a form that can be consumed by GN
+# This script queries malioc for the list of GPU cores it supports and the
+# maximum OpenGL ES / Vulkan versions of each core, and writes the result to
+# impeller/tools/malioc_cores.json in a form that can be consumed by GN (see
+# impeller/tools/malioc.gni).
+#
+# The JSON file is checked in so that `gn gen` does not have to run malioc.
+# Re-run this script whenever the malioc CIPD package is updated (see
+# tools/cipd/malioc/README.md) and commit the result.
+
+DEFAULT_OUTPUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'malioc_cores.json')
 
 
 def parse_args(argv):
@@ -27,7 +35,8 @@ def parse_args(argv):
       '--output',
       '-o',
       type=str,
-      help='The output path.',
+      default=DEFAULT_OUTPUT,
+      help='The output path. Defaults to %(default)s.',
   )
   return parser.parse_args(argv)
 
@@ -93,11 +102,9 @@ def main(argv):
   for core in malioc_core_list(args.malioc):
     infos.append(malioc_core_info(args.malioc, core))
 
-  if args.output:
-    with open(args.output, 'w') as file:
-      json.dump(infos, file, sort_keys=True)
-  else:
-    print(infos)
+  with open(args.output, 'w') as file:
+    json.dump(infos, file, sort_keys=True, indent=2)
+    file.write('\n')
 
   return 0
 

@@ -66,6 +66,7 @@ canvaskit_wasm_lib("canvaskit") {
     sources += [
       "$_skia_root/modules/canvaskit/bidi_bindings.cpp",
       "$_skia_root/modules/canvaskit/bidi_bindings_gen.cpp",
+      "$_skia_root/modules/canvaskit/bidi_c_api.h",
     ]
   }
 

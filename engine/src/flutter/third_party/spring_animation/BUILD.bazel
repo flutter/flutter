@@ -1,0 +1,126 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/spring_animation/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+# The Objective-C(++) sources of spring_animation, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); spring_animation links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "spring_animation_objc",
+    srcs = ["spring_animation.mm"],
+    hdrs = ["spring_animation.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "spring_animation",
+    hdrs = ["spring_animation.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":spring_animation_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "spring_animation_fixtures",
+    target_compatible_with = select({
+        ":when_is_ios_or_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# `is_ios || is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_or_is_mac",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:macos",
+    ],
+)
+
+# `(is_ios || is_mac) && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_or_is_mac_and_enable_unittests",
+    match_all = [
+        ":when_is_ios_or_is_mac",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# The Objective-C(++) sources of spring_animation_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); spring_animation_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "spring_animation_unittests_objc",
+    testonly = True,
+    srcs = ["SpringAnimationTest.mm"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_ios_or_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":spring_animation",
+        ":spring_animation_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/testing",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "spring_animation_unittests",
+    size = "small",
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        ":when_is_ios_or_is_mac_and_enable_unittests": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":spring_animation",
+        ":spring_animation_fixtures",
+        ":spring_animation_unittests_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/testing",
+    ],
+)

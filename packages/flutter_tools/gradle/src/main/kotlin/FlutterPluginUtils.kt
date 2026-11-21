@@ -48,6 +48,9 @@ object FlutterPluginUtils {
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_TARGET = "target"
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
+
+    /** The manifest a Bazel build of the engine writes beside its outputs (the flutter tool's LocalEngineLayout). */
+    internal const val LOCAL_ENGINE_MANIFEST = "local_engine.json"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
     internal const val PROP_SDK_MANAGER_PATH = "flutter.sdkManagerPath"
@@ -302,6 +305,14 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("shouldProjectUseLocalEngine")
     internal fun shouldProjectUseLocalEngine(project: Project): Boolean = project.hasProperty(PROP_LOCAL_ENGINE_REPO)
+
+    /**
+     * Whether a local engine directory is a Bazel build's: it holds the manifest the flutter tool
+     * reads (`local_engine.json`), where GN's build directory is laid out by name.
+     */
+    @JvmStatic
+    @JvmName("isBazelLocalEngine")
+    internal fun isBazelLocalEngine(engineOut: File): Boolean = File(engineOut, LOCAL_ENGINE_MANIFEST).isFile
 
     @JvmStatic
     @JvmName("isProjectVerbose")

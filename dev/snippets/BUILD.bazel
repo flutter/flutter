@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The snippets package under Bazel: its tests compiled by the frontend
+# server and run by package:test's precompiled runner
+# (build_defs/dart/dart_test.bzl; NEED_DECISION D14).
+#
+#   bazel test //dev/snippets:tests
+
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "bin/**",
+        "lib/**",
+    ]) + ["pubspec.yaml"],
+)
+
+dart_package_tests(
+    name = "tests",
+    size = "small",
+    # The helpers beside the tests (fake_process_manager.dart, ...).
+    srcs = glob(
+        ["test/*.dart"],
+        exclude = ["test/*_test.dart"],
+    ),
+    package = "snippets",
+    tests = glob(["test/*_test.dart"]),
+)

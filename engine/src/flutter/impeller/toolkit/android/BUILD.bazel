@@ -1,0 +1,125 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/toolkit/android/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/android:native_activity_apk.bzl", "native_activity_apk")
+load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//build_defs/testing:android_device_test.bzl", "flutter_android_device_test")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "public_android_config",
+    defines = ["__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__"],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "android",
+    srcs = [
+        "choreographer.cc",
+        "hardware_buffer.cc",
+        "native_window.cc",
+        "proc_table.cc",
+        "surface_control.cc",
+        "surface_control_impl.cc",
+        "surface_transaction.cc",
+        "surface_transaction_stats.cc",
+    ],
+    hdrs = [
+        "choreographer.h",
+        "hardware_buffer.h",
+        "native_window.h",
+        "proc_table.h",
+        "surface_control.h",
+        "surface_control_impl.h",
+        "surface_transaction.h",
+        "surface_transaction_stats.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":public_android_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/geometry",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "unittests_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "unittests_lib",
+    testonly = True,
+    srcs = ["toolkit_android_unittests.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":android",
+        ":unittests_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",
+    ],
+    alwayslink = True,
+)
+
+flutter_android_device_test(
+    name = "impeller_toolkit_android_unittests",
+    size = "large",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":unittests_lib"],
+)
+
+alias(
+    name = "unittests",
+    actual = ":impeller_toolkit_android_unittests",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+native_activity_apk(
+    name = "apk_unittests",
+    testonly = True,
+    apk_name = "impeller_toolkit_android_unittests",
+    target_compatible_with = select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":unittests_lib",
+        "//engine/src/flutter/testing/android/native_activity:gtest_activity",
+    ],
+)

@@ -1,0 +1,32 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @vulkan_memory_allocator_tree: the allocator's tree as
+# files, for the wrapped GN build of the GPU test backends
+# (//engine/src/flutter/build/bazel/gl_wrap), whose ANGLE compiles against
+# it through flutter_vma. Bazel's own library is @vulkan_memory_allocator,
+# generated from the engine's GN over the same tree.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
+            "bin/**",
+            "docs/**",
+            "tools/**",
+        ],
+    ),
+)

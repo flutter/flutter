@@ -19,4 +19,8 @@ CIPD package that CI uses to obtain `malioc`.
 4. Run the `generate.sh` script in this directory.
 5. Verify that the file appears [here](https://chrome-infra-packages.appspot.com/p/flutter_internal/tools).
 6. Update `.ci.yaml` to refer to the new version tag echoed by `generate.sh`.
-7. Delete the `arm-tools` directory
+7. Refresh the checked-in list of GPU cores that GN uses to decide which
+   shaders to analyze:
+   `../../impeller/tools/malioc_cores.py --malioc arm-tools/mali_offline_compiler/malioc`
+   and commit the resulting `impeller/tools/malioc_cores.json`.
+8. Delete the `arm-tools` directory

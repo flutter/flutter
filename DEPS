@@ -23,6 +23,12 @@ vars = {
   # for the web engine.
   'download_emsdk': False,
 
+  # Whether to download bazelisk (which fetches the Bazel version .bazelversion
+  # names) for the engine's Bazel build. Developers install bazelisk themselves
+  # (see engine/src/flutter/build/bazel/README.md); the CI builders that build
+  # with Bazel set this in their gclient_variables.
+  'download_bazelisk': False,
+
   # For experimental features some dependencies may only be avaialable in the master/main
   # channels. This variable is being set when CI is checking out the repository.
   'release_candidate': False,
@@ -689,6 +695,20 @@ deps = {
         'version': 'version:2@1.11.1.chromium.4',
       }
     ],
+    'dep_type': 'cipd',
+  },
+
+  # bazelisk, for the CI builders that build the engine with Bazel
+  # (tools/gn --bazel; see engine/src/flutter/build/bazel/ci.md). It fetches
+  # the Bazel release .bazelversion names.
+  'engine/src/flutter/third_party/bazelisk': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/bazelisk/${{platform}}',
+        'version': 'version:3@1.30.0',
+      }
+    ],
+    'condition': 'download_bazelisk',
     'dep_type': 'cipd',
   },
 

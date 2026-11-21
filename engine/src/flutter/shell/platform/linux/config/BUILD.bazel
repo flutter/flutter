@@ -1,0 +1,95 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Linux embeddings' system libraries, as BUILD.gn's pkg_config() configs
+# (build/config/linux/pkg_config.gni): each is what pkg-config says of one
+# package against the sysroot (build/config/linux/pkg-config.py -s <sysroot>
+# -a x64 <package>), which GN reads through exec_script and this file holds.
+# Hand-written for that reason (the converter runs no scripts, and the file
+# is a foreach over the six); the answers are from the Debian bullseye
+# sysroots the engine pins (build/linux/sysroot_scripts/sysroots.json), as
+# `libs` -- none but gtk has include directories or flags of its own --
+# which link against the sysroot's shared objects, as GN's do. gtk's twenty
+# include directories are the sysroot repository's (its overlay's
+# gtk3_include_dirs), since Bazel's `includes` is package-relative.
+#
+# GN's is_minimal_linux (a host "without x11, etc.") makes every one of these
+# an empty config; the Bazel build has no such switch yet, as tools/gn never
+# sets it for the configurations it builds.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The Linux embedding's alone (GN declares the configs under is_linux): a
+# wildcard build on a Mac skips them without fetching the arm64 sysroot
+# that gtk's select names there (the Mac's T53).
+_LINUX = ["@platforms//os:linux"]
+
+# pkg-config x11: [[], [], ["X11"], []]
+cc_library(
+    name = "x11",
+    linkopts = ["-lX11"],
+    target_compatible_with = _LINUX,
+)
+
+# pkg-config gtk+-3.0: [[<twenty include directories under the sysroot>], [],
+# ["gtk-3", ..., "glib-2.0"], []]
+cc_library(
+    name = "gtk",
+    linkopts = [
+        "-lgtk-3",
+        "-lgdk-3",
+        "-lpangocairo-1.0",
+        "-lcairo-gobject",
+        "-lgdk_pixbuf-2.0",
+        "-latk-1.0",
+        "-lpango-1.0",
+        "-lharfbuzz",
+        "-lcairo",
+        "-lgio-2.0",
+        "-lgobject-2.0",
+        "-lglib-2.0",
+    ],
+    target_compatible_with = _LINUX,
+    # The target CPU's sysroot: the two directories under its multiarch
+    # library directory hold glibconfig.h and dbus-arch-deps.h, which differ
+    # between the architectures (the arm64 cross build is
+    # //engine/src/flutter/build/bazel/toolchains:linux_arm64).
+    deps = select({
+        "@platforms//cpu:aarch64": ["@sysroot_linux_arm64//:gtk3_include_dirs"],
+        "//conditions:default": ["@sysroot_linux_x64//:gtk3_include_dirs"],
+    }),
+)
+
+# pkg-config egl: [[], [], ["EGL"], []]
+cc_library(
+    name = "egl",
+    linkopts = ["-lEGL"],
+    target_compatible_with = _LINUX,
+)
+
+# pkg-config epoxy: [[], [], ["epoxy"], []]
+cc_library(
+    name = "epoxy",
+    linkopts = ["-lepoxy"],
+    target_compatible_with = _LINUX,
+)
+
+# pkg-config wayland-client: [[], [], ["wayland-client"], []]
+cc_library(
+    name = "wayland_client",
+    linkopts = ["-lwayland-client"],
+    target_compatible_with = _LINUX,
+)
+
+# pkg-config wayland-egl: [[], [], ["wayland-egl", "wayland-client"], []]
+cc_library(
+    name = "wayland_egl",
+    linkopts = [
+        "-lwayland-egl",
+        "-lwayland-client",
+    ],
+    target_compatible_with = _LINUX,
+)

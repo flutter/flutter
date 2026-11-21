@@ -1,0 +1,26 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:header_guard_check: the header guard linter. A Dart package with no
+# GN build file; its tests are run_tests.py's (--type dart-host).
+
+load("//build_defs/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources",
+        "//engine/src/flutter/tools/pkg/git_repo_tools:dart_sources",
+    ],
+)
+
+dart_package_test(
+    name = "tests",
+    deps = [
+        ":dart_sources",
+        "//engine/src/flutter/tools/pkg/process_fakes:dart_sources",
+    ],
+)

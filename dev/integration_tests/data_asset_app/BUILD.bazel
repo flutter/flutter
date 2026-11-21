@@ -1,0 +1,25 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The project flutter_tools' isolated/dart_data_asset_* tests (integration.shard)
+# copy and run `flutter run` and `flutter test` in.
+
+load("//build_defs/dart:flutter_project.bzl", "FLUTTER_PROJECT_GENERATED")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "project",
+    srcs = glob(
+        [
+            "data/**",
+            "hook/**",
+            "lib/**",
+            "linux/**",
+            "test/**",
+            "web/**",
+        ],
+        exclude = FLUTTER_PROJECT_GENERATED,
+    ) + ["pubspec.yaml"],
+)

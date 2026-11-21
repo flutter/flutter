@@ -1,0 +1,38 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# packages/flutter's profile-mode tests under Bazel: the tree `flutter test
+# --dart-define=dart.vm.product=false --dart-define=dart.vm.profile=true
+# test_profile/` runs (dev/bots; the README beside them), compiled with
+# kProfileMode true from a prelude of its own, and run on the Bazel-built
+# flutter_tester (//build_defs/dart:flutter_package_tests.bzl; research/15).
+#
+#   bazel test //packages/flutter/test_profile:tests
+
+load("//build_defs/dart:flutter_package_tests.bzl", "flutter_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["**/*.dart"],
+        allow_empty = True,
+        exclude = ["**/*_test.dart"],
+    ),
+    # Overrides the debug default (-Ddart.vm.profile=false) for the prelude
+    # and every test.
+    compile_args = ["-Ddart.vm.profile=true"],
+    directory = "packages/flutter",
+    package = "flutter",
+    # The framework's dev dependencies among the workspace's packages, as
+    # test/BUILD.bazel lists them.
+    packages = {
+        "//packages/flutter_driver:sources": "flutter_driver",
+        "//packages/flutter_goldens:sources": "flutter_goldens",
+        "//packages/flutter_localizations:sources": "flutter_localizations",
+        "//packages/fuchsia_remote_debug_protocol:sources": "fuchsia_remote_debug_protocol",
+    },
+    tests = glob(["**/*_test.dart"]),
+)

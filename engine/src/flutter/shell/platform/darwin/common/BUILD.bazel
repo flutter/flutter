@@ -1,0 +1,1167 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/darwin/common/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@macos_sdk//:sdk.bzl", "IPHONEOS_PLATFORM_PATH", "IPHONESIMULATOR_PLATFORM_PATH", "MACOS_PLATFORM_PATH")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//build_defs/cc:copts.bzl", "FLUTTER_CFLAGS_OBJC", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "MACOS_CFLAGS_OBJC")
+load("//build_defs/cc:objc_library.bzl", "flutter_objc_library")
+load("//build_defs/cc:swift_library.bzl", "flutter_swift_library")
+load("//build_defs/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "config",
+    includes = ["."],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_library(
+    name = "test_config",
+    linkopts = select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-L" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-L" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":config"],
+)
+
+cc_library(
+    name = "swift_testing_config",
+    linkopts = select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-Wl,-rpath," + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-Wl,-rpath," + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-framework",
+        "Testing",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The Objective-C(++) sources of common, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); common links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "common_objc",
+    srcs = [
+        "buffer_conversions.mm",
+        "command_line.mm",
+    ],
+    hdrs = [
+        "buffer_conversions.h",
+        "command_line.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": FLUTTER_CFLAGS_OBJC,
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":availability_version_check",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "common",
+    hdrs = [
+        "buffer_conversions.h",
+        "command_line.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":availability_version_check",
+        ":common_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+# Provides an implementation for _availability_version_check.
+#
+# This is required due to an upstream compiler builtin (runtime) change
+# that marked this function as weakly-linked via __attribute__((weak import))
+# As such, no linking failure occurs when the function is unavailable at
+# link time. Since the symbol is no longer linked in, App Store review blocks
+# publishing due to relying on a private symbol. Instead we link in our own
+# implementation, which provides the exact implementation used in clang prior
+# to the upstream change.
+#
+# See: Upstream clang change: https://reviews.llvm.org/D150397
+# See: https://github.com/flutter/flutter/issues/133777
+cc_library(
+    name = "availability_version_check",
+    srcs = ["availability_version_check.cc"],
+    hdrs = ["availability_version_check.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "availability_version_check_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+cc_test(
+    name = "availability_version_check_unittests",
+    size = "small",
+    srcs = ["availability_version_check_unittests.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":availability_version_check",
+        ":availability_version_check_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/testing",
+    ],
+)
+
+# Shared framework headers end up in the same folder as platform-specific
+# framework headers when consumed by clients, so the include paths assume they
+# are next to each other.
+cc_library(
+    name = "framework_relative_headers",
+    includes = ["framework/Headers"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# The Objective-C(++) sources of flutter_engine_bindings, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); flutter_engine_bindings links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "flutter_engine_bindings_objc",
+    srcs = ["framework/Source/FlutterTracing.mm"],
+    hdrs = [
+        "framework/Headers/FlutterMacros.h",
+        "framework/Source/FlutterTracing.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": FLUTTER_CFLAGS_OBJC,
+    }),
+    includes = ["."],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "flutter_engine_bindings",
+    hdrs = [
+        "framework/Headers/FlutterMacros.h",
+        "framework/Source/FlutterTracing.h",
+    ],
+    copts = FLUTTER_COPTS,
+    includes = ["."],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings_objc",
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+flutter_swift_library(
+    name = "InternalFlutterSwiftCommon",
+    srcs = [
+        "framework/Source/Logger.swift",
+        "framework/Source/Tracing+TraceScope.swift",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterBinaryMessenger.h",
+        "framework/Headers/FlutterChannels.h",
+        "framework/Headers/FlutterCodecs.h",
+        "framework/Headers/FlutterDartProject.h",
+        "framework/Headers/FlutterHourFormat.h",
+        "framework/Headers/FlutterMacros.h",
+        "framework/Headers/FlutterTexture.h",
+    ],
+    bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h",
+    includes = ["."],
+    swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }),
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":flutter_engine_bindings",
+        "//engine/src:include_root",
+    ],
+)
+
+# The Objective-C(++) sources of framework_common, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); framework_common links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "framework_common_objc",
+    srcs = [
+        "framework/Source/FlutterBinaryMessengerRelay.mm",
+        "framework/Source/FlutterChannels.mm",
+        "framework/Source/FlutterCodecs.mm",
+        "framework/Source/FlutterHourFormat.mm",
+        "framework/Source/FlutterNSBundleUtils.mm",
+        "framework/Source/FlutterStandardCodec.mm",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterBinaryMessenger.h",
+        "framework/Headers/FlutterChannels.h",
+        "framework/Headers/FlutterCodecs.h",
+        "framework/Headers/FlutterDartProject.h",
+        "framework/Headers/FlutterHourFormat.h",
+        "framework/Headers/FlutterMacros.h",
+        "framework/Headers/FlutterTexture.h",
+        "framework/Source/FlutterBinaryMessengerRelay.h",
+        "framework/Source/FlutterNSBundleUtils.h",
+        "framework/Source/FlutterStandardCodecHelper.h",
+        "framework/Source/FlutterStandardCodec_Internal.h",
+    ],
+    copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": FLUTTER_CFLAGS_OBJC,
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwiftCommon",
+        ":flutter_engine_bindings",
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+# Framework code shared between iOS and macOS.
+cc_library(
+    name = "framework_common",
+    srcs = [
+        "framework/Source/FlutterNSBundleUtils.h",
+        "framework/Source/FlutterStandardCodecHelper.cc",
+        "framework/Source/FlutterStandardCodecHelper.h",
+        "framework/Source/FlutterStandardCodec_Internal.h",
+    ],
+    hdrs = [
+        "framework/Headers/FlutterBinaryMessenger.h",
+        "framework/Headers/FlutterChannels.h",
+        "framework/Headers/FlutterCodecs.h",
+        "framework/Headers/FlutterDartProject.h",
+        "framework/Headers/FlutterHourFormat.h",
+        "framework/Headers/FlutterMacros.h",
+        "framework/Headers/FlutterTexture.h",
+        "framework/Source/FlutterBinaryMessengerRelay.h",
+        "framework/Source/FlutterNSBundleUtils.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":InternalFlutterSwiftCommon",
+        ":flutter_engine_bindings",
+        ":framework_common_objc",
+        ":framework_relative_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "framework_common_fixtures",
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
+# Utilities written in Swift, for use in unit tests.
+flutter_swift_library(
+    name = "test_utils_swift",
+    testonly = True,
+    srcs = ["framework/Source/LoggerTestUtils.swift"],
+    bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h",
+    includes = ["."],
+    linkopts = select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-L" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-L" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": [
+            "-target",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_use_ios_simulator": [
+            "arm64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_not_use_ios_simulator": [
+            "arm64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_use_ios_simulator": [
+            "x86_64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_not_use_ios_simulator": [
+            "x86_64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    tags = ["no-remote-exec"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":framework_common",
+        "//engine/src:include_root",
+    ],
+)
+
+# Implements a main entry point for Swift Testing tests.
+# To build a Swift Testing executable, add this target to `deps`.
+flutter_swift_library(
+    name = "swift_testing_main",
+    testonly = True,
+    srcs = [
+        "SwiftTestingMain.swift",
+        "SwiftTestingRunner.swift",
+    ],
+    includes = ["."],
+    linkopts = select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-L" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-L" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-Wl,-rpath," + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-Wl,-rpath," + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wl,-rpath," + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-framework",
+        "Testing",
+    ],
+    swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": [
+            "-target",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_use_ios_simulator": [
+            "arm64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_not_use_ios_simulator": [
+            "arm64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_use_ios_simulator": [
+            "x86_64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_not_use_ios_simulator": [
+            "x86_64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    tags = ["no-remote-exec"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = ["//engine/src:include_root"],
+)
+
+# The Swift sources of framework_common_swift_unittests, as the module GN compiles them into
+# (build_defs/cc/swift_library.bzl); framework_common_swift_unittests links them in.
+flutter_swift_library(
+    name = "framework_common_swift_unittests_swift",
+    testonly = True,
+    srcs = [
+        "framework/Source/LoggerTests.swift",
+        "framework/Source/TracingTests.swift",
+    ],
+    includes = ["."],
+    module_name = "framework_common_swift_unittests",
+    swiftflags = select({
+        ":when_is_ios_and_enable_ios_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        ":when_is_mac_and_enable_unittests": [
+            "-enable-testing",  # is_ios && enable_ios_unittests || (is_mac && enable_unittests)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": [
+            "-target",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_use_ios_simulator": [
+            "arm64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_arm64_and_not_use_ios_simulator": [
+            "arm64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_use_ios_simulator": [
+            "x86_64-apple-ios15.0-simulator",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_current_cpu_x64_and_not_use_ios_simulator": [
+            "x86_64-apple-ios15.0",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-I" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-I" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-I" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    tags = ["no-remote-exec"],
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":swift_testing_config",
+        ":swift_testing_main",
+        ":test_config",
+        ":test_utils_swift",
+        "//engine/src:include_root",
+    ],
+)
+
+cc_test(
+    name = "framework_common_swift_unittests",
+    size = "small",
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = FLUTTER_COPTS + [
+        "-fvisibility=default",  # from :swift_testing_main
+        "-fvisibility=default",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # from :swift_testing_main
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # from :swift_testing_main
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # from :swift_testing_main
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":framework_common_swift_unittests_swift",
+        ":swift_testing_config",
+        ":swift_testing_main",
+        ":test_config",
+        ":test_utils_swift",
+        "//engine/src:include_root",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # from :swift_testing_main
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # from :swift_testing_main
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "@macos_sdk//:macos_developer",  # from :swift_testing_main
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# The Objective-C(++) sources of framework_common_unittests, which cc_library takes none of
+# (build_defs/cc/objc_library.bzl); framework_common_unittests links them in on the Apple
+# platforms.
+flutter_objc_library(
+    name = "framework_common_unittests_objc",
+    testonly = True,
+    srcs = [
+        "framework/Source/FlutterBinaryMessengerRelayTest.mm",
+        "framework/Source/FlutterTestUtils.mm",
+        "framework/Source/flutter_codecs_unittest.mm",
+        "framework/Source/flutter_standard_codec_unittest.mm",
+    ],
+    hdrs = [
+        "framework/Source/FlutterTestUtils.h",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-fvisibility=default",
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ] + MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": FLUTTER_CFLAGS_OBJC,
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":framework_common_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+        "@ocmock",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "@macos_sdk//:macos_developer",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    alwayslink = True,
+)
+
+# Unit tests for channels.
+cc_test(
+    name = "framework_common_unittests",
+    size = "small",
+    srcs = [
+        "framework/Source/FlutterTestUtils.h",
+        "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",
+    ],
+    # Add platform frameworks directory to search path for test frameworks.
+    # Add platform lib to search path for test libraries/Swift modules.
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+        "-fvisibility=default",
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    linkopts = ["-ObjC"] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-F" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-F" + IPHONEOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-F" + MACOS_PLATFORM_PATH + "/Developer/Library/Frameworks",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-L" + IPHONESIMULATOR_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-L" + IPHONEOS_PLATFORM_PATH + "/Developer/usr/lib",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-L" + MACOS_PLATFORM_PATH + "/Developer/usr/lib",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "@platforms//os:ios": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":config",
+        ":framework_common",
+        ":framework_common_fixtures",
+        ":framework_common_unittests_objc",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+        "@ocmock",
+    ] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "@macos_sdk//:ios_developer",  # is_ios
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "@macos_sdk//:macos_developer",  # !(is_ios) && is_mac
+        ],
+        "//conditions:default": [],
+    }),
+)
+
+# `is_ios && use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# `is_ios && !use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_not_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# `is_ios && enable_ios_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_enable_ios_unittests",
+    match_all = [
+        "@platforms//os:ios",
+        "//engine/src/flutter/testing:ios_unittests_enabled",
+    ],
+)
+
+# `is_mac && enable_unittests`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_mac_and_enable_unittests",
+    match_all = [
+        "@platforms//os:macos",
+        "//engine/src/flutter/testing:unittests_enabled",
+    ],
+)
+
+# `is_ios && current_cpu == "arm64" && use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_arm64_and_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# `is_ios && current_cpu == "arm64" && !use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_arm64_and_not_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:aarch64",
+        "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# `is_ios && current_cpu == "x64" && use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_x64_and_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/build/bazel:ios_simulator_enabled",
+    ],
+)
+
+# `is_ios && current_cpu == "x64" && !use_ios_simulator`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_is_ios_and_current_cpu_x64_and_not_use_ios_simulator",
+    match_all = [
+        "@platforms//os:ios",
+        "@platforms//cpu:x86_64",
+        "//engine/src/flutter/build/bazel:ios_simulator_disabled",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The iOS embedding's XCTest project (testing/ios/IosUnitTests, which
+# xcodebuild builds: run_tests.py --type objc) compiles FlutterChannelsTest.m
+# -- a source no GN target lists -- out of the tree, with the framework's
+# headers directory as a header search path.
+exports_files(["framework/Source/FlutterChannelsTest.m"])
+
+filegroup(
+    name = "framework_headers",
+    srcs = glob(["framework/Headers/*.h"]),
+)

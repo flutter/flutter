@@ -1,0 +1,565 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/sky/packages/sky_engine/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//build_defs/dart:dart_pkg.bzl", "dart_pkg")
+load("//build_defs/dist:local_engine.bzl", "assembled_directory")
+load("//build_defs/gn:gn_action.bzl", "gn_copy", "gn_generated_file")
+load("//build_defs/web:web_sdk.bzl", "web_ui_ui_web_with_output")
+
+package(default_visibility = ["//visibility:public"])
+
+gn_copy(
+    name = "copy_sky_engine_authors",
+    srcs = ["//engine/src:AUTHORS"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "async",
+    srcs = [
+        "@dart//:sdk/lib/async/async.dart",
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/async/async_error.dart",
+        "@dart//:sdk/lib/async/broadcast_stream_controller.dart",
+        "@dart//:sdk/lib/async/deferred_load.dart",
+        "@dart//:sdk/lib/async/future.dart",
+        "@dart//:sdk/lib/async/future_extensions.dart",
+        "@dart//:sdk/lib/async/future_impl.dart",
+        "@dart//:sdk/lib/async/schedule_microtask.dart",
+        "@dart//:sdk/lib/async/stream.dart",
+        "@dart//:sdk/lib/async/stream_controller.dart",
+        "@dart//:sdk/lib/async/stream_impl.dart",
+        "@dart//:sdk/lib/async/stream_pipe.dart",
+        "@dart//:sdk/lib/async/stream_transformers.dart",
+        "@dart//:sdk/lib/async/timer.dart",
+        "@dart//:sdk/lib/async/zone.dart",
+        "@dart//:sdk/lib/async/zone_api.dart",
+        "@dart//:sdk/lib/async/zone_delegate.dart",
+        "@dart//:sdk/lib/async/zone_root.dart",
+        "@dart//:sdk/lib/async/zone_specification.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/async/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "collection",
+    srcs = [
+        "@dart//:sdk/lib/collection/collection.dart",
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/collection/collections.dart",
+        "@dart//:sdk/lib/collection/hash_map.dart",
+        "@dart//:sdk/lib/collection/hash_set.dart",
+        "@dart//:sdk/lib/collection/iterable.dart",
+        "@dart//:sdk/lib/collection/iterator.dart",
+        "@dart//:sdk/lib/collection/linked_hash_map.dart",
+        "@dart//:sdk/lib/collection/linked_hash_set.dart",
+        "@dart//:sdk/lib/collection/linked_list.dart",
+        "@dart//:sdk/lib/collection/list.dart",
+        "@dart//:sdk/lib/collection/maps.dart",
+        "@dart//:sdk/lib/collection/queue.dart",
+        "@dart//:sdk/lib/collection/set.dart",
+        "@dart//:sdk/lib/collection/splay_tree.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/collection/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "concurrent",
+    srcs = ["@dart//:sdk/lib/concurrent/concurrent.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/concurrent/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "convert",
+    srcs = [
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/convert/ascii.dart",
+        "@dart//:sdk/lib/convert/base64.dart",
+        "@dart//:sdk/lib/convert/byte_conversion.dart",
+        "@dart//:sdk/lib/convert/chunked_conversion.dart",
+        "@dart//:sdk/lib/convert/codec.dart",
+        "@dart//:sdk/lib/convert/convert.dart",
+        "@dart//:sdk/lib/convert/converter.dart",
+        "@dart//:sdk/lib/convert/encoding.dart",
+        "@dart//:sdk/lib/convert/html_escape.dart",
+        "@dart//:sdk/lib/convert/json.dart",
+        "@dart//:sdk/lib/convert/latin1.dart",
+        "@dart//:sdk/lib/convert/line_splitter.dart",
+        "@dart//:sdk/lib/convert/string_conversion.dart",
+        "@dart//:sdk/lib/convert/utf.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/convert/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "core",
+    srcs = [
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/core/annotations.dart",
+        "@dart//:sdk/lib/core/bigint.dart",
+        "@dart//:sdk/lib/core/bool.dart",
+        "@dart//:sdk/lib/core/comparable.dart",
+        "@dart//:sdk/lib/core/core.dart",
+        "@dart//:sdk/lib/core/date_time.dart",
+        "@dart//:sdk/lib/core/double.dart",
+        "@dart//:sdk/lib/core/duration.dart",
+        "@dart//:sdk/lib/core/enum.dart",
+        "@dart//:sdk/lib/core/errors.dart",
+        "@dart//:sdk/lib/core/exceptions.dart",
+        "@dart//:sdk/lib/core/function.dart",
+        "@dart//:sdk/lib/core/identical.dart",
+        "@dart//:sdk/lib/core/int.dart",
+        "@dart//:sdk/lib/core/invocation.dart",
+        "@dart//:sdk/lib/core/iterable.dart",
+        "@dart//:sdk/lib/core/iterator.dart",
+        "@dart//:sdk/lib/core/list.dart",
+        "@dart//:sdk/lib/core/map.dart",
+        "@dart//:sdk/lib/core/null.dart",
+        "@dart//:sdk/lib/core/num.dart",
+        "@dart//:sdk/lib/core/object.dart",
+        "@dart//:sdk/lib/core/pattern.dart",
+        "@dart//:sdk/lib/core/print.dart",
+        "@dart//:sdk/lib/core/record.dart",
+        "@dart//:sdk/lib/core/regexp.dart",
+        "@dart//:sdk/lib/core/set.dart",
+        "@dart//:sdk/lib/core/sink.dart",
+        "@dart//:sdk/lib/core/stacktrace.dart",
+        "@dart//:sdk/lib/core/stopwatch.dart",
+        "@dart//:sdk/lib/core/string.dart",
+        "@dart//:sdk/lib/core/string_buffer.dart",
+        "@dart//:sdk/lib/core/string_sink.dart",
+        "@dart//:sdk/lib/core/symbol.dart",
+        "@dart//:sdk/lib/core/type.dart",
+        "@dart//:sdk/lib/core/uri.dart",
+        "@dart//:sdk/lib/core/weak.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/core/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "developer",
+    srcs = [
+        # The above file needs to be first if additional parts are added to the lib.
+        "@dart//:sdk/lib/developer/creation_tracking.dart",
+        "@dart//:sdk/lib/developer/developer.dart",
+        "@dart//:sdk/lib/developer/extension.dart",
+        "@dart//:sdk/lib/developer/profiler.dart",
+        "@dart//:sdk/lib/developer/service.dart",
+        "@dart//:sdk/lib/developer/timeline.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/developer/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "_http",
+    srcs = [
+        # The above file needs to be first if additional parts are added to the lib.
+        "@dart//:sdk/lib/_http/crypto.dart",
+        "@dart//:sdk/lib/_http/http.dart",
+        "@dart//:sdk/lib/_http/http_date.dart",
+        "@dart//:sdk/lib/_http/http_headers.dart",
+        "@dart//:sdk/lib/_http/http_impl.dart",
+        "@dart//:sdk/lib/_http/http_parser.dart",
+        "@dart//:sdk/lib/_http/http_session.dart",
+        "@dart//:sdk/lib/_http/overrides.dart",
+        "@dart//:sdk/lib/_http/websocket.dart",
+        "@dart//:sdk/lib/_http/websocket_impl.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_http/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "_interceptors",
+    srcs = ["@dart//:sdk/lib/_internal/js_runtime/lib/interceptors.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_interceptors/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "_js_types",
+    srcs = ["@dart//:sdk/lib/_internal/js_shared/lib/js_types.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_js_types/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "internal",
+    srcs = [
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/internal/async_cast.dart",
+        "@dart//:sdk/lib/internal/bytes_builder.dart",
+        "@dart//:sdk/lib/internal/cast.dart",
+        "@dart//:sdk/lib/internal/errors.dart",
+        "@dart//:sdk/lib/internal/internal.dart",
+        "@dart//:sdk/lib/internal/iterable.dart",
+        "@dart//:sdk/lib/internal/linked_list.dart",
+        "@dart//:sdk/lib/internal/list.dart",
+        "@dart//:sdk/lib/internal/lowering.dart",
+        "@dart//:sdk/lib/internal/print.dart",
+        "@dart//:sdk/lib/internal/sort.dart",
+        "@dart//:sdk/lib/internal/symbol.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/internal/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "vm_internal",
+    srcs = [
+        "@dart//:sdk/lib/_internal/vm/lib/array.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/array_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/async_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/bigint_patch_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/class_id_fasta.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/concurrent_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/convert_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/core_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/developer.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/double.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/double_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/empty_source.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/errors_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/expando_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/ffi_allocation_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/ffi_dynamic_library_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/ffi_native_finalizer_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/ffi_native_type_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/ffi_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/ffi_struct_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/finalizer_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/function.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/function_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/growable_array.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/hash_factories.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/http_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/identical_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/immutable_map.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/integers.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/internal_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/invocation_mirror_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/isolate_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/lib_prefix.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/math_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/mirror_reference.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/mirrors_impl.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/mirrors_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/object_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/print_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/profiler.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/record_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/regexp_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/schedule_microtask_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/stacktrace.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/stopwatch_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/string_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/symbol_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/timeline.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/timer_impl.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/timer_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/type_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/typed_data_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/uri_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/lib/weak_property.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm/lib/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "vm_internal_bin",
+    srcs = [
+        "@dart//:sdk/lib/_internal/vm/bin/builtin.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/common_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/directory_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/eventhandler_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/file_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/file_system_entity_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/filter_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/io_service_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/namespace_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/platform_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/process_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/resident_compiler_utils.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/secure_socket_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/socket_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/stdio_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/sync_socket_patch.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/vmservice_io.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/vmservice_server.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm/bin/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "vm_shared",
+    srcs = [
+        "@dart//:sdk/lib/_internal/vm_shared/lib/bigint_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/bool_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/collection_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/compact_hash.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/date_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/integers_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/map_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/null_patch.dart",
+        "@dart//:sdk/lib/_internal/vm_shared/lib/string_buffer_patch.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_internal/vm_shared/lib/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "io",
+    srcs = [
+        # The above file needs to be first if additional parts are added to the lib.
+        "@dart//:sdk/lib/io/common.dart",
+        "@dart//:sdk/lib/io/data_transformer.dart",
+        "@dart//:sdk/lib/io/directory.dart",
+        "@dart//:sdk/lib/io/directory_impl.dart",
+        "@dart//:sdk/lib/io/embedder_config.dart",
+        "@dart//:sdk/lib/io/eventhandler.dart",
+        "@dart//:sdk/lib/io/file.dart",
+        "@dart//:sdk/lib/io/file_impl.dart",
+        "@dart//:sdk/lib/io/file_system_entity.dart",
+        "@dart//:sdk/lib/io/io.dart",
+        "@dart//:sdk/lib/io/io_resource_info.dart",
+        "@dart//:sdk/lib/io/io_service.dart",
+        "@dart//:sdk/lib/io/io_sink.dart",
+        "@dart//:sdk/lib/io/link.dart",
+        "@dart//:sdk/lib/io/namespace_impl.dart",
+        "@dart//:sdk/lib/io/network_profiling.dart",
+        "@dart//:sdk/lib/io/overrides.dart",
+        "@dart//:sdk/lib/io/platform.dart",
+        "@dart//:sdk/lib/io/platform_impl.dart",
+        "@dart//:sdk/lib/io/process.dart",
+        "@dart//:sdk/lib/io/secure_server_socket.dart",
+        "@dart//:sdk/lib/io/secure_socket.dart",
+        "@dart//:sdk/lib/io/security_context.dart",
+        "@dart//:sdk/lib/io/service_object.dart",
+        "@dart//:sdk/lib/io/socket.dart",
+        "@dart//:sdk/lib/io/stdio.dart",
+        "@dart//:sdk/lib/io/string_transformer.dart",
+        "@dart//:sdk/lib/io/sync_socket.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/io/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "ffi",
+    srcs = [
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/ffi/abi.dart",
+        "@dart//:sdk/lib/ffi/abi_specific.dart",
+        "@dart//:sdk/lib/ffi/allocation.dart",
+        "@dart//:sdk/lib/ffi/annotations.dart",
+        "@dart//:sdk/lib/ffi/c_type.dart",
+        "@dart//:sdk/lib/ffi/dynamic_library.dart",
+        "@dart//:sdk/lib/ffi/ffi.dart",
+        "@dart//:sdk/lib/ffi/native_finalizer.dart",
+        "@dart//:sdk/lib/ffi/native_type.dart",
+        "@dart//:sdk/lib/ffi/struct.dart",
+        "@dart//:sdk/lib/ffi/union.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/ffi/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "html",
+    srcs = ["@dart//:sdk/lib/html/dart2js/html_dart2js.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/html/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "isolate",
+    srcs = [
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/isolate/capability.dart",
+        "@dart//:sdk/lib/isolate/isolate.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/isolate/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "js",
+    srcs = [
+        "@dart//:sdk/lib/js/js.dart",
+        "@dart//:sdk/lib/js/js_wasm.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/js/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "js_interop",
+    srcs = ["@dart//:sdk/lib/js_interop/js_interop.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/js_interop/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "js_interop_unsafe",
+    srcs = ["@dart//:sdk/lib/js_interop_unsafe/js_interop_unsafe.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/js_interop_unsafe/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "math",
+    srcs = [
+        "@dart//:sdk/lib/math/math.dart",
+        # The above file needs to be first as it lists the parts below.
+        "@dart//:sdk/lib/math/point.dart",
+        "@dart//:sdk/lib/math/random.dart",
+        "@dart//:sdk/lib/math/rectangle.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/math/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "typed_data",
+    srcs = ["@dart//:sdk/lib/typed_data/typed_data.dart"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/typed_data/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "copy_dart_ui",
+    srcs = [
+        "//engine/src/flutter/lib/ui:annotations.dart",
+        "//engine/src/flutter/lib/ui:channel_buffers.dart",
+        "//engine/src/flutter/lib/ui:compositing.dart",
+        "//engine/src/flutter/lib/ui:geometry.dart",
+        "//engine/src/flutter/lib/ui:hooks.dart",
+        "//engine/src/flutter/lib/ui:isolate_name_server.dart",
+        "//engine/src/flutter/lib/ui:key.dart",
+        "//engine/src/flutter/lib/ui:lerp.dart",
+        "//engine/src/flutter/lib/ui:math.dart",
+        "//engine/src/flutter/lib/ui:natives.dart",
+        "//engine/src/flutter/lib/ui:painting.dart",
+        "//engine/src/flutter/lib/ui:platform_dispatcher.dart",
+        "//engine/src/flutter/lib/ui:platform_isolate.dart",
+        "//engine/src/flutter/lib/ui:plugins.dart",
+        "//engine/src/flutter/lib/ui:pointer.dart",
+        "//engine/src/flutter/lib/ui:semantics.dart",
+        "//engine/src/flutter/lib/ui:text.dart",
+        "//engine/src/flutter/lib/ui:ui.dart",
+        "//engine/src/flutter/lib/ui:window.dart",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/ui/{{source_file_part}}"],
+)
+
+gn_copy(
+    name = "copy_dart_ui_fix_data",
+    srcs = ["//engine/src/flutter/lib/ui:fix_dart_ui.yaml"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/fix_data/fix_dart_ui.yaml"],
+)
+
+web_ui_ui_web_with_output(
+    name = "copy_dart_ui_web",
+    output_dir = "$root_gen_dir/dart-pkg/sky_engine/lib/ui_web/",
+)
+
+gn_copy(
+    name = "copy_allowed_experiments",
+    srcs = ["@dart//:sdk/lib/_internal/allowed_experiments.json"],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_internal/allowed_experiments.json"],
+)
+
+cc_library(
+    name = "copy_dart_sdk",
+    data = [
+        ":_http",
+        ":_interceptors",
+        ":_js_types",
+        ":async",
+        ":collection",
+        ":concurrent",
+        ":convert",
+        ":copy_allowed_experiments",
+        ":core",
+        ":developer",
+        ":ffi",
+        ":html",
+        ":internal",
+        ":io",
+        ":isolate",
+        ":js",
+        ":js_interop",
+        ":js_interop_unsafe",
+        ":math",
+        ":typed_data",
+        ":vm_internal",
+        ":vm_internal_bin",
+        ":vm_shared",
+    ],
+)
+
+gn_generated_file(
+    name = "_embedder_yaml",
+    out = "gen/dart-pkg/sky_engine/lib/_embedder.yaml",
+    content = [
+        "# This file is generated by //flutter/sky/packages/sky_engine:_embedder_yaml",
+        "# Do not modify this file directly. Instead, update the build file.",
+        "",
+        "embedded_libs:",
+        "  \"dart:async\": \"async/async.dart\"",
+        "  \"dart:collection\": \"collection/collection.dart\"",
+        "  \"dart:concurrent\": \"concurrent/concurrent.dart\"",
+        "  \"dart:convert\": \"convert/convert.dart\"",
+        "  \"dart:core\": \"core/core.dart\"",
+        "  \"dart:developer\": \"developer/developer.dart\"",
+        "  \"dart:ffi\": \"ffi/ffi.dart\"",
+        "  \"dart:html\": \"html/html_dart2js.dart\"",
+        "  \"dart:io\": \"io/io.dart\"",
+        "  \"dart:isolate\": \"isolate/isolate.dart\"",
+        "  \"dart:js\": \"js/js.dart\"",
+        "  \"dart:js_interop\": \"js_interop/js_interop.dart\"",
+        "  \"dart:js_interop_unsafe\": \"js_interop_unsafe/js_interop_unsafe.dart\"",
+        "  \"dart:math\": \"math/math.dart\"",
+        "  \"dart:typed_data\": \"typed_data/typed_data.dart\"",
+        "  \"dart:ui\": \"ui/ui.dart\"",
+        "  \"dart:ui_web\": \"ui_web/ui_web.dart\"",
+        "",
+        "  \"dart:_http\": \"_http/http.dart\"",
+        "  \"dart:_interceptors\": \"_interceptors/interceptors.dart\"",
+        "  # The _internal library is needed as some implementations bleed into the",
+        "  # public API, e.g. List being Iterable by virtue of implementing",
+        "  # EfficientLengthIterable. Not including this library yields analysis errors.",
+        "  \"dart:_internal\": \"internal/internal.dart\"",
+        "  # The _js_types library is also needed for the same reasons as _internal.",
+        "  \"dart:_js_types\": \"_js_types/js_types.dart\"",
+        "  \"dart:nativewrappers\": \"_empty.dart\"",
+    ],
+    outputs = ["$root_gen_dir/dart-pkg/sky_engine/lib/_embedder.yaml"],
+)
+
+dart_pkg(
+    name = "sky_engine",
+    srcs = [
+        "LICENSE",
+        "README.md",
+        "lib/_empty.dart",
+        "pubspec.yaml",
+    ],
+    package = "sky_engine",
+    sdk_ext = [
+        "@dart//:sdk/lib/_internal/vm/bin/vmservice_io.dart",
+        "@dart//:sdk/lib/_internal/vm/bin/vmservice_server.dart",
+    ],
+    deps = [
+        ":_embedder_yaml",
+        ":copy_dart_sdk",
+        ":copy_dart_ui",
+        ":copy_dart_ui_fix_data",
+        ":copy_dart_ui_web",
+        ":copy_sky_engine_authors",  # !is_fuchsia
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The package as the SDK cache holds it (bin/cache/pkg/sky_engine): one
+# directory of what the targets above place under gen/dart-pkg/sky_engine,
+# for a test that runs the real pub or the analyzer on a project of its own
+# (a dart_test's cache_files lays it there, where pub looks for the SDK's
+# packages and the analyzer for dart:ui).
+assembled_directory(
+    name = "package",
+    contents = [":sky_engine"],
+    prefix = "gen/dart-pkg/sky_engine",
+)

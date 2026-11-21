@@ -177,6 +177,13 @@ interface class FlutterTestRunner {
       :FlutterProject? flutterProject,
     ) = spec;
 
+    // flutter_tester finds icudtl.dat beside itself unless told; a local
+    // engine's directory may keep the file elsewhere (a Bazel build leaves it
+    // in ICU's repository and maps it), so name the artifact.
+    final String? icudtlPath =
+        spec.icudtlPath ??
+        (artifacts.localEngineInfo == null ? null : artifacts.getArtifactPath(Artifact.icuData));
+
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = spec.toPackageTestArgs(
       supportsColor: terminal.supportsColor,
@@ -252,7 +259,7 @@ interface class FlutterTestRunner {
       applicationPackageFactory: _applicationPackageFactory,
       enableVmService: spec.enableVmService,
       flutterProject: flutterProject,
-      icudtlPath: spec.icudtlPath,
+      icudtlPath: icudtlPath,
       integrationTestDevice: spec.integrationTestDevice,
       integrationTestUserIdentifier: spec.integrationTestUserIdentifier,
       machine: spec.machine,

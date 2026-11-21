@@ -18,6 +18,18 @@
 # actually due to those PRs, not due to a package being updated.
 !/pubspec.lock
 
+# Bazel (see MODULE.bazel). The module lockfile is committed so that registry
+# resolution is reproducible; convenience symlinks normally live under
+# engine/src/out (see .bazelrc), the pattern below only covers runs that
+# bypass the rc files.
+!/MODULE.bazel.lock
+/user.bazelrc
+/bazel-*
+# A CI bot's Bazel state (the output root, bazelisk's download of Bazel),
+# kept across builds in the bot's checkout cache; see
+# engine/src/flutter/build/bazel/ci.md.
+/.bazel_ci/
+
 # IntelliJ related
 *.iml
 *.ipr

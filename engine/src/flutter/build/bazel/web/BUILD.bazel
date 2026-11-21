@@ -1,0 +1,107 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The web build's per-variant arguments as build settings.
+#
+# GN builds the web engine's modules in six wasm toolchains
+# (//flutter/third_party/canvaskit/BUILD.gn), each with an
+# `extra_toolchain_args` block of Skia arguments -- which ICU, which codecs,
+# whether PNGs are encoded by Skia or the browser -- and re-evaluates Skia
+# under each. Here a toolchain is a platform (wasm_platform in
+# build_defs/web/wasm.bzl) whose flags set these settings, and Skia's
+# generated files carry select()s on them where GN reads the arguments. The
+# defaults are the host build's values (tools/gn's host block and skia.gni's
+# defaults on Linux), so that nothing changes for a build that names none of
+# the variants. The two arguments that are compiler flags in GN
+# (wasm_use_workers, wasm_prioritize_size) are features of the emscripten
+# toolchain instead, and enable_lto its `lto` feature.
+
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+
+package(default_visibility = ["//visibility:public"])
+
+# [name, default]: skia.gni's arguments the wasm toolchains set, with the
+# host's values.
+_SETTINGS = [
+    ("skia_use_icu", True),
+    ("skia_use_client_icu", False),
+    ("skia_use_libjpeg_turbo_decode", True),
+    ("skia_use_libpng_decode", True),
+    ("skia_use_libwebp_decode", True),
+    ("skia_use_no_png_encode", False),
+    ("skia_use_libpng_encode", True),
+    ("skia_enable_threadlocal_strikecache", False),
+    # The CanvasKit toolchains' (the WebParagraph variant turns the text
+    # stack off); the defaults are skia.gni's and canvaskit.gni's on a Linux
+    # host, flutter_use_freetype_woff2's FreeType's. The wasm platform sets
+    # flutter_use_freetype_woff2 for the web (tools/gn's --web).
+    ("skia_use_bidi", False),
+    ("skia_canvaskit_enable_bidi", False),
+    ("skia_enable_skparagraph", True),
+    ("skia_canvaskit_enable_paragraph", True),
+    ("skia_enable_skshaper", True),
+    ("skia_use_harfbuzz", True),
+    ("skia_use_freetype", True),
+    ("flutter_use_freetype_woff2", False),
+    ("skia_enable_fontmgr_custom_embedded", True),
+    ("skia_enable_fontmgr_custom_empty", True),
+    ("skia_canvaskit_enable_font", True),
+    ("skia_canvaskit_enable_alias_font", True),
+]
+
+[
+    bool_flag(
+        name = name,
+        build_setting_default = default,
+    )
+    for name, default in _SETTINGS
+]
+
+# `<name>_on` holds where the argument is true, `<name>_off` where it is
+# false (the converter's select() keys, and the members of the
+# config_setting_groups it builds for conjunctions and disjunctions).
+[
+    config_setting(
+        name = name + "_on",
+        flag_values = {":" + name: "True"},
+    )
+    for name, _ in _SETTINGS
+]
+
+[
+    config_setting(
+        name = name + "_off",
+        flag_values = {":" + name: "False"},
+    )
+    for name, _ in _SETTINGS
+]
+
+# Which of the platforms a wasm module is built for. GN builds a wasm_lib in
+# the toolchain its dependent names on the dependency edge
+# (`"//flutter/skwasm(:skwasm)"` in the web SDK's copies,
+# //flutter/third_party/canvaskit/BUILD.gn) and in no other: the module has
+# no build of its own in the default toolchain. Here the edge is a gn_copy
+# with a `platform`, whose transition sets this flag (and --platforms) for
+# the copy's sources, and wasm_module's own transition builds the module
+# for the platform the flag names and spends the flag -- so that a module
+# named from the command line can be given one too (`--//engine/src/flutter/
+# build/bazel/web:module_platform=//engine/src/flutter/third_party/canvaskit:skwasm`,
+# or --platforms of the same). See build_defs/web/wasm.bzl.
+string_flag(
+    name = "module_platform",
+    build_setting_default = "",
+)
+
+# What makes a platform one of the web build's variants: every wasm_platform
+# carries `variant`, the bare wasm platform does not, and a wasm module is
+# compatible with the variants alone (GN has no module outside those
+# toolchains).
+constraint_setting(
+    name = "variant_platform",
+)
+
+constraint_value(
+    name = "variant",
+    constraint_setting = ":variant_platform",
+)

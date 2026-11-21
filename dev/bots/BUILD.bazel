@@ -1,0 +1,71 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# dev/bots' scripts and their tests under Bazel: each test compiled by the
+# frontend server for the VM and run by package:test's precompiled runner
+# from this directory, as `dart test` runs them (dev/bots' own
+# `runDartTest`; build_defs/dart/dart_test.bzl;
+# research/15).
+#
+#   bazel test //dev/bots:tests
+
+load("@host_platform//:host.bzl", "HOST_DART_SDK", "HOST_OS")
+load("//build_defs/dart:dart_test.bzl", "dart_package_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+# The package's files: the scripts at its root (the tests import them as
+# ../analyze.dart), the suite runners and prepare_package's parts.
+filegroup(
+    name = "sources",
+    srcs = glob([
+        "*.dart",
+        "prepare_package/**",
+        "suite_runners/**",
+    ]) + ["pubspec.yaml"],
+)
+
+# Four of the sixteen are tests of the repository rather than of the
+# scripts, and stay out: analyze_test runs `git ls-files` over its fixtures
+# (no git repository in the sandbox), ci_yaml_validation_test and
+# test_ownership_validation_test walk up to the checkout's DEPS and read
+# .ci.yaml and every test directory, test_test runs test.dart itself over the
+# checkout. codesign_test is `@TestOn('mac-os')`, which the runner honours
+# by running nothing elsewhere, and nothing run is a failure to Bazel: it is
+# a Mac host's test (its codesign is a fake process manager's).
+dart_package_tests(
+    name = "tests",
+    srcs = glob(
+        ["test/*.dart"],
+        exclude = ["test/*_test.dart"],
+    ),
+    # The Dart SDK, as ../../bin/cache/dart-sdk/bin/dart.
+    cache = {HOST_DART_SDK + "//:dart": "dart-sdk"},
+    # The fixture trees the tests read; the repository root's DEPS, by which
+    # tool_test_durations_test finds the root, with the durations file it
+    # checks against the three tool shards' test files.
+    data = glob([
+        "test/analyze-snippet-code-test-dart-ui/**",
+        "test/analyze-snippet-code-test-input/**",
+        "test/analyze-test-input/**",
+    ]) + [
+        "tool_test_durations.json",
+        "//:DEPS",
+        "//packages/flutter_tools:durations_shard_test_files",
+    ],
+    package = "tests_on_bots",
+    packages = {"//dev/devicelab:sources": "flutter_devicelab"},
+    tests = glob(
+        ["test/*_test.dart"],
+        exclude = [
+            "test/analyze_test.dart",
+            "test/ci_yaml_validation_test.dart",
+            "test/test_ownership_validation_test.dart",
+            "test/test_test.dart",
+        ] + ([] if HOST_OS == "mac" else ["test/codesign_test.dart"]),
+    ),
+    # flutter_tools' test harness: codesign_test, post_process_docs_test and
+    # prepare_package_test import its fake_process_manager.dart.
+    deps = ["//packages/flutter_tools:test_harness"],
+)
