@@ -5,51 +5,31 @@
 import 'dart:js_interop';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 /// The JS bindings for the configuration object passed to [FlutterApp.addView].
-extension type JsFlutterViewOptions._primary(JSObject _) implements JSObject {
-  factory JsFlutterViewOptions({
-    required DomElement hostElement,
-    JsViewConstraints? viewConstraints,
-    Object? initialData,
-  }) => JsFlutterViewOptions._(
-    hostElement: hostElement,
-    viewConstraints: viewConstraints,
-    initialData: initialData?.toJSAnyDeep,
-  );
-  external factory JsFlutterViewOptions._({
-    required DomElement hostElement,
-    JsViewConstraints? viewConstraints,
-    JSAny? initialData,
-  });
+///
+/// This is the public [ui_web.FlutterViewOptions]. The engine reads the host
+/// element through [JsFlutterViewOptionsExtension.hostDomElement].
+typedef JsFlutterViewOptions = ui_web.FlutterViewOptions;
 
+/// Engine-only accessors for [JsFlutterViewOptions].
+extension JsFlutterViewOptionsExtension on JsFlutterViewOptions {
   @JS('hostElement')
   external DomElement? get _hostElement;
-  DomElement get hostElement {
+
+  /// The host element, as the engine-internal [DomElement] type, which can't
+  /// appear in `dart:ui_web`.
+  DomElement get hostDomElement {
     assert(_hostElement != null, '`hostElement` passed to addView cannot be null.');
     return _hostElement!;
   }
-
-  external JsViewConstraints? get viewConstraints;
-  external JSAny? get initialData;
 }
 
 /// The JS bindings for a [ViewConstraints] object.
 ///
 /// Attributes are expressed in *logical* pixels.
-extension type JsViewConstraints._(JSObject _) implements JSObject {
-  external factory JsViewConstraints({
-    double? minWidth,
-    double? maxWidth,
-    double? minHeight,
-    double? maxHeight,
-  });
-
-  external double? get maxHeight;
-  external double? get maxWidth;
-  external double? get minHeight;
-  external double? get minWidth;
-}
+typedef JsViewConstraints = ui_web.FlutterViewConstraints;
 
 /// The public JS API of a running Flutter Web App.
 extension type FlutterApp._primary(JSObject _) implements JSObject {

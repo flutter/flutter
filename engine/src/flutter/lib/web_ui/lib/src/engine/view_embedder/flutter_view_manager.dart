@@ -44,7 +44,7 @@ class FlutterViewManager {
   EngineFlutterView createAndRegisterView(JsFlutterViewOptions jsViewOptions) {
     final view = EngineFlutterView(
       _dispatcher,
-      jsViewOptions.hostElement,
+      jsViewOptions.hostDomElement,
       viewConstraints: jsViewOptions.viewConstraints,
     );
     registerView(view, jsViewOptions: jsViewOptions);
