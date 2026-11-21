@@ -8,6 +8,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('then completes with the error thrown by its success callback', () async {
+    final error = StateError('callback failed');
+    final stackTrace = StackTrace.fromString('success callback');
+    final Future<int> result = SynchronousFuture<int>(42).then<int>(
+      (int value) => Error.throwWithStackTrace(error, stackTrace),
+      onError: (Object error) => fail('onError only handles errors from the input future'),
+    );
+
+    try {
+      await result;
+      fail('Expected the returned future to complete with an error');
+    } catch (actual, actualStackTrace) {
+      expect(actual, same(error));
+      expect(actualStackTrace.toString(), stackTrace.toString());
+    }
+  });
+
   test('SynchronousFuture control test', () async {
     final Future<int> future = SynchronousFuture<int>(42);
 

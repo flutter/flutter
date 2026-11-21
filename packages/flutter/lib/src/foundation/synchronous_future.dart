@@ -16,6 +16,8 @@ import 'dart:async';
 /// such bimodal behavior.**
 ///
 /// A [SynchronousFuture] will never complete with an error.
+/// An error thrown by a [then] callback completes the returned future with
+/// that error, not this synchronous future.
 class SynchronousFuture<T> implements Future<T> {
   /// Creates a synchronous future.
   ///
@@ -41,10 +43,14 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Future<R> then<R>(FutureOr<R> Function(T value) onValue, {Function? onError}) {
-    return switch (onValue(_value)) {
-      final Future<R> result => result,
-      final R result => SynchronousFuture<R>(result),
-    };
+    try {
+      return switch (onValue(_value)) {
+        final Future<R> result => result,
+        final R result => SynchronousFuture<R>(result),
+      };
+    } catch (error, stackTrace) {
+      return Future<R>.error(error, stackTrace);
+    }
   }
 
   @override
