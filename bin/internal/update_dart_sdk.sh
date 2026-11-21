@@ -189,11 +189,6 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     exit 1
   fi
 
-  # The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
-  if [ -f "$DART_SDK_PATH_TEMP/LICENSE.dart_sdk_archive.md" ]; then
-    mv "$DART_SDK_PATH_TEMP/LICENSE.dart_sdk_archive.md" "$FLUTTER_ROOT/bin/cache/LICENSE.dart_sdk_archive.md"
-  fi
-
   $FIND "$DART_SDK_PATH_TEMP/dart-sdk" -type d -exec chmod 755 {} +
   $FIND "$DART_SDK_PATH_TEMP/dart-sdk" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} +
 
@@ -209,6 +204,20 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     rm -rf -- "$DART_SDK_PATH_TEMP"
     exit 1
   }
+
+  # Move all other extracted files/directories (e.g., license files, metadata) to bin/cache/
+  for item in "$DART_SDK_PATH_TEMP"/*; do
+    if [ -e "$item" ]; then
+      dest="$FLUTTER_ROOT/bin/cache/$(basename "$item")"
+      rm -rf "$dest"
+      mv -f "$item" "$dest" || {
+        >&2 echo "Failed to move $item to $dest"
+        rm -rf -- "$DART_SDK_PATH_TEMP"
+        exit 1
+      }
+    fi
+  done
+
   rm -rf -- "$DART_SDK_PATH_TEMP"
 
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"

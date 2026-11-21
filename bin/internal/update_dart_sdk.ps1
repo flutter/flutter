@@ -18,7 +18,6 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
 $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
-$dartSdkLicense = "$cachePath\LICENSE.dart_sdk_archive.md"
 $engineStamp = "$cachePath\engine-dart-sdk.stamp"
 $engineVersion = (Get-Content "$flutterRoot\bin\cache\engine.stamp")
 $engineRealm = (Get-Content "$flutterRoot\bin\cache\engine.realm")
@@ -97,23 +96,23 @@ Catch {
 If (Get-Command 7z -errorAction SilentlyContinue) {
     Write-Host "Expanding downloaded archive with 7z..."
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
-    & 7z x $dartSdkZip "-o$dartSdkPathTemp" -bd | Out-Null
+    & 7z x $dartSdkZip "-o$dartSdkPathTemp" -aoa -bd | Out-Null
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
     Write-Host "Expanding downloaded archive with 7za..."
     # Use 7-Zip's standalone version 7za.exe, if available.
-    & 7za x $dartSdkZip "-o$dartSdkPathTemp" -bd | Out-Null
+    & 7za x $dartSdkZip "-o$dartSdkPathTemp" -aoa -bd | Out-Null
 } ElseIf (Get-Command Microsoft.PowerShell.Archive\Expand-Archive -errorAction SilentlyContinue) {
     Write-Host "Expanding downloaded archive with PowerShell..."
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
     $global:ProgressPreference='SilentlyContinue'
-    Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $dartSdkPathTemp
+    Microsoft.PowerShell.Archive\Expand-Archive $dartSdkZip -DestinationPath $dartSdkPathTemp -Force
 } Else {
     Write-Host "Expanding downloaded archive with Windows..."
     # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application
     $zip = $shell.NameSpace($dartSdkZip)
     foreach($item in $zip.items()) {
-        $shell.Namespace($dartSdkPathTemp).copyhere($item)
+        $shell.Namespace($dartSdkPathTemp).copyhere($item, 16)
     }
 }
 
@@ -126,35 +125,28 @@ if (-not (Test-Path "$dartSdkPathTemp\dart-sdk")) {
 }
 
 # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
-if ((Test-Path $dartSdkPath) -or (Test-Path $dartSdkLicense)) {
+if (Test-Path $dartSdkPath) {
     $oldDartSdkSuffix = 1
     while (Test-Path "$cachePath\$oldDartSdkPrefix$oldDartSdkSuffix") { $oldDartSdkSuffix++ }
-
-    if (Test-Path $dartSdkPath) {
-        Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix" -ErrorAction Stop
-    }
-
-    if (Test-Path $dartSdkLicense) {
-        Rename-Item $dartSdkLicense "$oldDartSdkPrefix$oldDartSdkSuffix.LICENSE.md" -ErrorAction Stop
-    }
-}
-
-# The unzip might have extracted LICENSE.dart_sdk_archive.md to the temp dir
-$tempLicense = "$dartSdkPathTemp\LICENSE.dart_sdk_archive.md"
-if (Test-Path $tempLicense) {
-    if (Test-Path $dartSdkLicense) {
-        Remove-Item $dartSdkLicense -Force -ErrorAction Stop
-    }
-    Move-Item $tempLicense $dartSdkLicense -ErrorAction Stop
+    Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix" -ErrorAction Stop
 }
 
 # Move the extracted SDK to the final location
 try {
     Move-Item "$dartSdkPathTemp\dart-sdk" $dartSdkPath -ErrorAction Stop
+
+    # Move all other files/directories extracted from archive into $cachePath
+    Get-ChildItem -Path $dartSdkPathTemp | ForEach-Object {
+        $dest = Join-Path $cachePath $_.Name
+        if (Test-Path $dest) {
+            Remove-Item $dest -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        Move-Item $_.FullName $dest -Force -ErrorAction Stop
+    }
 } finally {
     Remove-Item $dartSdkPathTemp -Recurse -Force -ErrorAction SilentlyContinue
 }
 $engineVersion | Out-File $engineStamp -Encoding ASCII
 
-# Try to delete all old SDKs and license files.
+# Try to delete all old SDKs.
 Get-ChildItem -Path $cachePath | Where {$_.BaseName.StartsWith($oldDartSdkPrefix)} | Remove-Item -Recurse -ErrorAction SilentlyContinue
