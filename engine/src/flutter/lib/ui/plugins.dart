@@ -7,7 +7,7 @@ part of dart.ui;
 /// A wrapper for a raw callback handle.
 ///
 /// This is the return type for [PluginUtilities.getCallbackHandle].
-class CallbackHandle {
+final class CallbackHandle {
   /// Create an instance using a raw callback handle.
   ///
   /// Only values produced by a call to [CallbackHandle.toRawHandle] should be
@@ -22,9 +22,6 @@ class CallbackHandle {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType) {
-      return false;
-    }
     return other is CallbackHandle && other._handle == _handle;
   }
 

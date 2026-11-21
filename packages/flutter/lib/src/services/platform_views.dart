@@ -35,7 +35,7 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 ///
 /// A Flutter application has a single [PlatformViewsRegistry] which can be accesses
 /// through the [platformViewsRegistry] getter.
-class PlatformViewsRegistry {
+final class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 
   // Always non-negative. The id value -1 is used in the accessibility bridge
@@ -69,7 +69,7 @@ typedef PlatformViewCreatedCallback = void Function(int id);
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
-class PlatformViewsService {
+final class PlatformViewsService {
   PlatformViewsService._() {
     SystemChannels.platform_views.setMethodCallHandler(_onMethodCall);
   }
@@ -333,7 +333,7 @@ class PlatformViewsService {
 /// Properties of an Android pointer.
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
-class AndroidPointerProperties {
+final class AndroidPointerProperties {
   /// Creates an [AndroidPointerProperties] object.
   const AndroidPointerProperties({required this.id, required this.toolType});
 
@@ -370,7 +370,7 @@ class AndroidPointerProperties {
 /// Position information for an Android pointer.
 ///
 /// A Dart version of Android's [MotionEvent.PointerCoords](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords).
-class AndroidPointerCoords {
+final class AndroidPointerCoords {
   /// Creates an AndroidPointerCoords.
   const AndroidPointerCoords({
     required this.orientation,
@@ -450,7 +450,7 @@ class AndroidPointerCoords {
 /// See also:
 ///
 ///  * [AndroidViewController.sendMotionEvent], which can be used to send an [AndroidMotionEvent] explicitly.
-class AndroidMotionEvent {
+final class AndroidMotionEvent {
   /// Creates an AndroidMotionEvent.
   AndroidMotionEvent({
     required this.downTime,

@@ -7418,7 +7418,7 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
 ///
 /// Setting a [DebugCreator] as [RenderObject.debugCreator] will lead to better
 /// error messages.
-class DebugCreator {
+final class DebugCreator {
   /// Create a [DebugCreator] instance with input [Element].
   DebugCreator(this.element);
 
