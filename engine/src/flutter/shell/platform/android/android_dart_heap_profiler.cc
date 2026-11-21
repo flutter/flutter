@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bit>
 #include <cstddef>
 #include <cstdint>
@@ -31,6 +32,7 @@
 #include "perfetto/ext/base/unix_socket.h"
 #include "perfetto/ext/tracing/core/shared_memory_abi.h"
 #include "perfetto/protozero/proto_utils.h"
+#include "perfetto/tracing/core/flush_flags.h"
 
 namespace flutter {
 namespace {
@@ -46,22 +48,16 @@ constexpr size_t kMaxFrameSize = 16 * 1024 * 1024;
 constexpr uint32_t kInitialBackoffMs = 1000;
 constexpr uint32_t kMaxBackoffMs = 30000;
 
-// Perfetto IPCFrame wire-protocol field IDs.
-constexpr uint32_t kIpcFrameRequestIdField = 2;
-constexpr uint32_t kIpcFrameBindServiceField = 3;
-constexpr uint32_t kIpcFrameBindServiceReplyField = 4;
-constexpr uint32_t kIpcFrameInvokeMethodField = 5;
-constexpr uint32_t kIpcFrameInvokeMethodReplyField = 6;
-
 /// Android `DartHeapProfilerDelegate` and Perfetto `ProducerPort` client
 /// running on a `perfetto::base::ThreadTaskRunner` that registers
-/// `"android.heapprofd"` for `ProfilingManager` and streams `ProfilePacket`s
-/// via `SharedMemoryABI`.
+/// `"android.heapprofd"`, `"android.java_hprof"`, and
+/// `"android.java_hprof.oom"` for `ProfilingManager` and streams
+/// `ProfilePacket` and `HeapGraph` batches via `SharedMemoryABI`.
 class TracedHeapProducer final
     : public DartHeapProfilerDelegate,
       public perfetto::base::UnixSocket::EventListener {
  public:
-  TracedHeapProducer() = default;
+  TracedHeapProducer() { aggregator_.EndSession(); }
 
   void Start() {
     task_runner_.emplace(
@@ -71,7 +67,25 @@ class TracedHeapProducer final
 
   // DartHeapProfilerDelegate:
   void OnDartVMInitialized() override {
+    vm_shutting_down_.store(false, std::memory_order_release);
     hp::ElfModuleScanner::RegisterMissingDartEhFrames();
+  }
+
+  void OnDartVMCleanup() override {
+    vm_shutting_down_.store(true, std::memory_order_release);
+  }
+
+  void OnLowMemory() override {
+    if (task_runner_.has_value()) {
+      task_runner_->PostTask(
+          [this]() { EmitSessionDump(FindStartedHeapprofd()); });
+    }
+  }
+
+  void OnUnhandledOutOfMemory() override {
+    if (task_runner_.has_value()) {
+      task_runner_->PostTask([this]() { OnUnhandledOutOfMemoryOnProducer(); });
+    }
   }
 
   void* OnSampleCreated(uintptr_t isolate_group_id,
@@ -90,6 +104,67 @@ class TracedHeapProducer final
     uint32_t page = 0;
     uint32_t chunk = 0;
   };
+
+  struct ActiveSession {
+    uint64_t id = 0;
+    hp::ParsedSessionConfig cfg;
+    uint16_t writer_id = 0;
+    uint64_t packet_index = 0;
+    uint64_t dump_gen = 0;
+    bool started = false;
+    bool first_packet_on_sequence = true;
+  };
+
+  ActiveSession* FindSession(uint64_t id) {
+    for (ActiveSession& s : sessions_) {
+      if (s.id == id) {
+        return &s;
+      }
+    }
+    return nullptr;
+  }
+
+  ActiveSession* FindStartedHeapprofd() {
+    for (ActiveSession& s : sessions_) {
+      if (s.started && s.cfg.kind == hp::SessionKind::kHeapprofd) {
+        return &s;
+      }
+    }
+    return nullptr;
+  }
+
+  uint16_t AllocateWriterId() {
+    const uint16_t id = next_writer_id_;
+    next_writer_id_ = (next_writer_id_ % kMaxWriterId) + 1;
+    return id;
+  }
+
+  void InvokeSingleIdMethod(uint32_t method_id, uint64_t id) {
+    if (id == 0 || method_id == 0) {
+      return;
+    }
+    protozero::HeapBuffered<protozero::Message> req;
+    req->AppendVarInt(1, id);
+    InvokeMethod(method_id, req.SerializeAsArray(), /*drop_reply=*/true);
+  }
+
+  void RegisterWriter(uint16_t writer_id, uint32_t target_buffer) {
+    if (writer_id == 0 || m_reg_writer_ == 0) {
+      return;
+    }
+    protozero::HeapBuffered<protozero::Message> req;
+    req->AppendVarInt(/*trace_writer_id=*/1, writer_id);
+    req->AppendVarInt(/*target_buffer=*/2, target_buffer);
+    InvokeMethod(m_reg_writer_, req.SerializeAsArray(), /*drop_reply=*/true);
+  }
+
+  bool RegisterNamedDataSource(std::string_view name) {
+    protozero::HeapBuffered<protozero::Message> req;
+    auto* dsd = req->BeginNestedMessage<protozero::Message>(1);
+    dsd->AppendBytes(/*name=*/1, name.data(), name.size());
+    dsd->AppendVarInt(/*will_notify_on_stop=*/2, 1u);
+    return InvokeMethod(m_reg_ds_, req.SerializeAsArray());
+  }
 
   void ConnectOnProducerThread() {
     PERFETTO_DCHECK(task_runner_->RunsTasksOnCurrentThread());
@@ -118,24 +193,27 @@ class TracedHeapProducer final
     rx_buffer_.reserve(8192);
 
     protozero::HeapBuffered<protozero::Message> frame;
-    frame->AppendVarInt(kIpcFrameRequestIdField, next_req_id_++);
-    auto* bind = frame->BeginNestedMessage<protozero::Message>(
-        kIpcFrameBindServiceField);
-    bind->AppendString(/*service_name=*/1, "ProducerPort");
-    bind->Finalize();
+    frame->AppendVarInt(/*request_id=*/2, next_req_id_++);
+    frame->BeginNestedMessage<protozero::Message>(/*msg_bind_service=*/3)
+        ->AppendString(/*service_name=*/1, "ProducerPort");
     SendFrame(frame.SerializeAsArray());
   }
 
   void OnDisconnect(perfetto::base::UnixSocket* /*self*/) override {
-    StopSession(/*notify_service=*/false);
+    if (FindStartedHeapprofd() != nullptr) {
+      if (!vm_shutting_down_.load(std::memory_order_acquire)) {
+        DartHeapProfiler::StartSampling(hp::kDefaultSamplingInterval);
+      }
+      aggregator_.EndSession();
+    }
+    sessions_.clear();
     socket_.reset();
     pending_shm_fd_.reset();
     shm_mapping_.reset();
     rx_buffer_.clear();
     service_id_ = 0;
     m_init_ = m_reg_ds_ = m_commit_ = m_async_cmd_ = m_reg_writer_ =
-        m_unreg_writer_ = m_notify_stopped_ = 0;
-    pending_id_ = 0;
+        m_unreg_writer_ = m_notify_stopped_ = m_activate_triggers_ = 0;
     ScheduleReconnect();
   }
 
@@ -201,16 +279,15 @@ class TracedHeapProducer final
       return false;
     }
     protozero::HeapBuffered<protozero::Message> frame;
-    frame->AppendVarInt(kIpcFrameRequestIdField, next_req_id_++);
-    auto* inv = frame->BeginNestedMessage<protozero::Message>(
-        kIpcFrameInvokeMethodField);
+    frame->AppendVarInt(/*request_id=*/2, next_req_id_++);
+    auto* inv =
+        frame->BeginNestedMessage<protozero::Message>(/*msg_invoke_method=*/5);
     inv->AppendVarInt(/*service_id=*/1, service_id_);
     inv->AppendVarInt(/*method_id=*/2, method_id);
     inv->AppendBytes(/*args_proto=*/3, args.data(), args.size());
     if (drop_reply) {
       inv->AppendVarInt(/*drop_reply=*/4, 1u);
     }
-    inv->Finalize();
     return SendFrame(frame.SerializeAsArray());
   }
 
@@ -229,34 +306,23 @@ class TracedHeapProducer final
       m_unreg_writer_ = mid;
     } else if (name == "NotifyDataSourceStopped") {
       m_notify_stopped_ = mid;
+    } else if (name == "ActivateTriggers") {
+      m_activate_triggers_ = mid;
     }
   }
 
   bool HandleBindServiceReply(std::span<const uint8_t> reply) {
-    protozero::ProtoDecoder br(reply.data(), reply.size());
-    bool ok = false;
-    for (auto f = br.ReadField(); f.valid(); f = br.ReadField()) {
-      if (f.id() == 1) {
-        ok = f.as_bool();
-      } else if (f.id() == 2) {
-        service_id_ = f.as_uint32();
-      } else if (f.id() == 3) {
-        protozero::ProtoDecoder mi(f.data(), f.size());
-        uint32_t mid = 0;
-        std::string_view mname;
-        for (auto mf = mi.ReadField(); mf.valid(); mf = mi.ReadField()) {
-          if (mf.id() == 1) {
-            mid = mf.as_uint32();
-          } else if (mf.id() == 2) {
-            mname = std::string_view(reinterpret_cast<const char*>(mf.data()),
-                                     mf.size());
-          }
-        }
-        RecordMethodId(mid, mname);
-      }
-    }
-    if (!ok || service_id_ == 0) {
+    // BindServiceReply: success=1, service_id=2, methods=3.
+    protozero::TypedProtoDecoder<3, true> br(reply.data(), reply.size());
+    service_id_ = br.at<2>().as_uint32();
+    if (!br.at<1>().as_bool() || service_id_ == 0) {
       return false;
+    }
+    for (auto it = br.GetRepeated<protozero::ConstBytes>(3); it; ++it) {
+      // MethodInfo: id=1, name=2.
+      const protozero::ConstBytes raw = *it;
+      protozero::TypedProtoDecoder<2, false> mi(raw.data, raw.size);
+      RecordMethodId(mi.at<1>().as_uint32(), hp::View(mi.at<2>().as_string()));
     }
 
     protozero::HeapBuffered<protozero::Message> init_req;
@@ -269,55 +335,34 @@ class TracedHeapProducer final
     }
 
     async_cmd_req_id_ = next_req_id_;
-    if (!InvokeMethod(m_async_cmd_, {})) {
-      return false;
-    }
-
-    protozero::HeapBuffered<protozero::Message> ds_req;
-    auto* dsd = ds_req->BeginNestedMessage<protozero::Message>(1);
-    dsd->AppendBytes(/*name=*/1, hp::kHeapprofdDataSourceName.data(),
-                     hp::kHeapprofdDataSourceName.size());
-    dsd->AppendVarInt(/*will_notify_on_stop=*/2, 1u);
-    dsd->Finalize();
-    return InvokeMethod(m_reg_ds_, ds_req.SerializeAsArray());
+    return InvokeMethod(m_async_cmd_, {}) &&
+           RegisterNamedDataSource(hp::kHeapprofdDataSourceName) &&
+           RegisterNamedDataSource(hp::kJavaHprofDataSourceName) &&
+           RegisterNamedDataSource(hp::kJavaHprofOomDataSourceName);
   }
 
   bool HandleFrame(std::span<const uint8_t> frame_bytes) {
-    protozero::ProtoDecoder frame(frame_bytes.data(), frame_bytes.size());
-    uint64_t req_id = 0;
-    protozero::ConstBytes bind_reply{};
-    protozero::ConstBytes invoke_reply{};
-    for (auto f = frame.ReadField(); f.valid(); f = frame.ReadField()) {
-      if (f.id() == kIpcFrameRequestIdField) {
-        req_id = f.as_uint64();
-      } else if (f.id() == kIpcFrameBindServiceReplyField) {
-        bind_reply = f.as_bytes();
-      } else if (f.id() == kIpcFrameInvokeMethodReplyField) {
-        invoke_reply = f.as_bytes();
-      }
+    // IPCFrame: request_id=2, bind_service_reply=4, invoke_method_reply=6.
+    protozero::TypedProtoDecoder<8, false> frame(frame_bytes.data(),
+                                                 frame_bytes.size());
+    if (const auto br = frame.at<4>().as_bytes(); br.data != nullptr) {
+      return HandleBindServiceReply({br.data, br.size});
     }
-    if (bind_reply.data != nullptr) {
-      return HandleBindServiceReply({bind_reply.data, bind_reply.size});
-    }
-    if (invoke_reply.data != nullptr && req_id == async_cmd_req_id_) {
-      protozero::ProtoDecoder ir(invoke_reply.data, invoke_reply.size);
-      for (auto f = ir.ReadField(); f.valid(); f = ir.ReadField()) {
-        if (f.id() == 3) {
-          HandleAsyncCommand({f.data(), f.size()});
-        }
+    if (const auto ir_raw = frame.at<6>().as_bytes();
+        ir_raw.data != nullptr &&
+        frame.at<2>().as_uint64() == async_cmd_req_id_) {
+      protozero::TypedProtoDecoder<3, false> ir(ir_raw.data, ir_raw.size);
+      if (const auto cmd = ir.at<3>().as_bytes(); cmd.data != nullptr) {
+        HandleAsyncCommand({cmd.data, cmd.size});
       }
     }
     return true;
   }
 
   void OnSetupTracing(std::span<const uint8_t> data) {
-    uint32_t page_kb = 4;
     protozero::ProtoDecoder st(data.data(), data.size());
-    for (auto sf = st.ReadField(); sf.valid(); sf = st.ReadField()) {
-      if (sf.id() == 1) {
-        page_kb = sf.as_uint32();
-      }
-    }
+    const auto page_f = st.FindField(/*shared_buffer_page_size_kb=*/1);
+    const uint32_t page_kb = page_f.valid() ? page_f.as_uint32() : 4u;
     if (!pending_shm_fd_.is_valid() || shm_mapping_ != nullptr) {
       return;
     }
@@ -335,97 +380,138 @@ class TracedHeapProducer final
     }
   }
 
-  void OnStartDataSource(uint64_t id) {
-    if (id == 0 || id != pending_id_ || active_id_ != 0) {
+  void OnSetupDataSource(uint64_t id, std::span<const uint8_t> cfg_bytes) {
+    if (id == 0 || FindSession(id) != nullptr) {
       return;
     }
-    active_id_ = id;
-    active_session_ = pending_session_;
-    pending_id_ = 0;
-    packet_index_ = 0;
-    next_chunk_id_ = 0;
-    active_writer_id_ = next_writer_id_;
-    next_writer_id_ = (next_writer_id_ % kMaxWriterId) + 1;
-
-    if (m_reg_writer_ != 0) {
-      protozero::HeapBuffered<protozero::Message> req;
-      req->AppendVarInt(/*trace_writer_id=*/1, active_writer_id_);
-      req->AppendVarInt(/*target_buffer=*/2, active_session_.target_buffer);
-      InvokeMethod(m_reg_writer_, req.SerializeAsArray(), /*drop_reply=*/true);
+    const hp::ParsedSessionConfig parsed = hp::ParseDataSourceConfig(cfg_bytes);
+    if (!parsed.matched || (parsed.kind == hp::SessionKind::kHeapprofd &&
+                            FindStartedHeapprofd() != nullptr)) {
+      return;
     }
+    sessions_.push_back(ActiveSession{.id = id, .cfg = parsed});
+  }
 
-    aggregator_.Clear();
-    hp::ElfModuleScanner::RegisterMissingDartEhFrames();
-    sampling_interval_ = active_session_.sampling_interval;
-    DartHeapProfiler::StartSampling(sampling_interval_);
+  void ScheduleContinuousDump(uint64_t session_id,
+                              uint64_t gen,
+                              uint32_t delay_ms) {
+    task_runner_->PostDelayedTask(
+        [this, session_id, gen]() {
+          ActiveSession* s = FindSession(session_id);
+          if (s == nullptr || !s->started || s->dump_gen != gen) {
+            return;
+          }
+          EmitSessionDump(s);
+          if (s->cfg.dump_interval_ms > 0) {
+            ScheduleContinuousDump(session_id, gen, s->cfg.dump_interval_ms);
+          }
+        },
+        delay_ms);
+  }
+
+  void OnStartDataSource(uint64_t id) {
+    ActiveSession* s = FindSession(id);
+    if (s == nullptr || s->started ||
+        (s->cfg.kind == hp::SessionKind::kHeapprofd &&
+         FindStartedHeapprofd() != nullptr)) {
+      return;
+    }
+    s->started = true;
+    s->packet_index = 0;
+    s->first_packet_on_sequence = true;
+    ++s->dump_gen;
+    s->writer_id = AllocateWriterId();
+    RegisterWriter(s->writer_id, s->cfg.target_buffer);
+
+    if (s->cfg.kind == hp::SessionKind::kHeapprofd) {
+      aggregator_.BeginSession();
+      hp::ElfModuleScanner::RegisterMissingDartEhFrames();
+      if (!s->cfg.no_startup &&
+          !vm_shutting_down_.load(std::memory_order_acquire)) {
+        hp::HeapSampleAggregator::SeededBatch batch{.aggregator = &aggregator_};
+        DartHeapProfiler::ReportSurvivingAllocations(
+            &hp::HeapSampleAggregator::SeedSurvivingSampleCallback, &batch,
+            /*force_gc=*/false);
+        aggregator_.FinalizeSeededBatch(batch);
+      }
+      DartHeapProfiler::StartSampling(s->cfg.sampling_interval);
+    } else {
+      EmitSessionDump(s);
+    }
+    if (s->cfg.dump_interval_ms > 0) {
+      ScheduleContinuousDump(s->id, s->dump_gen, s->cfg.dump_phase_ms);
+    }
+  }
+
+  void OnFlushCommand(std::span<const uint8_t> flush_bytes) {
+    // Flush: data_source_ids=1, request_id=2, flags=3.
+    protozero::TypedProtoDecoder<3, true> fl(flush_bytes.data(),
+                                             flush_bytes.size());
+    ActiveSession* hp_session = FindStartedHeapprofd();
+    bool has_ds_filter = false;
+    bool matches_heapprofd = false;
+    for (auto it = fl.GetRepeated<uint64_t>(1); it; ++it) {
+      has_ds_filter = true;
+      matches_heapprofd |= (hp_session != nullptr && *it == hp_session->id);
+    }
+    if (hp_session != nullptr && (!has_ds_filter || matches_heapprofd) &&
+        perfetto::FlushFlags(fl.at<3>().as_uint64()).reason() !=
+            perfetto::FlushFlags::Reason::kTraceStop) {
+      EmitSessionDump(hp_session);
+    }
+    if (const uint64_t flush_id = fl.at<2>().as_uint64(); flush_id != 0) {
+      SendCommit({}, /*target_buffer=*/0, flush_id);
+    }
+  }
+
+  void OnStopDataSource(uint64_t id) {
+    if (id == 0) {
+      return;
+    }
+    for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
+      if (it->id != id) {
+        continue;
+      }
+      if (it->started) {
+        if (it->cfg.kind == hp::SessionKind::kHeapprofd) {
+          if (!vm_shutting_down_.load(std::memory_order_acquire)) {
+            DartHeapProfiler::StartSampling(hp::kDefaultSamplingInterval);
+          }
+          EmitSessionDump(&(*it));
+          aggregator_.EndSession();
+        }
+        InvokeSingleIdMethod(m_unreg_writer_, it->writer_id);
+      }
+      sessions_.erase(it);
+      break;
+    }
+    InvokeSingleIdMethod(m_notify_stopped_, id);
   }
 
   void HandleAsyncCommand(std::span<const uint8_t> cmd_bytes) {
     protozero::ProtoDecoder cmd(cmd_bytes.data(), cmd_bytes.size());
     for (auto f = cmd.ReadField(); f.valid(); f = cmd.ReadField()) {
       switch (f.id()) {
+        case 1:  // start_data_source
+          OnStartDataSource(protozero::ProtoDecoder(f.data(), f.size())
+                                .FindField(1)
+                                .as_uint64());
+          break;
+        case 2:  // stop_data_source
+          OnStopDataSource(protozero::ProtoDecoder(f.data(), f.size())
+                               .FindField(1)
+                               .as_uint64());
+          break;
         case 3:  // setup_tracing
           OnSetupTracing({f.data(), f.size()});
           break;
+        case 5:  // flush
+          OnFlushCommand({f.data(), f.size()});
+          break;
         case 6: {  // setup_data_source
-          uint64_t id = 0;
-          protozero::ConstBytes cfg{};
-          protozero::ProtoDecoder sd(f.data(), f.size());
-          for (auto sf = sd.ReadField(); sf.valid(); sf = sd.ReadField()) {
-            if (sf.id() == 1) {
-              id = sf.as_uint64();
-            } else if (sf.id() == 2) {
-              cfg = sf.as_bytes();
-            }
-          }
-          hp::ParsedHeapprofdSession parsed =
-              hp::ParseDataSourceConfig({cfg.data, cfg.size});
-          if (parsed.matched && active_id_ == 0) {
-            pending_id_ = id;
-            pending_session_ = parsed;
-          }
-          break;
-        }
-        case 1: {  // start_data_source
-          uint64_t id = 0;
-          protozero::ProtoDecoder sd(f.data(), f.size());
-          for (auto sf = sd.ReadField(); sf.valid(); sf = sd.ReadField()) {
-            if (sf.id() == 1) {
-              id = sf.as_uint64();
-            }
-          }
-          OnStartDataSource(id);
-          break;
-        }
-        case 5: {  // flush
-          uint64_t flush_id = 0;
-          protozero::ProtoDecoder fl(f.data(), f.size());
-          for (auto ff = fl.ReadField(); ff.valid(); ff = fl.ReadField()) {
-            if (ff.id() == 2) {
-              flush_id = ff.as_uint64();
-            }
-          }
-          if (flush_id != 0) {
-            SendCommit({}, flush_id);
-          }
-          break;
-        }
-        case 2: {  // stop_data_source
-          uint64_t id = 0;
-          protozero::ProtoDecoder sp(f.data(), f.size());
-          for (auto sf = sp.ReadField(); sf.valid(); sf = sp.ReadField()) {
-            if (sf.id() == 1) {
-              id = sf.as_uint64();
-            }
-          }
-          if (id != 0 && id == active_id_) {
-            StopSession(/*notify_service=*/true);
-          } else if (id != 0 && m_notify_stopped_ != 0) {
-            protozero::HeapBuffered<protozero::Message> req;
-            req->AppendVarInt(1, id);
-            InvokeMethod(m_notify_stopped_, req.SerializeAsArray(),
-                         /*drop_reply=*/true);
-          }
+          protozero::TypedProtoDecoder<2, false> sd(f.data(), f.size());
+          const auto cfg = sd.at<2>().as_bytes();
+          OnSetupDataSource(sd.at<1>().as_uint64(), {cfg.data, cfg.size});
           break;
         }
         default:
@@ -434,9 +520,10 @@ class TracedHeapProducer final
     }
   }
 
-  perfetto::SharedMemoryABI::Chunk AcquireChunk(uint16_t packet_count,
+  perfetto::SharedMemoryABI::Chunk AcquireChunk(uint16_t writer_id,
+                                                uint16_t packet_count,
                                                 uint8_t flags) {
-    if (shm_mapping_ == nullptr) {
+    if (shm_mapping_ == nullptr || writer_id == 0) {
       return perfetto::SharedMemoryABI::Chunk();
     }
     for (int attempt = 0; attempt < 200; ++attempt) {
@@ -447,7 +534,7 @@ class TracedHeapProducer final
         if ((shm_abi_.GetFreeChunks(p) & 1u) != 0) {
           perfetto::SharedMemoryABI::ChunkHeader hdr{};
           hdr.chunk_id.store(next_chunk_id_++, std::memory_order_relaxed);
-          hdr.writer_id.store(active_writer_id_, std::memory_order_relaxed);
+          hdr.writer_id.store(writer_id, std::memory_order_relaxed);
           hdr.packets.store({packet_count, flags}, std::memory_order_relaxed);
           auto chunk = shm_abi_.TryAcquireChunkForWriting(p, 0, &hdr);
           if (chunk.is_valid()) {
@@ -460,8 +547,10 @@ class TracedHeapProducer final
     return perfetto::SharedMemoryABI::Chunk();
   }
 
-  void WriteSerializedPacketToShm(std::span<const uint8_t> packet_bytes) {
-    if (shm_mapping_ == nullptr || packet_bytes.empty()) {
+  void WriteSerializedPacketToShm(std::span<const uint8_t> packet_bytes,
+                                  uint16_t writer_id,
+                                  uint32_t target_buffer) {
+    if (shm_mapping_ == nullptr || packet_bytes.empty() || writer_id == 0) {
       return;
     }
     const size_t max_payload = shm_abi_.page_size() -
@@ -488,7 +577,7 @@ class TracedHeapProducer final
             kLastPacketContinuesOnNextChunk;
       }
 
-      auto chunk = AcquireChunk(/*packet_count=*/1, flags);
+      auto chunk = AcquireChunk(writer_id, /*packet_count=*/1, flags);
       if (!chunk.is_valid()) {
         break;
       }
@@ -505,27 +594,28 @@ class TracedHeapProducer final
           .chunk = static_cast<uint32_t>(chunk_idx),
       };
       if (moved_count == moved.size()) {
-        SendCommit(moved, /*flush_req_id=*/0);
+        SendCommit(moved, target_buffer, /*flush_req_id=*/0);
         moved_count = 0;
       }
       offset += frag_len;
       first = false;
     }
     if (moved_count > 0) {
-      SendCommit(std::span<const MovedChunk>(moved.data(), moved_count),
+      SendCommit({moved.data(), moved_count}, target_buffer,
                  /*flush_req_id=*/0);
     }
   }
 
-  void SendCommit(std::span<const MovedChunk> chunks, uint64_t flush_req_id) {
+  void SendCommit(std::span<const MovedChunk> chunks,
+                  uint32_t target_buffer,
+                  uint64_t flush_req_id) {
     protozero::HeapBuffered<protozero::Message> req;
     for (const MovedChunk& c : chunks) {
       auto* msg =
           req->BeginNestedMessage<protozero::Message>(/*chunks_to_move=*/1);
       msg->AppendVarInt(/*page=*/1, c.page);
       msg->AppendVarInt(/*chunk=*/2, c.chunk);
-      msg->AppendVarInt(/*target_buffer=*/3, active_session_.target_buffer);
-      msg->Finalize();
+      msg->AppendVarInt(/*target_buffer=*/3, target_buffer);
     }
     if (flush_req_id != 0) {
       req->AppendVarInt(/*flush_request_id=*/3, flush_req_id);
@@ -534,45 +624,53 @@ class TracedHeapProducer final
                  /*drop_reply=*/flush_req_id == 0);
   }
 
-  void EmitDump() {
+  void EmitSessionDump(ActiveSession* session) {
     PERFETTO_DCHECK(task_runner_->RunsTasksOnCurrentThread());
-    hp::WriteHeapProfilePackets(
-        aggregator_, sampling_interval_, &packet_index_,
-        [this](auto&& fill_fn) {
-          protozero::HeapBuffered<perfetto::protos::pbzero::TracePacket> pkt;
-          fill_fn(pkt.get());
-          WriteSerializedPacketToShm(pkt.SerializeAsArray());
-        });
+    if (session == nullptr || !session->started || session->writer_id == 0) {
+      return;
+    }
+    const uint16_t writer_id = session->writer_id;
+    const uint32_t target_buffer = session->cfg.target_buffer;
+    auto emit = [this, writer_id, target_buffer](auto&& fill_fn) {
+      protozero::HeapBuffered<perfetto::protos::pbzero::TracePacket> pkt;
+      fill_fn(pkt.get());
+      WriteSerializedPacketToShm(pkt.SerializeAsArray(), writer_id,
+                                 target_buffer);
+    };
+
+    if (session->cfg.kind == hp::SessionKind::kHeapprofd) {
+      hp::WriteHeapProfilePackets(aggregator_, session->cfg.sampling_interval,
+                                  /*from_startup=*/!session->cfg.no_startup,
+                                  &session->first_packet_on_sequence,
+                                  &session->packet_index, emit);
+    } else {
+      std::vector<hp::SurvivingObjectSample> surviving;
+      if (!vm_shutting_down_.load(std::memory_order_acquire)) {
+        DartHeapProfiler::ReportSurvivingAllocations(
+            &hp::HeapSampleAggregator::CollectSurvivingSampleCallback,
+            &surviving, /*force_gc=*/true);
+      }
+      hp::WriteDartHeapGraphPackets(surviving,
+                                    &session->first_packet_on_sequence,
+                                    &session->packet_index, emit);
+    }
   }
 
-  void StopSession(bool notify_service) {
-    const uint64_t stopped_id = active_id_;
-    const uint16_t stopped_writer = active_writer_id_;
-    DartHeapProfiler::StopSampling();
-    if (notify_service && stopped_id != 0) {
-      EmitDump();
-    }
-    aggregator_.Clear();
-    active_id_ = 0;
-    active_writer_id_ = 0;
-    if (notify_service && stopped_id != 0) {
-      if (stopped_writer != 0 && m_unreg_writer_ != 0) {
-        protozero::HeapBuffered<protozero::Message> req;
-        req->AppendVarInt(/*trace_writer_id=*/1, stopped_writer);
-        InvokeMethod(m_unreg_writer_, req.SerializeAsArray(),
-                     /*drop_reply=*/true);
-      }
-      if (m_notify_stopped_ != 0) {
-        protozero::HeapBuffered<protozero::Message> req;
-        req->AppendVarInt(1, stopped_id);
-        InvokeMethod(m_notify_stopped_, req.SerializeAsArray(),
-                     /*drop_reply=*/true);
-      }
+  void OnUnhandledOutOfMemoryOnProducer() {
+    PERFETTO_DCHECK(task_runner_->RunsTasksOnCurrentThread());
+    EmitSessionDump(FindStartedHeapprofd());
+    if (m_activate_triggers_ != 0) {
+      protozero::HeapBuffered<protozero::Message> req;
+      req->AppendBytes(/*trigger_names=*/1,
+                       hp::kArtOutOfMemoryTriggerName.data(),
+                       hp::kArtOutOfMemoryTriggerName.size());
+      InvokeMethod(m_activate_triggers_, req.SerializeAsArray(),
+                   /*drop_reply=*/true);
     }
   }
 
   std::optional<perfetto::base::ThreadTaskRunner> task_runner_;
-  intptr_t sampling_interval_ = hp::kDefaultSamplingInterval;
+  std::atomic<bool> vm_shutting_down_{false};
 
   std::unique_ptr<perfetto::base::UnixSocket> socket_;
   std::vector<uint8_t> rx_buffer_;
@@ -581,7 +679,6 @@ class TracedHeapProducer final
   perfetto::SharedMemoryABI shm_abi_;
   uint32_t next_chunk_id_ = 0;
   uint16_t next_writer_id_ = 1;
-  uint16_t active_writer_id_ = 0;
   uint32_t backoff_ms_ = kInitialBackoffMs;
 
   uint64_t next_req_id_ = 1;
@@ -594,12 +691,9 @@ class TracedHeapProducer final
   uint32_t m_reg_writer_ = 0;
   uint32_t m_unreg_writer_ = 0;
   uint32_t m_notify_stopped_ = 0;
+  uint32_t m_activate_triggers_ = 0;
 
-  uint64_t pending_id_ = 0;
-  hp::ParsedHeapprofdSession pending_session_;
-  uint64_t active_id_ = 0;
-  hp::ParsedHeapprofdSession active_session_;
-  uint64_t packet_index_ = 0;
+  std::vector<ActiveSession> sessions_;
   hp::HeapSampleAggregator aggregator_;
 };
 
@@ -614,6 +708,10 @@ void InitializeAndroidDartHeapProfiler(int api_level) {
     auto producer = std::make_unique<TracedHeapProducer>();
     TracedHeapProducer* raw = producer.get();
     DartHeapProfiler::SetDelegate(std::move(producer));
+    // Enable coarse background sampling from VM startup so surviving
+    // pre-session Dart allocations can be reported via
+    // Dart_ReportSurvivingAllocations on java_hprof / OOM / heapprofd dumps.
+    DartHeapProfiler::StartSampling(hp::kDefaultSamplingInterval);
     raw->Start();
   });
 }

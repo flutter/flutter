@@ -324,3 +324,16 @@ void sendSemanticsUpdate() {
 
 @pragma('vm:external-name', 'SemanticsUpdate')
 external void _semanticsUpdate(SemanticsUpdate update);
+
+Uint8List? retainedHeapBuffer;
+
+@pragma('vm:entry-point')
+void retainLargeBuffer() {
+  retainedHeapBuffer = Uint8List(256 * 1024);
+  notifyNative();
+}
+
+@pragma('vm:entry-point')
+void throwOutOfMemoryErrorNow() {
+  throw const OutOfMemoryError();
+}

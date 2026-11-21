@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <shared_mutex>
 #include <utility>
 
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -16,10 +17,12 @@ namespace {
 constexpr intptr_t kDefaultSamplingIntervalBytes = 512 * 1024;
 
 struct ProfilerState {
+  std::shared_mutex vm_lifecycle_mutex;
   std::mutex mutex;
   std::unique_ptr<DartHeapProfilerDelegate> owned_delegate;
   std::atomic<DartHeapProfilerDelegate*> active_delegate{nullptr};
   std::atomic<bool> sampling_active{false};
+  std::atomic<bool> vm_alive{false};
   intptr_t sampling_interval_bytes = kDefaultSamplingIntervalBytes;
   bool vm_initialized = false;
   bool callbacks_registered = false;
@@ -68,6 +71,7 @@ void DartHeapProfiler::SetDelegate(
   ProfilerState& state = GetState();
   std::unique_ptr<DartHeapProfilerDelegate> previous;
   {
+    std::unique_lock vm_lock(state.vm_lifecycle_mutex);
     std::scoped_lock lock(state.mutex);
     if (delegate == nullptr && state.vm_initialized &&
         state.sampling_active.load(std::memory_order_relaxed)) {
@@ -121,10 +125,44 @@ void DartHeapProfiler::StopSampling() {
   }
 }
 
+void DartHeapProfiler::ReportSurvivingAllocations(
+    SurvivingSampleVisitor visitor,
+    void* user_context,
+    bool force_gc) {
+  if (visitor == nullptr) {
+    return;
+  }
+  ProfilerState& state = GetState();
+  std::shared_lock vm_lock(state.vm_lifecycle_mutex);
+  if (!state.vm_alive.load(std::memory_order_acquire) ||
+      Dart_CurrentIsolate() != nullptr) {
+    return;
+  }
+  Dart_ReportSurvivingAllocations(visitor, user_context, force_gc);
+}
+
+void DartHeapProfiler::NotifyLowMemory() {
+  DartHeapProfilerDelegate* delegate =
+      GetState().active_delegate.load(std::memory_order_acquire);
+  if (delegate != nullptr) {
+    delegate->OnLowMemory();
+  }
+}
+
+void DartHeapProfiler::NotifyUnhandledOutOfMemory() {
+  DartHeapProfilerDelegate* delegate =
+      GetState().active_delegate.load(std::memory_order_acquire);
+  if (delegate != nullptr) {
+    delegate->OnUnhandledOutOfMemory();
+  }
+}
+
 void DartHeapProfiler::OnDartVMInitialized() {
   ProfilerState& state = GetState();
+  std::unique_lock vm_lock(state.vm_lifecycle_mutex);
   std::scoped_lock lock(state.mutex);
   state.vm_initialized = true;
+  state.vm_alive.store(true, std::memory_order_release);
   if (state.owned_delegate == nullptr) {
     return;
   }
@@ -140,6 +178,8 @@ void DartHeapProfiler::OnDartVMInitialized() {
 
 void DartHeapProfiler::OnDartVMCleanup() {
   ProfilerState& state = GetState();
+  std::unique_lock vm_lock(state.vm_lifecycle_mutex);
+  state.vm_alive.store(false, std::memory_order_release);
   std::scoped_lock lock(state.mutex);
   if (state.vm_initialized &&
       state.sampling_active.load(std::memory_order_relaxed)) {

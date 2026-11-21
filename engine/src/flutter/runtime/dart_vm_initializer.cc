@@ -5,6 +5,8 @@
 #include "flutter/runtime/dart_vm_initializer.h"
 
 #include <atomic>
+#include <cstdint>
+#include <string_view>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -42,8 +44,35 @@ void LogUnhandledException(Dart_Handle exception_handle,
                  << stack_trace;
 }
 
+bool IsOutOfMemoryException(Dart_Handle exception_handle) {
+  if (Dart_IsNull(exception_handle) || Dart_IsError(exception_handle)) {
+    return false;
+  }
+  Dart_Handle str_handle = Dart_IsString(exception_handle)
+                               ? exception_handle
+                               : Dart_ToString(exception_handle);
+  if (!Dart_IsString(str_handle)) {
+    return false;
+  }
+  uint8_t* utf8 = nullptr;
+  intptr_t length = 0;
+  if (Dart_IsError(Dart_StringToUTF8(str_handle, &utf8, &length)) ||
+      utf8 == nullptr) {
+    return false;
+  }
+  const std::string_view text(reinterpret_cast<const char*>(utf8),
+                              static_cast<size_t>(length));
+  // OutOfMemoryError.toString() returns "Out of Memory", while pre-allocated
+  // Roots::unhandled_oom_exception() carries "Out of memory".
+  return text == "Out of Memory" || text == "Out of memory";
+}
+
 void ReportUnhandledException(Dart_Handle exception_handle,
                               Dart_Handle stack_trace_handle) {
+  if (IsOutOfMemoryException(exception_handle)) {
+    flutter::DartHeapProfiler::NotifyUnhandledOutOfMemory();
+  }
+
   // Hooks.dart will call the error handler on PlatformDispatcher if it is
   // not null. If it is null, returns false, fall into the !handled branch
   // below and log.

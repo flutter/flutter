@@ -32,6 +32,12 @@ class DartHeapProfilerDelegate {
   /// Invoked when the Dart VM is about to shut down (`Dart_Cleanup`).
   virtual void OnDartVMCleanup() {}
 
+  /// Invoked when the embedder receives a system low-memory notification.
+  virtual void OnLowMemory() {}
+
+  /// Invoked when an isolate encounters an unhandled `OutOfMemoryError`.
+  virtual void OnUnhandledOutOfMemory() {}
+
   /// Invoked when the Dart VM samples a heap allocation of `size` bytes for
   /// `class_name` in `isolate_group_id`. Returns an opaque context pointer
   /// later passed to `OnSampleDestroyed` when the object is collected, or
@@ -48,6 +54,9 @@ class DartHeapProfilerDelegate {
 /// (`Dart_*HeapSampling*`) and a platform `DartHeapProfilerDelegate`.
 class DartHeapProfiler {
  public:
+  using SurvivingSampleVisitor = void (*)(void* user_context,
+                                          void* sample_context);
+
   /// Installs (or clears when `nullptr`) the active platform delegate.
   /// Safe to call before or after `OnDartVMInitialized()`.
   static void SetDelegate(std::unique_ptr<DartHeapProfilerDelegate> delegate);
@@ -59,6 +68,22 @@ class DartHeapProfiler {
 
   /// Disables Dart VM heap allocation sampling. Safe to call from any thread.
   static void StopSampling();
+
+  /// Enumerates all surviving sampled allocations across live isolate groups
+  /// via `Dart_ReportSurvivingAllocations`.
+  ///
+  /// Must be called from a thread with no current isolate entered. If
+  /// `force_gc` is true, each isolate group performs a full GC before reporting
+  /// surviving samples.
+  static void ReportSurvivingAllocations(SurvivingSampleVisitor visitor,
+                                         void* user_context,
+                                         bool force_gc);
+
+  /// Forwards a system low-memory warning to the active delegate.
+  static void NotifyLowMemory();
+
+  /// Forwards an unhandled Dart `OutOfMemoryError` to the active delegate.
+  static void NotifyUnhandledOutOfMemory();
 
   /// Invoked by `DartVMInitializer::Initialize()` after `Dart_Initialize()`.
   static void OnDartVMInitialized();
