@@ -138,8 +138,8 @@ extension FlutterProjectPreviewExtension on FlutterProject {
       return true;
     }
     return workspaceProjects.any(
-      (FlutterProject project) =>
-          fs.path.canonicalize(project.pubspecFile.path) == canonicalPubspecPath,
+      (FlutterProject workspaceProject) =>
+          fs.path.canonicalize(workspaceProject.pubspecFile.path) == canonicalPubspecPath,
     );
   }
 }
