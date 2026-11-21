@@ -64,6 +64,30 @@ final listViewsWithoutIsolate = FakeVmServiceRequest(
   },
 );
 
+/// A read of the view metrics override that applies to every view, which
+/// reports [allViews] as that override.
+FakeVmServiceRequest readAllViewsMetricsOverride([Map<String, Object>? allViews]) {
+  return FakeVmServiceRequest(
+    method: 'ext.flutter.viewMetricsOverride',
+    args: const <String, Object>{'isolateId': '1', 'viewId': 'all'},
+    jsonResponse: <String, Object>{
+      'overrides': <String, Object>{'all': ?allViews},
+    },
+  );
+}
+
+/// A write that replaces the view metrics override that applies to every view
+/// with [overrides].
+FakeVmServiceRequest writeAllViewsMetricsOverride(Map<String, Object> overrides) {
+  return FakeVmServiceRequest(
+    method: 'ext.flutter.viewMetricsOverride',
+    args: <String, Object>{'isolateId': '1', 'viewId': 'all', 'overrides': json.encode(overrides)},
+    jsonResponse: <String, Object>{
+      'overrides': <String, Object>{'all': overrides},
+    },
+  );
+}
+
 void main() {
   testWithoutContext('keyboard input handling single help character', () async {
     final testRunner = TestRunner();
@@ -176,42 +200,62 @@ void main() {
     testWithoutContext('b - debugToggleBrightness', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.brightnessOverride',
-          args: <String, Object>{'isolateId': '1'},
-          jsonResponse: <String, Object>{'value': 'Brightness.light'},
-        ),
-        listViews,
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.brightnessOverride',
-          args: <String, Object>{'isolateId': '1', 'value': 'Brightness.dark'},
-          jsonResponse: <String, Object>{'value': 'Brightness.dark'},
-        ),
+        readAllViewsMetricsOverride(),
+        writeAllViewsMetricsOverride(const <String, Object>{'platformBrightness': 'dark'}),
       ]);
       await terminalHandler.processTerminalInput('b');
 
       expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
     });
 
+    testWithoutContext(
+      'b - debugToggleBrightness keeps the other metrics of the override',
+      () async {
+        const allViews = <String, Object>{'boldText': true, 'platformBrightness': 'dark'};
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViews,
+          readAllViewsMetricsOverride(allViews),
+          writeAllViewsMetricsOverride(const <String, Object>{
+            'boldText': true,
+            'platformBrightness': 'light',
+          }),
+        ]);
+        await terminalHandler.processTerminalInput('b');
+
+        expect(
+          terminalHandler.logger.statusText,
+          contains('Changed brightness to Brightness.light'),
+        );
+      },
+    );
+
     testWithoutContext('b - debugToggleBrightness with web target', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.brightnessOverride',
-          args: <String, Object>{'isolateId': '1'},
-          jsonResponse: <String, Object>{'value': 'Brightness.light'},
-        ),
-        listViews,
-        const FakeVmServiceRequest(
-          method: 'ext.flutter.brightnessOverride',
-          args: <String, Object>{'isolateId': '1', 'value': 'Brightness.dark'},
-          jsonResponse: <String, Object>{'value': 'Brightness.dark'},
-        ),
+        readAllViewsMetricsOverride(),
+        writeAllViewsMetricsOverride(const <String, Object>{'platformBrightness': 'dark'}),
       ], web: true);
       await terminalHandler.processTerminalInput('b');
 
       expect(terminalHandler.logger.statusText, contains('Changed brightness to Brightness.dark'));
     });
+
+    testWithoutContext(
+      'b - debugToggleBrightness does nothing when the app rejects a viewId of all',
+      () async {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
+          listViews,
+          FakeVmServiceRequest(
+            method: 'ext.flutter.viewMetricsOverride',
+            args: const <String, Object>{'isolateId': '1', 'viewId': 'all'},
+            error: FakeRPCError(code: vm_service.RPCErrorKind.kServerError.code),
+          ),
+        ]);
+        await terminalHandler.processTerminalInput('b');
+
+        expect(terminalHandler.logger.statusText, isNot(contains('Changed brightness')));
+      },
+    );
 
     testWithoutContext('b - debugToggleBrightness without service protocol is skipped', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(

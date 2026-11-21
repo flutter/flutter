@@ -768,27 +768,36 @@ abstract class ResidentHandlers {
     return true;
   }
 
-  /// Toggle the operating system brightness (light or dark).
+  /// Toggle the brightness that every view of the application reports between
+  /// dark and light.
+  ///
+  /// This sets the brightness of the view metrics override that applies to
+  /// every view. It sets dark unless that override already sets dark, and it
+  /// keeps the other metrics of that override.
   Future<bool> debugToggleBrightness() async {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
-    final Brightness? current = await flutterDevices.first!.vmService!.flutterBrightnessOverride(
-      isolateId: views.first.uiIsolate!.id!,
-    );
-    final Brightness next = switch (current) {
-      Brightness.light => Brightness.dark,
-      Brightness.dark || null => Brightness.light,
-    };
+    Brightness? next;
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
-      for (final view in views) {
-        await device.vmService!.flutterBrightnessOverride(
-          isolateId: view.uiIsolate!.id!,
-          brightness: next,
+      // Views that share an isolate share the override too.
+      for (final isolateId in <String>{for (final view in views) view.uiIsolate!.id!}) {
+        final Map<String, Object?>? allViews = await device.vmService!
+            .flutterAllViewsMetricsOverride(isolateId: isolateId);
+        if (allViews == null) {
+          continue;
+        }
+        next ??= allViews['platformBrightness'] == Brightness.dark.name
+            ? Brightness.light
+            : Brightness.dark;
+        await device.vmService!.flutterAllViewsMetricsOverride(
+          isolateId: isolateId,
+          overrides: <String, Object?>{...allViews, 'platformBrightness': next.name},
         );
       }
+    }
+    if (next != null) {
       logger.printStatus('Changed brightness to $next.');
     }
     return true;
