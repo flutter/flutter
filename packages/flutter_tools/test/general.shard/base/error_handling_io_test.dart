@@ -156,6 +156,7 @@ void main() {
   group('throws ToolExit on Windows', () {
     const kDeviceFull = 112;
     const kFilenameExcedRange = 206;
+    const kDirectoryNameInvalid = 267; // Win32 ERROR_DIRECTORY.
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
     const kWriteProtect = 19;
@@ -358,6 +359,122 @@ void main() {
       expect(() => file.writeAsStringSync(''), throwsToolExit(message: expectedMessage));
       expect(() => file.openSync(), throwsToolExit(message: expectedMessage));
       expect(() => file.createSync(), throwsToolExit(message: expectedMessage));
+    });
+
+    testWithoutContext('when directory name is invalid', () async {
+      final fileSystem = ErrorHandlingFileSystem(
+        delegate: MemoryFileSystem.test(opHandle: exceptionHandler.opHandle),
+        platform: windowsPlatform,
+      );
+      final Directory directory = fileSystem.directory('directory');
+      final File file = fileSystem.file('file');
+
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.exists,
+        FileSystemException('', directory.path, const OSError('', kDirectoryNameInvalid)),
+      );
+      exceptionHandler.addError(
+        directory,
+        FileSystemOp.create,
+        FileSystemException('', directory.path, const OSError('', kDirectoryNameInvalid)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.read,
+        FileSystemException('', file.path, const OSError('', kDirectoryNameInvalid)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.write,
+        FileSystemException('', file.path, const OSError('', kDirectoryNameInvalid)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.open,
+        FileSystemException('', file.path, const OSError('', kDirectoryNameInvalid)),
+      );
+      exceptionHandler.addError(
+        file,
+        FileSystemOp.create,
+        FileSystemException('', file.path, const OSError('', kDirectoryNameInvalid)),
+      );
+
+      expect(directory.existsSync(), isFalse);
+      // ignore: avoid_slow_async_io
+      expect(await directory.exists(), isFalse);
+
+      expect(
+        () => directory.createSync(),
+        throwsToolExit(
+          message:
+              'Flutter failed to create a directory at "directory". The directory name is invalid.',
+        ),
+      );
+      await expectLater(
+        () => directory.create(),
+        throwsToolExit(
+          message:
+              'Flutter failed to create a directory at "directory". The directory name is invalid.',
+        ),
+      );
+
+      final listingDirectory = ErrorHandlingDirectory(
+        platform: windowsPlatform,
+        fileSystem: fileSystem,
+        delegate: _ThrowsOnListDirectory('directory', kDirectoryNameInvalid),
+      );
+      expect(
+        () => listingDirectory.listSync(),
+        throwsToolExit(
+          message:
+              'Flutter failed to list directory at "directory". The directory name is invalid.',
+        ),
+      );
+      await expectLater(
+        () => listingDirectory.list().toList(),
+        throwsToolExit(
+          message:
+              'Flutter failed to list directory at "directory". The directory name is invalid.',
+        ),
+      );
+
+      expect(
+        () => file.readAsStringSync(),
+        throwsToolExit(
+          message: 'Flutter failed to read a file at "file". The directory name is invalid.',
+        ),
+      );
+      await expectLater(
+        () => file.readAsString(),
+        throwsToolExit(
+          message: 'Flutter failed to read file at "file". The directory name is invalid.',
+        ),
+      );
+      expect(
+        () => file.writeAsStringSync(''),
+        throwsToolExit(
+          message: 'Flutter failed to write to a file at "file". The directory name is invalid.',
+        ),
+      );
+      await expectLater(
+        () => file.writeAsString(''),
+        throwsToolExit(
+          message: 'Flutter failed to write to a file at "file". The directory name is invalid.',
+        ),
+      );
+      expect(
+        () => file.openSync(),
+        throwsToolExit(
+          message: 'Flutter failed to open a file at "file". The directory name is invalid.',
+        ),
+      );
+      expect(
+        () => file.createSync(),
+        throwsToolExit(
+          message: 'Flutter failed to create file at "file". The directory name is invalid.',
+        ),
+      );
     });
 
     testWithoutContext('when creating a temporary dir on a full device', () async {
@@ -1283,6 +1400,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
   group('ProcessManager on windows throws tool exit', () {
     const kDeviceFull = 112;
     const kFilenameExcedRange = 206;
+    const kDirectoryNameInvalid = 267; // Win32 ERROR_DIRECTORY.
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
     const kApplicationControlPolicyBlocked = 4551;
@@ -1525,6 +1643,61 @@ Please ensure that the SDK and/or project is installed in a location that has re
           '  Command: foo --bar\n'
           'Please consider moving the Flutter SDK and/or project to a shorter path, '
           'or enabling long paths on Windows.';
+      await expectLater(
+        () => processManager.start(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+      await expectLater(
+        () => processManager.run(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+      expect(
+        () => processManager.runSync(<String>['foo', '--bar']),
+        throwsToolExit(message: expectedMessage),
+      );
+    });
+
+    testWithoutContext('when directory name is invalid', () async {
+      final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The directory name is invalid.',
+            kDirectoryNameInvalid,
+          ),
+        ),
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The directory name is invalid.',
+            kDirectoryNameInvalid,
+          ),
+        ),
+        const FakeCommand(
+          command: <String>['foo', '--bar'],
+          exception: ProcessException(
+            'foo',
+            <String>['--bar'],
+            'The directory name is invalid.',
+            kDirectoryNameInvalid,
+          ),
+        ),
+      ]);
+
+      final ProcessManager processManager = createProcessManager(
+        delegate: fakeProcessManager,
+        platform: windowsPlatform,
+      );
+
+      const expectedMessage =
+          'Flutter failed to run "foo --bar". The directory name is invalid.\n'
+          'ProcessException: The directory name is invalid.\n'
+          '  Command: foo --bar\n'
+          'Please ensure that the directory path is valid and refers to a directory.';
       await expectLater(
         () => processManager.start(<String>['foo', '--bar']),
         throwsToolExit(message: expectedMessage),
@@ -2227,6 +2400,27 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 
   @override
   Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
+}
+
+class _ThrowsOnListDirectory extends Fake implements io.Directory {
+  _ThrowsOnListDirectory(this.path, this.errorCode);
+
+  @override
+  final String path;
+
+  final int errorCode;
+
+  @override
+  List<io.FileSystemEntity> listSync({bool recursive = false, bool followLinks = true}) {
+    throw FileSystemException('Directory listing failed', path, OSError('', errorCode));
+  }
+
+  @override
+  Stream<io.FileSystemEntity> list({bool recursive = false, bool followLinks = true}) {
+    return Stream<io.FileSystemEntity>.error(
+      FileSystemException('Directory listing failed', path, OSError('', errorCode)),
+    );
+  }
 }
 
 class FakeFileSystem extends Fake implements FileSystem {
