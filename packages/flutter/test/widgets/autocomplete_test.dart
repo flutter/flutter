@@ -55,6 +55,46 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
+  testWidgets('the field builder can invoke an autocomplete action', (WidgetTester tester) async {
+    late BuildContext fieldContext;
+    late VoidCallback submitField;
+    String? selection;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue value) => const <String>['alfa', 'alpha'],
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController controller,
+                FocusNode focusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                fieldContext = context;
+                submitField = onFieldSubmitted;
+                return TestTextField(focusNode: focusNode, controller: controller);
+              },
+          optionsViewBuilder: (
+            BuildContext context,
+            AutocompleteOnSelected<String> onSelected,
+            Iterable<String> options,
+          ) => Text(options.elementAt(AutocompleteHighlightedOption.of(context))),
+          onSelected: (String option) => selection = option,
+        ),
+      ),
+    );
+    await tester.enterText(find.byType(TestTextField), 'al');
+    await tester.pump();
+    expect(find.text('alfa'), findsOneWidget);
+
+    Actions.invoke(fieldContext, const AutocompleteNextOptionIntent());
+    await tester.pump();
+    expect(find.text('alpha'), findsOneWidget);
+    submitField();
+    expect(selection, 'alpha');
+  });
+
   testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();

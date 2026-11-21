@@ -722,15 +722,14 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   @override
   Widget build(BuildContext context) {
-    final Widget fieldView =
-        widget.fieldViewBuilder?.call(
-          context,
-          _textEditingController,
-          _focusNode,
-          _onFieldSubmitted,
-        ) ??
+    final AutocompleteFieldViewBuilder? fieldViewBuilder = widget.fieldViewBuilder;
+    final Widget fieldView = fieldViewBuilder != null
+        ? Builder(
+            builder: (BuildContext context) =>
+                fieldViewBuilder(context, _textEditingController, _focusNode, _onFieldSubmitted),
+          )
         // Horizontally expand to make sure the options view's width won't be zero.
-        const SizedBox(width: double.infinity, height: 0.0);
+        : const SizedBox(width: double.infinity, height: 0.0);
     return OverlayPortal.overlayChildLayoutBuilder(
       controller: _optionsViewController,
       overlayChildBuilder: _buildOptionsView,
