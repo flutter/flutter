@@ -188,7 +188,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     [self hideSystemContextMenu];
     result(nil);
   } else if ([method isEqualToString:@"Magnifier.showSystemMagnifier"]) {
-    result(@([self showSystemMagnifier:args]));
+    result([self showSystemMagnifier:args]);
   } else if ([method isEqualToString:@"Magnifier.hideSystemMagnifier"]) {
     [self hideSystemMagnifier];
     result(nil);
@@ -217,12 +217,13 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 }
 
 // Shows the system loupe at the gesture position, or moves it if it is already shown. The
-// arguments are in the coordinate space of the Flutter view. Returns whether the loupe is shown.
-- (BOOL)showSystemMagnifier:(NSDictionary*)args {
+// arguments are in the coordinate space of the Flutter view. Returns @YES if the loupe is shown,
+// @NO if it could not be shown, and nil if this iOS version has no system loupe.
+- (NSNumber*)showSystemMagnifier:(NSDictionary*)args {
   if (@available(iOS 17.0, *)) {
     UIView* view = self.engine.viewController.viewIfLoaded;
     if (!view) {
-      return NO;
+      return @NO;
     }
     NSDictionary* encodedPosition = args[@"position"];
     NSDictionary* encodedCaretRect = args[@"caretRect"];
@@ -233,20 +234,17 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
         [encodedCaretRect[@"width"] doubleValue], [encodedCaretRect[@"height"] doubleValue]);
     UIView* cursorView = [self placeLoupeCursorViewInView:view atRect:caretRect];
     if (!self.loupeSession) {
-      // UIKit refuses a cursor taller than the loupe, so very large text begins without one.
       self.loupeSession = [UITextLoupeSession beginLoupeSessionAtPoint:position
                                                fromSelectionWidgetView:cursorView
                                                                 inView:view];
       if (!self.loupeSession) {
-        self.loupeSession = [UITextLoupeSession beginLoupeSessionAtPoint:position
-                                                 fromSelectionWidgetView:nil
-                                                                  inView:view];
+        return @NO;
       }
     }
     [self.loupeSession moveToPoint:position withCaretRect:caretRect trackingCaret:YES];
-    return self.loupeSession != nil;
+    return @YES;
   }
-  return NO;
+  return nil;
 }
 
 - (void)hideSystemMagnifier {

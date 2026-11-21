@@ -727,8 +727,8 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (void)testSystemMagnifierBeginsWithoutCursorWhenUIKitRefusesIt {
-  if (@available(iOS 17.4, *)) {
+- (void)testSystemMagnifierIsNotShownWhenUIKitReturnsNoSession {
+  if (@available(iOS 17.0, *)) {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
     [engine runWithEntrypoint:nil];
     FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -738,21 +738,16 @@ FLUTTER_ASSERT_ARC
     UIView* view = viewController.view;
     FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
 
-    // UIKit returns nil for a cursor taller than the loupe.
     id mockLoupeSession = OCMClassMock([UITextLoupeSession class]);
     OCMStub(ClassMethod([mockLoupeSession beginLoupeSessionAtPoint:CGPointMake(10, 20)
-                                           fromSelectionWidgetView:[OCMArg isNotNil]
+                                           fromSelectionWidgetView:[OCMArg any]
                                                             inView:view]))
         .andReturn(nil);
-    OCMStub(ClassMethod([mockLoupeSession beginLoupeSessionAtPoint:CGPointMake(10, 20)
-                                           fromSelectionWidgetView:[OCMArg isNil]
-                                                            inView:view]))
-        .andReturn(mockLoupeSession);
 
     __block id showResult;
     NSDictionary* args = @{
       @"position" : @{@"x" : @10, @"y" : @20},
-      @"caretRect" : @{@"x" : @8, @"y" : @0, @"width" : @4, @"height" : @300},
+      @"caretRect" : @{@"x" : @8, @"y" : @12, @"width" : @2, @"height" : @18},
     };
     [plugin handleMethodCall:[FlutterMethodCall
                                  methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
@@ -760,31 +755,60 @@ FLUTTER_ASSERT_ARC
                       result:^(id result) {
                         showResult = result;
                       }];
-    XCTAssertEqualObjects(showResult, @YES);
-    OCMVerify([mockLoupeSession moveToPoint:CGPointMake(10, 20)
-                              withCaretRect:CGRectMake(8, 0, 4, 300)
-                              trackingCaret:YES]);
+    XCTAssertEqualObjects(showResult, @NO);
+    // UIKit is asked only once, not again without the cursor.
+    OCMVerify(times(1), ClassMethod([mockLoupeSession beginLoupeSessionAtPoint:CGPointMake(10, 20)
+                                                       fromSelectionWidgetView:[OCMArg any]
+                                                                        inView:[OCMArg any]]));
 
     [mockLoupeSession stopMocking];
   }
 }
 
 - (void)testSystemMagnifierIsNotShownWithoutAView {
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
-  FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+  if (@available(iOS 17.0, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
 
-  __block id showResult;
-  NSDictionary* args = @{
-    @"position" : @{@"x" : @10, @"y" : @20},
-    @"caretRect" : @{@"x" : @8, @"y" : @12, @"width" : @2, @"height" : @18},
-  };
-  [plugin
-      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
-                                                         arguments:args]
-                result:^(id result) {
-                  showResult = result;
-                }];
-  XCTAssertEqualObjects(showResult, @NO);
+    __block id showResult;
+    NSDictionary* args = @{
+      @"position" : @{@"x" : @10, @"y" : @20},
+      @"caretRect" : @{@"x" : @8, @"y" : @12, @"width" : @2, @"height" : @18},
+    };
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
+                                                arguments:args]
+                      result:^(id result) {
+                        showResult = result;
+                      }];
+    XCTAssertEqualObjects(showResult, @NO);
+  }
+}
+
+- (void)testSystemMagnifierIsUnsupportedBeforeIOS17 {
+  if (!@available(iOS 17.0, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
+    [viewController loadViewIfNeeded];
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+
+    __block BOOL resultCalled = NO;
+    NSDictionary* args = @{
+      @"position" : @{@"x" : @10, @"y" : @20},
+      @"caretRect" : @{@"x" : @8, @"y" : @12, @"width" : @2, @"height" : @18},
+    };
+    [plugin handleMethodCall:[FlutterMethodCall
+                                 methodCallWithMethodName:@"Magnifier.showSystemMagnifier"
+                                                arguments:args]
+                      result:^(id result) {
+                        XCTAssertNil(result);
+                        resultCalled = YES;
+                      }];
+    XCTAssertTrue(resultCalled);
+  }
 }
 
 @end
