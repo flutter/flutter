@@ -117,6 +117,10 @@ Press play to produce texture frames.''';
         if ((tickCount % (calibrationTickCount ~/ 20)) == 0) {
           debugPrint('Calibrating... ${(100.0 * tickCount / calibrationTickCount).floor()}%');
         }
+        // Update label to force recompositing otherwise the calibration will only measure build time.
+        setState(() {
+          _summary = 'Calibrating... $tickCount';
+        });
       }
     });
     ticker.start();
