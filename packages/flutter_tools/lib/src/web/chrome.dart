@@ -147,7 +147,7 @@ String _findLinuxChromeExecutable(Platform platform, FileSystem fileSystem) {
       .toList();
   for (final executable in <String>[kLinuxExecutable, ...kLinuxChromiumExecutables]) {
     for (final directory in searchPath) {
-      if (fileSystem.file(fileSystem.path.join(directory, executable)).existsSync()) {
+      if (fileSystem.isFileSync(fileSystem.path.join(directory, executable))) {
         return executable;
       }
     }
