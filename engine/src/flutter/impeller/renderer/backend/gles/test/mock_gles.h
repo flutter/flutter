@@ -52,6 +52,12 @@ class IMockGLESImpl {
                                     GLenum textarget,
                                     GLuint texture,
                                     GLint level) {}
+  virtual void FramebufferTexture2DMultisampleEXT(GLenum target,
+                                                  GLenum attachment,
+                                                  GLenum textarget,
+                                                  GLuint texture,
+                                                  GLint level,
+                                                  GLsizei samples) {}
   virtual GLenum CheckFramebufferStatus(GLenum target) {
     return GL_FRAMEBUFFER_COMPLETE;
   }
@@ -234,6 +240,15 @@ class MockGLESImpl : public IMockGLESImpl {
                GLenum textarget,
                GLuint texture,
                GLint level),
+              (override));
+  MOCK_METHOD(void,
+              FramebufferTexture2DMultisampleEXT,
+              (GLenum target,
+               GLenum attachment,
+               GLenum textarget,
+               GLuint texture,
+               GLint level,
+               GLsizei samples),
               (override));
   MOCK_METHOD(GLenum, CheckFramebufferStatus, (GLenum target), (override));
   MOCK_METHOD(void,
