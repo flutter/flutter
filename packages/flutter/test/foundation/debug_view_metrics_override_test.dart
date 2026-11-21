@@ -760,6 +760,68 @@ void main() {
     });
   });
 
+  group('debugApplyViewMetricsOverridesToView', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    test('applies the entry of the id it is given, and reports that id', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.FlutterView raw = dispatcher.view(id: 1)!;
+      final ui.FlutterView aliased = debugApplyViewMetricsOverridesToView(raw, viewId: 7);
+      expect(aliased.viewId, 7);
+      expect(aliased.devicePixelRatio, 2.0);
+      expect(aliased.platformDispatcher.textScaleFactor, 1.0);
+      // View and RenderView compare the view they hold by identity.
+      expect(debugApplyViewMetricsOverridesToView(raw, viewId: 7), same(aliased));
+      expect(debugApplyViewMetricsOverridesToView(raw, viewId: 8), isNot(same(aliased)));
+
+      debugSetViewMetricsOverride(
+        7,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 9.0,
+          textScaling: <ui.Offset>[ui.Offset(1, 3)],
+          boldText: true,
+        ),
+      );
+      expect(aliased.devicePixelRatio, 9.0);
+      // The platform-wide metrics come from the same entry, through the
+      // dispatcher the view reports.
+      expect(aliased.platformDispatcher.textScaleFactor, 3.0);
+      expect(aliased.platformDispatcher.accessibilityFeatures.boldText, isTrue);
+      // The view the dispatcher reports for the wrapped view's own id is not
+      // affected by the entry of the alias.
+      expect(debugApplyViewMetricsOverrides(dispatcher).view(id: 1)!.devicePixelRatio, 2.0);
+
+      // Nor is the alias affected by the entry of the raw view's id.
+      debugSetViewMetricsOverride(7, null);
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(devicePixelRatio: 5.0, boldText: true),
+      );
+      expect(aliased.devicePixelRatio, 2.0);
+      expect(aliased.platformDispatcher.accessibilityFeatures.boldText, isFalse);
+    });
+
+    test('returns a wrapper of the same id itself, and wraps any other view', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.FlutterView raw = dispatcher.view(id: 1)!;
+      final ui.FlutterView vended = debugApplyViewMetricsOverrides(dispatcher).view(id: 1)!;
+      final ui.FlutterView aliased = debugApplyViewMetricsOverridesToView(raw, viewId: 7);
+
+      expect(debugApplyViewMetricsOverridesToView(vended, viewId: 1), same(vended));
+      expect(debugApplyViewMetricsOverridesToView(aliased, viewId: 7), same(aliased));
+      // The view a dispatcher reports is the answer for its own id.
+      expect(debugApplyViewMetricsOverridesToView(raw, viewId: 1), same(vended));
+      // Normalization leaves such a view alone too.
+      expect(debugViewWithMetricsOverrides(aliased), same(aliased));
+
+      // A wrapper of another id applies its entry below the entry of [viewId].
+      final ui.FlutterView stacked = debugApplyViewMetricsOverridesToView(vended, viewId: 7);
+      expect(stacked.viewId, 7);
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 5.0));
+      expect(stacked.devicePixelRatio, 5.0);
+    });
+  });
+
   group('the wrapper delegates when nothing is overridden', () {
     late ui.PlatformDispatcher real;
     late ui.PlatformDispatcher wrapped;

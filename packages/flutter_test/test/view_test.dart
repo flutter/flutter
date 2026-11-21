@@ -5,6 +5,8 @@
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart'
+    show DebugViewMetricsOverride, debugClearViewMetricsOverrides, debugSetViewMetricsOverride;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -355,6 +357,72 @@ void main() {
       expect(backingView.lastSemanticsUpdate, expectedUpdate);
     });
   });
+
+  group('TestFlutterView with a debug view metrics override', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    testWidgets('reports display features in the logical pixels of the ratio it reports', (
+      WidgetTester tester,
+    ) async {
+      final dispatcher = TestPlatformDispatcher(platformDispatcher: _HingePlatformDispatcher());
+      final TestFlutterView view = dispatcher.view(id: _HingeView.id)!;
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(20, 0, 30, 100));
+
+      // An overridden ratio moves the hinge into its logical pixels, so that it
+      // stays where it is physically.
+      debugSetViewMetricsOverride(
+        _HingeView.id,
+        const DebugViewMetricsOverride(devicePixelRatio: 4.0),
+      );
+      expect(view.devicePixelRatio, 4.0);
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(10, 0, 15, 50));
+
+      // A ratio the test sets hides the overridden one, so the hinge is in the
+      // logical pixels of the ratio the test set instead.
+      view.devicePixelRatio = 2.0;
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(20, 0, 30, 100));
+      view.devicePixelRatio = 1.0;
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(40, 0, 60, 200));
+      debugClearViewMetricsOverrides();
+      expect(view.displayFeatures.single.bounds, const Rect.fromLTRB(40, 0, 60, 200));
+    });
+
+    testWidgets('views of a dispatcher that was not wrapped apply their entries, unannounced', (
+      WidgetTester tester,
+    ) async {
+      // Unlike the binding's, this dispatcher was not wrapped by
+      // debugApplyViewMetricsOverrides, which is what applies the implicit
+      // view's entry to the platform-wide metrics and announces a change. The
+      // views still apply their entries to everything else.
+      final dispatcher = TestPlatformDispatcher(platformDispatcher: _TwoViewPlatformDispatcher());
+      var metricsChanged = 0;
+      dispatcher.onMetricsChanged = () => metricsChanged += 1;
+      final TestFlutterView implicitView = dispatcher.implicitView!;
+      final TestFlutterView secondView = dispatcher.view(
+        id: _TwoViewPlatformDispatcher.secondViewId,
+      )!;
+
+      debugSetViewMetricsOverride(
+        implicitView.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 4.0, textScaling: <Offset>[Offset(1, 3)]),
+      );
+      debugSetViewMetricsOverride(
+        secondView.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 5.0, textScaling: <Offset>[Offset(1, 2)]),
+      );
+      final double implicitRatio = implicitView.devicePixelRatio;
+      final double implicitTextScale = implicitView.platformDispatcher.textScaleFactor;
+      final double secondRatio = secondView.devicePixelRatio;
+      final double secondTextScale = secondView.platformDispatcher.textScaleFactor;
+      debugClearViewMetricsOverrides();
+
+      expect(implicitRatio, 4.0);
+      expect(implicitTextScale, 1.0);
+      expect(secondRatio, 5.0);
+      expect(secondTextScale, 2.0);
+      expect(metricsChanged, 0);
+    });
+  });
 }
 
 Matcher matchesSnapshot(FlutterViewSnapshot expected) => _FlutterViewSnapshotMatcher(expected);
@@ -514,3 +582,88 @@ class _FakeFlutterView extends Fake implements FlutterView {
 }
 
 class _FakeDisplay extends Fake implements TestDisplay {}
+
+/// A [PlatformDispatcher] that reports a single [_HingeView] and no displays.
+class _HingePlatformDispatcher extends Fake implements PlatformDispatcher {
+  final _HingeView _view = _HingeView();
+
+  @override
+  Iterable<FlutterView> get views => <FlutterView>[_view];
+
+  @override
+  Iterable<Display> get displays => const <Display>[];
+
+  @override
+  VoidCallback? onMetricsChanged;
+
+  @override
+  ViewFocusChangeCallback? onViewFocusChange;
+}
+
+/// A [FlutterView] at a device pixel ratio of 2 with a vertical hinge at the
+/// logical horizontal offsets 20 to 30.
+class _HingeView extends Fake implements FlutterView {
+  static const int id = 300;
+
+  @override
+  int get viewId => id;
+
+  @override
+  double get devicePixelRatio => 2.0;
+
+  @override
+  List<DisplayFeature> get displayFeatures => const <DisplayFeature>[
+    DisplayFeature(
+      bounds: Rect.fromLTRB(20, 0, 30, 100),
+      type: DisplayFeatureType.hinge,
+      state: DisplayFeatureState.postureFlat,
+    ),
+  ];
+}
+
+/// A [PlatformDispatcher] with an implicit view and a second view, that
+/// reports a text scale factor of 1 and no displays.
+class _TwoViewPlatformDispatcher extends Fake implements PlatformDispatcher {
+  static const int implicitViewId = 400;
+  static const int secondViewId = 401;
+
+  late final Map<int, FlutterView> _views = <int, FlutterView>{
+    implicitViewId: _PlainView(this, implicitViewId),
+    secondViewId: _PlainView(this, secondViewId),
+  };
+
+  @override
+  FlutterView? get implicitView => _views[implicitViewId];
+
+  @override
+  Iterable<FlutterView> get views => _views.values;
+
+  @override
+  FlutterView? view({required int id}) => _views[id];
+
+  @override
+  Iterable<Display> get displays => const <Display>[];
+
+  @override
+  double get textScaleFactor => 1.0;
+
+  @override
+  VoidCallback? onMetricsChanged;
+
+  @override
+  ViewFocusChangeCallback? onViewFocusChange;
+}
+
+/// A [FlutterView] of [platformDispatcher] at a device pixel ratio of 2.
+class _PlainView extends Fake implements FlutterView {
+  _PlainView(this.platformDispatcher, this.viewId);
+
+  @override
+  final PlatformDispatcher platformDispatcher;
+
+  @override
+  final int viewId;
+
+  @override
+  double get devicePixelRatio => 2.0;
+}
