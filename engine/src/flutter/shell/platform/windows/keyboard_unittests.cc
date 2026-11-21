@@ -79,8 +79,64 @@ constexpr bool kNotSynthesized = false;
 typedef UINT (*MapVirtualKeyLayout)(UINT uCode, UINT uMapType);
 typedef std::function<UINT(UINT)> MapVirtualKeyToChar;
 
+// A hermetic US English keyboard layout. The tests are authored against the
+// US (and US-International) layout, but MapVirtualKey consults the layout
+// installed on the machine running the tests, so on a non-US host the same
+// virtual key produces a different character and layout-sensitive tests fail
+// (for example, VK_OEM_3 is the grave accent on US but an umlaut on German).
+// This returns the character MapVirtualKey(uCode, MAPVK_VK_TO_CHAR) would
+// return on a US layout for the keys the tests exercise; other map types are
+// layout independent and are forwarded to the platform.
+UINT LayoutUsStandard(UINT uCode, UINT uMapType) {
+  if (uMapType != MAPVK_VK_TO_CHAR) {
+    return MapVirtualKey(uCode, uMapType);
+  }
+  // Digits and letters map to their ASCII characters, which are numerically
+  // equal to their virtual-key codes on the US layout.
+  if ((uCode >= '0' && uCode <= '9') || (uCode >= 'A' && uCode <= 'Z')) {
+    return uCode;
+  }
+  switch (uCode) {
+    // Control keys are layout independent; their values match a US layout.
+    case VK_BACK:  // 0x08
+      return '\b';
+    case VK_TAB:  // 0x09
+      return '\t';
+    case VK_RETURN:  // 0x0D
+      return '\r';
+    case VK_ESCAPE:  // 0x1B
+      return 0x1B;
+    case VK_SPACE:
+      return ' ';
+    case VK_OEM_1:  // 0xBA
+      return ';';
+    case VK_OEM_PLUS:  // 0xBB
+      return '=';
+    case VK_OEM_COMMA:  // 0xBC
+      return ',';
+    case VK_OEM_MINUS:  // 0xBD
+      return '-';
+    case VK_OEM_PERIOD:  // 0xBE
+      return '.';
+    case VK_OEM_2:  // 0xBF
+      return '/';
+    case VK_OEM_3:  // 0xC0
+      return '`';
+    case VK_OEM_4:  // 0xDB
+      return '[';
+    case VK_OEM_5:  // 0xDC
+      return '\\';
+    case VK_OEM_6:  // 0xDD
+      return ']';
+    case VK_OEM_7:  // 0xDE
+      return '\'';
+    default:
+      return 0;
+  }
+}
+
 UINT LayoutDefault(UINT uCode, UINT uMapType) {
-  return MapVirtualKey(uCode, uMapType);
+  return LayoutUsStandard(uCode, uMapType);
 }
 
 UINT LayoutFrench(UINT uCode, UINT uMapType) {
@@ -90,7 +146,7 @@ UINT LayoutFrench(UINT uCode, UINT uMapType) {
         case 0xDD:
           return 0x8000005E;
         default:
-          return MapVirtualKey(uCode, MAPVK_VK_TO_CHAR);
+          return LayoutUsStandard(uCode, MAPVK_VK_TO_CHAR);
       }
     default:
       return MapVirtualKey(uCode, uMapType);
