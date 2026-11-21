@@ -2201,7 +2201,14 @@ extension type DomOffscreenCanvas._(JSObject _) implements DomEventTarget, DomCa
     return blob.toDart.then((JSAny? value) => value! as DomBlob);
   }
 
-  external DomImageBitmap transferToImageBitmap();
+  @JS('transferToImageBitmap')
+  external DomImageBitmap _transferToImageBitmap();
+  DomImageBitmap transferToImageBitmap() {
+    if (debugThrowOnCreateImageBitmapIfDisabled && !browserSupportsCreateImageBitmap) {
+      throw UnsupportedError('createImageBitmap is not supported in this browser');
+    }
+    return _transferToImageBitmap();
+  }
 }
 
 DomOffscreenCanvas createDomOffscreenCanvas(int width, int height) =>

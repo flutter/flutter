@@ -490,18 +490,57 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
     List<ui.Picture> pictures,
   ) async {
     await _initialized.future;
-    // Everything from here until all bitmaps have been requested must be
-    // synchronous so that no other operation can resize or draw into the
-    // canvas in between. `createImageBitmap` copies the canvas contents at the
-    // time it is called; only the resolution of the returned promise is
-    // asynchronous.
+    // Everything from here on must be synchronous so that no other operation
+    // can resize or draw into the canvas while pictures are rendered and
+    // transferred out of it.
     setSize(size);
-    final bitmapFutures = <Future<DomImageBitmap>>[];
-    for (final picture in pictures) {
-      _drawPicture(picture as CkPicture);
-      bitmapFutures.add(createImageBitmap(_canvas));
+    for (var attempt = 0; ; attempt++) {
+      final List<DomImageBitmap>? bitmaps = _tryCaptureBitmaps(pictures);
+      if (bitmaps != null) {
+        return bitmaps;
+      }
+      if (attempt == 0) {
+        onContextLost();
+      } else {
+        _markWebGlFailed('WebGL context remained lost after recovery.');
+        _recreateSkSurface();
+      }
     }
-    return Future.wait(bitmapFutures);
+  }
+
+  /// Draws [pictures] and transfers each into a [DomImageBitmap], or closes any
+  /// partial bitmaps and returns `null` if the WebGL context was lost.
+  ///
+  /// Blink throws `InvalidStateError` from `transferToImageBitmap()` on a lost
+  /// WebGL context, whereas Gecko and WebKit silently return a blank bitmap, so
+  /// `isContextLost()` is checked explicitly as well.
+  List<DomImageBitmap>? _tryCaptureBitmaps(List<ui.Picture> pictures) {
+    final offscreenCanvas = canvas as DomOffscreenCanvas;
+    final WebGLContext? gl = supportsWebGl ? _webGlContextOf(offscreenCanvas) : null;
+    final bitmaps = <DomImageBitmap>[];
+    try {
+      for (final picture in pictures) {
+        _drawPicture(picture as CkPicture);
+        if (!_isDisposed && gl != null && gl.isContextLost()) {
+          _closeBitmaps(bitmaps);
+          return null;
+        }
+        bitmaps.add(offscreenCanvas.transferToImageBitmap());
+      }
+      return bitmaps;
+    } catch (_) {
+      _closeBitmaps(bitmaps);
+      if (!_isDisposed && gl != null && gl.isContextLost()) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  static void _closeBitmaps(List<DomImageBitmap> bitmaps) {
+    for (final bitmap in bitmaps) {
+      bitmap.close();
+    }
   }
 
   @override
