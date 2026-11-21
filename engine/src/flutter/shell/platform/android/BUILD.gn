@@ -4,9 +4,11 @@
 
 import("//build/config/android/config.gni")
 import("//build/toolchain/clang.gni")
+import("//build_overrides/build.gni")
 import("//flutter/build/bin_to_obj.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
+import("//flutter/common/heapprofd.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
@@ -51,6 +53,7 @@ executable("flutter_shell_native_unittests") {
   sources = [
     "android_context_dynamic_impeller_unittests.cc",
     "android_context_gl_impeller_unittests.cc",
+    "android_dart_heap_profiler_unittests.cc",
     "android_image_generator_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
@@ -67,6 +70,10 @@ executable("flutter_shell_native_unittests") {
   deps = [
     ":flutter_shell_native_fixtures",
     ":flutter_shell_native_src",
+    "${perfetto_root_path}include/perfetto/base",
+    "${perfetto_root_path}include/perfetto/ext/base",
+    "${perfetto_root_path}src/base",
+    "${perfetto_root_path}src/protozero",
     "//flutter/fml",
     "//flutter/impeller/renderer/testing:mocks",
     "//flutter/shell/platform/android/jni:jni_mock",
@@ -74,6 +81,10 @@ executable("flutter_shell_native_unittests") {
     "//flutter/testing:testing_lib",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
+    "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/hash",
+    "//third_party/abseil-cpp/absl/types:span",
+    "//third_party/perfetto:libprotozero",
   ]
 }
 
@@ -105,6 +116,8 @@ source_set("flutter_shell_native_src") {
     "android_context_gl_impeller.h",
     "android_context_vk_impeller.cc",
     "android_context_vk_impeller.h",
+    "android_dart_heap_profiler.cc",
+    "android_dart_heap_profiler.h",
     "android_display.cc",
     "android_display.h",
     "android_egl_surface.cc",
@@ -201,6 +214,28 @@ source_set("flutter_shell_native_src") {
   public_configs = [ "//flutter:config" ]
 
   defines = []
+  deps = []
+
+  if (flutter_enable_heapprofd) {
+    defines += [ "FLUTTER_ENABLE_HEAPPROFD=1" ]
+    sources += [
+      "${perfetto_root_path}src/tracing/core/shared_memory_abi.cc",
+      "android_dart_heap_profiler_internal.h",
+    ]
+    deps += [
+      "${perfetto_root_path}gn:gen_buildflags",
+      "${perfetto_root_path}include/perfetto/base",
+      "${perfetto_root_path}include/perfetto/ext/base",
+      "${perfetto_root_path}include/perfetto/ext/tracing/core",
+      "${perfetto_root_path}src/base",
+      "${perfetto_root_path}src/base:unix_socket",
+      "${perfetto_root_path}src/protozero",
+      "//third_party/abseil-cpp/absl/container:flat_hash_set",
+      "//third_party/abseil-cpp/absl/hash",
+      "//third_party/abseil-cpp/absl/types:span",
+      "//third_party/perfetto:libprotozero",
+    ]
+  }
 
   libs = [
     "android",

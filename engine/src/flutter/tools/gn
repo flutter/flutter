@@ -501,6 +501,8 @@ def to_gn_args(args):
       raise Exception('--enable-heapprofd is only supported when targeting Android.')
     gn_args['flutter_enable_heapprofd'] = True
     gn_args['dart_include_sampling_heap_profiler'] = True
+    gn_args['enable_perfetto_ipc'] = True
+    gn_args['enable_perfetto_system_consumer'] = False
 
   if args.target_os == 'android' or args.target_os == 'ios':
     gn_args['skia_gl_standard'] = 'gles'

@@ -5,11 +5,8 @@
 #ifndef FLUTTER_FML_FILE_H_
 #define FLUTTER_FML_FILE_H_
 
-#include <cstddef>
 #include <functional>
 #include <initializer_list>
-#include <limits>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -92,18 +89,6 @@ fml::UniqueFD CreateDirectory(const fml::UniqueFD& base_directory,
 bool WriteAtomically(const fml::UniqueFD& base_directory,
                      const char* file_name,
                      const Mapping& mapping);
-
-/// Sequentially reads up to `max_bytes` from `file` into `out`. Unlike
-/// `FileMapping`, this works on pseudo-files such as `/proc/self/cmdline`
-/// whose size is reported as 0 by `fstat` and which cannot be `mmap`-ed.
-bool ReadFileToString(const fml::UniqueFD& file,
-                      std::string* out,
-                      size_t max_bytes = std::numeric_limits<size_t>::max());
-
-/// Convenience wrapper that opens `path` read-only and reads up to `max_bytes`.
-std::optional<std::string> ReadFileToString(
-    const char* path,
-    size_t max_bytes = std::numeric_limits<size_t>::max());
 
 /// Signature of a callback on a file in `directory` with `filename` (relative
 /// to `directory`). The returned bool should be false if and only if further
