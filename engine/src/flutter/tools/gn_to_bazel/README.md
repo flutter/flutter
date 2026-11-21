@@ -545,7 +545,10 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    thousand sources). What a script would read outside its inputs comes
    through the rule's `env` from a Bazel-side constant
    (`scriptEnvironment`: the engine's revision for `copy_info_plist.py`;
-   ANGLE's for its `commit_id.py`, which would ask git).
+   ANGLE's for its `commit_id.py`, which would ask git). A program the
+   script would look for in the checkout by itself is one of the rule's
+   `tools`, with its path in `env` (`scriptTools`: the compiler whose
+   version line `copy_info_plist.py` writes).
    `generated_file()` with `contents` becomes a `gn_generated_file` writing
    the lines, named after GN's output path under the build directory; the
    `metadata`-walking form (`data_keys`, the macOS archives' entitlements

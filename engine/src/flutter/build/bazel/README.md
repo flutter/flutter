@@ -158,7 +158,9 @@ sandbox contribute.
 
 - No Windows, Fuchsia or riscv64 Linux build.
 - Without `gclient sync` there is no web engine build (the Emscripten SDK
-  is installed by a hook of `DEPS`), and a Mac has not been tried.
+  is installed by a hook of `DEPS`). On a Mac, `flutter_tester`, nineteen of
+  the host's test targets and `et` have been built and run that way; an
+  Android or iOS build from a Mac has not.
 - Golden images are compared with what was fetched from Flutter Gold
   beforehand (`docs/framework_tests.md`, "Golden files"): the tests run
   with the network blocked. Off a bot an image that does not match fails

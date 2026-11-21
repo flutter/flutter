@@ -2387,6 +2387,63 @@ gn_action(
         expect(output, contains('load("//build_defs/gn:gn_action.bzl", "gn_action")'));
       });
 
+      test("what a script reads outside its inputs: a value in the action's environment, "
+          'a program among its tools', () async {
+        // copy_info_plist.py asks git for the engine's revision and runs
+        // the checkout's clang++ for its version line, finding both through
+        // its own real path. The action gives it both: the revision as a
+        // value of its environment (which is then in the action's key), the
+        // compiler as one of its tools, named in the environment by its
+        // path. The compiler is the host's, whichever checkout it is from.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/build/copy_info_plist.py': '',
+          'flutter/example/Info.plist': '',
+          'flutter/example/BUILD.gn': r'''
+action("info_plist") {
+  script = "//flutter/build/copy_info_plist.py"
+  sources = [ "Info.plist" ]
+  outputs = [ "$target_gen_dir/Info.plist" ]
+  args = [
+    "--source",
+    rebase_path(sources[0], root_build_dir),
+    "--destination",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          // The script is another package's file.
+          layout: const OutputLayout.main(
+            packages: <String>{'engine/src/flutter/build', 'engine/src/flutter/example'},
+          ),
+          tree: tree,
+        );
+        expect(output, contains('    script = "//engine/src/flutter/build:copy_info_plist.py",\n'));
+        expect(output, contains('load("@host_platform//:host.bzl", "HOST_CLANG")\n'));
+        expect(
+          output,
+          contains(r'''
+    env = {
+        "FLUTTER_CLANG": "$(execpath " + HOST_CLANG + "//:bin/clang++)",
+        "FLUTTER_ENGINE_VERSION": ENGINE_VERSION,
+    },
+'''),
+        );
+        // The link and the binary it stands for.
+        expect(
+          output,
+          contains('''
+    tools = [
+        HOST_CLANG + "//:bin/clang++",
+        HOST_CLANG + "//:bin/llvm",
+    ],
+'''),
+        );
+      });
+
       test("names a test after its output_name, with GN's name as an alias", () async {
         // The Android suites run_tests.py pushes by file name
         // (impeller_toolkit_android_unittests for toolkit/android's

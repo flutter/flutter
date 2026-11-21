@@ -725,6 +725,45 @@ const Map<String, Map<String, String>> scriptEnvironment = <String, Map<String, 
   },
 };
 
+/// A program an action's script runs that GN does not name among its
+/// inputs, because the script finds it in the checkout by itself: its label
+/// as a repository ([repository], a constant that names it for the host)
+/// and a file in it.
+final class ScriptTool {
+  const ScriptTool(this.repository, this.target, {this.files = const <String>[]});
+
+  /// The Starlark constant that holds the repository's name (`@clang_...`).
+  final ReferenceConstant repository;
+
+  /// The program, a label in that repository (`//:bin/clang++`).
+  final String target;
+
+  /// What the program is beside its own file (the binary a link stands for).
+  final List<String> files;
+}
+
+/// The programs an action's script runs outside its inputs, by the script's
+/// GN path, each under the name of the environment variable that carries
+/// its path to the script (gn_action's `env`, as `$(execpath ...)`, with
+/// the program among the action's `tools`). copy_info_plist.py runs
+/// `buildtools/mac-<cpu>/clang/bin/clang++ --version` for the compiler's
+/// version line (the ClangVersion key of the iOS framework's and the
+/// embedder's Info.plist; it runs it for every plist), in the checkout it
+/// finds through its own real path: a read outside the sandbox, which only
+/// a checkout that `gclient sync` populated satisfies. With the variable
+/// the compiler is the action's input: the checkout's, or the fetched one
+/// where the checkout has none (@host_platform's HOST_CLANG either way).
+const Map<String, Map<String, ScriptTool>> scriptTools = <String, Map<String, ScriptTool>>{
+  '//flutter/build/copy_info_plist.py': <String, ScriptTool>{
+    'FLUTTER_CLANG': ScriptTool(
+      ReferenceConstant('@host_platform//:host.bzl', 'HOST_CLANG'),
+      '//:bin/clang++',
+      // bin/clang++ is a link to the multicall binary.
+      files: <String>['//:bin/llvm'],
+    ),
+  },
+};
+
 /// The platform a GN toolchain on an action's dependency edge stands for
 /// (`deps += [ "//third_party/vulkan_validation_layers($apilevel26_toolchain)" ]`):
 /// the dependency is built for it (gn_action's platform_deps, through a

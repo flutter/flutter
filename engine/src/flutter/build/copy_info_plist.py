@@ -25,10 +25,15 @@ _src_root_dir = os.path.join(_script_dir, '..', '..')
 
 
 def get_clang_version():
-  arch = 'arm64' if platform.machine() in ('arm64', 'aarch64') else 'x64'
-  clang_executable = os.path.join(
-      _src_root_dir, 'flutter', 'buildtools', f'mac-{arch}', 'clang', 'bin', 'clang++'
-  )
+  # A Bazel build names the compiler in the action's environment, an input of
+  # the action like any other: the checkout's, or the one Bazel fetched where
+  # `gclient sync` has not run. A GN build runs the checkout's.
+  clang_executable = os.environ.get('FLUTTER_CLANG')
+  if not clang_executable:
+    arch = 'arm64' if platform.machine() in ('arm64', 'aarch64') else 'x64'
+    clang_executable = os.path.join(
+        _src_root_dir, 'flutter', 'buildtools', f'mac-{arch}', 'clang', 'bin', 'clang++'
+    )
   version = subprocess.check_output([clang_executable, '--version'], text=True)
   return version.splitlines()[0]
 

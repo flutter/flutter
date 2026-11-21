@@ -1553,14 +1553,34 @@ final class _Emitter {
           for (final String label in scriptInputs[_gnPath(script)] ?? const <String>[]) {
             rule.list('inputs').addUnique(Condition.always, _Item(_localLabel(label)));
           }
-          // What it reads outside its inputs, in the action's key.
-          final Map<String, String>? environment = scriptEnvironment[_gnPath(script)];
-          if (environment != null) {
-            final entries = <String>[
-              for (final MapEntry<String, String> entry in environment.entries)
-                '${_starlarkString(entry.key)}: ${_constantSymbol(entry.value)}',
-            ];
-            rule.scalars['env'] = '{${entries.join(', ')}}';
+          // What it reads outside its inputs, in the action's key; and the
+          // programs it runs that are none of its inputs: among the
+          // action's tools, each one's path in the environment.
+          final entries = <String, String>{
+            for (final MapEntry<String, String> entry
+                in (scriptEnvironment[_gnPath(script)] ?? const <String, String>{}).entries)
+              entry.key: _constantSymbol(entry.value),
+          };
+          for (final MapEntry<String, ScriptTool> entry
+              in (scriptTools[_gnPath(script)] ?? const <String, ScriptTool>{}).entries) {
+            final ScriptTool tool = entry.value;
+            final String repository = tool.repository.symbol;
+            _use(tool.repository.file, repository);
+            entries[entry.key] = '"\$(execpath " + $repository + "${tool.target})"';
+            for (final file in <String>[tool.target, ...tool.files]) {
+              rule
+                  .list('tools')
+                  .addUnique(
+                    Condition.always,
+                    _Item('$repository + "$file"', quoted: false, expression: true),
+                  );
+            }
+          }
+          if (entries.isNotEmpty) {
+            final List<String> names = entries.keys.toList()..sort();
+            rule.scalars['env'] = names.length == 1
+                ? '{${_starlarkString(names.single)}: ${entries[names.single]}}'
+                : '{\n${names.map((String name) => '        ${_starlarkString(name)}: ${entries[name]},\n').join()}    }';
           }
         case 'sources':
           _actionFilesInto(rule, 'srcs', variable);

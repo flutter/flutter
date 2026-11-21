@@ -157,8 +157,9 @@ unchanged; there is no Bazel build on a Windows host.
 - The web engine: the Emscripten SDK is installed by a hook of `DEPS`
   (`download_emsdk`), which no fetched tree runs; `@emsdk` says so when a
   build asks for it.
-- macOS and Windows hosts: the rules are host-independent, but only Linux
-  x64 has been run.
+- Windows hosts. On macOS (arm64) `flutter_tester`, nineteen of the host's
+  test targets and `et` have been built and run this way; an Android or iOS
+  build from a Mac has not.
 - A synced checkout that lacks one nested dependency (a roll added it and
   `gclient sync` has not run since) is not repaired: a tree comes from the
   checkout or from a fetch, whole.

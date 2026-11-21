@@ -186,7 +186,14 @@ for the revision it writes into the Apple frameworks' Info.plist; the
 converter sets `FLUTTER_ENGINE_VERSION` from `@engine_version` on that
 script's actions and the script takes it from there, so the plist names the
 checkout's HEAD in a stamped build, `--config=stamp`, and a fixed word
-otherwise, and the action reruns when the value changes).
+otherwise, and the action reruns when the value changes). A program such a
+script would find in the checkout by itself comes the same way, as one of
+the action's `tools` whose path `env` names: the same script runs
+`buildtools/mac-<cpu>/clang/bin/clang++ --version` for the plist's compiler
+line, from the checkout it reaches through its own real path, which is
+outside the sandbox and not there without `gclient sync`; the converter's
+`scriptTools` makes the host's `clang++` (`HOST_CLANG`) a tool of those
+actions and sets `FLUTTER_CLANG` to its path.
 `shell/vmservice/BUILD.bazel` is hand-written
 (the VM-service kernel and its AOT snapshot per ABI). Against CI's artifacts
 of the base commit: the embedding jar byte-identical (456 classes), the

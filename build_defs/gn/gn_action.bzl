@@ -364,6 +364,14 @@ def _gn_action_impl(ctx):
         arguments = [arg.replace("{{response_file_name}}", response_file.path) for arg in arguments]
         response_files.append(response_file)
     inputs = ctx.files.srcs + ctx.files.inputs + dep_files + [file for file in read if file not in own] + response_files
+
+    # A value of `env` may name one of the tools by its path, as an argument
+    # may ($(execpath LABEL)): the compiler copy_info_plist.py asks for its
+    # version.
+    env = {
+        name: ctx.expand_location(value, targets.values()) if "$(" in value else value
+        for name, value in ctx.attr.env.items()
+    }
     run_python(
         ctx,
         script = ctx.file.script,
@@ -373,7 +381,7 @@ def _gn_action_impl(ctx):
         mnemonic = "GnAction",
         progress_message = "GN action %{label}",
         tools = ctx.files.tools,
-        env = ctx.attr.env,
+        env = env,
     )
 
     # The outputs are under GN's $target_gen_dir: gen/<GN package>/. An
@@ -490,7 +498,9 @@ gn_action = rule(
             doc = "Environment variables for the script. Also what puts in the action's key a value the script " +
                   "would read outside its inputs (copy_info_plist.py takes the engine's revision from " +
                   "FLUTTER_ENGINE_VERSION where a GN build asks git): the action reruns when the value changes, " +
-                  "where its cached result would be stale.",
+                  "where its cached result would be stale. A value may name one of `tools` as $(execpath LABEL): " +
+                  "a program the script would otherwise look for in the checkout (the same script's FLUTTER_CLANG, " +
+                  "the compiler whose version line it writes).",
         ),
     } | PYTHON_ATTRS,
 )
