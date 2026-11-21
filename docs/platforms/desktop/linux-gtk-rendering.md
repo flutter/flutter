@@ -157,6 +157,13 @@ GTK4 renderers make the distinction more important:
 * `GSK_RENDERER=cairo`: useful as a diagnostic software baseline, not an
   accelerated presentation target.
 
+On GTK 4.16 or newer, the generated GTK4 runner prefers GL composition for
+Flutter's default OpenGL texture path in a Wayland session. The runner applies
+this preference before GTK startup. An explicit `GSK_RENDERER` takes precedence.
+Selecting Flutter Vulkan, software rendering, DMA-BUF export, or graphics
+offload leaves the GTK renderer choice to the application and GTK. Existing
+runners can use `GSK_RENDERER=gl` at launch to try the same configuration.
+
 Available renderer names depend on the installed GTK version. `GSK_RENDERER`
 selects GTK's renderer, not Flutter's rendering backend.
 
