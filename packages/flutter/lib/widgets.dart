@@ -163,6 +163,7 @@ export 'src/widgets/standard_component_type.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/stretch_effect.dart';
 export 'src/widgets/system_context_menu.dart';
+export 'src/widgets/system_text_magnifier.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/tap_region.dart';
 export 'src/widgets/text.dart';
