@@ -66,6 +66,21 @@ version.
 AGP versions are updated (you should see these fail if you do not fix them
 preemptively).
 
+### Raising the supported versions of AGP, KGP, or Gradle
+When raising a `warn*Version` or `error*Version` in
+[DependencyVersionChecker.kt](../../../gradle/src/main/kotlin/DependencyVersionChecker.kt),
+also update
+[template_dependency_version_migration.dart](migrations/template_dependency_version_migration.dart),
+which upgrades projects created with older templates.
+`template_dependency_version_migration_test.dart` fails until they match.
+- Set its `template*UpgradeTarget` constants to the new `warn*Version` values,
+  and `minimumAgpUpgradeTarget` to the new `errorAGPVersion`.
+- Add the template versions that are now below the warn versions to its
+  `template*VersionsToUpgrade` sets. Include the previous upgrade targets, so
+  that projects that this migration already upgraded are upgraded again.
+- Keep every upgrade within one major version. Moving across a major version
+  usually needs other changes that this migration doesn't make.
+
 ### A new version becomes available for...
 
 #### Gradle
