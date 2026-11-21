@@ -37,6 +37,13 @@ if [[ -n "${TEST_TOTAL_SHARDS:-}" ]]; then
   fi
 fi
 unset GTEST_TOTAL_SHARDS GTEST_SHARD_INDEX GTEST_SHARD_STATUS_FILE
+# Bazel asks a test for its results as XML in $XML_OUTPUT_FILE, and a
+# googletest binary writes the file on its own: here every test's process
+# would write it in turn, the listing's first, and what stayed would be the
+# account of the test that finished last (of a suite with no test on the
+# platform, the listing). Without the variable Bazel writes the file itself:
+# the suite as one case, passed or failed, with this log.
+unset XML_OUTPUT_FILE
 if [[ -n "${TEST_UNDECLARED_OUTPUTS_DIR:-}" ]]; then
   options+=("--output_dir=$TEST_UNDECLARED_OUTPUTS_DIR")
 fi

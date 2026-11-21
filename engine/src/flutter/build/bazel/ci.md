@@ -51,6 +51,11 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   build directory is `run_tests.py --type binaries` in a Bazel build: the
   Bazel test of the same executable. A `--type` the build runs no Bazel test
   for is an error, not a silent pass.
+  With the recipe's `--logs-dir` the test command also writes its build
+  events to a temporary file (`--build_event_json_file`), and the logs of
+  the test runs Bazel reports there as failed are copied into the directory
+  CI uploads. The step's exit status is Bazel's, whatever becomes of the
+  copy.
 - **The builder files** carry `--bazel` among each build's flags (and
   `--no-rbe` in place of `--rbe`, so the recipe starts no reproxy -- Bazel
   speaks to RBE itself -- with `use_rbe: true` kept among the gclient

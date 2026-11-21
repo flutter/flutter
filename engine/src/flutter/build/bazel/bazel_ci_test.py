@@ -11,8 +11,11 @@ Run from this directory: `python3 bazel_ci_test.py`; CI runs it as
 """
 
 import collections
+import contextlib
+import io
 import json
 import os
+import stat
 import sys
 import tempfile
 import unittest
@@ -458,6 +461,226 @@ class TestSuitesTest(unittest.TestCase):
         ]
     )
     self.assertEqual(run.call_args.kwargs['cwd'], '/checkout')
+
+
+def summary_event(label, status, failed=(), passed=()):
+  """A testSummary line of --build_event_json_file (path conversion off)."""
+  return json.dumps({
+      'id': {'testSummary': {'label': label, 'configuration': {'id': 'c0'}}},
+      'testSummary': {
+          'overallStatus': status,
+          'failed': [{'uri': 'file://' + path} for path in failed],
+          'passed': [{'uri': 'file://' + path} for path in passed],
+      },
+  })
+
+
+class FailedTestLogsTest(unittest.TestCase):
+  """The failed runs' logs: Bazel's account of them, and their copies."""
+
+  def setUp(self):
+    self.scratch = tempfile.TemporaryDirectory()
+    self.addCleanup(self.scratch.cleanup)
+    self.root = self.scratch.name
+    self.testlogs = os.path.join(self.root, 'execroot', '_main', 'bazel-out', 'k8-dbg', 'testlogs')
+    self.logs_dir = os.path.join(self.root, 'flutter_logs_dir')
+    self.events = os.path.join(self.root, 'events.json')
+
+  def log(self, relative, text='log\n'):
+    """A test log as Bazel leaves it: read-only."""
+    path = os.path.join(self.testlogs, *relative.split('/'))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as log:
+      log.write(text)
+    os.chmod(path, 0o555)
+    return path
+
+  def write_events(self, *lines):
+    with open(self.events, 'w', encoding='utf-8') as events:
+      events.write(''.join(line + '\n' for line in lines))
+
+  def test_the_logs_are_those_of_the_runs_bazel_says_failed(self):
+    passed = self.log('engine/a/passes/test.log')
+    failed = self.log('engine/a/fails/test.log')
+    shard = self.log('engine/a/sharded/shard_2_of_3/test.log')
+    attempt = self.log('engine/a/flaky/test_attempts/attempt_1.log')
+    retried = self.log('engine/a/flaky/test.log')
+    self.write_events(
+        json.dumps({'id': {'started': {}}, 'started': {'uuid': 'u'}}),
+        json.dumps({'id': {'progress': {'opaqueCount': 1}}, 'progress': {'stderr': 'FAILED'}}),
+        summary_event('//engine/a:passes', 'PASSED', passed=[passed]),
+        summary_event('//engine/a:fails', 'FAILED', failed=[failed]),
+        '{"id": {"testSummary": {"label": "//engine/a:cut", "confi',
+        summary_event('//engine/a:sharded', 'FAILED', failed=[shard], passed=[passed]),
+        summary_event('//engine/a:flaky', 'FLAKY', failed=[attempt], passed=[retried]),
+        json.dumps({
+            'id': {'testSummary': {'label': '//engine/a:remote'}},
+            'testSummary': {
+                'overallStatus': 'FAILED', 'failed': [{'uri': 'bytestream://cas/blobs/1/2'}]
+            },
+        }),
+        json.dumps({'id': {'testSummary': {'label': '//engine/a:unbuilt'}}, 'testSummary': {}}),
+        '[]',
+        summary_event('//engine/a:fails', 'FAILED', failed=[failed]),
+    )
+    self.assertEqual(bazel_ci.failed_test_logs(self.events), [failed, shard, attempt])
+
+  def test_a_path_with_a_space_comes_back_from_its_uri(self):
+    failed = self.log('engine/a b/fails/test.log')
+    self.write_events(
+        json.dumps({
+            'id': {'testSummary': {'label': '//engine/a b:fails'}},
+            'testSummary': {
+                'overallStatus': 'FAILED',
+                'failed': [{'uri': 'file://' + failed.replace(' ', '%20')}]
+            },
+        })
+    )
+    self.assertEqual(bazel_ci.failed_test_logs(self.events), [failed])
+
+  def test_no_events_file_names_no_log(self):
+    self.assertEqual(bazel_ci.failed_test_logs(os.path.join(self.root, 'absent.json')), [])
+    self.assertEqual(
+        bazel_ci.copy_failed_test_logs(os.path.join(self.root, 'absent.json'), self.logs_dir), 0
+    )
+    self.assertFalse(os.path.exists(self.logs_dir))
+
+  def test_a_copy_is_named_after_the_logs_place_under_testlogs(self):
+    out = '/b/x/execroot/_main/bazel-out/linux_x64_debug-dbg/testlogs/'
+    self.assertEqual(
+        bazel_ci.test_log_name(out + 'engine/src/flutter/fml/fml_unittests/test.log'),
+        'engine_src_flutter_fml_fml_unittests.test.log'
+    )
+    self.assertEqual(
+        bazel_ci.test_log_name(out + 'engine/a/sharded/shard_2_of_3/test.log'),
+        'engine_a_sharded_shard_2_of_3.test.log'
+    )
+    self.assertEqual(
+        bazel_ci.test_log_name(out + 'engine/a/flaky/test_attempts/attempt_1.log'),
+        'engine_a_flaky_test_attempts_attempt_1.test.log'
+    )
+    self.assertEqual(
+        bazel_ci.test_log_name('/elsewhere/fails/test.log'), 'elsewhere_fails.test.log'
+    )
+
+  def test_copies_the_failed_runs_logs_and_no_other(self):
+    passed = self.log('engine/a/passes/test.log', 'passes\n')
+    failed = self.log('engine/a/fails/test.log', 'fails\n')
+    self.write_events(
+        summary_event('//engine/a:passes', 'PASSED', passed=[passed]),
+        summary_event('//engine/a:fails', 'FAILED', failed=[failed]),
+    )
+    stderr = io.StringIO()
+    with contextlib.redirect_stderr(stderr):
+      self.assertEqual(bazel_ci.copy_failed_test_logs(self.events, self.logs_dir), 1)
+    self.assertEqual(os.listdir(self.logs_dir), ['engine_a_fails.test.log'])
+    with open(os.path.join(self.logs_dir, 'engine_a_fails.test.log'), encoding='utf-8') as copy:
+      self.assertEqual(copy.read(), 'fails\n')
+    self.assertIn('1 test log(s) copied to ' + self.logs_dir, stderr.getvalue())
+
+  def test_a_later_attempt_writes_over_an_earlier_ones_copy(self):
+    # The recipe runs a failed step up to three times into one logs
+    # directory. With a cache Bazel's logs are read-only: a copy with their
+    # mode is one the next attempt could not write (PermissionError, which
+    # failed attempts whose tests had all passed).
+    failed = self.log('engine/a/fails/test.log', 'first\n')
+    self.write_events(summary_event('//engine/a:fails', 'FAILED', failed=[failed]))
+    copy = os.path.join(self.logs_dir, 'engine_a_fails.test.log')
+    with contextlib.redirect_stderr(io.StringIO()):
+      self.assertEqual(bazel_ci.copy_failed_test_logs(self.events, self.logs_dir), 1)
+      self.assertTrue(os.stat(copy).st_mode & stat.S_IWUSR)
+      # What an earlier version left behind: a copy no one can write.
+      os.chmod(copy, 0o555)
+      os.chmod(failed, 0o755)
+      with open(failed, 'w', encoding='utf-8') as log:
+        log.write('second\n')
+      os.chmod(failed, 0o555)
+      self.assertEqual(bazel_ci.copy_failed_test_logs(self.events, self.logs_dir), 1)
+    with open(copy, encoding='utf-8') as log:
+      self.assertEqual(log.read(), 'second\n')
+    self.assertTrue(os.stat(copy).st_mode & stat.S_IWUSR)
+
+  def test_a_log_that_cannot_be_copied_is_reported_not_raised(self):
+    failed = self.log('engine/a/fails/test.log')
+    gone = os.path.join(self.testlogs, 'engine', 'a', 'gone', 'test.log')
+    self.write_events(
+        summary_event('//engine/a:gone', 'FAILED', failed=[gone]),
+        summary_event('//engine/a:fails', 'FAILED', failed=[failed]),
+    )
+    stderr = io.StringIO()
+    with contextlib.redirect_stderr(stderr):
+      self.assertEqual(bazel_ci.copy_failed_test_logs(self.events, self.logs_dir), 1)
+    self.assertEqual(os.listdir(self.logs_dir), ['engine_a_fails.test.log'])
+    self.assertIn(gone + ' not copied', stderr.getvalue())
+
+  def description(self):
+    return {
+        'file': 'f',
+        'name': 'n',
+        'tests': HOST_DEBUG_UNOPT['tests'],
+        'bazelisk': '/tools/bazelisk',
+        'startup_options': [],
+        'build_options': [],
+        'config': 'ci_host_debug_unopt',
+        'repo_root': self.root,
+        'environment': {},
+    }
+
+  def test_a_run_with_a_logs_directory_copies_from_its_events(self):
+    failed = self.log('engine/src/flutter/fml/fml_unittests/test.log', 'fails\n')
+    seen = {}
+
+    def bazel(command, **_):
+      # The test command: writes its events where it was told to.
+      option = [word for word in command if word.startswith('--build_event_json_file=')]
+      seen['events'] = option[0].split('=', 1)[1]
+      seen['command'] = command
+      with open(seen['events'], 'w', encoding='utf-8') as events:
+        events.write(
+            summary_event('//engine/src/flutter/fml:fml_unittests', 'FAILED', failed=[failed]) +
+            '\n'
+        )
+      return unittest.mock.Mock(returncode=3)
+
+    with unittest.mock.patch.object(bazel_ci.subprocess, 'run', side_effect=bazel) as run, \
+        contextlib.redirect_stderr(io.StringIO()):
+      status = bazel_ci.run_tests(
+          self.description(), ['engine'],
+          logs_dir=self.logs_dir,
+          extra_arguments=['--runs_per_test=2']
+      )
+    self.assertEqual(status, 3)
+    self.assertEqual(run.call_count, 1)
+    command = seen['command']
+    self.assertEqual(
+        command[command.index('--config=ci_host_debug_unopt') + 1:], [
+            '--strategy=TestRunner=sandboxed,local', '--build_event_json_file=' + seen['events'],
+            '--build_event_json_file_path_conversion=false', '--runs_per_test=2',
+            '//engine/src/flutter/fml:fml_unittests', '//engine/src/flutter/flow:flow_unittests'
+        ]
+    )
+    self.assertEqual(os.listdir(self.logs_dir), ['engine_src_flutter_fml_fml_unittests.test.log'])
+    self.assertFalse(os.path.exists(seen['events']))
+
+  def test_the_exit_status_is_bazels_whatever_becomes_of_the_copy(self):
+    stderr = io.StringIO()
+    no_copy = unittest.mock.patch.object(
+        bazel_ci, 'copy_failed_test_logs', side_effect=RuntimeError('no copy')
+    )
+    with no_copy, unittest.mock.patch.object(bazel_ci.subprocess, 'run') as run, \
+        contextlib.redirect_stderr(stderr):
+      run.return_value.returncode = 0
+      self.assertEqual(
+          bazel_ci.run_tests(self.description(), ['engine'], logs_dir=self.logs_dir), 0
+      )
+    self.assertIn('RuntimeError: no copy', stderr.getvalue())
+
+  def test_without_a_logs_directory_the_command_asks_for_no_events(self):
+    with unittest.mock.patch.object(bazel_ci.subprocess, 'run') as run, \
+        contextlib.redirect_stderr(io.StringIO()):
+      run.return_value.returncode = 0
+      self.assertEqual(bazel_ci.run_tests(self.description(), ['engine']), 0)
+    self.assertFalse([word for word in run.call_args.args[0] if 'build_event' in word])
 
 
 class RealTableTest(unittest.TestCase):

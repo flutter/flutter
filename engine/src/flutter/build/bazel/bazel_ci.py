@@ -30,9 +30,13 @@ the standard library alone).
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import traceback
+import urllib.parse
 
 # The flags of a build that say where it runs rather than what it builds:
 # the recipe appends `--no-goma --no-rbe` to an official build's;
@@ -615,43 +619,100 @@ def test_suites(description, types):
   return suites
 
 
-def copy_failed_test_logs(description, logs_dir):
-  """Copies the test.log of every test that did not pass into `logs_dir`.
+def failed_test_logs(events):
+  """The logs of the test runs that did not pass, from Bazel's build events.
 
-  bazel-testlogs/<package>/<name>/test.log, under a name that keeps the
-  package: CI's log collection uploads the directory.
+  `events` is the file a test command's --build_event_json_file wrote: a
+  JSON object per line, a testSummary among them for every test the command
+  ran, with the logs of its runs that failed (a failed test's log, the
+  failed shards' of a sharded one, the failed attempts' of a flaky one) as
+  file:// URIs (--build_event_json_file_path_conversion=false; with a remote
+  cache they are bytestream:// ones otherwise, which name no file here). A
+  file that is not there names no log, and neither does a line that is not
+  an event (the server died as it wrote).
   """
-  result = subprocess.run(
-      described_command(description, 'info', ['bazel-testlogs']),
-      cwd=description['repo_root'],
-      env={**os.environ, **description['environment']},
-      capture_output=True,
-      text=True,
-      check=False,
-  )
-  if result.returncode != 0:
-    return
-  testlogs = result.stdout.strip()
+  logs = []
+  try:
+    with open(events, encoding='utf-8', errors='replace') as lines:
+      for line in lines:
+        try:
+          event = json.loads(line)
+        except ValueError:
+          continue
+        if not isinstance(event, dict) or not isinstance(event.get('id'), dict):
+          continue
+        summary = event.get('testSummary')
+        if 'testSummary' not in event['id'] or not isinstance(summary, dict):
+          continue
+        for failed in summary.get('failed') or []:
+          uri = urllib.parse.urlsplit(failed.get('uri', '') if isinstance(failed, dict) else '')
+          log = urllib.parse.unquote(uri.path)
+          if uri.scheme == 'file' and log not in logs:
+            logs.append(log)
+  except OSError:
+    return []
+  return logs
+
+
+_TESTLOGS = re.compile(r'/bazel-out/[^/]+/testlogs/(.+)$')
+
+
+def test_log_name(log):
+  """The name of a test log's copy: its place under bazel-testlogs, flattened.
+
+  .../testlogs/engine/src/flutter/fml/fml_unittests/test.log is
+  engine_src_flutter_fml_fml_unittests.test.log; a shard's log
+  (fml_unittests/shard_1_of_2/test.log) and an attempt's
+  (fml_unittests/test_attempts/attempt_1.log) keep theirs in the name.
+  """
+  path = log.replace(os.sep, '/')
+  match = _TESTLOGS.search(path)
+  relative = match.group(1) if match else path.strip('/')
+  if relative.endswith('/test.log'):
+    relative = relative[:-len('/test.log')]
+  elif relative.endswith('.log'):
+    relative = relative[:-len('.log')]
+  return relative.replace('/', '_') + '.test.log'
+
+
+def copy_test_log(log, destination):
+  """Copies a test log; False, and a line on stderr, if it cannot be.
+
+  The contents alone: with a disk or a remote cache Bazel leaves its logs
+  read-only, and a copy that takes their mode (shutil.copy) cannot be
+  written a second time -- the recipe runs a failed step up to three times,
+  into one logs directory. A file already there is removed first for the
+  same reason.
+  """
+  try:
+    if os.path.lexists(destination):
+      os.remove(destination)
+    shutil.copyfile(log, destination)
+  except OSError as error:
+    print(f'run_tests.py: {log} not copied: {error}', file=sys.stderr)
+    return False
+  return True
+
+
+def copy_failed_test_logs(events, logs_dir):
+  """Copies the logs of the test runs that did not pass into `logs_dir`; how many.
+
+  CI's log collection uploads the directory. Which runs did not pass is
+  Bazel's account (failed_test_logs), not a reading of each test.xml: a
+  test may write that file itself, and need not write the truth of the run
+  (a googletest binary that lists its tests writes the list there).
+  """
+  logs = failed_test_logs(events)
+  if not logs:
+    return 0
+  os.makedirs(logs_dir, exist_ok=True)
   copied = 0
-  for directory, _, files in os.walk(testlogs):
-    if 'test.log' not in files:
-      continue
-    # test.cache_status / test.xml: the status is in the XML; the quick
-    # test is whether test.log mentions a failure summary.
-    xml = os.path.join(directory, 'test.xml')
-    passed = False
-    if os.path.isfile(xml):
-      with open(xml, encoding='utf-8', errors='replace') as report:
-        head = report.read(4096)
-      passed = 'failures="0"' in head and 'errors="0"' in head
-    if passed:
-      continue
-    relative = os.path.relpath(directory, testlogs).replace(os.sep, '_')
-    os.makedirs(logs_dir, exist_ok=True)
-    shutil.copy(os.path.join(directory, 'test.log'), os.path.join(logs_dir, relative + '.test.log'))
-    copied += 1
+  for log in logs:
+    if copy_test_log(log, os.path.join(logs_dir, test_log_name(log))):
+      copied += 1
   if copied:
     print(f'run_tests.py: {copied} test log(s) copied to {logs_dir}', file=sys.stderr)
+  return copied
 
 
 # The engine's tests run on the machine, RBE or not (TEST_OPTIONS, before
@@ -663,23 +724,50 @@ TEST_OPTIONS = ['--strategy=TestRunner=sandboxed,local']
 
 
 def run_tests(description, types, logs_dir=None, extra_arguments=()):
-  """`bazelisk test --config=<name> <suites>` for run_tests.py's `types`; the exit status."""
+  """`bazelisk test --config=<name> <suites>` for run_tests.py's `types`; the exit status.
+
+  With a `logs_dir` (the recipe's FLUTTER_LOGS_DIR, run_tests.py's
+  --logs-dir) the command also writes its build events to a temporary file,
+  from which the logs of the runs that did not pass are copied into the
+  directory (copy_failed_test_logs). The exit status is Bazel's whatever
+  becomes of the copy: an error in it is printed, and decides nothing.
+  """
   suites = test_suites(description, types)
   if not suites:
     print('run_tests.py: nothing to run under Bazel for ' + ', '.join(types), file=sys.stderr)
     return 0
-  command = described_command(description, 'test', TEST_OPTIONS + list(extra_arguments) + suites)
+  options = list(TEST_OPTIONS)
+  events = None
+  if logs_dir:
+    handle, events = tempfile.mkstemp(prefix='bazel_test_events_', suffix='.json')
+    os.close(handle)
+    options += [
+        '--build_event_json_file=' + events,
+        '--build_event_json_file_path_conversion=false',
+    ]
+  command = described_command(description, 'test', options + list(extra_arguments) + suites)
   print('run_tests.py: ' + ' '.join(shell_quote(w) for w in command), file=sys.stderr)
   sys.stderr.flush()
   write_wrap_rbe_env()
-  result = subprocess.run(
-      command,
-      cwd=description['repo_root'],
-      env={**os.environ, **description['environment']},
-      check=False,
-  )
-  if logs_dir:
-    copy_failed_test_logs(description, logs_dir)
+  try:
+    result = subprocess.run(
+        command,
+        cwd=description['repo_root'],
+        env={**os.environ, **description['environment']},
+        check=False,
+    )
+    if events:
+      try:
+        copy_failed_test_logs(events, logs_dir)
+      except Exception:  # pylint: disable=broad-except
+        # The step's verdict is the tests': the copy is a convenience.
+        traceback.print_exc()
+  finally:
+    if events:
+      try:
+        os.remove(events)
+      except OSError:
+        pass
   return result.returncode
 
 
