@@ -614,6 +614,7 @@ class DartdocGenerator {
       'dartdoc',
       '--output',
       publishRoot.childDirectory('flutter').path,
+      '--rel-canonical-prefix=https://api.flutter.dev/flutter',
       '--allow-tools',
       if (useJson) '--json',
       if (validateLinks) '--validate-links' else '--no-validate-links',
@@ -832,6 +833,22 @@ class DartdocGenerator {
     }
   }
 
+  /// Matches an entire `<link rel="canonical" ...>` line so utility pages that
+  /// should not self-canonicalize (`search.html` and `__404error.html`) can
+  /// strip the tag emitted by `dartdoc --rel-canonical-prefix`.
+  static final RegExp _canonicalTagPattern = RegExp(r'[ \t]*<link rel="canonical"[^>]*>\r?\n?');
+
+  /// Matches the relative canonical tag that `dartdoc` emits on legacy
+  /// `dart-*-library.html` meta-refresh redirect stubs (which use either `/` or
+  /// HTML-escaped `&#47;`).
+  static final RegExp _dartLibraryRedirectCanonicalPattern = RegExp(
+    r'<link rel="canonical" href="\.\./(dart-[^"&/]+)(?:&#47;|/)"\s*/?>',
+  );
+
+  /// `dart:*` libraries whose canonical reference documentation lives on
+  /// `api.flutter.dev` rather than `api.dart.dev`.
+  static const Set<String> _flutterOwnedDartLibraries = <String>{'dart-ui', 'dart-ui_web'};
+
   /// Creates a custom index.html because we try to maintain old
   /// paths. Cleanup unused index.html files no longer needed.
   void _createIndexAndCleanup() {
@@ -840,6 +857,7 @@ class DartdocGenerator {
     _addHtmlBaseToIndex();
     _changePackageToSdkInTitlebar();
     _putRedirectInOldIndexLocation();
+    _rewriteDartSdkCanonicals();
     _writeSnippetsIndexFile();
     print('\nDocs ready to go!');
   }
@@ -869,6 +887,14 @@ class DartdocGenerator {
       '</title>\n',
       '</title>\n  <base href="./flutter/">\n',
     );
+    // `publishRoot/index.html` is copied from `flutter/index.html` before
+    // `_putRedirectInOldIndexLocation` overwrites `flutter/index.html` with a
+    // meta-refresh redirect back to `../index.html`. Point its canonical tag at
+    // the root URL so it does not canonicalize to a redirect stub.
+    indexContents = indexContents.replaceAll(
+      '<link rel="canonical" href="https://api.flutter.dev/flutter/"',
+      '<link rel="canonical" href="https://api.flutter.dev/"',
+    );
 
     for (final String platform in kPlatformDocs.keys) {
       final String sectionName = kPlatformDocs[platform]!.sectionName;
@@ -885,6 +911,66 @@ class DartdocGenerator {
   void _putRedirectInOldIndexLocation() {
     const metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
     publishRoot.childDirectory('flutter').childFile('index.html').writeAsStringSync(metaTag);
+  }
+
+  /// Strips canonical tags from non-content utility pages (`search.html` and
+  /// `__404error.html`) and rewrites canonical tags on mirrored core Dart SDK
+  /// library pages (`flutter/dart-*/**`, excluding `dart:ui` and `dart:ui_web`)
+  /// to point directly to `https://api.dart.dev/`.
+  ///
+  /// `create_api_docs.dart` invokes `dartdoc` with
+  /// `--rel-canonical-prefix=https://api.flutter.dev/flutter` so Flutter
+  /// framework and engine libraries self-canonicalize. Because `dartdoc` also
+  /// generates mirrored HTML pages for the Dart SDK under `flutter/dart-*`,
+  /// leaving those pages pointed at `api.flutter.dev` causes search engines to
+  /// treat `api.flutter.dev/flutter/dart-*` as canonical over the authoritative
+  /// Dart SDK docs on `api.dart.dev`. Unversioned `https://api.dart.dev/...`
+  /// URLs (without `/stable/`, which `301`-redirects back to root) serve `200`
+  /// directly and match `api.dart.dev`'s own self-referencing canonical tags.
+  void _rewriteDartSdkCanonicals() {
+    final Directory flutterDir = publishRoot.childDirectory('flutter');
+    for (final fileName in const <String>['search.html', '__404error.html']) {
+      final File utilityFile = flutterDir.childFile(fileName);
+      if (!utilityFile.existsSync()) {
+        continue;
+      }
+      final String contents = utilityFile.readAsStringSync();
+      final String stripped = contents.replaceAll(_canonicalTagPattern, '');
+      if (stripped != contents) {
+        utilityFile.writeAsStringSync(stripped);
+      }
+    }
+
+    final Iterable<File> dartSdkHtmlFiles = flutterDir
+        .listSync()
+        .whereType<Directory>()
+        .where(
+          (Directory dir) =>
+              dir.basename.startsWith('dart-') &&
+              !_flutterOwnedDartLibraries.contains(dir.basename),
+        )
+        .expand((Directory dir) => dir.listSync(recursive: true))
+        .whereType<File>()
+        .where((File file) => file.path.endsWith('.html'));
+
+    for (final htmlFile in dartSdkHtmlFiles) {
+      final String original = htmlFile.readAsStringSync();
+      // Match `<link rel="canonical"` specifically so prose `<a href="...">`
+      // links (such as `dart:math` references to `dart-ui/Offset-class.html`)
+      // continue pointing to `api.flutter.dev`.
+      final String updated = original
+          .replaceAll(
+            '<link rel="canonical" href="https://api.flutter.dev/flutter/',
+            '<link rel="canonical" href="https://api.dart.dev/',
+          )
+          .replaceAllMapped(
+            _dartLibraryRedirectCanonicalPattern,
+            (Match m) => '<link rel="canonical" href="https://api.dart.dev/${m[1]}/">',
+          );
+      if (updated != original) {
+        htmlFile.writeAsStringSync(updated);
+      }
+    }
   }
 
   void _writeSnippetsIndexFile() {

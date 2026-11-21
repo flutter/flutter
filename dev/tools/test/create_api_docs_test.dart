@@ -292,6 +292,7 @@ void main() {
             'dartdoc',
             '--output',
             '/path/to/publish/flutter',
+            '--rel-canonical-prefix=https://api.flutter.dev/flutter',
             '--allow-tools',
             '--json',
             '--validate-links',
@@ -434,6 +435,7 @@ void main() {
             'dartdoc',
             '--output',
             '/path/to/publish/flutter',
+            '--rel-canonical-prefix=https://api.flutter.dev/flutter',
             '--allow-tools',
             '--json',
             '--validate-links',
@@ -518,6 +520,7 @@ void main() {
             'dartdoc',
             '--output',
             '/path/to/publish/flutter',
+            '--rel-canonical-prefix=https://api.flutter.dev/flutter',
             '--allow-tools',
             '--json',
             '--validate-links',
@@ -604,6 +607,287 @@ void main() {
       ]);
 
       await generator.generateDartdoc();
+    });
+
+    test('rewrites root, utility, and Dart SDK canonicals while preserving Flutter and dart:ui canonicals', () async {
+      void writeHtml(String relativePath, String content) {
+        publishRoot.childFile(relativePath)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(content);
+      }
+
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'get']),
+        const FakeCommand(
+          command: <String>['/flutter/bin/flutter', '--version', '--machine'],
+          stdout: testVersionInfo,
+        ),
+        const FakeCommand(
+          command: <Pattern>['git', 'status', '-b', '--porcelain'],
+          stdout: '## $branchName',
+        ),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD']),
+        const FakeCommand(command: <String>['/flutter/bin/flutter', 'pub', 'global', 'list']),
+        FakeCommand(
+          command: <Pattern>[
+            '/flutter/bin/flutter',
+            'pub',
+            'global',
+            'run',
+            '--enable-asserts',
+            'dartdoc',
+            '--output',
+            '/path/to/publish/flutter',
+            '--rel-canonical-prefix=https://api.flutter.dev/flutter',
+            '--allow-tools',
+            '--json',
+            '--validate-links',
+            '--link-to-source-excludes',
+            '/flutter/bin/cache',
+            '--link-to-source-root',
+            '/flutter',
+            '--link-to-source-uri-template',
+            'https://github.com/flutter/flutter/blob/main/%f%#L%l%',
+            '--inject-html',
+            '--use-base-href',
+            '--header',
+            '/path/to/docs/styles.html',
+            '--header',
+            '/path/to/docs/analytics-header.html',
+            '--header',
+            '/path/to/docs/survey.html',
+            '--header',
+            '/path/to/docs/snippets.html',
+            '--header',
+            '/path/to/docs/opensearch.html',
+            '--footer',
+            '/path/to/docs/analytics-footer.html',
+            '--footer-text',
+            '/path/to/package/footer.html',
+            '--allow-warnings-in-packages',
+            RegExp(r'^(\w+,)+(\w+)$'),
+            '--exclude-packages',
+            RegExp(r'^(\w+,)+(\w+)$'),
+            '--exclude',
+            RegExp(r'^([\w\/:.]+,)+([\w\/:.]+)$'),
+            '--favicon',
+            '/path/to/docs/favicon.ico',
+            '--package-order',
+            'flutter,Dart,${apidocs.kPlatformIntegrationPackageName},flutter_test,flutter_driver',
+            '--auto-include-dependencies',
+          ],
+          onRun: (_) {
+            for (final File canary in generator.canaries) {
+              canary.createSync(recursive: true);
+            }
+            for (final String path in dartdocDirectiveCanaryFiles) {
+              publishRoot.childDirectory('flutter').childFile(path).createSync(recursive: true);
+            }
+            for (final String path in dartdocDirectiveCanaryLibraries) {
+              publishRoot
+                  .childDirectory('flutter')
+                  .childDirectory(path)
+                  .createSync(recursive: true);
+            }
+
+            writeHtml('flutter/index.html', '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Flutter - Dart API docs</title>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/">
+</head>
+<body>
+  <li><a href="https://flutter.dev">Flutter package</a></li>
+</body>
+</html>
+''');
+            writeHtml('flutter/search.html', '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Search</title>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/">
+</head>
+<body></body>
+</html>
+''');
+            writeHtml('flutter/__404error.html', '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>404</title>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/">
+</head>
+<body></body>
+</html>
+''');
+            writeHtml('flutter/widgets/Widget-class.html', '''
+<head>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/widgets/Widget-class.html">
+</head>
+''');
+            writeHtml('flutter/dart-ui/Canvas-class.html', '''
+<head>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/dart-ui/Canvas-class.html">
+</head>
+''');
+            writeHtml('flutter/dart-ui/dart-ui-library.html', '''
+<head>
+  <link rel="canonical" href="../dart-ui&#47;" />
+</head>
+''');
+            writeHtml('flutter/dart-ui_web/BrowserPlatformLocation-class.html', '''
+<head>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/dart-ui_web/BrowserPlatformLocation-class.html">
+</head>
+''');
+            writeHtml('flutter/dart-core/index.html', '''
+<head>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/dart-core/">
+</head>
+''');
+            writeHtml('flutter/dart-core/bool-class.html', '''
+<head>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/dart-core/bool-class.html">
+</head>
+<body>
+  <a href="https://api.flutter.dev/flutter/dart-ui/Offset-class.html">Offset</a>
+</body>
+''');
+            writeHtml('flutter/dart-core/Object/hash.html', '''
+<head>
+  <link rel="canonical" href="https://api.flutter.dev/flutter/dart-core/Object/hash.html">
+</head>
+''');
+            writeHtml('flutter/dart-core/dart-core-library.html', '''
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="canonical" href="../dart-core&#47;" />
+    <meta http-equiv="refresh" content="0; url=../dart-core&#47;" />
+  </head>
+  <body>
+    <p><a href="../dart-core&#47;">New URL</a></p>
+  </body>
+</html>
+''');
+            writeHtml('flutter/dart-async/dart-async-library.html', '''
+<head>
+  <link rel="canonical" href="../dart-async/">
+</head>
+''');
+
+            writeHtml('flutter/widgets/showGeneralDialog.html', '''
+<pre id="longSnippet1">
+  <code class="language-dart">
+    import &#39;package:flutter&#47;material.dart&#39;;
+  </code>
+</pre>
+''');
+            writeHtml('flutter/widgets/ModalRoute/barrierColor.html', '''
+<pre id="sample-code">
+  <code class="language-dart">
+    class FooClass {
+      Color get barrierColor => FooColor();
+    }
+  </code>
+</pre>
+''');
+            const queryParams = 'split=1&run=true&sample_id=widgets.Listener.123&channel=main';
+            writeHtml('flutter/widgets/Listener-class.html', '''
+<iframe class="snippet-dartpad" allow="clipboard-write" src="https://dartpad.dev/embed-flutter.html?$queryParams">
+</iframe>
+''');
+          },
+        ),
+      ]);
+
+      await generator.generateDartdoc();
+
+      // (a) Root index.html rewrites /flutter/ canonical to / and injects <base>.
+      final String rootIndex = publishRoot.childFile('index.html').readAsStringSync();
+      expect(rootIndex, contains('<base href="./flutter/">'));
+      expect(rootIndex, contains('<link rel="canonical" href="https://api.flutter.dev/">'));
+      expect(rootIndex, isNot(contains('href="https://api.flutter.dev/flutter/"')));
+      expect(
+        publishRoot.childFile('flutter/index.html').readAsStringSync(),
+        '<meta http-equiv="refresh" content="0;URL=../index.html">',
+      );
+
+      // (b) Utility pages strip canonical tags completely.
+      final String searchHtml = publishRoot.childFile('flutter/search.html').readAsStringSync();
+      expect(searchHtml, contains('<title>Search</title>'));
+      expect(searchHtml, isNot(contains('rel="canonical"')));
+      final String notFoundHtml = publishRoot
+          .childFile('flutter/__404error.html')
+          .readAsStringSync();
+      expect(notFoundHtml, contains('<title>404</title>'));
+      expect(notFoundHtml, isNot(contains('rel="canonical"')));
+
+      // (c) Flutter packages, dart:ui, and dart:ui_web retain api.flutter.dev canonicals.
+      expect(
+        publishRoot.childFile('flutter/widgets/Widget-class.html').readAsStringSync(),
+        contains(
+          '<link rel="canonical" href="https://api.flutter.dev/flutter/widgets/Widget-class.html">',
+        ),
+      );
+      expect(
+        publishRoot.childFile('flutter/dart-ui/Canvas-class.html').readAsStringSync(),
+        contains(
+          '<link rel="canonical" href="https://api.flutter.dev/flutter/dart-ui/Canvas-class.html">',
+        ),
+      );
+      expect(
+        publishRoot.childFile('flutter/dart-ui/dart-ui-library.html').readAsStringSync(),
+        contains('<link rel="canonical" href="../dart-ui&#47;" />'),
+      );
+      expect(
+        publishRoot
+            .childFile('flutter/dart-ui_web/BrowserPlatformLocation-class.html')
+            .readAsStringSync(),
+        contains(
+          '<link rel="canonical" href="https://api.flutter.dev/flutter/dart-ui_web/BrowserPlatformLocation-class.html">',
+        ),
+      );
+
+      // (d) Non-UI Dart SDK libraries rewrite canonicals (including nested pages and
+      // library redirect stubs) to api.dart.dev without altering prose links.
+      expect(
+        publishRoot.childFile('flutter/dart-core/index.html').readAsStringSync(),
+        contains('<link rel="canonical" href="https://api.dart.dev/dart-core/">'),
+      );
+      final String boolClassHtml = publishRoot
+          .childFile('flutter/dart-core/bool-class.html')
+          .readAsStringSync();
+      expect(
+        boolClassHtml,
+        contains('<link rel="canonical" href="https://api.dart.dev/dart-core/bool-class.html">'),
+      );
+      expect(
+        boolClassHtml,
+        contains('<a href="https://api.flutter.dev/flutter/dart-ui/Offset-class.html">Offset</a>'),
+      );
+      expect(
+        publishRoot.childFile('flutter/dart-core/Object/hash.html').readAsStringSync(),
+        contains('<link rel="canonical" href="https://api.dart.dev/dart-core/Object/hash.html">'),
+      );
+      final String dartCoreLibraryStub = publishRoot
+          .childFile('flutter/dart-core/dart-core-library.html')
+          .readAsStringSync();
+      expect(
+        dartCoreLibraryStub,
+        contains('<link rel="canonical" href="https://api.dart.dev/dart-core/">'),
+      );
+      expect(
+        dartCoreLibraryStub,
+        contains('<meta http-equiv="refresh" content="0; url=../dart-core&#47;" />'),
+      );
+      expect(
+        publishRoot.childFile('flutter/dart-async/dart-async-library.html').readAsStringSync(),
+        contains('<link rel="canonical" href="https://api.dart.dev/dart-async/">'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     });
   });
 }
