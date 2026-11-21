@@ -1075,6 +1075,7 @@ void testMain() {
           );
 
           ui_web.TestEnvironment.tearDown();
+          // Verify tearDown() is idempotent.
           ui_web.TestEnvironment.tearDown();
 
           final afterTearDown = Completer<ByteData?>();

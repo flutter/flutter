@@ -479,15 +479,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // In widget tests (ignorePlatformMessages), outgoing platform messages are
     // not processed by engine handlers and instead receive an asynchronous null
     // reply.
-    var returnImmediately = false;
+    var ignorePlatformMessages = false;
     assert(() {
-      if (ui_web.TestEnvironment.instance.ignorePlatformMessages) {
-        returnImmediately = true;
-      }
+      ignorePlatformMessages = ui_web.TestEnvironment.instance.ignorePlatformMessages;
       return true;
     }());
 
-    if (returnImmediately) {
+    if (ignorePlatformMessages) {
       // Emulate flutter_tester: platform messages get an empty (null) reply,
       // as unhandled channels do on native. Schedule it on the root zone so the
       // real event loop delivers it and it never becomes a FakeAsync timer;
@@ -649,7 +647,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         return;
 
       case 'flutter/accessibility':
-        // In widget tests we want to bypass processing of platform messages.
         const codec = StandardMessageCodec();
         final EngineSemantics semantics = EngineSemantics.instance;
         if (semantics.semanticsEnabled) {

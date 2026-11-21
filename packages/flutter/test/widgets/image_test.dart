@@ -2886,7 +2886,9 @@ void main() {
       await tester.pump();
       await expectLater(find.byKey(key), matchesGoldenFile('image_test.missing.2.png'));
     },
-    // https://github.com/flutter/flutter/issues/74935: web tests serve no assets (not even AssetManifest.bin.json), so Image.asset fails on the manifest instead of reporting "missing-asset".
+    // https://github.com/flutter/flutter/issues/74935: web tests serve no assets
+    // (not even AssetManifest.bin.json), so Image.asset fails on the manifest
+    // instead of reporting "missing-asset".
     skip: kIsWeb,
   );
 
