@@ -16,8 +16,16 @@ void main() {
 void testMain() {
   group('CanvasKit', () {
     setUpCanvasKitTest();
+    late double originalDpr;
+
     setUp(() {
+      originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+      CkSurface.debugForceGLFailure = false;
+    });
+
+    tearDown(() {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
       CkSurface.debugForceGLFailure = false;
     });
 
@@ -509,6 +517,7 @@ void testMain() {
 
       test('zero / minimum dimension boundary sizing followed by picture rasterization', () async {
         final surface = CkOffscreenSurface(OffscreenCanvasProvider());
+        addTearDown(surface.dispose);
         await surface.initialized;
 
         // Minimum dimension boundary: 1x1
@@ -518,6 +527,7 @@ void testMain() {
         final paint1 = ui.Paint()..color = const ui.Color(0xFFFF0000);
         canvas1.drawRect(const ui.Rect.fromLTWH(0, 0, 1, 1), paint1);
         final ui.Picture picture1 = recorder1.endRecording();
+        addTearDown(picture1.dispose);
         await surface.rasterizeToCanvas(picture1);
         expect(surface.skSurface, isNotNull);
 
@@ -544,6 +554,7 @@ void testMain() {
         final paint0 = ui.Paint()..color = const ui.Color(0xFF00FF00);
         canvas0.drawRect(ui.Rect.zero, paint0);
         final ui.Picture picture0 = recorder0.endRecording();
+        addTearDown(picture0.dispose);
         await surface.rasterizeToCanvas(picture0);
         expect(surface.skSurface, isNotNull);
 
