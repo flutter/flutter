@@ -2107,6 +2107,43 @@ void main() {
       expect(viewport.viewportDimension, const Size(300.0, 300.0));
     }, variant: TargetPlatformVariant.all());
 
+    testWidgets('clips only when children overflow the viewport', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/196651.
+      // Two 200x200 children laid out side by side.
+      const Key childKey = ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 0));
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 1,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox.square(key: ValueKey<ChildVicinity>(vicinity), dimension: 200);
+        },
+      );
+      addTearDown(delegate.dispose);
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1;
+
+      // Every child fits inside the viewport.
+      tester.view.physicalSize = const Size(400.0, 200.0);
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      await tester.pumpAndSettle();
+      expect(getViewport(tester, childKey), isNot(paints..clipRect()));
+
+      // The second child overflows the viewport.
+      tester.view.physicalSize = const Size(300.0, 200.0);
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      await tester.pumpAndSettle();
+      expect(
+        getViewport(tester, childKey),
+        paints..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 300.0, 200.0)),
+      );
+
+      // Every child fits inside the viewport again.
+      tester.view.physicalSize = const Size(400.0, 200.0);
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      await tester.pumpAndSettle();
+      expect(getViewport(tester, childKey), isNot(paints..clipRect()));
+    });
+
     testWidgets('Rebuilds when delegate changes', (WidgetTester tester) async {
       final firstChildKey = UniqueKey();
       final delegate = TwoDimensionalChildBuilderDelegate(

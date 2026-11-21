@@ -1326,6 +1326,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     _firstChild = null;
     _lastChild = null;
     _activeChildrenForLayoutPass.clear();
+    _hasVisualOverflow = false;
     _childManager._startLayout();
 
     // Subclass lays out children.
@@ -1529,12 +1530,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       child,
       layoutOffset: childParentData.layoutOffset!,
     );
-    // If the child is partially visible, or not visible at all, there is
+    // If the child extends beyond the bounds of the viewport, including when it
+    // is laid out outside of them (for example, in the cache extent), there is
     // visual overflow.
+    final Offset layoutOffset = childParentData.layoutOffset!;
     _hasVisualOverflow =
         _hasVisualOverflow ||
-        childParentData.layoutOffset != childParentData._paintExtent ||
-        !childParentData.isVisible;
+        layoutOffset.dx < 0.0 ||
+        layoutOffset.dy < 0.0 ||
+        layoutOffset.dx + child.size.width > viewportDimension.width ||
+        layoutOffset.dy + child.size.height > viewportDimension.height;
   }
 
   /// Computes the portion of the child that is visible, assuming that only the
