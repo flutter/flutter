@@ -125,8 +125,8 @@ class View extends StatefulWidget {
   /// The [FlutterView] into which [child] is drawn.
   ///
   /// This is the view passed to the constructor, normalized in debug mode with
-  /// [debugViewWithMetricsOverrides] so that it applies the
-  /// [debugViewMetricsOverrides] entry registered for its id.
+  /// [debugViewWithMetricsOverrides] so that it applies its entry in
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride].
   final FlutterView view;
 
   /// The widget below this widget in the tree, which will be drawn into the
@@ -152,10 +152,10 @@ class View extends StatefulWidget {
   ///
   /// {@template flutter.widgets.View.debugViewMetricsOverrides}
   /// In debug mode, a view that [PlatformDispatcher.instance] reports is used
-  /// through a wrapper that applies [debugViewMetricsOverrides], and this method
-  /// returns the wrapper. It is not identical to the view that
-  /// [PlatformDispatcher.instance] reports, and its
-  /// [FlutterView.platformDispatcher] is not identical to
+  /// through a wrapper that applies [debugViewMetricsOverrides] and
+  /// [debugAllViewsMetricsOverride], and this method returns the wrapper. It
+  /// is not identical to the view that [PlatformDispatcher.instance] reports,
+  /// and its [FlutterView.platformDispatcher] is not identical to
   /// [PlatformDispatcher.instance]. Compare views by [FlutterView.viewId]
   /// instead.
   /// {@endtemplate}
@@ -398,8 +398,8 @@ class RawView extends StatelessWidget {
   /// The [FlutterView] into which [child] is drawn.
   ///
   /// This is the view passed to the constructor, normalized in debug mode with
-  /// [debugViewWithMetricsOverrides] so that it applies the
-  /// [debugViewMetricsOverrides] entry registered for its id.
+  /// [debugViewWithMetricsOverrides] so that it applies its entry in
+  /// [debugViewMetricsOverrides] and [debugAllViewsMetricsOverride].
   final FlutterView view;
 
   /// The widget below this widget in the tree, which will be drawn into the

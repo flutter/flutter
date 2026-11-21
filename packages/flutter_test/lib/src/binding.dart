@@ -1203,8 +1203,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late final TestWindow window;
 
   // Wraps the dispatcher [BindingBase] provides rather than
-  // [PlatformDispatcher.instance], so that [debugViewMetricsOverrides] apply in
-  // tests too. Test values set explicitly still win: they are consulted first.
+  // [PlatformDispatcher.instance], so that [debugViewMetricsOverrides] and
+  // [debugAllViewsMetricsOverride] apply in tests too. Test values set
+  // explicitly still win: they are consulted first.
   @override
   late final TestPlatformDispatcher platformDispatcher = TestPlatformDispatcher(
     platformDispatcher: super.platformDispatcher,
