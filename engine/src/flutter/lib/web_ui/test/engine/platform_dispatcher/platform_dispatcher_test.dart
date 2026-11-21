@@ -1042,6 +1042,84 @@ void testMain() {
         expect(called, isTrue);
         expect(reply, isNull);
       });
+
+      test(
+        'handles null callbacks, null data, and flutter/debug-echo without side effects',
+        () async {
+          ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/assets', null, null);
+          ui.PlatformDispatcher.instance.sendPlatformMessage('', ByteData(0), null);
+
+          final payload = ByteData(4)..setUint32(0, 0xdeadbeef);
+          final completer = Completer<ByteData?>();
+          ui.PlatformDispatcher.instance.sendPlatformMessage(
+            'flutter/debug-echo',
+            payload,
+            completer.complete,
+          );
+
+          final ByteData? reply = await completer.future.timeout(const Duration(seconds: 2));
+          expect(reply, isNull);
+        },
+      );
+
+      test(
+        'delivers in-flight null reply across tearDown and resumes normal dispatch afterward',
+        () async {
+          ui_web.TestEnvironment.setUp(const ui_web.TestEnvironment.flutterTester());
+          final payload = ByteData(4)..setUint32(0, 42);
+          final inFlight = Completer<ByteData?>();
+          ui.PlatformDispatcher.instance.sendPlatformMessage(
+            'flutter/debug-echo',
+            payload,
+            inFlight.complete,
+          );
+
+          ui_web.TestEnvironment.tearDown();
+          ui_web.TestEnvironment.tearDown();
+
+          final afterTearDown = Completer<ByteData?>();
+          ui.PlatformDispatcher.instance.sendPlatformMessage(
+            'flutter/debug-echo',
+            payload,
+            afterTearDown.complete,
+          );
+
+          expect(await inFlight.future.timeout(const Duration(seconds: 2)), isNull);
+          final ByteData? echoed = await afterTearDown.future.timeout(const Duration(seconds: 2));
+          expect(echoed, isNotNull);
+          expect(echoed!.getUint32(0), 42);
+        },
+      );
+
+      test('delivers burst of messages across engine channels in FIFO order', () async {
+        const channels = <String>[
+          'flutter/platform',
+          'flutter/assets',
+          'flutter/debug-echo',
+          'flutter/skia',
+          'flutter/navigation',
+        ];
+        final order = <int>[];
+        final replies = <ByteData?>[];
+        final done = Completer<void>();
+
+        for (var i = 0; i < channels.length; i++) {
+          ui.PlatformDispatcher.instance.sendPlatformMessage(channels[i], ByteData(0), (
+            ByteData? reply,
+          ) {
+            order.add(i);
+            replies.add(reply);
+            if (order.length == channels.length) {
+              done.complete();
+            }
+          });
+        }
+        expect(order, isEmpty);
+
+        await done.future.timeout(const Duration(seconds: 2));
+        expect(order, <int>[0, 1, 2, 3, 4]);
+        expect(replies, everyElement(isNull));
+      });
     });
   }, skip: ui_web.browser.isFirefox);
 }
