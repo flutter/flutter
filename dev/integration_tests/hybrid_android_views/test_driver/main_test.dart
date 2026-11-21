@@ -54,10 +54,10 @@ Future<void> main() async {
       final SerializableFinder addChildView = find.byValueKey('AddChildView');
       await driver.waitFor(addChildView);
       await driver.tap(addChildView);
+      await driver.waitFor(find.byValueKey('ChildViewAdded'));
       final SerializableFinder childView = find.byValueKey('PlatformView');
       await driver.tap(childView);
-      // delay of 1000ms to allow widget to update
-      await Future<void>.delayed(const Duration(milliseconds: 1000));
+      await driver.waitFor(find.text('Click count: 1'));
       final String nestedViewClickCount = await driver.getText(
         find.byValueKey('NestedViewClickCount'),
       );
