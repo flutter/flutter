@@ -136,19 +136,26 @@ String? goldTryjobChangelist([Map<String, String>? environment]) {
 /// host); the bots' .bazelrc config, remote execution and sandbox location.
 ///
 /// The golden comparisons (`//build_defs/dart:golden_comparisons`): a test
-/// fails an image that is none of those Flutter Gold accepts. They are on
-/// off a bot, and in a pull request's presubmit that can reach Gold
-/// ([goldTryjobChangelist]), where the expectations are the pull request's
-/// (FLUTTER_GOLD_CHANGELIST, build_defs/repositories/gold.bzl) and the
-/// images a run fails are sent to Gold for triage afterwards
-/// ([BazelShard.run]). Any other bot compares nothing: post-submit's part is
-/// to send every image to Gold, which the Bazel shards do not do yet.
+/// compares its images with those Flutter Gold accepts. They are on off a
+/// bot, where an image that is none of them fails its test
+/// (`//build_defs/dart:golden_mismatch`, `fail` by default), and in a pull
+/// request's presubmit that can reach Gold ([goldTryjobChangelist]). There
+/// the expectations are the pull request's (FLUTTER_GOLD_CHANGELIST,
+/// build_defs/repositories/gold.bzl), such an image passes its test
+/// (`golden_mismatch=pass`) and is sent to Gold afterwards
+/// ([BazelShard.run]), and the verdict is Gold's check on the pull request,
+/// as with `flutter test`. Any other bot compares nothing: post-submit's
+/// part is to send every image to Gold, which the Bazel shards do not do
+/// yet.
 List<String> bazelTestOptions() {
   final String? changelist = isLuci ? goldTryjobChangelist() : null;
   return <String>[
     if (isLuci) '--config=ci',
     if (isLuci && changelist == null) '--no//build_defs/dart:golden_comparisons',
-    if (changelist != null) '--repo_env=FLUTTER_GOLD_CHANGELIST=$changelist',
+    if (changelist != null) ...<String>[
+      '--repo_env=FLUTTER_GOLD_CHANGELIST=$changelist',
+      '--//build_defs/dart:golden_mismatch=pass',
+    ],
     '--config=prebuilt_engine',
     '--keep_going',
     '--test_output=errors',
@@ -539,11 +546,13 @@ class BazelShard {
 
   /// The images the golden comparisons of [labels] wrote out
   /// ([bazelGoldenImageDirectories]) to Flutter Gold, as results of the pull
-  /// request's tryjob: the images Gold does not accept, whose tests failed,
-  /// and those of tests Gold does not know, which passed. Gold then shows
-  /// them on the pull request's page with their differences, to be triaged;
-  /// the run after a triage fetches the pull request's expectations and
-  /// passes. flutter_goldens' own client does the sending
+  /// request's tryjob: the images Gold does not accept and those of tests
+  /// Gold does not know, whose tests passed all the same
+  /// ([bazelTestOptions]). Gold then shows them on the pull request's page
+  /// with their differences, and its check on the pull request waits for
+  /// their triage; a run after the triage fetches the pull request's
+  /// expectations and has nothing to send. flutter_goldens' own client does
+  /// the sending
   /// (packages/flutter_goldens/bin/upload_tryjob_images.dart), with the
   /// arguments and keys `flutter test` uploads with. A no-op unless
   /// [goldTryjobChangelist].
@@ -562,7 +571,7 @@ class BazelShard {
           directory.path,
     ];
     if (directories.isEmpty) {
-      print('No golden image to send to Flutter Gold: every comparison matched what Gold accepts.');
+      print('No golden image to send to Flutter Gold: no test left one.');
       return;
     }
     printProgress(

@@ -443,9 +443,11 @@ def _flutter_test_impl(ctx):
     # The golden comparisons: what Flutter Gold accepts for the tests of
     # this file's library (gold_library_expectations), which flutter_goldens'
     # FlutterOfflineFileComparator decides by -- a test has no network to
-    # ask Gold itself. An image that fails lands among the test's outputs,
-    # from where a pull request's presubmit sends it to Gold
-    # (dev/bots/bazel.dart).
+    # ask Gold itself. An image Gold does not accept lands among the test's
+    # outputs and fails the test, or passes it where
+    # //build_defs/dart:golden_mismatch is `pass`: in a pull request's
+    # presubmit, which sends those images to Gold afterwards and leaves the
+    # verdict to it (dev/bots/bazel.dart).
     # A file that compares no golden gets no expectations at all: Gold's
     # answer changes whenever anyone triages an image, and a test that
     # received it would run again each time, for nothing.
@@ -485,6 +487,8 @@ def _flutter_test_impl(ctx):
                 "test.outputs/goldens",
             )
         )
+        if ctx.attr._golden_mismatch[BuildSettingInfo].value == "pass":
+            gold_env += "export FLUTTER_GOLD_MISMATCH=pass\n"
         gold_files = [expectations]
     launcher = ctx.actions.declare_file(ctx.label.name + ".launcher.sh")
     ctx.actions.write(
@@ -621,9 +625,12 @@ flutter_test = rule(
                   "(gold_library_expectations), for a test tree whose configuration is " +
                   "flutter_goldens': a test that compares goldens compares with it " +
                   "(FLUTTER_GOLD_EXPECTATIONS) unless --no//build_defs/dart:golden_comparisons. " +
+                  "An image Gold does not accept fails the test, or passes it with " +
+                  "--//build_defs/dart:golden_mismatch=pass (FLUTTER_GOLD_MISMATCH). " +
                   "Without it the comparisons compare nothing, Gold being out of reach.",
         ),
         "_golden_comparisons": attr.label(default = "//build_defs/dart:golden_comparisons"),
+        "_golden_mismatch": attr.label(default = "//build_defs/dart:golden_mismatch"),
     },
 )
 

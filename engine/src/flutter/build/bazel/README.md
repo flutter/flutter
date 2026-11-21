@@ -158,8 +158,10 @@ sandbox contribute.
   is installed by a hook of `DEPS`), and a Mac has not been tried.
 - Golden images are compared with what was fetched from Flutter Gold
   beforehand (`docs/framework_tests.md`, "Golden files"): the tests run
-  with the network blocked. Off a bot, and in a pull request's presubmit,
-  where the images that do not match are sent to Gold afterwards. In
+  with the network blocked. Off a bot an image that does not match fails
+  its test; in a pull request's presubmit it passes, is sent to Gold
+  afterwards, and Gold's check on the pull request is the verdict
+  (`--//build_defs/dart:golden_mismatch`). In
   post-submit they are neither compared nor uploaded under Bazel yet, and
   the Impeller runs compare nothing yet (Gold's Impeller images come from a
   Mac bot alone).

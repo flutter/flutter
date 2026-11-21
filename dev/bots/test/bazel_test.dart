@@ -197,6 +197,12 @@ void main() {
         options.where((String option) => option.startsWith('--repo_env=FLUTTER_GOLD_CHANGELIST=')),
         changelist == null ? isEmpty : <String>['--repo_env=FLUTTER_GOLD_CHANGELIST=$changelist'],
       );
+      // A mismatch fails its test by default; where the images go to Gold
+      // afterwards it passes, and the verdict is Gold's.
+      expect(
+        options.where((String option) => option.startsWith('--//build_defs/dart:golden_mismatch')),
+        changelist == null ? isEmpty : <String>['--//build_defs/dart:golden_mismatch=pass'],
+      );
     });
   });
 

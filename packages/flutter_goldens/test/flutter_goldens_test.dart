@@ -1587,6 +1587,7 @@ void main() {
         Map<String, Set<String>> expectations, {
         Directory? failures,
         String? failuresLocation,
+        bool passMismatches = false,
       }) {
         return FlutterOfflineFileComparator(
           basedir.uri,
@@ -1594,6 +1595,7 @@ void main() {
           expectations,
           failures: failures,
           failuresLocation: failuresLocation,
+          passMismatches: passMismatches,
           fs: fs,
           platform: FakePlatform(
             environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
@@ -1678,6 +1680,65 @@ void main() {
           failures.childFile('library.flutter.golden_test.1.png').readAsBytesSync(),
           equals(_kRgbPngBytes),
         );
+      });
+
+      test(
+        'passes an image that is none of the positive ones when told to, and writes it out',
+        () async {
+          final Directory failures = fs.directory('/outputs/goldens');
+          final FlutterOfflineFileComparator comparator = comparatorFor(
+            <String, Set<String>>{
+              'library.flutter.golden_test.1': <String>{_kTestPngDigest},
+            },
+            failures: failures,
+            failuresLocation: 'testlogs/library/test.outputs/goldens',
+            passMismatches: true,
+          );
+          expect(
+            await comparator.compare(
+              Uint8List.fromList(_kRgbPngBytes),
+              Uri.parse('flutter.golden_test.1.png'),
+            ),
+            isTrue,
+          );
+          expect(
+            log.single,
+            allOf(
+              contains('Golden "library.flutter.golden_test.1.png"'),
+              contains('the image is not one that Flutter Gold accepts for this test'),
+              contains('Its digest is $_kRgbPngDigest'),
+              contains(
+                'The image was written to '
+                'testlogs/library/test.outputs/goldens/library.flutter.golden_test.1.png',
+              ),
+              contains('The comparison passes: this run leaves the verdict to Flutter Gold.'),
+            ),
+          );
+          expect(
+            failures.childFile('library.flutter.golden_test.1.png').readAsBytesSync(),
+            equals(_kRgbPngBytes),
+          );
+        },
+      );
+
+      test('passes an accepted image without a note or a file when mismatches pass', () async {
+        final Directory failures = fs.directory('/outputs/goldens');
+        final FlutterOfflineFileComparator comparator = comparatorFor(
+          <String, Set<String>>{
+            'library.flutter.golden_test.1': <String>{_kTestPngDigest},
+          },
+          failures: failures,
+          passMismatches: true,
+        );
+        expect(
+          await comparator.compare(
+            Uint8List.fromList(_kTestPngBytes),
+            Uri.parse('flutter.golden_test.1.png'),
+          ),
+          isTrue,
+        );
+        expect(log, isEmpty);
+        expect(failures.existsSync(), isFalse);
       });
 
       test('names the place the runner will leave the image in, when told one', () async {
@@ -1791,6 +1852,7 @@ void main() {
         expect(comparator.basedir, basedir.uri);
         expect(comparator.failures!.path, '/outputs/goldens');
         expect(comparator.failuresLocation, 'testlogs/outputs/goldens');
+        expect(comparator.passMismatches, isFalse);
         expect(comparator.expectations, <String, Set<String>>{
           'library.flutter.golden_test.1': <String>{'aaaa'},
         });
@@ -1802,6 +1864,60 @@ void main() {
           ),
           throwsA(isA<FlutterError>()),
         );
+        expect(fs.file('/outputs/goldens/library.flutter.golden_test.1.png').existsSync(), isTrue);
+      });
+
+      test('takes what an image Gold does not accept does from the environment', () async {
+        fs
+            .file('/expectations.json')
+            .writeAsStringSync(
+              json.encode(<String, Object?>{
+                'primary': <String, Object?>{
+                  'library.flutter.golden_test.1': <String, String>{'aaaa': 'positive'},
+                },
+              }),
+            );
+        final defaultComparator = FakeLocalFileComparator()..basedir = basedir.uri;
+        FlutterOfflineFileComparator comparatorWith(String? mismatch) {
+          return FlutterOfflineFileComparator.fromLocalFileComparator(
+            localFileComparator: defaultComparator,
+            platform: FakePlatform(
+              environment: <String, String>{
+                'FLUTTER_GOLD_EXPECTATIONS': '/expectations.json',
+                'FLUTTER_GOLD_FAILURES': '/outputs/goldens',
+                'FLUTTER_GOLD_MISMATCH': ?mismatch,
+              },
+              operatingSystem: 'linux',
+            ),
+            log: log.add,
+            fs: fs,
+            process: FakeProcessManager(),
+            httpClient: FakeHttpClient(),
+          );
+        }
+
+        expect(comparatorWith(null).passMismatches, isFalse);
+        expect(comparatorWith('').passMismatches, isFalse);
+        expect(comparatorWith('fail').passMismatches, isFalse);
+        expect(comparatorWith('pass').passMismatches, isTrue);
+        expect(
+          () => comparatorWith('yes'),
+          throwsA(
+            isA<ArgumentError>().having(
+              (ArgumentError error) => error.toString(),
+              'description',
+              allOf(contains('FLUTTER_GOLD_MISMATCH'), contains('must be "fail" or "pass"')),
+            ),
+          ),
+        );
+
+        // With `pass` the image that would have failed passes, and is written out.
+        expect(
+          await comparatorWith('pass')
+              .compare(Uint8List.fromList(_kTestPngBytes), Uri.parse('flutter.golden_test.1.png')),
+          isTrue,
+        );
+        expect(log.single, contains('The comparison passes'));
         expect(fs.file('/outputs/goldens/library.flutter.golden_test.1.png').existsSync(), isTrue);
       });
     });

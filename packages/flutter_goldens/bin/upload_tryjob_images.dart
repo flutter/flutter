@@ -10,9 +10,9 @@
 // This is for a runner whose tests have no network (the Bazel shards of
 // dev/bots/test.dart). There the golden comparisons are made in the test by
 // the offline comparator, against what Flutter Gold accepts, and the images
-// that are to go to Gold -- those it does not accept, whose tests fail, and
-// those of tests it does not know -- are left in the tests' output
-// directories. The runner calls this once the tests are over, in a LUCI
+// that are to go to Gold -- those it does not accept and those of tests it
+// does not know -- are left in the tests' output directories. The runner
+// calls this once the tests are over, in a LUCI
 // presubmit: the environment `flutter test` uploads from (GOLDCTL,
 // GOLD_TRYJOB, LOGDOG_STREAM_PREFIX, LUCI_CONTEXT, FLUTTER_ROOT), with the
 // same client, so that an image lands on the trace `flutter test` would have
@@ -21,8 +21,9 @@
 // A PNG file's path under its directory is its golden's name.
 //
 // Exits with 1 if an image could not be sent. An image Gold holds as
-// untriaged is sent, not a failure here: the test that rendered it has
-// failed already, and Gold's check on the pull request waits for the triage.
+// untriaged is sent, not a failure here: Gold's check on the pull request
+// waits for its triage, and whether the test that rendered it failed was
+// the runner's choice (the comparator's FLUTTER_GOLD_MISMATCH).
 
 import 'dart:io' as io;
 

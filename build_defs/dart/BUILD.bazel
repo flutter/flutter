@@ -12,7 +12,7 @@
 # dart_test.bzl, a pure-Dart package's test under package:test's runner,
 # precompiled (dart_test, dart_test_runner).
 
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load(":dart_test.bzl", "dart_test_runner")
 load(":pub.bzl", "pub_package_config")
 
@@ -32,13 +32,35 @@ exports_files([
 # Flutter Gold (flutter_test's gold_expectations; build_defs/repositories/
 # gold.bzl). On by default. Off, a comparison compares nothing, as before
 # there was anything to compare with: for a bot's run that cannot send to
-# Gold the images that fail, which is every one but a pull request's
-# presubmit (dev/bots/bazel.dart).
+# Gold the images that do not match, which is every one but a pull
+# request's presubmit (dev/bots/bazel.dart).
 #
 #   bazel test --no//build_defs/dart:golden_comparisons ...
 bool_flag(
     name = "golden_comparisons",
     build_setting_default = True,
+)
+
+# What an image that is none of those Flutter Gold accepts does to its test,
+# where the goldens are compared (golden_comparisons):
+#
+# - fail, the default: the test fails. For a developer's run, from which
+#   nothing is sent to Gold.
+# - pass: the test passes, with a note in its log. For a run that sends the
+#   images to Gold afterwards and leaves the verdict to Gold's check on the
+#   pull request, as `flutter test` does in presubmit: dev/bots/bazel.dart
+#   passes it there.
+#
+# The image is written to the test's outputs either way.
+#
+#   bazel test --//build_defs/dart:golden_mismatch=pass ...
+string_flag(
+    name = "golden_mismatch",
+    build_setting_default = "fail",
+    values = [
+        "fail",
+        "pass",
+    ],
 )
 
 # package:test's runner as a kernel, for every dart_test (dart_test.bzl):
