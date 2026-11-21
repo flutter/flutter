@@ -21,15 +21,48 @@ class ExtensionBuildContext {
     required this.outputDir,
     required this.projectRoot,
     required this.resolvedArtifacts,
+    required this.trackWidgetCreation,
+    required this.treeShakeIcons,
+    this.buildName,
+    this.buildNumber,
+    this.dartDefines = const <String, String>{},
+    this.dartObfuscation = false,
+    this.extraFrontEndOptions = const <String>[],
+    this.extraGenSnapshotOptions = const <String>[],
+    this.flavor,
+    this.splitDebugInfo,
+    this.targetDeviceId,
+    this.targetPlatform,
   });
 
   /// The compilation mode for the build.
   final BuildMode buildMode;
 
+  /// User-facing version name (`--build-name`, or the version from `pubspec.yaml`).
+  final String? buildName;
+
+  /// Version code or build number (`--build-number`, or the `+` suffix from `pubspec.yaml`).
+  final String? buildNumber;
+
+  /// Compile-time environment constants passed via `--dart-define` and `--dart-define-from-file`.
+  final Map<String, String> dartDefines;
+
+  /// Whether Dart source code obfuscation is enabled (`--obfuscate`).
+  final bool dartObfuscation;
+
+  /// Additional command-line options forwarded to the Dart front-end compiler (`--extra-front-end-options`).
+  final List<String> extraFrontEndOptions;
+
+  /// Additional command-line options forwarded to `gen_snapshot` (`--extra-gen-snapshot-options`).
+  final List<String> extraGenSnapshotOptions;
+
+  /// Optional application flavor specified via `--flavor`.
+  final String? flavor;
+
   /// The absolute directory URI (ending with `/`) to the Flutter SDK root directory.
   final Uri flutterRoot;
 
-  /// The path to the main entrypoint file (typically `lib/main.dart`).
+  /// Absolute file system path to the Dart entrypoint being compiled.
   final String mainPath;
 
   /// The absolute directory URI (ending with `/`) where final build outputs should be placed.
@@ -42,6 +75,21 @@ class ExtensionBuildContext {
   ///
   /// Keys correspond to [ExtensionArtifact.name] or [ExtensionHostArtifact.name] values.
   final Map<String, String> resolvedArtifacts;
+
+  /// Optional directory URI where separated debug symbols are written in release builds (`--split-debug-info`).
+  final Uri? splitDebugInfo;
+
+  /// Identifier of the target device when building for a specific device (`-d`), or `null` for standalone `flutter build`.
+  final String? targetDeviceId;
+
+  /// Active target platform identifier for this build (for example, `'linux-x64'`).
+  final String? targetPlatform;
+
+  /// Whether widget creation locations are tracked by the Dart compiler.
+  final bool trackWidgetCreation;
+
+  /// Whether icon fonts are tree-shaken to retain only referenced glyphs.
+  final bool treeShakeIcons;
 }
 
 /// Context passed to an extension target's [AssembleTarget.build] method.
@@ -55,6 +103,18 @@ class ExtensionAssembleContext extends ExtensionBuildContext {
     required super.outputDir,
     required super.projectRoot,
     required super.resolvedArtifacts,
+    required super.trackWidgetCreation,
+    required super.treeShakeIcons,
+    super.buildName,
+    super.buildNumber,
+    super.dartDefines,
+    super.dartObfuscation,
+    super.extraFrontEndOptions,
+    super.extraGenSnapshotOptions,
+    super.flavor,
+    super.splitDebugInfo,
+    super.targetDeviceId,
+    super.targetPlatform,
   });
 
   /// The absolute directory URI (ending with `/`) used for intermediate build
@@ -181,6 +241,27 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC parameter key for the build mode.
   static const String buildModeParam = 'buildMode';
 
+  /// RPC parameter key for the build name.
+  static const String buildNameParam = 'buildName';
+
+  /// RPC parameter key for the build number.
+  static const String buildNumberParam = 'buildNumber';
+
+  /// RPC parameter key for compile-time Dart defines.
+  static const String dartDefinesParam = 'dartDefines';
+
+  /// RPC parameter key for whether Dart symbol obfuscation is enabled.
+  static const String dartObfuscationParam = 'dartObfuscation';
+
+  /// RPC parameter key for extra front-end compiler options.
+  static const String extraFrontEndOptionsParam = 'extraFrontEndOptions';
+
+  /// RPC parameter key for extra `gen_snapshot` options.
+  static const String extraGenSnapshotOptionsParam = 'extraGenSnapshotOptions';
+
+  /// RPC parameter key for the application flavor.
+  static const String flavorParam = 'flavor';
+
   /// RPC parameter key for the Flutter SDK root directory.
   static const String flutterRootParam = 'flutterRoot';
 
@@ -196,8 +277,23 @@ abstract base class BuildService extends ToolExtensionService {
   /// RPC parameter key for the map of resolved engine artifacts.
   static const String resolvedArtifactsParam = 'resolvedArtifacts';
 
+  /// RPC parameter key for the split debug info directory URI.
+  static const String splitDebugInfoParam = 'splitDebugInfo';
+
+  /// RPC parameter key for the target device ID.
+  static const String targetDeviceIdParam = 'targetDeviceId';
+
   /// RPC parameter key for the target name.
   static const String targetNameParam = 'targetName';
+
+  /// RPC parameter key for the active target platform identifier.
+  static const String targetPlatformParam = 'targetPlatform';
+
+  /// RPC parameter key for whether widget creation tracking is enabled.
+  static const String trackWidgetCreationParam = 'trackWidgetCreation';
+
+  /// RPC parameter key for whether icon tree shaking is enabled.
+  static const String treeShakeIconsParam = 'treeShakeIcons';
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
   static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
@@ -275,6 +371,18 @@ abstract base class BuildService extends ToolExtensionService {
     final Uri outputDirUri;
     final Uri flutterRootUri;
     final Map<String, Object?> rawResolvedArtifacts;
+    final String? buildName;
+    final String? buildNumber;
+    final Map<String, String> dartDefines;
+    final bool dartObfuscation;
+    final List<String> extraFrontEndOptions;
+    final List<String> extraGenSnapshotOptions;
+    final String? flavor;
+    final Uri? splitDebugInfo;
+    final String? targetDeviceId;
+    final String? targetPlatform;
+    final bool trackWidgetCreation;
+    final bool treeShakeIcons;
     try {
       targetName = params.requiredField<String>(targetNameParam);
       projectRootUri = _requireAbsoluteDirectoryUri(params, projectRootParam);
@@ -283,6 +391,22 @@ abstract base class BuildService extends ToolExtensionService {
       outputDirUri = _requireAbsoluteDirectoryUri(params, outputDirParam);
       flutterRootUri = _requireAbsoluteDirectoryUri(params, flutterRootParam);
       rawResolvedArtifacts = params.requiredField<Map<String, Object?>>(resolvedArtifactsParam);
+      buildName = params.nullableField<String>(buildNameParam);
+      buildNumber = params.nullableField<String>(buildNumberParam);
+      dartDefines = params[dartDefinesParam] != null
+          ? params.stringMap(dartDefinesParam)
+          : const <String, String>{};
+      dartObfuscation = params.optionalField<bool>(dartObfuscationParam, defaultValue: false);
+      extraFrontEndOptions = params.stringIterable(extraFrontEndOptionsParam).toList();
+      extraGenSnapshotOptions = params.stringIterable(extraGenSnapshotOptionsParam).toList();
+      flavor = params.nullableField<String>(flavorParam);
+      splitDebugInfo = params[splitDebugInfoParam] != null
+          ? params.directoryUri(splitDebugInfoParam)
+          : null;
+      targetDeviceId = params.nullableField<String>(targetDeviceIdParam);
+      targetPlatform = params.nullableField<String>(targetPlatformParam);
+      trackWidgetCreation = params.requiredField<bool>(trackWidgetCreationParam);
+      treeShakeIcons = params.requiredField<bool>(treeShakeIconsParam);
     } on FormatException catch (e) {
       throw RpcException.invalidParams(e.message);
     }
@@ -305,11 +429,23 @@ abstract base class BuildService extends ToolExtensionService {
 
     final context = ExtensionBuildContext(
       buildMode: mode,
+      buildName: buildName,
+      buildNumber: buildNumber,
+      dartDefines: dartDefines,
+      dartObfuscation: dartObfuscation,
+      extraFrontEndOptions: extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      flavor: flavor,
       flutterRoot: flutterRootUri,
       mainPath: mainPath,
       outputDir: outputDirUri,
       projectRoot: projectRootUri,
       resolvedArtifacts: resolvedArtifacts,
+      splitDebugInfo: splitDebugInfo,
+      targetDeviceId: targetDeviceId,
+      targetPlatform: targetPlatform,
+      trackWidgetCreation: trackWidgetCreation,
+      treeShakeIcons: treeShakeIcons,
     );
     return (targetName, context);
   }
@@ -327,11 +463,23 @@ abstract base class BuildService extends ToolExtensionService {
     final context = ExtensionAssembleContext(
       buildDir: buildDirUri,
       buildMode: buildContext.buildMode,
+      buildName: buildContext.buildName,
+      buildNumber: buildContext.buildNumber,
+      dartDefines: buildContext.dartDefines,
+      dartObfuscation: buildContext.dartObfuscation,
+      extraFrontEndOptions: buildContext.extraFrontEndOptions,
+      extraGenSnapshotOptions: buildContext.extraGenSnapshotOptions,
+      flavor: buildContext.flavor,
       flutterRoot: buildContext.flutterRoot,
       mainPath: buildContext.mainPath,
       outputDir: buildContext.outputDir,
       projectRoot: buildContext.projectRoot,
       resolvedArtifacts: buildContext.resolvedArtifacts,
+      splitDebugInfo: buildContext.splitDebugInfo,
+      targetDeviceId: buildContext.targetDeviceId,
+      targetPlatform: buildContext.targetPlatform,
+      trackWidgetCreation: buildContext.trackWidgetCreation,
+      treeShakeIcons: buildContext.treeShakeIcons,
     );
     return (targetName, context);
   }

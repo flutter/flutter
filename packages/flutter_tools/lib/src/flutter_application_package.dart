@@ -8,6 +8,7 @@ import 'application_package.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
+import 'features.dart';
 import 'ios/application_package.dart';
 import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
@@ -18,6 +19,24 @@ import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/application_package.dart';
 
+/// An [ApplicationPackage] representing an application targeting a custom tool
+/// extension device.
+class ExtensionApplicationPackage extends ApplicationPackage {
+  ExtensionApplicationPackage({required super.id}) : name = id;
+
+  @override
+  final String name;
+}
+
+/// A prebuilt [ExtensionApplicationPackage] supplied via `--use-application-binary`.
+class PrebuiltExtensionApplicationPackage extends ExtensionApplicationPackage
+    implements PrebuiltApplicationPackage {
+  PrebuiltExtensionApplicationPackage({required this.applicationPackage, required super.id});
+
+  @override
+  final FileSystemEntity applicationPackage;
+}
+
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
@@ -25,9 +44,11 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     required this._plistParserBuilder,
     required this._templatePathProvider,
     required this._toolContext,
+    this._featureFlags,
   });
 
   final AndroidSdk? Function() _androidSdkBuilder;
+  final FeatureFlags? _featureFlags;
   final PlistParser Function() _plistParserBuilder;
   final TemplatePathProvider _templatePathProvider;
   final ToolContext _toolContext;
@@ -102,6 +123,18 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(_currentProject().windows, toolContext: _toolContext)
             : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
+      case .unsupported when _featureFlags?.isToolExtensionsEnabled ?? false:
+        // TODO(bkonyi): Replace with device-scoped DeviceService.resolveApplication
+        // once available so unsupported built-in architectures are not routed here.
+        final String id = _currentProject().manifest.appName;
+        if (applicationBinary == null) {
+          return ExtensionApplicationPackage(id: id);
+        }
+        final FileSystem fs = _toolContext.fs;
+        final FileSystemEntity entity = fs.isDirectorySync(applicationBinary.path)
+            ? fs.directory(applicationBinary.path)
+            : applicationBinary;
+        return PrebuiltExtensionApplicationPackage(applicationPackage: entity, id: id);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart' show BuildInfo, BuildMode;
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
@@ -23,7 +24,7 @@ import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
@@ -49,22 +50,28 @@ final class _RecordingExtensionBuildManager extends ExtensionBuildManager {
 
   @override
   Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
+    required BuildInfo buildInfo,
+    required FileSystem fileSystem,
     required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
+    String? targetDeviceId,
+    String? targetPlatform,
   }) async {
     lastBuildArgs = <String, Object?>{
-      'buildMode': buildMode,
+      'buildInfo': buildInfo,
+      'fileSystem': fileSystem,
       'flutterRoot': flutterRoot,
       'mainPath': mainPath,
       'outputDir': outputDir,
       'projectRoot': projectRoot,
       'resolvedArtifacts': resolvedArtifacts,
+      'targetDeviceId': targetDeviceId,
       'targetName': targetName,
+      'targetPlatform': targetPlatform,
     };
     return const ExtensionBuildResult(success: true);
   }
@@ -334,6 +341,110 @@ void _domainErrorBuildExtensionEntryPoint(SendPort sendPort) {
   );
 }
 
+final class _WireRecordingBuildTarget extends BuildTarget {
+  const _WireRecordingBuildTarget(this._sendPort)
+    : super(
+        description: 'Records parsed ExtensionBuildContext.',
+        outputDir: '${BuiltInPlaceholders.outputDir}/custom_os',
+        targetPlatform: 'linux-x64',
+      );
+
+  final SendPort _sendPort;
+
+  @override
+  String get name => 'wire-recorded-build';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    _sendPort.send(<String, Object?>{
+      'kind': 'context',
+      'buildMode': context.buildMode.cliName,
+      'buildName': context.buildName,
+      'buildNumber': context.buildNumber,
+      'dartDefines': context.dartDefines,
+      'dartObfuscation': context.dartObfuscation,
+      'extraFrontEndOptions': context.extraFrontEndOptions,
+      'extraGenSnapshotOptions': context.extraGenSnapshotOptions,
+      'flavor': context.flavor,
+      'mainPath': context.mainPath,
+      'splitDebugInfo': context.splitDebugInfo?.toString(),
+      'targetDeviceId': context.targetDeviceId,
+      'targetPlatform': context.targetPlatform,
+      'trackWidgetCreation': context.trackWidgetCreation,
+      'treeShakeIcons': context.treeShakeIcons,
+    });
+    return ExtensionBuildResult(
+      success: true,
+      executableUri: Uri.parse('file:///project/build/custom_os/MyApp.app/'),
+    );
+  }
+}
+
+final class _WireRecordingAssembleTarget extends AssembleTarget {
+  const _WireRecordingAssembleTarget(this._sendPort)
+    : super(description: 'Records parsed ExtensionAssembleContext.', targetPlatform: 'linux-x64');
+
+  final SendPort _sendPort;
+
+  @override
+  String get name => 'wire-recorded-assemble';
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionAssembleContext context) async {
+    _sendPort.send(<String, Object?>{
+      'kind': 'assemble_context',
+      'buildDir': context.buildDir.toString(),
+      'buildMode': context.buildMode.cliName,
+      'trackWidgetCreation': context.trackWidgetCreation,
+      'treeShakeIcons': context.treeShakeIcons,
+    });
+    return const ExtensionBuildResult(success: true);
+  }
+}
+
+final class _WireRecordingBuildService extends BuildService {
+  _WireRecordingBuildService(this._sendPort);
+
+  final SendPort _sendPort;
+
+  @override
+  List<BuildTarget> get buildTargets => <BuildTarget>[_WireRecordingBuildTarget(_sendPort)];
+
+  @override
+  List<AssembleTarget> get assembleTargets => <AssembleTarget>[
+    _WireRecordingAssembleTarget(_sendPort),
+  ];
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    final Map<String, ExtensionRpcHandler> handlers = await super.initialize();
+    final ExtensionRpcHandler originalBuild = handlers['build']!;
+    final ExtensionRpcHandler originalAssemble = handlers['assemble']!;
+    return <String, ExtensionRpcHandler>{
+      ...handlers,
+      'build': (Map<String, Object?> params) {
+        _sendPort.send(<String, Object?>{'kind': 'wire', 'params': params});
+        return originalBuild(params);
+      },
+      'assemble': (Map<String, Object?> params) {
+        _sendPort.send(<String, Object?>{'kind': 'assemble_wire', 'params': params});
+        return originalAssemble(params);
+      },
+    };
+  }
+}
+
+ExtensionEntryPoint _createWireRecordingBuildEntryPoint(SendPort eventSendPort) {
+  return (SendPort sendPort) {
+    ToolExtensionEntryPoint.run(
+      sendPort,
+      <ToolExtensionService>[_WireRecordingBuildService(eventSendPort)],
+      extensionName: 'wire_build_ext',
+      supportedPlatforms: const <String>{'linux'},
+    );
+  };
+}
+
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -381,7 +492,8 @@ void main() {
         );
 
         final ExtensionBuildResult buildResult = await buildManager.build(
-          buildMode: .debug,
+          buildInfo: BuildInfo.debug,
+          fileSystem: MemoryFileSystem.test(),
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
           outputDir: Uri.parse('/build'),
@@ -401,6 +513,8 @@ void main() {
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'custom-linux-assemble-only-debug',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         );
         expect(assembleResult.success, isFalse);
         expect(assembleResult.errorMessage, 'Tool extensions are disabled.');
@@ -548,7 +662,8 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fs,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
           outputDir: Uri.parse('/out'),
@@ -561,7 +676,8 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fs,
           flutterRoot: Uri.parse('relative/flutter'),
           mainPath: 'lib/main.dart',
           outputDir: Uri.parse('/out'),
@@ -574,7 +690,8 @@ void main() {
 
       await expectLater(
         () => buildManager.build(
-          buildMode: .debug,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fs,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
           outputDir: Uri.parse('relative/out'),
@@ -595,6 +712,8 @@ void main() {
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'custom-linux-assemble-only-debug',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         ),
         throwsArgumentError,
       );
@@ -609,6 +728,8 @@ void main() {
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'custom-linux-assemble-only-debug',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         ),
         throwsArgumentError,
       );
@@ -634,7 +755,8 @@ void main() {
         );
 
         final ExtensionBuildResult buildResult = await buildManager.build(
-          buildMode: .debug,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fs,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
           outputDir: Uri.parse('/out'),
@@ -657,6 +779,8 @@ void main() {
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'non-existent-assemble-target',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         );
         expect(assembleResult.success, isFalse);
         expect(
@@ -701,7 +825,8 @@ void main() {
         );
 
         final ExtensionBuildResult buildResult = await buildManager.build(
-          buildMode: .debug,
+          buildInfo: BuildInfo.debug,
+          fileSystem: fs,
           flutterRoot: Uri.parse('/flutter'),
           mainPath: 'lib/main.dart',
           outputDir: Uri.parse('/out'),
@@ -733,6 +858,8 @@ void main() {
           projectRoot: Uri.parse('/'),
           resolvedArtifacts: const <String, String>{},
           targetName: 'shared-assemble-target',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
         );
         expect(assembleResult.success, isTrue);
 
@@ -1234,7 +1361,8 @@ void main() {
       );
 
       final ExtensionBuildResult result = await buildManager.build(
-        buildMode: .debug,
+        buildInfo: BuildInfo.debug,
+        fileSystem: fs,
         flutterRoot: Uri.directory('/flutter'),
         mainPath: 'lib/main.dart',
         outputDir: Uri.directory('/project/build/custom_os'),
@@ -1244,6 +1372,260 @@ void main() {
       );
       expect(result.success, isFalse);
       expect(result.errorMessage, 'Custom compiler missing.');
+    });
+
+    testWithoutContext('ExtensionBuildManager.build serializes BuildInfo parameters over RPC and resolves splitDebugInfoPath', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[_createWireRecordingBuildEntryPoint(eventPort.sendPort)],
+        featureFlags: featureFlags,
+      );
+      addTearDown(manager.dispose);
+
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+      final projectFs = MemoryFileSystem.test();
+      projectFs.currentDirectory = projectFs.directory('/project')..createSync(recursive: true);
+
+      final ExtensionBuildResult result = await buildManager.build(
+        buildInfo: const BuildInfo(
+          BuildMode.release,
+          'production',
+          buildName: '4.0.0',
+          buildNumber: '12',
+          dartDefines: <String>['API_KEY=secret=1', 'BARE_KEY'],
+          dartObfuscation: true,
+          extraFrontEndOptions: <String>['--fe-flag'],
+          extraGenSnapshotOptions: <String>['--gs-flag'],
+          packageConfigPath: '.dart_tool/package_config.json',
+          splitDebugInfoPath: 'symbols',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+        ),
+        fileSystem: projectFs,
+        flutterRoot: Uri.directory('/flutter'),
+        mainPath: '/project/lib/main.dart',
+        outputDir: Uri.directory('/project/build/custom_os'),
+        projectRoot: Uri.directory('/project'),
+        resolvedArtifacts: const <String, String>{'icuData': '/flutter/icudtl.dat'},
+        targetDeviceId: 'custom-device-1',
+        targetName: 'wire-recorded-build',
+        targetPlatform: 'custom-os-arm64',
+      );
+      expect(result.success, isTrue);
+      expect(result.executableUri, Uri.parse('file:///project/build/custom_os/MyApp.app/'));
+
+      final List<Map<String, Object?>> events = await eventPort
+          .cast<Map<String, Object?>>()
+          .take(2)
+          .toList();
+      final wireParams =
+          events.firstWhere((Map<String, Object?> e) => e['kind'] == 'wire')['params']!
+              as Map<String, Object?>;
+      expect(wireParams[BuildService.buildModeParam], 'release');
+      expect(wireParams[BuildService.buildNameParam], '4.0.0');
+      expect(wireParams[BuildService.buildNumberParam], '12');
+      expect(wireParams[BuildService.dartDefinesParam], const <String, Object?>{
+        'API_KEY': 'secret=1',
+        'BARE_KEY': '',
+      });
+      expect(wireParams[BuildService.dartObfuscationParam], isTrue);
+      expect(wireParams[BuildService.extraFrontEndOptionsParam], const <Object?>['--fe-flag']);
+      expect(wireParams[BuildService.extraGenSnapshotOptionsParam], const <Object?>['--gs-flag']);
+      expect(wireParams[BuildService.flavorParam], 'production');
+      expect(wireParams[BuildService.mainPathParam], '/project/lib/main.dart');
+      expect(wireParams[BuildService.splitDebugInfoParam], 'file:///project/symbols/');
+      expect(wireParams[BuildService.targetDeviceIdParam], 'custom-device-1');
+      expect(wireParams[BuildService.targetPlatformParam], 'custom-os-arm64');
+      expect(wireParams[BuildService.trackWidgetCreationParam], isTrue);
+      expect(wireParams[BuildService.treeShakeIconsParam], isFalse);
+
+      final Map<String, Object?> parsedContext = events.firstWhere(
+        (Map<String, Object?> e) => e['kind'] == 'context',
+      );
+      expect(parsedContext['buildMode'], 'release');
+      expect(parsedContext['buildName'], '4.0.0');
+      expect(parsedContext['buildNumber'], '12');
+      expect(parsedContext['dartDefines'], const <String, String>{
+        'API_KEY': 'secret=1',
+        'BARE_KEY': '',
+      });
+      expect(parsedContext['dartObfuscation'], isTrue);
+      expect(parsedContext['extraFrontEndOptions'], const <String>['--fe-flag']);
+      expect(parsedContext['extraGenSnapshotOptions'], const <String>['--gs-flag']);
+      expect(parsedContext['flavor'], 'production');
+      expect(parsedContext['mainPath'], '/project/lib/main.dart');
+      expect(parsedContext['splitDebugInfo'], 'file:///project/symbols/');
+      expect(parsedContext['targetDeviceId'], 'custom-device-1');
+      expect(parsedContext['targetPlatform'], 'custom-os-arm64');
+      expect(parsedContext['trackWidgetCreation'], isTrue);
+      expect(parsedContext['treeShakeIcons'], isFalse);
+    });
+
+    testWithoutContext(
+      'AssembleCommand forwards TrackWidgetCreation and TreeShakeIcons defines over RPC',
+      () async {
+        final eventPort = ReceivePort();
+        addTearDown(eventPort.close);
+
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[
+            _createWireRecordingBuildEntryPoint(eventPort.sendPort),
+          ],
+          featureFlags: featureFlags,
+        );
+        addTearDown(manager.dispose);
+
+        final buildManager = ExtensionBuildManager(
+          extensionManager: manager,
+          featureFlags: featureFlags,
+          logger: logger,
+        );
+        final buildSystem = FlutterBuildSystem(
+          fileSystem: fs,
+          logger: logger,
+          platform: FakePlatform(),
+        );
+        final command = AssembleCommand(
+          androidContext: FakeAndroidContext(),
+          buildSystem: buildSystem,
+          extensionBuildManager: buildManager,
+          featureFlags: featureFlags,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(fileSystem: fs),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fs,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
+          ),
+          xcode: null,
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await runner.run(<String>[
+          'assemble',
+          '-o',
+          '/out',
+          '-d',
+          'BuildMode=debug',
+          '-d',
+          'TrackWidgetCreation=false',
+          '-d',
+          'TreeShakeIcons=true',
+          'wire-recorded-assemble',
+        ]);
+
+        final List<Map<String, Object?>> events = await eventPort
+            .cast<Map<String, Object?>>()
+            .take(2)
+            .toList();
+        final wireParams =
+            events.firstWhere((Map<String, Object?> e) => e['kind'] == 'assemble_wire')['params']!
+                as Map<String, Object?>;
+        expect(wireParams[BuildService.buildModeParam], 'debug');
+        expect(wireParams[BuildService.trackWidgetCreationParam], isFalse);
+        expect(wireParams[BuildService.treeShakeIconsParam], isTrue);
+
+        final Map<String, Object?> parsedContext = events.firstWhere(
+          (Map<String, Object?> e) => e['kind'] == 'assemble_context',
+        );
+        expect(parsedContext['buildMode'], 'debug');
+        expect(parsedContext['trackWidgetCreation'], isFalse);
+        expect(parsedContext['treeShakeIcons'], isTrue);
+      },
+    );
+
+    testWithoutContext('ExtensionBuildSubCommand forwards CLI BuildInfo flags to ExtensionBuildManager.build', () async {
+      fs.file('/pubspec.yaml').writeAsStringSync('name: test_app\nversion: 1.0.0+1\n');
+      fs.file('/lib/custom_entry.dart').createSync(recursive: true);
+      fs.file('/defines.json').writeAsStringSync('{"FILE_KEY": "file_val"}');
+
+      final buildManager = _RecordingExtensionBuildManager();
+      final target = ExtensionBuildTarget(
+        description: 'Custom hermetic build target.',
+        name: 'custom-hermetic-build',
+        outputDir:
+            '${BuiltInPlaceholders.outputDir}/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}',
+        targetPlatform: 'custom-os-arm64',
+      );
+      final subCommand = ExtensionBuildSubCommand(
+        buildManager: buildManager,
+        target: target,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(fileSystem: fs),
+          cache: cache,
+          fs: fs,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+        ),
+        verboseHelp: false,
+      );
+      expect(subCommand.argParser.options.containsKey('enable-experiment'), isFalse);
+
+      final CommandRunner<void> runner = createTestCommandRunner(subCommand);
+      await expectLater(
+        () => runner.run(<String>['custom-hermetic-build', '--enable-experiment=variance']),
+        throwsA(isA<UsageException>()),
+      );
+
+      await runner.run(<String>[
+        'custom-hermetic-build',
+        '--no-pub',
+        '--release',
+        '--target=lib/custom_entry.dart',
+        '--no-tree-shake-icons',
+        '--track-widget-creation',
+        '--flavor=staging',
+        '--build-name=2.0.0',
+        '--build-number=5',
+        '--dart-define=MY_KEY=my=val',
+        '--dart-define=BARE_KEY',
+        '--dart-define-from-file=defines.json',
+        '--split-debug-info=out/symbols',
+        '--obfuscate',
+        '--extra-front-end-options=--fe-arg',
+        '--extra-gen-snapshot-options=--gs-arg',
+      ]);
+
+      final Map<String, Object?> args = buildManager.lastBuildArgs!;
+      final buildInfo = args['buildInfo']! as BuildInfo;
+      expect(buildInfo.mode, BuildMode.release);
+      expect(buildInfo.buildName, '2.0.0');
+      expect(buildInfo.buildNumber, '5');
+      expect(
+        buildInfo.dartDefines,
+        containsAll(<String>[
+          'MY_KEY=my=val',
+          'BARE_KEY',
+          'FILE_KEY=file_val',
+          'FLUTTER_APP_FLAVOR=staging',
+        ]),
+      );
+      expect(buildInfo.dartObfuscation, isTrue);
+      expect(buildInfo.extraFrontEndOptions, const <String>['--fe-arg']);
+      expect(buildInfo.extraGenSnapshotOptions, const <String>['--gs-arg']);
+      expect(buildInfo.flavor, 'staging');
+      expect(buildInfo.splitDebugInfoPath, 'out/symbols');
+      expect(buildInfo.trackWidgetCreation, isTrue);
+      expect(buildInfo.treeShakeIcons, isFalse);
+      expect(args['fileSystem'], same(fs));
+      expect(args['mainPath'], fs.file('/lib/custom_entry.dart').path);
+      expect(args['targetDeviceId'], isNull);
+      expect(args['targetName'], 'custom-hermetic-build');
+      expect(args['targetPlatform'], 'custom-os-arm64');
     });
   });
 }

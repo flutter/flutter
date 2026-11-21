@@ -384,11 +384,11 @@ class ExtensionBuildResult {
       return null;
     }
     final Uri? uri = Uri.tryParse(raw);
-    if (uri != null && uri.isValidFileUri) {
+    if (uri != null && uri.isValidArtifactUri) {
       return uri;
     }
     throw const FormatException(
-      'Invalid "$executableUriKey" in ExtensionBuildResult: must be an absolute file:// URI.',
+      'Invalid "$executableUriKey" in ExtensionBuildResult: must be a non-root absolute file:// URI.',
     );
   }
 

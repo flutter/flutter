@@ -12,8 +12,21 @@ extension ExtensionUriValidation on Uri {
 
   /// Whether this URI is an absolute `file:` URI that does not end with a
   /// trailing slash (`/`).
+  ///
+  /// Validates file-only URIs (such as `LocalArtifactDependency.stampUri`),
+  /// whereas [isValidArtifactUri] validates build and executable artifacts that
+  /// may be either files or directory bundles.
   bool get isValidFileUri =>
       isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && !path.endsWith('/');
+
+  /// Whether this URI is a non-root absolute `file:` URI pointing to either a
+  /// file ([isValidFileUri]) or a directory bundle ([isValidDirectoryUri]).
+  ///
+  /// Validates build and executable artifacts that may be either files or
+  /// directory bundles, whereas [isValidFileUri] validates file-only URIs.
+  bool get isValidArtifactUri =>
+      (isValidFileUri || isValidDirectoryUri) &&
+      pathSegments.any((String segment) => segment.isNotEmpty);
 }
 
 /// Shared JSON deserialization utilities for Flutter tool extension models.

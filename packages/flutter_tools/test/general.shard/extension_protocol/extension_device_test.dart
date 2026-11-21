@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_device_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode, Category;
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/error_code.dart' as error_code;
@@ -25,6 +28,8 @@ const _primaryDeviceId = 'custom_device_1';
 const _secondaryDeviceId = 'custom_device_2';
 const _startEventType = 'start';
 const _stopEventType = 'stop';
+const _launchEventType = 'launch';
+const _appStopEventType = 'app_stop';
 const _eventTypeKey = 'type';
 
 final class _StreamingTestDeviceService extends DeviceService {
@@ -35,6 +40,7 @@ final class _StreamingTestDeviceService extends DeviceService {
     this.failGetDevicesOnPoll,
     this.linesByDevice = const <String, List<String>>{},
     this.throwOnStart = false,
+    this.vmServiceUri,
   });
 
   final SendPort eventSendPort;
@@ -43,6 +49,7 @@ final class _StreamingTestDeviceService extends DeviceService {
   final int? failGetDevicesOnPoll;
   final Map<String, List<String>> linesByDevice;
   final bool throwOnStart;
+  final Uri? vmServiceUri;
   int _getDevicesCallCount = 0;
 
   @override
@@ -59,6 +66,7 @@ final class _StreamingTestDeviceService extends DeviceService {
           category: Category.desktop,
           id: _primaryDeviceId,
           name: 'Primary Extension Device',
+          targetPlatform: 'custom-arm64',
         ),
       const TargetDevice(
         buildTarget: 'custom-linux-build',
@@ -76,17 +84,34 @@ final class _StreamingTestDeviceService extends DeviceService {
   }) async => true;
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
-  }) async => false;
+    bool prebuiltApplication = false,
+  }) async {
+    eventSendPort.send(<String, Object?>{
+      _eventTypeKey: _launchEventType,
+      DeviceService.appIdParam: appId,
+      DeviceService.debuggingOptionsParam: debuggingOptions.toMap(),
+      DeviceService.deviceIdParam: deviceId,
+      DeviceService.executableUriParam: executableUri.toString(),
+      DeviceService.prebuiltApplicationParam: prebuiltApplication,
+    });
+  }
 
   @override
-  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => vmServiceUri;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async => false;
+  Future<void> stopApp({required String deviceId, String? appId}) async {
+    eventSendPort.send(<String, Object?>{
+      _eventTypeKey: _appStopEventType,
+      DeviceService.appIdParam: appId,
+      DeviceService.deviceIdParam: deviceId,
+    });
+  }
 
   @override
   Future<void> startLogStream({required String deviceId}) async {
@@ -122,37 +147,59 @@ final class _FakeExtensionBuildManager extends ExtensionBuildManager {
     required super.extensionManager,
     required super.featureFlags,
     required super.logger,
+    this.buildResult = const ExtensionBuildResult(success: true),
     List<ExtensionBuildTarget>? targets,
   }) : _targets =
            targets ??
            <ExtensionBuildTarget>[
              ExtensionBuildTarget(
+               artifacts: const <ExtensionArtifact>{BuiltInArtifacts.genSnapshot},
                description: 'Custom Linux Build',
                name: 'custom-linux-build',
-               outputDir: '{OUTPUT_DIR}/linux',
+               outputDir: '{OUTPUT_DIR}/linux/{TARGET_PLATFORM}/{BUILD_MODE}',
                targetPlatform: 'linux-x64',
              ),
            ];
 
+  ExtensionBuildResult buildResult;
   final List<ExtensionBuildTarget> _targets;
+  final buildCalls = <Map<String, Object?>>[];
 
   @override
   Future<List<ExtensionBuildTarget>> getBuildTargets() async => _targets;
 
   @override
   Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
+    required BuildInfo buildInfo,
+    required FileSystem fileSystem,
     required Uri flutterRoot,
     required String mainPath,
     required Uri outputDir,
     required Uri projectRoot,
     required Map<String, String> resolvedArtifacts,
     required String targetName,
-  }) async => const ExtensionBuildResult(success: true);
+    String? targetDeviceId,
+    String? targetPlatform,
+  }) async {
+    buildCalls.add(<String, Object?>{
+      'buildInfo': buildInfo,
+      'fileSystem': fileSystem,
+      'flutterRoot': flutterRoot,
+      'mainPath': mainPath,
+      'outputDir': outputDir,
+      'projectRoot': projectRoot,
+      'resolvedArtifacts': resolvedArtifacts,
+      'targetDeviceId': targetDeviceId,
+      'targetName': targetName,
+      'targetPlatform': targetPlatform,
+    });
+    return buildResult;
+  }
 }
 
-ExtensionBuildManager _createBuildManager({
+_FakeExtensionBuildManager _createBuildManager({
   required Logger logger,
+  ExtensionBuildResult buildResult = const ExtensionBuildResult(success: true),
   ExtensionManager? extensionManager,
   List<ExtensionBuildTarget>? targets,
 }) {
@@ -167,6 +214,7 @@ ExtensionBuildManager _createBuildManager({
     addTearDown(manager.dispose);
   }
   return _FakeExtensionBuildManager(
+    buildResult: buildResult,
     extensionManager: manager,
     featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
     logger: logger,
@@ -653,8 +701,13 @@ void main() {
         );
         addTearDown(device.dispose);
 
+        await expectLater(
+          device.startApp(null, debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug)),
+          throwsStateError,
+        );
+
         final LaunchResult result = await device.startApp(
-          null,
+          ExtensionApplicationPackage(id: 'test_app'),
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         );
         expect(result.started, isFalse);
@@ -665,7 +718,217 @@ void main() {
       },
     );
 
-    testWithoutContext('ExtensionDeviceClient.launchApp and stopApp log error and return false on ToolExtensionException', () async {
+    testWithoutContext('ExtensionBackedDevice.startApp and stopApp forward BuildInfo, appId, directory bundle URIs, ExtensionDebuggingOptions, and retry reuse', () async {
+      final eventPort = ReceivePort();
+      addTearDown(eventPort.close);
+      final Stream<Map<String, Object?>> events = eventPort
+          .cast<Map<String, Object?>>()
+          .asBroadcastStream();
+      final SendPort eventSendPort = eventPort.sendPort;
+
+      void entryPoint(SendPort sendPort) {
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _StreamingTestDeviceService(
+              eventSendPort: eventSendPort,
+              vmServiceUri: Uri.parse('http://127.0.0.1:9191/ws=/'),
+            ),
+          ]),
+        );
+      }
+
+      final ExtensionConnection conn = await ExtensionConnection.spawn(entryPoint, logger: logger);
+      addTearDown(conn.dispose);
+
+      final fileSystem = MemoryFileSystem.test();
+      fileSystem.currentDirectory = fileSystem.directory('/project')..createSync(recursive: true);
+      final client = ExtensionDeviceClient(conn, logger: logger);
+      final List<TargetDevice> targetDevices = await client.getDevices();
+      final _FakeExtensionBuildManager buildManager = _createBuildManager(
+        buildResult: ExtensionBuildResult(
+          executableUri: fileSystem.directory('/build/custom/MyApp.app').uri,
+          success: true,
+        ),
+        logger: logger,
+      );
+      final device = ExtensionBackedDevice(
+        artifacts: Artifacts.test(fileSystem: fileSystem),
+        buildManager: buildManager,
+        connection: conn,
+        deviceService: client,
+        fileSystem: fileSystem,
+        logger: logger,
+        targetDevice: targetDevices.first,
+      );
+      addTearDown(device.dispose);
+
+      final launchEvents = <Map<String, Object?>>[];
+      final StreamSubscription<Map<String, Object?>> launchSub = events
+          .where((Map<String, Object?> event) => event[_eventTypeKey] == _launchEventType)
+          .listen(launchEvents.add);
+      addTearDown(launchSub.cancel);
+
+      final stopEvents = <Map<String, Object?>>[];
+      final StreamSubscription<Map<String, Object?>> stopSub = events
+          .where((Map<String, Object?> event) => event[_eventTypeKey] == _appStopEventType)
+          .listen(stopEvents.add);
+      addTearDown(stopSub.cancel);
+
+      final debuggingOptions = DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug,
+          'prod',
+          buildName: '2.3.4',
+          buildNumber: '42',
+          dartDefines: <String>['API_URL=https://api.example.com?a=1', 'EMPTY_KEY'],
+          dartObfuscation: true,
+          extraFrontEndOptions: <String>['--enable-asserts'],
+          extraGenSnapshotOptions: <String>['--deterministic'],
+          packageConfigPath: '.dart_tool/package_config.json',
+          splitDebugInfoPath: 'symbols/out',
+          trackWidgetCreation: true,
+          treeShakeIcons: false,
+        ),
+        dartEntrypointArgs: <String>['--arg1', 'val1'],
+        deviceVmServicePort: 8181,
+        hostVmServicePort: 8282,
+        startPaused: true,
+        uninstallFirst: true,
+        verboseSystemLogs: true,
+      );
+
+      final appPackage = ExtensionApplicationPackage(id: 'com.example.test_app');
+      final LaunchResult buildLaunchResult = await device.startApp(
+        appPackage,
+        debuggingOptions: debuggingOptions,
+        mainPath: 'lib/custom_main.dart',
+        platformArgs: <String, Object?>{'trace-startup': true},
+        route: '/initial',
+      );
+      expect(buildLaunchResult.started, isTrue);
+      expect(buildLaunchResult.vmServiceUri, Uri.parse('http://127.0.0.1:9191/ws=/'));
+
+      expect(buildManager.buildCalls, hasLength(1));
+      final Map<String, Object?> buildCall = buildManager.buildCalls.single;
+      expect(buildCall['buildInfo'], same(debuggingOptions.buildInfo));
+      expect(buildCall['fileSystem'], same(fileSystem));
+      expect(buildCall['mainPath'], fileSystem.file('/project/lib/custom_main.dart').path);
+      expect(buildCall['targetDeviceId'], _primaryDeviceId);
+      expect(buildCall['targetPlatform'], 'custom-arm64');
+      expect((buildCall['outputDir']! as Uri).path, endsWith('/build/linux/linux-x64/debug/'));
+      expect(
+        (buildCall['resolvedArtifacts']! as Map<String, String>).keys,
+        contains(BuiltInArtifacts.genSnapshot.name),
+      );
+
+      expect(launchEvents, hasLength(1));
+      final Map<String, Object?> firstLaunch = launchEvents.first;
+      expect(firstLaunch[DeviceService.appIdParam], 'com.example.test_app');
+      expect(firstLaunch[DeviceService.prebuiltApplicationParam], isFalse);
+      expect(firstLaunch[DeviceService.executableUriParam], 'file:///build/custom/MyApp.app/');
+      final parsedOptions = ExtensionDebuggingOptions.fromJson(
+        firstLaunch[DeviceService.debuggingOptionsParam]! as Map<String, Object?>,
+      );
+      expect(parsedOptions.buildMode, equals(BuildMode.debug));
+      expect(parsedOptions.debuggingEnabled, isTrue);
+      expect(parsedOptions.dartEntrypointArgs, equals(<String>['--arg1', 'val1']));
+      expect(parsedOptions.deviceVmServicePort, 8181);
+      expect(parsedOptions.hostVmServicePort, 8282);
+      expect(parsedOptions.route, '/initial');
+      expect(parsedOptions.uninstallFirst, isTrue);
+      expect(
+        parsedOptions.engineSwitches,
+        containsAll(<String>[
+          'enable-dart-profiling=true',
+          'trace-startup=true',
+          'route=/initial',
+          'vm-service-port=8181',
+          'enable-checked-mode=true',
+          'verify-entry-points=true',
+          'start-paused=true',
+          'verbose-logging=true',
+        ]),
+      );
+
+      // Stopping with an ApplicationPackage forwards appId; stopping with null omits appId.
+      expect(await device.stopApp(appPackage), isTrue);
+      expect(await device.stopApp(null), isTrue);
+      expect(stopEvents, hasLength(2));
+      expect(stopEvents[0][DeviceService.appIdParam], 'com.example.test_app');
+      expect(stopEvents[1][DeviceService.appIdParam], isNull);
+
+      // Retry with prebuiltApplication: true on a non-prebuilt package reuses the built executableUri
+      // without rebuilding and without mislabeling the launch as prebuiltApplication: true.
+      final LaunchResult retryLaunchResult = await device.startApp(
+        appPackage,
+        debuggingOptions: debuggingOptions,
+        prebuiltApplication: true,
+      );
+      expect(retryLaunchResult.started, isTrue);
+      expect(buildManager.buildCalls, hasLength(1));
+      expect(launchEvents, hasLength(2));
+      expect(launchEvents[1][DeviceService.appIdParam], 'com.example.test_app');
+      expect(launchEvents[1][DeviceService.prebuiltApplicationParam], isFalse);
+      expect(launchEvents[1][DeviceService.executableUriParam], 'file:///build/custom/MyApp.app/');
+
+      // Launching a PrebuiltExtensionApplicationPackage skips build and sets prebuiltApplication: true
+      // for both single-file binaries and directory bundles.
+      final File prebuiltFile = fileSystem.file('/prebuilt/app.bundle')
+        ..createSync(recursive: true);
+      final LaunchResult prebuiltLaunchResult = await device.startApp(
+        PrebuiltExtensionApplicationPackage(
+          applicationPackage: prebuiltFile,
+          id: 'com.example.prebuilt_app',
+        ),
+        debuggingOptions: debuggingOptions,
+        prebuiltApplication: true,
+      );
+      expect(prebuiltLaunchResult.started, isTrue);
+      expect(buildManager.buildCalls, hasLength(1));
+      expect(launchEvents, hasLength(3));
+      expect(launchEvents[2][DeviceService.appIdParam], 'com.example.prebuilt_app');
+      expect(launchEvents[2][DeviceService.prebuiltApplicationParam], isTrue);
+      expect(launchEvents[2][DeviceService.executableUriParam], 'file:///prebuilt/app.bundle');
+
+      final Directory prebuiltBundleDir = fileSystem.directory('/prebuilt/Bundle.app')
+        ..createSync(recursive: true);
+      final LaunchResult prebuiltDirLaunchResult = await device.startApp(
+        PrebuiltExtensionApplicationPackage(
+          applicationPackage: prebuiltBundleDir,
+          id: 'com.example.prebuilt_bundle',
+        ),
+        debuggingOptions: debuggingOptions,
+        prebuiltApplication: true,
+      );
+      expect(prebuiltDirLaunchResult.started, isTrue);
+      expect(launchEvents, hasLength(4));
+      expect(launchEvents[3][DeviceService.appIdParam], 'com.example.prebuilt_bundle');
+      expect(launchEvents[3][DeviceService.prebuiltApplicationParam], isTrue);
+      expect(launchEvents[3][DeviceService.executableUriParam], 'file:///prebuilt/Bundle.app/');
+
+      // A subsequent failed build clears _lastBuiltExecutableUri so a retry with
+      // prebuiltApplication: true does not launch the stale binary from the earlier build.
+      buildManager.buildResult = const ExtensionBuildResult(
+        errorMessage: 'Simulated build failure',
+        success: false,
+      );
+      final LaunchResult failedBuildResult = await device.startApp(
+        appPackage,
+        debuggingOptions: debuggingOptions,
+      );
+      expect(failedBuildResult.started, isFalse);
+      expect(buildManager.buildCalls, hasLength(2));
+
+      final LaunchResult retryAfterFailedBuildResult = await device.startApp(
+        appPackage,
+        debuggingOptions: debuggingOptions,
+        prebuiltApplication: true,
+      );
+      expect(retryAfterFailedBuildResult.started, isFalse);
+      expect(launchEvents, hasLength(4));
+    });
+
+    testWithoutContext('ExtensionDeviceClient rethrows ToolExtensionException and ExtensionBackedDevice logs clean error and returns failure', () async {
       void domainErrorEntryPoint(SendPort sendPort) {
         unawaited(
           ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
@@ -681,26 +944,132 @@ void main() {
       addTearDown(conn.dispose);
 
       final client = ExtensionDeviceClient(conn, logger: logger);
-      final bool launched = await client.launchApp(
-        debuggingOptions: const ExtensionDebuggingOptions(
-          buildMode: .debug,
-          debuggingEnabled: true,
+      await expectLater(
+        client.launchApp(
+          appId: 'com.example.app',
+          debuggingOptions: const ExtensionDebuggingOptions(
+            buildMode: .debug,
+            debuggingEnabled: true,
+          ),
+          deviceId: _primaryDeviceId,
+          executableUri: Uri.parse('file:///project/build/app'),
         ),
-        deviceId: _primaryDeviceId,
-        executableUri: Uri.file('/project/build/app'),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Launch failed: device disconnected.',
+          ),
+        ),
       );
-      expect(launched, isFalse);
-      expect(
-        logger.errorText,
-        contains('Extension "custom_device_ext": Launch failed: device disconnected.'),
+      await expectLater(
+        client.stopApp(appId: 'com.example.app', deviceId: _primaryDeviceId),
+        throwsA(
+          isA<ToolExtensionException>().having(
+            (ToolExtensionException e) => e.message,
+            'message',
+            'Stop failed: app not running.',
+          ),
+        ),
       );
 
+      final fileSystem = MemoryFileSystem.test();
+      final device = ExtensionBackedDevice(
+        buildManager: _createBuildManager(
+          buildResult: ExtensionBuildResult(
+            executableUri: fileSystem.file('/build/custom/app').uri,
+            success: true,
+          ),
+          logger: logger,
+        ),
+        connection: conn,
+        deviceService: client,
+        fileSystem: fileSystem,
+        logger: logger,
+        targetDevice: const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
+          id: _primaryDeviceId,
+          name: 'Primary Extension Device',
+        ),
+      );
+      addTearDown(device.dispose);
+
+      final LaunchResult launchResult = await device.startApp(
+        ExtensionApplicationPackage(id: 'com.example.app'),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
+      expect(launchResult.started, isFalse);
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to launch application on Primary Extension Device ("custom_device_ext"): '
+          'Launch failed: device disconnected.',
+        ),
+      );
+      expect(logger.errorText, isNot(contains('ToolExtensionException')));
+      expect(logger.errorText, isNot(contains('JSON-RPC error')));
+
       logger.clear();
-      final bool stopped = await client.stopApp(deviceId: _primaryDeviceId);
+      final bool stopped = await device.stopApp(ExtensionApplicationPackage(id: 'com.example.app'));
       expect(stopped, isFalse);
       expect(
         logger.errorText,
-        contains('Extension "custom_device_ext": Stop failed: app not running.'),
+        contains(
+          'Failed to stop application on Primary Extension Device ("custom_device_ext"): '
+          'Stop failed: app not running.',
+        ),
+      );
+      expect(logger.errorText, isNot(contains('ToolExtensionException')));
+      expect(logger.errorText, isNot(contains('JSON-RPC error')));
+
+      // Non-RPC operational exceptions (such as TimeoutException) are also logged and return failure.
+      final timeoutDevice = ExtensionBackedDevice(
+        buildManager: _createBuildManager(
+          buildResult: ExtensionBuildResult(
+            executableUri: fileSystem.file('/build/custom/app').uri,
+            success: true,
+          ),
+          logger: logger,
+        ),
+        connection: conn,
+        deviceService: _TimeoutDeviceService(),
+        fileSystem: fileSystem,
+        logger: logger,
+        targetDevice: const TargetDevice(
+          buildTarget: 'custom-linux-build',
+          category: Category.desktop,
+          id: _primaryDeviceId,
+          name: 'Primary Extension Device',
+        ),
+      );
+      addTearDown(timeoutDevice.dispose);
+
+      logger.clear();
+      final LaunchResult timeoutLaunchResult = await timeoutDevice.startApp(
+        ExtensionApplicationPackage(id: 'com.example.app'),
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      );
+      expect(timeoutLaunchResult.started, isFalse);
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to launch application on Primary Extension Device ("custom_device_ext"): '
+          'TimeoutException: RPC request "device.launchApp" timed out.',
+        ),
+      );
+
+      logger.clear();
+      final bool timeoutStopped = await timeoutDevice.stopApp(
+        ExtensionApplicationPackage(id: 'com.example.app'),
+      );
+      expect(timeoutStopped, isFalse);
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to stop application on Primary Extension Device ("custom_device_ext"): '
+          'TimeoutException: RPC request "device.stopApp" timed out.',
+        ),
       );
     });
 
@@ -751,10 +1120,12 @@ final class _DomainErrorDeviceService extends DeviceService {
   }) async => true;
 
   @override
-  Future<bool> launchApp({
+  Future<void> launchApp({
+    required String appId,
     required ExtensionDebuggingOptions debuggingOptions,
     required String deviceId,
     required Uri executableUri,
+    bool prebuiltApplication = false,
   }) async {
     throw const ToolExtensionException('Launch failed: device disconnected.');
   }
@@ -763,8 +1134,44 @@ final class _DomainErrorDeviceService extends DeviceService {
   Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp({required String deviceId}) async {
+  Future<void> stopApp({required String deviceId, String? appId}) async {
     throw const ToolExtensionException('Stop failed: app not running.');
+  }
+
+  @override
+  Future<void> startLogStream({required String deviceId}) async {}
+
+  @override
+  Future<void> stopLogStream({required String deviceId}) async {}
+}
+
+final class _TimeoutDeviceService extends DeviceService {
+  @override
+  Future<List<TargetDevice>> getDevices() async => const <TargetDevice>[];
+
+  @override
+  Future<bool> isSupportedForProject({
+    required String deviceId,
+    required ExtensionFlutterProject project,
+  }) async => true;
+
+  @override
+  Future<void> launchApp({
+    required String appId,
+    required ExtensionDebuggingOptions debuggingOptions,
+    required String deviceId,
+    required Uri executableUri,
+    bool prebuiltApplication = false,
+  }) async {
+    throw TimeoutException('RPC request "device.launchApp" timed out.');
+  }
+
+  @override
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
+
+  @override
+  Future<void> stopApp({required String deviceId, String? appId}) async {
+    throw TimeoutException('RPC request "device.stopApp" timed out.');
   }
 
   @override

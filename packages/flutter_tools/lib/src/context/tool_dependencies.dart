@@ -837,6 +837,7 @@ class ToolDependencies {
         applicationPackageFactory ??
         FlutterApplicationPackageFactory(
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          featureFlags: finalFeatureFlags,
           plistParserBuilder: () => appleContext.plistParser,
           templatePathProvider: finalTemplatePathProvider,
           toolContext: finalToolContext,

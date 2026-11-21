@@ -126,6 +126,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
              _defaultFromContext<ApplicationPackageFactory>() ??
              FlutterApplicationPackageFactory(
                androidSdkBuilder: () => _defaultFromContext<AndroidSdk>(),
+               featureFlags: featureFlags ?? _defaultFromContext<FeatureFlags>(),
                plistParserBuilder: () => _defaultFromContext<PlistParser>() ?? FakePlistParser(),
                templatePathProvider: _DeferredTestTemplatePathProvider(
                  toolContext ?? const DelegatingToolContext(),
