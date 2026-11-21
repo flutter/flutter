@@ -213,57 +213,83 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return <_ImageAssetFileKey, String>{};
     }
     final File contentsJsonFile = contentsJsonDirectory.childFile('Contents.json');
-    final Map<String, dynamic> contents =
-        json.decode(contentsJsonFile.readAsStringSync()) as Map<String, dynamic>? ??
-        <String, dynamic>{};
-    final List<dynamic> images = contents['images'] as List<dynamic>? ?? <dynamic>[];
-    final Map<String, dynamic> info =
-        contents['info'] as Map<String, dynamic>? ?? <String, dynamic>{};
-    if ((info['version'] as int?) != 1) {
+    if (!contentsJsonFile.existsSync()) {
+      return <_ImageAssetFileKey, String>{};
+    }
+    final Object? decodedContents;
+    try {
+      decodedContents = json.decode(contentsJsonFile.readAsStringSync());
+    } on FileSystemException catch (e) {
+      logger.printError('Failed to read image asset manifest at "${contentsJsonFile.path}": $e');
+      return <_ImageAssetFileKey, String>{};
+    } on FormatException catch (e) {
+      logger.printError(
+        'Image asset manifest at "${contentsJsonFile.path}" was invalid JSON. '
+        'Ensure the file contains valid JSON (for example, remove any trailing commas):\n$e',
+      );
+      return <_ImageAssetFileKey, String>{};
+    }
+    if (decodedContents == null) {
+      return <_ImageAssetFileKey, String>{};
+    }
+    if (decodedContents is! Map<String, Object?>) {
+      logger.printError(
+        'Image asset manifest at "${contentsJsonFile.path}" must be a JSON object.',
+      );
+      return <_ImageAssetFileKey, String>{};
+    }
+    final Object? info = decodedContents['info'];
+    if (info is! Map<String, Object?> || info['version'] != 1) {
       // Skips validation for unknown format.
+      return <_ImageAssetFileKey, String>{};
+    }
+    final Object? images = decodedContents['images'];
+    if (images is! List<Object?>) {
       return <_ImageAssetFileKey, String>{};
     }
 
     final iconInfo = <_ImageAssetFileKey, String>{};
-    for (final dynamic image in images) {
-      final imageMap = image as Map<String, dynamic>;
-      final idiom = imageMap['idiom'] as String?;
-      final size = imageMap['size'] as String?;
-      final scale = imageMap['scale'] as String?;
-      final fileName = imageMap['filename'] as String?;
-
-      // requiresSize must match the actual presence of size in json.
-      if (requiresSize != (size != null) || idiom == null || scale == null || fileName == null) {
-        continue;
-      }
-
-      final double? parsedSize;
-      if (size != null) {
-        // for example, "64x64". Parse the width since it is a square.
-        final Iterable<double> parsedSizes = size
-            .split('x')
-            .map((String element) => double.tryParse(element))
-            .whereType<double>();
-        if (parsedSizes.isEmpty) {
+    for (final Object? image in images) {
+      if (image case {
+        'idiom': final String idiom,
+        'scale': final String scale,
+        'filename': final String fileName,
+      }) {
+        final Object? size = image['size'];
+        // requiresSize must match the actual presence of size in json.
+        if (requiresSize != (size != null) || size is! String?) {
           continue;
         }
-        parsedSize = parsedSizes.first;
-      } else {
-        parsedSize = null;
+        final double? parsedSize = size != null ? _parseImageSize(size) : null;
+        if (requiresSize && parsedSize == null) {
+          continue;
+        }
+        final int? parsedScale = _parseImageScale(scale);
+        if (parsedScale == null) {
+          continue;
+        }
+        iconInfo[_ImageAssetFileKey(idiom, parsedScale, parsedSize)] = fileName;
       }
-
-      // for example, "3x".
-      final Iterable<int> parsedScales = scale
-          .split('x')
-          .map((String element) => int.tryParse(element))
-          .whereType<int>();
-      if (parsedScales.isEmpty) {
-        continue;
-      }
-      final int parsedScale = parsedScales.first;
-      iconInfo[_ImageAssetFileKey(idiom, parsedScale, parsedSize)] = fileName;
     }
     return iconInfo;
+  }
+
+  // for example, "64x64". Parse the width since it is a square.
+  static double? _parseImageSize(String size) {
+    return size
+        .split('x')
+        .map((String element) => double.tryParse(element))
+        .whereType<double>()
+        .firstOrNull;
+  }
+
+  // for example, "3x".
+  static int? _parseImageScale(String scale) {
+    return scale
+        .split('x')
+        .map((String element) => int.tryParse(element))
+        .whereType<int>()
+        .firstOrNull;
   }
 
   // A helper function to check if an image asset is still using template files.
