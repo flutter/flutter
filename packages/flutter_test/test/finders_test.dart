@@ -23,6 +23,24 @@ void main() {
       expect(find.image(FileImage(File('test'))), findsOneWidget);
     });
 
+    testWidgets('finds a FadeInImage once for its target provider', (WidgetTester tester) async {
+      addTearDown(imageCache.clear);
+      final target = FileImage(File('target'));
+      final placeholder = FileImage(File('placeholder'));
+      await tester.pumpWidget(
+        _boilerplate(
+          Column(
+            children: <Widget>[
+              _TestFadeInImage(image: target, placeholder: placeholder),
+              Image(image: target),
+            ],
+          ),
+        ),
+      );
+      expect(tester.widgetList(find.image(target)), <Matcher>[isA<FadeInImage>(), isA<Image>()]);
+      expect(find.image(placeholder), findsOneWidget);
+    });
+
     testWidgets('finds Button widgets with Image', (WidgetTester tester) async {
       addTearDown(imageCache.clear);
       await tester.pumpWidget(
@@ -2301,4 +2319,8 @@ class _ButtonWithIgnorePointer extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TestFadeInImage extends FadeInImage {
+  const _TestFadeInImage({required super.image, required super.placeholder});
 }
