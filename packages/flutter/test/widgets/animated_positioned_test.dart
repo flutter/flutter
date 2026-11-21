@@ -758,6 +758,9 @@ void main() {
               children: <Widget>[
                 AnimatedPositionedDirectional(
                   duration: Duration(milliseconds: 300),
+                  top: 0.0,
+                  bottom: 1.0,
+                  start: 0.0,
                   child: Text('X'),
                 ),
               ],
@@ -768,5 +771,30 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(AnimatedPositionedDirectional)), Size.zero);
+  });
+
+  testWidgets('AnimatedPositioned does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Stack(
+              children: <Widget>[
+                AnimatedPositioned(
+                  duration: Duration(milliseconds: 300),
+                  top: 0.0,
+                  bottom: 1.0,
+                  left: 0.0,
+                  child: Text('X'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedPositioned)), Size.zero);
   });
 }
