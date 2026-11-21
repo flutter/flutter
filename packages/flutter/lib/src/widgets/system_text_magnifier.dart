@@ -32,6 +32,10 @@ import 'overlay.dart';
 /// shows the loupe when it is inserted into the tree, moves it whenever
 /// [magnifierInfo] changes, and hides it when it is removed from the tree.
 ///
+/// On iOS 17.4 and above, the platform shows no loupe when the caret is much
+/// taller than the loupe, as with very large text. The platform's own text
+/// fields behave the same way.
+///
 /// This example shows the system loupe where supported and the default
 /// magnifier elsewhere:
 ///
