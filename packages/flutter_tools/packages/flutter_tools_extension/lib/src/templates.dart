@@ -4,35 +4,35 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 
 import 'protocol_base/service.dart';
 
 /// The service responsible for adding custom platform support to
-/// `flutter create`.
+/// `flutter create` for `app`, `plugin`, and `plugin_ffi` projects.
 ///
-/// Extensions implement this service to provide platform templates
-/// ([appPlatformTemplates] and [pluginPlatformTemplates]) when scaffolding
-/// custom platform implementations (e.g. via
-/// `flutter create --platforms=<custom> .`; `flutter create` integration is
+/// Extensions implement [supportedPlatforms] to advertise custom `--platforms`
+/// identifiers and [resolvePlatformTemplate] to resolve the template directory
+/// to render when scaffolding a project (`flutter create` integration is
 /// tracked in https://github.com/flutter/flutter/issues/190749).
 abstract base class TemplateService extends ToolExtensionService {
   /// Service namespace identifier for templates.
   static const String serviceNamespace = 'template';
 
-  static const String _getAppPlatformTemplatesRpcMethod = 'getAppPlatformTemplates';
-  static const String _getPluginPlatformTemplatesRpcMethod = 'getPluginPlatformTemplates';
+  static const String _getSupportedPlatformsRpcMethod = 'getSupportedPlatforms';
+  static const String _resolvePlatformTemplateRpcMethod = 'resolvePlatformTemplate';
   static const String _generatePlatformTemplateParametersRpcMethod =
       'generatePlatformTemplateParameters';
 
-  /// RPC method identifier to retrieve app platform templates.
-  static const String getAppPlatformTemplatesMethod =
-      '$serviceNamespace.$_getAppPlatformTemplatesRpcMethod';
+  /// RPC method identifier to retrieve supported platforms by template type.
+  static const String getSupportedPlatformsMethod =
+      '$serviceNamespace.$_getSupportedPlatformsRpcMethod';
 
-  /// RPC method identifier to retrieve plugin platform templates.
-  static const String getPluginPlatformTemplatesMethod =
-      '$serviceNamespace.$_getPluginPlatformTemplatesRpcMethod';
+  /// RPC method identifier to resolve a platform template descriptor.
+  static const String resolvePlatformTemplateMethod =
+      '$serviceNamespace.$_resolvePlatformTemplateRpcMethod';
 
   /// RPC method identifier to generate platform template parameters.
   static const String generatePlatformTemplateParametersMethod =
@@ -41,61 +41,72 @@ abstract base class TemplateService extends ToolExtensionService {
   /// RPC parameter key for the target platform.
   static const String platformParam = 'platform';
 
+  /// RPC parameter key for the [ExtensionTemplateType] name.
+  static const String templateTypeParam = 'templateType';
+
   /// RPC parameter key for the tool parameters map.
   static const String toolParametersParam = 'toolParameters';
 
   @override
   String get namespace => serviceNamespace;
 
-  /// Templates this extension provides to add custom platform support to an
-  /// app project.
+  /// Custom platform identifiers supported by this extension for
+  /// [templateType], surfaced in `flutter create --help` and `--platforms`
+  /// validation.
   ///
-  /// When a user runs `flutter create --platforms=<custom> .`, the tool looks
-  /// up `<custom>` in this map. If it finds an entry, it renders that template
-  /// into the project.
+  /// Defaults to an empty set.
   ///
-  /// The map's values are `package:` URIs pointing to a directory of template
-  /// files inside this extension's `lib/` folder.
+  /// ```dart
+  /// @override
+  /// Set<String> supportedPlatforms(ExtensionTemplateType templateType) =>
+  ///     switch (templateType) {
+  ///       .app || .plugin => const <String>{'custom_linux'},
+  ///       .ffiPlugin => const <String>{},
+  ///     };
+  /// ```
+  Set<String> supportedPlatforms(ExtensionTemplateType templateType) => const <String>{};
+
+  /// Resolves the [ExtensionPlatformTemplate] to render for [platform] and
+  /// [templateType] using [toolParameters], or returns `null` if no template
+  /// should be rendered for that `(platform, templateType)` pair.
   ///
+  /// [ExtensionPlatformTemplate.templateUri] must be a `package:` URI pointing
+  /// to a directory of template files inside this extension's `lib/` folder.
   /// Files ending in `.tmpl` are rendered with Mustache using the values from
   /// [generatePlatformTemplateParameters] and written to the same relative path
   /// inside the project without the `.tmpl` suffix. Files ending in
   /// `.copy.tmpl` are copied without Mustache rendering, with the `.copy.tmpl`
   /// suffix stripped. Files without `.tmpl` in their path are ignored.
   ///
-  /// The template should contain only the files needed for this platform. It is
-  /// added to a project that already exists, so it should not include
-  /// project-wide files such as `lib/main.dart` or `pubspec.yaml`.
-  ///
-  /// For example, this maps `--platforms=custom_linux` to the template files in
-  /// `lib/templates/custom_linux/` of the `my_linux_extension` package:
+  /// Extensions with multiple template variants (such as language or app-type
+  /// variants) can inspect [toolParameters] to select the appropriate template
+  /// directory dynamically.
   ///
   /// ```dart
   /// @override
-  /// Map<String, String> get appPlatformTemplates => const <String, String>{
-  ///   'custom_linux': 'package:my_linux_extension/templates/custom_linux',
+  /// Future<ExtensionPlatformTemplate?> resolvePlatformTemplate({
+  ///   required String platform,
+  ///   required ExtensionTemplateType templateType,
+  ///   required Map<String, Object?> toolParameters,
+  /// }) async => switch ((platform, templateType)) {
+  ///   ('custom_linux', .app) => ExtensionPlatformTemplate(
+  ///     templateUri: Uri.parse('package:my_linux_extension/templates/app'),
+  ///   ),
+  ///   ('custom_linux', .plugin) => ExtensionPlatformTemplate(
+  ///     templateUri: Uri.parse('package:my_linux_extension/templates/plugin'),
+  ///   ),
+  ///   _ => null,
   /// };
   /// ```
-  Map<String, String> get appPlatformTemplates => const <String, String>{};
+  Future<ExtensionPlatformTemplate?> resolvePlatformTemplate({
+    required String platform,
+    required ExtensionTemplateType templateType,
+    required Map<String, Object?> toolParameters,
+  }) async => null;
 
-  /// Templates this extension provides to add custom platform support to a
-  /// `plugin` project.
-  ///
-  /// When a user runs `flutter create --template=plugin --platforms=<custom> .`,
-  /// the tool looks up `<custom>` in this map. If it finds an entry, it renders
-  /// that template into the project.
-  ///
-  /// The map's values are `package:` URIs pointing to a directory of `.tmpl`
-  /// and `.copy.tmpl` template files inside this extension's `lib/` folder,
-  /// rendered using the values from [generatePlatformTemplateParameters].
-  ///
-  /// See [appPlatformTemplates] for details on how platform template files are
-  /// structured and rendered.
-  Map<String, String> get pluginPlatformTemplates => const <String, String>{};
-
-  /// Generates custom template parameters for both [appPlatformTemplates] and
-  /// [pluginPlatformTemplates] (for example, when scaffolding platform files via
-  /// `flutter create --platforms=<platform>`).
+  /// Generates custom template parameters when rendering Mustache templates
+  /// returned by [resolvePlatformTemplate] across all [ExtensionTemplateType]s
+  /// (for example, via `flutter create --platforms=<platform>`).
   ///
   /// Defaults to returning [toolParameters] unchanged. Extensions can override
   /// this method to supply custom template variables to Mustache templates.
@@ -108,8 +119,8 @@ abstract base class TemplateService extends ToolExtensionService {
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
-      _getAppPlatformTemplatesRpcMethod: _getAppPlatformTemplatesRpc,
-      _getPluginPlatformTemplatesRpcMethod: _getPluginPlatformTemplatesRpc,
+      _getSupportedPlatformsRpcMethod: _getSupportedPlatformsRpc,
+      _resolvePlatformTemplateRpcMethod: _resolvePlatformTemplateRpc,
       _generatePlatformTemplateParametersRpcMethod: _generatePlatformTemplateParametersRpc,
     };
   }
@@ -118,11 +129,32 @@ abstract base class TemplateService extends ToolExtensionService {
   @override
   Future<void> shutdown() async {}
 
-  Future<Object?> _getAppPlatformTemplatesRpc(Map<String, Object?> params) async =>
-      appPlatformTemplates;
+  Future<Object?> _getSupportedPlatformsRpc(Map<String, Object?> params) async => <String, Object?>{
+    for (final ExtensionTemplateType type in ExtensionTemplateType.values)
+      type.name: supportedPlatforms(type).toList(),
+  };
 
-  Future<Object?> _getPluginPlatformTemplatesRpc(Map<String, Object?> params) async =>
-      pluginPlatformTemplates;
+  Future<Object?> _resolvePlatformTemplateRpc(Map<String, Object?> params) async {
+    final String platform;
+    final ExtensionTemplateType templateType;
+    final Map<String, Object?> toolParameters;
+    try {
+      platform = params.requiredField<String>(platformParam);
+      final String rawType = params.requiredField<String>(templateTypeParam);
+      templateType =
+          ExtensionTemplateType.values.asNameMap()[rawType] ??
+          (throw FormatException('Invalid "$templateTypeParam": "$rawType".'));
+      toolParameters = params.requiredField<Map<String, Object?>>(toolParametersParam);
+    } on FormatException catch (e) {
+      throw RpcException.invalidParams(e.message);
+    }
+    final ExtensionPlatformTemplate? resolved = await resolvePlatformTemplate(
+      platform: platform,
+      templateType: templateType,
+      toolParameters: toolParameters,
+    );
+    return resolved?.toMap();
+  }
 
   Future<Object?> _generatePlatformTemplateParametersRpc(Map<String, Object?> params) async {
     final String platform;

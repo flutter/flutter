@@ -18,6 +18,21 @@ import 'dart/package_map.dart';
 /// https://kotlinlang.org/docs/keyword-reference.html
 const kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
+/// A list of all possible create platforms, even those that may not be enabled
+/// with the current config.
+// Defined here rather than commands/create_base.dart because non-command
+// libraries (such as experimental/templates.dart) cannot import commands/*
+// (enforced by test/integration.shard/forbidden_imports_test.dart).
+const kAllCreatePlatforms = <String>[
+  'ios',
+  'android',
+  'windows',
+  'linux',
+  'macos',
+  'web',
+  'darwin',
+];
+
 /// Provides the path where templates used by flutter_tools are stored.
 class TemplatePathProvider {
   const TemplatePathProvider({required this._flutterRoot});

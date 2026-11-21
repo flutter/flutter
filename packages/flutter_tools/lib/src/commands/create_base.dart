@@ -27,18 +27,6 @@ import '../version.dart';
 
 const _kAvailablePlatforms = <String>['ios', 'android', 'windows', 'linux', 'macos', 'web'];
 
-/// A list of all possible create platforms, even those that may not be enabled
-/// with the current config.
-const kAllCreatePlatforms = <String>[
-  'ios',
-  'android',
-  'windows',
-  'linux',
-  'macos',
-  'web',
-  'darwin',
-];
-
 const _kDefaultPlatformArgumentHelp =
     '(required) The platforms supported by this project. '
     'Platform folders (e.g. android/) will be generated in the target project. '
