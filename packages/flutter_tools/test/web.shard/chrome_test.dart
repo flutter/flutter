@@ -1535,6 +1535,100 @@ ${List<String>.generate(200, (int i) => '[CHROME STDOUT]: line-${i + 50}').join(
       expect(testLogger.errorText, isNot(contains('Last 200 lines of Chrome output:')));
     });
   });
+
+  group('findChromeExecutable on linux', () {
+    void createExecutable(String path) {
+      fileSystem.file(path).createSync(recursive: true);
+    }
+
+    testWithoutContext('returns google-chrome when it is on the PATH', () {
+      createExecutable('/usr/bin/google-chrome');
+      createExecutable('/usr/bin/chromium');
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
+          fileSystem,
+        ),
+        kLinuxExecutable,
+      );
+    });
+
+    testWithoutContext('prefers google-chrome over chromium earlier on the PATH', () {
+      createExecutable('/snap/bin/chromium');
+      createExecutable('/usr/bin/google-chrome');
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(environment: <String, String>{'PATH': '/snap/bin:/usr/bin'}),
+          fileSystem,
+        ),
+        kLinuxExecutable,
+      );
+    });
+
+    testWithoutContext('returns chromium when google-chrome is not on the PATH', () {
+      createExecutable('/usr/bin/chromium');
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(environment: <String, String>{'PATH': '/bin:/usr/bin'}),
+          fileSystem,
+        ),
+        'chromium',
+      );
+    });
+
+    testWithoutContext('returns chromium-browser when google-chrome is not on the PATH', () {
+      createExecutable('/usr/bin/chromium-browser');
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
+          fileSystem,
+        ),
+        'chromium-browser',
+      );
+    });
+
+    testWithoutContext('ignores browsers that are not on the PATH', () {
+      createExecutable('/opt/chromium/chromium');
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
+          fileSystem,
+        ),
+        kLinuxExecutable,
+      );
+    });
+
+    testWithoutContext('returns google-chrome when PATH is not set', () {
+      createExecutable('/usr/bin/chromium');
+
+      expect(
+        findChromeExecutable(FakePlatform(environment: <String, String>{}), fileSystem),
+        kLinuxExecutable,
+      );
+    });
+
+    testWithoutContext('returns $kChromeEnvironment when it is set', () {
+      createExecutable('/usr/bin/chromium');
+
+      expect(
+        findChromeExecutable(
+          FakePlatform(
+            environment: <String, String>{
+              'PATH': '/usr/bin',
+              kChromeEnvironment: '/opt/chrome/chrome',
+            },
+          ),
+          fileSystem,
+        ),
+        '/opt/chrome/chrome',
+      );
+    });
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.

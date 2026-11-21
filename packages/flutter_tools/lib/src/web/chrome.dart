@@ -31,6 +31,10 @@ const kEdgeEnvironment = 'EDGE_ENVIRONMENT';
 /// The expected executable name on linux.
 const kLinuxExecutable = 'google-chrome';
 
+/// Chromium executable names on linux, used when [kLinuxExecutable] is not on
+/// the `PATH`.
+const kLinuxChromiumExecutables = <String>['chromium', 'chromium-browser'];
+
 /// The expected executable name on macOS.
 const kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
@@ -104,13 +108,15 @@ typedef BrowserFinder = String Function(Platform, FileSystem);
 
 /// Find the chrome executable on the current platform.
 ///
-/// Does not verify whether the executable exists.
+/// On linux, falls back to a Chromium executable on the `PATH` when
+/// [kLinuxExecutable] is not on the `PATH`. Does not verify whether the
+/// returned executable exists.
 String findChromeExecutable(Platform platform, FileSystem fileSystem) {
   if (platform.environment.containsKey(kChromeEnvironment)) {
     return platform.environment[kChromeEnvironment]!;
   }
   if (platform.isLinux) {
-    return kLinuxExecutable;
+    return _findLinuxChromeExecutable(platform, fileSystem);
   }
   if (platform.isMacOS) {
     return kMacOSExecutable;
@@ -130,6 +136,23 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
     return fileSystem.path.join(windowsPrefix, kWindowsExecutable);
   }
   throwToolExit('Platform ${platform.operatingSystem} is not supported.');
+}
+
+/// Returns the first of [kLinuxExecutable] and [kLinuxChromiumExecutables]
+/// that is on the `PATH`, or [kLinuxExecutable] if none of them is.
+String _findLinuxChromeExecutable(Platform platform, FileSystem fileSystem) {
+  final List<String> searchPath = (platform.environment['PATH'] ?? '')
+      .split(':')
+      .where((String directory) => directory.isNotEmpty)
+      .toList();
+  for (final executable in <String>[kLinuxExecutable, ...kLinuxChromiumExecutables]) {
+    for (final directory in searchPath) {
+      if (fileSystem.file(fileSystem.path.join(directory, executable)).existsSync()) {
+        return executable;
+      }
+    }
+  }
+  return kLinuxExecutable;
 }
 
 /// Find the Microsoft Edge executable on the current platform.

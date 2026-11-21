@@ -253,6 +253,35 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext(
+    'Chrome uses chromium on linux when google-chrome is not on the PATH',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      fileSystem.file('/usr/bin/chromium').createSync(recursive: true);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['chromium', '--version'],
+          stdout: 'Chromium 120.0.6099.224',
+        ),
+      ]);
+      final webDevices = WebDevices(
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(environment: <String, String>{'PATH': '/usr/bin'}),
+        processManager: processManager,
+      );
+
+      final GoogleChromeDevice chromeDevice = (await webDevices.pollingGetDevices())
+          .whereType<GoogleChromeDevice>()
+          .first;
+
+      expect(await chromeDevice.isSupported(), true);
+      expect(await chromeDevice.sdkNameAndVersion, 'Chromium 120.0.6099.224');
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
   test('Chrome and Edge version check invokes registry query on windows.', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
