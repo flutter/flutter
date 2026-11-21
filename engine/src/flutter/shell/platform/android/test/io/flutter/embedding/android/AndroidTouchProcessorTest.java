@@ -653,6 +653,85 @@ public class AndroidTouchProcessorTest {
   }
 
   @Test
+  public void stylusMovePreservesHistoricalSamplesBeforeCurrentSample() {
+    MotionEvent.PointerProperties pen = new MotionEvent.PointerProperties();
+    pen.id = 0;
+    pen.toolType = MotionEvent.TOOL_TYPE_STYLUS;
+    MotionEvent.PointerCoords point = new MotionEvent.PointerCoords();
+    MotionEvent.PointerCoords[] coords = {point};
+    point.pressure = 0.25f;
+    MotionEvent event =
+        MotionEvent.obtain(
+            100,
+            100,
+            MotionEvent.ACTION_MOVE,
+            1,
+            new MotionEvent.PointerProperties[] {pen},
+            coords,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            InputDevice.SOURCE_STYLUS,
+            0);
+    try {
+      point.x = 5;
+      point.y = 9;
+      point.pressure = 0.5f;
+      event.addBatch(106, coords, 0);
+      point.x = 10;
+      point.y = 0;
+      point.pressure = 0.75f;
+      event.addBatch(112, coords, 0);
+      assertEquals(2, event.getHistorySize());
+
+      new AndroidTouchProcessor(mockRenderer, true).onTouchEvent(event);
+      verify(mockRenderer)
+          .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+      int stride =
+          AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT * AndroidTouchProcessor.BYTES_PER_FIELD;
+      assertEquals(3 * stride, packetSizeCaptor.getValue().intValue());
+      ByteBuffer packet = packetCaptor.getValue();
+      for (int i = 0; i < 3; i++) {
+        int start = i * stride;
+        assertEquals(
+            AndroidTouchProcessor.PointerChange.MOVE, readPointerChangeForPointer(packet, i));
+        assertEquals(i == 2, packet.getLong(start) != 0); // Only track the original MotionEvent.
+        assertEquals(
+            i == 2 ? (1 << 8) | 2 : 1,
+            packet.getLong(start + 26 * AndroidTouchProcessor.BYTES_PER_FIELD));
+        assertEquals(
+            (100L + 6L * i) * 1000, packet.getLong(start + AndroidTouchProcessor.BYTES_PER_FIELD));
+        assertEquals(5.0 * i, readPointerPhysicalXForPointer(packet, i));
+        assertEquals(i == 1 ? 9.0 : 0.0, readPointerPhysicalYForPointer(packet, i));
+        assertEquals(
+            0.25 * (i + 1), packet.getDouble(start + 14 * AndroidTouchProcessor.BYTES_PER_FIELD));
+      }
+    } finally {
+      event.recycle();
+    }
+  }
+
+  @Test
+  public void batchedFingerMoveStillSendsOnlyCurrentSample() {
+    MotionEvent event =
+        new MotionEventMocker(0, InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.TOOL_TYPE_FINGER)
+            .mockEvent(MotionEvent.ACTION_MOVE, 10.0f, 5.0f, 0);
+    when(event.getHistorySize()).thenReturn(2);
+
+    touchProcessor.onTouchEvent(event);
+
+    verify(mockRenderer)
+        .dispatchPointerDataPacket(packetCaptor.capture(), packetSizeCaptor.capture());
+    assertEquals(
+        AndroidTouchProcessor.POINTER_DATA_FIELD_COUNT * AndroidTouchProcessor.BYTES_PER_FIELD,
+        packetSizeCaptor.getValue().intValue());
+    assertEquals(10.0, readPointerPhysicalXForPointer(packetCaptor.getValue(), 0));
+  }
+
+  @Test
   public void stylusDistance() {
     MotionEventMocker mocker =
         new MotionEventMocker(0, InputDevice.SOURCE_STYLUS, MotionEvent.TOOL_TYPE_STYLUS);
