@@ -24,7 +24,7 @@ TEST_F(FlViewAccessibleTest, BuildTree) {
                                      .flags2 = &flags,
                                      .identifier = ""};
   FlutterSemanticsNode2 child1_node = {
-      .id = 111, .label = "child 1", .flags2 = &flags};
+      .id = 111, .label = "child 1", .flags2 = &flags, .heading_level = 1};
   FlutterSemanticsNode2 child2_node = {
       .id = 222, .label = "child 2", .flags2 = &flags};
   FlutterSemanticsNode2* nodes[3] = {&root_node, &child1_node, &child2_node};
@@ -42,6 +42,7 @@ TEST_F(FlViewAccessibleTest, BuildTree) {
   EXPECT_EQ(atk_object_get_parent(child1_object), root_object);
   EXPECT_EQ(atk_object_get_index_in_parent(child1_object), 0);
   EXPECT_EQ(atk_object_get_n_accessible_children(child1_object), 0);
+  EXPECT_EQ(atk_object_get_role(child1_object), ATK_ROLE_HEADING);
 
   AtkObject* child2_object = atk_object_ref_accessible_child(root_object, 1);
   EXPECT_STREQ(atk_object_get_name(child2_object), "child 2");
