@@ -152,13 +152,6 @@ static void ResetAnchor(CALayer* layer) {
 
 - (void)clipViewSetMaskView:(UIView*)clipView devicePixelRatio:(CGFloat)devicePixelRatio;
 
-// Composites the platform view described by `layer`.
-//
-// This method sets the frames of the view's |ChildClippingView| and
-// |FlutterTouchInterceptingView|, then applies the layer's mutators.
-// This method divides by `devicePixelRatio` to convert the layer from physical pixels to points.
-- (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio;
-
 // Applies the mutators to the UIView chain that was constructed by
 // `ReconstructClipViewsChain`
 //
@@ -643,13 +636,6 @@ static void ResetAnchor(CALayer* layer) {
   embeddedView.layer.transform = transformMatrix;
 }
 
-- (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params {
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  [self compositeLayer:flutter::GetPlatformViewLayerFromEmbeddedViewParams(viewId, params,
-                                                                           screenScale)
-      devicePixelRatio:screenScale];
-}
-
 - (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio {
   // TODO(https://github.com/flutter/flutter/issues/109700)
   CGRect frame =
@@ -1095,10 +1081,6 @@ static void ResetAnchor(CALayer* layer) {
     params.PushPlatformViewClipPath(clipPath);
     self.currentCompositionParams[id] = params;
   }
-}
-
-- (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId {
-  return self.currentCompositionParams.find(viewId)->second;
 }
 
 #pragma mark - Properties

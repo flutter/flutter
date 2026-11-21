@@ -25,6 +25,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FlutterPlatformViewLayer;
 @class FlutterTouchInterceptingView;
 @class FlutterClippingMaskViewPool;
 
@@ -135,15 +136,13 @@ NS_ASSUME_NONNULL_BEGIN
 // returns nil.
 - (UIView* _Nullable)platformViewForId:(int64_t)viewId;
 
-// Composite the PlatformView with `viewId`.
+// Composites the platform view described by `layer`.
 //
-// This method converts `params` to a `FlutterPlatformViewLayer` with the main screen's scale and
-// composites the view from it.
+// This method sets the frames of the view's |ChildClippingView| and |FlutterTouchInterceptingView|,
+// then applies the layer's mutators.
 //
-// `presentFrame:` composites views with the device pixel ratio of their frame.
-- (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params;
-
-- (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
+// It divides by `devicePixelRatio` to convert the layer from physical pixels to points.
+- (void)compositeLayer:(FlutterPlatformViewLayer*)layer devicePixelRatio:(CGFloat)devicePixelRatio;
 
 /// @brief The composition order from the previous frame.
 ///
