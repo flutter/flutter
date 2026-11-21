@@ -4733,8 +4733,8 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
     }
     _hasPendingSystemFontsDidChangeCallBack = true;
 
-    // The system fonts notification can arrive during any scheduler phase
-    // (e.g. midFrameMicrotasks on web when fonts load asynchronously).
+    // Reached only during idle, persistentCallbacks or postFrameCallbacks;
+    // notifications that arrive before this frame's layout are handled above.
     // scheduleFrameCallback is safe to call during any phase; if called
     // mid-frame, the callback runs in the next frame's transient callback
     // phase since handleBeginFrame snapshots and replaces _transientCallbacks.
