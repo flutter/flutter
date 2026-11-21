@@ -41,6 +41,7 @@ import '_accessibility_evaluations.dart';
 import '_window.dart';
 import 'accessibility_inspector.dart';
 import 'app.dart';
+import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
@@ -1370,6 +1371,15 @@ mixin WidgetsBinding
       'cancelBackGesture' => _handleCancelBackGesture(),
       _ => throw MissingPluginException(),
     };
+  }
+
+  @override
+  void handleDismissContextMenu() {
+    super.handleDismissContextMenu();
+    // The embedder sends this when a platform menu opens or a window drag
+    // starts. The application stays resumed, so focus handling does not hide
+    // the menu.
+    ContextMenuController.removeAny();
   }
 
   @override
