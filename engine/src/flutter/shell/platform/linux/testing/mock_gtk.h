@@ -22,6 +22,15 @@ class MockGtk {
   MOCK_METHOD(guint,
               gdk_keymap_lookup_key,
               (GdkKeymap * keymap, const GdkKeymapKey* key));
+  MOCK_METHOD(int, gdk_display_get_n_monitors, (GdkDisplay * display));
+  MOCK_METHOD(GdkMonitor*,
+              gdk_display_get_monitor,
+              (GdkDisplay * display, int n));
+  MOCK_METHOD(void,
+              gdk_monitor_get_geometry,
+              (GdkMonitor * monitor, GdkRectangle* geometry));
+  MOCK_METHOD(int, gdk_monitor_get_refresh_rate, (GdkMonitor * monitor));
+  MOCK_METHOD(int, gdk_monitor_get_scale_factor, (GdkMonitor * monitor));
   MOCK_METHOD(GdkWindowState, gdk_window_get_state, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_width, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_height, (GdkWindow * window));
