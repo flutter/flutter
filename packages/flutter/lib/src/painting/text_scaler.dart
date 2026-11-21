@@ -127,7 +127,11 @@ final class _ClampedTextScaler implements TextScaler {
   double scale(double fontSize) {
     assert(fontSize >= 0);
     assert(fontSize.isFinite);
-    return clampDouble(scaler.scale(fontSize), minScale * fontSize, maxScale * fontSize);
+    return clampDouble(
+      scaler.scale(fontSize),
+      minScale * fontSize,
+      maxScale.isFinite ? maxScale * fontSize : double.infinity,
+    );
   }
 
   @override
