@@ -212,6 +212,27 @@ void main() {
     expect(root.debugSemantics!.childrenCount, 1);
     expect(greatGrandChild.debugSemantics!.transform, Matrix4.translationValues(20.0, 30.0, 0.0));
   });
+
+  test('semantics transform updates when a child moves without changing its size', () {
+    final first = RenderTestLayoutSemanticsBoundary()..targetSize = const Size(100.0, 40.0);
+    final second = RenderTestLayoutSemanticsBoundary()
+      ..targetSize = const Size(100.0, 20.0)
+      ..isSemanticBoundary = true;
+    // The parent forms a semantics node and is a relayout boundary, so its
+    // layout does not clear the geometry of its children.
+    final parent = RenderTestColumnParent(children: <RenderBox>[first, second]);
+
+    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+    layout(parent, phase: EnginePhase.flushSemantics);
+    expect(second.debugSemantics!.transform, Matrix4.translationValues(0.0, 40.0, 0.0));
+
+    // The second child moves down, its size stays the same.
+    first.targetSize = const Size(100.0, 70.0);
+    first.markNeedsLayout();
+    pumpFrame(phase: EnginePhase.flushSemantics);
+
+    expect(second.debugSemantics!.transform, Matrix4.translationValues(0.0, 70.0, 0.0));
+  });
 }
 
 class RenderTestTransformParent extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
@@ -376,6 +397,56 @@ class RenderTestMultiChildParent extends RenderBox
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.explicitChildNodes = explicitChildNode;
+    config.label = 'Test Parent';
+    config.textDirection = TextDirection.ltr;
+  }
+}
+
+class RenderTestColumnParent extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, TestParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, TestParentData> {
+  RenderTestColumnParent({List<RenderBox>? children}) {
+    if (children != null) {
+      addAll(children);
+    }
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! TestParentData) {
+      child.parentData = TestParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    var top = 0.0;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      child.layout(constraints.loosen(), parentUsesSize: true);
+      (child.parentData! as TestParentData).offset = Offset(0.0, top);
+      top += child.size.height;
+      child = childAfter(child);
+    }
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    defaultPaint(context, offset);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.explicitChildNodes = true;
     config.label = 'Test Parent';
     config.textDirection = TextDirection.ltr;
   }

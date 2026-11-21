@@ -6317,6 +6317,15 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           usedSemanticsIds.contains(child.cachedSemanticsNode!.id)) {
         child.markNeedsBuild();
         child.cachedSemanticsNode = null;
+      } else if (child.built && !child.geometryDirty && child._hasOutdatedNodeGeometry) {
+        // A child that is not built again keeps the geometry that its nodes got
+        // when it was built, although its geometry can have changed since, for
+        // example when it moved without changing its size. And a parent can
+        // change the geometry of its children in assembleSemanticsNode, for
+        // example RenderTable moves them into the nodes that it creates for its
+        // rows. Build the child again, so that assembleSemanticsNode gets it
+        // with its current geometry in the coordinate system of this node.
+        child.markNeedsBuild();
       }
 
       child._buildSemantics(usedSemanticsIds: usedSemanticsIds);
@@ -6466,6 +6475,26 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
     }
     _updateSiblingNodesGeometries();
+  }
+
+  /// Whether the transform or the clip rects of the nodes that this object
+  /// produced differ from the ones that [_updateSemanticsNodeGeometry] and
+  /// [_updateSiblingNodesGeometries] give them.
+  ///
+  /// The rect is not compared, because [RenderObject.assembleSemanticsNode] can
+  /// change the rect of its own node, for example to the thumb of a slider.
+  bool get _hasOutdatedNodeGeometry {
+    final SemanticsNode node = cachedSemanticsNode!;
+    final _SemanticsGeometry nodeGeometry = geometry!;
+    if (!MatrixUtils.matrixEquals(node.transform, nodeGeometry.transform) ||
+        node.parentSemanticsClipRect != nodeGeometry.semanticsClipRect ||
+        node.parentPaintClipRect != nodeGeometry.paintClipRect) {
+      return true;
+    }
+    // Sibling nodes have their transform in their rect.
+    return _producedSiblingNodesAndOwners.keys.any(
+      (SemanticsNode siblingNode) => siblingNode.transform != null,
+    );
   }
 
   /// Updates the semantics geometry of the cached semantics node.
