@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
 import '../version.dart';
 import '../vmservice.dart';
 import 'test_device.dart';
@@ -54,13 +55,14 @@ class IntegrationTestTestDevice extends TestDevice {
   Future<StreamChannel<String>> start(String entrypointPath) async {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
         toolContext;
-    final TargetPlatform targetPlatform = await device.targetPlatform;
-    _applicationPackage = await applicationPackageFactory.getPackageForPlatform(
-      targetPlatform,
+    _applicationPackage = await getApplicationPackageForDevice(
+      device,
+      factoryBuilder: () => applicationPackageFactory,
       buildInfo: debuggingOptions.buildInfo,
     );
     final ApplicationPackage? package = _applicationPackage;
     if (package == null) {
+      final TargetPlatform targetPlatform = await device.targetPlatform;
       throw TestDeviceException('No application found for $targetPlatform.', StackTrace.current);
     }
 

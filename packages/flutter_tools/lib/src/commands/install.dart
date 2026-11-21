@@ -9,6 +9,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -62,19 +63,24 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     if (device == null) {
       throwToolExit('No target device found');
     }
+    if (!device!.supportsInstall) {
+      throwToolExit('flutter install is not supported on ${device!.displayName}');
+    }
     if (userIdentifier != null && device is! AndroidDevice) {
       throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
     }
-    if (_applicationBinaryPath != null && !(_applicationBinary?.existsSync() ?? true)) {
-      throwToolExit('Prebuilt binary $_applicationBinaryPath does not exist');
+    if (_applicationBinaryPath case final String binaryPath
+        when toolContext.fs.typeSync(binaryPath) == FileSystemEntityType.notFound) {
+      throwToolExit('Prebuilt binary $binaryPath does not exist');
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Device targetDevice = device!;
-    final ApplicationPackage? package = await applicationPackages.getPackageForPlatform(
-      await targetDevice.targetPlatform,
+    final ApplicationPackage? package = await getApplicationPackageForDevice(
+      targetDevice,
+      factoryBuilder: () => applicationPackages,
       applicationBinary: _applicationBinary,
       buildInfo: await getBuildInfo(),
     );
@@ -123,6 +129,9 @@ Future<bool> installApp(
   bool uninstall = true,
   String? userIdentifier,
 }) async {
+  if (device is ExtensionBackedDevice && !device.hasValidInstallBundle(package)) {
+    return false;
+  }
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       logger.printStatus('Uninstalling old version...');

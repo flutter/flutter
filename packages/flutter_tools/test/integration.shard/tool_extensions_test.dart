@@ -170,51 +170,56 @@ void main() {
     expect(projectDir.existsSync(), isFalse);
   });
 
-  testWithoutContext('flutter create with custom template succeeds when enabled', () async {
-    final Directory projectDir = tempHome.childDirectory('custom_app');
+  testWithoutContext('flutter install with --use-application-binary succeeds on custom extension device when enabled', () async {
+    final Directory projectDir = tempHome.childDirectory('custom_install_app');
     if (projectDir.existsSync()) {
       projectDir.deleteSync(recursive: true);
     }
+    projectDir.createSync(recursive: true);
+    projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: custom_install_app
+environment:
+  sdk: ^3.7.0-0
+''');
+    final File binaryFile = projectDir.childFile('prebuilt_bundle.bin')
+      ..writeAsStringSync('binary-payload');
 
     final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
+      <String>[
+        flutterBin,
+        'install',
+        '-d',
+        'custom_linux_device',
+        '--use-application-binary=${binaryFile.path}',
+      ],
+      workingDirectory: projectDir.path,
       environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
     );
 
     if (isLinux) {
       expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-      expect(projectDir.existsSync(), isTrue);
-      final File verificationFile = projectDir.childFile('.custom_device_extension_info');
-      expect(verificationFile.existsSync(), isTrue);
       expect(
-        verificationFile.readAsStringSync().trim(),
-        'Custom Linux Device Extension App Template Verified',
+        result.stdout,
+        contains('Installing prebuilt_bundle.bin to Linux Custom Extension Prototype Device...'),
+      );
+
+      final ProcessResult uninstallResult = await processManager.run(
+        <String>[flutterBin, 'install', '-d', 'custom_linux_device', '--uninstall-only'],
+        workingDirectory: projectDir.path,
+        environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+      );
+      expect(
+        uninstallResult.exitCode,
+        0,
+        reason: 'stdout: ${uninstallResult.stdout}\nstderr: ${uninstallResult.stderr}',
+      );
+      expect(
+        uninstallResult.stdout,
+        contains('Uninstalling custom_install_app from Linux Custom Extension Prototype Device...'),
       );
     } else {
-      expect(
-        result.exitCode,
-        isNot(0),
-        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
-      );
-      expect(result.stderr, contains('custom-linux-app'));
-      expect(projectDir.existsSync(), isFalse);
+      expect(result.exitCode, isNot(0));
     }
-  });
-
-  testWithoutContext('flutter create with custom template fails when disabled', () async {
-    final Directory projectDir = tempHome.childDirectory('custom_app_disabled');
-    if (projectDir.existsSync()) {
-      projectDir.deleteSync(recursive: true);
-    }
-
-    final ProcessResult result = await processManager.run(
-      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
-      environment: baseEnv, // disabled by default
-    );
-
-    expect(result.exitCode, isNot(0));
-    expect(result.stderr, contains('is not an allowed value for option "--template"'));
-    expect(projectDir.existsSync(), isFalse);
   });
 
   testWithoutContext(

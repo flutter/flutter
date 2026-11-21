@@ -14,6 +14,15 @@ extension ExtensionUriValidation on Uri {
   /// trailing slash (`/`).
   bool get isValidFileUri =>
       isScheme('file') && hasAbsolutePath && !hasQuery && !hasFragment && !path.endsWith('/');
+
+  /// Whether this URI is an absolute `file:` URI pointing to a non-root file or
+  /// bundle directory, with no query or fragment components.
+  bool get isValidArtifactUri =>
+      isScheme('file') &&
+      hasAbsolutePath &&
+      !hasQuery &&
+      !hasFragment &&
+      pathSegments.any((String segment) => segment.isNotEmpty);
 }
 
 /// Shared JSON deserialization utilities for Flutter tool extension models.

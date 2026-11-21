@@ -34,6 +34,131 @@ void main() {
       expect(device.sdkNameAndVersion, 'Custom Linux 1.0.0');
       expect(device.ephemeral, isFalse);
       expect(device.isSupported, isTrue);
+      expect(device.supportsInstall, isTrue);
+    });
+
+    test('resolveApplication resolves CMake BINARY_NAME, custom buildDirectory, and prebuilt binary', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_resolve_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final Uri customBuildDirUri = tempDir.uri.resolve('custom_out/');
+      final project = ExtensionFlutterProject(
+        appName: 'pubspec_app',
+        buildDirectory: customBuildDirUri,
+        directory: tempDir.uri,
+      );
+      final service = LinuxDeviceService();
+
+      // Unknown device returns null.
+      expect(
+        await service.resolveApplication(
+          ExtensionApplicationResolutionContext(
+            buildMode: .release,
+            deviceId: 'unknown_device',
+            project: project,
+          ),
+        ),
+        isNull,
+      );
+
+      // Without linux/CMakeLists.txt and without prebuilt binary, returns null.
+      expect(
+        await service.resolveApplication(
+          ExtensionApplicationResolutionContext(
+            buildMode: .release,
+            deviceId: LinuxDeviceService.customLinuxDeviceId,
+            project: project,
+          ),
+        ),
+        isNull,
+      );
+
+      // With prebuilt binary and no CMakeLists.txt, falls back to project.appName and prebuilt URI.
+      final Uri prebuiltUri = tempDir.uri.resolve('prebuilt.bin');
+      expect(
+        await service.resolveApplication(
+          ExtensionApplicationResolutionContext(
+            applicationBinaryUri: prebuiltUri,
+            buildMode: .release,
+            deviceId: LinuxDeviceService.customLinuxDeviceId,
+            project: project,
+          ),
+        ),
+        ExtensionApplicationPackage(appId: 'pubspec_app', bundleUri: prebuiltUri),
+      );
+
+      // With linux/CMakeLists.txt defining BINARY_NAME, resolves binaryName and expected bundleUri.
+      final linuxDir = Directory.fromUri(tempDir.uri.resolve('linux'))..createSync();
+      File('${linuxDir.path}/CMakeLists.txt')
+          .writeAsStringSync('set(BINARY_NAME "custom_runner_bin")\n');
+
+      expect(
+        await service.resolveApplication(
+          ExtensionApplicationResolutionContext(
+            buildMode: .release,
+            deviceId: LinuxDeviceService.customLinuxDeviceId,
+            project: project,
+          ),
+        ),
+        ExtensionApplicationPackage(
+          appId: 'custom_runner_bin',
+          bundleUri: customBuildDirUri.resolve(
+            'linux_extension/x64/release/bundle/custom_runner_bin',
+          ),
+        ),
+      );
+    });
+
+    test('installApp, isAppInstalled, and uninstallApp mirror DesktopDevice behavior', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_install_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final bundleFile = File('${tempDir.path}/app_bundle')..writeAsStringSync('binary');
+      final bundleDir = Directory('${tempDir.path}/dir_bundle.app')..createSync();
+      final service = LinuxDeviceService();
+
+      await expectLater(
+        service.installApp(
+          bundleUri: Uri.file('${tempDir.path}/missing_bundle'),
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+        ),
+        throwsA(isA<FileSystemException>()),
+      );
+      await expectLater(
+        service.installApp(bundleUri: bundleFile.uri, deviceId: 'unknown_device'),
+        throwsUnsupportedError,
+      );
+      await service.installApp(
+        bundleUri: bundleFile.uri,
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        prebuiltApplication: true,
+      );
+      await service.installApp(
+        bundleUri: bundleDir.uri,
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+        prebuiltApplication: true,
+      );
+
+      expect(
+        await service.isAppInstalled(
+          appId: 'test_app',
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+        ),
+        isTrue,
+      );
+      await expectLater(
+        service.isAppInstalled(appId: 'test_app', deviceId: 'unknown_device'),
+        throwsUnsupportedError,
+      );
+
+      await service.uninstallApp(
+        appId: 'test_app',
+        deviceId: LinuxDeviceService.customLinuxDeviceId,
+      );
+      await expectLater(
+        service.uninstallApp(appId: 'test_app', deviceId: 'unknown_device'),
+        throwsUnsupportedError,
+      );
     });
 
     test('isSupportedForProject checks for linux/ directory and matching deviceId', () async {
@@ -152,6 +277,12 @@ void main() {
         );
       }
 
+      final ExtensionRpcHandler resolveApplicationHandler = handlers['resolveApplication']!;
+      await expectLater(
+        resolveApplicationHandler(const <String, Object?>{}),
+        _throwsInvalidParams('Missing required "${DeviceService.deviceIdParam}"'),
+      );
+
       final ExtensionRpcHandler launchAppHandler = handlers['launchApp']!;
       expect(
         await launchAppHandler(<String, Object?>{
@@ -224,6 +355,17 @@ void main() {
           'Missing required "${DeviceService.deviceIdParam}" (expected String).',
         ),
       );
+
+      final ExtensionRpcHandler uninstallAppHandler = handlers['uninstallApp']!;
+      final ExtensionRpcHandler isAppInstalledHandler = handlers['isAppInstalled']!;
+      for (final handler in <ExtensionRpcHandler>[uninstallAppHandler, isAppInstalledHandler]) {
+        await expectLater(
+          handler(<String, Object?>{
+            DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          }),
+          _throwsInvalidParams('Missing required "${DeviceService.appIdParam}" (expected String).'),
+        );
+      }
     });
 
     test('launchApp, getVmServiceUri, and stopApp manage process lifecycle and parse VM Service URI with base64url padding', () async {
