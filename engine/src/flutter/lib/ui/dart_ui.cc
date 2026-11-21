@@ -226,6 +226,7 @@ typedef CanvasPath Path;
   V(ParagraphBuilder, pushStyle)                 \
   V(Paragraph, alphabeticBaseline)               \
   V(Paragraph, computeLineMetrics)               \
+  V(Paragraph, computeScrollFadeOpacity)         \
   V(Paragraph, didExceedMaxLines)                \
   V(Paragraph, dispose)                          \
   V(Paragraph, getClosestGlyphInfo)              \
@@ -241,6 +242,7 @@ typedef CanvasPath Path;
   V(Paragraph, height)                           \
   V(Paragraph, ideographicBaseline)              \
   V(Paragraph, layout)                           \
+  V(Paragraph, layoutWithShrinkLock)             \
   V(Paragraph, longestLine)                      \
   V(Paragraph, maxIntrinsicWidth)                \
   V(Paragraph, minIntrinsicWidth)                \

@@ -96,6 +96,12 @@ class ParagraphSkia : public Paragraph {
  private:
   void LayoutInternal(double width);
 
+  void PaintAlignedOrSplit(flutter::DisplayListBuilder* builder,
+                           double x,
+                           double y,
+                           const flutter::DlRect& clip,
+                           OverflowPosition overflow_position);
+
   TextStyle SkiaToTxt(const skia::textlayout::TextStyle& skia);
 
   std::unique_ptr<skia::textlayout::Paragraph> paragraph_;

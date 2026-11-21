@@ -3106,6 +3106,18 @@ abstract class Paragraph {
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
   void layout(ParagraphConstraints constraints);
 
+  /// Lays out the paragraph while optionally locking the layout width to the
+  /// high-water-mark width seen so far when [lockWidth] is true.
+  void layoutWithShrinkLock(ParagraphConstraints constraints, {bool lockWidth = false});
+
+  /// Computes the scroll-shrink fade opacity in `0.0..1.0` based on the locked
+  /// high-water-mark dimensions and the current visible container dimensions.
+  double computeScrollFadeOpacity(
+    double currentWidth,
+    double currentHeight, {
+    double fadeEndFraction = 0.5,
+  });
+
   /// Returns a list of text boxes that enclose the given text range.
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] parameters allow customization
@@ -3224,6 +3236,25 @@ abstract class Paragraph {
   /// after this method is called.
   void dispose();
 
+  /// Draws the text in this paragraph onto [canvas] at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
+  ///
+  /// This paragraph must have had [layout] called on it first. Values of
+  /// [opacity] are clamped to `0.0..1.0`; if [opacity] is less than or equal to
+  /// `0.0` or `NaN`, nothing is drawn.
+  ///
+  /// When [fadeHorizontal] is true, applies a horizontal overflow fade
+  /// controlled by [overflowPosition] (`0` for start, `1` for middle, `2` for
+  /// end).
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  });
+
   /// Whether this reference to the underlying picture is [dispose]d.
   ///
   /// This only returns a valid value if asserts are enabled, and must not be
@@ -3283,6 +3314,38 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
 
   @Native<Void Function(Pointer<Void>, Double)>(symbol: 'Paragraph::layout', isLeaf: true)
   external void _layout(double width);
+
+  @override
+  void layoutWithShrinkLock(ParagraphConstraints constraints, {bool lockWidth = false}) {
+    _layoutWithShrinkLock(constraints.width, lockWidth);
+    assert(() {
+      _needsLayout = false;
+      return true;
+    }());
+  }
+
+  @Native<Void Function(Pointer<Void>, Double, Bool)>(
+    symbol: 'Paragraph::layoutWithShrinkLock',
+    isLeaf: true,
+  )
+  external void _layoutWithShrinkLock(double width, bool lockWidth);
+
+  @override
+  double computeScrollFadeOpacity(
+    double currentWidth,
+    double currentHeight, {
+    double fadeEndFraction = 0.5,
+  }) => _computeScrollFadeOpacity(currentWidth, currentHeight, fadeEndFraction);
+
+  @Native<Double Function(Pointer<Void>, Double, Double, Double)>(
+    symbol: 'Paragraph::computeScrollFadeOpacity',
+    isLeaf: true,
+  )
+  external double _computeScrollFadeOpacity(
+    double currentWidth,
+    double currentHeight,
+    double fadeEndFraction,
+  );
 
   List<TextBox> _decodeTextBoxes(Float32List encoded) {
     final int count = encoded.length ~/ 5;
@@ -3426,6 +3489,156 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
     bool fadeHorizontal,
     int overflowPosition,
   );
+
+  @override
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  }) {
+    assert(!debugDisposed);
+    assert(_offsetIsValid(offset));
+    assert(_rectIsValid(clipRect));
+    assert(!_needsLayout);
+    assert(overflowPosition >= 0 && overflowPosition <= 2);
+    if (!(opacity > 0.0)) {
+      return;
+    }
+    final Rect sortedClip = _NativeCanvas._sorted(clipRect);
+    if (sortedClip.isEmpty) {
+      return;
+    }
+    final double clampedOpacity = opacity > 1.0 ? 1.0 : opacity;
+    if (canvas case final _NativeCanvas nativeCanvas) {
+      _paintMasked(
+        nativeCanvas,
+        offset.dx,
+        offset.dy,
+        sortedClip.left,
+        sortedClip.top,
+        sortedClip.right,
+        sortedClip.bottom,
+        clampedOpacity,
+        fadeHorizontal,
+        overflowPosition,
+      );
+      return;
+    }
+    final int alpha = Color.getAlphaFromOpacity(clampedOpacity);
+    if (alpha == 0) {
+      return;
+    }
+    canvas.save();
+    canvas.clipRect(sortedClip);
+    if (fadeHorizontal || alpha < 255) {
+      final layerPaint = Paint();
+      if (alpha < 255) {
+        layerPaint.color = Color.fromARGB(alpha, 0, 0, 0);
+      }
+      canvas.saveLayer(sortedClip, layerPaint);
+    }
+    final double clipWidth = sortedClip.width;
+    final double contentWidth = width.isFinite ? width : longestLine;
+    final double overflowWidth = contentWidth - clipWidth;
+    if (overflowWidth > 0.0 && numberOfLines <= 1) {
+      if (overflowPosition == 1 && clipWidth > 0.0) {
+        final double halfWidth = clipWidth / 2.0;
+        final double midX = sortedClip.left + halfWidth;
+        canvas.save();
+        canvas.clipRect(Rect.fromLTRB(sortedClip.left, sortedClip.top, midX, sortedClip.bottom));
+        canvas.drawParagraph(this, offset);
+        canvas.restore();
+        canvas.save();
+        canvas.clipRect(Rect.fromLTRB(midX, sortedClip.top, sortedClip.right, sortedClip.bottom));
+        canvas.drawParagraph(this, Offset(offset.dx - overflowWidth, offset.dy));
+        canvas.restore();
+      } else if (overflowPosition == 0) {
+        canvas.drawParagraph(this, Offset(offset.dx - overflowWidth, offset.dy));
+      } else {
+        canvas.drawParagraph(this, offset);
+      }
+    } else {
+      canvas.drawParagraph(this, offset);
+    }
+    if (fadeHorizontal) {
+      final List<LineMetrics> lines = computeLineMetrics();
+      var fadeWidth = 14.0;
+      if (lines.isNotEmpty) {
+        final LineMetrics lastLine = lines.last;
+        fadeWidth = (lastLine.ascent + lastLine.descent).roundToDouble();
+      } else if (sortedClip.height > 0.0) {
+        fadeWidth = sortedClip.height;
+      }
+      fadeWidth = math.max(fadeWidth, 1.0);
+      final maskPaint = Paint()..blendMode = BlendMode.modulate;
+      if (lines.length > 1) {
+        final LineMetrics lastLine = lines.last;
+        final double lineTop = math.max(
+          sortedClip.top,
+          offset.dy + lastLine.baseline - lastLine.ascent,
+        );
+        final double lineLeft = math.max(sortedClip.left, offset.dx + lastLine.left);
+        final double lineRight = math.min(
+          sortedClip.right,
+          offset.dx + lastLine.left + lastLine.width,
+        );
+        if (lineRight > lineLeft && sortedClip.bottom > lineTop) {
+          final double effectiveFade = math.min(fadeWidth * 2.0, lineRight - lineLeft);
+          final fadeAtLeft = overflowPosition == 0;
+          final double fadeStart = fadeAtLeft
+              ? math.min(lineRight, lineLeft + effectiveFade)
+              : math.max(lineLeft, lineRight - effectiveFade);
+          final double fadeEnd = fadeAtLeft ? lineLeft : lineRight;
+          maskPaint.shader = Gradient.linear(
+            Offset(fadeStart, 0.0),
+            Offset(fadeEnd, 0.0),
+            const <Color>[Color(0xFFFFFFFF), Color(0x00FFFFFF)],
+          );
+          canvas.drawRect(
+            Rect.fromLTRB(sortedClip.left, lineTop, sortedClip.right, sortedClip.bottom),
+            maskPaint,
+          );
+        }
+      } else if (overflowPosition == 1 && clipWidth > 0.0) {
+        final double halfWidth = clipWidth / 2.0;
+        final double halfFade = math.min(fadeWidth, halfWidth);
+        final double stop1 = clampDouble((halfWidth - halfFade) / clipWidth, 0.0, 0.5);
+        final double stop2 = clampDouble((halfWidth + halfFade) / clipWidth, 0.5, 1.0);
+        maskPaint.shader = Gradient.linear(
+          Offset(sortedClip.left, 0.0),
+          Offset(sortedClip.right, 0.0),
+          const <Color>[
+            Color(0xFFFFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0x00FFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0xFFFFFFFF),
+          ],
+          <double>[0.0, stop1, 0.5, stop2, 1.0],
+        );
+        canvas.drawRect(sortedClip, maskPaint);
+      } else {
+        final fadeAtLeft = overflowPosition == 0;
+        final double fadeStart = fadeAtLeft
+            ? math.min(sortedClip.right, sortedClip.left + fadeWidth)
+            : math.max(sortedClip.left, sortedClip.right - fadeWidth);
+        final double fadeEnd = fadeAtLeft ? sortedClip.left : sortedClip.right;
+        maskPaint.shader = Gradient.linear(
+          Offset(fadeStart, 0.0),
+          Offset(fadeEnd, 0.0),
+          const <Color>[Color(0xFFFFFFFF), Color(0x00FFFFFF)],
+        );
+        canvas.drawRect(sortedClip, maskPaint);
+      }
+    }
+    if (fadeHorizontal || alpha < 255) {
+      canvas.restore();
+    }
+    canvas.restore();
+  }
 
   @override
   List<LineMetrics> computeLineMetrics() {

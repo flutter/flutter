@@ -694,6 +694,12 @@ abstract class Paragraph {
   double get ideographicBaseline;
   bool get didExceedMaxLines;
   void layout(ParagraphConstraints constraints);
+  void layoutWithShrinkLock(ParagraphConstraints constraints, {bool lockWidth = false});
+  double computeScrollFadeOpacity(
+    double currentWidth,
+    double currentHeight, {
+    double fadeEndFraction = 0.5,
+  });
   List<TextBox> getBoxesForRange(
     int start,
     int end, {
@@ -710,6 +716,14 @@ abstract class Paragraph {
   LineMetrics? getLineMetricsAt(int lineNumber);
   int get numberOfLines;
   int? getLineNumberAt(int codeUnitOffset);
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    int overflowPosition = 2,
+  });
   void dispose();
   bool get debugDisposed;
 }

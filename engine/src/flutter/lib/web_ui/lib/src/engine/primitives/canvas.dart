@@ -373,7 +373,51 @@ class EngineCanvas implements LayerCanvas {
     }
   }
 
-  @override
+  /// Draws the text in [paragraph] onto this canvas at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
+  void _drawParagraphAlignedOrSplit(
+    ui.Paragraph paragraph,
+    ui.Offset offset,
+    ui.Rect sortedClip,
+    int overflowPosition,
+  ) {
+    final double clipWidth = sortedClip.width;
+    final double contentWidth = paragraph.width.isFinite ? paragraph.width : paragraph.longestLine;
+    final double overflowWidth = contentWidth - clipWidth;
+    if (overflowWidth <= 0.0 || paragraph.numberOfLines > 1) {
+      drawParagraph(paragraph, offset);
+      return;
+    }
+    if (overflowPosition == 1 && clipWidth > 0.0) {
+      final double halfWidth = clipWidth / 2.0;
+      final double midX = sortedClip.left + halfWidth;
+
+      save();
+      clipRect(
+        ui.Rect.fromLTRB(sortedClip.left, sortedClip.top, midX, sortedClip.bottom),
+        doAntiAlias: false,
+      );
+      drawParagraph(paragraph, offset);
+      restore();
+
+      save();
+      clipRect(
+        ui.Rect.fromLTRB(midX, sortedClip.top, sortedClip.right, sortedClip.bottom),
+        doAntiAlias: false,
+      );
+      drawParagraph(paragraph, ui.Offset(offset.dx - overflowWidth, offset.dy));
+      restore();
+      return;
+    }
+    if (overflowPosition == 0) {
+      drawParagraph(paragraph, ui.Offset(offset.dx - overflowWidth, offset.dy));
+      return;
+    }
+    drawParagraph(paragraph, offset);
+  }
+
+  /// Draws the text in [paragraph] onto this canvas at [offset], clipped to
+  /// [clipRect] and modulated by [opacity].
   void drawParagraphMasked(
     ui.Paragraph paragraph,
     ui.Offset offset, {
@@ -423,7 +467,7 @@ class EngineCanvas implements LayerCanvas {
         layerPaint.color = ui.Color.fromARGB(alpha, 0, 0, 0);
       }
       saveLayer(sortedClip, layerPaint);
-      drawParagraph(paragraph, offset);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition);
 
       final maskPaint = ui.Paint()..blendMode = ui.BlendMode.modulate;
       if (lines.length > 1) {
@@ -488,10 +532,10 @@ class EngineCanvas implements LayerCanvas {
       restore();
     } else if (alpha < 255) {
       saveLayer(sortedClip, ui.Paint()..color = ui.Color.fromARGB(alpha, 0, 0, 0));
-      drawParagraph(paragraph, offset);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition);
       restore();
     } else {
-      drawParagraph(paragraph, offset);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition);
     }
 
     restore();

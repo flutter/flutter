@@ -347,7 +347,11 @@ double ParagraphSkia::ComputeScrollFadeOpacity(double current_width,
       std::isfinite(fade_end_fraction) ? fade_end_fraction : 0.5;
   const double denom_frac = std::clamp(1.0 - safe_end, 0.0001, 1.0);
   double width_alpha = 1.0;
-  const double ref_w = locked_max_width_;
+  const double intrinsic_w = GetMaxIntrinsicWidth();
+  const double ref_w = (std::isfinite(intrinsic_w) && intrinsic_w > 0.0 &&
+                        locked_max_width_ > 0.0)
+                           ? std::min(locked_max_width_, intrinsic_w)
+                           : locked_max_width_;
   if (ref_w > 0.0 && std::isfinite(current_width) && current_width < ref_w) {
     const double shrink_progress =
         std::clamp(1.0 - (current_width / ref_w), 0.0, 1.0);
@@ -355,7 +359,11 @@ double ParagraphSkia::ComputeScrollFadeOpacity(double current_width,
   }
 
   double height_alpha = 1.0;
-  const double ref_h = std::max(locked_max_height_, GetHeight());
+  const double natural_h = GetHeight();
+  const double ref_h = (std::isfinite(natural_h) && natural_h > 0.0 &&
+                        locked_max_height_ > 0.0)
+                           ? std::min(locked_max_height_, natural_h)
+                           : std::max(locked_max_height_, natural_h);
   if (ref_h > 0.0 && std::isfinite(current_height) && current_height < ref_h) {
     const double shrink_progress =
         std::clamp(1.0 - (current_height / ref_h), 0.0, 1.0);
@@ -369,6 +377,51 @@ bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
   DisplayListParagraphPainter painter(builder, dl_paints_, impeller_enabled_);
   paragraph_->paint(&painter, x, y);
   return true;
+}
+
+void ParagraphSkia::PaintAlignedOrSplit(DisplayListBuilder* builder,
+                                        double x,
+                                        double y,
+                                        const DlRect& clip,
+                                        OverflowPosition overflow_position) {
+  const double clip_width = static_cast<double>(clip.GetWidth());
+  const double content_width =
+      std::isfinite(GetMaxWidth()) ? GetMaxWidth() : GetLongestLine();
+  const double overflow_width = content_width - clip_width;
+  if (overflow_width <= 0.0 || GetNumberOfLines() > 1) {
+    Paint(builder, x, y);
+    return;
+  }
+
+  const bool is_rtl = text_direction_ == TextDirection::rtl;
+  if (overflow_position == OverflowPosition::kMiddle && clip_width > 0.0) {
+    const double half_width = clip_width / 2.0;
+    const DlScalar mid_x =
+        static_cast<DlScalar>(static_cast<double>(clip.GetLeft()) + half_width);
+
+    builder->Save();
+    builder->ClipRect(
+        DlRect::MakeLTRB(clip.GetLeft(), clip.GetTop(), mid_x, clip.GetBottom()),
+        DlClipOp::kIntersect, false);
+    Paint(builder, x, y);
+    builder->Restore();
+
+    builder->Save();
+    builder->ClipRect(
+        DlRect::MakeLTRB(mid_x, clip.GetTop(), clip.GetRight(), clip.GetBottom()),
+        DlClipOp::kIntersect, false);
+    Paint(builder, x - overflow_width, y);
+    builder->Restore();
+    return;
+  }
+
+  if ((overflow_position == OverflowPosition::kStart && !is_rtl) ||
+      (overflow_position == OverflowPosition::kEnd && is_rtl)) {
+    Paint(builder, x - overflow_width, y);
+    return;
+  }
+
+  Paint(builder, x, y);
 }
 
 bool ParagraphSkia::PaintMasked(DisplayListBuilder* builder,
@@ -418,7 +471,7 @@ bool ParagraphSkia::PaintMasked(DisplayListBuilder* builder,
     fade_width = std::max(fade_width, 1.0);
 
     builder->SaveLayer(clip, has_opacity_layer ? &opacity_paint : nullptr);
-    Paint(builder, x, y);
+    PaintAlignedOrSplit(builder, x, y, clip, overflow_position);
 
     const bool is_rtl = text_direction_ == TextDirection::rtl;
     DlPaint mask_paint;
@@ -498,10 +551,10 @@ bool ParagraphSkia::PaintMasked(DisplayListBuilder* builder,
     builder->Restore();
   } else if (has_opacity_layer) {
     builder->SaveLayer(clip, &opacity_paint);
-    Paint(builder, x, y);
+    PaintAlignedOrSplit(builder, x, y, clip, overflow_position);
     builder->Restore();
   } else {
-    Paint(builder, x, y);
+    PaintAlignedOrSplit(builder, x, y, clip, overflow_position);
   }
 
   builder->Restore();

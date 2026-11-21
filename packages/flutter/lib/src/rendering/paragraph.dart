@@ -1939,6 +1939,37 @@ class RenderParagraph extends RenderBox
       }
     }
 
+    assert(() {
+      _textPainter.debugPaintTextLayoutBoxes = debugPaintTextLayoutBoxes;
+      return true;
+    }());
+
+    final double overflowWidth = _textPainter.width - size.width;
+    // When there are no inline children, selectable fragments, or vertical-only
+    // maxHeight fade, delegate clipping and horizontal overflow fading directly
+    // to TextPainter.paintMasked -> ui.Paragraph.paintMasked (ParagraphSkia::PaintMasked in C++).
+    final bool canDelegateToParagraphPaintMasked =
+        _needsClipping &&
+        firstChild == null &&
+        _lastSelectableFragments == null &&
+        (_overflowShader == null || overflowWidth > 0.0 || _overflowShaderRect != null);
+    if (canDelegateToParagraphPaintMasked) {
+      final TextOverflowPosition effectivePosition =
+          (_overflowPosition == TextOverflowPosition.end && textDirection == TextDirection.rtl)
+          ? TextOverflowPosition.start
+          : ((_overflowPosition == TextOverflowPosition.start && textDirection == TextDirection.rtl)
+                ? TextOverflowPosition.end
+                : _overflowPosition);
+      _textPainter.paintMasked(
+        context.canvas,
+        offset,
+        clipRect: offset & size,
+        fadeHorizontal: _overflowShader != null,
+        overflowPosition: effectivePosition,
+      );
+      return;
+    }
+
     if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
@@ -1951,12 +1982,6 @@ class RenderParagraph extends RenderBox
       context.canvas.clipRect(bounds);
     }
 
-    assert(() {
-      _textPainter.debugPaintTextLayoutBoxes = debugPaintTextLayoutBoxes;
-      return true;
-    }());
-
-    final double overflowWidth = _textPainter.width - size.width;
     if (_overflowPosition == TextOverflowPosition.middle &&
         _overflow != TextOverflow.ellipsis &&
         _overflow != TextOverflow.visible &&

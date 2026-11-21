@@ -1443,8 +1443,16 @@ class TextPainter {
   /// Valid only after [layout] has been called. Values of [opacity] are clamped
   /// to the range `0.0` to `1.0`; if the resulting opacity is `0.0` or
   /// [clipRect] is empty, nothing is painted.
-  void paintMasked(Canvas canvas, Offset offset, {required Rect clipRect, double opacity = 1.0}) {
-    if (_layoutCache == null) {
+  void paintMasked(
+    Canvas canvas,
+    Offset offset, {
+    required Rect clipRect,
+    double opacity = 1.0,
+    bool fadeHorizontal = false,
+    TextOverflowPosition overflowPosition = TextOverflowPosition.end,
+  }) {
+    final _TextPainterLayoutCacheWithOffset? layoutCache = _layoutCache;
+    if (layoutCache == null) {
       throw StateError(
         'TextPainter.paintMasked called when text geometry was not yet calculated.\n'
         'Please call layout() before paintMasked() to position the text before painting it.',
@@ -1457,16 +1465,33 @@ class TextPainter {
       return;
     }
 
-    canvas.save();
-    canvas.clipRect(clipRect);
-    if (alpha < 255) {
-      canvas.saveLayer(clipRect, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
-      paint(canvas, offset);
-      canvas.restore();
-    } else {
-      paint(canvas, offset);
+    if (_rebuildParagraphForPaint) {
+      Size? debugSize;
+      assert(() {
+        debugSize = size;
+        return true;
+      }());
+      final ui.Paragraph paragraph = layoutCache.paragraph;
+      assert(!layoutCache.layoutMaxWidth.isNaN);
+      layoutCache.layout._paragraph = _createParagraph(text!)
+        ..layout(ui.ParagraphConstraints(width: layoutCache.layoutMaxWidth));
+      assert(paragraph.width == layoutCache.layout._paragraph.width);
+      paragraph.dispose();
+      assert(debugSize == size);
     }
-    canvas.restore();
+    assert(!_rebuildParagraphForPaint);
+
+    assert(
+      !debugPaintTextLayoutBoxes || _debugPaintCharacterLayoutBoxes(canvas, layoutCache, offset),
+    );
+    layoutCache.paragraph.paintMasked(
+      canvas,
+      offset + layoutCache.paintOffset,
+      clipRect: clipRect,
+      opacity: effectiveOpacity,
+      fadeHorizontal: fadeHorizontal,
+      overflowPosition: overflowPosition.index,
+    );
   }
 
   bool _debugPaintCharacterLayoutBoxes(
