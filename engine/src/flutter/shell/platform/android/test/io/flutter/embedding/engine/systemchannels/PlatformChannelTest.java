@@ -5,10 +5,15 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
@@ -17,6 +22,8 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import java.util.Arrays;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -108,5 +115,134 @@ public class PlatformChannelTest {
 
     verify(mockResult).success(null);
     verify(messageHandler).setFrameworkHandlesBack(true);
+  }
+
+  private static MethodChannel.Result invokeMethod(
+      PlatformChannel platformChannel, String method, Object arguments) {
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+    platformChannel.parsingMethodCallHandler.onMethodCall(
+        new MethodCall(method, arguments), mockResult);
+    return mockResult;
+  }
+
+  private static PlatformChannel newPlatformChannel() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    return new PlatformChannel(dartExecutor);
+  }
+
+  @Test
+  public void platformChannel_completesSetPreferredOrientationsWithoutHandler() {
+    MethodChannel.Result mockResult =
+        invokeMethod(
+            newPlatformChannel(),
+            "SystemChrome.setPreferredOrientations",
+            new JSONArray(Arrays.asList("DeviceOrientation.portraitUp")));
+
+    verify(mockResult).success(null);
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_completesSetEnabledSystemUIModeWithoutHandler() {
+    MethodChannel.Result mockResult =
+        invokeMethod(
+            newPlatformChannel(),
+            "SystemChrome.setEnabledSystemUIMode",
+            "SystemUiMode.immersiveSticky");
+
+    verify(mockResult).success(null);
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_completesHapticFeedbackWithoutHandler() {
+    MethodChannel.Result mockResult =
+        invokeMethod(
+            newPlatformChannel(), "HapticFeedback.vibrate", "HapticFeedbackType.lightImpact");
+
+    verify(mockResult).success(null);
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_completesShareInvokeWithoutHandler() {
+    MethodChannel.Result mockResult = invokeMethod(newPlatformChannel(), "Share.invoke", "Flutter");
+
+    verify(mockResult).success(null);
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_reportsNoClipboardDataWithoutHandler() {
+    MethodChannel.Result mockResult =
+        invokeMethod(newPlatformChannel(), "Clipboard.getData", "text/plain");
+
+    verify(mockResult).success(null);
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_reportsNoStringsWithoutHandler() throws JSONException {
+    MethodChannel.Result mockResult =
+        invokeMethod(newPlatformChannel(), "Clipboard.hasStrings", "text/plain");
+
+    JSONObject expected = new JSONObject();
+    expected.put("value", false);
+    verify(mockResult).success(refEq(expected));
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_reportsUnknownMethodWithoutHandler() {
+    // An iOS-only method, so it has no case in this channel.
+    MethodChannel.Result mockResult =
+        invokeMethod(newPlatformChannel(), "SearchWeb.invoke", "Flutter");
+
+    verify(mockResult).notImplemented();
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_reportsInvalidArgumentsWithoutHandler() {
+    MethodChannel.Result mockResult =
+        invokeMethod(newPlatformChannel(), "HapticFeedback.vibrate", "HapticFeedbackType.unknown");
+
+    verify(mockResult).error(eq("error"), any(), any());
+    verifyNoMoreInteractions(mockResult);
+  }
+
+  @Test
+  public void platformChannel_answersCallsAfterHandlerIsRemoved() {
+    PlatformChannel fakePlatformChannel = newPlatformChannel();
+    PlatformChannel.PlatformMessageHandler mockMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(mockMessageHandler);
+    fakePlatformChannel.setPlatformMessageHandler(null);
+
+    MethodChannel.Result mockResult =
+        invokeMethod(
+            fakePlatformChannel,
+            "SystemChrome.setPreferredOrientations",
+            new JSONArray(Arrays.asList("DeviceOrientation.portraitUp")));
+
+    verify(mockResult).success(null);
+    verifyNoMoreInteractions(mockResult);
+    verify(mockMessageHandler, never()).setPreferredOrientations(anyInt());
+  }
+
+  @Test
+  public void platformChannel_repliesOnceToUnsupportedClipboardFormat() {
+    PlatformChannel fakePlatformChannel = newPlatformChannel();
+    PlatformChannel.PlatformMessageHandler mockMessageHandler =
+        mock(PlatformChannel.PlatformMessageHandler.class);
+    fakePlatformChannel.setPlatformMessageHandler(mockMessageHandler);
+
+    MethodChannel.Result mockResult =
+        invokeMethod(fakePlatformChannel, "Clipboard.getData", "text/html");
+
+    verify(mockResult).error(eq("error"), any(), any());
+    verifyNoMoreInteractions(mockResult);
+    verify(mockMessageHandler, never()).getClipboardData(any());
   }
 }
