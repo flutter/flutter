@@ -1845,8 +1845,7 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''');
     }
-    _windowingOwner ??= createWindowingOwner();
-    return _windowingOwner!;
+    return _windowingOwner ??= createWindowingOwner();
   }
 
   /// Sets the [WindowingOwner].
