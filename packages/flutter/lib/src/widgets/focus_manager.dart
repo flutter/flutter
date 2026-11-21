@@ -1954,6 +1954,13 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
           assert(_haveScheduledUpdate);
           _suspendedNode = null;
         }
+        // Apply the change now instead of in a microtask. On platforms where
+        // the UI and platform threads are merged, platform messages run
+        // synchronously, and their microtasks only run once the message loop
+        // gets to them. A key event that arrives right after the app is
+        // resumed, such as the Cmd+V a launcher posts when it hands activation
+        // back, would otherwise still find the root scope focused.
+        applyFocusChangesIfNeeded();
       }
     } else if (_primaryFocus != rootScope) {
       assert(_focusDebug(() => 'suspending $_primaryFocus'));
