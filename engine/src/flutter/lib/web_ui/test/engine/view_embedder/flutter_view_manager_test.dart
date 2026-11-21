@@ -110,6 +110,67 @@ Future<void> doTests() async {
       });
     });
 
+    group('moveView', () {
+      test('moves view into a new host element and preserves the DOM tree', () {
+        final DomElement originalHost = createDomHTMLDivElement();
+        final view = EngineFlutterView(platformDispatcher, originalHost);
+        final int viewId = view.viewId;
+        final originalOptions = JsFlutterViewOptions(hostElement: originalHost);
+
+        viewManager.registerView(view, jsViewOptions: originalOptions);
+        expect(viewManager.getHostElement(viewId), originalHost);
+
+        // Capture the original root element and a child so we can verify they
+        // survive the move without being recreated.
+        final DomElement originalRoot = view.dom.rootElement;
+        final DomElement originalChild = createDomHTMLDivElement();
+        originalRoot.appendChild(originalChild);
+
+        final DomElement newHost = createDomHTMLDivElement();
+        final JsFlutterViewOptions? result = viewManager.moveView(viewId, newHost);
+
+        expect(result?.hostElement, newHost);
+        expect(viewManager.getHostElement(viewId), newHost);
+        expect(view.embeddingStrategy.hostElement, newHost);
+        expect(view.dom.rootElement.parent, newHost);
+        // The root element and its children must be the same instances after
+        // the move; the strategy should update its host, not recreate the tree.
+        expect(view.dom.rootElement, same(originalRoot));
+        expect(view.dom.rootElement.contains(originalChild), isTrue);
+        expect(originalHost.contains(view.dom.rootElement), isFalse);
+
+        view.dispose();
+      });
+
+      test('fires onViewMoved event', () async {
+        final DomElement originalHost = createDomHTMLDivElement();
+        final view = EngineFlutterView(platformDispatcher, originalHost);
+        final int viewId = view.viewId;
+
+        viewManager.registerView(view);
+
+        final Stream<int> onViewMoved = viewManager.onViewMoved.timeout(
+          const Duration(milliseconds: 100),
+          onTimeout: (EventSink<int> sink) => sink.close(),
+        );
+        final Future<List<int>> viewMovedEvents = onViewMoved.toList();
+
+        final DomElement newHost = createDomHTMLDivElement();
+        viewManager.moveView(viewId, newHost);
+
+        expect(viewMovedEvents, completes);
+        final List<int> movedViewIds = await viewMovedEvents;
+        expect(movedViewIds, listEqual(<int>[viewId]));
+
+        view.dispose();
+      });
+
+      test('returns null for unknown viewId', () {
+        final DomElement host = createDomHTMLDivElement();
+        expect(viewManager.moveView(12345, host), isNull);
+      });
+    });
+
     group('findViewForElement', () {
       test('finds view for root and descendant elements', () {
         final DomElement host = createDomElement('div');
