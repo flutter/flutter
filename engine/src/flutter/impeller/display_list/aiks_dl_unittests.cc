@@ -823,6 +823,46 @@ TEST_P(AiksTest, MatrixBackdropFilterWithTranslation) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/194846.
+TEST_P(AiksTest, BackdropFilterWithFractionalOriginIsNotShifted) {
+  DisplayListBuilder builder;
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+
+  DlPaint line_paint;
+  line_paint.setColor(DlColor::kBlack());
+  for (int i = 0; i < 600; i += 4) {
+    builder.DrawRect(DlRect::MakeXYWH(i, 0, 1, 600), line_paint);
+    builder.DrawRect(DlRect::MakeXYWH(0, i, 600, 1), line_paint);
+  }
+
+  const float matrix[20] = {
+      1, 0, 0, 0, 0,  //
+      0, 1, 0, 0, 0,  //
+      0, 0, 1, 0, 0,  //
+      0, 0, 0, 1, 0   //
+  };
+  auto backdrop_filter =
+      DlImageFilter::MakeColorFilter(DlColorFilter::MakeMatrix(matrix));
+
+  const DlPoint origins[] = {
+      DlPoint(50, 50),
+      DlPoint(300.5, 50),
+      DlPoint(50, 300.4),
+      DlPoint(300.7, 300.3),
+  };
+  for (const DlPoint& origin : origins) {
+    builder.Save();
+    // A non-AA clip would be rounded to whole pixels.
+    builder.ClipRect(DlRect::MakeXYWH(origin.x, origin.y, 200, 200),
+                     DlClipOp::kIntersect, /*is_aa=*/true);
+    builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
+    builder.Restore();
+    builder.Restore();
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, MatrixSaveLayerFilter) {
   DisplayListBuilder builder;
 

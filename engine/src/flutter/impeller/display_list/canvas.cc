@@ -1910,7 +1910,11 @@ void Canvas::SaveLayer(const Paint& paint,
   std::shared_ptr<FilterContents> backdrop_filter_contents;
   Point local_position = Point(0, 0);
   if (backdrop_filter) {
-    local_position = subpass_coverage.GetOrigin() - GetGlobalPassPosition();
+    // Match the rounded-out origin of the subpass texture.
+    // See https://github.com/flutter/flutter/issues/194846
+    local_position =
+        subpass_coverage.Shift(-coverage_origin_adjustment).GetOrigin() -
+        GetGlobalPassPosition();
 
     std::shared_ptr<Texture> input_texture;
 
