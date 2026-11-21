@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -129,13 +130,18 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? linuxPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildCommand(
       androidContext: FakeAndroidContext(),
       appleContext: FakeAppleContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: featureFlags ?? TestFeatureFlags(isLinuxEnabled: true),
+      templatePathProvider: const TemplatePathProvider(flutterRoot: _kTestFlutterRoot),
       templateRenderer: FakeTemplateRenderer(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -162,7 +168,11 @@ void main() {
       os: osUtils ?? FakeOperatingSystemUtils(),
       platform: platform ?? linuxPlatform,
       processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: resolvedLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildLinuxCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

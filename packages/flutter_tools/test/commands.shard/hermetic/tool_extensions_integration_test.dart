@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -20,8 +21,9 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_features.dart';
 import 'package:flutter_tools/src/flutter_features_config.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -88,7 +90,31 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final doctor = Doctor(cache: FakeCache(), logger: testLogger, clock: const SystemClock());
+        final cache = FakeCache();
+        final doctor = Doctor(
+          analytics: const NoOpAnalytics(),
+          cache: cache,
+          clock: const SystemClock(),
+          logger: testLogger,
+          validatorsProviderBuilder: ({ExtensionManager? extensionManager}) {
+            final toolContext = FakeToolContext(cache: cache, logger: testLogger);
+            return DoctorValidatorsProvider.create(
+              androidContext: FakeAndroidContext(),
+              androidWorkflow: AndroidWorkflow(
+                androidSdkBuilder: () => null,
+                featureFlags: featureFlags,
+              ),
+              appleContext: FakeAppleContext(),
+              extensionManager: extensionManager,
+              featureFlags: featureFlags,
+              toolContext: toolContext,
+              windowsWorkflow: WindowsWorkflow(
+                featureFlags: featureFlags,
+                platform: toolContext.platform,
+              ),
+            );
+          },
+        );
 
         await doctor.diagnose(extensionManager: manager);
         expect(testLogger.statusText, isNot(contains('Linux Custom Extension Prototype')));
@@ -158,7 +184,31 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final doctor = Doctor(cache: FakeCache(), logger: testLogger, clock: const SystemClock());
+        final cache = FakeCache();
+        final doctor = Doctor(
+          analytics: const NoOpAnalytics(),
+          cache: cache,
+          clock: const SystemClock(),
+          logger: testLogger,
+          validatorsProviderBuilder: ({ExtensionManager? extensionManager}) {
+            final toolContext = FakeToolContext(cache: cache, logger: testLogger);
+            return DoctorValidatorsProvider.create(
+              androidContext: FakeAndroidContext(),
+              androidWorkflow: AndroidWorkflow(
+                androidSdkBuilder: () => null,
+                featureFlags: featureFlags,
+              ),
+              appleContext: FakeAppleContext(),
+              extensionManager: extensionManager,
+              featureFlags: featureFlags,
+              toolContext: toolContext,
+              windowsWorkflow: WindowsWorkflow(
+                featureFlags: featureFlags,
+                platform: toolContext.platform,
+              ),
+            );
+          },
+        );
 
         await doctor.diagnose(extensionManager: manager);
         expect(testLogger.statusText, contains('[✓] Linux Custom Extension Prototype'));
@@ -226,7 +276,7 @@ void main() {
           featureFlags: featureFlags,
           extensionManager: manager,
         );
-        final runner = FlutterCommandRunner(
+        final runner = TestFlutterCommandRunner(
           toolContext: toolContext,
           featureFlags: featureFlags,
           extensionManager: manager,
@@ -278,7 +328,7 @@ void main() {
           toolContext: toolContext,
           discovery: discovery,
         );
-        final runner = FlutterCommandRunner(
+        final runner = TestFlutterCommandRunner(
           toolContext: toolContext,
           featureFlags: featureFlags,
           extensionManager: manager,

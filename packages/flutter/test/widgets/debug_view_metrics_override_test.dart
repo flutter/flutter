@@ -154,6 +154,7 @@ class _NotificationRecorder with WidgetsBindingObserver {
   int accessibilityFeatures = 0;
   int textScaleFactor = 0;
   int platformBrightness = 0;
+  int alwaysUse24HourFormat = 0;
 
   @override
   void didChangeMetrics() => metrics += 1;
@@ -168,9 +169,13 @@ class _NotificationRecorder with WidgetsBindingObserver {
   void didChangePlatformBrightness() => platformBrightness += 1;
 
   @override
+  void didChangeAlwaysUse24HourFormat() => alwaysUse24HourFormat += 1;
+
+  @override
   String toString() =>
       'metrics: $metrics, accessibilityFeatures: $accessibilityFeatures, '
-      'textScaleFactor: $textScaleFactor, platformBrightness: $platformBrightness';
+      'textScaleFactor: $textScaleFactor, platformBrightness: $platformBrightness, '
+      'alwaysUse24HourFormat: $alwaysUse24HourFormat';
 }
 
 /// An observer that fails on one notification, to check that the ones after
@@ -1462,6 +1467,7 @@ void main() {
       expect(recorder.metrics, 0, reason: '$recorder');
       expect(recorder.textScaleFactor, 0, reason: '$recorder');
       expect(recorder.platformBrightness, 0, reason: '$recorder');
+      expect(recorder.alwaysUse24HourFormat, 0, reason: '$recorder');
 
       // ...nor is a text scaling table, or a brightness.
       debugSetViewMetricsOverride(
@@ -1471,6 +1477,7 @@ void main() {
       expect(recorder.textScaleFactor, 1, reason: '$recorder');
       expect(recorder.accessibilityFeatures, 1, reason: '$recorder');
       expect(recorder.metrics, 0, reason: '$recorder');
+      expect(recorder.alwaysUse24HourFormat, 0, reason: '$recorder');
 
       debugSetViewMetricsOverride(
         tester.view.viewId,
@@ -1482,6 +1489,20 @@ void main() {
       );
       expect(recorder.platformBrightness, 1, reason: '$recorder');
       expect(recorder.metrics, 0, reason: '$recorder');
+      expect(recorder.alwaysUse24HourFormat, 0, reason: '$recorder');
+
+      // ...or 24 hour format.
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(
+          boldText: true,
+          textScaling: <ui.Offset>[ui.Offset(1, 2)],
+          platformBrightness: ui.Brightness.dark,
+          alwaysUse24HourFormat: true,
+        ),
+      );
+      expect(recorder.alwaysUse24HourFormat, 1, reason: '$recorder');
+      expect(recorder.metrics, 0, reason: '$recorder');
 
       // A geometry change is.
       debugSetViewMetricsOverride(
@@ -1490,6 +1511,7 @@ void main() {
           boldText: true,
           textScaling: <ui.Offset>[ui.Offset(1, 2)],
           platformBrightness: ui.Brightness.dark,
+          alwaysUse24HourFormat: true,
           devicePixelRatio: 4.0,
         ),
       );
@@ -1497,6 +1519,7 @@ void main() {
       expect(recorder.accessibilityFeatures, 1, reason: '$recorder');
       expect(recorder.textScaleFactor, 1, reason: '$recorder');
       expect(recorder.platformBrightness, 1, reason: '$recorder');
+      expect(recorder.alwaysUse24HourFormat, 1, reason: '$recorder');
 
       // Setting the same override again changes nothing at all.
       debugSetViewMetricsOverride(
@@ -1505,11 +1528,13 @@ void main() {
           boldText: true,
           textScaling: <ui.Offset>[ui.Offset(1, 2)],
           platformBrightness: ui.Brightness.dark,
+          alwaysUse24HourFormat: true,
           devicePixelRatio: 4.0,
         ),
       );
       expect(recorder.metrics, 1, reason: '$recorder');
       expect(recorder.accessibilityFeatures, 1, reason: '$recorder');
+      expect(recorder.alwaysUse24HourFormat, 1, reason: '$recorder');
 
       // Clearing reverts every group that was overridden.
       debugClearViewMetricsOverrides();
@@ -1517,6 +1542,7 @@ void main() {
       expect(recorder.accessibilityFeatures, 2, reason: '$recorder');
       expect(recorder.textScaleFactor, 2, reason: '$recorder');
       expect(recorder.platformBrightness, 2, reason: '$recorder');
+      expect(recorder.alwaysUse24HourFormat, 2, reason: '$recorder');
 
       await tester.pump();
     });
@@ -1745,6 +1771,9 @@ class _CurvedTextScalingPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   ui.VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  ui.VoidCallback? onAlwaysUse24HourFormatChanged;
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

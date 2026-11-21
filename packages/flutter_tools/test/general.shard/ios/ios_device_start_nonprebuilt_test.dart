@@ -29,7 +29,9 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -140,13 +142,13 @@ void main() {
           xcodeProjectInterpreter: xcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
         );
 
@@ -203,13 +205,13 @@ void main() {
           xcode: xcode,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
         );
 
@@ -247,13 +249,13 @@ void main() {
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
         );
         fileSystem
@@ -350,13 +352,13 @@ void main() {
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
         );
         fileSystem
@@ -498,13 +500,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -608,13 +610,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
 
@@ -693,13 +695,13 @@ void main() {
           xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
         );
         setUpIOSProject(fileSystem);
-        final FlutterProject flutterProject = FlutterProject.fromDirectory(
-          fileSystem.currentDirectory,
-        );
+        final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+            .fromDirectory(fileSystem.currentDirectory);
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
           'flutter',
           'My Super Awesome App',
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
           toolContext: FakeToolContext(fs: fileSystem),
         );
 
@@ -835,13 +837,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -907,13 +909,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -976,13 +978,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1029,13 +1031,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1113,13 +1115,13 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1195,13 +1197,13 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1298,13 +1300,13 @@ void main() {
             );
 
             setUpIOSProject(fileSystem, scheme: flavor);
-            final FlutterProject flutterProject = FlutterProject.fromDirectory(
-              fileSystem.currentDirectory,
-            );
+            final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+                .fromDirectory(fileSystem.currentDirectory);
             final buildableIOSApp = BuildableIOSApp(
               flutterProject.ios,
               'flutter',
               'My Super Awesome App',
+              templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
               toolContext: FakeToolContext(fs: fileSystem),
             );
             fileSystem
@@ -1386,13 +1388,13 @@ void main() {
           );
 
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1468,13 +1470,13 @@ void main() {
             xcode: xcode,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1526,13 +1528,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem, createWorkspace: false);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1585,13 +1587,13 @@ void main() {
             xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
           );
           setUpIOSProject(fileSystem);
-          final FlutterProject flutterProject = FlutterProject.fromDirectory(
-            fileSystem.currentDirectory,
-          );
+          final FlutterProject flutterProject = const DelegatingToolContext().projectFactory
+              .fromDirectory(fileSystem.currentDirectory);
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
             'flutter',
             'My Super Awesome App',
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
             toolContext: FakeToolContext(fs: fileSystem),
           );
           fileSystem
@@ -1706,6 +1708,7 @@ IOSDevice setUpIOSDevice({
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
+    featureFlags: TestFeatureFlags(isLLDBDebuggingEnabled: true),
     toolContext: toolContext,
     xcode: xcode,
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
@@ -1729,6 +1732,11 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
+      analytics: analytics ?? FakeExactAnalytics(),
+      logger: logger,
+      platform: macPlatform,
+    ),
     templateRenderer: FakeTemplateRenderer(),
   );
 }

@@ -678,17 +678,14 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged,
-  // plus alwaysUse24HourFormat, which dart:ui reports through
-  // PlatformDispatcher.onPlatformConfigurationChanged because it has no
-  // callback of its own.
+  // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged.
   //
-  // This grouping, `_accessibilityFeatures`, and the standalone `textScaling`
-  // and `platformBrightness` are what `_changesFrom`, and so == and hashCode,
-  // compare, so a metric that reaches none of them is never compared. A record
-  // is used so that adding a field without adding it here shows up as a
-  // completeness guard failure rather than as a metric that only sometimes
-  // takes effect. The paddings are reduced to their edges because
+  // This grouping, `_accessibilityFeatures`, and the standalone `textScaling`,
+  // `platformBrightness`, and `alwaysUse24HourFormat` are what `_changesFrom`,
+  // and so == and hashCode, compare, so a metric that reaches none of them is
+  // never compared. A record is used so that adding a field without adding it
+  // here shows up as a completeness guard failure rather than as a metric that
+  // only sometimes takes effect. The paddings are reduced to their edges because
   // ui.ViewPadding has no == of its own.
   _ViewMetrics get _viewMetrics => (
     devicePixelRatio: devicePixelRatio,
@@ -697,7 +694,6 @@ class DebugViewMetricsOverride with Diagnosticable {
     viewPadding: _edges(viewPadding),
     viewInsets: _edges(viewInsets),
     systemGestureInsets: _edges(systemGestureInsets),
-    alwaysUse24HourFormat: alwaysUse24HourFormat,
   );
 
   static _Edges? _edges(ui.ViewPadding? padding) =>
@@ -723,9 +719,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   // override and [other]: the view metrics (onMetricsChanged), the text scaling
   // table (onTextScaleFactorChanged), the brightness
   // (onPlatformBrightnessChanged), the accessibility flags
-  // (onAccessibilityFeaturesChanged), and the 24 hour format, which is one of
-  // the view metrics but is also announced through
-  // onPlatformConfigurationChanged.
+  // (onAccessibilityFeaturesChanged), and the 24 hour format
+  // (onAlwaysUse24HourFormatChanged, also announced through
+  // onPlatformConfigurationChanged).
   //
   // The one definition of "changed" that == and the replay of dart:ui
   // callbacks on an override change share, so that a metric cannot be compared
@@ -746,12 +742,12 @@ class DebugViewMetricsOverride with Diagnosticable {
     if (other is! DebugViewMetricsOverride) {
       return false;
     }
-    // alwaysUse24HourFormat is one of the view metrics.
     final _Changes changes = _changesFrom(other);
     return !changes.viewMetrics &&
         !changes.textScaling &&
         !changes.platformBrightness &&
-        !changes.accessibilityFeatures;
+        !changes.accessibilityFeatures &&
+        !changes.alwaysUse24HourFormat;
   }
 
   @override
@@ -760,6 +756,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     textScaling == null ? null : Object.hashAll(textScaling!),
     platformBrightness,
     _accessibilityFeatures,
+    alwaysUse24HourFormat,
   );
 
   @override
@@ -1231,9 +1228,7 @@ ui.FlutterView debugApplyViewMetricsOverridesToView(ui.FlutterView view, {requir
 // changed on every wrapped dispatcher, so that the framework re-reads them as
 // it would after a platform change: the platform configuration first when a
 // platform-wide setting changed, then the callback of each group that changed,
-// in the order dart:ui uses. alwaysUse24HourFormat has no callback of its own
-// and rides onMetricsChanged, the one notification the framework treats as
-// "re-read everything about this view".
+// in the order dart:ui uses.
 //
 // Like the engine, this does not let one callback's failure cancel the ones
 // after it, or the framework would be left reading a metric it was never told
@@ -1250,6 +1245,8 @@ void _debugNotifyViewMetricsOverrideChanged(_Changes changes) {
     if (platformConfiguration) (ui.PlatformDispatcher d) => d.onPlatformConfigurationChanged,
     if (changes.textScaling) (ui.PlatformDispatcher d) => d.onTextScaleFactorChanged,
     if (changes.platformBrightness) (ui.PlatformDispatcher d) => d.onPlatformBrightnessChanged,
+    if (changes.alwaysUse24HourFormat)
+      (ui.PlatformDispatcher d) => d.onAlwaysUse24HourFormatChanged,
     if (changes.accessibilityFeatures)
       (ui.PlatformDispatcher d) => d.onAccessibilityFeaturesChanged,
     if (changes.viewMetrics) (ui.PlatformDispatcher d) => d.onMetricsChanged,
@@ -1354,8 +1351,8 @@ enum DebugViewMetric {
 // right, bottom.
 typedef _Edges = (double, double, double, double);
 
-// The metrics dart:ui announces through PlatformDispatcher.onMetricsChanged,
-// plus alwaysUse24HourFormat. See [DebugViewMetricsOverride._viewMetrics].
+// The metrics dart:ui announces through PlatformDispatcher.onMetricsChanged.
+// See [DebugViewMetricsOverride._viewMetrics].
 typedef _ViewMetrics = ({
   double? devicePixelRatio,
   ui.Size? physicalSize,
@@ -1363,7 +1360,6 @@ typedef _ViewMetrics = ({
   _Edges? viewPadding,
   _Edges? viewInsets,
   _Edges? systemGestureInsets,
-  bool? alwaysUse24HourFormat,
 });
 
 // The flags dart:ui announces through
@@ -1713,6 +1709,12 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) =>
       _dispatcher.onTextScaleFactorChanged = callback;
+
+  @override
+  ui.VoidCallback? get onAlwaysUse24HourFormatChanged => _dispatcher.onAlwaysUse24HourFormatChanged;
+  @override
+  set onAlwaysUse24HourFormatChanged(ui.VoidCallback? callback) =>
+      _dispatcher.onAlwaysUse24HourFormatChanged = callback;
 
   @override
   ui.ViewFocusChangeCallback? get onViewFocusChange => _dispatcher.onViewFocusChange;

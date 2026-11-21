@@ -6,7 +6,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../context/tool_context.dart';
 import '../features.dart';
 import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
@@ -21,13 +20,9 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     required this.buildSystem,
     required this.featureFlags,
-    required ToolContext toolContext,
+    required super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -38,9 +33,6 @@ class BuildWebCommand extends BuildSubCommand {
 
   final BuildSystem buildSystem;
   final FeatureFlags featureFlags;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -214,6 +206,7 @@ class BuildWebCommand extends BuildSubCommand {
       analytics: analytics,
       buildSystem: buildSystem,
       buildTargets: const BuildTargetsImpl(),
+      featureFlags: featureFlags,
       toolContext: toolContext,
     );
     await webBuilder.buildWeb(
@@ -226,15 +219,13 @@ class BuildWebCommand extends BuildSubCommand {
       outputDirectoryPath: outputDirectoryPath,
       webDefines: webDefines,
     );
-    // TODO(kevmoo): Ensure https://github.com/flutter/website/issues/13825 is
-    // documented and merged before this feature is promoted to default/stable.
     if (webContentHash) {
       logger.printStatus(
         '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
         'with "Cache-Control: no-cache" (or revalidation) so browser clients immediately pick up new deployments.\n'
-        'Hashed entrypoint files (*.<hash>.*) can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'
-        'When "--no-web-resources-cdn" is used, bundled "canvaskit/**" files are not content-hashed ("urlHashed: false" in "precache_manifest.json") and should not be served with "immutable" caching.\n'
-        'See https://docs.flutter.dev/deployment/web for caching guidance.',
+        'Hashed files ("main.dart.<hash>.*" and everything under "assets/") can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'
+        'Other files, including everything under "canvaskit/", are not content-hashed and should not be served with "immutable" caching.\n'
+        'See https://docs.flutter.dev/deployment/web#web-content-hashing for caching guidance.',
       );
     }
     return FlutterCommandResult.success();

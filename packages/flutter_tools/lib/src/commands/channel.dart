@@ -15,7 +15,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false}) {
+  ChannelCommand({required super.toolContext, super.verboseHelp = false}) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -36,9 +36,6 @@ class ChannelCommand extends FlutterCommand {
       negatable: false,
     );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'channel';
@@ -167,7 +164,8 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _switchChannel(String branchName) async {
-    final ToolContext(:Cache cache, :Git git, :Logger logger) = toolContext;
+    final ToolContext(:Cache cache, :FlutterVersion flutterVersion, :Git git, :Logger logger) =
+        toolContext;
 
     logger.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
@@ -180,7 +178,13 @@ class ChannelCommand extends FlutterCommand {
         'This is not an official channel. For a list of available channels, try "flutter channel".',
       );
     }
-    await _checkout(branchName, git: git, cache: cache, force: boolArg('force'));
+    await _checkout(
+      branchName,
+      git: git,
+      cache: cache,
+      flutterVersion: flutterVersion,
+      force: boolArg('force'),
+    );
     if (boolArg('cache-artifacts')) {
       await precacheArtifacts(toolContext: toolContext, workingDirectory: cache.flutterRoot);
     }
@@ -200,13 +204,14 @@ class ChannelCommand extends FlutterCommand {
     if (kObsoleteBranches.containsKey(channel)) {
       final String alternative = kObsoleteBranches[channel]!;
       logger.printStatus("Transitioning from '$channel' to '$alternative'...");
-      return _checkout(alternative, git: git, cache: cache);
+      return _checkout(alternative, git: git, cache: cache, flutterVersion: currentVersion);
     }
   }
 
   static Future<void> _checkout(
     String branchName, {
     required Cache cache,
+    required FlutterVersion flutterVersion,
     required Git git,
     bool force = false,
   }) async {
@@ -247,6 +252,10 @@ class ChannelCommand extends FlutterCommand {
         exitCode: runResult.processResult.exitCode,
       );
     } else {
+      // Delete the cached version file so subsequent tool invocations regenerate
+      // it with the new channel, even when the target branch points at the same
+      // commit as the previous branch.
+      flutterVersion.deleteVersionFile();
       // Remove the version check stamp, since it could contain out-of-date
       // information that pertains to the previous channel.
       await FlutterVersion.resetFlutterVersionFreshnessCheck(cache);
