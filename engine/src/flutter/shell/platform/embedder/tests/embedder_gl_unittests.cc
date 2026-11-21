@@ -4100,16 +4100,13 @@ TEST_F(EmbedderTest, SetSingleDisplayConfigurationWithDisplayIdAboveInt64Max) {
   fml::AutoResetWaitableEvent ready_latch;
   fml::AutoResetWaitableEvent report_latch;
   int64_t reported_display_id = 0;
-  context.AddNativeCallback("SignalNativeTest",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              ready_latch.Signal();
-                            }));
-  context.AddNativeCallback(
-      "SignalNativeCount", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        reported_display_id = tonic::DartConverter<int64_t>::FromDart(
-            Dart_GetNativeArgument(args, 0));
-        report_latch.Signal();
-      }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&](int64_t display_id) {
+                                 reported_display_id = display_id;
+                                 report_latch.Signal();
+                               }));
 
   auto engine = builder.LaunchEngine();
 
