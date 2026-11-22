@@ -59,7 +59,9 @@ with `--experimental_disk_cache_gc_max_size=10G
 --experimental_disk_cache_gc_idle_delay=10s` collects it on demand.
 
 After a rebase or a roll, before any of them, the generated files: `DEPS`
-feeds `deps.lock.bzl` (`gen_deps.dart --check` in `tools/bazel_tools`),
+feeds `deps.lock.bzl` (`gen_deps.dart --check` in `tools/bazel_tools`; the
+regeneration after a changed CIPD pin asks CIPD for its sha256 and so needs
+the network),
 `pubspec.lock` and lib/web_ui's feed `pub.lock.bzl` (`gen_pub_lock.dart
 --check` there too, after `dart pub get` at the root and in lib/web_ui so the
 package configurations match the locks), the GN files feed the BUILD files

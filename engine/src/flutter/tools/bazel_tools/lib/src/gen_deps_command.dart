@@ -7,6 +7,7 @@ import 'dart:io' as io;
 import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
 
+import 'cipd.dart';
 import 'deps_file.dart';
 import 'deps_outputs.dart';
 
@@ -48,18 +49,22 @@ final class GenDepsCommand {
     required this.verbose,
     required io.IOSink stdout,
     required io.IOSink stderr,
+    required CipdResolver? cipdResolver,
   }) : _stdout = stdout,
-       _stderr = stderr;
+       _stderr = stderr,
+       _cipdResolver = cipdResolver;
 
   /// Parses [arguments] and creates the command.
   ///
   /// Prints usage and returns `null` when `--help` is requested or the
-  /// arguments are invalid.
+  /// arguments are invalid. [cipdResolver] answers for CIPD (the service
+  /// itself by default); a test passes its own.
   static GenDepsCommand? fromCommandLine(
     List<String> arguments, {
     io.IOSink? stdout,
     io.IOSink? stderr,
     String? workingDirectory,
+    CipdResolver? cipdResolver,
   }) {
     final io.IOSink out = stdout ?? io.stdout;
     final io.IOSink err = stderr ?? io.stderr;
@@ -94,6 +99,7 @@ final class GenDepsCommand {
       verbose: results.flag('verbose'),
       stdout: out,
       stderr: err,
+      cipdResolver: cipdResolver,
     );
   }
 
@@ -104,8 +110,8 @@ final class GenDepsCommand {
       'check',
       negatable: false,
       help:
-          'Do not write anything; exit with status 1 if the generated files '
-          'are missing or out of date (for presubmit).',
+          'Do not write anything and ask no server; exit with status 1 if the '
+          'generated files are missing or out of date (for presubmit).',
     )
     ..addFlag('verbose', abbr: 'v', negatable: false, help: 'Print each file written.')
     ..addOption(
@@ -124,6 +130,11 @@ final class GenDepsCommand {
       '  $defaultDepsLockPath\n'
       '  $defaultBazelignorePath\n'
       '\n'
+      'The lock also records the sha256 of every CIPD package at its pinned\n'
+      'version. A package whose pin changed is looked up at CIPD (over HTTPS,\n'
+      'anonymously); the ones the lock already has are kept, so a run with no\n'
+      'changed CIPD pin needs no network, and neither does --check.\n'
+      '\n'
       '${argParser.usage}';
 
   /// The repository root (the directory containing `DEPS`).
@@ -137,6 +148,7 @@ final class GenDepsCommand {
 
   final io.IOSink _stdout;
   final io.IOSink _stderr;
+  final CipdResolver? _cipdResolver;
 
   /// Runs the command and returns the process exit code.
   Future<int> run() async {
@@ -153,8 +165,21 @@ final class GenDepsCommand {
       return 1;
     }
 
+    final lockFile = io.File(p.join(repoRoot, defaultDepsLockPath));
+    final Map<String, String> recorded = lockFile.existsSync()
+        ? parseCipdSha256(await lockFile.readAsString())
+        : const <String, String>{};
+    final Map<String, String>? cipdSha256 = await _cipdSha256(deps, recorded);
+    if (cipdSha256 == null) {
+      return 1;
+    }
+
     final outputs = <String, String>{
-      defaultDepsLockPath: generateDepsLock(deps, generator: generatorLabel),
+      defaultDepsLockPath: generateDepsLock(
+        deps,
+        generator: generatorLabel,
+        cipdSha256: cipdSha256,
+      ),
       defaultBazelignorePath: generateBazelignore(deps, generator: generatorLabel),
     };
 
@@ -184,5 +209,77 @@ final class GenDepsCommand {
       return 1;
     }
     return 0;
+  }
+
+  /// The lock's `CIPD_SHA256` for [deps]: for each package at its pinned
+  /// version, the hash its instance id names, else the one [recorded] (the
+  /// lock as it is) has, else what CIPD answers now.
+  ///
+  /// Returns `null`, with the reason printed, when a hash is missing and
+  /// cannot be had: under `--check`, which asks no server (the lock is then
+  /// out of date), or when CIPD could not be asked.
+  Future<Map<String, String>?> _cipdSha256(DepsFile deps, Map<String, String> recorded) async {
+    final result = <String, String>{};
+    final unknown = <String, ({String package, String version})>{};
+    for (final CipdDep dep in deps.cipdDeps) {
+      for (final CipdPackage package in dep.packages) {
+        for (final String name in expandCipdPackage(package.package)) {
+          final String key = cipdKey(name, package.version);
+          final String? known = sha256OfInstanceId(package.version) ?? recorded[key];
+          if (known != null) {
+            result[key] = known;
+          } else {
+            unknown[key] = (package: name, version: package.version);
+          }
+        }
+      }
+    }
+    if (unknown.isEmpty) {
+      return result;
+    }
+    final ({String package, String version}) first = unknown.values.first;
+    final description =
+        '${unknown.length} CIPD package(s) at their pinned version, the first of them '
+        '${first.package} at ${first.version}';
+    if (check) {
+      _stderr
+        ..writeln('Out of date: $defaultDepsLockPath (no sha256 for $description).')
+        ..writeln(
+          'Run `dart $generatorLabel` from the repository root, with access to the '
+          'network, and commit the result.',
+        );
+      return null;
+    }
+    final CipdResolver resolver = _cipdResolver ?? HttpCipdResolver();
+    try {
+      for (final MapEntry<String, ({String package, String version})> pin in unknown.entries) {
+        final String? digest = await resolver.resolve(pin.value.package, pin.value.version);
+        result[pin.key] = digest ?? '';
+        if (digest == null) {
+          // Expected for a platform a package is not built for (no Android
+          // SDK for a Linux arm64 host); worth a line all the same, since a
+          // misspelt tag looks the same from here.
+          _stderr.writeln(
+            'CIPD has no ${pin.value.package} at ${pin.value.version}, or shows none to an '
+            'anonymous caller: the lock records no sha256 for it.',
+          );
+        } else if (verbose) {
+          _stdout.writeln('CIPD: ${pin.value.package} at ${pin.value.version}: $digest');
+        }
+      }
+    } on CipdException catch (e) {
+      _stderr
+        ..writeln(e)
+        ..writeln(
+          'The lock records the sha256 of every CIPD package and has none for $description; '
+          'run this again with access to the network.',
+        );
+      return null;
+    } finally {
+      if (_cipdResolver == null && resolver is HttpCipdResolver) {
+        resolver.close();
+      }
+    }
+    return result;
   }
 }

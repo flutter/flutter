@@ -21,7 +21,7 @@ repositories have the same layout either way.
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//engine/src/flutter/build/bazel/toolchains/emscripten:lto_libraries.bzl", "emsdk_lto_libraries")
-load(":deps.lock.bzl", "CIPD_DEPS", "GCLIENT_GN_ARGS", "GCLIENT_GN_ARGS_FILE", "GIT_DEPS", "VARS")
+load(":deps.lock.bzl", "CIPD_DEPS", "CIPD_SHA256", "GCLIENT_GN_ARGS", "GCLIENT_GN_ARGS_FILE", "GIT_DEPS", "VARS")
 load(":engine_packages.bzl", "ENGINE_PACKAGE_CONFIG_FILE", "engine_package_config")
 load(":fetched_archive.bzl", "fetched_archive")
 load(":flutter_bin_cache.bzl", "PREBUILT_ENGINE_ENV")
@@ -689,30 +689,16 @@ _SYSROOTS_DIR = "engine/src/build/linux"
 
 _FETCH_TOOLCHAINS_ENV = "FLUTTER_BAZEL_FETCH_TOOLCHAINS"
 
-# sha256 of the zip CIPD serves for a (package, version) pair.
-#
-# A CIPD instance id is base64url(sha256(zip) + 0x02), so the hash can be read
-# off the instance id `gclient sync` records in `<path>/.versions/*.cipd_version`
-# without downloading anything; Bazel also prints it after an unpinned fetch.
-# A missing entry is not an error -- the download is merely unverified and not
-# shared through the repository cache. These should eventually be produced by
-# gen_deps.dart rather than maintained by hand.
-_CIPD_SHA256 = {
-    ("fuchsia/third_party/clang/linux-amd64", "git_revision:07d67299a15ce03b053736e2d31a668ee0576987"): "6b657ccd9ca05c6b9e4458181ec71f1dbaf7122a5e6df7aaaec381a31ab34bd3",
-    ("gn/gn/linux-amd64", "git_revision:81b24e01531ecf0eff12ec9359a555ec3944ec4e"): "cd330cb4f4e0d8e5c82ca3a583798ea5337fd01308952dbe227c9dd8bc51d854",
-    ("infra/3pp/tools/ninja/linux-amd64", "version:2@1.11.1.chromium.4"): "55833d93abb510f908b2347235116717b10ba6eca19e426a01e6a66b8c3cfd86",
-    ("infra/rbe/client/linux-amd64", "re_client_version:0.185.0.db415f21-gomaip"): "003bf3eac433bd071450e97a2e6633f7f93046828c8be428a5c3938c63dd1764",
-    ("infra/rbe/client/mac-arm64", "re_client_version:0.185.0.db415f21-gomaip"): "3033391e7e35c9a14b48a0fdeb608ed0dbf8b30897d157e06d0308975ddf6543",
-    ("infra/rbe/client/mac-amd64", "re_client_version:0.185.0.db415f21-gomaip"): "c103f2afacb79dede1333425547252eb18375dbfe48eb09f9ba95fe5797f6e2d",
-    ("flutter_internal/rbe/reclient_cfgs", "Vk7WiSKwQdBHbCrZ9PtRl3po2WpRFQZSag9M6-sxF_0C"): "564ed68922b041d0476c2ad9f4fb51977a68d96a511506526a0f4cebeb3117fd",
-    # cpython3: decoded from the instance ids `cipd describe` reports for
-    # DEPS' version (the rule above).
-    ("infra/3pp/tools/cpython3/linux-amd64", "version:3@3.11.9.chromium.38"): "b7b8a0a6d171b8918fda51aee1d6ffeb0c8a14c791fb1d0bc5d7454c8c9d949b",
-    ("infra/3pp/tools/cpython3/linux-arm64", "version:3@3.11.9.chromium.38"): "0d223051e9fd26a92010266e8508677ea832986d2a0a28015b2b809feecba17b",
-    ("infra/3pp/tools/cpython3/mac-amd64", "version:3@3.11.9.chromium.38"): "4117f3d5f00e323469c420036f4a39e3fd6413959a59da26c62d7acbe25acbdd",
-    ("infra/3pp/tools/cpython3/mac-arm64", "version:3@3.11.9.chromium.38"): "cfa6cee19e64c2d934ba1f68c465ce7793bb2f26430279a53be7bcea764b4621",
-    ("infra/3pp/tools/cpython3/windows-amd64", "version:3@3.11.9.chromium.38"): "8c83d1aa0e044fe2023bf5e43aec12696f266f07d88962790836fc42eeeadb89",
-}
+# sha256 of the zip CIPD serves for a package at its pinned version, from the
+# lock (deps.lock.bzl's CIPD_SHA256, which gen_deps.dart writes: every CIPD
+# package of DEPS, a ${platform} one for every platform). A CIPD instance id
+# is base64url(sha256(zip) + 0x02), so a pin by instance id names its own
+# hash; a tag's is what CIPD answered when the pin was written. Empty for a
+# package CIPD does not show an anonymous caller, or does not have for the
+# platform: such a download is unverified and not shared through the
+# repository cache.
+def _cipd_sha256(package, version):
+    return CIPD_SHA256.get(package + "@" + version, "")
 
 def _cipd_platform(mctx):
     """Returns the value CIPD substitutes for `${platform}` on this host."""
@@ -765,7 +751,7 @@ def _download_cipd_package(name, package_template, version, platform, build_file
         name = name,
         package = package,
         version = version,
-        sha256 = _CIPD_SHA256.get((package, version), ""),
+        sha256 = _cipd_sha256(package, version),
         build_file = build_file,
         strip_prefix = strip_prefix,
     )
@@ -867,8 +853,8 @@ def _fetched_trees(platform, hooks):
             package = entry["packages"][0]["package"].replace("${platform}", platform)
             version = entry["packages"][0]["version"]
             cipd[inner[len(prefix):]] = cipd_download_url(package, version)
-            if (package, version) in _CIPD_SHA256:
-                cipd_sha256[inner[len(prefix):]] = _CIPD_SHA256[(package, version)]
+            if _cipd_sha256(package, version):
+                cipd_sha256[inner[len(prefix):]] = _cipd_sha256(package, version)
 
         # The dependencies DEPS nests in this one: fetched in place where
         # the tree runs hooks (all of them), else linked in from their own
@@ -980,7 +966,7 @@ def _synced_deps_impl(mctx):
                 name = _FETCHED_PREFIX + name,
                 path = path,
                 url = cipd_download_url(package, pin["version"]),
-                sha256 = _CIPD_SHA256.get((package, pin["version"]), ""),
+                sha256 = _cipd_sha256(package, pin["version"]),
                 strip_prefix = subdir,
             )
             synced_repository(

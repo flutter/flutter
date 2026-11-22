@@ -19,7 +19,7 @@ Generates the files Bazel derives from `DEPS`:
 
 | Output (relative to the repository root)      | Contents                                                                                    |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `build_defs/repositories/deps.lock.bzl` | `VARS`, `GIT_DEPS`, `CIPD_DEPS`, `GCLIENT_GN_ARGS[_FILE]`: the pins from `DEPS` as Starlark |
+| `build_defs/repositories/deps.lock.bzl` | `VARS`, `GIT_DEPS`, `CIPD_DEPS`, `GCLIENT_GN_ARGS[_FILE]`: the pins from `DEPS` as Starlark; `CIPD_SHA256`: the sha256 of every CIPD package at its pin |
 | `.bazelignore`                                 | every directory gclient syncs or its hooks populate, plus GN outputs and tool caches        |
 
 Run it from anywhere inside the checkout after editing `DEPS`:
@@ -31,6 +31,15 @@ dart engine/src/flutter/tools/bazel_tools/bin/gen_deps.dart
 `--check` verifies the files without writing them (exit status 1 if they are
 stale); `test/repo_deps_test.dart` runs that check in CI, so a `DEPS` change
 that forgets to regenerate the files fails the `dart-host` tests.
+
+`CIPD_SHA256` is the one thing in the lock that `DEPS` does not hold
+(`lib/src/cipd.dart`). A pin by instance id names its own hash. For a pin by
+tag the tool asks CIPD what the tag stands for, over HTTPS and anonymously,
+once: the hashes the lock already has are kept, so a run needs the network
+only when a CIPD pin is new or changed, and `--check` never does (a changed
+pin without its hash fails it). A `${platform}` package gets an entry for
+each platform gclient syncs on; where CIPD has no package for a platform the
+entry is empty and the tool says so.
 
 `DEPS` is parsed with `lib/src/deps_file.dart`, a Dart implementation of the
 Python subset that gclient's `gclient_eval.py` accepts (literal assignments,

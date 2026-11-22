@@ -33,12 +33,22 @@ package file `gclient` installs (verified byte-for-byte for clang, gn and
 ninja on linux-x64), served as a zip by
 `https://chrome-infra-packages.appspot.com/dl/<package>/+/<version>`.
 
-A CIPD instance id is `base64url(sha256(zip) + 0x02)`, so the sha256 Bazel
-needs to verify (and cache) a download can be read off the instance id that
-`gclient sync` writes to `<path>/.versions/<name>.cipd_version` (or, for
-packages without one, to `.cipd/pkgs/<n>/_current` next to `DEPS`), without
-downloading anything. Known hashes live in `_CIPD_SHA256` in `extensions.bzl`;
-for an unknown pin Bazel still fetches and prints the hash to add.
+Every CIPD download is checked against a sha256, and the lock holds them:
+`deps.lock.bzl`'s `CIPD_SHA256` has the hash of the archive for every CIPD
+package of `DEPS` at its pinned version, a `${platform}` package once for
+each platform `gclient` syncs on. `gen_deps.dart` writes it. A CIPD instance
+id is `base64url(sha256(zip) + 0x02)`, so a pin by instance id names its own
+hash; for a pin by tag the tool asks CIPD what the tag stands for (one
+anonymous HTTPS request per package and platform, only for a pin the lock
+does not have yet) and records the answer. From then on the lock is what a
+download is checked against, so a tag that is moved upstream fails the fetch
+instead of changing the build, and Bazel's repository cache
+(`--repository_cache`) serves the archive to every checkout and output base
+after the first download. An entry is empty where CIPD has no such package
+for a platform or does not show it to an anonymous caller; a pin by tag of
+such a package would be fetched unverified. `gen_deps.dart --check`, which
+CI runs, asks no server: a `DEPS` whose CIPD pin changed without the lock
+fails it.
 
 Every tool is a `DEPS` entry, `@cpython3` included: the hermetic Python
 `engine/src/.gn` names as GN's `script_executable` (DEPS'
@@ -190,11 +200,12 @@ making one.
 
 ## Adding a dependency
 
-1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
+1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`). After a
+   change to `DEPS`, `gen_deps.dart` rewrites it; for a new or changed CIPD
+   pin that takes access to the network, once (the sha256, above).
 2. Add an entry to `_SOURCE_REPOSITORIES` or `_TOOL_REPOSITORIES` in
    `extensions.bzl`, pointing at the `DEPS` path (sysroots go in
-   `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry), and the
-   sha256 of its CIPD zip to `_CIPD_SHA256` so a download is verified.
+   `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry).
 3. If upstream has no usable Bazel files, add `third_party/<name>/BUILD.<name>.bazel`,
    starting its `copts` from `FLUTTER_THIRD_PARTY_COPTS` and adding the `-Wno-*`
    flags its `BUILD.gn` uses.

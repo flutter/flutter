@@ -51,7 +51,16 @@ const List<String> defaultIgnoredDirectories = <String>[
 /// The result is a Starlark file declaring the dependency pins so that Bazel
 /// module extensions can consume them without parsing `DEPS` themselves.
 /// Entries are sorted so that the output is stable across runs.
-String generateDepsLock(DepsFile deps, {required String generator}) {
+///
+/// [cipdSha256] is the lock's `CIPD_SHA256`: the sha256 of the archive CIPD
+/// serves for each package at its pinned version, by `cipdKey`. `DEPS` does
+/// not hold these; the caller keeps the ones the lock already has and looks
+/// up the rest (`GenDepsCommand`).
+String generateDepsLock(
+  DepsFile deps, {
+  required String generator,
+  Map<String, String> cipdSha256 = const <String, String>{},
+}) {
   final out = StringBuffer();
   out
     ..write(generatedFileLicenseHeader)
@@ -103,6 +112,17 @@ String generateDepsLock(DepsFile deps, {required String generator}) {
           },
       }),
     )
+    ..writeln()
+    ..writeln()
+    ..writeln('# The sha256 of the archive CIPD serves for each package above at its pinned')
+    ..writeln(r'# version, by "<package>@<version>"; a ${platform} package once for every')
+    ..writeln('# platform gclient syncs this repository on. DEPS does not hold these: an')
+    ..writeln('# instance id names its own hash, and a tag is looked up at CIPD when its pin')
+    ..writeln('# changes, after which this file is the record a download is checked against.')
+    ..writeln('# An empty value: CIPD has no such package for that platform, or shows none to')
+    ..writeln('# an anonymous caller; a download of it goes unverified.')
+    ..write('CIPD_SHA256 = ')
+    ..write(_starlark(_sortedMap(cipdSha256)))
     ..writeln()
     ..writeln()
     ..writeln('# The GN arguments gclient writes to GCLIENT_GN_ARGS_FILE (values in VARS).')
