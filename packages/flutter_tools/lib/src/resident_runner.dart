@@ -21,7 +21,6 @@ import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
-import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
@@ -50,7 +49,6 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
-import 'web/web_flutter_device.dart';
 import 'windows/visual_studio.dart';
 
 class FlutterDevice {
@@ -67,20 +65,21 @@ class FlutterDevice {
 
   final Duration logFlushDelay;
 
-  /// Create a [FlutterDevice] with optional code generation enabled.
-  static Future<FlutterDevice> create(
+  /// Creates the [DevelopmentShaderCompiler] and optional [ResidentCompiler]
+  /// for [device] and [buildInfo].
+  static Future<
+    ({
+      DevelopmentShaderCompiler developmentShaderCompiler,
+      ResidentCompiler? generator,
+      TargetPlatform targetPlatform,
+    })
+  >
+  createCompilers(
     Device device, {
-    required ToolContext toolContext,
     required BuildInfo buildInfo,
-    required String? target,
-    FlutterProject? flutterProject,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
+    required ToolContext toolContext,
+    bool createGenerator = true,
     TargetModel? targetModelOverride,
-    UrlTunneller? urlTunneller,
-    bool useWasm = false,
-    String? userIdentifier,
-    Map<String, String> webDefines = const <String, String>{},
-    WebFlutterDeviceFactory? webFlutterDeviceFactory,
   }) async {
     final ToolContext(
       :Artifacts artifacts,
@@ -93,8 +92,7 @@ class FlutterDevice {
     ) = toolContext;
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
-
-    final shaderCompiler = DevelopmentShaderCompiler(
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
         artifacts: artifacts,
         logger: logger,
@@ -105,11 +103,8 @@ class FlutterDevice {
       fileSystem: fs,
       logger: logger,
     );
-
-    final isWeb = targetPlatform == TargetPlatform.web_javascript;
-    final ResidentCompiler? generator = isWeb && (!buildInfo.isDebug || useWasm)
-        ? null
-        : residentCompilerFactory.create(
+    final ResidentCompiler? generator = createGenerator
+        ? residentCompilerFactory.create(
             artifacts: artifacts,
             processManager: processManager,
             logger: logger,
@@ -120,35 +115,40 @@ class FlutterDevice {
             targetPlatform: targetPlatform,
             buildInfo: buildInfo,
             targetModelOverride: targetModelOverride,
-          );
+          )
+        : null;
+    return (
+      developmentShaderCompiler: developmentShaderCompiler,
+      generator: generator,
+      targetPlatform: targetPlatform,
+    );
+  }
 
-    if (isWeb) {
-      if (webFlutterDeviceFactory == null) {
-        throw StateError('webFlutterDeviceFactory is required for web devices.');
-      }
-      if (flutterProject == null) {
-        throw StateError('flutterProject is required when webFlutterDeviceFactory is provided.');
-      }
-      return webFlutterDeviceFactory.createWebFlutterDevice(
-        device,
-        buildInfo: buildInfo,
-        developmentShaderCompiler: shaderCompiler,
-        flutterProject: flutterProject,
-        generator: generator,
-        platformArgs: platformArgs,
-        targetPlatform: targetPlatform,
-        toolContext: toolContext,
-        urlTunneller: urlTunneller,
-        userIdentifier: userIdentifier,
-        webDefines: webDefines,
-      );
-    }
+  /// Creates a standard [FlutterDevice] backed by the default [ResidentCompiler]
+  /// and [DevelopmentShaderCompiler].
+  static Future<FlutterDevice> createDefault(
+    Device device, {
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    TargetModel? targetModelOverride,
+    String? userIdentifier,
+  }) async {
+    final (
+      :DevelopmentShaderCompiler developmentShaderCompiler,
+      :ResidentCompiler? generator,
+      :TargetPlatform targetPlatform,
+    ) = await createCompilers(
+      device,
+      buildInfo: buildInfo,
+      targetModelOverride: targetModelOverride,
+      toolContext: toolContext,
+    );
 
     return FlutterDevice(
       device,
       toolContext: toolContext,
       buildInfo: buildInfo,
-      developmentShaderCompiler: shaderCompiler,
+      developmentShaderCompiler: developmentShaderCompiler,
       generator: generator,
       targetPlatform: targetPlatform,
       userIdentifier: userIdentifier,

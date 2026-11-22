@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -22,13 +23,14 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
+import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
-import 'package:flutter_tools/src/isolated/web_flutter_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/template.dart';
@@ -127,35 +129,44 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
   }
 }
 
-class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
+abstract class _FakeChromiumWebDevice extends Fake implements ChromiumDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
   PlatformType? get platformType => PlatformType.web;
 
+  @override
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    bool useWasm = false,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) => FlutterDevice.createDefault(
+    this,
+    buildInfo: buildInfo,
+    targetModelOverride: targetModelOverride,
+    toolContext: toolContext,
+    userIdentifier: userIdentifier,
+  );
+}
+
+class FakeGoogleChromeDevice extends _FakeChromiumWebDevice implements GoogleChromeDevice {
   @override
   String get displayName => GoogleChromeDevice.kChromeDeviceName;
 }
 
-class FakeMicrosoftEdgeDevice extends Fake implements MicrosoftEdgeDevice {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
-
-  @override
-  PlatformType? get platformType => PlatformType.web;
-
+class FakeMicrosoftEdgeDevice extends _FakeChromiumWebDevice implements MicrosoftEdgeDevice {
   @override
   String get displayName => MicrosoftEdgeDevice.kEdgeDeviceName;
 }
 
-class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
-
-  @override
-  PlatformType? get platformType => PlatformType.web;
-
+class FakeCustomBrowserDevice extends _FakeChromiumWebDevice {
   @override
   String get displayName => 'Dartium';
 }
@@ -343,7 +354,6 @@ void main() {
       analysisServerFactoryOverride:
           analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
       residentRunnerFactoryOverride: residentRunnerFactoryOverride,
-      webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
     );
   }
 

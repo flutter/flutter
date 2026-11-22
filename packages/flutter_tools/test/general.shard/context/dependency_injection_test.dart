@@ -13,12 +13,19 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/context/web_context.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/flutter_device_manager.dart';
@@ -31,7 +38,12 @@ import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:flutter_tools/src/web/web_flutter_device.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -60,6 +72,31 @@ class FakeJava extends Fake implements Java {}
 class _StubFlutterVersion extends Fake implements FlutterVersion {
   @override
   String get channel => 'master';
+}
+
+class _FakeFlutterDevice extends Fake implements FlutterDevice {}
+
+class _RecordingWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
+  final created = _FakeFlutterDevice();
+  Device? lastDevice;
+
+  @override
+  FlutterDevice createWebFlutterDevice(
+    Device device, {
+    required BuildInfo buildInfo,
+    required DevelopmentShaderCompiler developmentShaderCompiler,
+    required FlutterProject flutterProject,
+    required ResidentCompiler? generator,
+    required TargetPlatform targetPlatform,
+    required ToolContext toolContext,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    UrlTunneller? urlTunneller,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) {
+    lastDevice = device;
+    return created;
+  }
 }
 
 void main() {
@@ -822,6 +859,126 @@ void main() {
       expect(context.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
       expect(context.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
       expect(xcodeProjectInterpreterEvaluations, 1);
+    });
+  });
+
+  group('WebContext', () {
+    testWithoutContext(
+      'evaluates chromiumLauncher and webWorkflow lazily and memoizes results',
+      () {
+        var chromiumLauncherEvaluations = 0;
+        var webWorkflowEvaluations = 0;
+
+        final mockChromiumLauncher = FakeChromiumLauncher();
+        final mockWebWorkflow = FakeWebWorkflow();
+        final factory = _RecordingWebFlutterDeviceFactory();
+
+        final webContext = WebContext(
+          chromiumLauncherBuilder: () {
+            chromiumLauncherEvaluations++;
+            return mockChromiumLauncher;
+          },
+          webFlutterDeviceFactory: factory,
+          webWorkflowBuilder: () {
+            webWorkflowEvaluations++;
+            return mockWebWorkflow;
+          },
+        );
+
+        // No builder has been invoked upon instantiation.
+        expect(chromiumLauncherEvaluations, 0);
+        expect(webWorkflowEvaluations, 0);
+        expect(webContext.webFlutterDeviceFactory, same(factory));
+
+        // Accessing chromiumLauncher multiple times evaluates builder exactly once.
+        expect(webContext.chromiumLauncher, same(mockChromiumLauncher));
+        expect(webContext.chromiumLauncher, same(mockChromiumLauncher));
+        expect(chromiumLauncherEvaluations, 1);
+        expect(webWorkflowEvaluations, 0);
+
+        // Accessing webWorkflow multiple times evaluates builder exactly once.
+        expect(webContext.webWorkflow, same(mockWebWorkflow));
+        expect(webContext.webWorkflow, same(mockWebWorkflow));
+        expect(webWorkflowEvaluations, 1);
+      },
+    );
+
+    testWithoutContext('ToolDependencies.bootstrap wires WebContext lazily into WebDevices and WebDevice.createFlutterDevice', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final platform = FakePlatform(
+        environment: <String, String>{'FLUTTER_ROOT': '/flutter', 'HOME': '/home/user'},
+      );
+      fs.directory('/flutter/packages/flutter_tools').createSync(recursive: true);
+      fs.file('/pubspec.yaml').writeAsStringSync('name: my_app\n');
+
+      var chromiumLauncherEvaluations = 0;
+      var webWorkflowEvaluations = 0;
+      final factory = _RecordingWebFlutterDeviceFactory();
+      final webContext = WebContext(
+        chromiumLauncherBuilder: () {
+          chromiumLauncherEvaluations++;
+          return FakeChromiumLauncher();
+        },
+        webFlutterDeviceFactory: factory,
+        webWorkflowBuilder: () {
+          webWorkflowEvaluations++;
+          return WebWorkflow(
+            featureFlags: TestFeatureFlags(isWebEnabled: true),
+            platform: platform,
+          );
+        },
+      );
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(isWebEnabled: true),
+        flutterVersion: _StubFlutterVersion(),
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        webContext: webContext,
+      );
+
+      // Neither builder runs during bootstrap or creating device discoverers.
+      expect(dependencies.webContext, same(webContext));
+      expect(chromiumLauncherEvaluations, 0);
+      expect(webWorkflowEvaluations, 0);
+
+      final List<DeviceDiscovery> discoverers = dependencies.deviceManager.deviceDiscoverers;
+      expect(discoverers.whereType<WebDevices>(), hasLength(1));
+      expect(chromiumLauncherEvaluations, 0);
+      expect(webWorkflowEvaluations, 0);
+
+      // WebServerDevice discovered via WebDevices delegates createFlutterDevice
+      // to WebContext.webFlutterDeviceFactory.
+      final bool previousShowWebServerDevice = WebServerDevice.showWebServerDevice;
+      WebServerDevice.showWebServerDevice = true;
+      addTearDown(() => WebServerDevice.showWebServerDevice = previousShowWebServerDevice);
+
+      final WebDevices webDevices = discoverers.whereType<WebDevices>().single;
+      final List<Device> devices = await webDevices.pollingGetDevices();
+      expect(chromiumLauncherEvaluations, 1);
+      expect(webWorkflowEvaluations, 0);
+
+      // Doctor reuses the same WebContext webWorkflow and memoized chromiumLauncher.
+      expect(dependencies.doctor.validators, isNotEmpty);
+      expect(webWorkflowEvaluations, 1);
+      expect(chromiumLauncherEvaluations, 1);
+
+      final WebServerDevice webServer = devices.whereType<WebServerDevice>().single;
+      final FlutterProject project = dependencies.toolContext.projectFactory.fromDirectory(
+        fs.currentDirectory,
+      );
+      final FlutterDevice created = await webServer.createFlutterDevice(
+        buildInfo: BuildInfo.release,
+        flutterProject: project,
+        toolContext: dependencies.toolContext,
+      );
+      expect(created, same(factory.created));
+      expect(factory.lastDevice, same(webServer));
     });
   });
 }

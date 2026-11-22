@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -26,6 +27,7 @@ import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -616,6 +618,25 @@ class FakeDevice extends Fake implements Device {
   Future<void> dispose() async {
     disposed = true;
   }
+
+  @override
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    bool useWasm = false,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) => FlutterDevice.createDefault(
+    this,
+    buildInfo: buildInfo,
+    targetModelOverride: targetModelOverride,
+    toolContext: toolContext,
+    userIdentifier: userIdentifier,
+  );
 
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {

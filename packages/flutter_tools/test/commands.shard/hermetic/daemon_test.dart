@@ -35,6 +35,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -1623,7 +1624,6 @@ void main() {
 
   Future<(AppInstance, _FakeDaemonWebFlutterDeviceFactory)> runWebDaemonStartApp({
     required FileSystem fs,
-    required Device webDevice,
     required String projectDirPath,
     required String customRootPath,
     required DebuggingOptions options,
@@ -1634,6 +1634,10 @@ void main() {
     final streams = FakeDaemonStreams();
     final connection = DaemonConnection(daemonStreams: streams, logger: bufferLogger);
     final webDeviceFactory = _FakeDaemonWebFlutterDeviceFactory();
+    final webDevice = WebServerDevice(
+      logger: bufferLogger,
+      webFlutterDeviceFactory: webDeviceFactory,
+    );
     final toolContext = FakeToolContext(
       cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
       fs: fs,
@@ -1655,7 +1659,6 @@ void main() {
       featureFlags: TestFeatureFlags(),
       notifyingLogger: testNotifyingLogger,
       toolContext: toolContext,
-      webFlutterDeviceFactory: webDeviceFactory,
       xcode: null,
     );
 
@@ -1687,7 +1690,6 @@ void main() {
       fs.file('$projectDirPath/lib/main.dart').createSync(recursive: true);
       fs.directory(customRootPath).createSync(recursive: true);
 
-      final webDevice = _FakeDaemonWebDevice();
       for (final (DebuggingOptions options, bool expectTunneller) in <(DebuggingOptions, bool)>[
         (
           DebuggingOptions.enabled(
@@ -1707,7 +1709,6 @@ void main() {
           _FakeDaemonWebFlutterDeviceFactory webDeviceFactory,
         ) = await runWebDaemonStartApp(
           fs: fs,
-          webDevice: webDevice,
           projectDirPath: projectDirPath,
           customRootPath: customRootPath,
           options: options,
@@ -1723,8 +1724,8 @@ void main() {
     },
   );
 
-  // Uses testUsingContext because FlutterDevice.create reads the context-scoped
-  // ResidentCompilerFactory when constructing a debug non-wasm generator.
+  // Uses testUsingContext because WebDevice.createFlutterDevice reads the
+  // context-scoped ResidentCompilerFactory when constructing a debug non-wasm generator.
   testUsingContext(
     'AppDomain.startApp routes debug JS web runs (with and without hot reload) to HotRunner',
     () async {
@@ -1735,14 +1736,12 @@ void main() {
       fs.file('$projectDirPath/lib/main.dart').createSync(recursive: true);
       fs.directory(customRootPath).createSync(recursive: true);
 
-      final webDevice = _FakeDaemonWebDevice();
       for (final enableHotReload in const <bool>[true, false]) {
         final (
           AppInstance app,
           _FakeDaemonWebFlutterDeviceFactory webDeviceFactory,
         ) = await runWebDaemonStartApp(
           fs: fs,
-          webDevice: webDevice,
           projectDirPath: projectDirPath,
           customRootPath: customRootPath,
           options: DebuggingOptions.enabled(
@@ -2229,32 +2228,6 @@ class FakeRestartableResidentRunner extends FakeResidentRunner {
 }
 
 class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
-
-class _FakeDaemonWebDevice extends Fake implements Device {
-  @override
-  String get id => 'chrome';
-
-  @override
-  String get name => 'Chrome';
-
-  @override
-  String get displayName => name;
-
-  @override
-  bool get supportsHotReload => true;
-
-  @override
-  bool get supportsHotRestart => true;
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
-
-  @override
-  Future<bool> supportsRuntimeMode(BuildMode buildMode) async => true;
-
-  @override
-  Future<void> dispose() async {}
-}
 
 class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
   _FakeDaemonWebFlutterDevice(this.device);

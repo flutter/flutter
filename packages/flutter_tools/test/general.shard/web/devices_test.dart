@@ -7,11 +7,15 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/web_context.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
@@ -19,9 +23,41 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
+WebDevices _createWebDevices({
+  required FeatureFlags featureFlags,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required Platform platform,
+  required ProcessManager processManager,
+}) {
+  return WebDevices(
+    featureFlags: featureFlags,
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+    webContext: WebContext(
+      chromiumLauncherBuilder: () => ChromiumLauncher(
+        browserFinder: findChromeExecutable,
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: OperatingSystemUtils(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+        platform: platform,
+        processManager: processManager,
+      ),
+      webWorkflowBuilder: () => WebWorkflow(featureFlags: featureFlags, platform: platform),
+    ),
+  );
+}
+
 void main() {
   testWithoutContext('No web devices listed if feature is disabled', () async {
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -168,7 +204,7 @@ void main() {
   });
 
   testWithoutContext('Chrome device is listed when Chrome can be run', () async {
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -180,7 +216,7 @@ void main() {
   });
 
   testWithoutContext('Has well known device ids chrome, edge, and web-server', () async {
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -194,7 +230,7 @@ void main() {
   testWithoutContext('Chrome device is not listed when Chrome cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     processManager.excludedExecutables = <String>{kLinuxExecutable};
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -207,7 +243,7 @@ void main() {
 
   testWithoutContext('Web Server device is listed if enabled via showWebServerDevice', () async {
     WebServerDevice.showWebServerDevice = true;
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -222,7 +258,7 @@ void main() {
     'Web Server device is not listed if disabled via showWebServerDevice',
     () async {
       WebServerDevice.showWebServerDevice = false;
-      final webDevices = WebDevices(
+      final WebDevices webDevices = _createWebDevices(
         featureFlags: TestFeatureFlags(isWebEnabled: true),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -238,7 +274,7 @@ void main() {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[kLinuxExecutable, '--version'], stdout: 'ABC'),
     ]);
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -281,7 +317,7 @@ void main() {
         stdout: r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A',
       ),
     ]);
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -352,7 +388,7 @@ void main() {
         stdout: r'HKEY_CURRENT_USER\Software\Microsoft\Edge\BLBeacon\ version REG_SZ 72.0.478.44 ',
       ),
     ]);
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -364,7 +400,7 @@ void main() {
   });
 
   testWithoutContext('Edge is not support on non-windows platform', () async {
-    final webDevices = WebDevices(
+    final WebDevices webDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -374,7 +410,7 @@ void main() {
 
     expect((await webDevices.pollingGetDevices()).whereType<MicrosoftEdgeDevice>(), isEmpty);
 
-    final macosWebDevices = WebDevices(
+    final WebDevices macosWebDevices = _createWebDevices(
       featureFlags: TestFeatureFlags(isWebEnabled: true),
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),

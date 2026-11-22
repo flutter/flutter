@@ -31,7 +31,6 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../web/chrome_constants.dart';
-import '../web/web_flutter_device.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
@@ -46,7 +45,6 @@ class WebDriverService extends DriverService {
     required this._featureFlags,
     required super.toolContext,
     this._flutterHookRunner,
-    this._webFlutterDeviceFactory,
   });
 
   final Analytics _analytics;
@@ -57,7 +55,6 @@ class WebDriverService extends DriverService {
   final String _dartSdkPath;
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -91,17 +88,14 @@ class WebDriverService extends DriverService {
       renderer: debuggingOptions.webConfig.renderer,
       useWasm: debuggingOptions.webConfig.useWasm,
     );
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: buildInfo,
       flutterProject: flutterProject,
       platformArgs: platformArgs,
-      target: mainPath,
+      toolContext: toolContext,
       useWasm: webConfig.useWasm,
       userIdentifier: userIdentifier,
       webDefines: webDefines,
-      webFlutterDeviceFactory: _webFlutterDeviceFactory,
     );
     final resolvedDebuggingOptions = buildInfo.isRelease
         ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)

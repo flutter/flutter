@@ -568,6 +568,9 @@ void main() {
           cache: Cache.test(processManager: fakeProcessManager),
           platform: platform,
         ),
+        webContext: FakeWebContext(
+          webWorkflow: WebWorkflow(featureFlags: featureFlags, platform: platform),
+        ),
         windowsWorkflow: WindowsWorkflow(featureFlags: featureFlags, platform: platform),
       ).workflows;
       expect(workflows, contains(isA<WebWorkflow>()));
@@ -590,6 +593,7 @@ void main() {
         cache: Cache.test(processManager: fakeProcessManager),
         platform: platform,
       ),
+      webContext: FakeWebContext(),
       windowsWorkflow: WindowsWorkflow(featureFlags: featureFlags, platform: platform),
     ).workflows;
     expect(workflows, contains(isA<CustomDeviceWorkflow>()));
@@ -637,6 +641,7 @@ void main() {
             platform: platform,
             processManager: fakeProcessManager,
           ),
+          webContext: FakeWebContext(),
           windowsWorkflow: WindowsWorkflow(featureFlags: featureFlags, platform: platform),
         ).validators;
         final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;

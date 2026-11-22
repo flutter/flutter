@@ -1073,7 +1073,10 @@ void main() {
         expect(xcodeEvaluations, 1);
         expect(command.resolvePlistParser(), same(fakePlistParser));
         expect(command.resolveHookRunner(), same(fakeHookRunner));
-        expect(toolDependencies.webFlutterDeviceFactory, same(fakeWebFlutterDeviceFactory));
+        expect(
+          toolDependencies.webContext.webFlutterDeviceFactory,
+          same(fakeWebFlutterDeviceFactory),
+        );
       },
     );
 

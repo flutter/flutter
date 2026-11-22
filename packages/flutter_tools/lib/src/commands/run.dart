@@ -37,7 +37,6 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/web_flutter_device.dart';
 import '../web/web_options.dart';
 import 'daemon.dart';
 
@@ -348,7 +347,6 @@ class RunCommand extends RunCommandBase {
     super.applicationPackages,
     this.deviceManager,
     this._flutterHookRunner,
-    this._webFlutterDeviceFactory,
     super.verboseHelp = false,
   }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
@@ -417,7 +415,6 @@ class RunCommand extends RunCommandBase {
   final DeviceManager? deviceManager;
   final DevtoolsLauncher _devtoolsLauncher;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
 
   @override
   final name = 'run';
@@ -736,7 +733,6 @@ class RunCommand extends RunCommandBase {
       featureFlags: _featureFlags,
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
-      webFlutterDeviceFactory: _webFlutterDeviceFactory,
       xcode: appleContext.xcode,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
@@ -828,16 +824,13 @@ class RunCommand extends RunCommandBase {
 
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
-        await FlutterDevice.create(
-          device,
+        await device.createFlutterDevice(
           buildInfo: buildInfo,
           flutterProject: project,
-          target: targetFile,
           toolContext: toolContext,
           useWasm: useWasm,
           userIdentifier: userIdentifier,
           webDefines: webDefines,
-          webFlutterDeviceFactory: _webFlutterDeviceFactory,
         ),
     ];
 

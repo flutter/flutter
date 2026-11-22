@@ -367,12 +367,16 @@ void main() {
   );
 
   testWithoutContext(
-    'FlutterDevice.create skips ResidentCompiler in profile, release, and wasm modes',
+    'WebDevice.createFlutterDevice skips ResidentCompiler in profile, release, and wasm modes',
     () async {
       final toolContext = FakeToolContext(
         fs: fileSystem,
         logger: logger,
         processManager: FakeProcessManager.any(),
+      );
+      final webDevice = WebServerDevice(
+        logger: logger,
+        webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
       );
 
       final FlutterProject flutterProject = toolContext.projectFactory.fromDirectory(
@@ -383,14 +387,11 @@ void main() {
         (BuildInfo.release, false),
         (BuildInfo.debug, true),
       ]) {
-        final FlutterDevice device = await FlutterDevice.create(
-          fakeWebDevice,
+        final FlutterDevice device = await webDevice.createFlutterDevice(
           buildInfo: buildInfo,
           flutterProject: flutterProject,
-          target: 'lib/main.dart',
           toolContext: toolContext,
           useWasm: useWasm,
-          webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
         );
 
         expect(device, isA<WebFlutterDevice>());
@@ -399,11 +400,9 @@ void main() {
       }
 
       await expectLater(
-        FlutterDevice.create(
-          fakeWebDevice,
+        WebServerDevice(logger: logger).createFlutterDevice(
           buildInfo: BuildInfo.release,
           flutterProject: flutterProject,
-          target: 'lib/main.dart',
           toolContext: toolContext,
         ),
         throwsA(
@@ -416,13 +415,7 @@ void main() {
       );
 
       await expectLater(
-        FlutterDevice.create(
-          fakeWebDevice,
-          buildInfo: BuildInfo.release,
-          target: 'lib/main.dart',
-          toolContext: toolContext,
-          webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
-        ),
+        webDevice.createFlutterDevice(buildInfo: BuildInfo.release, toolContext: toolContext),
         throwsStateError,
       );
     },

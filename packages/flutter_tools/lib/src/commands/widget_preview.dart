@@ -37,7 +37,6 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../web/web_device.dart';
-import '../web/web_flutter_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
@@ -73,7 +72,6 @@ class WidgetPreviewCommand extends FlutterCommand {
     FlutterHookRunner? flutterHookRunner,
     @visibleForTesting ResidentRunnerFactory? residentRunnerFactoryOverride,
     bool verboseHelp = false,
-    WebFlutterDeviceFactory? webFlutterDeviceFactory,
   }) : super(applicationPackages: applicationPackages) {
     addSubcommand(
       WidgetPreviewStartCommand(
@@ -90,7 +88,6 @@ class WidgetPreviewCommand extends FlutterCommand {
         flutterHookRunner: flutterHookRunner,
         residentRunnerFactoryOverride: residentRunnerFactoryOverride,
         verbose: verboseHelp,
-        webFlutterDeviceFactory: webFlutterDeviceFactory,
       ),
     );
     addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
@@ -174,7 +171,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     this._flutterHookRunner,
     @visibleForTesting this._residentRunnerFactoryOverride,
     this.verbose = false,
-    this._webFlutterDeviceFactory,
   }) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
@@ -264,7 +260,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final DeviceManager _deviceManager;
   final FlutterHookRunner? _flutterHookRunner;
   final Pub _pub;
-  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
@@ -689,13 +684,10 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             .childFile('main.dart')
             .absolute
             .path;
-        final FlutterDevice flutterDevice = await FlutterDevice.create(
-          device,
-          toolContext: toolContext,
+        final FlutterDevice flutterDevice = await device.createFlutterDevice(
           buildInfo: debuggingOptions.buildInfo,
           flutterProject: widgetPreviewScaffoldProject,
-          target: target,
-          webFlutterDeviceFactory: _webFlutterDeviceFactory,
+          toolContext: toolContext,
         );
 
         if (boolArg(kLaunchPreviewer)) {

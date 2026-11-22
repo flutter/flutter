@@ -12,13 +12,16 @@ import 'application_package.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
+import 'resident_runner.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
 import 'web/devfs_config.dart';
@@ -720,6 +723,25 @@ abstract class Device {
   DevFSWriter? createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return null;
   }
+
+  /// Creates a [FlutterDevice] configured to run a Flutter application on this device.
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    bool useWasm = false,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) => FlutterDevice.createDefault(
+    this,
+    buildInfo: buildInfo,
+    targetModelOverride: targetModelOverride,
+    toolContext: toolContext,
+    userIdentifier: userIdentifier,
+  );
 
   /// Get a log reader for this device.
   ///

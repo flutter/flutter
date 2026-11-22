@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -309,14 +310,15 @@ void main() {
     );
   });
 
-  // Uses testUsingContext because FlutterDevice.create reads the context-scoped
-  // ResidentCompilerFactory when constructing a debug non-wasm generator.
+  // Uses testUsingContext because WebDevice.createFlutterDevice reads the
+  // context-scoped ResidentCompilerFactory when constructing a debug non-wasm generator.
   testUsingContext('WebDriverService starts and stops a debug hot app', () async {
     fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-    final WebDriverService service = setUpDriverService(
+    final WebDriverService service = setUpDriverService();
+    final device = WebServerDevice(
+      logger: BufferLogger.test(),
       webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
     );
-    final device = FakeDevice();
     await service.start(
       BuildInfo.debug,
       device,
@@ -334,10 +336,11 @@ void main() {
 
   testWithoutContext('WebDriverService starts and stops a cold app', () async {
     fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-    final WebDriverService service = setUpDriverService(
+    final WebDriverService service = setUpDriverService();
+    final device = WebServerDevice(
+      logger: BufferLogger.test(),
       webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
     );
-    final device = FakeDevice();
     await service.start(
       BuildInfo.profile,
       device,
@@ -356,10 +359,11 @@ void main() {
     'WebDriverService forwards platform args to WebFlutterDeviceFactory',
     () async {
       fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-      final WebDriverService service = setUpDriverService(
+      final WebDriverService service = setUpDriverService();
+      final device = WebServerDevice(
+        logger: BufferLogger.test(),
         webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
       );
-      final device = FakeDevice();
       await service.start(
         BuildInfo.profile,
         device,
@@ -375,10 +379,11 @@ void main() {
 
   testWithoutContext('WebDriverService forwards web-defines to WebFlutterDeviceFactory', () async {
     fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-    final WebDriverService service = setUpDriverService(
+    final WebDriverService service = setUpDriverService();
+    final device = WebServerDevice(
+      logger: BufferLogger.test(),
       webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
     );
-    final device = FakeDevice();
     await service.start(
       BuildInfo.profile,
       device,
@@ -391,10 +396,11 @@ void main() {
 
   testWithoutContext('WebDriverService can start an app with a launch url provided', () async {
     fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-    final WebDriverService service = setUpDriverService(
+    final WebDriverService service = setUpDriverService();
+    final device = WebServerDevice(
+      logger: BufferLogger.test(),
       webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
     );
-    final device = FakeDevice();
     const testUrl = 'http://localhost:1234/test';
     await service.start(
       BuildInfo.profile,
@@ -411,10 +417,11 @@ void main() {
 
   testWithoutContext('WebDriverService starts an app with provided web headers', () async {
     fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-    final WebDriverService service = setUpDriverService(
+    final WebDriverService service = setUpDriverService();
+    final device = WebServerDevice(
+      logger: BufferLogger.test(),
       webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
     );
-    final device = FakeDevice();
     final webHeaders = <String, String>{'test-header': 'test-value'};
     final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
     await service.start(
@@ -442,10 +449,11 @@ void main() {
     'WebDriverService will throw when an invalid launch url is provided',
     () async {
       fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
-      final WebDriverService service = setUpDriverService(
+      final WebDriverService service = setUpDriverService();
+      final device = WebServerDevice(
+        logger: BufferLogger.test(),
         webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
       );
-      final device = FakeDevice();
       const invalidTestUrl = '::INVALID_URL::';
       await expectLater(
         service.start(
@@ -466,10 +474,11 @@ void main() {
   testWithoutContext(
     'WebDriverService forwards exception when run future fails before app starts',
     () async {
-      final WebDriverService service = setUpDriverService(
+      final WebDriverService service = setUpDriverService();
+      final Device device = WebServerDevice(
+        logger: BufferLogger.test(),
         webFlutterDeviceFactory: FakeWebFlutterDeviceFactory(doResolveToError: true),
       );
-      final Device device = FakeDevice();
       await expectLater(
         service.start(
           BuildInfo.profile,
@@ -670,7 +679,7 @@ class FakeColdWebFlutterDevice extends Fake implements FlutterDevice {
   Future<void> stopEchoingDeviceLog() async {}
 }
 
-WebDriverService setUpDriverService({WebFlutterDeviceFactory? webFlutterDeviceFactory}) {
+WebDriverService setUpDriverService() {
   final toolContext = FakeToolContext();
   final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
   return WebDriverService(
@@ -692,17 +701,5 @@ WebDriverService setUpDriverService({WebFlutterDeviceFactory? webFlutterDeviceFa
     dartSdkPath: 'dart',
     featureFlags: TestFeatureFlags(isWebEnabled: true),
     toolContext: toolContext,
-    webFlutterDeviceFactory: webFlutterDeviceFactory,
   );
-}
-
-class FakeDevice extends Fake implements Device {
-  @override
-  final PlatformType platformType = PlatformType.web;
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
-
-  @override
-  Future<void> dispose() async {}
 }

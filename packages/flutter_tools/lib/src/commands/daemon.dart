@@ -46,7 +46,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
-import '../web/web_flutter_device.dart';
 
 const protocolVersion = '0.6.1';
 
@@ -70,7 +69,6 @@ class DaemonCommand extends FlutterCommand {
     this._deviceManager,
     this._flutterHookRunner,
     this.hidden = false,
-    this._webFlutterDeviceFactory,
   }) {
     argParser.addOption(
       'listen-on-tcp-port',
@@ -85,7 +83,6 @@ class DaemonCommand extends FlutterCommand {
   final BuildTargets _buildTargets;
   final DevtoolsLauncher _devtoolsLauncher;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
   final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
@@ -143,7 +140,6 @@ class DaemonCommand extends FlutterCommand {
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         port: port,
         toolContext: toolContext,
-        webFlutterDeviceFactory: _webFlutterDeviceFactory,
         xcode: _xcode,
       ).run();
       return FlutterCommandResult.success();
@@ -167,7 +163,6 @@ class DaemonCommand extends FlutterCommand {
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
       toolContext: toolContext,
-      webFlutterDeviceFactory: _webFlutterDeviceFactory,
       xcode: _xcode,
     );
     logger.printStatus('Device daemon started.');
@@ -200,7 +195,6 @@ class DaemonServer {
     this.java,
     this.notifyingLogger,
     this.port,
-    this.webFlutterDeviceFactory,
   });
 
   final int? port;
@@ -211,7 +205,6 @@ class DaemonServer {
   final DevtoolsLauncher devtoolsLauncher;
   final FlutterHookRunner? flutterHookRunner;
   final ToolContext toolContext;
-  final WebFlutterDeviceFactory? webFlutterDeviceFactory;
   final Xcode? xcode;
 
   /// Stdout logger used to print general server-related errors.
@@ -273,7 +266,6 @@ class DaemonServer {
         java: java,
         notifyingLogger: notifyingLogger,
         toolContext: toolContext,
-        webFlutterDeviceFactory: webFlutterDeviceFactory,
         xcode: xcode,
       );
       await daemon.onExit;
@@ -315,7 +307,6 @@ class Daemon {
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
-    WebFlutterDeviceFactory? webFlutterDeviceFactory,
   }) {
     final Platform platform = _toolContext.platform;
     final AndroidWorkflow workflow =
@@ -337,7 +328,6 @@ class Daemon {
         buildTargets: buildTargets,
         featureFlags: featureFlags,
         flutterHookRunner: flutterHookRunner,
-        webFlutterDeviceFactory: webFlutterDeviceFactory,
         xcode: xcode,
       ),
     );
@@ -388,7 +378,6 @@ class Daemon {
     DeviceManager? deviceManager,
     FlutterHookRunner? flutterHookRunner,
     Java? java,
-    WebFlutterDeviceFactory? webFlutterDeviceFactory,
   }) {
     final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
     final daemon = Daemon(
@@ -413,7 +402,6 @@ class Daemon {
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       toolContext: toolContext,
-      webFlutterDeviceFactory: webFlutterDeviceFactory,
       xcode: xcode,
     );
     return daemon;
@@ -871,7 +859,6 @@ class AppDomain extends Domain {
     required this._featureFlags,
     required this._xcode,
     this._flutterHookRunner,
-    this._webFlutterDeviceFactory,
   }) : super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
@@ -886,7 +873,6 @@ class AppDomain extends Domain {
   final BuildTargets _buildTargets;
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
   final Xcode? _xcode;
 
   static const _uuidGenerator = Uuid();
@@ -934,17 +920,14 @@ class AppDomain extends Domain {
         ? daemon.daemonDomain.exposeUrl
         : null;
     final isWeb = await device.targetPlatform == TargetPlatform.web_javascript;
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: buildInfo,
       flutterProject: flutterProject,
-      target: target,
+      toolContext: toolContext,
       urlTunneller: urlTunneller,
       useWasm: webConfig.useWasm,
       userIdentifier: userIdentifier,
       webDefines: webDefines,
-      webFlutterDeviceFactory: _webFlutterDeviceFactory,
     );
 
     final bool useHotRunner = isWeb ? buildInfo.isDebug && !webConfig.useWasm : enableHotReload;

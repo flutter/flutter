@@ -9,15 +9,22 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../build_system/tools/shader_compiler.dart';
+import '../compile.dart';
+import '../context/tool_context.dart';
+import '../context/web_context.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../project.dart';
+import '../resident_runner.dart';
 import 'chrome.dart';
+import 'web_flutter_device.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this.flutterProject) : super(id: flutterProject.manifest.appName);
@@ -32,8 +39,10 @@ class WebApplicationPackage extends ApplicationPackage {
 }
 
 abstract class WebDevice extends Device {
-  WebDevice(super.id, {required super.logger})
+  WebDevice(super.id, {required super.logger, this._webFlutterDeviceFactory})
     : super(category: Category.web, platformType: PlatformType.web, ephemeral: false);
+
+  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
 
   @override
   Uri? get devToolsUri => _devToolsUri;
@@ -43,6 +52,50 @@ abstract class WebDevice extends Device {
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;
+
+  @override
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    bool useWasm = false,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) async {
+    if (_webFlutterDeviceFactory == null) {
+      throw StateError('webFlutterDeviceFactory is required for web devices.');
+    }
+    if (flutterProject == null) {
+      throw StateError('flutterProject is required when webFlutterDeviceFactory is provided.');
+    }
+    final (
+      :DevelopmentShaderCompiler developmentShaderCompiler,
+      :ResidentCompiler? generator,
+      :TargetPlatform targetPlatform,
+    ) = await FlutterDevice.createCompilers(
+      this,
+      buildInfo: buildInfo,
+      createGenerator: buildInfo.isDebug && !useWasm,
+      targetModelOverride: targetModelOverride,
+      toolContext: toolContext,
+    );
+    return _webFlutterDeviceFactory.createWebFlutterDevice(
+      this,
+      buildInfo: buildInfo,
+      developmentShaderCompiler: developmentShaderCompiler,
+      flutterProject: flutterProject,
+      generator: generator,
+      platformArgs: platformArgs,
+      targetPlatform: targetPlatform,
+      toolContext: toolContext,
+      urlTunneller: urlTunneller,
+      userIdentifier: userIdentifier,
+      webDefines: webDefines,
+    );
+  }
 }
 
 /// A web device that supports a chromium browser.
@@ -52,6 +105,7 @@ abstract class ChromiumDevice extends WebDevice {
     required this.chromeLauncher,
     required this._fileSystem,
     required super.logger,
+    super.webFlutterDeviceFactory,
   }) : _logger = logger,
        super(name);
 
@@ -196,6 +250,7 @@ class GoogleChromeDevice extends ChromiumDevice {
     required ChromiumLauncher chromiumLauncher,
     required super.logger,
     required super.fileSystem,
+    super.webFlutterDeviceFactory,
   }) : super(name: 'chrome', chromeLauncher: chromiumLauncher);
 
   final Platform _platform;
@@ -250,6 +305,7 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
     required super.logger,
     required super.fileSystem,
     required this._processManager,
+    super.webFlutterDeviceFactory,
   }) : super(name: 'edge', chromeLauncher: chromiumLauncher);
 
   final ProcessManager _processManager;
@@ -299,54 +355,54 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
 
 class WebDevices extends PollingDeviceDiscovery {
   WebDevices({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
     required this._featureFlags,
-  }) : _webServerDevice = WebServerDevice(logger: logger),
-       super(GoogleChromeDevice.kChromeDeviceName) {
-    final operatingSystemUtils = OperatingSystemUtils(
-      fileSystem: fileSystem,
-      platform: platform,
-      logger: logger,
-      processManager: processManager,
-    );
-    _chromeDevice = GoogleChromeDevice(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      chromiumLauncher: ChromiumLauncher(
-        browserFinder: findChromeExecutable,
-        fileSystem: fileSystem,
-        platform: platform,
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-        logger: logger,
-      ),
-    );
-    if (platform.isWindows) {
-      _edgeDevice = MicrosoftEdgeDevice(
-        chromiumLauncher: ChromiumLauncher(
-          browserFinder: findEdgeExecutable,
-          fileSystem: fileSystem,
-          platform: platform,
-          processManager: processManager,
-          operatingSystemUtils: operatingSystemUtils,
-          logger: logger,
-        ),
-        processManager: processManager,
-        logger: logger,
-        fileSystem: fileSystem,
-      );
-    }
-  }
+    required this._fileSystem,
+    required this._logger,
+    required this._platform,
+    required this._processManager,
+    required this._webContext,
+  }) : super(GoogleChromeDevice.kChromeDeviceName);
 
-  late final GoogleChromeDevice _chromeDevice;
-  final WebServerDevice _webServerDevice;
-  MicrosoftEdgeDevice? _edgeDevice;
   final FeatureFlags _featureFlags;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Platform _platform;
+  final ProcessManager _processManager;
+  final WebContext _webContext;
+
+  late final GoogleChromeDevice _chromeDevice = GoogleChromeDevice(
+    fileSystem: _fileSystem,
+    logger: _logger,
+    platform: _platform,
+    processManager: _processManager,
+    chromiumLauncher: _webContext.chromiumLauncher,
+    webFlutterDeviceFactory: _webContext.webFlutterDeviceFactory,
+  );
+  late final WebServerDevice _webServerDevice = WebServerDevice(
+    logger: _logger,
+    webFlutterDeviceFactory: _webContext.webFlutterDeviceFactory,
+  );
+  late final MicrosoftEdgeDevice? _edgeDevice = _platform.isWindows
+      ? MicrosoftEdgeDevice(
+          chromiumLauncher: ChromiumLauncher(
+            browserFinder: findEdgeExecutable,
+            fileSystem: _fileSystem,
+            platform: _platform,
+            processManager: _processManager,
+            operatingSystemUtils: OperatingSystemUtils(
+              fileSystem: _fileSystem,
+              platform: _platform,
+              logger: _logger,
+              processManager: _processManager,
+            ),
+            logger: _logger,
+          ),
+          processManager: _processManager,
+          logger: _logger,
+          fileSystem: _fileSystem,
+          webFlutterDeviceFactory: _webContext.webFlutterDeviceFactory,
+        )
+      : null;
 
   @override
   bool get canListAnything => _featureFlags.isWebEnabled;
@@ -376,7 +432,9 @@ class WebDevices extends PollingDeviceDiscovery {
 
 /// A special device type to allow serving for arbitrary browsers.
 class WebServerDevice extends WebDevice {
-  WebServerDevice({required super.logger}) : _logger = logger, super('web-server');
+  WebServerDevice({required super.logger, super.webFlutterDeviceFactory})
+    : _logger = logger,
+      super('web-server');
 
   static const kWebServerDeviceId = 'web-server';
   static bool showWebServerDevice = false;

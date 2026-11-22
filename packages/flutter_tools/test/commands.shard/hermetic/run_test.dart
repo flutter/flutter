@@ -42,6 +42,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
@@ -779,11 +780,10 @@ void main() {
                 buildTargets: const BuildTargetsImpl(),
                 devtoolsLauncher: FakeDevtoolsLauncher(),
                 toolContext: const DelegatingToolContext(),
-                webFlutterDeviceFactory: fakeWebDeviceFactory,
               );
-              final device = FakeDevice(
-                platformType: PlatformType.web,
-                targetPlatform: TargetPlatform.web_javascript,
+              final device = _FakeRunWebDevice(
+                logger: logger,
+                webFlutterDeviceFactory: fakeWebDeviceFactory,
               );
               testDeviceManager.devices = <Device>[device];
 
@@ -1342,10 +1342,9 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+        final device = _FakeRunWebDevice(
+          logger: logger,
+          webFlutterDeviceFactory: fakeWebDeviceFactory,
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1360,7 +1359,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
@@ -1391,7 +1389,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await expectLater(
             () => createTestCommandRunner(
@@ -1423,7 +1420,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1457,7 +1453,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await expectLater(
             () =>
@@ -1485,7 +1480,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1516,7 +1510,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1559,10 +1552,9 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+        final device = _FakeRunWebDevice(
+          logger: logger,
+          webFlutterDeviceFactory: fakeWebDeviceFactory,
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1582,7 +1574,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
@@ -1615,7 +1606,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
@@ -1653,7 +1643,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1698,7 +1687,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
@@ -1734,7 +1722,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1783,7 +1770,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
@@ -1822,7 +1808,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1870,10 +1855,9 @@ server:
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+        final device = _FakeRunWebDevice(
+          logger: logger,
+          webFlutterDeviceFactory: fakeWebDeviceFactory,
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1888,7 +1872,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
@@ -1919,7 +1902,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await expectLater(
             () =>
@@ -1947,7 +1929,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await expectLater(
             () =>
@@ -1975,7 +1956,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
@@ -2001,12 +1981,7 @@ server:
         fs.file('pubspec.yaml').writeAsStringSync('name: my_app\n');
         writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
 
-        final webDevice = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
-        )..supportsHotReload = true;
-        final deviceManager = FakeDeviceManager()..attachedDevices = <Device>[webDevice];
+        final deviceManager = FakeDeviceManager();
         final toolContext = FakeToolContext(
           cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
           fs: fs,
@@ -2020,6 +1995,9 @@ server:
           <String>['--wasm'],
         ]) {
           final fakeWebDeviceFactory = _FakeRunWebFlutterDeviceFactory();
+          deviceManager.attachedDevices = <Device>[
+            _FakeRunWebDevice(logger: logger, webFlutterDeviceFactory: fakeWebDeviceFactory),
+          ];
           final command = _RunnerCapturingRunCommand(
             appleContext: FakeAppleContext(),
             assetBundleFactory: _FakeAssetBundleFactory(),
@@ -2028,7 +2006,6 @@ server:
             deviceManager: deviceManager,
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: toolContext,
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           final runner = TestFlutterCommandRunner(
             deviceManager: deviceManager,
@@ -2051,8 +2028,8 @@ server:
       },
     );
 
-    // Uses testUsingContext because FlutterDevice.create reads the context-scoped
-    // ResidentCompilerFactory when constructing a debug non-wasm generator.
+    // Uses testUsingContext because WebDevice.createFlutterDevice reads the
+    // context-scoped ResidentCompilerFactory when constructing a debug non-wasm generator.
     testUsingContext(
       'routes debug JS web runs (with and without --no-hot) to HotRunner with DDC',
       () async {
@@ -2061,12 +2038,7 @@ server:
         fs.file('pubspec.yaml').writeAsStringSync('name: my_app\n');
         writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
 
-        final webDevice = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
-        )..supportsHotReload = true;
-        final deviceManager = FakeDeviceManager()..attachedDevices = <Device>[webDevice];
+        final deviceManager = FakeDeviceManager();
         final toolContext = FakeToolContext(
           cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
           fs: fs,
@@ -2079,6 +2051,9 @@ server:
           (<String>['--debug', '--no-hot'], false),
         ]) {
           final fakeWebDeviceFactory = _FakeRunWebFlutterDeviceFactory();
+          deviceManager.attachedDevices = <Device>[
+            _FakeRunWebDevice(logger: logger, webFlutterDeviceFactory: fakeWebDeviceFactory),
+          ];
           final command = _RunnerCapturingRunCommand(
             appleContext: FakeAppleContext(),
             assetBundleFactory: _FakeAssetBundleFactory(),
@@ -2087,7 +2062,6 @@ server:
             deviceManager: deviceManager,
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: toolContext,
-            webFlutterDeviceFactory: fakeWebDeviceFactory,
           );
           final runner = TestFlutterCommandRunner(
             deviceManager: deviceManager,
@@ -2745,6 +2719,25 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    bool useWasm = false,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) => FlutterDevice.createDefault(
+    this,
+    buildInfo: buildInfo,
+    targetModelOverride: targetModelOverride,
+    toolContext: toolContext,
+    userIdentifier: userIdentifier,
+  );
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
     String? mainPath,
@@ -3042,7 +3035,6 @@ class _RunnerCapturingRunCommand extends RunCommand {
     required super.devtoolsLauncher,
     required super.toolContext,
     super.deviceManager,
-    super.webFlutterDeviceFactory,
   });
 
   ResidentRunner? capturedRunner;
@@ -3061,6 +3053,13 @@ class _RunnerCapturingRunCommand extends RunCommand {
       flutterProject: flutterProject,
     );
   }
+}
+
+class _FakeRunWebDevice extends WebServerDevice {
+  _FakeRunWebDevice({required super.logger, super.webFlutterDeviceFactory});
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class _FakeRunWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFactory {
