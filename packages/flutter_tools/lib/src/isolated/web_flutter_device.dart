@@ -41,6 +41,7 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
+import '../web/web_debug_config.dart';
 import '../web/web_device.dart';
 import '../web/web_flutter_device.dart';
 import 'devfs_web.dart';
@@ -66,10 +67,8 @@ class DwdsWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
     required TargetPlatform targetPlatform,
     required ToolContext toolContext,
     Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
     String? userIdentifier,
-    bool useWasm = false,
-    Map<String, String> webDefines = const <String, String>{},
+    WebDebugConfig webConfig = const WebDebugConfig(),
   }) {
     return WebFlutterDevice(
       device,
@@ -80,10 +79,8 @@ class DwdsWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
       platformArgs: platformArgs,
       targetPlatform: targetPlatform,
       toolContext: toolContext,
-      urlTunneller: urlTunneller,
       userIdentifier: userIdentifier,
-      useWasm: useWasm,
-      webDefines: webDefines,
+      webConfig: webConfig,
     );
   }
 }
@@ -99,10 +96,8 @@ class WebFlutterDevice extends FlutterDevice {
     required super.targetPlatform,
     required super.toolContext,
     this._platformArgs = const <String, Object?>{},
-    this._urlTunneller,
     super.userIdentifier,
-    this._useWasm = false,
-    this._webDefines = const <String, String>{},
+    this._webConfig = const WebDebugConfig(),
   });
 
   static const _kNoLaunchChromeArg = 'no-launch-chrome';
@@ -128,9 +123,7 @@ class WebFlutterDevice extends FlutterDevice {
 
   final FlutterProject _flutterProject;
   final Map<String, Object?> _platformArgs;
-  final UrlTunneller? _urlTunneller;
-  final bool _useWasm;
-  final Map<String, String> _webDefines;
+  final WebDebugConfig _webConfig;
 
   WipConnection? _wipConnection;
   Future<ConnectionResult?>? _connectDebug;
@@ -187,7 +180,7 @@ class WebFlutterDevice extends FlutterDevice {
   }
 
   @override
-  bool get supportsDebugRuntime => !_useWasm;
+  bool get supportsDebugRuntime => !_webConfig.useWasm;
 
   @override
   bool get supportsProfileServiceProtocol => false;
@@ -210,12 +203,12 @@ class WebFlutterDevice extends FlutterDevice {
   bool get supportsIsolatePauseEventLookup => false;
 
   @override
-  bool usesHotRunner({required bool hotMode}) => buildInfo.isDebug && !_useWasm;
+  bool usesHotRunner({required bool hotMode}) => buildInfo.isDebug && !_webConfig.useWasm;
 
   // DevTools are only supported in debug mode for JS web builds, and DWDS owns
   // DevTools serving rather than `device.dds`.
   @override
-  bool launchDevToolsInBrowser() => buildInfo.isDebug && !_useWasm;
+  bool launchDevToolsInBrowser() => buildInfo.isDebug && !_webConfig.useWasm;
 
   @override
   List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) => ddcFrontEndOptions(buildInfo);
@@ -650,12 +643,15 @@ class WebFlutterDevice extends FlutterDevice {
   }) async {
     final DebuggingOptions debuggingOptions = runner.debuggingOptions;
     final WebDebugConfig(
-      :WebDevServerConfig? devServerConfig,
-      :bool useSseForDebugProxy,
-      :bool useSseForDebugBackend,
-      :bool useSseForInjectedClient,
-      :WebRendererMode renderer,
       :bool crossOriginIsolation,
+      :WebDevServerConfig? devServerConfig,
+      :bool nativeNullAssertions,
+      :WebRendererMode renderer,
+      :UrlTunneller? urlTunneller,
+      :bool useSseForDebugBackend,
+      :bool useSseForDebugProxy,
+      :bool useSseForInjectedClient,
+      :Map<String, String> webDefines,
     ) = debuggingOptions.webConfig;
 
     final WebDevServerConfig serverConfig = devServerConfig ?? const WebDevServerConfig();
@@ -666,7 +662,7 @@ class WebFlutterDevice extends FlutterDevice {
     devFS ??= WebDevFS(
       webDevServerConfig: serverConfig,
       packagesFilePath: runner.packagesFilePath,
-      urlTunneller: _urlTunneller,
+      urlTunneller: urlTunneller,
       useSseForDebugProxy: useSseForDebugProxy,
       useSseForDebugBackend: useSseForDebugBackend,
       useSseForInjectedClient: useSseForInjectedClient,
@@ -681,7 +677,7 @@ class WebFlutterDevice extends FlutterDevice {
       entrypoint: _fs.file(runner.mainPath).uri,
       expressionCompiler: expressionCompiler,
       chromiumLauncher: chromiumLauncher,
-      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+      nativeNullAssertions: nativeNullAssertions,
       webRenderer: renderer,
       isWasm: isWasm,
       useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
@@ -689,7 +685,7 @@ class WebFlutterDevice extends FlutterDevice {
       useDwdsWebSocketConnection: !_toolLaunchesChromium,
       webCrossOriginIsolation: crossOriginIsolation,
       toolContext: toolContext,
-      webDefines: _webDefines,
+      webDefines: webDefines,
     );
     Uri url = await devFS!.create();
     if (serverConfig.https?.certKeyPath != null && serverConfig.https?.certPath != null) {
@@ -787,11 +783,17 @@ class WebFlutterDevice extends FlutterDevice {
 
   Future<void> _buildWeb(ColdRunner coldRunner) async {
     final DebuggingOptions debuggingOptions = coldRunner.debuggingOptions;
-    final WebCompilerConfig compilerConfig = debuggingOptions.webConfig.useWasm
-        ? WasmCompilerConfig(renderer: debuggingOptions.webConfig.renderer)
+    final WebDebugConfig(
+      :bool nativeNullAssertions,
+      :WebRendererMode renderer,
+      :bool useWasm,
+      :Map<String, String> webDefines,
+    ) = debuggingOptions.webConfig;
+    final WebCompilerConfig compilerConfig = useWasm
+        ? WasmCompilerConfig(renderer: renderer)
         : JsCompilerConfig.run(
-            nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-            renderer: debuggingOptions.webConfig.renderer,
+            nativeNullAssertions: nativeNullAssertions,
+            renderer: renderer,
             deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
           );
     final webBuilder = WebBuilder(
@@ -806,7 +808,7 @@ class WebFlutterDevice extends FlutterDevice {
       coldRunner.target,
       debuggingOptions.buildInfo,
       compilerConfigs: <WebCompilerConfig>[compilerConfig],
-      webDefines: _webDefines,
+      webDefines: webDefines,
     );
   }
 }

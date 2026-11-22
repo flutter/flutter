@@ -31,6 +31,7 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -66,7 +67,6 @@ void main() {
     Device? device,
     bool prePopulateDevFS = true,
     bool stayResident = true,
-    Map<String, String> webDefines = const <String, String>{},
   }) {
     final toolContext = FakeToolContext(
       fs: fileSystem,
@@ -85,8 +85,7 @@ void main() {
       generator: null,
       targetPlatform: TargetPlatform.web_javascript,
       toolContext: toolContext,
-      useWasm: debuggingOptions.webConfig.useWasm,
-      webDefines: webDefines,
+      webConfig: debuggingOptions.webConfig,
     );
     if (prePopulateDevFS) {
       webFlutterDevice.devFS = fakeWebDevFS;
@@ -243,7 +242,7 @@ void main() {
       final ColdRunner wasmRunner = createWebColdRunner(
         debuggingOptions: DebuggingOptions.enabled(
           buildInfo,
-          webConfig: const WebDebugConfig(useWasm: true),
+          platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
         ),
         stayResident: false,
       );
@@ -288,7 +287,7 @@ void main() {
           packageConfigPath: '.dart_tool/package_config.json',
           extraFrontEndOptions: kDdcLibraryBundleFlags,
         ),
-        webConfig: const WebDebugConfig(useWasm: true),
+        platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
       ),
     );
 
@@ -368,7 +367,9 @@ void main() {
       final ColdRunner highPortRunner = createWebColdRunner(
         debuggingOptions: DebuggingOptions.disabled(
           BuildInfo.release,
-          webConfig: const WebDebugConfig(devServerConfig: WebDevServerConfig(port: 65536)),
+          platformOptions: const <PlatformDebuggingOptions>[
+            WebDebugConfig(devServerConfig: WebDevServerConfig(port: 65536)),
+          ],
         ),
         stayResident: false,
       );
@@ -377,7 +378,9 @@ void main() {
       final ColdRunner negativePortRunner = createWebColdRunner(
         debuggingOptions: DebuggingOptions.disabled(
           BuildInfo.release,
-          webConfig: const WebDebugConfig(devServerConfig: WebDevServerConfig(port: -1)),
+          platformOptions: const <PlatformDebuggingOptions>[
+            WebDebugConfig(devServerConfig: WebDevServerConfig(port: -1)),
+          ],
         ),
         stayResident: false,
       );
@@ -408,9 +411,12 @@ void main() {
       ]) {
         final FlutterDevice device = await webDevice.createFlutterDevice(
           buildInfo: buildInfo,
+          debuggingOptions: DebuggingOptions.enabled(
+            buildInfo,
+            platformOptions: <PlatformDebuggingOptions>[WebDebugConfig(useWasm: useWasm)],
+          ),
           flutterProject: flutterProject,
           toolContext: toolContext,
-          useWasm: useWasm,
         );
 
         expect(device, isA<WebFlutterDevice>());
@@ -444,9 +450,13 @@ void main() {
     testWithoutContext('passes web-defines to the build in profile mode', () async {
       var sawDefines = false;
       final ColdRunner runner = createWebColdRunner(
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.profile,
+          platformOptions: const <PlatformDebuggingOptions>[
+            WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+          ],
+        ),
         stayResident: false,
-        webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -465,8 +475,12 @@ void main() {
       () async {
         var buildCount = 0;
         final ColdRunner runner = createWebColdRunner(
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-          webDefines: const <String, String>{'VERSION': 'v1.2.3'},
+          debuggingOptions: DebuggingOptions.disabled(
+            BuildInfo.release,
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+            ],
+          ),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
@@ -492,10 +506,11 @@ void main() {
       final ColdRunner runner = createWebColdRunner(
         debuggingOptions: DebuggingOptions.enabled(
           BuildInfo.debug,
-          webConfig: const WebDebugConfig(useWasm: true),
+          platformOptions: const <PlatformDebuggingOptions>[
+            WebDebugConfig(useWasm: true, webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+          ],
         ),
         stayResident: false,
-        webDefines: const <String, String>{'VERSION': 'v1.2.3'},
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -518,7 +533,7 @@ void main() {
         final ColdRunner runner = createWebColdRunner(
           debuggingOptions: DebuggingOptions.disabled(
             BuildInfo.release,
-            webConfig: const WebDebugConfig(useWasm: true),
+            platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
           ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -552,7 +567,7 @@ void main() {
         final ColdRunner runner = createWebColdRunner(
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
-            webConfig: const WebDebugConfig(useWasm: true),
+            platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
           ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (

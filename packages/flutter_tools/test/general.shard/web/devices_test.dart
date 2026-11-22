@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/context/web_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:meta/meta.dart';
@@ -432,7 +433,7 @@ void main() {
           null,
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
-            webConfig: WebDebugConfig(launchUrl: url),
+            platformOptions: <PlatformDebuggingOptions>[WebDebugConfig(launchUrl: url)],
           ),
           platformArgs: <String, Object?>{'uri': url},
         ),

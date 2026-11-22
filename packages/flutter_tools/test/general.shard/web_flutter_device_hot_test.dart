@@ -35,6 +35,7 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -170,7 +171,7 @@ void main() {
       platformArgs: platformArgs,
       targetPlatform: TargetPlatform.web_javascript,
       toolContext: toolContext,
-      useWasm: options.webConfig.useWasm,
+      webConfig: options.webConfig,
     );
     if (prePopulateDevFS) {
       webFlutterDevice.devFS = fakeWebDevFS;
@@ -379,11 +380,13 @@ void main() {
                   .childFile('package_config.json')
                   .path,
             ),
-            webConfig: const WebDebugConfig(
-              devServerConfig: WebDevServerConfig(
-                https: HttpsConfig(certPath: 'cert.pem', certKeyPath: 'key.pem'),
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(
+                devServerConfig: WebDevServerConfig(
+                  https: HttpsConfig(certPath: 'cert.pem', certKeyPath: 'key.pem'),
+                ),
               ),
-            ),
+            ],
           ),
           flutterProject: project,
           platformArgs: const <String, Object?>{'no-launch-chrome': true},
@@ -417,7 +420,9 @@ void main() {
         final (HotRunner runner, _) = createWebHotRunner(
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
-            webConfig: WebDebugConfig(devServerConfig: WebDevServerConfig(port: invalidPort)),
+            platformOptions: <PlatformDebuggingOptions>[
+              WebDebugConfig(devServerConfig: WebDevServerConfig(port: invalidPort)),
+            ],
           ),
           stayResident: false,
         );
@@ -1616,7 +1621,7 @@ flutter:
           generator: residentCompiler,
           targetPlatform: TargetPlatform.web_javascript,
           toolContext: toolContext,
-          useWasm: useWasm,
+          webConfig: WebDebugConfig(useWasm: useWasm),
         );
       }
 

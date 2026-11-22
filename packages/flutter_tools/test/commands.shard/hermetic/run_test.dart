@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -42,6 +41,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:test/fake.dart';
@@ -2315,7 +2315,7 @@ server:
       expect(options.profileMicrotasks, true);
       expect(options.profileStartup, true);
       expect(options.verboseSystemLogs, true);
-      expect(options.nativeNullAssertions, true);
+      expect(options.webConfig.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.enableFlutterGpu, true);
@@ -2722,13 +2722,11 @@ class FakeDevice extends Fake implements Device {
   Future<FlutterDevice> createFlutterDevice({
     required BuildInfo buildInfo,
     required ToolContext toolContext,
+    DebuggingOptions? debuggingOptions,
     FlutterProject? flutterProject,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     TargetModel? targetModelOverride,
-    UrlTunneller? urlTunneller,
-    bool useWasm = false,
     String? userIdentifier,
-    Map<String, String> webDefines = const <String, String>{},
   }) => FlutterDevice.createDefault(
     this,
     buildInfo: buildInfo,
@@ -2956,7 +2954,6 @@ class CapturingAppDomain extends AppDomain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -3079,14 +3076,16 @@ class _FakeRunWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFa
     required TargetPlatform targetPlatform,
     required ToolContext toolContext,
     Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
     String? userIdentifier,
-    bool useWasm = false,
-    Map<String, String> webDefines = const <String, String>{},
+    WebDebugConfig webConfig = const WebDebugConfig(),
   }) {
     lastGeneratorWasNull = generator == null;
-    lastWebDefines = webDefines;
-    return lastDevice = _FakeRunWebFlutterDevice(device, buildInfo: buildInfo, useWasm: useWasm);
+    lastWebDefines = webConfig.webDefines;
+    return lastDevice = _FakeRunWebFlutterDevice(
+      device,
+      buildInfo: buildInfo,
+      useWasm: webConfig.useWasm,
+    );
   }
 }
 

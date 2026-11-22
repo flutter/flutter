@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -1963,13 +1962,11 @@ mixin _DefaultCreateFlutterDevice on Fake {
   Future<FlutterDevice> createFlutterDevice({
     required BuildInfo buildInfo,
     required ToolContext toolContext,
+    DebuggingOptions? debuggingOptions,
     FlutterProject? flutterProject,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     TargetModel? targetModelOverride,
-    UrlTunneller? urlTunneller,
-    bool useWasm = false,
     String? userIdentifier,
-    Map<String, String> webDefines = const <String, String>{},
   }) => FlutterDevice.createDefault(
     this as Device,
     buildInfo: buildInfo,

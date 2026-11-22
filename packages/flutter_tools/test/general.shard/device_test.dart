@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -656,7 +657,7 @@ void main() {
   });
 
   group('JSON encode DebuggingOptions', () {
-    testWithoutContext('can preserve the original options', () {
+    testWithoutContext('can preserve core options without platformOptions', () {
       final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
@@ -670,29 +671,16 @@ void main() {
         enableFlutterGpu: true,
         enableDartProfiling: false,
         enableEmbedderApi: true,
-        webConfig: const WebDebugConfig(
-          enableExposeUrl: true,
-          useSseForDebugProxy: false,
-          useSseForDebugBackend: false,
-          useSseForInjectedClient: false,
-          runHeadless: true,
-          browserDebugPort: 9222,
-          browserFlags: <String>['--flag1', '--flag2'],
-          enableExpressionEvaluation: true,
-          launchUrl: 'http://localhost:8080/app',
-          crossOriginIsolation: true,
-          renderer: WebRendererMode.skwasm,
-          useWasm: true,
-          devServerConfig: WebDevServerConfig(
-            port: 9000,
-            host: '127.0.0.1',
-            headers: <String, String>{'k': 'v'},
-          ),
-        ),
       );
       final String jsonString = json.encode(original.toJson());
-      final Map<String, dynamic> decoded = castStringKeyedMap(json.decode(jsonString))!;
-      final DebuggingOptions deserialized = DebuggingOptions.fromJson(decoded, BuildInfo.debug);
+      final Map<String, Object?> decoded = castStringKeyedMap(json.decode(jsonString))!;
+      expect(decoded.containsKey('webRenderer'), isFalse);
+      expect(decoded.containsKey('nativeNullAssertions'), isFalse);
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(
+        decoded,
+        BuildInfo.debug,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
+      );
       expect(deserialized.startPaused, original.startPaused);
       expect(deserialized.disableServiceAuthCodes, original.disableServiceAuthCodes);
       expect(deserialized.disableServiceOriginCheck, original.disableServiceOriginCheck);
@@ -704,7 +692,48 @@ void main() {
       expect(deserialized.enableFlutterGpu, original.enableFlutterGpu);
       expect(deserialized.enableDartProfiling, original.enableDartProfiling);
       expect(deserialized.enableEmbedderApi, original.enableEmbedderApi);
+      expect(deserialized.platformOptions, isEmpty);
+      expect(deserialized.findPlatformOptions<WebDebugConfig>(), isNull);
+    });
 
+    testWithoutContext('can preserve WebDebugConfig via PlatformDebuggingOptions', () {
+      Future<String> fakeTunneller(String url) async => url;
+      final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        platformOptions: <PlatformDebuggingOptions>[
+          WebDebugConfig(
+            enableExposeUrl: true,
+            useSseForDebugProxy: false,
+            useSseForDebugBackend: false,
+            useSseForInjectedClient: false,
+            runHeadless: true,
+            browserDebugPort: 9222,
+            browserFlags: const <String>['--flag1', '--flag2'],
+            enableExpressionEvaluation: true,
+            launchUrl: 'http://localhost:8080/app',
+            crossOriginIsolation: true,
+            nativeNullAssertions: true,
+            renderer: WebRendererMode.skwasm,
+            urlTunneller: fakeTunneller,
+            useWasm: true,
+            webDefines: const <String, String>{'API': 'v1'},
+            devServerConfig: const WebDevServerConfig(
+              port: 9000,
+              host: '127.0.0.1',
+              headers: <String, String>{'k': 'v'},
+            ),
+          ),
+        ],
+      );
+      final String jsonString = json.encode(original.toJson());
+      final Map<String, Object?> decoded = castStringKeyedMap(json.decode(jsonString))!;
+      final DebuggingOptions deserialized = DebuggingOptions.fromJson(
+        decoded,
+        BuildInfo.debug,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
+      );
+
+      expect(deserialized.findPlatformOptions<WebDebugConfig>(), isNotNull);
       expect(deserialized.webConfig.enableExposeUrl, true);
       expect(deserialized.webConfig.useSseForDebugProxy, false);
       expect(deserialized.webConfig.useSseForDebugBackend, false);
@@ -715,11 +744,37 @@ void main() {
       expect(deserialized.webConfig.enableExpressionEvaluation, true);
       expect(deserialized.webConfig.launchUrl, 'http://localhost:8080/app');
       expect(deserialized.webConfig.crossOriginIsolation, true);
+      expect(deserialized.webConfig.nativeNullAssertions, true);
       expect(deserialized.webConfig.renderer, WebRendererMode.skwasm);
+      expect(deserialized.webConfig.urlTunneller, isNull);
       expect(deserialized.webConfig.useWasm, true);
+      expect(deserialized.webConfig.webDefines, <String, String>{'API': 'v1'});
       expect(deserialized.webConfig.devServerConfig?.port, 9000);
       expect(deserialized.webConfig.devServerConfig?.host, '127.0.0.1');
       expect(deserialized.webConfig.devServerConfig?.headers, <String, String>{'k': 'v'});
+    });
+
+    testWithoutContext('withPlatformOption replaces matching type and preserves other options', () {
+      const otherOption = _FakePlatformDebuggingOptions('custom');
+      final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        testFlag: true,
+        platformOptions: const <PlatformDebuggingOptions>[
+          otherOption,
+          WebDebugConfig(enableExposeUrl: true, webDefines: <String, String>{'K': 'V'}),
+        ],
+      );
+      Future<String> tunneller(String url) async => url;
+      final DebuggingOptions updated = original.withPlatformOption(
+        original.webConfig.copyWith(urlTunneller: tunneller),
+      );
+
+      expect(updated.testFlag, isTrue);
+      expect(updated.findPlatformOptions<_FakePlatformDebuggingOptions>(), same(otherOption));
+      expect(updated.platformOptions.whereType<WebDebugConfig>(), hasLength(1));
+      expect(updated.webConfig.enableExposeUrl, isTrue);
+      expect(updated.webConfig.webDefines, const <String, String>{'K': 'V'});
+      expect(updated.webConfig.urlTunneller, same(tunneller));
     });
 
     testWithoutContext('WebDebugConfig defaults and useWasm defaulting', () {
@@ -734,9 +789,13 @@ void main() {
       expect(defaultConfig.enableExpressionEvaluation, isFalse);
       expect(defaultConfig.launchUrl, isNull);
       expect(defaultConfig.crossOriginIsolation, isFalse);
+      expect(defaultConfig.nativeNullAssertions, isFalse);
       expect(defaultConfig.renderer, WebRendererMode.canvaskit);
+      expect(defaultConfig.urlTunneller, isNull);
       expect(defaultConfig.useWasm, isFalse);
+      expect(defaultConfig.webDefines, isEmpty);
       expect(defaultConfig.devServerConfig, isNull);
+      expect(WebDebugConfig.tryFromJson(const <String, Object?>{}), isNull);
 
       const wasmConfig = WebDebugConfig(useWasm: true);
       expect(wasmConfig.useWasm, isTrue);
@@ -1515,4 +1574,13 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   List<String> get wellKnownIds => <String>[];
+}
+
+class _FakePlatformDebuggingOptions implements PlatformDebuggingOptions {
+  const _FakePlatformDebuggingOptions(this.label);
+
+  final String label;
+
+  @override
+  Map<String, Object?> toJson() => <String, Object?>{'fakeLabel': label};
 }

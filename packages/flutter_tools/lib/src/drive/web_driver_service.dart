@@ -31,6 +31,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../web/chrome_constants.dart';
+import '../web/web_debug_config.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
@@ -79,31 +80,34 @@ class WebDriverService extends DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
+    final WebDebugConfig incomingWebConfig = debuggingOptions.webConfig;
     final webConfig = WebDebugConfig(
-      devServerConfig: debuggingOptions.webConfig.devServerConfig,
-      renderer: debuggingOptions.webConfig.renderer,
-      useWasm: debuggingOptions.webConfig.useWasm,
-    );
-    final FlutterDevice flutterDevice = await device.createFlutterDevice(
-      buildInfo: buildInfo,
-      flutterProject: flutterProject,
-      platformArgs: platformArgs,
-      toolContext: toolContext,
-      useWasm: webConfig.useWasm,
-      userIdentifier: userIdentifier,
-      webDefines: webDefines,
+      devServerConfig: incomingWebConfig.devServerConfig,
+      renderer: incomingWebConfig.renderer,
+      useWasm: incomingWebConfig.useWasm,
+      webDefines: incomingWebConfig.webDefines,
     );
     final resolvedDebuggingOptions = buildInfo.isRelease
-        ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
+        ? DebuggingOptions.disabled(
+            buildInfo,
+            platformOptions: <PlatformDebuggingOptions>[webConfig],
+          )
         : DebuggingOptions.enabled(
             buildInfo,
             disablePortPublication: debuggingOptions.disablePortPublication,
-            webConfig: webConfig,
+            platformOptions: <PlatformDebuggingOptions>[webConfig],
           );
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
+      buildInfo: buildInfo,
+      debuggingOptions: resolvedDebuggingOptions,
+      flutterProject: flutterProject,
+      platformArgs: platformArgs,
+      toolContext: toolContext,
+      userIdentifier: userIdentifier,
+    );
     final String target = mainPath ?? fs.path.join('lib', 'main.dart');
     if (flutterDevice.usesHotRunner(hotMode: true)) {
       _residentRunner = HotRunner(

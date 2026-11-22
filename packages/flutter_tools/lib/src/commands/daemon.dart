@@ -19,7 +19,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -46,6 +45,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
+import '../web/web_debug_config.dart';
 
 const protocolVersion = '0.6.1';
 
@@ -890,7 +890,6 @@ class AppDomain extends Domain {
     String? route,
     DebuggingOptions options,
     bool enableHotReload, {
-    Map<String, String> webDefines = const <String, String>{},
     File? applicationBinary,
     required bool trackWidgetCreation,
     String? projectRootPath,
@@ -915,18 +914,18 @@ class AppDomain extends Domain {
     fs.currentDirectory = fs.directory(projectDirectory);
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
 
-    final DebuggingOptions(:BuildInfo buildInfo, :WebDebugConfig webConfig) = options;
-    final UrlTunneller? urlTunneller = webConfig.enableExposeUrl
-        ? daemon.daemonDomain.exposeUrl
-        : null;
+    final WebDebugConfig webConfig = options.webConfig;
+    final DebuggingOptions launchOptions = webConfig.enableExposeUrl
+        ? options.withPlatformOption(
+            webConfig.copyWith(urlTunneller: daemon.daemonDomain.exposeUrl),
+          )
+        : options;
     final FlutterDevice flutterDevice = await device.createFlutterDevice(
-      buildInfo: buildInfo,
+      buildInfo: launchOptions.buildInfo,
+      debuggingOptions: launchOptions,
       flutterProject: flutterProject,
       toolContext: toolContext,
-      urlTunneller: urlTunneller,
-      useWasm: webConfig.useWasm,
       userIdentifier: userIdentifier,
-      webDefines: webDefines,
     );
 
     final bool useHotRunner = flutterDevice.usesHotRunner(hotMode: enableHotReload);
@@ -940,7 +939,7 @@ class AppDomain extends Domain {
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
             dartBuilder: _flutterHookRunner,
-            debuggingOptions: options,
+            debuggingOptions: launchOptions,
             dillOutputPath: dillOutputPath,
             featureFlags: _featureFlags,
             hostIsIde: true,
@@ -960,7 +959,7 @@ class AppDomain extends Domain {
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
             dartBuilder: _flutterHookRunner,
-            debuggingOptions: options,
+            debuggingOptions: launchOptions,
             featureFlags: _featureFlags,
             machine: machine,
             projectRootPath: projectRootPath,
@@ -1474,6 +1473,7 @@ class DeviceDomain extends Domain {
         castStringKeyedMap(args['debuggingOptions'])!,
         // We are using prebuilts, build info does not matter here.
         BuildInfo.dummy,
+        platformOptionParsers: const <PlatformDebuggingOptionsParser>[WebDebugConfig.tryFromJson],
       ),
       mainPath: _getStringArg(args, 'mainPath'),
       route: _getStringArg(args, 'route'),

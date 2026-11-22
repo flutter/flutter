@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -41,6 +40,7 @@ import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
@@ -90,10 +90,8 @@ class _RecordingWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
     required TargetPlatform targetPlatform,
     required ToolContext toolContext,
     Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
     String? userIdentifier,
-    bool useWasm = false,
-    Map<String, String> webDefines = const <String, String>{},
+    WebDebugConfig webConfig = const WebDebugConfig(),
   }) {
     lastDevice = device;
     return created;

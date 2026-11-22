@@ -9,7 +9,6 @@ import 'dart:io' as io;
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -30,6 +29,7 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:package_config/package_config.dart';
@@ -387,8 +387,13 @@ void main() {
     await service.start(
       BuildInfo.profile,
       device,
-      DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-      webDefines: <String, String>{'VERSION': 'v1.2.3'},
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        platformOptions: const <PlatformDebuggingOptions>[
+          WebDebugConfig(webDefines: <String, String>{'VERSION': 'v1.2.3'}),
+        ],
+        ipv6: true,
+      ),
     );
     await service.stop();
     expect(fakeWebFlutterDeviceFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
@@ -407,7 +412,7 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webConfig: const WebDebugConfig(launchUrl: testUrl),
+        platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(launchUrl: testUrl)],
         ipv6: true,
       ),
     );
@@ -429,7 +434,9 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webConfig: WebDebugConfig(devServerConfig: webDevServerConfig),
+        platformOptions: <PlatformDebuggingOptions>[
+          WebDebugConfig(devServerConfig: webDevServerConfig),
+        ],
         ipv6: true,
       ),
     );
@@ -461,7 +468,9 @@ void main() {
           device,
           DebuggingOptions.enabled(
             BuildInfo.profile,
-            webConfig: const WebDebugConfig(launchUrl: invalidTestUrl),
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(launchUrl: invalidTestUrl),
+            ],
             ipv6: true,
           ),
         ),
@@ -572,18 +581,16 @@ class FakeWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
     required TargetPlatform targetPlatform,
     required ToolContext toolContext,
     Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
     String? userIdentifier,
-    bool useWasm = false,
-    Map<String, String> webDefines = const <String, String>{},
+    WebDebugConfig webConfig = const WebDebugConfig(),
   }) {
     lastPlatformArgs = platformArgs;
-    lastWebDefines = webDefines;
+    lastWebDefines = webConfig.webDefines;
     return lastDevice = FakeColdWebFlutterDevice(
       device,
       buildInfo: buildInfo,
       doResolveToError: doResolveToError,
-      useWasm: useWasm,
+      useWasm: webConfig.useWasm,
     );
   }
 }

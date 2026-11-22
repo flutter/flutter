@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -35,6 +34,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
@@ -1671,7 +1671,6 @@ void main() {
       enableHotReload,
       projectRootPath: customRootPath,
       trackWidgetCreation: options.buildInfo.isDebug,
-      webDefines: const <String, String>{'FOO': 'BAR'},
     );
     await app.runner.exitApp();
     await testDaemon.shutdown();
@@ -1694,13 +1693,28 @@ void main() {
         (
           DebuggingOptions.enabled(
             BuildInfo.profile,
-            webConfig: const WebDebugConfig(enableExposeUrl: true),
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(enableExposeUrl: true, webDefines: <String, String>{'FOO': 'BAR'}),
+            ],
           ),
           true,
         ),
-        (DebuggingOptions.disabled(BuildInfo.release), false),
         (
-          DebuggingOptions.enabled(BuildInfo.debug, webConfig: const WebDebugConfig(useWasm: true)),
+          DebuggingOptions.disabled(
+            BuildInfo.release,
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(webDefines: <String, String>{'FOO': 'BAR'}),
+            ],
+          ),
+          false,
+        ),
+        (
+          DebuggingOptions.enabled(
+            BuildInfo.debug,
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(useWasm: true, webDefines: <String, String>{'FOO': 'BAR'}),
+            ],
+          ),
           false,
         ),
       ]) {
@@ -1717,8 +1731,8 @@ void main() {
         expect(app.runner, isA<ColdRunner>());
         expect(app.runner.projectRootPath, customRootPath);
         expect(webDeviceFactory.lastGeneratorWasNull, isTrue);
-        expect(webDeviceFactory.lastUrlTunneller != null, expectTunneller);
-        expect(webDeviceFactory.lastWebDefines, const <String, String>{'FOO': 'BAR'});
+        expect(webDeviceFactory.lastWebConfig?.urlTunneller != null, expectTunneller);
+        expect(webDeviceFactory.lastWebConfig?.webDefines, const <String, String>{'FOO': 'BAR'});
       }
       await pumpEventQueue();
     },
@@ -1746,7 +1760,9 @@ void main() {
           customRootPath: customRootPath,
           options: DebuggingOptions.enabled(
             BuildInfo.debug,
-            webConfig: const WebDebugConfig(enableExposeUrl: true),
+            platformOptions: const <PlatformDebuggingOptions>[
+              WebDebugConfig(enableExposeUrl: true, webDefines: <String, String>{'FOO': 'BAR'}),
+            ],
           ),
           enableHotReload: enableHotReload,
         );
@@ -1758,8 +1774,8 @@ void main() {
         expect(hotRunner.supportsRestart, enableHotReload);
         expect(hotRunner.projectRootPath, customRootPath);
         expect(webDeviceFactory.lastGeneratorWasNull, isFalse);
-        expect(webDeviceFactory.lastUrlTunneller, isNotNull);
-        expect(webDeviceFactory.lastWebDefines, const <String, String>{'FOO': 'BAR'});
+        expect(webDeviceFactory.lastWebConfig?.urlTunneller, isNotNull);
+        expect(webDeviceFactory.lastWebConfig?.webDefines, const <String, String>{'FOO': 'BAR'});
       }
       await pumpEventQueue();
     },
@@ -2298,8 +2314,7 @@ class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
 
 class _FakeDaemonWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFactory {
   bool? lastGeneratorWasNull;
-  UrlTunneller? lastUrlTunneller;
-  Map<String, String>? lastWebDefines;
+  WebDebugConfig? lastWebConfig;
 
   @override
   FlutterDevice createWebFlutterDevice(
@@ -2311,14 +2326,11 @@ class _FakeDaemonWebFlutterDeviceFactory extends Fake implements WebFlutterDevic
     required TargetPlatform targetPlatform,
     required ToolContext toolContext,
     Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
     String? userIdentifier,
-    bool useWasm = false,
-    Map<String, String> webDefines = const <String, String>{},
+    WebDebugConfig webConfig = const WebDebugConfig(),
   }) {
     lastGeneratorWasNull = generator == null;
-    lastUrlTunneller = urlTunneller;
-    lastWebDefines = webDefines;
-    return _FakeDaemonWebFlutterDevice(device, buildInfo: buildInfo, useWasm: useWasm);
+    lastWebConfig = webConfig;
+    return _FakeDaemonWebFlutterDevice(device, buildInfo: buildInfo, useWasm: webConfig.useWasm);
   }
 }

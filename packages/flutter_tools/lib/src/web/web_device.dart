@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
@@ -24,6 +23,7 @@ import '../features.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import 'chrome.dart';
+import 'web_debug_config.dart';
 import 'web_flutter_device.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
@@ -57,13 +57,11 @@ abstract class WebDevice extends Device {
   Future<FlutterDevice> createFlutterDevice({
     required BuildInfo buildInfo,
     required ToolContext toolContext,
+    DebuggingOptions? debuggingOptions,
     FlutterProject? flutterProject,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     TargetModel? targetModelOverride,
-    UrlTunneller? urlTunneller,
-    bool useWasm = false,
     String? userIdentifier,
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (_webFlutterDeviceFactory == null) {
       throw StateError('webFlutterDeviceFactory is required for web devices.');
@@ -71,6 +69,7 @@ abstract class WebDevice extends Device {
     if (flutterProject == null) {
       throw StateError('flutterProject is required when webFlutterDeviceFactory is provided.');
     }
+    final WebDebugConfig webConfig = debuggingOptions?.webConfig ?? const WebDebugConfig();
     final (
       :DevelopmentShaderCompiler developmentShaderCompiler,
       :ResidentCompiler? generator,
@@ -78,7 +77,7 @@ abstract class WebDevice extends Device {
     ) = await FlutterDevice.createCompilers(
       this,
       buildInfo: buildInfo,
-      createGenerator: buildInfo.isDebug && !useWasm,
+      createGenerator: buildInfo.isDebug && !webConfig.useWasm,
       targetModelOverride: targetModelOverride,
       toolContext: toolContext,
     );
@@ -91,10 +90,8 @@ abstract class WebDevice extends Device {
       platformArgs: platformArgs,
       targetPlatform: targetPlatform,
       toolContext: toolContext,
-      urlTunneller: urlTunneller,
       userIdentifier: userIdentifier,
-      useWasm: useWasm,
-      webDefines: webDefines,
+      webConfig: webConfig,
     );
   }
 }
