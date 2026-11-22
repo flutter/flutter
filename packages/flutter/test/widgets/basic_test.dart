@@ -336,6 +336,32 @@ void main() {
       );
       expect(tester.getSize(find.byType(FractionalTranslation)), Size.zero);
     });
+
+    testWidgets('FractionalTranslation can be hit tested while it needs layout', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: FractionalTranslation(
+              translation: Offset(0.5, 0.0),
+              child: SizedBox(width: 100.0, height: 100.0),
+            ),
+          ),
+        ),
+      );
+
+      final RenderFractionalTranslation renderObject = tester
+          .renderObject<RenderFractionalTranslation>(find.byType(FractionalTranslation));
+      renderObject.markNeedsLayout();
+      expect(renderObject.debugNeedsLayout, isTrue);
+
+      expect(
+        () => renderObject.hitTest(BoxHitTestResult(), position: Offset.zero),
+        returnsNormally,
+      );
+    });
   });
 
   group('Semantics', () {

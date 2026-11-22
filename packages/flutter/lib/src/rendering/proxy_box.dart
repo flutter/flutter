@@ -3110,7 +3110,6 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    assert(!debugNeedsLayout);
     return result.addWithPaintOffset(
       offset: transformHitTests
           ? Offset(translation.dx * size.width, translation.dy * size.height)
