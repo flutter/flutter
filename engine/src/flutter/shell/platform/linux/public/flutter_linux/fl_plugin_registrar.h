@@ -11,6 +11,7 @@
 
 #include <glib-object.h>
 #include <gmodule.h>
+#include <stdint.h>
 
 #include "fl_binary_messenger.h"
 #include "fl_texture_registrar.h"
@@ -33,6 +34,8 @@ struct _FlPluginRegistrarInterface {
   FlTextureRegistrar* (*get_texture_registrar)(FlPluginRegistrar* registrar);
 
   FlView* (*get_view)(FlPluginRegistrar* registrar);
+
+  FlView* (*get_view_by_id)(FlPluginRegistrar* registrar, int64_t view_id);
 };
 
 /**
@@ -69,9 +72,24 @@ FlTextureRegistrar* fl_plugin_registrar_get_texture_registrar(
  *
  * Get the view that Flutter is rendering with.
  *
- * Returns: (allow-none): an #FlView or %NULL if running in headless mode.
+ * Deprecated: Use fl_plugin_registrar_get_view_by_id() instead.
+ *
+ * Returns: (allow-none): an #FlView or %NULL if running in headless mode or if
+ * there is no implicit view.
  */
 FlView* fl_plugin_registrar_get_view(FlPluginRegistrar* registrar);
+
+/**
+ * fl_plugin_registrar_get_view_by_id:
+ * @registrar: an #FlPluginRegistrar.
+ * @view_id: the ID of the view to retrieve.
+ *
+ * Gets the view with the given ID associated with this registrar's engine.
+ *
+ * Returns: (allow-none): an #FlView or %NULL if no view with @view_id exists.
+ */
+FlView* fl_plugin_registrar_get_view_by_id(FlPluginRegistrar* registrar,
+                                           int64_t view_id);
 
 G_END_DECLS
 

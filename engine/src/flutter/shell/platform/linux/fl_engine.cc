@@ -564,7 +564,7 @@ static FlPluginRegistrar* fl_engine_get_registrar_for_plugin(
     const gchar* name) {
   FlEngine* self = FL_ENGINE(registry);
 
-  return fl_plugin_registrar_new(nullptr, self->binary_messenger,
+  return fl_plugin_registrar_new(self, nullptr, self->binary_messenger,
                                  self->texture_registrar);
 }
 
