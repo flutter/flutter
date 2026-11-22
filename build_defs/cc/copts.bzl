@@ -101,6 +101,7 @@ WASM_DEFAULT_WARNING_FLAGS = [
 # `copts = FLUTTER_COPTS + [...]` composes with. Labels, since the overlays
 # of external repositories load this file too.
 _ANDROID = Label("@platforms//os:android")
+_IOS = Label("@platforms//os:ios")
 _WASM = Label("@platforms//os:emscripten")
 _MACOS = Label("@platforms//os:macos")
 
@@ -159,13 +160,19 @@ MACOS_CFLAGS_OBJCC = MACOS_CFLAGS_OBJC
 
 # //build/config/compiler:chromium_code (defines): the C99 macros, and, off
 # Linux (and without a sanitizer), a fortified libc -- `!is_linux ||
-# !is_clang`, so Android's first-party compiles have _FORTIFY_SOURCE=2 and
-# the host's do not; no_chromium_code (third-party) never does. The config
-# is empty under is_wasm (as under is_win): the web's compiles define
-# neither.
+# !is_clang`, so Android's, macOS's and iOS's first-party compiles have
+# _FORTIFY_SOURCE=2 and the Linux host's do not (nor does a build with a
+# sanitizer, and Linux has the only one); no_chromium_code (third-party)
+# never does. The config is empty under is_wasm (as under is_win): the web's
+# compiles define neither.
 FLUTTER_LOCAL_DEFINES = select({
     _WASM: [],
     _ANDROID: [
+        "__STDC_CONSTANT_MACROS",
+        "__STDC_FORMAT_MACROS",
+        "_FORTIFY_SOURCE=2",
+    ],
+    _IOS: [
         "__STDC_CONSTANT_MACROS",
         "__STDC_FORMAT_MACROS",
         "_FORTIFY_SOURCE=2",
