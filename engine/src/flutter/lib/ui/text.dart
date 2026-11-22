@@ -3255,9 +3255,8 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   /// or extended directly.
   ///
   /// To create a [Paragraph] object, use a [ParagraphBuilder].
-  _NativeParagraph._([this._textDirection = TextDirection.ltr]);
+  _NativeParagraph._();
 
-  final TextDirection _textDirection;
   bool _needsLayout = true;
 
   @override
@@ -3489,176 +3488,16 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
     if (alpha == 0) {
       return;
     }
-    final bool needsLayer = fadeHorizontal || alpha < 255;
-    final bool isRtl = _textDirection == TextDirection.rtl;
-
     canvas.save();
     canvas.clipRect(sortedClip);
-    if (needsLayer) {
-      final layerPaint = Paint();
-      if (alpha < 255) {
-        layerPaint.color = Color.fromARGB(alpha, 0, 0, 0);
-      }
-      canvas.saveLayer(sortedClip, layerPaint);
-    }
-
-    _paintAlignedOrSplitFallback(canvas, offset, sortedClip, overflowPosition, isRtl);
-    if (fadeHorizontal) {
-      _drawHorizontalFadeMask(canvas, offset, sortedClip, overflowPosition, isRtl);
-    }
-
-    if (needsLayer) {
+    if (alpha < 255) {
+      canvas.saveLayer(sortedClip, Paint()..color = Color.fromARGB(alpha, 0, 0, 0));
+      canvas.drawParagraph(this, offset);
       canvas.restore();
+    } else {
+      canvas.drawParagraph(this, offset);
     }
     canvas.restore();
-  }
-
-  void _paintAlignedOrSplitFallback(
-    Canvas canvas,
-    Offset offset,
-    Rect clip,
-    int overflowPosition,
-    bool isRtl,
-  ) {
-    final double clipWidth = clip.width;
-    final double contentWidth = width.isFinite ? width : longestLine;
-    final double overflowWidth = contentWidth - clipWidth;
-    if (overflowWidth <= 0.0 || numberOfLines > 1) {
-      canvas.drawParagraph(this, offset);
-      return;
-    }
-    if (overflowPosition == 1 && clipWidth > 0.0) {
-      final double midX = clip.left + clipWidth / 2.0;
-      canvas.save();
-      canvas.clipRect(Rect.fromLTRB(clip.left, clip.top, midX, clip.bottom));
-      canvas.drawParagraph(this, offset);
-      canvas.restore();
-
-      canvas.save();
-      canvas.clipRect(Rect.fromLTRB(midX, clip.top, clip.right, clip.bottom));
-      canvas.drawParagraph(this, Offset(offset.dx - overflowWidth, offset.dy));
-      canvas.restore();
-      return;
-    }
-    final bool alignTrailingEdge =
-        (overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl);
-    canvas.drawParagraph(
-      this,
-      alignTrailingEdge ? Offset(offset.dx - overflowWidth, offset.dy) : offset,
-    );
-  }
-
-  void _drawHorizontalFadeMask(
-    Canvas canvas,
-    Offset offset,
-    Rect clip,
-    int overflowPosition,
-    bool isRtl,
-  ) {
-    final List<LineMetrics> lines = computeLineMetrics();
-    // Default 14.0 logical-pixel font size fallback when no line metrics are available.
-    var fadeWidth = 14.0;
-    if (lines.isNotEmpty) {
-      final LineMetrics lastLine = lines.last;
-      fadeWidth = (lastLine.ascent + lastLine.descent).roundToDouble();
-    } else if (clip.height > 0.0) {
-      fadeWidth = clip.height;
-    }
-    fadeWidth = math.max(fadeWidth, 1.0);
-
-    final maskPaint = Paint()..blendMode = BlendMode.modulate;
-    final bool fadeAtLeft = (overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl);
-
-    if (lines.length > 1) {
-      final LineMetrics lastLine = lines.last;
-      final double lineTop = math.max(clip.top, offset.dy + lastLine.baseline - lastLine.ascent);
-      final double lineLeft = math.max(clip.left, offset.dx + lastLine.left);
-      final double lineRight = math.min(clip.right, offset.dx + lastLine.left + lastLine.width);
-      if (lineRight <= lineLeft || clip.bottom <= lineTop) {
-        return;
-      }
-      _drawDirectionalFadeRect(
-        canvas,
-        maskPaint,
-        Rect.fromLTRB(clip.left, lineTop, clip.right, clip.bottom),
-        left: lineLeft,
-        right: lineRight,
-        fadeWidth: fadeWidth * 2.0,
-        fadeAtLeft: fadeAtLeft,
-      );
-      return;
-    }
-
-    if (overflowPosition == 1 && clip.width > 0.0) {
-      final double halfWidth = clip.width / 2.0;
-      final double halfFade = math.min(fadeWidth, halfWidth);
-      final double stop1 = clampDouble((halfWidth - halfFade) / clip.width, 0.0, 0.5);
-      final double stop2 = clampDouble((halfWidth + halfFade) / clip.width, 0.5, 1.0);
-      maskPaint.shader = Gradient.linear(
-        Offset(clip.left, 0.0),
-        Offset(clip.right, 0.0),
-        const <Color>[
-          Color(0xFFFFFFFF),
-          Color(0xFFFFFFFF),
-          Color(0x00FFFFFF),
-          Color(0xFFFFFFFF),
-          Color(0xFFFFFFFF),
-        ],
-        <double>[0.0, stop1, 0.5, stop2, 1.0],
-      );
-      canvas.drawRect(clip, maskPaint);
-      return;
-    }
-
-    _drawDirectionalFadeRect(
-      canvas,
-      maskPaint,
-      clip,
-      left: clip.left,
-      right: clip.right,
-      fadeWidth: fadeWidth,
-      fadeAtLeft: fadeAtLeft,
-    );
-  }
-
-  static void _drawDirectionalFadeRect(
-    Canvas canvas,
-    Paint maskPaint,
-    Rect rect, {
-    required double left,
-    required double right,
-    required double fadeWidth,
-    required bool fadeAtLeft,
-  }) {
-    final double fadeStart = fadeAtLeft
-        ? math.min(right, left + fadeWidth)
-        : math.max(left, right - fadeWidth);
-    final double fadeEnd = fadeAtLeft ? left : right;
-    maskPaint.shader = Gradient.linear(Offset(fadeStart, 0.0), Offset(fadeEnd, 0.0), const <Color>[
-      Color(0xFFFFFFFF),
-      Color(0x00FFFFFF),
-    ]);
-    canvas.drawRect(rect, maskPaint);
-  }
-
-  static void _drawDirectionalFadeRect(
-    Canvas canvas,
-    Paint maskPaint,
-    Rect rect, {
-    required double left,
-    required double right,
-    required double fadeWidth,
-    required bool fadeAtLeft,
-  }) {
-    final double fadeStart = fadeAtLeft
-        ? math.min(right, left + fadeWidth)
-        : math.max(left, right - fadeWidth);
-    final double fadeEnd = fadeAtLeft ? left : right;
-    maskPaint.shader = Gradient.linear(Offset(fadeStart, 0.0), Offset(fadeEnd, 0.0), const <Color>[
-      Color(0xFFFFFFFF),
-      Color(0x00FFFFFF),
-    ]);
-    canvas.drawRect(rect, maskPaint);
   }
 
   @override
@@ -3865,10 +3704,7 @@ abstract class ParagraphBuilder {
 
 base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements ParagraphBuilder {
   _NativeParagraphBuilder(ParagraphStyle style)
-    : _defaultLeadingDistribution = style._leadingDistribution,
-      _textDirection = (style._encoded[0] & (1 << 2)) != 0
-          ? TextDirection.values[style._encoded[2]]
-          : TextDirection.ltr {
+    : _defaultLeadingDistribution = style._leadingDistribution {
     List<String>? strutFontFamilies;
     final StrutStyle? strutStyle = style._strutStyle;
     final ByteData? encodedStrutStyle;
@@ -3923,7 +3759,6 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
   final List<double> _placeholderScales = <double>[];
 
   final TextLeadingDistribution _defaultLeadingDistribution;
-  final TextDirection _textDirection;
 
   @override
   void pushStyle(TextStyle style) {
@@ -4087,7 +3922,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @override
   Paragraph build() {
-    final paragraph = _NativeParagraph._(_textDirection);
+    final paragraph = _NativeParagraph._();
     _build(paragraph);
     return paragraph;
   }

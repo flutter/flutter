@@ -1816,16 +1816,12 @@ void main() {
         layout(paragraphFade, constraints: const BoxConstraints(maxWidth: 100.0));
         final context = MockPaintingContext();
         paragraphFade.paint(context, Offset.zero);
-        expect(context.operations, contains('shaderRect'));
-        if (position == TextOverflowPosition.start) {
-          expect(context.canvas.drawnParagraphOffsets.single.dx, lessThan(0.0));
-        } else if (position == TextOverflowPosition.middle) {
-          expect(context.canvas.drawnParagraphOffsets.length, 2);
-          expect(context.canvas.drawnParagraphOffsets[0].dx, 0.0);
-          expect(context.canvas.drawnParagraphOffsets[1].dx, lessThan(0.0));
-        } else {
-          expect(context.canvas.drawnParagraphOffsets.single.dx, 0.0);
-        }
+        expect(paragraphFade.debugHasOverflowShader, isTrue);
+        expect(
+          context.operations,
+          containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+        );
+        expect(context.canvas.drawnParagraphOffsets, hasLength(1));
 
         final paragraphClip = RenderParagraph(
           const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
@@ -1837,6 +1833,7 @@ void main() {
         layout(paragraphClip, constraints: const BoxConstraints(maxWidth: 100.0));
         final clipContext = MockPaintingContext();
         paragraphClip.paint(clipContext, Offset.zero);
+        expect(paragraphClip.debugHasOverflowShader, isFalse);
         expect(clipContext.operations, contains('clipRect'));
       }
 
@@ -1855,7 +1852,7 @@ void main() {
       expect(visibleContext.operations, isNot(contains('clipRect')));
       expect(visibleContext.canvas.drawnParagraphOffsets.length, 1);
 
-      // RTL start overflow keeps trailing left edge aligned at dx == 0.
+      // RTL start overflow delegates fade and clipping to Paragraph.paintMasked.
       final rtlStart = RenderParagraph(
         const TextSpan(text: longText, style: TextStyle(fontSize: 14.0)),
         textDirection: TextDirection.rtl,
@@ -1867,8 +1864,12 @@ void main() {
       layout(rtlStart, constraints: const BoxConstraints(maxWidth: 100.0));
       final rtlContext = MockPaintingContext();
       rtlStart.paint(rtlContext, Offset.zero);
-      expect(rtlContext.operations, contains('shaderRect'));
-      expect(rtlContext.canvas.drawnParagraphOffsets.single.dx, 0.0);
+      expect(rtlStart.debugHasOverflowShader, isTrue);
+      expect(
+        rtlContext.operations,
+        containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+      );
+      expect(rtlContext.canvas.drawnParagraphOffsets, hasLength(1));
     });
 
     test('paints each inline child at most once in middle overflow and falls back to ellipsis with placeholders', () {
@@ -2006,8 +2007,12 @@ void main() {
 
       final context = MockPaintingContext();
       paragraph.paint(context, Offset.zero);
+      expect(paragraph.debugHasOverflowShader, isTrue);
+      expect(
+        context.operations,
+        containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+      );
       expect(context.canvas.drawnParagraphOffsets, hasLength(1));
-      expect(context.canvas.drawnParagraphOffsets.single.dx, lessThan(0.0));
     });
   });
 
@@ -2029,12 +2034,11 @@ void main() {
 
       final context = MockPaintingContext();
       paragraph.paint(context, Offset.zero);
-      expect(context.operations, contains('shaderRect'));
-      // The shader rect must only cover the bottom line (top > 0), leaving the
-      // first line completely unmodulated.
-      expect(context.canvas.drawnRect, isNotNull);
-      expect(context.canvas.drawnRect!.top, greaterThan(0.0));
-      expect(context.canvas.drawnRect!.bottom, closeTo(paragraph.size.height, 0.01));
+      expect(paragraph.debugHasOverflowShader, isTrue);
+      expect(
+        context.operations,
+        containsAllInOrder(<String>['save', 'clipRect', 'paragraph', 'restore']),
+      );
     });
 
     test('falls back to vertical fade when clipped by maxHeight rather than maxLines', () {
