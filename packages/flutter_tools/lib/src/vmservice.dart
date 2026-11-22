@@ -1045,7 +1045,8 @@ class FlutterVmService {
             if (error is vm_service.SentinelException ||
                 error == null ||
                 (error is vm_service.RPCError &&
-                    error.code == vm_service.RPCErrorKind.kServiceDisappeared.code)) {
+                    (error.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+                        error.code == vm_service.RPCErrorKind.kMethodNotFound.code))) {
               return null;
             }
             return Future<vm_service.Event?>.error(error, stackTrace);

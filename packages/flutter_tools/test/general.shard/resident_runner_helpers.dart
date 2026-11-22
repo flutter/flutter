@@ -383,6 +383,34 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   bool supportsColdRestart = false;
 
   @override
+  bool get defersServiceProtocolConnection => false;
+
+  @override
+  bool get alwaysReloadSources => false;
+
+  @override
+  String get hotRestartTimingVariableName => 'restart';
+
+  @override
+  void onDetach() {}
+
+  @override
+  Future<bool?> performHotRestart() async => null;
+
+  @override
+  Future<List<Future<vm_service.ReloadReport>>?> reloadDeviceSources(
+    String entryPath, {
+    bool? pause = false,
+  }) async {
+    final deviceEntryUri = '${devFS!.baseUri!.resolve(entryPath)}';
+    final vm_service.VM vm = await vmService!.service.getVM();
+    return <Future<vm_service.ReloadReport>>[
+      for (final vm_service.IsolateRef isolateRef in vm.isolates!)
+        vmService!.service.reloadSources(isolateRef.id!, pause: pause, rootLibUri: deviceEntryUri),
+    ];
+  }
+
+  @override
   Future<void> dispose() async {}
 
   @override

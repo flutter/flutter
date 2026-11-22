@@ -47,6 +47,8 @@ import 'mustache_template.dart';
 import 'web_expression_compiler.dart';
 import 'web_flutter_device.dart' show kExitMessage;
 
+export '../run_hot.dart' show kNoClientConnectedMessage;
+
 /// Injectable factory to create a [ResidentWebRunner].
 class DwdsWebRunnerFactory extends WebRunnerFactory {
   @override
@@ -90,8 +92,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     );
   }
 }
-
-const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
 
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(

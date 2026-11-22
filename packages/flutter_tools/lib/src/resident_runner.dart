@@ -580,6 +580,53 @@ class FlutterDevice {
     await device?.dds.handleHotRestart(this);
   }
 
+  /// Whether this device establishes its VM Service connection asynchronously
+  /// after [runHot] completes rather than returning a synchronous VM Service URI.
+  bool get defersServiceProtocolConnection => false;
+
+  /// Whether [HotRunner] should invoke [reloadDeviceSources] even when
+  /// [ProjectFileInvalidator] reports zero invalidated Dart source files.
+  bool get alwaysReloadSources => false;
+
+  /// The `Event.timing` `variableName` recorded on a successful hot restart.
+  String get hotRestartTimingVariableName => 'restart';
+
+  /// Begins listening for and attaching a deferred debug connection after
+  /// [runHot] has launched the application.
+  void attachDeferredConnection({
+    required HotRunner hotRunner,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+  }) {}
+
+  /// Translates device-specific startup or debug-connection exceptions into a
+  /// [ToolExit], or rethrows [error] with [stackTrace] when unhandled.
+  Never handleConnectionException(Exception error, StackTrace stackTrace) {
+    Error.throwWithStackTrace(error, stackTrace);
+  }
+
+  /// Notifies this device that the runner detached and should leave the
+  /// application running during subsequent cleanup.
+  void onDetach() {}
+
+  /// Performs a device-specific hot restart when non-null (`true` if an active
+  /// client was restarted, `false` if no client was connected), or returns
+  /// `null` to use [HotRunner]'s standard VM isolate restart flow.
+  Future<bool?> performHotRestart() async => null;
+
+  /// Reloads sources for all active isolates on this device, or returns `null`
+  /// when recompilation succeeded while no client is connected.
+  Future<List<Future<vm_service.ReloadReport>>?> reloadDeviceSources(
+    String entryPath, {
+    bool? pause = false,
+  }) async {
+    final deviceEntryUri = '${devFS!.baseUri!.resolve(entryPath)}';
+    final vm_service.VM vm = await vmService!.service.getVM();
+    return <Future<vm_service.ReloadReport>>[
+      for (final vm_service.IsolateRef isolateRef in vm.isolates!)
+        vmService!.service.reloadSources(isolateRef.id!, pause: pause, rootLibUri: deviceEntryUri),
+    ];
+  }
+
   /// Whether this device supports restarting while running under [ColdRunner].
   bool get supportsColdRestart => false;
 
@@ -1155,7 +1202,9 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   /// True if the shared Dart plugin registry (which is different than the one
   /// used for web) should be generated during source generation.
-  bool get generateDartPluginRegistry => true;
+  bool get generateDartPluginRegistry => flutterDevices.any(
+    (FlutterDevice? device) => device!.targetPlatform != TargetPlatform.web_javascript,
+  );
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -1221,7 +1270,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     logger.printTrace('complete');
   }
 
-  @protected
+  @internal
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
@@ -1242,6 +1291,9 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> exit() async {
+    if (_exited) {
+      return;
+    }
     _exited = true;
     await stopEchoingDeviceLog();
     await preExit();
@@ -1253,6 +1305,9 @@ abstract class ResidentRunner extends ResidentHandlers {
   @mustCallSuper
   Future<void> detach() async {
     stopAppDuringCleanup = false;
+    for (final FlutterDevice? device in flutterDevices) {
+      device!.onDetach();
+    }
 
     await stopEchoingDeviceLog();
     await preExit();
@@ -1284,7 +1339,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  @protected
+  @internal
   void cacheInitialDillCompilation() {
     if (_dillOutputPath != null) {
       return;
@@ -1584,10 +1639,9 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// at the correct synced asset bundle directory inside the local DevFS before
   /// assets are evicted and reloaded.
   ///
-  /// Native runners (like 'HotRunner') override this to invoke the
-  /// `setAssetDirectory` VM Service extension. Web runners (like 'ResidentWebRunner')
-  /// keep this as a no-op because asset paths are already resolved relative
-  /// to the web server base URI.
+  /// Native devices in [HotRunner] invoke the `setAssetDirectory` VM Service
+  /// extension, whereas web devices skip this because asset paths are already
+  /// resolved relative to the web server base URI.
   @protected
   Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {}
 
@@ -1674,6 +1728,7 @@ class OperationResult {
     this.code,
     this.message, {
     this.fatal = false,
+    this.noClientsConnected = false,
     this.updateFSReport,
     this.extraTimings = const <OperationResultExtraTiming>[],
   });
@@ -1689,6 +1744,9 @@ class OperationResult {
 
   /// Whether this error should cause the runner to exit.
   final bool fatal;
+
+  /// Whether recompilation succeeded while no client was connected.
+  final bool noClientsConnected;
 
   final UpdateFSReport? updateFSReport;
 

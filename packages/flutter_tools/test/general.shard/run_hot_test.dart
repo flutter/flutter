@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -164,6 +165,89 @@ void main() {
         ProcessManager: FakeProcessManager.empty,
       },
     );
+
+    testWithoutContext('exit() on an attached device terminates the app', () async {
+      final runner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => null,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: FakeToolContext(fs: fileSystem),
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        assetBundleFactory: AssetBundleFactory.defaultInstance(
+          fileSystem: fileSystem,
+          flutterRoot: getFlutterRoot(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+        ),
+        buildTargets: const BuildTargetsImpl(),
+        featureFlags: TestFeatureFlags(),
+        target: 'main.dart',
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        toolContext: FakeToolContext(fs: fileSystem),
+        xcode: null,
+        analytics: _FakeAnalytics(),
+      );
+
+      await runner.attach();
+      await runner.exit();
+      expect(flutterDevice.wasExited, true);
+    });
+  });
+
+  group('updateDevFS manifestPath', () {
+    for (final (String description, String? projectRootPath, String expectedManifestPath)
+        in <(String, String?, String)>[
+          ('defaults to pubspec.yaml when projectRootPath matches cwd', null, 'pubspec.yaml'),
+          (
+            'resolves pubspec.yaml relative to custom projectRootPath',
+            '/workspace/subproject',
+            '/workspace/subproject/pubspec.yaml',
+          ),
+        ]) {
+      testWithoutContext(description, () async {
+        final fileSystem = MemoryFileSystem.test();
+        final Directory rootDir = projectRootPath == null
+            ? fileSystem.currentDirectory
+            : (fileSystem.directory(projectRootPath)..createSync(recursive: true));
+        rootDir.childFile('main.dart').createSync();
+
+        final assetBundle = _RecordingAssetBundle();
+        final flutterDevice = _FakeHotCompatibleFlutterDevice(FakeDevice());
+        final runner = HotRunner(
+          <FlutterDevice>[flutterDevice],
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => null,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: FakeToolContext(fs: fileSystem),
+          ),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          assetBundleFactory: _FixedAssetBundleFactory(assetBundle),
+          buildTargets: const BuildTargetsImpl(),
+          featureFlags: TestFeatureFlags(),
+          projectFileInvalidator: _NoOpProjectFileInvalidator(
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+          ),
+          projectRootPath: projectRootPath,
+          target: rootDir.childFile('main.dart').path,
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          toolContext: FakeToolContext(fs: fileSystem),
+          xcode: null,
+          analytics: _FakeAnalytics(),
+        );
+
+        final UpdateFSReport report = await runner.updateDevFS();
+
+        expect(report.success, isTrue);
+        expect(assetBundle.needsBuildManifestPaths, <String>[expectedManifestPath]);
+        expect(assetBundle.buildManifestPaths, <String>[expectedManifestPath]);
+      });
+    }
   });
 
   group('multiple target devices', () {
@@ -236,6 +320,15 @@ class _FakeDevFS extends Fake implements DevFS {
   final Uri? baseUri = Uri();
 
   @override
+  DateTime? lastCompiled;
+
+  @override
+  List<Uri> sources = <Uri>[];
+
+  @override
+  PackageConfig? lastPackageConfig;
+
+  @override
   Future<void> destroy() async {}
 
   @override
@@ -248,6 +341,19 @@ class _FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   final FlutterVmService? vmService = _FakeFlutterVmService();
+
+  @override
+  Future<List<Future<vm_service.ReloadReport>>?> reloadDeviceSources(
+    String entryPath, {
+    bool? pause = false,
+  }) async {
+    final deviceEntryUri = '${devFS!.baseUri!.resolve(entryPath)}';
+    final vm_service.VM vm = await vmService!.service.getVM();
+    return <Future<vm_service.ReloadReport>>[
+      for (final vm_service.IsolateRef isolateRef in vm.isolates!)
+        vmService!.service.reloadSources(isolateRef.id!, pause: pause, rootLibUri: deviceEntryUri),
+    ];
+  }
 }
 
 class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
@@ -257,15 +363,50 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
   final Device device;
 
   @override
+  TargetPlatform get targetPlatform => TargetPlatform.tester;
+
+  @override
+  bool get defersServiceProtocolConnection => false;
+
+  @override
+  bool get alwaysReloadSources => false;
+
+  @override
+  String get hotRestartTimingVariableName => 'restart';
+
+  @override
   DevFS? devFS = _FakeDevFS();
 
   @override
   ResidentCompiler? get generator => null;
 
   @override
+  void onDetach() {}
+
+  @override
+  Future<bool?> performHotRestart() async => null;
+
+  @override
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
     return 0;
   }
+
+  @override
+  Future<UpdateFSReport> updateDevFS({
+    required Uri mainUri,
+    String? target,
+    AssetBundle? bundle,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
+    bool fullRestart = false,
+    required String pathToReload,
+    required String dillOutputPath,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
+  }) async => UpdateFSReport(success: true);
+
+  @override
+  Future<void> dispose() async {}
 
   @override
   Future<void> stopEchoingDeviceLog() async {}
@@ -276,6 +417,60 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
   }
 
   bool wasExited = false;
+}
+
+class _FixedAssetBundleFactory implements AssetBundleFactory {
+  const _FixedAssetBundleFactory(this._bundle);
+
+  final AssetBundle _bundle;
+
+  @override
+  AssetBundle createBundle() => _bundle;
+}
+
+class _RecordingAssetBundle extends Fake implements AssetBundle {
+  final needsBuildManifestPaths = <String>[];
+  final buildManifestPaths = <String>[];
+
+  @override
+  bool wasBuiltOnce() => false;
+
+  @override
+  bool needsBuild({String manifestPath = defaultManifestPath}) {
+    needsBuildManifestPaths.add(manifestPath);
+    return true;
+  }
+
+  @override
+  Future<int> build({
+    FlutterHookResult? flutterHookResult,
+    String manifestPath = defaultManifestPath,
+    required String packageConfigPath,
+    bool deferredComponentsEnabled = false,
+    required TargetPlatform targetPlatform,
+    String? flavor,
+    bool includeAssetsFromDevDependencies = false,
+  }) async {
+    buildManifestPaths.add(manifestPath);
+    return 0;
+  }
+}
+
+class _NoOpProjectFileInvalidator extends ProjectFileInvalidator {
+  _NoOpProjectFileInvalidator({
+    required super.fileSystem,
+    required super.logger,
+    required super.platform,
+  });
+
+  @override
+  Future<InvalidationResult> findInvalidated({
+    required DateTime? lastCompiled,
+    required List<Uri> urisToMonitor,
+    required String packagesPath,
+    required PackageConfig packageConfig,
+    bool asyncScanning = false,
+  }) async => const InvalidationResult(uris: <Uri>[], packageConfig: PackageConfig.empty);
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
