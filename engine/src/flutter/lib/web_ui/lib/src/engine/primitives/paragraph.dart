@@ -803,49 +803,6 @@ class EngineParagraph implements ui.Paragraph {
   }
 
   @override
-  void paintMasked(
-    ui.Canvas canvas,
-    ui.Offset offset, {
-    required ui.Rect clipRect,
-    double opacity = 1.0,
-    bool fadeHorizontal = false,
-    int overflowPosition = 2,
-  }) {
-    if (canvas case final EngineCanvas engineCanvas) {
-      engineCanvas.drawParagraphMasked(
-        this,
-        offset,
-        clipRect: clipRect,
-        opacity: opacity,
-        fadeHorizontal: fadeHorizontal,
-        overflowPosition: overflowPosition,
-      );
-      return;
-    }
-    assert(!debugDisposed);
-    assert(offsetIsValid(offset));
-    assert(rectIsValid(clipRect));
-    assert(overflowPosition >= 0 && overflowPosition <= 2);
-    if (!(opacity > 0.0) || clipRect.isEmpty) {
-      return;
-    }
-    final int alpha = ui.Color.getAlphaFromOpacity(opacity > 1.0 ? 1.0 : opacity);
-    if (alpha == 0) {
-      return;
-    }
-    canvas.save();
-    canvas.clipRect(clipRect);
-    if (alpha < 255) {
-      canvas.saveLayer(clipRect, ui.Paint()..color = ui.Color.fromARGB(alpha, 0, 0, 0));
-      canvas.drawParagraph(this, offset);
-      canvas.restore();
-    } else {
-      canvas.drawParagraph(this, offset);
-    }
-    canvas.restore();
-  }
-
-  @override
   bool get debugDisposed => _ref.debugDisposed;
 }
 
