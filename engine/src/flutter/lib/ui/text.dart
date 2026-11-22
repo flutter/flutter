@@ -3255,8 +3255,9 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
   /// or extended directly.
   ///
   /// To create a [Paragraph] object, use a [ParagraphBuilder].
-  _NativeParagraph._();
+  _NativeParagraph._([this._textDirection = TextDirection.ltr]);
 
+  final TextDirection _textDirection;
   bool _needsLayout = true;
 
   @override
@@ -3499,6 +3500,7 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
     final double clipWidth = sortedClip.width;
     final double contentWidth = width.isFinite ? width : longestLine;
     final double overflowWidth = contentWidth - clipWidth;
+    final bool isRtl = _textDirection == TextDirection.rtl;
     if (overflowWidth > 0.0 && numberOfLines <= 1) {
       if (overflowPosition == 1 && clipWidth > 0.0) {
         final double halfWidth = clipWidth / 2.0;
@@ -3511,7 +3513,7 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
         canvas.clipRect(Rect.fromLTRB(midX, sortedClip.top, sortedClip.right, sortedClip.bottom));
         canvas.drawParagraph(this, Offset(offset.dx - overflowWidth, offset.dy));
         canvas.restore();
-      } else if (overflowPosition == 0) {
+      } else if ((overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl)) {
         canvas.drawParagraph(this, Offset(offset.dx - overflowWidth, offset.dy));
       } else {
         canvas.drawParagraph(this, offset);
@@ -3530,6 +3532,7 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
       }
       fadeWidth = math.max(fadeWidth, 1.0);
       final maskPaint = Paint()..blendMode = BlendMode.modulate;
+      final bool fadeAtLeft = (overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl);
       if (lines.length > 1) {
         final LineMetrics lastLine = lines.last;
         final double lineTop = math.max(
@@ -3543,7 +3546,6 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
         );
         if (lineRight > lineLeft && sortedClip.bottom > lineTop) {
           final double effectiveFade = math.min(fadeWidth * 2.0, lineRight - lineLeft);
-          final fadeAtLeft = overflowPosition == 0;
           final double fadeStart = fadeAtLeft
               ? math.min(lineRight, lineLeft + effectiveFade)
               : math.max(lineLeft, lineRight - effectiveFade);
@@ -3577,7 +3579,6 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
         );
         canvas.drawRect(sortedClip, maskPaint);
       } else {
-        final fadeAtLeft = overflowPosition == 0;
         final double fadeStart = fadeAtLeft
             ? math.min(sortedClip.right, sortedClip.left + fadeWidth)
             : math.max(sortedClip.left, sortedClip.right - fadeWidth);
@@ -3800,7 +3801,10 @@ abstract class ParagraphBuilder {
 
 base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements ParagraphBuilder {
   _NativeParagraphBuilder(ParagraphStyle style)
-    : _defaultLeadingDistribution = style._leadingDistribution {
+    : _defaultLeadingDistribution = style._leadingDistribution,
+      _textDirection = (style._encoded[0] & (1 << 2)) != 0
+          ? TextDirection.values[style._encoded[2]]
+          : TextDirection.ltr {
     List<String>? strutFontFamilies;
     final StrutStyle? strutStyle = style._strutStyle;
     final ByteData? encodedStrutStyle;
@@ -3855,6 +3859,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
   final List<double> _placeholderScales = <double>[];
 
   final TextLeadingDistribution _defaultLeadingDistribution;
+  final TextDirection _textDirection;
 
   @override
   void pushStyle(TextStyle style) {
@@ -4018,7 +4023,7 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
 
   @override
   Paragraph build() {
-    final paragraph = _NativeParagraph._();
+    final paragraph = _NativeParagraph._(_textDirection);
     _build(paragraph);
     return paragraph;
   }

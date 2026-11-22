@@ -373,6 +373,16 @@ class EngineCanvas implements LayerCanvas {
     }
   }
 
+  static bool _isParagraphRtl(ui.Paragraph paragraph) {
+    if (paragraph is EngineParagraph) {
+      return paragraph.textDirection == ui.TextDirection.rtl;
+    }
+    if (paragraph is WebParagraph) {
+      return paragraph.paragraphStyle.textDirection == ui.TextDirection.rtl;
+    }
+    return false;
+  }
+
   /// Draws the text in [paragraph] onto this canvas at [offset], clipped to
   /// [clipRect] and modulated by [opacity].
   void _drawParagraphAlignedOrSplit(
@@ -380,6 +390,7 @@ class EngineCanvas implements LayerCanvas {
     ui.Offset offset,
     ui.Rect sortedClip,
     int overflowPosition,
+    bool isRtl,
   ) {
     final double clipWidth = sortedClip.width;
     final double contentWidth = paragraph.width.isFinite ? paragraph.width : paragraph.longestLine;
@@ -409,7 +420,7 @@ class EngineCanvas implements LayerCanvas {
       restore();
       return;
     }
-    if (overflowPosition == 0) {
+    if ((overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl)) {
       drawParagraph(paragraph, ui.Offset(offset.dx - overflowWidth, offset.dy));
       return;
     }
@@ -448,6 +459,8 @@ class EngineCanvas implements LayerCanvas {
       return;
     }
 
+    final bool isRtl = _isParagraphRtl(paragraph);
+
     save();
     this.clipRect(sortedClip, doAntiAlias: false);
 
@@ -467,9 +480,10 @@ class EngineCanvas implements LayerCanvas {
         layerPaint.color = ui.Color.fromARGB(alpha, 0, 0, 0);
       }
       saveLayer(sortedClip, layerPaint);
-      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition, isRtl);
 
       final maskPaint = ui.Paint()..blendMode = ui.BlendMode.modulate;
+      final bool fadeAtLeft = (overflowPosition == 0 && !isRtl) || (overflowPosition == 2 && isRtl);
       if (lines.length > 1) {
         final ui.LineMetrics lastLine = lines.last;
         final double lineTop = math.max(
@@ -483,7 +497,6 @@ class EngineCanvas implements LayerCanvas {
         );
         if (lineRight > lineLeft && sortedClip.bottom > lineTop) {
           final double effectiveFade = math.min(fadeWidth * 2.0, lineRight - lineLeft);
-          final fadeAtLeft = overflowPosition == 0;
           final double fadeStart = fadeAtLeft
               ? math.min(lineRight, lineLeft + effectiveFade)
               : math.max(lineLeft, lineRight - effectiveFade);
@@ -517,7 +530,6 @@ class EngineCanvas implements LayerCanvas {
         );
         drawRect(sortedClip, maskPaint);
       } else {
-        final fadeAtLeft = overflowPosition == 0;
         final double fadeStart = fadeAtLeft
             ? math.min(sortedClip.right, sortedClip.left + fadeWidth)
             : math.max(sortedClip.left, sortedClip.right - fadeWidth);
@@ -532,10 +544,10 @@ class EngineCanvas implements LayerCanvas {
       restore();
     } else if (alpha < 255) {
       saveLayer(sortedClip, ui.Paint()..color = ui.Color.fromARGB(alpha, 0, 0, 0));
-      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition, isRtl);
       restore();
     } else {
-      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition);
+      _drawParagraphAlignedOrSplit(paragraph, offset, sortedClip, overflowPosition, isRtl);
     }
 
     restore();

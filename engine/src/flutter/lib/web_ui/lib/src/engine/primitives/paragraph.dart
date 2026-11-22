@@ -607,7 +607,7 @@ class EngineTextStyle implements ui.TextStyle {
 }
 
 class EngineParagraph implements ui.Paragraph {
-  EngineParagraph(BackendParagraph backendParagraph) {
+  EngineParagraph(BackendParagraph backendParagraph, {this.textDirection = ui.TextDirection.ltr}) {
     _ref = UniqueRef<BackendParagraph>(
       this,
       backendParagraph,
@@ -615,6 +615,8 @@ class EngineParagraph implements ui.Paragraph {
       onDispose: (BackendParagraph p) => p.dispose(),
     );
   }
+
+  final ui.TextDirection textDirection;
 
   late final UniqueRef<BackendParagraph> _ref;
 
@@ -807,7 +809,8 @@ class EngineParagraph implements ui.Paragraph {
 }
 
 class EngineParagraphBuilder implements ui.ParagraphBuilder {
-  EngineParagraphBuilder(EngineParagraphStyle style) {
+  EngineParagraphBuilder(EngineParagraphStyle style)
+    : _textDirection = style.textDirection ?? ui.TextDirection.ltr {
     _ref = UniqueRef<BackendParagraphBuilder>(
       this,
       renderer.createParagraphBuilder(style),
@@ -816,6 +819,8 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     );
     _styleStack.add(style.getTextStyle());
   }
+
+  final ui.TextDirection _textDirection;
 
   late final UniqueRef<BackendParagraphBuilder> _ref;
 
@@ -891,6 +896,6 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     // The backend builder is single-use; release it (and detach its
     // finalizer) as soon as the paragraph is built.
     _ref.dispose();
-    return EngineParagraph(backendParagraph);
+    return EngineParagraph(backendParagraph, textDirection: _textDirection);
   }
 }

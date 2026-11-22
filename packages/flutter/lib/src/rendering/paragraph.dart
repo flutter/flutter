@@ -1262,35 +1262,41 @@ class RenderParagraph extends RenderBox
 
   static TextStyle? _styleAtOffset(InlineSpan span, int targetOffset) {
     final int clampedOffset = math.max(0, targetOffset);
-    var offset = 0;
-    TextStyle? matchedStyle;
-    TextStyle? lastStyle = span.style;
-    span.visitChildren((InlineSpan child) {
-      if (child is PlaceholderSpan) {
-        if (clampedOffset == offset) {
-          matchedStyle = child.style ?? lastStyle;
-          return false;
+
+    (TextStyle?, int) findStyle(InlineSpan current, TextStyle? parentStyle, int currentOffset) {
+      final TextStyle? currentStyle = current.style ?? parentStyle;
+      if (current is PlaceholderSpan) {
+        if (clampedOffset == currentOffset) {
+          return (currentStyle, currentOffset + 1);
         }
-        offset += 1;
-        return true;
+        return (null, currentOffset + 1);
       }
-      if (child is TextSpan) {
-        if (child.style != null) {
-          lastStyle = child.style;
-        }
-        final String? text = child.text;
+      if (current is TextSpan) {
+        var offset = currentOffset;
+        final String? text = current.text;
         if (text != null && text.isNotEmpty) {
           final int end = offset + text.length;
           if (clampedOffset < end) {
-            matchedStyle = child.style ?? lastStyle;
-            return false;
+            return (currentStyle, end);
           }
           offset = end;
         }
+        final List<InlineSpan>? children = current.children;
+        if (children != null) {
+          for (final InlineSpan child in children) {
+            final (TextStyle? matched, int nextOffset) = findStyle(child, currentStyle, offset);
+            if (matched != null) {
+              return (matched, nextOffset);
+            }
+            offset = nextOffset;
+          }
+        }
+        return (null, offset);
       }
-      return true;
-    });
-    return matchedStyle ?? lastStyle;
+      return (null, currentOffset);
+    }
+
+    return findStyle(span, span.style, 0).$1 ?? span.style;
   }
 
   static (TextRange, double) _measureClusterAt(
@@ -1339,85 +1345,93 @@ class RenderParagraph extends RenderBox
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
       hyphens: hyphens,
-    )..layout();
-    final double fullWidth = fullPainter.width;
-    _cachedFullTextWidth = fullWidth;
-    if (fullWidth <= maxWidth) {
-      fullPainter.dispose();
-      return null;
-    }
-
-    final TextStyle? ellipsisStyle = _rawText.style ?? _styleAtOffset(_rawText, 0);
-    final ellipsisPainter = TextPainter(
-      text: TextSpan(style: ellipsisStyle, text: _kEllipsis),
-      textDirection: textDirection,
-      textScaler: textScaler,
-      locale: locale,
-      strutStyle: strutStyle,
-      textHeightBehavior: textHeightBehavior,
-    )..layout();
-    final double ellipsisWidth = ellipsisPainter.width;
-    ellipsisPainter.dispose();
-
-    // For short or medium texts, collect all clusters once so subsequent width
-    // increases can reuse the cache; for very long strings, only scan enough
-    // leading and trailing clusters to fill maxWidth.
-    final bool scanFullText = plainText.length <= 256;
-    final scannedBudgetWidth = scanFullText ? fullWidth : maxWidth;
-    final leadingClusters = <(TextRange, double)>[];
-    final trailingClusters = <(TextRange, double)>[];
-
-    if (scanFullText || _overflowPosition == TextOverflowPosition.middle) {
-      var leadingOffset = 0;
-      var leadingWidth = 0.0;
-      while (leadingOffset < plainText.length && (scanFullText || leadingWidth <= maxWidth)) {
-        final (TextRange range, double clusterWidth) = _measureClusterAt(
-          fullPainter,
-          plainText,
-          fullWidth,
-          leadingOffset,
-        );
-        leadingClusters.add((range, clusterWidth));
-        leadingWidth += clusterWidth;
-        leadingOffset = range.end;
-      }
-    }
-
-    if (scanFullText) {
-      trailingClusters.addAll(leadingClusters.reversed);
-    } else {
-      final int minTrailingOffset = leadingClusters.isNotEmpty ? leadingClusters.last.$1.end : 0;
-      int trailingCursor = plainText.length;
-      var trailingWidth = 0.0;
-      while (trailingCursor > minTrailingOffset && trailingWidth <= maxWidth) {
-        final int probeOffset =
-            trailingCursor >= 2 &&
-                TextPainter.isLowSurrogate(plainText.codeUnitAt(trailingCursor - 1)) &&
-                TextPainter.isHighSurrogate(plainText.codeUnitAt(trailingCursor - 2))
-            ? trailingCursor - 2
-            : trailingCursor - 1;
-        final (TextRange range, double clusterWidth) = _measureClusterAt(
-          fullPainter,
-          plainText,
-          fullWidth,
-          probeOffset,
-        );
-        final int nextCursor = range.start < trailingCursor ? range.start : probeOffset;
-        trailingClusters.add((range, clusterWidth));
-        trailingWidth += clusterWidth;
-        trailingCursor = nextCursor;
-      }
-    }
-    fullPainter.dispose();
-
-    return _cachedEllipsisMetrics = (
-      text: plainText,
-      width: fullWidth,
-      ellipsisWidth: ellipsisWidth,
-      scannedBudgetWidth: scannedBudgetWidth,
-      leadingClusters: leadingClusters,
-      trailingClusters: trailingClusters,
     );
+    try {
+      fullPainter.layout();
+      final double fullWidth = fullPainter.width;
+      _cachedFullTextWidth = fullWidth;
+      if (fullWidth <= maxWidth) {
+        return null;
+      }
+
+      final TextStyle? ellipsisStyle = _rawText.style ?? _styleAtOffset(_rawText, 0);
+      final ellipsisPainter = TextPainter(
+        text: TextSpan(style: ellipsisStyle, text: _kEllipsis),
+        textDirection: textDirection,
+        textScaler: textScaler,
+        locale: locale,
+        strutStyle: strutStyle,
+        textHeightBehavior: textHeightBehavior,
+      );
+      final double ellipsisWidth;
+      try {
+        ellipsisPainter.layout();
+        ellipsisWidth = ellipsisPainter.width;
+      } finally {
+        ellipsisPainter.dispose();
+      }
+
+      // For short or medium texts, collect all clusters once so subsequent width
+      // increases can reuse the cache; for very long strings, only scan enough
+      // leading and trailing clusters to fill maxWidth.
+      final bool scanFullText = plainText.length <= 256;
+      final scannedBudgetWidth = scanFullText ? fullWidth : maxWidth;
+      final leadingClusters = <(TextRange, double)>[];
+      final trailingClusters = <(TextRange, double)>[];
+
+      if (scanFullText || _overflowPosition == TextOverflowPosition.middle) {
+        var leadingOffset = 0;
+        var leadingWidth = 0.0;
+        while (leadingOffset < plainText.length && (scanFullText || leadingWidth <= maxWidth)) {
+          final (TextRange range, double clusterWidth) = _measureClusterAt(
+            fullPainter,
+            plainText,
+            fullWidth,
+            leadingOffset,
+          );
+          leadingClusters.add((range, clusterWidth));
+          leadingWidth += clusterWidth;
+          leadingOffset = range.end;
+        }
+      }
+
+      if (scanFullText) {
+        trailingClusters.addAll(leadingClusters.reversed);
+      } else {
+        final int minTrailingOffset = leadingClusters.isNotEmpty ? leadingClusters.last.$1.end : 0;
+        int trailingCursor = plainText.length;
+        var trailingWidth = 0.0;
+        while (trailingCursor > minTrailingOffset && trailingWidth <= maxWidth) {
+          final int probeOffset =
+              trailingCursor >= 2 &&
+                  TextPainter.isLowSurrogate(plainText.codeUnitAt(trailingCursor - 1)) &&
+                  TextPainter.isHighSurrogate(plainText.codeUnitAt(trailingCursor - 2))
+              ? trailingCursor - 2
+              : trailingCursor - 1;
+          final (TextRange range, double clusterWidth) = _measureClusterAt(
+            fullPainter,
+            plainText,
+            fullWidth,
+            probeOffset,
+          );
+          final int nextCursor = range.start < trailingCursor ? range.start : probeOffset;
+          trailingClusters.add((range, clusterWidth));
+          trailingWidth += clusterWidth;
+          trailingCursor = nextCursor;
+        }
+      }
+
+      return _cachedEllipsisMetrics = (
+        text: plainText,
+        width: fullWidth,
+        ellipsisWidth: ellipsisWidth,
+        scannedBudgetWidth: scannedBudgetWidth,
+        leadingClusters: leadingClusters,
+        trailingClusters: trailingClusters,
+      );
+    } finally {
+      fullPainter.dispose();
+    }
   }
 
   InlineSpan _truncateSpanForEllipsis(double maxWidth) {
@@ -1950,22 +1964,17 @@ class RenderParagraph extends RenderBox
     // to TextPainter.paintMasked -> ui.Paragraph.paintMasked (ParagraphSkia::PaintMasked in C++).
     final bool canDelegateToParagraphPaintMasked =
         _needsClipping &&
+        !size.isEmpty &&
         firstChild == null &&
         _lastSelectableFragments == null &&
         (_overflowShader == null || overflowWidth > 0.0 || _overflowShaderRect != null);
     if (canDelegateToParagraphPaintMasked) {
-      final TextOverflowPosition effectivePosition =
-          (_overflowPosition == TextOverflowPosition.end && textDirection == TextDirection.rtl)
-          ? TextOverflowPosition.start
-          : ((_overflowPosition == TextOverflowPosition.start && textDirection == TextDirection.rtl)
-                ? TextOverflowPosition.end
-                : _overflowPosition);
       _textPainter.paintMasked(
         context.canvas,
         offset,
         clipRect: offset & size,
         fadeHorizontal: _overflowShader != null,
-        overflowPosition: effectivePosition,
+        overflowPosition: _overflowPosition,
       );
       return;
     }
