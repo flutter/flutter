@@ -96,6 +96,11 @@ script="$(readlink -f "$root/{script}")"
 cd "$(dirname "$script")"
 export HOME="$TEST_TMPDIR/home"
 mkdir -p "$HOME"
+
+# The machine's system tools, as a bot's step has them: tools/gn asks
+# `sysctl` whether it runs under Rosetta, which is /usr/sbin's on a Mac,
+# and a test's PATH under Bazel ends at /usr/local/bin.
+export PATH="${{PATH:-/bin:/usr/bin}}:/usr/sbin:/sbin"
 """.format(script = script.short_path)
     else:
         prologue = checkout_view_prologue(directory, build_directory)
