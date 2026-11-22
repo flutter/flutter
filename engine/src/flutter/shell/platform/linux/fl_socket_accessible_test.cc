@@ -12,22 +12,30 @@
 
 class FlSocketAccessibleTest : public flutter::testing::LinuxTest {};
 
-TEST_F(FlSocketAccessibleTest, SocketParent) {
+// Screen readers need to navigate from Flutter content up to the window.
+TEST_F(FlSocketAccessibleTest, PlugParentChainReachesView) {
   flutter::testing::fl_ensure_gtk_init();
   FlView* view = fl_view_new(project);
   g_object_ref_sink(view);
 
   AtkObject* accessible = gtk_widget_get_accessible(GTK_WIDGET(view));
   ASSERT_TRUE(FL_IS_SOCKET_ACCESSIBLE(accessible));
-  ASSERT_EQ(atk_object_get_n_accessible_children(accessible), 1);
-  g_autoptr(AtkObject) socket = atk_object_ref_accessible_child(accessible, 0);
-  ASSERT_TRUE(ATK_IS_SOCKET(socket));
+  g_autoptr(AtkObject) plug = atk_plug_new();
+  fl_socket_accessible_embed(FL_SOCKET_ACCESSIBLE(accessible), ATK_PLUG(plug));
+
+  AtkObject* socket = atk_object_get_parent(plug);
+  ASSERT_NE(socket, nullptr);
   EXPECT_EQ(atk_object_get_parent(socket), accessible);
+  ASSERT_EQ(atk_object_get_n_accessible_children(accessible), 1);
+  g_autoptr(AtkObject) child = atk_object_ref_accessible_child(accessible, 0);
+  EXPECT_EQ(child, socket);
 
   g_object_unref(view);
 }
 
-TEST_F(FlSocketAccessibleTest, SocketState) {
+// Screen readers ignore content that isn't reported as visible, so the socket
+// containing the Flutter content must follow the visibility of the view.
+TEST_F(FlSocketAccessibleTest, ContentVisibleWhenViewVisible) {
   flutter::testing::fl_ensure_gtk_init();
   FlView* view = fl_view_new(project);
   g_object_ref_sink(view);
@@ -44,12 +52,15 @@ TEST_F(FlSocketAccessibleTest, SocketState) {
   g_object_unref(view);
 }
 
-TEST_F(FlSocketAccessibleTest, Embed) {
+// When at-spi2-atk embeds a plug it replaces the socket state lookup with a
+// D-Bus call that can't work for an in-process plug. Check the content is
+// still reported as visible.
+TEST_F(FlSocketAccessibleTest, ContentVisibleAfterAtSpiEmbed) {
   flutter::testing::fl_ensure_gtk_init();
   FlView* view = fl_view_new(project);
   g_object_ref_sink(view);
 
-  // Simulate at-spi2-atk embedding.
+  // Simulate at-spi2-atk embedding, which overrides the socket state lookup.
   AtkSocketClass* atk_socket_class =
       ATK_SOCKET_CLASS(g_type_class_ref(ATK_TYPE_SOCKET));
   auto saved_embed = atk_socket_class->embed;
@@ -68,13 +79,15 @@ TEST_F(FlSocketAccessibleTest, Embed) {
   AtkObject* accessible = gtk_widget_get_accessible(GTK_WIDGET(view));
   g_autoptr(AtkObject) socket = atk_object_ref_accessible_child(accessible, 0);
   AtkObjectClass* socket_class = ATK_OBJECT_GET_CLASS(socket);
-  auto ref_state_set = socket_class->ref_state_set;
+  auto saved_ref_state_set = socket_class->ref_state_set;
   g_autoptr(AtkObject) plug = atk_plug_new();
   fl_socket_accessible_embed(FL_SOCKET_ACCESSIBLE(accessible), ATK_PLUG(plug));
-  EXPECT_EQ(socket_class->ref_state_set, ref_state_set);
-  EXPECT_EQ(atk_object_get_parent(plug), socket);
 
-  socket_class->ref_state_set = ref_state_set;
+  gtk_widget_set_visible(GTK_WIDGET(view), TRUE);
+  g_autoptr(AtkStateSet) states = atk_object_ref_state_set(socket);
+  EXPECT_TRUE(atk_state_set_contains_state(states, ATK_STATE_VISIBLE));
+
+  socket_class->ref_state_set = saved_ref_state_set;
   atk_plug_class->get_object_id = saved_get_object_id;
   g_type_class_unref(atk_plug_class);
   atk_socket_class->embed = saved_embed;

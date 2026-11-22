@@ -162,7 +162,11 @@ TEST_F(FlViewAccessibleTest, AddRemoveChildren) {
   EXPECT_EQ(atk_object_get_n_accessible_children(root_object), 0);
 }
 
-TEST_F(FlViewAccessibleTest, Extents) {
+// Screen readers find content by its location on screen. When at-spi2-atk
+// embeds a plug it replaces the extents lookup with a D-Bus call that can't
+// work for an in-process plug. Check the content still reports the extents of
+// the widget containing it.
+TEST_F(FlViewAccessibleTest, ExtentsMatchParentAfterAtSpiEmbed) {
   g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine, 456);
   g_autoptr(FlAccessibleNode) parent = fl_accessible_node_new(engine, 456, 0);
   fl_accessible_node_set_extents(parent, 10, 20, 30, 40);
