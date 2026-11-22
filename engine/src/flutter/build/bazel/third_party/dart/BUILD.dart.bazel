@@ -12,6 +12,8 @@
 # engine's own snapshot pipeline (//flutter/lib/snapshot) reads from the tree:
 # the core library sources and the bin_to_assembly script.
 
+# This file is loaded as the root of @dart, so the main module is named.
+load("@flutter//build_defs/cc:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -26,12 +28,15 @@ package(default_visibility = ["//visibility:public"])
 # includes the headers as "third_party/dart/runtime/include/<name>.h", which
 # GN resolves through the engine root include directory; include_prefix
 # reproduces that path here so no source has to change. (The headers are
-# exported, through the glob buildifier cannot see into.)
+# exported, through the glob buildifier cannot see into.) The source set
+# keeps GN's default configs, so the shim compiles as first-party code does
+# (chromium_code: -Wall -Wextra, warnings as errors, the C99 macros).
 # buildifier: disable=no-hdrs-no-alwayslink
 cc_library(
     name = "dart_api_headers",
     srcs = ["runtime/include/dart_api_dl.c"],
     hdrs = glob(["runtime/include/**/*.h"]),
+    copts = CHROMIUM_CODE_COPTS,
     include_prefix = "third_party/dart",
     # dart_public_config's include_dirs (runtime/ and runtime/include/): a few
     # sources include "dart_api.h" bare (lib/ui's scene_builder.cc).
@@ -39,6 +44,7 @@ cc_library(
         "runtime",
         "runtime/include",
     ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
 )
 
 # third_party/double-conversion's headers, as the engine includes them

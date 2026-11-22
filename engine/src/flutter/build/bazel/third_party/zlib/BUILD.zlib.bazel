@@ -323,14 +323,18 @@ cc_library(
 # static_library("compression_utils_portable") in google/BUILD.gn: the
 # gzip helpers over zlib that ANGLE's shader cache uses. The secondary tree's
 # //third_party/zlib/google:compression_utils_portable, through which ANGLE
-# names it, adds google/ as an include directory.
+# names it, adds google/ as an include directory. The target keeps GN's
+# default configs, so this one file of the tree compiles as first-party
+# code does (chromium_code: -Wall -Wextra and the C99 macros), unlike zlib
+# itself.
 cc_library(
     name = "compression_utils_portable",
     srcs = ["google/compression_utils_portable.cc"],
     hdrs = ["google/compression_utils_portable.h"],
-    copts = FLUTTER_THIRD_PARTY_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     includes = ["google"],
     linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [":zlib"],
 )
 
