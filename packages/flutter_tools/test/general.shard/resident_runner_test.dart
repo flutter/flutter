@@ -2080,7 +2080,6 @@ flutter:
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
-          setAssetBundlePath,
           const FakeVmServiceRequest(
             method: 'ext.flutter.evict',
             args: <String, Object>{'value': 'foo.shaderbundle', 'isolateId': '1'},
