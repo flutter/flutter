@@ -110,19 +110,30 @@ bool RenderPipeline::Core::BindToPipelineDescriptor(
 
 std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
 RenderPipeline::Core::Resolve(impeller::Context& context,
-                              const impeller::PipelineDescriptor& state) const {
-  // A reload replaced some shader's code, possibly this pipeline's, so a state
-  // that failed to build may build now.
+                              const PipelineState& state) const {
+  // A reload replaced some shader's code, possibly this pipeline's. Recordings
+  // retain what they used, so in-flight work is unaffected.
   const uint64_t generation = Shader::GetRegistrationGeneration();
   if (generation != resolved_generation_) {
     resolved_generation_ = generation;
+    resolved_.clear();
     std::scoped_lock lock(failed_mutex_);
     failed_keys_.clear();
     has_failures_.store(false, std::memory_order_relaxed);
   }
 
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
-  impeller::PipelineDescriptor descriptor = state;
+  if (auto found = resolved_.find(state); found != resolved_.end()) {
+    return found->second;
+  }
+
+  // [state] may be truncated to its used size in a recording, so it has to be
+  // copied by hand.
+  PipelineState key;
+  std::memcpy(static_cast<void*>(&key), &state, state.GetUsedSize());
+  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>& pipeline =
+      resolved_[key];
+
+  impeller::PipelineDescriptor descriptor = state.ToDescriptor();
   if (BindToPipelineDescriptor(*context.GetShaderLibrary(), descriptor)) {
     auto& library = *context.GetPipelineLibrary();
     pipeline =
@@ -145,8 +156,7 @@ RenderPipeline::Core::Resolve(impeller::Context& context,
   return pipeline;
 }
 
-bool RenderPipeline::Core::HasBuildFailed(
-    const impeller::PipelineDescriptor& state) const {
+bool RenderPipeline::Core::HasBuildFailed(const PipelineState& state) const {
   if (!has_failures_.load(std::memory_order_relaxed)) {
     return false;
   }

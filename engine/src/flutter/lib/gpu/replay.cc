@@ -63,15 +63,15 @@ impeller::raw_ptr<const impeller::Sampler> PassReplayer::GetSampler(
 void PassReplayer::SetPipelineState(PassRecording& recording,
                                     const SetPipelineStateOp& op) {
   if (pipeline_op_ && pipeline_op_->core == op.core &&
-      pipeline_op_->descriptor == op.descriptor) {
+      pipeline_op_->state == op.state) {
     return;
   }
   pipeline_op_ = &op;
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline =
-      op.core->Resolve(context_, *op.descriptor);
+      op.core->Resolve(context_, op.state);
   pipeline_ = impeller::PipelineRef(pipeline);
   // Backends can read the pipeline until the work completes, and a shader
-  // reload can drop it from the library before then.
+  // reload can drop it from the core and the library before then.
   if (pipeline) {
     recording.Retain(std::move(pipeline));
   }

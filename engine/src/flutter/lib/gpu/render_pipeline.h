@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 
 #include <atomic>
+#include <cstdint>
 #include <future>
 #include <memory>
 #include <mutex>
@@ -13,12 +14,14 @@
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/pipeline_state.h"
 #include "flutter/lib/gpu/shader.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/vertex_descriptor.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_set.h"
 
 namespace flutter {
@@ -49,17 +52,19 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
         impeller::ShaderLibrary& library,
         impeller::PipelineDescriptor& desc) const;
 
-    /// The backend pipeline for [state], a descriptor without shaders or a
-    /// vertex layout, or null if it fails to build. Only for use on the replay
-    /// thread.
+    /// The backend pipeline for [state], built on first use, or null if it
+    /// fails to build. Only for use on the replay thread.
+    ///
+    /// Keyed on plain data so that a state change costs one hash, instead of
+    /// building a descriptor and looking it up in the pipeline library.
     std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> Resolve(
         impeller::Context& context,
-        const impeller::PipelineDescriptor& state) const;
+        const PipelineState& state) const;
 
     /// Whether the backend failed to build the pipeline for [state], so that
     /// draws with that state fail on the recording thread instead of being
     /// dropped at replay.
-    bool HasBuildFailed(const impeller::PipelineDescriptor& state) const;
+    bool HasBuildFailed(const PipelineState& state) const;
 
    private:
     const std::string vertex_name_;
@@ -71,6 +76,11 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
     const std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor_;
 
     // Replay thread only.
+    mutable absl::flat_hash_map<
+        PipelineState,
+        std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>,
+        PipelineState::Hash>
+        resolved_;
     mutable uint64_t resolved_generation_ = 0;
 
     // Keeps the check on the recording thread free of locks and hashing,

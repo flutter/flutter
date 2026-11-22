@@ -48,6 +48,8 @@ source_set("gpu") {
       "export.h",
       "formats.cc",
       "formats.h",
+      "pipeline_state.cc",
+      "pipeline_state.h",
       "recording.cc",
       "recording.h",
       "render_pass.cc",

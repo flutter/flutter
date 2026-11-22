@@ -230,6 +230,7 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     ON_CALL(*pipeline_library_, GetPipeline(_, _, _))
         .WillByDefault([this](impeller::PipelineDescriptor descriptor,
                               bool async, bool threadsafe) {
+          pipeline_builds_++;
           std::promise<
               std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>
               promise;
@@ -295,7 +296,7 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     const impeller::SamplerDescriptor sampler;
     for (size_t i = 0; i < draws; i++) {
       pass.ClearBindings();
-      pass.SetPipeline(pipeline_);
+      pass.SetPipeline(pipeline_.get());
       pass.SetCullMode(i % 2 == 0 ? impeller::CullMode::kBackFace
                                   : impeller::CullMode::kFrontFace);
       pass.BindVertexBuffer(0, *buffer_, 0, 1024);
@@ -313,6 +314,16 @@ class FlutterGpuRecordingTest : public ::testing::Test {
     }
   }
 
+  // Records and submits a frame of draws.
+  void RunFrame(size_t draws) {
+    auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
+    auto pass = MakePass();
+    EXPECT_TRUE(pass->Begin(*command_buffer));
+    RecordDraws(*pass, draws);
+    pass->End();
+    EXPECT_TRUE(command_buffer->Submit());
+  }
+
   std::shared_ptr<NiceMock<MockImpellerContext>> context_;
   std::shared_ptr<NiceMock<MockCommandBuffer>> impeller_command_buffer_;
   std::shared_ptr<NiceMock<MockCommandQueue>> command_queue_;
@@ -326,8 +337,35 @@ class FlutterGpuRecordingTest : public ::testing::Test {
   fml::RefPtr<RenderPipeline> pipeline_;
   fml::RefPtr<DeviceBuffer> buffer_;
   fml::RefPtr<Texture> texture_;
+  size_t pipeline_builds_ = 0;
   bool build_fails_ = false;
 };
+
+// Only a change of state costs a lookup, and only a new state costs a build.
+TEST_F(FlutterGpuRecordingTest, PipelinesBuildOncePerState) {
+  RunFrame(100);
+  // The back and front face culling states, across every frame so far.
+  EXPECT_EQ(pipeline_builds_, 2u);
+  RunFrame(100);
+  EXPECT_EQ(pipeline_builds_, 2u);
+  EXPECT_EQ(last_pass_->pipelines, 100u);
+  EXPECT_EQ(last_pass_->draws, 100u);
+}
+
+// A reload replaces a shader's code, so what was built from it can't be used
+// for new work.
+TEST_F(FlutterGpuRecordingTest, ReplacingAShaderRebuildsPipelines) {
+  auto context = fml::MakeRefCounted<Context>(context_);
+  vertex_->ScheduleRegistration(*context);
+  RunFrame(1);
+  const size_t builds = pipeline_builds_;
+  ASSERT_GT(builds, 0u);
+
+  vertex_->ResetFrom(*MakeShader(impeller::ShaderStage::kVertex));
+  vertex_->ScheduleRegistration(*context);
+  RunFrame(1);
+  EXPECT_GT(pipeline_builds_, builds);
+}
 
 // A build failure is only discovered at replay. That draw is dropped, and later
 // draws with the same state fail when recorded, so the caller sees it.
@@ -338,7 +376,7 @@ TEST_F(FlutterGpuRecordingTest, KnownBuildFailuresFailDrawsWhenRecorded) {
   auto first_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto first = MakePass();
   ASSERT_TRUE(first->Begin(*first_buffer));
-  first->SetPipeline(pipeline_);
+  first->SetPipeline(pipeline_.get());
   EXPECT_TRUE(first->Draw(3, 1, /*indexed=*/false));
   first->End();
   EXPECT_EQ(last_pass_->draws, 0u);
@@ -347,7 +385,7 @@ TEST_F(FlutterGpuRecordingTest, KnownBuildFailuresFailDrawsWhenRecorded) {
   auto second_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto second = MakePass();
   ASSERT_TRUE(second->Begin(*second_buffer));
-  second->SetPipeline(pipeline_);
+  second->SetPipeline(pipeline_.get());
   EXPECT_FALSE(second->Draw(3, 1, /*indexed=*/false));
 
   // Different state is unaffected.
@@ -362,13 +400,13 @@ TEST_F(FlutterGpuRecordingTest, ReplayFollowsBindingRules) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer));
-  pass->SetPipeline(pipeline_);
+  pass->SetPipeline(pipeline_.get());
 
   auto set = fml::MakeRefCounted<BindingSet>();
   ASSERT_TRUE(set->AddUniform(*vertex_, 0, buffer_->GetBuffer(), 256, 64));
-  pass->BindSet(0, set);
-  pass->BindSet(0, set);
-  pass->BindSet(RenderPass::kMaxBindingSets, set);
+  pass->BindSet(0, set.get());
+  pass->BindSet(0, set.get());
+  pass->BindSet(RenderPass::kMaxBindingSets, set.get());
   pass->BindUniform(*vertex_, vertex_->GetUniformStructAt(0), *buffer_, 512,
                     64);
   // Rebinding replaces the earlier bind of the same binding.
@@ -399,7 +437,7 @@ TEST_F(FlutterGpuRecordingTest, ReplayKeepsDrawState) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context_);
   auto pass = MakePass();
   ASSERT_TRUE(pass->Begin(*command_buffer));
-  pass->SetPipeline(pipeline_);
+  pass->SetPipeline(pipeline_.get());
   pass->BindVertexBuffer(0, *buffer_, 0, 64);
   pass->BindVertexBuffer(1, *buffer_, 64, 64);
   pass->BindIndexBuffer(*buffer_, 128, 64, impeller::IndexType::k32bit);
@@ -438,6 +476,46 @@ TEST(FlutterGpuOpStreamTest, ForEachCrossesChunks) {
 
   stream.Reset();
   stream.ForEach([](const OpHeader& header) { FAIL(); });
+}
+
+TEST(FlutterGpuPipelineStateTest, ComparesOnlyUsedAttachments) {
+  PipelineState a;
+  a.color_attachment_count = 1;
+  PipelineState b = a;
+  EXPECT_EQ(a, b);
+  EXPECT_EQ(a.GetHash(), b.GetHash());
+
+  // Beyond the used attachments, which a recording does not copy.
+  b.colors[1].blending_enabled = true;
+  EXPECT_EQ(a, b);
+  EXPECT_EQ(a.GetHash(), b.GetHash());
+
+  b.colors[0].blending_enabled = true;
+  EXPECT_FALSE(a == b);
+  EXPECT_NE(a.GetHash(), b.GetHash());
+}
+
+TEST(FlutterGpuPipelineStateTest, ToDescriptorKeepsTheState) {
+  PipelineState state;
+  state.cull_mode = impeller::CullMode::kBackFace;
+  state.sample_count = impeller::SampleCount::kCount4;
+  state.depth_format = impeller::PixelFormat::kD32FloatS8UInt;
+  state.depth.depth_write_enabled = true;
+  state.color_attachment_count = 2;
+  state.colors[0].format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  state.colors[1].format = impeller::PixelFormat::kUnknown;
+
+  const impeller::PipelineDescriptor descriptor = state.ToDescriptor();
+  EXPECT_EQ(descriptor.GetCullMode(), impeller::CullMode::kBackFace);
+  EXPECT_EQ(descriptor.GetSampleCount(), impeller::SampleCount::kCount4);
+  EXPECT_EQ(descriptor.GetDepthPixelFormat(),
+            impeller::PixelFormat::kD32FloatS8UInt);
+  ASSERT_TRUE(descriptor.GetDepthStencilAttachmentDescriptor().has_value());
+  EXPECT_TRUE(
+      descriptor.GetDepthStencilAttachmentDescriptor()->depth_write_enabled);
+  EXPECT_EQ(descriptor.GetColorAttachmentDescriptors().size(), 1u);
+  EXPECT_EQ(descriptor.GetStencilPixelFormat(),
+            impeller::PixelFormat::kUnknown);
 }
 
 TEST(FlutterGpuSamplerKeyTest, KeysRoundTrip) {

@@ -14,6 +14,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/compute_pipeline.h"
+#include "flutter/lib/gpu/pipeline_state.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/core/device_buffer.h"
@@ -22,7 +23,6 @@
 #include "impeller/core/texture.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_target.h"
 
 namespace flutter {
@@ -67,9 +67,16 @@ struct Op : OpHeader {
 // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 
 struct SetPipelineStateOp : Op<RecordedOp::kSetPipelineState> {
+  /// The op's size when it holds [state], whose unused color attachments are
+  /// not recorded.
+  static size_t SizeFor(const PipelineState& state) {
+    return sizeof(SetPipelineStateOp) - sizeof(PipelineState) +
+           state.GetUsedSize();
+  }
+
   const RenderPipeline::Core* core;
-  /// The draw state, without shaders or a vertex layout.
-  const impeller::PipelineDescriptor* descriptor;
+  /// Must stay last. See `SizeFor`.
+  PipelineState state;
 };
 
 struct BindUniformOp : Op<RecordedOp::kBindUniform> {
@@ -198,13 +205,13 @@ class OpStream {
 
   ~OpStream();
 
-  /// Appends an op, and returns it for the caller to fill in.
+  /// Appends an op, and returns it for the caller to fill in. [size] is
+  /// smaller than the op when its trailing fields are unused.
   template <typename T>
-  T* Append() {
+  T* Append(size_t size = sizeof(T)) {
     static_assert(std::is_trivially_destructible_v<T>);
     static_assert(alignof(T) <= kAlignment);
-    constexpr size_t aligned_size =
-        (sizeof(T) + kAlignment - 1) & ~(kAlignment - 1);
+    const size_t aligned_size = (size + kAlignment - 1) & ~(kAlignment - 1);
     if (aligned_size > static_cast<size_t>(limit_ - cursor_)) [[unlikely]] {
       AddChunk();
     }

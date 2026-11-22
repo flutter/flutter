@@ -95,10 +95,10 @@ TEST(FlutterGpuRenderPassTest, SetDepthWriteEnableHonorsArgument) {
   auto render_pass = fml::MakeRefCounted<RenderPass>();
 
   InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), true);
-  EXPECT_TRUE(render_pass->GetDepthAttachmentDescriptor().depth_write_enabled);
+  EXPECT_TRUE(render_pass->GetPipelineState().depth.depth_write_enabled);
 
   InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), false);
-  EXPECT_FALSE(render_pass->GetDepthAttachmentDescriptor().depth_write_enabled);
+  EXPECT_FALSE(render_pass->GetPipelineState().depth.depth_write_enabled);
 }
 
 // Draws memoize the built pipeline until the pipeline-affecting state
@@ -139,7 +139,8 @@ TEST(FlutterGpuRenderPassTest, PipelineStateMutationsMarkStateDirty) {
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 
   render_pass->ClearPipelineStateDirtyForTesting();
-  render_pass->SetPipeline(MakeRenderPipeline());
+  auto pipeline = MakeRenderPipeline();
+  render_pass->SetPipeline(pipeline.get());
   EXPECT_TRUE(render_pass->IsPipelineStateDirtyForTesting());
 }
 
@@ -154,14 +155,17 @@ TEST(FlutterGpuRenderPassTest, RedundantPipelineStateAssignmentsAreIgnored) {
   render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
   render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
   render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(pipeline.get());
 
   render_pass->ClearPipelineStateDirtyForTesting();
   render_pass->SetCullMode(impeller::CullMode::kBackFace);
   render_pass->SetWindingOrder(impeller::WindingOrder::kCounterClockwise);
   render_pass->SetPrimitiveType(impeller::PrimitiveType::kTriangleStrip);
   render_pass->SetPolygonMode(impeller::PolygonMode::kLine);
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(pipeline.get());
+  InternalFlutterGpu_RenderPass_SetColorBlendEnable(render_pass.get(), 0,
+                                                    false);
+  InternalFlutterGpu_RenderPass_SetDepthWriteEnable(render_pass.get(), false);
   EXPECT_FALSE(render_pass->IsPipelineStateDirtyForTesting());
 
   // A real change still dirties.
@@ -177,7 +181,7 @@ TEST(FlutterGpuRenderPassTest, DrawsRecordPipelineStateOnlyWhenItChanges) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
   auto render_pass = MakeBegunRenderPass(*command_buffer);
   auto pipeline = MakeRenderPipeline();
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(pipeline.get());
 
   EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
   EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
@@ -198,7 +202,7 @@ TEST(FlutterGpuRenderPassTest, EndedPassesRecordNothing) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
   auto render_pass = MakeBegunRenderPass(*command_buffer);
   auto pipeline = MakeRenderPipeline();
-  render_pass->SetPipeline(pipeline);
+  render_pass->SetPipeline(pipeline.get());
   EXPECT_TRUE(render_pass->Draw(3, 1, /*indexed=*/false));
 
   {
@@ -218,7 +222,7 @@ TEST(FlutterGpuRenderPassTest, PassesEndedByALaterPassRecordNothing) {
   auto command_buffer = fml::MakeRefCounted<CommandBuffer>(context);
   auto first = MakeBegunRenderPass(*command_buffer);
   auto pipeline = MakeRenderPipeline();
-  first->SetPipeline(pipeline);
+  first->SetPipeline(pipeline.get());
 
   impeller::ScopedValidationDisable disable_validation;
   auto second = MakeBegunRenderPass(*command_buffer);

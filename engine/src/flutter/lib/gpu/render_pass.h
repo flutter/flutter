@@ -6,18 +6,17 @@
 #define FLUTTER_LIB_GPU_RENDER_PASS_H_
 
 #include <cstdint>
-#include <map>
 #include <memory>
 
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
+#include "flutter/lib/gpu/pipeline_state.h"
 #include "flutter/lib/gpu/recording.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_target.h"
 #include "lib/gpu/device_buffer.h"
 #include "lib/gpu/render_pipeline.h"
@@ -38,16 +37,22 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   impeller::RenderTarget& GetRenderTarget();
   const impeller::RenderTarget& GetRenderTarget() const;
 
-  impeller::ColorAttachmentDescriptor& GetColorAttachmentDescriptor(
-      size_t color_attachment_index);
+  const PipelineState& GetPipelineState() const { return pipeline_state_; }
 
-  impeller::DepthAttachmentDescriptor& GetDepthAttachmentDescriptor();
+  /// [color_attachment_index] must be less than
+  /// `PipelineState::kMaxColorAttachments`.
+  void SetColorAttachmentDescriptor(
+      size_t color_attachment_index,
+      const impeller::ColorAttachmentDescriptor& descriptor);
 
-  impeller::StencilAttachmentDescriptor& GetStencilFrontAttachmentDescriptor();
+  void SetDepthAttachmentDescriptor(
+      const impeller::DepthAttachmentDescriptor& descriptor);
 
-  impeller::StencilAttachmentDescriptor& GetStencilBackAttachmentDescriptor();
+  void SetStencilFrontAttachmentDescriptor(
+      const impeller::StencilAttachmentDescriptor& descriptor);
 
-  impeller::PipelineDescriptor& GetPipelineDescriptor();
+  void SetStencilBackAttachmentDescriptor(
+      const impeller::StencilAttachmentDescriptor& descriptor);
 
   /// Ends the command buffer's open pass and starts recording this one, for
   /// the command buffer to replay on the raster thread. Fails when the render
@@ -58,7 +63,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   /// nothing if a later command already ended it.
   void End();
 
-  void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
+  void SetPipeline(RenderPipeline* pipeline);
 
   /// Set the face culling mode for subsequent draws.
   void SetCullMode(impeller::CullMode mode);
@@ -82,7 +87,7 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   /// Puts [set] in [slot], replacing whatever was there. Passing a null set
   /// empties the slot. Out of range slots are ignored.
-  void BindSet(size_t slot, const fml::RefPtr<BindingSet>& set);
+  void BindSet(size_t slot, BindingSet* set);
 
   void ClearBindings();
 
@@ -146,10 +151,11 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
     return command_buffer_ ? command_buffer_->GetOpenPass(this) : nullptr;
   }
 
-  // The non-dirtying counterpart of GetColorAttachmentDescriptor, for
-  // recording the pipeline state.
-  impeller::ColorAttachmentDescriptor& ColorAttachmentDescriptorAt(
-      size_t color_attachment_index);
+  template <typename T>
+  void SetPipelineStateField(T& field, const T& value);
+
+  /// Fills in the parts of the pipeline state the render target decides.
+  void CaptureRenderTargetState();
 
   /// Records the pipeline state for the draws that follow.
   void RecordPipelineState(PassRecording& recording);
@@ -159,15 +165,8 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   // the open pass, so nothing has to tell the pass when it ended.
   fml::RefPtr<CommandBuffer> command_buffer_;
   fml::RefPtr<RenderPipeline> render_pipeline_;
-  impeller::PipelineDescriptor pipeline_descriptor_;
 
-  // Pipeline descriptor layout state. We always keep track of this state,
-  // but we'll only apply it as necessary to match the RenderTarget.
-  std::map<size_t, impeller::ColorAttachmentDescriptor> color_descriptors_;
-  impeller::StencilAttachmentDescriptor stencil_front_desc_;
-  impeller::StencilAttachmentDescriptor stencil_back_desc_;
-  impeller::DepthAttachmentDescriptor depth_desc_;
-
+  PipelineState pipeline_state_;
   bool pipeline_state_dirty_ = true;
   // Whether the backend already failed to build the current state.
   bool pipeline_known_failed_ = false;
