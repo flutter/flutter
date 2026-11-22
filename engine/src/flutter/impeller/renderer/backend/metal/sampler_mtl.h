@@ -22,7 +22,7 @@ class SamplerMTL final : public Sampler,
   // |Sampler|
   ~SamplerMTL() override;
 
-  id<MTLSamplerState> GetMTLSamplerState() const;
+  const id<MTLSamplerState>& GetMTLSamplerState() const { return state_; }
 
  private:
   friend SamplerLibraryMTL;

@@ -38,6 +38,13 @@ class TextureMTL final : public Texture,
 
   id<MTLTexture> GetMTLTexture() const;
 
+  /// The texture, without acquiring it or touching its reference count, for
+  /// use once per bind. Nil for a drawable, which only `GetMTLTexture` can
+  /// acquire.
+  const id<MTLTexture>& GetResolvedMTLTexture() const {
+    return resolved_texture_;
+  }
+
   bool IsWrapped() const;
 
   /// @brief Whether or not this texture is wrapping a Metal drawable.
@@ -59,6 +66,7 @@ class TextureMTL final : public Texture,
 #endif  // IMPELLER_DEBUG
 
   AcquireTextureProc aquire_proc_ = {};
+  id<MTLTexture> resolved_texture_ = nil;
   bool is_valid_ = false;
   bool is_wrapped_ = false;
   bool is_drawable_ = false;
