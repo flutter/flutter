@@ -1079,77 +1079,16 @@ class WebParagraph implements ui.Paragraph {
     return result;
   }
 
-  double _lockedMaxWidth = 0.0;
-  double _lockedMaxHeight = 0.0;
-
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    _lockedMaxWidth = 0.0;
-    _lockedMaxHeight = 0.0;
-    _layoutInternal(constraints.width);
-  }
-
-  void _layoutInternal(double width) {
-    _layout.performLayout(width);
+    _layout.performLayout(constraints.width);
     WebParagraphDebug.apiTrace(
-      'layout("$text", ${width.toStringAsFixed(4)}}): '
-      'width=${this.width.toStringAsFixed(4)} height=${height.toStringAsFixed(4)} '
+      'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
+      'width=${width.toStringAsFixed(4)} height=${height.toStringAsFixed(4)} '
       'minIntrinsicWidth=${minIntrinsicWidth.toStringAsFixed(4)} maxIntrinsicWidth=${maxIntrinsicWidth.toStringAsFixed(4)} '
       'longestLine=${longestLine.toStringAsFixed(4)} '
       'maxLineWidthWithTrailingSpaces=${maxLineWidthWithTrailingSpaces.toStringAsFixed(4)} lines=${_layout.lines.length}',
     );
-  }
-
-  @override
-  void layoutWithShrinkLock(ui.ParagraphConstraints constraints, {bool lockWidth = false}) {
-    if (!lockWidth) {
-      layout(constraints);
-      return;
-    }
-    final double width = constraints.width;
-    if (width.isFinite && width > _lockedMaxWidth) {
-      _lockedMaxWidth = width;
-    }
-    final double targetWidth = _lockedMaxWidth > width ? _lockedMaxWidth : width;
-    _layoutInternal(targetWidth);
-
-    final double intrinsicW = maxIntrinsicWidth;
-    if (numberOfLines <= 1 && intrinsicW.isFinite && intrinsicW > _lockedMaxWidth) {
-      _lockedMaxWidth = intrinsicW;
-      if (_lockedMaxWidth > targetWidth) {
-        _layoutInternal(_lockedMaxWidth);
-      }
-    }
-    final double naturalH = height;
-    if (naturalH.isFinite && naturalH > _lockedMaxHeight) {
-      _lockedMaxHeight = naturalH;
-    }
-  }
-
-  @override
-  double computeScrollFadeOpacity(
-    double currentWidth,
-    double currentHeight, {
-    double fadeEndFraction = 0.5,
-  }) {
-    final double safeEnd = fadeEndFraction.isFinite ? fadeEndFraction : 0.5;
-    final double denom = ui.clampDouble(1.0 - safeEnd, 0.0001, 1.0);
-    var widthAlpha = 1.0;
-    final double intrinsicW = maxIntrinsicWidth;
-    final double refW = (intrinsicW.isFinite && intrinsicW > 0.0 && _lockedMaxWidth > 0.0)
-        ? math.min(_lockedMaxWidth, intrinsicW)
-        : _lockedMaxWidth;
-    if (refW > 0.0 && currentWidth.isFinite && currentWidth < refW) {
-      final double progress = ui.clampDouble(1.0 - (currentWidth / refW), 0.0, 1.0);
-      widthAlpha = ui.clampDouble(1.0 - (progress / denom), 0.0, 1.0);
-    }
-    var heightAlpha = 1.0;
-    final double refH = _lockedMaxHeight;
-    if (refH > 0.0 && currentHeight.isFinite && currentHeight < refH) {
-      final double progress = ui.clampDouble(1.0 - (currentHeight / refH), 0.0, 1.0);
-      heightAlpha = ui.clampDouble(1.0 - (progress / denom), 0.0, 1.0);
-    }
-    return math.min(widthAlpha, heightAlpha);
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {

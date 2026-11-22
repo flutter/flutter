@@ -694,12 +694,6 @@ abstract class Paragraph {
   double get ideographicBaseline;
   bool get didExceedMaxLines;
   void layout(ParagraphConstraints constraints);
-  void layoutWithShrinkLock(ParagraphConstraints constraints, {bool lockWidth = false});
-  double computeScrollFadeOpacity(
-    double currentWidth,
-    double currentHeight, {
-    double fadeEndFraction = 0.5,
-  });
   List<TextBox> getBoxesForRange(
     int start,
     int end, {

@@ -63,17 +63,6 @@ void Paragraph::layout(double width) {
   m_paragraph_->Layout(width);
 }
 
-void Paragraph::layoutWithShrinkLock(double width, bool lock_width) {
-  m_paragraph_->LayoutWithShrinkLock(width, lock_width);
-}
-
-double Paragraph::computeScrollFadeOpacity(double current_width,
-                                           double current_height,
-                                           double fade_end_fraction) {
-  return m_paragraph_->ComputeScrollFadeOpacity(current_width, current_height,
-                                                fade_end_fraction);
-}
-
 void Paragraph::paint(Canvas* canvas, double x, double y) {
   if (!m_paragraph_ || !canvas) {
     // disposed.

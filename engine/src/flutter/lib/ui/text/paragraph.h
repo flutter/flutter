@@ -35,10 +35,6 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   bool didExceedMaxLines();
 
   void layout(double width);
-  void layoutWithShrinkLock(double width, bool lock_width);
-  double computeScrollFadeOpacity(double current_width,
-                                  double current_height,
-                                  double fade_end_fraction = 0.5);
   void paint(Canvas* canvas, double x, double y);
   void paintMasked(Canvas* canvas,
                    double x,

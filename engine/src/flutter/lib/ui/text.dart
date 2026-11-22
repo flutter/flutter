@@ -3106,18 +3106,6 @@ abstract class Paragraph {
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
   void layout(ParagraphConstraints constraints);
 
-  /// Lays out the paragraph while optionally locking the layout width to the
-  /// high-water-mark width seen so far when [lockWidth] is true.
-  void layoutWithShrinkLock(ParagraphConstraints constraints, {bool lockWidth = false});
-
-  /// Computes the scroll-shrink fade opacity in `0.0..1.0` based on the locked
-  /// high-water-mark dimensions and the current visible container dimensions.
-  double computeScrollFadeOpacity(
-    double currentWidth,
-    double currentHeight, {
-    double fadeEndFraction = 0.5,
-  });
-
   /// Returns a list of text boxes that enclose the given text range.
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] parameters allow customization
@@ -3314,38 +3302,6 @@ base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragrap
 
   @Native<Void Function(Pointer<Void>, Double)>(symbol: 'Paragraph::layout', isLeaf: true)
   external void _layout(double width);
-
-  @override
-  void layoutWithShrinkLock(ParagraphConstraints constraints, {bool lockWidth = false}) {
-    _layoutWithShrinkLock(constraints.width, lockWidth);
-    assert(() {
-      _needsLayout = false;
-      return true;
-    }());
-  }
-
-  @Native<Void Function(Pointer<Void>, Double, Bool)>(
-    symbol: 'Paragraph::layoutWithShrinkLock',
-    isLeaf: true,
-  )
-  external void _layoutWithShrinkLock(double width, bool lockWidth);
-
-  @override
-  double computeScrollFadeOpacity(
-    double currentWidth,
-    double currentHeight, {
-    double fadeEndFraction = 0.5,
-  }) => _computeScrollFadeOpacity(currentWidth, currentHeight, fadeEndFraction);
-
-  @Native<Double Function(Pointer<Void>, Double, Double, Double)>(
-    symbol: 'Paragraph::computeScrollFadeOpacity',
-    isLeaf: true,
-  )
-  external double _computeScrollFadeOpacity(
-    double currentWidth,
-    double currentHeight,
-    double fadeEndFraction,
-  );
 
   List<TextBox> _decodeTextBoxes(Float32List encoded) {
     final int count = encoded.length ~/ 5;
