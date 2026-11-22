@@ -2144,6 +2144,95 @@ void main() {
       expect(getViewport(tester, childKey), isNot(paints..clipRect()));
     });
 
+    testWidgets('clips when a child is laid out beyond any edge of the viewport', (
+      WidgetTester tester,
+    ) async {
+      // Four 200x200 children laid out in a 2x2 grid.
+      const Key childKey = ValueKey<ChildVicinity>(ChildVicinity(xIndex: 0, yIndex: 0));
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 1,
+        maxYIndex: 1,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox.square(key: ValueKey<ChildVicinity>(vicinity), dimension: 200);
+        },
+      );
+      addTearDown(delegate.dispose);
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1;
+
+      Future<void> pumpViewport(
+        Size size, {
+        AxisDirection horizontalDirection = AxisDirection.right,
+        AxisDirection verticalDirection = AxisDirection.down,
+      }) async {
+        tester.view.physicalSize = size;
+        await tester.pumpWidget(
+          simpleBuilderTest(
+            delegate: delegate,
+            horizontalDetails: ScrollableDetails(direction: horizontalDirection),
+            verticalDetails: ScrollableDetails(direction: verticalDirection),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      // The second column extends beyond the right edge.
+      await pumpViewport(const Size(300.0, 400.0));
+      expect(getViewport(tester, childKey), paints..clipRect());
+
+      // The second column extends beyond the left edge.
+      await pumpViewport(const Size(300.0, 400.0), horizontalDirection: AxisDirection.left);
+      expect(getViewport(tester, childKey), paints..clipRect());
+
+      // The second row extends beyond the bottom edge.
+      await pumpViewport(const Size(400.0, 300.0));
+      expect(getViewport(tester, childKey), paints..clipRect());
+
+      // The second row extends beyond the top edge.
+      await pumpViewport(const Size(400.0, 300.0), verticalDirection: AxisDirection.up);
+      expect(getViewport(tester, childKey), paints..clipRect());
+
+      // The second column is laid out entirely outside of the viewport. It is
+      // not painted, but the viewport still clips.
+      await pumpViewport(const Size(200.0, 400.0));
+      expect(getViewport(tester, childKey), paints..clipRect());
+    });
+
+    testWidgets('clips when scrolled, even if every child fits', (WidgetTester tester) async {
+      // Three 200x200 children laid out side by side in a 400x200 viewport.
+      const Key childKey = ValueKey<ChildVicinity>(ChildVicinity(xIndex: 1, yIndex: 0));
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 2,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox.square(key: ValueKey<ChildVicinity>(vicinity), dimension: 200);
+        },
+      );
+      addTearDown(delegate.dispose);
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(400.0, 200.0);
+
+      await tester.pumpWidget(
+        simpleBuilderTest(
+          delegate: delegate,
+          horizontalDetails: ScrollableDetails.horizontal(controller: controller),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Only the second and third children are laid out, and they fill the
+      // viewport exactly.
+      controller.jumpTo(200.0);
+      await tester.pump();
+      expect(
+        getViewport(tester, childKey),
+        paints..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 400.0, 200.0)),
+      );
+    });
+
     testWidgets('Rebuilds when delegate changes', (WidgetTester tester) async {
       final firstChildKey = UniqueKey();
       final delegate = TwoDimensionalChildBuilderDelegate(
@@ -2420,6 +2509,23 @@ void main() {
       final error = tester.takeException() as AssertionError;
       expect(error.toString(), contains('child.hasSize'));
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('asserts the children are laid out with parentUsesSize or tight constraints', (
+      WidgetTester tester,
+    ) async {
+      final delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 5,
+        maxYIndex: 5,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox.square(dimension: 200);
+        },
+      );
+      addTearDown(delegate.dispose);
+
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate, layoutChildLoosely: true));
+      final error = tester.takeException() as AssertionError;
+      expect(error.message, contains('without parentUsesSize: true'));
+    });
 
     testWidgets('does not support intrinsics', (WidgetTester tester) async {
       final childKeys = <ChildVicinity, UniqueKey>{};

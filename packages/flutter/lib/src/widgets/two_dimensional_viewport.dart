@@ -1326,7 +1326,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     _firstChild = null;
     _lastChild = null;
     _activeChildrenForLayoutPass.clear();
-    _hasVisualOverflow = false;
+    _hasVisualOverflow = horizontalOffset.pixels > 0.0 || verticalOffset.pixels > 0.0;
     _childManager._startLayout();
 
     // Subclass lays out children.
@@ -1519,6 +1519,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       'representing the position of the child.',
     );
     assert(child.hasSize); // Child must have been laid out by now.
+    assert(
+      child.debugCanParentUseSize || child.constraints.isTight,
+      'The child with ChildVicinity(xIndex: ${childParentData.vicinity.xIndex}, '
+      'yIndex: ${childParentData.vicinity.yIndex}) was laid out with loose '
+      'constraints and without parentUsesSize: true. Children should be laid '
+      'out with parentUsesSize: true during layoutChildSequence.',
+    );
 
     // Set paintExtent (and visibility)
     childParentData._paintExtent = computeChildPaintExtent(
@@ -1533,13 +1540,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // If the child extends beyond the bounds of the viewport, including when it
     // is laid out outside of them (for example, in the cache extent), there is
     // visual overflow.
-    final Offset layoutOffset = childParentData.layoutOffset!;
+    final Offset paintOffset = childParentData.paintOffset!;
     _hasVisualOverflow =
         _hasVisualOverflow ||
-        layoutOffset.dx < 0.0 ||
-        layoutOffset.dy < 0.0 ||
-        layoutOffset.dx + child.size.width > viewportDimension.width ||
-        layoutOffset.dy + child.size.height > viewportDimension.height;
+        paintOffset.dx < 0.0 ||
+        paintOffset.dy < 0.0 ||
+        paintOffset.dx + child.size.width > viewportDimension.width ||
+        paintOffset.dy + child.size.height > viewportDimension.height;
   }
 
   /// Computes the portion of the child that is visible, assuming that only the

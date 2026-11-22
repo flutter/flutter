@@ -46,6 +46,7 @@ Widget simpleBuilderTest({
   bool useCacheExtent = false,
   bool applyDimensions = true,
   bool forgetToLayoutChild = false,
+  bool layoutChildLoosely = false,
   bool setLayoutOffset = true,
 }) {
   return TestWidgetsApp(
@@ -63,6 +64,7 @@ Widget simpleBuilderTest({
         delegate: delegate ?? builderDelegate,
         applyDimensions: applyDimensions,
         forgetToLayoutChild: forgetToLayoutChild,
+        layoutChildLoosely: layoutChildLoosely,
         setLayoutOffset: setLayoutOffset,
       ),
     ),
@@ -86,6 +88,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     this.useCacheExtent = false,
     this.applyDimensions = true,
     this.forgetToLayoutChild = false,
+    this.layoutChildLoosely = false,
     this.setLayoutOffset = true,
     super.hitTestBehavior,
   });
@@ -94,6 +97,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
   final bool useCacheExtent;
   final bool applyDimensions;
   final bool forgetToLayoutChild;
+  final bool layoutChildLoosely;
   final bool setLayoutOffset;
 
   @override
@@ -115,6 +119,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
       useCacheExtent: useCacheExtent,
       applyDimensions: applyDimensions,
       forgetToLayoutChild: forgetToLayoutChild,
+      layoutChildLoosely: layoutChildLoosely,
       setLayoutOffset: setLayoutOffset,
     );
   }
@@ -135,6 +140,7 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
     this.useCacheExtent = false,
     this.applyDimensions = true,
     this.forgetToLayoutChild = false,
+    this.layoutChildLoosely = false,
     this.setLayoutOffset = true,
   });
 
@@ -142,6 +148,7 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
   final bool useCacheExtent;
   final bool applyDimensions;
   final bool forgetToLayoutChild;
+  final bool layoutChildLoosely;
   final bool setLayoutOffset;
 
   @override
@@ -160,6 +167,7 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
       useCacheExtent: useCacheExtent,
       applyDimensions: applyDimensions,
       forgetToLayoutChild: forgetToLayoutChild,
+      layoutChildLoosely: layoutChildLoosely,
       setLayoutOffset: setLayoutOffset,
     );
   }
@@ -195,6 +203,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     this.setLayoutOffset = true,
     this.useCacheExtent = false,
     this.forgetToLayoutChild = false,
+    this.layoutChildLoosely = false,
   });
 
   // These are to test conditions to validate subclass implementations after
@@ -203,6 +212,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
   final bool setLayoutOffset;
   final bool useCacheExtent;
   final bool forgetToLayoutChild;
+  final bool layoutChildLoosely;
 
   RenderBox? testGetChildFor(ChildVicinity vicinity) => getChildFor(vicinity);
 
@@ -266,7 +276,9 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
       for (var row = leadingRow; row <= trailingRow; row++) {
         final vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox? child = buildOrObtainChildFor(vicinity);
-        if (!forgetToLayoutChild) {
+        if (layoutChildLoosely) {
+          child?.layout(constraints.loosen());
+        } else if (!forgetToLayoutChild) {
           child?.layout(constraints.tighten(width: 200.0, height: 200.0));
         }
 
