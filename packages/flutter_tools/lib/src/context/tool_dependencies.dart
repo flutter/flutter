@@ -79,7 +79,6 @@ import '../runner/local_engine.dart';
 import '../template.dart';
 import '../version.dart';
 import '../web/web_flutter_device.dart';
-import '../web/web_runner.dart';
 import '../windows/windows_workflow.dart';
 import 'android_context.dart';
 import 'apple_context.dart';
@@ -130,7 +129,6 @@ class ToolDependencies {
     this.extensionManager,
     this.flutterHookRunner,
     this.webFlutterDeviceFactory,
-    this.webRunnerFactory,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -210,9 +208,6 @@ class ToolDependencies {
 
   /// Factory for creating web-backed [FlutterDevice] instances when supported by the embedder.
   final WebFlutterDeviceFactory? webFlutterDeviceFactory;
-
-  /// Factory for creating web resident runners when supported by the embedder.
-  final WebRunnerFactory? webRunnerFactory;
 
   /// Evaluates host readiness and toolchain requirements for Windows workflows.
   final WindowsWorkflow windowsWorkflow;
@@ -294,7 +289,6 @@ class ToolDependencies {
     AnsiTerminal? terminal,
     UserMessages? userMessages,
     WebFlutterDeviceFactory? webFlutterDeviceFactory,
-    WebRunnerFactory? webRunnerFactory,
     WindowsWorkflow? windowsWorkflow,
     XCDevice? xcdevice,
     XCDevice? Function()? xcdeviceBuilder,
@@ -931,7 +925,6 @@ class ToolDependencies {
       templateRenderer: templateRenderer,
       toolContext: finalToolContext,
       webFlutterDeviceFactory: webFlutterDeviceFactory,
-      webRunnerFactory: webRunnerFactory,
       windowsWorkflow: finalWindowsWorkflow,
     );
   }

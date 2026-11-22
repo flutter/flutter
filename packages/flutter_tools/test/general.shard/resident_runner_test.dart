@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/isolated/web_flutter_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -1325,7 +1326,9 @@ flutter:
         FakeDevice(targetPlatform: TargetPlatform.web_javascript),
         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
         buildInfo: BuildInfo.profile,
+        flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
         target: 'lib/main.dart',
+        webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
       );
 
       final ResidentRunner residentRunner = createHotRunner(
@@ -1706,7 +1709,9 @@ flutter:
                 treeShakeIcons: false,
                 packageConfigPath: '.dart_tool/package_config.json',
               ),
+              flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
               target: null,
+              webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
             )).generator
             as DefaultResidentCompiler?;
 

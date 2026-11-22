@@ -28,6 +28,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/isolated/web_flutter_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/template.dart';
@@ -342,6 +343,7 @@ void main() {
       analysisServerFactoryOverride:
           analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
       residentRunnerFactoryOverride: residentRunnerFactoryOverride,
+      webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
     );
   }
 

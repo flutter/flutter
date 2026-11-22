@@ -29,9 +29,9 @@ import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
+import '../run_hot.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_flutter_device.dart';
-import '../web/web_runner.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
@@ -47,7 +47,6 @@ class WebDriverService extends DriverService {
     required super.toolContext,
     this._flutterHookRunner,
     this._webFlutterDeviceFactory,
-    this._webRunnerFactory,
   });
 
   final Analytics _analytics;
@@ -59,7 +58,6 @@ class WebDriverService extends DriverService {
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
   final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
-  final WebRunnerFactory? _webRunnerFactory;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -112,7 +110,23 @@ class WebDriverService extends DriverService {
             disablePortPublication: debuggingOptions.disablePortPublication,
             webConfig: webConfig,
           );
-    if (!buildInfo.isDebug || webConfig.useWasm) {
+    final String target = mainPath ?? fs.path.join('lib', 'main.dart');
+    if (resolvedDebuggingOptions.buildInfo.isDebug && !resolvedDebuggingOptions.webConfig.useWasm) {
+      _residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: resolvedDebuggingOptions,
+        featureFlags: _featureFlags,
+        target: target,
+        toolContext: toolContext,
+        xcode: null,
+      );
+    } else {
       _residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         analytics: _analytics,
@@ -123,27 +137,9 @@ class WebDriverService extends DriverService {
         dartBuilder: _flutterHookRunner,
         debuggingOptions: resolvedDebuggingOptions,
         featureFlags: _featureFlags,
-        target: mainPath ?? fs.path.join('lib', 'main.dart'),
+        target: target,
         toolContext: toolContext,
         xcode: null,
-      );
-    } else {
-      _residentRunner = _webRunnerFactory!.createWebRunner(
-        flutterDevice,
-        analytics: _analytics,
-        applicationPackageFactory: _applicationPackageFactory,
-        assetBundleFactory: _assetBundleFactory,
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        debuggingOptions: resolvedDebuggingOptions,
-        featureFlags: _featureFlags,
-        flutterHookRunner: _flutterHookRunner,
-        flutterProject: flutterProject,
-        platformArgs: platformArgs,
-        stayResident: true,
-        target: mainPath,
-        toolContext: toolContext,
-        webDefines: webDefines,
       );
     }
     final appStartedCompleter = Completer<void>.sync();

@@ -292,9 +292,11 @@ class WebFlutterDevice extends FlutterDevice {
 
         final Device targetDevice = device!;
         await setUpVmService(
-          reloadSources: (String isolateId, {bool? force, bool? pause}) async {
-            await hotRunner.restart(pause: pause ?? false);
-          },
+          reloadSources: hotRunner.canHotReload
+              ? (String isolateId, {bool? force, bool? pause}) async {
+                  await hotRunner.restart(pause: pause ?? false);
+                }
+              : null,
           device: targetDevice,
           flutterProject: _flutterProject,
           flutterVersion: flutterVersion,
@@ -438,13 +440,11 @@ class WebFlutterDevice extends FlutterDevice {
       _logger.printTrace('No isolates available for hot reload');
       return null;
     }
-    final String hotReloadMethod =
-        _registeredMethodsForService[_kHotReloadMethod] ?? _kHotReloadMethod;
     final vmservice.ReloadReport reloadReport;
     try {
       reloadReport = await service.service.reloadSources(vm.isolates!.first.id!);
     } on vmservice.RPCError catch (e) {
-      if (e.callingMethod == hotReloadMethod &&
+      if (e.callingMethod == _kHotReloadMethod &&
           e.code == vmservice.RPCErrorKind.kIsolateCannotReload.code) {
         return null;
       }

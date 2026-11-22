@@ -402,6 +402,23 @@ void main() {
         FlutterDevice.create(
           fakeWebDevice,
           buildInfo: BuildInfo.release,
+          flutterProject: flutterProject,
+          target: 'lib/main.dart',
+          toolContext: toolContext,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            'webFlutterDeviceFactory is required for web devices.',
+          ),
+        ),
+      );
+
+      await expectLater(
+        FlutterDevice.create(
+          fakeWebDevice,
+          buildInfo: BuildInfo.release,
           target: 'lib/main.dart',
           toolContext: toolContext,
           webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),

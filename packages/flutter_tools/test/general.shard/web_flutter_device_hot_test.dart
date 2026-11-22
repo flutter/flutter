@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -48,7 +49,7 @@ import '../src/fakes.dart' hide FakeProcess;
 import '../src/package_config.dart';
 import '../src/test_build_system.dart';
 import 'hot_shared.dart' as hot_shared;
-import 'resident_runner_helpers.dart' show fakePausedEvent, fakeUnpausedEvent, fakeVM, listViews;
+import 'resident_runner_helpers.dart' show fakeVM, listViews;
 
 const _kDefaultWsUri = 'ws://127.0.0.1/abcd/';
 const _kDefaultDevToolsUri = 'http://127.0.0.1/abcd/';
@@ -148,6 +149,7 @@ void main() {
     DebuggingOptions? debuggingOptions,
     Device? device,
     FlutterProject? flutterProject,
+    bool hotMode = true,
     HotRunnerConfig? hotRunnerConfig,
     Map<String, Object?> platformArgs = const <String, Object?>{},
     bool prePopulateDevFS = true,
@@ -193,6 +195,7 @@ void main() {
       buildTargets: const BuildTargetsImpl(),
       debuggingOptions: options,
       featureFlags: TestFeatureFlags(),
+      hotMode: hotMode,
       hotRunnerConfig: hotRunnerConfig,
       projectRootPath: projectRootPath,
       stayResident: stayResident,
@@ -469,37 +472,391 @@ void main() {
             ),
           );
         }
+
+        final compiler = const ResidentCompilerFactory().create(
+          targetPlatform: TargetPlatform.web_javascript,
+          buildInfo: buildInfo,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.any(),
+          artifacts: Artifacts.test(),
+          platform: FakePlatform(),
+          fileSystem: fileSystem,
+          shutdownHooks: FakeShutdownHooks(),
+          config: config,
+        ) as DefaultResidentCompiler;
+        expect(fileSystem.file(compiler.initializeFromDill).readAsStringSync(), 'KERNEL_BYTES');
       });
     }
 
     testWithoutContext(
-      'calls appFailedToStart and sends failure analytics on initial DDC compile failure',
+      'caches initial app.dill with kDdcLibraryBundleFlags when trackWidgetCreation is true',
       () async {
-        fakeWebDevFS.report = UpdateFSReport();
-        final (HotRunner runner, _) = createWebHotRunner(
-          debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(
-              .debug,
-              null,
-              treeShakeIcons: false,
-              packageConfigPath: '.dart_tool/package_config.json',
-              deprecatedJsInterop: true,
+        fakeVmServiceHost = FakeVmServiceHost(requests: _kAttachExpectations.toList());
+        final (HotRunner runner, _) = createWebHotRunner(stayResident: false);
+        runner.artifactDirectory.childFile('app.dill').writeAsStringSync('TRACKED_KERNEL');
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        expect(await runner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
+        await connectionInfoCompleter.future;
+
+        final String expectedPath = getDefaultCachedKernelPath(
+          trackWidgetCreation: true,
+          dartDefines: const <String>[],
+          config: config,
+          fileSystem: fileSystem,
+          targetModel: TargetModel.dartdevc,
+          extraFrontEndOptions: kDdcLibraryBundleFlags,
+        );
+        expect(fileSystem.file(expectedPath).readAsStringSync(), 'TRACKED_KERNEL');
+      },
+    );
+
+    for (final deprecatedJsInterop in <bool?>[true, false, null]) {
+      testWithoutContext(
+        'calls appFailedToStart and sends failure analytics on initial DDC compile failure '
+        'when deprecatedJsInterop is $deprecatedJsInterop',
+        () async {
+          fakeWebDevFS.report = UpdateFSReport();
+          final (HotRunner runner, _) = createWebHotRunner(
+            debuggingOptions: DebuggingOptions.enabled(
+              BuildInfo(
+                .debug,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+                deprecatedJsInterop: deprecatedJsInterop,
+              ),
             ),
+          );
+
+          expect(await runner.run(), 1);
+          expect(await runner.waitForAppToFinish(), 1);
+          expect(logger.errorText, contains('Failed to compile application.'));
+          if (deprecatedJsInterop == null) {
+            expect(fakeAnalytics.sentEvents, isEmpty);
+          } else {
+            expect(fakeAnalytics.sentEvents, <Event>[
+              Event.flutterBuildInfo(
+                label: 'web-compile',
+                buildType: 'web',
+                command: 'run',
+                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+                error: 'ddc-compile-failure',
+              ),
+            ]);
+          }
+        },
+      );
+    }
+
+    testWithoutContext('formats Flutter.Error extension events and logs invalid Flutter.Error payloads', () async {
+      fakeWebDevice.name = 'Chromez';
+      final requests = <VmServiceExpectation>[
+        ..._kAttachExpectations,
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+              'errorsSinceReload': 0,
+              'renderedErrorText': 'first',
+            }),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+              'errorsSinceReload': 1,
+              'renderedErrorText': 'second',
+            }),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Other',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+              'errorsSinceReload': 2,
+              'renderedErrorText': 'not an error',
+            }),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+              'errorsSinceReload': 2,
+              'renderedErrorText': 'third',
+            }),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{'other': 'bad stuff'}),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+              'test': 'data',
+              'renderedErrorText': '',
+            }),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Extension',
+          event: vm_service.Event(
+            timestamp: 0,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm_service.ExtensionData.parse(<String, Object?>{
+              'test': 'data',
+              'renderedErrorText': 'error text',
+            }),
+            kind: vm_service.EventStreams.kExtension,
+          ),
+        ),
+      ];
+      fakeVmServiceHost = FakeVmServiceHost(requests: requests.toList());
+
+      final (HotRunner runner, _) = createWebHotRunner();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfoCompleter);
+      await connectionInfoCompleter.future;
+      await pumpEventQueue();
+
+      expect(
+        logger.statusText,
+        'Launching lib/main.dart on Chromez in debug mode...\n'
+        'Waiting for connection from debug service on Chromez...\n'
+        'Debug service listening on $_kDefaultWsUri\n'
+        'A Dart VM Service on Chromez is available at: $_kDefaultDevToolsUri\n'
+        'The Flutter DevTools debugger and profiler on Chromez is available at: $_kDefaultDevToolsUri\n'
+        '\n'
+        'first\n'
+        '\n'
+        'second\n'
+        'third\n'
+        '\n'
+        '\n'
+        '\n'
+        '\n'
+        'error text\n'
+        '\n',
+      );
+      expect(
+        logger.errorText,
+        'Received an invalid Flutter.Error message from app: {other: bad stuff}\n',
+      );
+
+      await runner.exit();
+      expect(await runFuture, 0);
+    });
+
+    testWithoutContext(
+      'sends app.webLaunchUrl events and sets useDwdsWebSocketConnection for Chrome vs WebServer',
+      () async {
+        fakeWebDevFS.baseUri = Uri.parse('http://localhost:8765/app/');
+        final chromeConnection = FakeChromeConnection()..tabs.add(FakeChromeTab('index.html'));
+        final chromiumLauncher = TestChromiumLauncher();
+        chromiumLauncher.setInstance(
+          Chromium(
+            1,
+            chromeConnection,
+            chromiumLauncher: chromiumLauncher,
+            process: FakeProcess(),
+            logger: logger,
+          ),
+        );
+        final chromeDevice = GoogleChromeDevice(
+          fileSystem: fileSystem,
+          chromiumLauncher: chromiumLauncher,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+        );
+
+        fakeVmServiceHost = FakeVmServiceHost(requests: _kAttachExpectations.toList());
+        final (HotRunner chromeRunner, WebFlutterDevice chromeWebDevice) = createWebHotRunner(
+          device: chromeDevice,
+          stayResident: false,
+        );
+        expect(chromeWebDevice.useDwdsWebSocketConnection, isFalse);
+        expect(chromeRunner.debuggingEnabled, isTrue);
+
+        final chromeConn = Completer<DebugConnectionInfo>();
+        expect(await chromeRunner.run(connectionInfoCompleter: chromeConn), 0);
+        await chromeConn.future;
+        expect(
+          logger.eventText,
+          contains(
+            json.encode(<String, Object>{
+              'name': 'app.webLaunchUrl',
+              'args': <String, Object>{'url': 'http://localhost:8765/app/', 'launched': true},
+            }),
           ),
         );
 
-        expect(await runner.run(), 1);
-        expect(await runner.waitForAppToFinish(), 1);
-        expect(logger.errorText, contains('Failed to compile application.'));
-        expect(fakeAnalytics.sentEvents, <Event>[
-          Event.flutterBuildInfo(
-            label: 'web-compile',
-            buildType: 'web',
-            command: 'run',
-            settings: 'deprecatedJsInterop: true; web-compiler: ddc;',
-            error: 'ddc-compile-failure',
+        logger.clear();
+        fakeWebDevFS =
+            FakeWebDevFS(
+                defaultResultBuilder: () =>
+                    ConnectionResult(appConnection, debugConnection, debugConnection.vmService),
+              )
+              ..baseUri = Uri.parse('http://localhost:8765/app/')
+              ..report = UpdateFSReport(success: true);
+        fakeVmServiceHost = FakeVmServiceHost(requests: _kAttachExpectations.toList());
+        final webServerDevice = WebServerDevice(logger: logger);
+        final (HotRunner serverRunner, WebFlutterDevice serverWebDevice) = createWebHotRunner(
+          device: webServerDevice,
+          stayResident: false,
+        );
+        expect(serverWebDevice.useDwdsWebSocketConnection, isTrue);
+        expect(serverRunner.debuggingEnabled, isTrue);
+        expect(serverRunner.uri, fakeWebDevFS.baseUri);
+
+        final serverConn = Completer<DebugConnectionInfo>();
+        expect(await serverRunner.run(connectionInfoCompleter: serverConn), 0);
+        await serverConn.future;
+        expect(
+          logger.eventText,
+          contains(
+            json.encode(<String, Object>{
+              'name': 'app.webLaunchUrl',
+              'args': <String, Object>{'url': 'http://localhost:8765/app/', 'launched': false},
+            }),
           ),
-        ]);
+        );
+      },
+    );
+
+    testWithoutContext('generates localizations when l10n.yaml exists without generating dart_plugin_registrant.dart', () async {
+      fakeVmServiceHost = FakeVmServiceHost(requests: _kAttachExpectations.toList());
+      fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "helloWorld": "Hello, World!",
+  "@helloWorld": {
+    "description": "Sample description"
+  }
+}''');
+      fileSystem.file('l10n.yaml').createSync();
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  generate: true
+''');
+      writePackageConfigFiles(
+        directory: fileSystem.currentDirectory,
+        mainLibName: 'my_app',
+        packages: <String, String>{'path_provider_linux': '../../path_provider_linux'},
+      );
+      final File dartPluginRegistrant =
+          fileSystem
+              .directory('.dart_tool')
+              .childDirectory('flutter_build')
+              .childFile('dart_plugin_registrant.dart')
+            ..createSync(recursive: true);
+
+      final (HotRunner runner, _) = createWebHotRunner(
+        buildSystem: FlutterBuildSystem(
+          fileSystem: fileSystem,
+          platform: FakePlatform(),
+          logger: logger,
+        ),
+        stayResident: false,
+      );
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      expect(await runner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
+      await connectionInfoCompleter.future;
+
+      expect(
+        fileSystem
+            .directory('lib')
+            .childDirectory('l10n')
+            .childFile('app_localizations.dart')
+            .existsSync(),
+        isTrue,
+      );
+      // Had DartPluginRegistrantTarget run, the empty file would have been deleted
+      // since path_provider_linux has no pubspec here.
+      expect(dartPluginRegistrant.existsSync(), isTrue);
+      expect(dartPluginRegistrant.readAsStringSync(), isEmpty);
+    });
+
+    testWithoutContext(
+      'respects hotMode: false (--debug --no-hot) in printHelp and service registration',
+      () async {
+        final (HotRunner defaultRunner, _) = createWebHotRunner();
+        defaultRunner.printHelp(details: false);
+        expect(logger.statusText, contains('Hot reload'));
+        expect(logger.statusText, contains('Hot restart'));
+
+        logger.clear();
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            ..._kAttachLogExpectations,
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Service'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Isolate'},
+            ),
+            const FakeVmServiceRequest(
+              method: 'registerService',
+              args: <String, Object>{
+                'service': kFlutterVersionServiceName,
+                'alias': kFlutterToolAlias,
+              },
+            ),
+            const FakeVmServiceRequest(
+              method: 'registerService',
+              args: <String, Object>{
+                'service': kFlutterMemoryInfoServiceName,
+                'alias': kFlutterToolAlias,
+              },
+            ),
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Extension'},
+            ),
+          ],
+        );
+
+        final (HotRunner noHotRunner, _) = createWebHotRunner(hotMode: false, stayResident: false);
+        expect(noHotRunner.canHotReload, isFalse);
+        expect(noHotRunner.supportsRestart, isFalse);
+
+        noHotRunner.printHelp(details: false);
+        expect(logger.statusText, isNot(contains('Hot reload')));
+        expect(logger.statusText, isNot(contains('Hot restart')));
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        expect(await noHotRunner.run(connectionInfoCompleter: connectionInfoCompleter), 0);
+        await connectionInfoCompleter.future;
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
       },
     );
 
@@ -649,11 +1006,6 @@ void main() {
               jsonResponse: <String, Object>{'type': 'Success'},
             ),
             listViews,
-            FakeVmServiceRequest(
-              method: 'getIsolatePauseEvent',
-              args: const <String, Object>{'isolateId': _kIsolateId},
-              jsonResponse: fakeUnpausedEvent.toJson(),
-            ),
             const FakeVmServiceRequest(
               method: 'ext.flutter.reassemble',
               args: <String, Object>{'isolateId': _kIsolateId},
@@ -713,75 +1065,40 @@ void main() {
       },
     );
 
-    testWithoutContext('skips flutterReassemble when isolate is paused', () async {
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          ..._kAttachExpectations,
-          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
-          const FakeVmServiceRequest(
-            method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': _kIsolateId},
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolatePauseEvent',
-            args: const <String, Object>{'isolateId': _kIsolateId},
-            jsonResponse: fakePausedEvent.toJson(),
-          ),
-        ],
-      );
+    testWithoutContext(
+      'skips getIsolatePauseEvent and proceeds directly to flutterReassemble on web',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            ..._kAttachExpectations,
+            FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
+            const FakeVmServiceRequest(
+              method: kReloadSourcesServiceName,
+              args: <String, Object>{'isolateId': _kIsolateId},
+              jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+            ),
+            listViews,
+            const FakeVmServiceRequest(
+              method: 'ext.flutter.reassemble',
+              args: <String, Object>{'isolateId': _kIsolateId},
+              jsonResponse: <String, Object>{'type': 'Success'},
+            ),
+          ],
+        );
 
-      final (HotRunner runner, _) = createWebHotRunner();
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-      final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfoCompleter);
-      await connectionInfoCompleter.future;
+        final (HotRunner runner, _) = createWebHotRunner();
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfoCompleter);
+        await connectionInfoCompleter.future;
 
-      final OperationResult reloadResult = await runner.restart();
-      expect(reloadResult.isOk, isTrue);
-      expect(logger.traceText, contains('Skipping reassemble because all isolates are paused.'));
-      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+        final OperationResult reloadResult = await runner.restart();
+        expect(reloadResult.isOk, isTrue);
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
 
-      await runner.exit();
-      expect(await runFuture, 0);
-    });
-
-    testWithoutContext('proceeds with flutterReassemble when getIsolatePauseEvent returns kMethodNotFound (--no-dds)', () async {
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          ..._kAttachExpectations,
-          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
-          const FakeVmServiceRequest(
-            method: kReloadSourcesServiceName,
-            args: <String, Object>{'isolateId': _kIsolateId},
-            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
-          ),
-          listViews,
-          FakeVmServiceRequest(
-            method: 'getIsolatePauseEvent',
-            args: const <String, Object>{'isolateId': _kIsolateId},
-            error: FakeRPCError(code: vm_service.RPCErrorKind.kMethodNotFound.code),
-          ),
-          const FakeVmServiceRequest(
-            method: 'ext.flutter.reassemble',
-            args: <String, Object>{'isolateId': _kIsolateId},
-            jsonResponse: <String, Object>{'type': 'Success'},
-          ),
-        ],
-      );
-
-      final (HotRunner runner, _) = createWebHotRunner();
-      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
-      final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfoCompleter);
-      await connectionInfoCompleter.future;
-
-      final OperationResult reloadResult = await runner.restart();
-      expect(reloadResult.isOk, isTrue);
-      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
-
-      await runner.exit();
-      expect(await runFuture, 0);
-    });
+        await runner.exit();
+        expect(await runFuture, 0);
+      },
+    );
 
     testWithoutContext(
       'rejects compiler and sends reload-reject analytics on compile-time hot reload rejection',
@@ -860,11 +1177,6 @@ void main() {
           ),
           listViews,
           FakeVmServiceRequest(
-            method: 'getIsolatePauseEvent',
-            args: const <String, Object>{'isolateId': _kIsolateId},
-            jsonResponse: fakeUnpausedEvent.toJson(),
-          ),
-          FakeVmServiceRequest(
             method: 'ext.flutter.reassemble',
             args: const <String, Object>{'isolateId': _kIsolateId},
             error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
@@ -927,10 +1239,11 @@ void main() {
       );
       final File generatedEntrypoint = fileSystem.file(fakeWebDevFS.mainUri);
       expect(generatedEntrypoint.existsSync(), isTrue);
-      expect(
-        generatedEntrypoint.readAsStringSync(),
-        contains("import 'org-dartlang-app:///custom_main.dart'"),
-      );
+      final String entrypointContents = generatedEntrypoint.readAsStringSync();
+      expect(entrypointContents, contains('// Flutter web bootstrap script'));
+      expect(entrypointContents, contains("import 'dart:ui_web' as ui_web;"));
+      expect(entrypointContents, contains('await ui_web.bootstrapEngine('));
+      expect(entrypointContents, contains("import 'org-dartlang-app:///custom_main.dart'"));
 
       final OperationResult restartOk = await runner.restart(fullRestart: true);
       expect(restartOk.isOk, isTrue);
@@ -1014,6 +1327,44 @@ void main() {
         expect(await runFuture, 0);
       },
     );
+
+    testWithoutContext('treats non-RPCError Failed hotRestart response as non-fatal and recovers after failed recompile', () async {
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ..._kAttachExpectations,
+          const FakeVmServiceRequest(
+            method: kHotRestartServiceName,
+            jsonResponse: <String, Object>{'type': 'Failed'},
+          ),
+          const FakeVmServiceRequest(
+            method: kHotRestartServiceName,
+            jsonResponse: <String, Object>{'type': 'Success'},
+          ),
+        ],
+      );
+      final webServerDevice = WebServerDevice(logger: logger);
+      final (HotRunner runner, _) = createWebHotRunner(device: webServerDevice);
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfoCompleter);
+      await connectionInfoCompleter.future;
+
+      final OperationResult nonFatal = await runner.restart(fullRestart: true);
+      expect(nonFatal.code, 0);
+      expect(nonFatal.fatal, isFalse);
+
+      // Failed recompile resets _isRestarting so subsequent restarts proceed.
+      fakeWebDevFS.report = UpdateFSReport();
+      final OperationResult failedCompile = await runner.restart(fullRestart: true);
+      expect(failedCompile.code, 1);
+
+      fakeWebDevFS.report = UpdateFSReport(success: true);
+      final OperationResult recovered = await runner.restart(fullRestart: true);
+      expect(recovered.code, 0);
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+
+      await runner.exit();
+      expect(await runFuture, 0);
+    });
 
     testWithoutContext('marks internal RPCError during hot restart as fatal', () async {
       fakeVmServiceHost = FakeVmServiceHost(
@@ -1103,33 +1454,36 @@ void main() {
       expect(await runFuture, 0);
     });
 
-    testWithoutContext('tolerates kIsolateCannotReload on hot reload', () async {
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          ..._kAttachExpectations,
-          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
-          FakeVmServiceRequest(
-            method: kReloadSourcesServiceName,
-            args: const <String, Object>{'isolateId': _kIsolateId},
-            error: FakeRPCError(code: vm_service.RPCErrorKind.kIsolateCannotReload.code),
-          ),
-        ],
-      );
+    testWithoutContext(
+      'tolerates kIsolateCannotReload on hot reload when no client is connected',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            ..._kAttachExpectations,
+            FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
+            FakeVmServiceRequest(
+              method: kReloadSourcesServiceName,
+              args: const <String, Object>{'isolateId': _kIsolateId},
+              error: FakeRPCError(code: vm_service.RPCErrorKind.kIsolateCannotReload.code),
+            ),
+          ],
+        );
 
-      final (HotRunner runner, _) = createWebHotRunner();
-      final connectionInfo = Completer<DebugConnectionInfo>();
-      final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfo);
-      await connectionInfo.future;
+        final (HotRunner runner, _) = createWebHotRunner();
+        final connectionInfo = Completer<DebugConnectionInfo>();
+        final Future<int> runFuture = runner.run(connectionInfoCompleter: connectionInfo);
+        await connectionInfo.future;
 
-      final OperationResult result = await runner.restart();
-      expect(result.isOk, isTrue);
-      expect(logger.statusText, contains(kNoClientConnectedMessage));
-      expect(fakeAnalytics.sentEvents, isEmpty);
-      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+        final OperationResult result = await runner.restart();
+        expect(result.isOk, isTrue);
+        expect(logger.statusText, contains(kNoClientConnectedMessage));
+        expect(fakeAnalytics.sentEvents, isEmpty);
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
 
-      await runner.exit();
-      expect(await runFuture, 0);
-    });
+        await runner.exit();
+        expect(await runFuture, 0);
+      },
+    );
 
     for (final (String errorName, int errorCode) in <(String, int)>[
       ('kIsolateCannotReload', vm_service.RPCErrorKind.kIsolateCannotReload.code),
@@ -1251,7 +1605,7 @@ void main() {
 
 class FakeWebDevice extends Fake implements WebDevice {
   @override
-  String get name => 'FakeWebDevice';
+  String name = 'FakeWebDevice';
 
   @override
   String get displayName => name;

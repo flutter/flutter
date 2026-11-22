@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -28,17 +27,15 @@ import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/web_flutter_device.dart';
-import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1624,6 +1621,62 @@ void main() {
     );
   });
 
+  Future<(AppInstance, _FakeDaemonWebFlutterDeviceFactory)> runWebDaemonStartApp({
+    required FileSystem fs,
+    required Device webDevice,
+    required String projectDirPath,
+    required String customRootPath,
+    required DebuggingOptions options,
+    required bool enableHotReload,
+  }) async {
+    final bufferLogger = BufferLogger.test();
+    final testNotifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
+    final streams = FakeDaemonStreams();
+    final connection = DaemonConnection(daemonStreams: streams, logger: bufferLogger);
+    final webDeviceFactory = _FakeDaemonWebFlutterDeviceFactory();
+    final toolContext = FakeToolContext(
+      cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+      fs: fs,
+      logger: MachineOutputLogger(parent: testNotifyingLogger),
+    );
+    final testDaemon = Daemon(
+      connection,
+      analytics: const NoOpAnalytics(),
+      applicationPackageFactory: FakeApplicationPackageFactory(),
+      assetBundleFactory: AssetBundleFactory.defaultInstance(
+        fileSystem: fs,
+        flutterRoot: '/flutter',
+        logger: testNotifyingLogger,
+        platform: toolContext.platform,
+      ),
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
+      devtoolsLauncher: FakeDevtoolsLauncher(),
+      featureFlags: TestFeatureFlags(),
+      notifyingLogger: testNotifyingLogger,
+      toolContext: toolContext,
+      webFlutterDeviceFactory: webDeviceFactory,
+      xcode: null,
+    );
+
+    final AppInstance app = await testDaemon.appDomain.startApp(
+      webDevice,
+      projectDirPath,
+      'lib/main.dart',
+      null,
+      options,
+      enableHotReload,
+      projectRootPath: customRootPath,
+      trackWidgetCreation: options.buildInfo.isDebug,
+      webDefines: const <String, String>{'FOO': 'BAR'},
+    );
+    await app.runner.exitApp();
+    await testDaemon.shutdown();
+    testNotifyingLogger.dispose();
+    await connection.dispose();
+    return (app, webDeviceFactory);
+  }
+
   testWithoutContext(
     'AppDomain.startApp routes profile, release, and --wasm web runs to ColdRunner',
     () async {
@@ -1649,59 +1702,65 @@ void main() {
           false,
         ),
       ]) {
-        final bufferLogger = BufferLogger.test();
-        final testNotifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
-        final streams = FakeDaemonStreams();
-        final connection = DaemonConnection(daemonStreams: streams, logger: bufferLogger);
-        final webDeviceFactory = _FakeDaemonWebFlutterDeviceFactory();
-        final webRunnerFactory = _FakeDaemonWebRunnerFactory();
-        final toolContext = FakeToolContext(
-          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+        final (
+          AppInstance app,
+          _FakeDaemonWebFlutterDeviceFactory webDeviceFactory,
+        ) = await runWebDaemonStartApp(
           fs: fs,
-          logger: MachineOutputLogger(parent: testNotifyingLogger),
-        );
-        final testDaemon = Daemon(
-          connection,
-          analytics: const NoOpAnalytics(),
-          applicationPackageFactory: FakeApplicationPackageFactory(),
-          assetBundleFactory: AssetBundleFactory.defaultInstance(
-            fileSystem: fs,
-            flutterRoot: '/flutter',
-            logger: testNotifyingLogger,
-            platform: toolContext.platform,
-          ),
-          buildSystem: buildSystem,
-          buildTargets: buildTargets,
-          devtoolsLauncher: FakeDevtoolsLauncher(),
-          featureFlags: TestFeatureFlags(),
-          notifyingLogger: testNotifyingLogger,
-          toolContext: toolContext,
-          webFlutterDeviceFactory: webDeviceFactory,
-          webRunnerFactory: webRunnerFactory,
-          xcode: null,
-        );
-
-        final AppInstance app = await testDaemon.appDomain.startApp(
-          webDevice,
-          projectDirPath,
-          'lib/main.dart',
-          null,
-          options,
-          options.buildInfo.isDebug,
-          projectRootPath: customRootPath,
-          trackWidgetCreation: options.buildInfo.isDebug,
-          webDefines: const <String, String>{'FOO': 'BAR'},
+          webDevice: webDevice,
+          projectDirPath: projectDirPath,
+          customRootPath: customRootPath,
+          options: options,
+          enableHotReload: options.buildInfo.isDebug,
         );
         expect(app.runner, isA<ColdRunner>());
         expect(app.runner.projectRootPath, customRootPath);
+        expect(webDeviceFactory.lastGeneratorWasNull, isTrue);
         expect(webDeviceFactory.lastUrlTunneller != null, expectTunneller);
         expect(webDeviceFactory.lastWebDefines, const <String, String>{'FOO': 'BAR'});
-        expect(webRunnerFactory.createCalled, isFalse);
+      }
+      await pumpEventQueue();
+    },
+  );
 
-        await app.runner.exitApp();
-        await testDaemon.shutdown();
-        testNotifyingLogger.dispose();
-        await connection.dispose();
+  // Uses testUsingContext because FlutterDevice.create reads the context-scoped
+  // ResidentCompilerFactory when constructing a debug non-wasm generator.
+  testUsingContext(
+    'AppDomain.startApp routes debug JS web runs (with and without hot reload) to HotRunner',
+    () async {
+      const projectDirPath = '/project';
+      const customRootPath = '/custom_root';
+      final fs = MemoryFileSystem.test();
+      fs.file('$projectDirPath/pubspec.yaml').createSync(recursive: true);
+      fs.file('$projectDirPath/lib/main.dart').createSync(recursive: true);
+      fs.directory(customRootPath).createSync(recursive: true);
+
+      final webDevice = _FakeDaemonWebDevice();
+      for (final enableHotReload in const <bool>[true, false]) {
+        final (
+          AppInstance app,
+          _FakeDaemonWebFlutterDeviceFactory webDeviceFactory,
+        ) = await runWebDaemonStartApp(
+          fs: fs,
+          webDevice: webDevice,
+          projectDirPath: projectDirPath,
+          customRootPath: customRootPath,
+          options: DebuggingOptions.enabled(
+            BuildInfo.debug,
+            webConfig: const WebDebugConfig(enableExposeUrl: true),
+          ),
+          enableHotReload: enableHotReload,
+        );
+        expect(app.runner, isA<HotRunner>());
+        final hotRunner = app.runner as HotRunner;
+        expect(hotRunner.hostIsIde, isTrue);
+        expect(hotRunner.hotMode, enableHotReload);
+        expect(hotRunner.canHotReload, enableHotReload);
+        expect(hotRunner.supportsRestart, enableHotReload);
+        expect(hotRunner.projectRootPath, customRootPath);
+        expect(webDeviceFactory.lastGeneratorWasNull, isFalse);
+        expect(webDeviceFactory.lastUrlTunneller, isNotNull);
+        expect(webDeviceFactory.lastWebDefines, const <String, String>{'FOO': 'BAR'});
       }
       await pumpEventQueue();
     },
@@ -2216,7 +2275,23 @@ class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
 
   @override
+  bool get defersServiceProtocolConnection => true;
+
+  @override
   bool get supportsColdRestart => true;
+
+  @override
+  Future<int> runHot({required HotRunner hotRunner, String? route}) async => 0;
+
+  @override
+  void attachDeferredConnection({
+    required HotRunner hotRunner,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+  }) {
+    connectionInfoCompleter?.complete(
+      DebugConnectionInfo(wsUri: Uri.parse('ws://localhost:8080/ws')),
+    );
+  }
 
   @override
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async => 0;
@@ -2232,6 +2307,7 @@ class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
 }
 
 class _FakeDaemonWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFactory {
+  bool? lastGeneratorWasNull;
   UrlTunneller? lastUrlTunneller;
   Map<String, String>? lastWebDefines;
 
@@ -2249,37 +2325,9 @@ class _FakeDaemonWebFlutterDeviceFactory extends Fake implements WebFlutterDevic
     String? userIdentifier,
     Map<String, String> webDefines = const <String, String>{},
   }) {
-    expect(generator, isNull);
+    lastGeneratorWasNull = generator == null;
     lastUrlTunneller = urlTunneller;
     lastWebDefines = webDefines;
     return _FakeDaemonWebFlutterDevice(device);
-  }
-}
-
-class _FakeDaemonWebRunnerFactory extends Fake implements WebRunnerFactory {
-  bool createCalled = false;
-
-  @override
-  ResidentRunner createWebRunner(
-    FlutterDevice device, {
-    required Analytics analytics,
-    required ApplicationPackageFactory applicationPackageFactory,
-    required AssetBundleFactory assetBundleFactory,
-    required BuildSystem buildSystem,
-    required BuildTargets buildTargets,
-    required DebuggingOptions debuggingOptions,
-    required FeatureFlags featureFlags,
-    required FlutterProject flutterProject,
-    required bool stayResident,
-    required ToolContext toolContext,
-    FlutterHookRunner? flutterHookRunner,
-    bool machine = false,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    String? target,
-    UrlTunneller? urlTunneller,
-    Map<String, String> webDefines = const <String, String>{},
-  }) {
-    createCalled = true;
-    throw StateError('Unexpected createWebRunner call');
   }
 }

@@ -30,13 +30,14 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../hook_runner.dart';
-import '../isolated/resident_web_runner.dart';
 import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../web/web_device.dart';
+import '../web/web_flutter_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
@@ -72,6 +73,7 @@ class WidgetPreviewCommand extends FlutterCommand {
     FlutterHookRunner? flutterHookRunner,
     @visibleForTesting ResidentRunnerFactory? residentRunnerFactoryOverride,
     bool verboseHelp = false,
+    WebFlutterDeviceFactory? webFlutterDeviceFactory,
   }) : super(applicationPackages: applicationPackages) {
     addSubcommand(
       WidgetPreviewStartCommand(
@@ -88,6 +90,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         flutterHookRunner: flutterHookRunner,
         residentRunnerFactoryOverride: residentRunnerFactoryOverride,
         verbose: verboseHelp,
+        webFlutterDeviceFactory: webFlutterDeviceFactory,
       ),
     );
     addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
@@ -171,6 +174,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     this._flutterHookRunner,
     @visibleForTesting this._residentRunnerFactoryOverride,
     this.verbose = false,
+    this._webFlutterDeviceFactory,
   }) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
@@ -260,6 +264,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   final DeviceManager _deviceManager;
   final FlutterHookRunner? _flutterHookRunner;
   final Pub _pub;
+  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
@@ -688,7 +693,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           device,
           toolContext: toolContext,
           buildInfo: debuggingOptions.buildInfo,
+          flutterProject: widgetPreviewScaffoldProject,
           target: target,
+          webFlutterDeviceFactory: _webFlutterDeviceFactory,
         );
 
         if (boolArg(kLaunchPreviewer)) {
@@ -702,19 +709,16 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                   flutterProject: widgetPreviewScaffoldProject,
                   projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
                 )
-              : ResidentWebRunner(
-                  flutterDevice,
+              : HotRunner(
+                  <FlutterDevice>[flutterDevice],
+                  analytics: analytics,
                   applicationPackageFactory: applicationPackages,
                   assetBundleFactory: _assetBundleFactory,
                   buildSystem: _buildSystem,
                   buildTargets: _buildTargets,
                   dartBuilder: _flutterHookRunner,
-                  featureFlags: featureFlags,
-                  toolContext: toolContext,
-                  target: target,
                   debuggingOptions: debuggingOptions,
-                  analytics: analytics,
-                  flutterProject: widgetPreviewScaffoldProject,
+                  featureFlags: featureFlags,
                   // Explicitly provide the project root path rather than relying on the current directory
                   // as the current directory exists within $TMP. At least on MacOS, when setting the
                   // current directory to the widget_preview_scaffold project created under
@@ -724,6 +728,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                   // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
                   // See https://github.com/flutter/flutter/issues/179036
                   projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+                  target: target,
+                  toolContext: toolContext,
+                  xcode: null,
                 );
           unawaited(
             _widgetPreviewApp!.run(

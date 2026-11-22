@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -36,6 +37,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
@@ -305,6 +307,29 @@ void main() {
       ),
       expected,
     );
+  });
+
+  // Uses testUsingContext because FlutterDevice.create reads the context-scoped
+  // ResidentCompilerFactory when constructing a debug non-wasm generator.
+  testUsingContext('WebDriverService starts and stops a debug hot app', () async {
+    fakeWebFlutterDeviceFactory = FakeWebFlutterDeviceFactory();
+    final WebDriverService service = setUpDriverService(
+      webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
+    );
+    final device = FakeDevice();
+    await service.start(
+      BuildInfo.debug,
+      device,
+      DebuggingOptions.enabled(BuildInfo.debug, ipv6: true),
+    );
+    await service.stop();
+    expect(fakeWebFlutterDeviceFactory.lastDevice!.callLog, <String>[
+      'runHot',
+      'attachDeferredConnection',
+      'exitApps',
+      'dispose',
+      'destroyDevFS',
+    ]);
   });
 
   testWithoutContext('WebDriverService starts and stops a cold app', () async {
@@ -589,7 +614,32 @@ class FakeColdWebFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
 
   @override
+  bool get defersServiceProtocolConnection => true;
+
+  @override
   bool get supportsColdRestart => true;
+
+  @override
+  Future<int> runHot({required HotRunner hotRunner, String? route}) async {
+    expect(hotRunner.stayResident, isTrue);
+    callLog.add('runHot');
+    lastDebuggingOptions = hotRunner.debuggingOptions;
+    if (doResolveToError) {
+      return Future<int>.error('This is a test error');
+    }
+    return 0;
+  }
+
+  @override
+  void attachDeferredConnection({
+    required HotRunner hotRunner,
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+  }) {
+    callLog.add('attachDeferredConnection');
+    connectionInfoCompleter?.complete(
+      DebugConnectionInfo(wsUri: Uri.parse('ws://localhost:8080/ws')),
+    );
+  }
 
   @override
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
@@ -604,7 +654,9 @@ class FakeColdWebFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async {
-    callLog.add('exitApps');
+    if (!callLog.contains('exitApps')) {
+      callLog.add('exitApps');
+    }
   }
 
   @override

@@ -28,7 +28,6 @@ import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import '../web/web_flutter_device.dart';
 import '../web/web_options.dart';
-import '../web/web_runner.dart';
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -65,7 +64,6 @@ class DriveCommand extends RunCommandBase {
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
     this._webFlutterDeviceFactory,
-    this._webRunnerFactory,
   }) {
     requiresPubspecYaml();
 
@@ -228,7 +226,6 @@ class DriveCommand extends RunCommandBase {
   FlutterDriverFactory? _flutterDriverFactory;
   final FlutterHookRunner? _flutterHookRunner;
   final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
-  final WebRunnerFactory? _webRunnerFactory;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -379,7 +376,6 @@ class DriveCommand extends RunCommandBase {
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
       webFlutterDeviceFactory: _webFlutterDeviceFactory,
-      webRunnerFactory: _webRunnerFactory,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 

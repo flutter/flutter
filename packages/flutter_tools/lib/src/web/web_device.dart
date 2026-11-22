@@ -124,7 +124,7 @@ abstract class ChromiumDevice extends WebDevice {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
+    // See [WebFlutterDevice] in flutter_tools/lib/src/isolated/web_flutter_device.dart
     // for the web initialization and server logic.
     final WebDebugConfig(
       :String? launchUrl,

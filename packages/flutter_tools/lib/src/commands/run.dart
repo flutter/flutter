@@ -39,7 +39,6 @@ import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/web_flutter_device.dart';
 import '../web/web_options.dart';
-import '../web/web_runner.dart';
 import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
@@ -350,7 +349,6 @@ class RunCommand extends RunCommandBase {
     this.deviceManager,
     this._flutterHookRunner,
     this._webFlutterDeviceFactory,
-    this._webRunnerFactory,
     super.verboseHelp = false,
   }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
@@ -420,7 +418,6 @@ class RunCommand extends RunCommandBase {
   final DevtoolsLauncher _devtoolsLauncher;
   final FlutterHookRunner? _flutterHookRunner;
   final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
-  final WebRunnerFactory? _webRunnerFactory;
 
   @override
   final name = 'run';
@@ -589,7 +586,7 @@ class RunCommand extends RunCommandBase {
 
   bool shouldUseHotMode(BuildInfo buildInfo) {
     final bool hotArg = getValue(_hot);
-    final bool shouldUseHotMode = hotArg && !traceStartup;
+    final bool shouldUseHotMode = hotArg && !traceStartup && !useWasm;
     return buildInfo.isDebug && shouldUseHotMode;
   }
 
@@ -680,7 +677,10 @@ class RunCommand extends RunCommandBase {
       webDevServerConfig: webDevServerConfig,
     );
 
-    if (hotMode && !webMode) {
+    final bool useHotRunner =
+        hotMode ||
+        (webMode && debuggingOptions.buildInfo.isDebug && !debuggingOptions.webConfig.useWasm);
+    if (useHotRunner) {
       return HotRunner(
         flutterDevices,
         target: targetFile,
@@ -690,6 +690,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
         dillOutputPath: getValue(BuildInfoOptions.outputDill),
         stayResident: stayResident,
+        hotMode: hotMode,
         analytics: this.analytics,
         applicationPackageFactory: applicationPackages,
         assetBundleFactory: assetBundleFactory,
@@ -700,25 +701,6 @@ class RunCommand extends RunCommandBase {
         featureFlags: _featureFlags,
         toolContext: toolContext,
         xcode: appleContext.xcode,
-      );
-    } else if (webMode &&
-        debuggingOptions.buildInfo.isDebug &&
-        !debuggingOptions.webConfig.useWasm) {
-      return _webRunnerFactory!.createWebRunner(
-        flutterDevices.single,
-        target: targetFile,
-        flutterProject: flutterProject,
-        debuggingOptions: debuggingOptions,
-        stayResident: stayResident,
-        analytics: this.analytics,
-        applicationPackageFactory: applicationPackages,
-        assetBundleFactory: assetBundleFactory,
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        featureFlags: _featureFlags,
-        flutterHookRunner: _flutterHookRunner,
-        toolContext: toolContext,
-        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
@@ -755,7 +737,6 @@ class RunCommand extends RunCommandBase {
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
       webFlutterDeviceFactory: _webFlutterDeviceFactory,
-      webRunnerFactory: _webRunnerFactory,
       xcode: appleContext.xcode,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
@@ -781,6 +762,9 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode(buildInfo);
     final String? applicationBinaryPath = prebuiltApplicationBinaryPath;
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
+    final Map<String, String> webDefines = webDevServerConfig != null
+        ? extractWebDefines()
+        : const <String, String>{};
 
     if (outputMachineFormat) {
       if (devices!.length > 1) {
@@ -800,7 +784,7 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
-          webDefines: extractWebDefines(),
+          webDefines: webDefines,
           applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
@@ -842,9 +826,6 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    final Map<String, String> webDefines = webDevServerConfig != null
-        ? extractWebDefines()
-        : const <String, String>{};
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(

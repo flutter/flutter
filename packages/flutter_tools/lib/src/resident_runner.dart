@@ -122,7 +122,10 @@ class FlutterDevice {
             targetModelOverride: targetModelOverride,
           );
 
-    if (isWeb && webFlutterDeviceFactory != null) {
+    if (isWeb) {
+      if (webFlutterDeviceFactory == null) {
+        throw StateError('webFlutterDeviceFactory is required for web devices.');
+      }
       if (flutterProject == null) {
         throw StateError('flutterProject is required when webFlutterDeviceFactory is provided.');
       }
@@ -1987,7 +1990,7 @@ class TerminalHandler {
         return true;
       case 'r':
         // Allow hot reload if enabled. Also allow it if reloadIsRestart is true
-        // (e.g., web with --no-hot), since in that case the reload will be
+        // (e.g., cold web modes), since in that case the reload will be
         // converted to a restart internally.
         if (!(residentRunner.canHotReload || residentRunner.reloadIsRestart)) {
           return false;

@@ -85,6 +85,7 @@ class HotRunner extends ResidentRunner {
     super.dartBuilder,
     super.dillOutputPath,
     this.hostIsIde = false,
+    super.hotMode,
     HotRunnerConfig? hotRunnerConfig,
     super.machine,
     this._nativeAssetsYamlFile,
@@ -101,8 +102,7 @@ class HotRunner extends ResidentRunner {
              fileSystem: toolContext.fs,
              platform: toolContext.platform,
              logger: toolContext.logger,
-           ),
-       super(hotMode: true);
+           );
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
@@ -154,6 +154,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   bool get supportsDetach => stopAppDuringCleanup;
+
+  @override
+  bool get supportsRestart => hotMode && super.supportsRestart;
 
   @override
   bool get reloadIsRestart => false;
@@ -1464,19 +1467,22 @@ Future<ReassembleResult> _defaultReassembleHelper(
   final Logger logger = hotRunner.logger;
   // Check if any isolates are paused and reassemble those that aren't.
   final reassembleViews = <FlutterView, FlutterVmService?>{};
+  final webViews = <FlutterView>{};
   final reassembleFutures = <Future<void>>[];
   String? serviceEventKind;
   var pausedIsolatesFound = 0;
   var failedReassemble = false;
   var shouldReportReloadTime = true;
   for (final device in flutterDevices) {
+    final isWeb = device!.targetPlatform == TargetPlatform.web_javascript;
     final List<FlutterView> views = viewCache[device]!;
     for (final view in views) {
       // Check if the isolate is paused, and if so, don't reassemble. Ignore the
       // PostPauseEvent event - the client requesting the pause will resume the app.
-      final vm_service.Event? pauseEvent = await device!.vmService!.getIsolatePauseEventOrNull(
-        view.uiIsolate!.id!,
-      );
+      // DWDS does not implement `getIsolatePauseEvent`, so skip the lookup on web.
+      final vm_service.Event? pauseEvent = isWeb
+          ? null
+          : await device.vmService!.getIsolatePauseEventOrNull(view.uiIsolate!.id!);
       if (pauseEvent != null &&
           isPauseEvent(pauseEvent.kind!) &&
           pauseEvent.kind != vm_service.EventKind.kPausePostRequest) {
@@ -1488,6 +1494,9 @@ Future<ReassembleResult> _defaultReassembleHelper(
         }
       } else {
         reassembleViews[view] = device.vmService;
+        if (isWeb) {
+          webViews.add(view);
+        }
         // If the tool identified a change in a single widget, do a fast instead
         // of a full reassemble.
         final Future<void> reassembleWork = device.vmService!.flutterReassemble(
@@ -1536,6 +1545,9 @@ Future<ReassembleResult> _defaultReassembleHelper(
       var postReloadPausedIsolatesFound = 0;
       String? serviceEventKind;
       for (final FlutterView view in reassembleViews.keys) {
+        if (webViews.contains(view)) {
+          continue;
+        }
         final vm_service.Event? pauseEvent = await reassembleViews[view]!
             .getIsolatePauseEventOrNull(view.uiIsolate!.id!);
         if (pauseEvent != null && isPauseEvent(pauseEvent.kind!)) {

@@ -41,7 +41,7 @@ import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/testing.dart';
@@ -80,7 +80,7 @@ Future<ToolDependencies> _bootstrapForTest({
   io.Stdio? stdio,
   AnsiTerminal? terminal,
   UserMessages? userMessages,
-  WebRunnerFactory? webRunnerFactory,
+  WebFlutterDeviceFactory? webFlutterDeviceFactory,
   XCDevice? Function()? xcdeviceBuilder,
   Xcode? Function()? xcodeBuilder,
 }) {
@@ -130,7 +130,7 @@ Future<ToolDependencies> _bootstrapForTest({
     templateRenderer: FakeTemplateRenderer(),
     terminal: resolvedTerminal,
     userMessages: userMessages ?? UserMessages(),
-    webRunnerFactory: webRunnerFactory,
+    webFlutterDeviceFactory: webFlutterDeviceFactory,
     xcdeviceBuilder: xcdeviceBuilder,
     xcodeBuilder: xcodeBuilder,
     xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
@@ -1019,7 +1019,7 @@ void main() {
         final fakeAndroidSdk = FakeAndroidSdk();
         final fakeHookRunner = _FakeFlutterHookRunner();
         final fakePlistParser = FakePlistParser();
-        final fakeWebRunnerFactory = _FakeWebRunnerFactory();
+        final fakeWebFlutterDeviceFactory = _FakeWebFlutterDeviceFactory();
         final fakeXCDevice = FakeXCDevice();
         final fakeXcode = FakeXcode();
         late final _ContextRecordingFlutterCommand command;
@@ -1032,7 +1032,7 @@ void main() {
           flutterHookRunner: fakeHookRunner,
           fs: fs,
           plistParser: fakePlistParser,
-          webRunnerFactory: fakeWebRunnerFactory,
+          webFlutterDeviceFactory: fakeWebFlutterDeviceFactory,
           xcdeviceBuilder: () {
             xcdeviceEvaluations++;
             return fakeXCDevice;
@@ -1073,7 +1073,7 @@ void main() {
         expect(xcodeEvaluations, 1);
         expect(command.resolvePlistParser(), same(fakePlistParser));
         expect(command.resolveHookRunner(), same(fakeHookRunner));
-        expect(command.resolveWebRunnerFactory(), same(fakeWebRunnerFactory));
+        expect(toolDependencies.webFlutterDeviceFactory, same(fakeWebFlutterDeviceFactory));
       },
     );
 
@@ -1369,7 +1369,6 @@ class _ContextRecordingFlutterCommand extends FlutterCommand {
   late AndroidSdk? Function() resolveAndroidSdk;
   late FlutterHookRunner? Function() resolveHookRunner;
   late PlistParser Function() resolvePlistParser;
-  late WebRunnerFactory? Function() resolveWebRunnerFactory;
   late XCDevice? Function() resolveXCDevice;
   late Xcode? Function() resolveXcode;
 
@@ -1388,7 +1387,6 @@ class _ContextRecordingFlutterCommand extends FlutterCommand {
     resolveAndroidSdk = () => commandContext.get<AndroidSdk>();
     resolveHookRunner = () => commandContext.get<FlutterHookRunner>();
     resolvePlistParser = () => commandContext.get<PlistParser>()!;
-    resolveWebRunnerFactory = () => commandContext.get<WebRunnerFactory>();
     resolveXCDevice = () => commandContext.get<XCDevice>();
     resolveXcode = () => commandContext.get<Xcode>();
     return FlutterCommandResult.success();
@@ -1567,7 +1565,7 @@ class _FakeAndroidStudio extends Fake implements AndroidStudio {}
 
 class _FakeFlutterHookRunner extends Fake implements FlutterHookRunner {}
 
-class _FakeWebRunnerFactory extends Fake implements WebRunnerFactory {}
+class _FakeWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFactory {}
 
 /// Answers `which` lookups like a host where the binary is not on PATH, and
 /// delegates everything else to [FakeProcessManager.any].

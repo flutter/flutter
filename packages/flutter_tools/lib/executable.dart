@@ -57,7 +57,6 @@ import 'src/features.dart';
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
-import 'src/isolated/resident_web_runner.dart';
 import 'src/isolated/web_flutter_device.dart';
 import 'src/native_assets.dart';
 import 'src/pre_run_validator.dart';
@@ -138,9 +137,8 @@ Future<void> main(List<String> args) async {
     stdio: stdio,
     templateRenderer: const MustacheTemplateRenderer(),
     terminal: terminal,
-    // The web runner is not supported in google3 because it depends on dwds.
+    // Web devices are not supported through this factory in google3 because they depend on dwds.
     webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
-    webRunnerFactory: DwdsWebRunnerFactory(),
   );
 
   await runner.run(
@@ -274,7 +272,6 @@ List<FlutterCommand> generateCommands({
       hidden: !verboseHelp,
       toolContext: toolContext,
       webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
-      webRunnerFactory: toolDependencies.webRunnerFactory,
       xcode: toolDependencies.appleContext.xcode,
     ),
     DebugAdapterCommand(toolContext: toolContext, verboseHelp: verboseHelp),
@@ -302,7 +299,6 @@ List<FlutterCommand> generateCommands({
       toolContext: toolContext,
       verboseHelp: verboseHelp,
       webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
-      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     EmulatorsCommand(
       doctor: toolDependencies.doctor,
@@ -348,7 +344,6 @@ List<FlutterCommand> generateCommands({
       flutterHookRunner: toolDependencies.flutterHookRunner,
       verboseHelp: verboseHelp,
       webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
-      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),
@@ -372,6 +367,7 @@ List<FlutterCommand> generateCommands({
       templatePathProvider: toolDependencies.templatePathProvider,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
+      webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
     ),
     UpgradeCommand(featureFlags: featureFlags, toolContext: toolContext, verboseHelp: verboseHelp),
     SymbolizeCommand(toolContext: toolContext),

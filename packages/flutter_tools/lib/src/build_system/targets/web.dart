@@ -47,7 +47,7 @@ const String _kLegacyWebDeprecationWarning =
     'package:web and dart:js_interop.';
 
 /// Generates an entry point for a web target.
-// Keep this in sync with build_runner/resident_web_runner.dart
+// Keep this in sync with lib/src/isolated/web_flutter_device.dart.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget({this.templateRenderer = const MustacheTemplateRenderer()});
 
