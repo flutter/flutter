@@ -177,9 +177,6 @@ sandbox contribute.
   inside it reruns the whole wrapped build. (The GPU test backends -- ANGLE,
   SwiftShader, the Vulkan loader and the validation layer -- are built from
   their converted GN files on Linux and on a Mac.)
-- A Mac's ANGLE as converted -- its Metal backend, whose shaders the host
-  Xcode's Metal toolchain compiles at build time, and its two shared
-  libraries -- has not been built on a Mac yet.
 - The wrapped Dart SDK build compiles the VM without LTO in every build.
   GN compiles it with the engine's LTO: full in the Android AOT and iOS
   device builds, thin in the Linux profile and release builds.
