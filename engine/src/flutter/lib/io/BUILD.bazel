@@ -20,8 +20,6 @@ cc_library(
         "-Wvla",  # from //flutter/third_party/dart/runtime:dart_config
         "-Woverloaded-virtual",  # from //flutter/third_party/dart/runtime:dart_config
         "-Wno-comments",  # from //flutter/third_party/dart/runtime:dart_config
-        "-g3",  # from //flutter/third_party/dart/runtime:dart_config
-        "-ggdb3",  # from //flutter/third_party/dart/runtime:dart_config
         "-fno-rtti",  # from //flutter/third_party/dart/runtime:dart_config
         "-fno-exceptions",  # from //flutter/third_party/dart/runtime:dart_config
         "-Wnewline-eof",  # from //flutter/third_party/dart/runtime:dart_config

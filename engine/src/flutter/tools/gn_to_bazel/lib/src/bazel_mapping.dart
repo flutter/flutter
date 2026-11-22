@@ -1448,6 +1448,11 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   // the ones below under every host configuration (dart_debug is false
   // unless tools/gn is given --dart-debug, so the runtime, and this one
   // file of the engine, compile with -O2 even in an unoptimized build).
+  // A copy of the cflags of runtime/BUILD.gn's config for clang off
+  // Windows, which the converter does not read; it follows Dart's file by
+  // hand. The flag comparison with GN (tool/compile_command_diff.py over
+  // lib/io) is what shows when it has not: the config once had -g3 and
+  // -ggdb3, and this list kept them after a roll had dropped them.
   '//flutter/third_party/dart/runtime:dart_config': ConfigDependency(
     '@dart//:dart_config',
     copts: <String>[
@@ -1457,8 +1462,6 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
       '-Wvla',
       '-Woverloaded-virtual',
       '-Wno-comments',
-      '-g3',
-      '-ggdb3',
       '-fno-rtti',
       '-fno-exceptions',
       '-Wnewline-eof',
