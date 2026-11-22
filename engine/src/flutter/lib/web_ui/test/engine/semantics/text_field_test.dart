@@ -215,6 +215,70 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, isNot(textField));
     });
 
+    for (final isMultiline in <bool>[false, true]) {
+      test(
+        'clicking a ${isMultiline ? 'multiline' : 'single-line'} field does not tap its ancestor',
+        () {
+          // Regression test for https://github.com/flutter/flutter/issues/195812.
+          final capturedActions = <(int, ui.SemanticsAction)>[];
+          final ui.SemanticsActionEventCallback? previousCallback =
+              EnginePlatformDispatcher.instance.onSemanticsActionEvent;
+          addTearDown(() {
+            EnginePlatformDispatcher.instance.onSemanticsActionEvent = previousCallback;
+          });
+          EnginePlatformDispatcher.instance.onSemanticsActionEvent =
+              (ui.SemanticsActionEvent event) {
+                capturedActions.add((event.nodeId, event.type));
+              };
+
+          final tester = SemanticsTester(owner());
+          tester.updateNode(
+            id: 0,
+            hasTap: true,
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(
+                id: 1,
+                flags: ui.SemanticsFlags(
+                  isTextField: true,
+                  isEnabled: ui.Tristate.isTrue,
+                  isFocused: ui.Tristate.isFalse,
+                  isMultiline: isMultiline,
+                ),
+                hasTap: true,
+                rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+              ),
+            ],
+          );
+          tester.apply();
+          final textField = tester.getSemanticsObject(1).semanticRole! as SemanticTextField;
+
+          // A standalone click has no preceding pointer events, as can happen
+          // with assistive technology or browser test automation.
+          textField.editableElement.dispatchEvent(
+            createDomMouseEvent('click', <Object?, Object?>{'bubbles': true}),
+          );
+          expect(domDocument.activeElement, textField.editableElement);
+          expect(capturedActions, <(int, ui.SemanticsAction)>[(1, ui.SemanticsAction.focus)]);
+
+          // Clicking an already focused field must not tap the ancestor either.
+          capturedActions.clear();
+          textField.editableElement.dispatchEvent(
+            createDomMouseEvent('click', <Object?, Object?>{'bubbles': true}),
+          );
+          expect(capturedActions, isEmpty);
+          expect(domDocument.activeElement, textField.editableElement);
+
+          // The ancestor must still handle clicks that target it directly.
+          tester
+              .getSemanticsObject(0)
+              .element
+              .dispatchEvent(createDomMouseEvent('click', <Object?, Object?>{'bubbles': true}));
+          expect(capturedActions, contains((0, ui.SemanticsAction.tap)));
+        },
+      );
+    }
+
     test('Syncs semantic state from framework', () async {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 

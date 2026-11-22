@@ -431,6 +431,10 @@ class SemanticTextField extends SemanticRole {
       'click',
       createDomEventListener((DomEvent event) {
         editableElement.focusWithoutScroll();
+        // Activating the field must not also tap an ancestor semantics node.
+        // Standalone clicks from assistive technology or browser automation
+        // may arrive without pointer events and bypass click debouncing.
+        event.stopPropagation();
       }),
     );
     editableElement.addEventListener(
