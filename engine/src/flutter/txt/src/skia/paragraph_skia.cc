@@ -396,16 +396,16 @@ void ParagraphSkia::PaintAlignedOrSplit(DisplayListBuilder* builder,
         static_cast<DlScalar>(static_cast<double>(clip.GetLeft()) + half_width);
 
     builder->Save();
-    builder->ClipRect(
-        DlRect::MakeLTRB(clip.GetLeft(), clip.GetTop(), mid_x, clip.GetBottom()),
-        DlClipOp::kIntersect, false);
+    builder->ClipRect(DlRect::MakeLTRB(clip.GetLeft(), clip.GetTop(), mid_x,
+                                       clip.GetBottom()),
+                      DlClipOp::kIntersect, false);
     Paint(builder, x, y);
     builder->Restore();
 
     builder->Save();
-    builder->ClipRect(
-        DlRect::MakeLTRB(mid_x, clip.GetTop(), clip.GetRight(), clip.GetBottom()),
-        DlClipOp::kIntersect, false);
+    builder->ClipRect(DlRect::MakeLTRB(mid_x, clip.GetTop(), clip.GetRight(),
+                                       clip.GetBottom()),
+                      DlClipOp::kIntersect, false);
     Paint(builder, x - overflow_width, y);
     builder->Restore();
     return;
