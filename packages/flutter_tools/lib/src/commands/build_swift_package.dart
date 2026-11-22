@@ -67,6 +67,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._cocoaPods,
     required this._codesign,
     required this._featureFlags,
+    required this._templatePathProvider,
     required this._templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
@@ -116,6 +117,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final BuildSystem _buildSystem;
   final Xcode? _xcode;
   final Analytics _analytics;
+  final TemplatePathProvider _templatePathProvider;
   final TemplateRenderer _templateRenderer;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
@@ -207,8 +209,10 @@ class BuildSwiftPackage extends BuildSubCommand {
     analytics: _analytics,
     buildSystem: _buildSystem,
     cocoaPods: _cocoaPods,
+    featureFlags: _featureFlags,
     flutterRoot: toolContext.cache.flutterRoot,
     project: project,
+    templatePathProvider: _templatePathProvider,
     templateRenderer: _templateRenderer,
     toolContext: toolContext,
     xcode: _xcode!,
@@ -1251,6 +1255,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       platform: hostPlatform,
       analytics: _utils.analytics,
       androidSdkBuilder: null,
+      featureFlags: _utils.featureFlags,
       projectFactory: projectFactory,
       visualStudio: null,
       xcode: _utils.xcode,
@@ -1585,6 +1590,7 @@ class CocoaPodPluginDependencies {
       _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
       cocoaPods: _utils.cocoaPods,
+      featureFlags: _utils.featureFlags,
       templateRenderer: _utils.templateRenderer,
       toolContext: _utils.toolContext,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
@@ -1954,6 +1960,7 @@ class FlutterNativeIntegrationSwiftPackage {
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: _utils.templatePathProvider,
       templateRenderer: _utils.templateRenderer,
     );
     scriptsTemplate.render(scriptsDirectory, <String, Object>{
@@ -1979,6 +1986,7 @@ class FlutterNativeIntegrationSwiftPackage {
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: _utils.templatePathProvider,
       templateRenderer: _utils.templateRenderer,
     );
     toolsTemplate.render(sourcesDirectory, <String, Object>{}, printStatusWhenWriting: false);
@@ -1994,6 +2002,7 @@ class FlutterNativeIntegrationSwiftPackage {
       fileSystem: fileSystem,
       templateManifest: null,
       logger: logger,
+      templatePathProvider: _utils.templatePathProvider,
       templateRenderer: _utils.templateRenderer,
     );
 
@@ -2015,6 +2024,7 @@ class FlutterNativeIntegrationSwiftPackage {
         fileSystem: fileSystem,
         templateManifest: null,
         logger: logger,
+        templatePathProvider: _utils.templatePathProvider,
         templateRenderer: _utils.templateRenderer,
       );
       testsTemplate.render(testDirectory, <String, Object>{}, printStatusWhenWriting: false);
@@ -2169,8 +2179,10 @@ class BuildSwiftPackageUtils {
     required this.analytics,
     required this.buildSystem,
     required this.cocoaPods,
+    required this.featureFlags,
     required this.flutterRoot,
     required this.project,
+    required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
     required this.xcode,
@@ -2179,8 +2191,10 @@ class BuildSwiftPackageUtils {
   final Analytics analytics;
   final BuildSystem buildSystem;
   final CocoaPods cocoaPods;
+  final FeatureFlags featureFlags;
   final String flutterRoot;
   final FlutterProject project;
+  final TemplatePathProvider templatePathProvider;
   final TemplateRenderer templateRenderer;
   final ToolContext toolContext;
   final Xcode xcode;

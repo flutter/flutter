@@ -28,6 +28,7 @@ void main() {
   testWithoutContext('LinuxDevice defaults', () async {
     final device = LinuxDevice(
       analytics: const NoOpAnalytics(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -55,6 +56,7 @@ void main() {
   testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
     final deviceArm64Host = LinuxDevice(
       analytics: const NoOpAnalytics(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       toolContext: FakeToolContext(
         fs: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
@@ -158,6 +160,7 @@ void main() {
     expect(
       LinuxDevice(
         analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -177,6 +180,7 @@ void main() {
     expect(
       LinuxDevice(
         analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
         toolContext: FakeToolContext(
           fs: fileSystem,
           logger: BufferLogger.test(),
@@ -194,6 +198,7 @@ void main() {
       final mockApp = FakeLinuxApp();
       final device = LinuxDevice(
         analytics: const NoOpAnalytics(),
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
@@ -243,6 +248,7 @@ void main() {
         ]);
         final device = LinuxDevice(
           analytics: fakeAnalytics,
+          featureFlags: TestFeatureFlags(isLinuxEnabled: true),
           toolContext: FakeToolContext(
             cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
             fs: fileSystem,

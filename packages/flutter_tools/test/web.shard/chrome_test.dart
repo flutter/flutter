@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:fake_async/fake_async.dart';
@@ -1202,6 +1203,142 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     },
   );
 
+  testWithoutContext('Chromium close does not hang when Browser.close never replies', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // Process outlives the Browser.close timeout (6s > 5s), so the
+      // timeout must fire and escalate to SIGTERM. Without the timeout,
+      // close() would wait here forever.
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      // 5s timeout + wait up to 5s more for the 6s process to exit.
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
+  testWithoutContext('Chromium close does not hang when Chrome never responds', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangGetTab: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      final process = FakeProcess(duration: const Duration(seconds: 6));
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+
+      fakeAsync.elapse(kBrowserCloseTimeout + const Duration(seconds: 5));
+      expect(closeCompleted, isTrue);
+      expect(process.signals, <io.ProcessSignal>[io.ProcessSignal.sigterm]);
+    });
+
+    expect(logger.warningText, isEmpty);
+    expect(logger.traceText, contains('Chrome did not complete a graceful shutdown within 5s.'));
+  });
+
+  testWithoutContext('Chromium close returns promptly when Chrome already exited', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync fakeAsync) {
+      final chromeConnection = FakeChromeConnectionWithTab(hangBrowserClose: true);
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: operatingSystemUtils,
+        browserFinder: findChromeExecutable,
+        logger: logger,
+      );
+      // The process has already exited, so the reply never arrives. The exit
+      // should win the race and skip the timeout.
+      final process = FakeProcess();
+      final chrome = Chromium(
+        0,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+
+      var connectCompleted = false;
+      chromiumLauncher.connect(chrome, false).then((Chromium value) {
+        expect(value, equals(chrome));
+        connectCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      expect(connectCompleted, isTrue);
+
+      var closeCompleted = false;
+      chrome.close().then((_) {
+        closeCompleted = true;
+      });
+      fakeAsync.flushMicrotasks();
+      // The process exit timer is already due.
+      fakeAsync.elapse(Duration.zero);
+      expect(closeCompleted, isTrue);
+      expect(process.signals, isEmpty);
+    });
+
+    expect(logger.warningText, isEmpty);
+  });
+
   testWithoutContext(
     'Chromium close handles a WebSocketException when closing the WipConnection',
     () async {
@@ -1250,6 +1387,168 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
       ),
     );
+  });
+
+  group('Chromium crash diagnostics', () {
+    void addChromeProcessCommand(_ControllableProcess process) {
+      addTearDown(process.exit);
+      processManager.addCommand(
+        FakeCommand(
+          command: const <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=0',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          process: process,
+        ),
+      );
+    }
+
+    testWithoutContext(
+      'logs produced after "DevTools listening" appear in crash diagnostics',
+      () async {
+        final process = _ControllableProcess(pid: 2468);
+        addChromeProcessCommand(process);
+
+        final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+        process.emitStderr('Starting Chromium browser...');
+        process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+        final Chromium chrome = await launchFuture;
+
+        process.emitStdout('Post-launch diagnostic message from stdout');
+        process.emitStderr('Post-launch diagnostic message from stderr');
+        await pumpEventQueue();
+
+        process.exit(1);
+        await chrome.onExit;
+        await pumpEventQueue();
+
+        expect(
+          testLogger.errorText,
+          contains('Chrome process PID 2468 exited unexpectedly with code 1.'),
+        );
+        expect(testLogger.errorText, contains('Last 200 lines of Chrome output:'));
+        expect(testLogger.errorText, contains('[CHROME STDERR]: Starting Chromium browser...'));
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDOUT]: Post-launch diagnostic message from stdout'),
+        );
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDERR]: Post-launch diagnostic message from stderr'),
+        );
+      },
+    );
+
+    testWithoutContext('older log entries are evicted once 200-line limit is exceeded', () async {
+      final process = _ControllableProcess(pid: 3579);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      for (var i = 0; i < 250; i++) {
+        process.emitStdout('line-$i');
+      }
+      await pumpEventQueue();
+
+      process.exit(1);
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(testLogger.errorText, '''
+Chrome process PID 3579 exited unexpectedly with code 1.
+Last 200 lines of Chrome output:
+${List<String>.generate(200, (int i) => '[CHROME STDOUT]: line-${i + 50}').join('\n')}
+''');
+    });
+
+    testWithoutContext(
+      'the correct logs are associated with the correct Chromium process across retries',
+      () async {
+        final failedProcess = _ControllableProcess(pid: 1111);
+        final successfulProcess = _ControllableProcess(pid: 2222);
+
+        addChromeProcessCommand(failedProcess);
+        addChromeProcessCommand(successfulProcess);
+
+        final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+
+        // Attempt 1 fails DevTools server startup.
+        failedProcess.emitStderr('Process 1 early diagnostic line');
+        failedProcess.emitStderr(
+          '[ERROR:content/browser/devtools/devtools_http_handler.cc:313] '
+          'Cannot start http server for devtools.',
+        );
+        await pumpEventQueue();
+
+        // Attempt 2 succeeds.
+        successfulProcess.emitStderr('Process 2 startup diagnostic line');
+        successfulProcess.emitStderr(
+          'DevTools listening on ws://127.0.0.1:12346/devtools/browser/abc',
+        );
+        final Chromium chrome = await launchFuture;
+
+        successfulProcess.emitStdout('Process 2 post-launch diagnostic line');
+        await pumpEventQueue();
+
+        successfulProcess.exit(1);
+        await chrome.onExit;
+        await pumpEventQueue();
+
+        expect(
+          testLogger.errorText,
+          contains('Chrome process PID 2222 exited unexpectedly with code 1.'),
+        );
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDERR]: Process 2 startup diagnostic line'),
+        );
+        expect(
+          testLogger.errorText,
+          contains('[CHROME STDOUT]: Process 2 post-launch diagnostic line'),
+        );
+        expect(testLogger.errorText, isNot(contains('Process 1 early diagnostic line')));
+      },
+    );
+
+    testWithoutContext('clean exit does not log unexpected crash diagnostics', () async {
+      final process = _ControllableProcess(pid: 5555);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      process.emitStdout('Normal application log');
+      await pumpEventQueue();
+
+      process.exit();
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(testLogger.errorText, isNot(contains('exited unexpectedly')));
+      expect(testLogger.errorText, isNot(contains('Last 200 lines of Chrome output:')));
+    });
+
+    testWithoutContext('chrome.close does not log unexpected crash diagnostics', () async {
+      final process = _ControllableProcess(pid: 6666);
+      addChromeProcessCommand(process);
+
+      final Future<Chromium> launchFuture = chromeLauncher.launch('example_url', skipCheck: true);
+      process.emitStderr('DevTools listening on ws://127.0.0.1:12345/devtools/browser/abc');
+      final Chromium chrome = await launchFuture;
+
+      await chrome.close();
+      await chrome.onExit;
+      await pumpEventQueue();
+
+      expect(testLogger.errorText, isNot(contains('exited unexpectedly')));
+      expect(testLogger.errorText, isNot(contains('Last 200 lines of Chrome output:')));
+    });
   });
 }
 
@@ -1300,17 +1599,24 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
     OnSendCommand? onSendCommand,
     this.onGetTab,
     bool throwWebSocketException = false,
-  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException);
+    bool hangBrowserClose = false,
+    this.hangGetTab = false,
+  }) : _tab = FakeChromeTab(onSendCommand, throwWebSocketException, hangBrowserClose);
 
   final FakeChromeTab _tab;
   void Function()? onGetTab;
   bool throwSocketExceptions = false;
+  final bool hangGetTab;
 
   @override
   Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
     onGetTab?.call();
     if (throwSocketExceptions) {
       throw const io.SocketException('test');
+    }
+    if (hangGetTab) {
+      // Simulate a Chrome that is alive but never answers.
+      return Completer<ChromeTab?>().future;
     }
     return _tab;
   }
@@ -1328,27 +1634,36 @@ class FakeChromeConnectionWithTab extends Fake implements ChromeConnection {
 }
 
 class FakeChromeTab extends Fake implements ChromeTab {
-  FakeChromeTab(this.onSendCommand, this.throwWebSocketException);
+  FakeChromeTab(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
   Future<WipConnection> connect({Function? onError}) async {
-    return FakeWipConnection(onSendCommand, throwWebSocketException);
+    return FakeWipConnection(onSendCommand, throwWebSocketException, hangBrowserClose);
   }
 }
 
 class FakeWipConnection extends Fake implements WipConnection {
-  FakeWipConnection(this.onSendCommand, this.throwWebSocketException);
+  FakeWipConnection(this.onSendCommand, this.throwWebSocketException, this.hangBrowserClose);
 
   final OnSendCommand? onSendCommand;
   final bool throwWebSocketException;
+  final bool hangBrowserClose;
 
   @override
-  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) async {
+  Future<WipResponse> sendCommand(String method, [Map<String, dynamic>? params]) {
     onSendCommand?.call(method);
-    return WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}});
+    if (hangBrowserClose && method == 'Browser.close') {
+      // Simulate Chrome exiting before its Browser.close reply arrives,
+      // so the pending future in webkit_inspection_protocol never completes.
+      return Completer<WipResponse>().future;
+    }
+    return Future<WipResponse>.value(
+      WipResponse(<String, dynamic>{'id': 0, 'result': <String, dynamic>{}}),
+    );
   }
 
   @override
@@ -1365,5 +1680,45 @@ class _FailOnFindFreePortOperatingSystemUtils extends FakeOperatingSystemUtils {
     throw StateError(
       'OperatingSystemUtils.findFreePort should not be called when port-0 binding is used',
     );
+  }
+}
+
+class _ControllableProcess extends FakeProcess {
+  _ControllableProcess({super.pid});
+
+  final _stdoutController = StreamController<List<int>>();
+  final _stderrController = StreamController<List<int>>();
+  final _exitCompleter = Completer<int>();
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  @override
+  Stream<List<int>> get stderr => _stderrController.stream;
+
+  @override
+  Future<int> get exitCode => _exitCompleter.future;
+
+  @override
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    super.kill(signal);
+    exit(15);
+    return true;
+  }
+
+  void emitStdout(String line) {
+    _stdoutController.add(utf8.encode('$line\n'));
+  }
+
+  void emitStderr(String line) {
+    _stderrController.add(utf8.encode('$line\n'));
+  }
+
+  void exit([int code = 0]) {
+    if (!_exitCompleter.isCompleted) {
+      unawaited(_stdoutController.close());
+      unawaited(_stderrController.close());
+      _exitCompleter.complete(code);
+    }
   }
 }
