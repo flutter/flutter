@@ -78,17 +78,10 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/testing:mocks
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],

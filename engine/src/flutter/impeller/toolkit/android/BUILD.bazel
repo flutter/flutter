@@ -74,7 +74,8 @@ cc_library(
     name = "unittests_lib",
     testonly = True,
     srcs = ["toolkit_android_unittests.cc"],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["TESTING"],

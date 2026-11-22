@@ -225,9 +225,9 @@ cc_test(
     name = "availability_version_check_unittests",
     size = "small",
     srcs = ["availability_version_check_unittests.cc"],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-unguarded-availability",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
@@ -838,24 +838,18 @@ cc_test(
     size = "small",
     # Add platform frameworks directory to search path for test frameworks.
     # Add platform lib to search path for test libraries/Swift modules.
-    copts = FLUTTER_COPTS + [
-        "-fvisibility=default",  # from :swift_testing_main
-        "-fvisibility=default",
-    ] + select({
+    copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
         ":when_is_ios_and_use_ios_simulator": [
-            "-mios-simulator-version-min=15.0",  # from :swift_testing_main
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
-            "-miphoneos-version-min=15.0",  # from :swift_testing_main
             "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
         ],
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": [
-            "-mmacosx-version-min=14.0",  # from :swift_testing_main
             "-mmacosx-version-min=14.0",  # !(is_ios) && is_mac
         ],
         "//conditions:default": [],
@@ -877,17 +871,17 @@ cc_test(
         "//engine/src:include_root",
     ] + select({
         ":when_is_ios_and_use_ios_simulator": [
-            "@macos_sdk//:ios_simulator_developer",  # from :swift_testing_main
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
-            "@macos_sdk//:ios_developer",  # from :swift_testing_main
+            "@macos_sdk//:ios_developer",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": [
-            "@macos_sdk//:macos_developer",  # from :swift_testing_main
+            "@macos_sdk//:macos_developer",  # !(is_ios) && is_mac
         ],
         "//conditions:default": [],
     }),
@@ -909,11 +903,7 @@ flutter_objc_library(
         "framework/Source/FlutterTestUtils.h",
         "//engine/src/flutter/shell/platform/darwin/ios:flutter_task_queue_dispatch.h",
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-fvisibility=default",
-        "-Wno-unguarded-availability",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
         ],
@@ -931,7 +921,9 @@ flutter_objc_library(
     }) + select({
         "@platforms//os:macos": [],
         "//conditions:default": FLUTTER_CFLAGS_OBJC,
-    }),
+    }) + [
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "@platforms//os:ios": [],
@@ -976,11 +968,7 @@ cc_test(
     ],
     # Add platform frameworks directory to search path for test frameworks.
     # Add platform lib to search path for test libraries/Swift modules.
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-fvisibility=default",
-        "-Wno-unguarded-availability",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + ["-fvisibility=default"] + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
         ],
@@ -996,6 +984,9 @@ cc_test(
         ],
         "//conditions:default": [],
     }),
+    cxxopts = [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     linkopts = ["-ObjC"] + select({
         ":when_is_ios_and_use_ios_simulator": [
             "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator

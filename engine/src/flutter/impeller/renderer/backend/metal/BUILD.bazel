@@ -189,21 +189,19 @@ flutter_objc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-    ] + select({
+    ] + FLUTTER_COPTS + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
         ],
         "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
         ],
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -227,17 +225,10 @@ cc_library(
     srcs = ["pending_image_upload_schedule_tracker_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     linkopts = [
         "-framework",
         "AppKit",

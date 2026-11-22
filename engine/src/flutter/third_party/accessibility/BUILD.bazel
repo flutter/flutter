@@ -85,15 +85,14 @@ flutter_objc_library(
         "//engine/src/flutter/third_party/accessibility/ax:test_ax_tree_manager.h",  # is_mac || is_win
         "//engine/src/flutter/third_party/accessibility/gfx:test/gfx_util.h",  # is_mac || is_win
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-unguarded-availability",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_is_mac_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/testing:dart
         ],
         "//conditions:default": [],
-    }) + MACOS_CFLAGS_OBJC,
+    }) + MACOS_CFLAGS_OBJC + [
+        "-Wno-unguarded-availability",  # from //flutter/testing
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         ":when_is_mac_and_enable_unittests": [],
@@ -147,15 +146,15 @@ cc_test(
         "//engine/src/flutter/third_party/accessibility/gfx:test/gfx_util.cc",  # is_mac || is_win
         "//engine/src/flutter/third_party/accessibility/gfx:test/gfx_util.h",  # is_mac || is_win
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-unguarded-availability",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_is_mac_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/testing:dart
         ],
         "//conditions:default": [],
     }),
+    cxxopts = [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     linkopts = [
         "-ObjC",  # is_mac || is_win && is_mac
         "-framework",

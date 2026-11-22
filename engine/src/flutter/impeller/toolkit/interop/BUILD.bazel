@@ -97,16 +97,13 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../../display_list
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../../display_list
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from ../../renderer/backend
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend
             "-Wno-deprecated-copy",  # from ../../renderer/backend
             "-Wno-implicit-fallthrough",  # from ../../renderer/backend
@@ -142,16 +139,23 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :interop_base
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :interop_base
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop_base
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from backend
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from backend
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
         "//engine/src/flutter/impeller/tools:vulkan": [
-            "-Wno-redundant-parens",  # from :interop_base
             "-Wno-c++98-compat-extra-semi",  # from :interop_base
             "-Wno-deprecated-copy",  # from :interop_base
             "-Wno-implicit-fallthrough",  # from :interop_base
@@ -163,13 +167,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from backend
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from backend
             "-Wno-c++98-compat-extra-semi",  # from backend
             "-Wno-deprecated-copy",  # from backend
             "-Wno-implicit-fallthrough",  # from backend
@@ -178,16 +176,10 @@ cc_library(
             "-Wno-suggest-override",  # from backend
             "-Wno-unused-private-field",  # from backend
             "-Wno-unused-variable",  # from backend
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from backend
             "-Wno-c++98-compat-extra-semi",  # from backend
             "-Wno-deprecated-copy",  # from backend
             "-Wno-implicit-fallthrough",  # from backend
@@ -196,11 +188,6 @@ cc_library(
             "-Wno-suggest-override",  # from backend
             "-Wno-unused-private-field",  # from backend
             "-Wno-unused-variable",  # from backend
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from backend
         ],
         "//conditions:default": [],
     }),
@@ -246,52 +233,23 @@ cc_binary(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :interop
             "-Wno-deprecated-copy",  # from :interop
             "-Wno-implicit-fallthrough",  # from :interop
@@ -303,8 +261,27 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
         ],
         "//conditions:default": [],
     }),
@@ -331,6 +308,27 @@ flutter_objc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :interop
         ],
@@ -339,34 +337,8 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/impeller/tools:vulkan": [
-            "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
@@ -375,28 +347,9 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :interop
         ],
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:macos": MACOS_CFLAGS_OBJC,
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -419,52 +372,23 @@ cc_binary(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :interop
             "-Wno-deprecated-copy",  # from :interop
             "-Wno-implicit-fallthrough",  # from :interop
@@ -476,8 +400,27 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
         ],
         "//conditions:default": [],
     }),
@@ -511,52 +454,23 @@ cc_binary(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :interop
             "-Wno-deprecated-copy",  # from :interop
             "-Wno-implicit-fallthrough",  # from :interop
@@ -568,8 +482,27 @@ cc_binary(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
         ],
         "//conditions:default": [],
     }),
@@ -618,55 +551,24 @@ cc_library(
     hdrs = ["playground_test.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from ../../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
+    ] + FLUTTER_COPTS + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
-            "-Wno-c++98-compat-extra-semi",  # from :interop
-            "-Wno-deprecated-copy",  # from :interop
-            "-Wno-implicit-fallthrough",  # from :interop
-            "-Wno-nullability-completeness",  # from :interop
-            "-Wno-suggest-destructor-override",  # from :interop
-            "-Wno-suggest-override",  # from :interop
-            "-Wno-unused-private-field",  # from :interop
-            "-Wno-unused-variable",  # from :interop
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
         ],
         "//conditions:default": [],
     }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :interop
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :interop
             "-Wno-deprecated-copy",  # from :interop
             "-Wno-implicit-fallthrough",  # from :interop
@@ -678,11 +580,32 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :interop
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
         ],
         "//conditions:default": [],
-    }),
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :interop
+            "-Wno-deprecated-copy",  # from :interop
+            "-Wno-implicit-fallthrough",  # from :interop
+            "-Wno-nullability-completeness",  # from :interop
+            "-Wno-suggest-destructor-override",  # from :interop
+            "-Wno-suggest-override",  # from :interop
+            "-Wno-unused-private-field",  # from :interop
+            "-Wno-unused-variable",  # from :interop
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from ../../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -805,6 +728,24 @@ zip_bundle(
     }),
 )
 
+# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
 # `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_is_mac_or_is_ios",
@@ -823,30 +764,12 @@ selects.config_setting_group(
     ],
 )
 
-# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/impeller/tools:metal",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
 # `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
     match_all = [
         "//engine/src/flutter/impeller/tools:opengles",
         ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_opengles_and_impeller_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/impeller/tools:opengles",
-        "//engine/src/flutter/impeller/tools:vulkan",
     ],
 )
 

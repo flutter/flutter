@@ -102,6 +102,8 @@ flutter_android_device_test(
     }),
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :flutter_shell_native_src
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from :flutter_shell_native_src
         "-Wno-deprecated-copy",  # from :flutter_shell_native_src
         "-Wno-implicit-fallthrough",  # from :flutter_shell_native_src
@@ -239,6 +241,8 @@ cc_library(
     additional_compiler_inputs = ["@icu//:flutter/icudtl.dat"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :android_gpu_configuration
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/toolkit/glvk
         "-Wno-deprecated-copy",  # from //flutter/impeller/toolkit/glvk
         "-Wno-implicit-fallthrough",  # from //flutter/impeller/toolkit/glvk

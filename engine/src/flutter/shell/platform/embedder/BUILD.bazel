@@ -190,13 +190,49 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
+        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_software_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -210,32 +246,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
@@ -246,24 +256,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_shell_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
@@ -271,19 +263,6 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -300,28 +279,9 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/impeller/tools:vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/impeller
-            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-            "-Wno-deprecated-copy",  # from //flutter/impeller
-            "-Wno-implicit-fallthrough",  # from //flutter/impeller
-            "-Wno-nullability-completeness",  # from //flutter/impeller
-            "-Wno-suggest-destructor-override",  # from //flutter/impeller
-            "-Wno-suggest-override",  # from //flutter/impeller
-            "-Wno-unused-private-field",  # from //flutter/impeller
-            "-Wno-unused-variable",  # from //flutter/impeller
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -529,72 +489,23 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -603,18 +514,18 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
             "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
             "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
@@ -626,21 +537,31 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/impeller
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
             "-Wno-deprecated-copy",  # from //flutter/impeller
             "-Wno-implicit-fallthrough",  # from //flutter/impeller
@@ -652,8 +573,15 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
         ],
         "//conditions:default": [],
     }),
@@ -816,13 +744,49 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
+        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_software_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -836,32 +800,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
@@ -872,24 +810,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_shell_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
@@ -897,19 +817,6 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -926,28 +833,9 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/impeller/tools:vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/impeller
-            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
-            "-Wno-deprecated-copy",  # from //flutter/impeller
-            "-Wno-implicit-fallthrough",  # from //flutter/impeller
-            "-Wno-nullability-completeness",  # from //flutter/impeller
-            "-Wno-suggest-destructor-override",  # from //flutter/impeller
-            "-Wno-suggest-override",  # from //flutter/impeller
-            "-Wno-unused-private-field",  # from //flutter/impeller
-            "-Wno-unused-variable",  # from //flutter/impeller
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
         ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -1156,72 +1044,23 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
-            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -1230,18 +1069,18 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
             "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
             "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
@@ -1253,21 +1092,31 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/impeller
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
             "-Wno-deprecated-copy",  # from //flutter/impeller
             "-Wno-implicit-fallthrough",  # from //flutter/impeller
@@ -1279,8 +1128,15 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
         ],
         "//conditions:default": [],
     }),
@@ -1480,21 +1336,54 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
+        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/vulkan
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_software_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -1508,24 +1397,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
@@ -1533,24 +1404,6 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_shell_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -1564,19 +1417,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/flow
         ],
@@ -1585,18 +1425,8 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_gl": [
-            "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from //flutter/testing:metal
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/vulkan
         ],
         "//conditions:default": [],
     }),
@@ -1734,16 +1564,9 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -1752,26 +1575,8 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -1780,26 +1585,8 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -1808,18 +1595,23 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/vulkan
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
             "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
             "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
@@ -1831,29 +1623,32 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_gl": [
-            "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/testing:metal
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/vulkan
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
-    }),
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     implementation_deps = ["//engine/src/flutter:export_dynamic_symbols"],
     includes = ["."],
     local_defines = FLUTTER_LOCAL_DEFINES + select({
@@ -1953,21 +1748,60 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
+        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_shell_enable_vulkan": [
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_test_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_software_and_is_mac_or_is_ios": [
+            "-Wno-unguarded-availability",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -1981,24 +1815,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_unittests_library
         ],
@@ -2006,24 +1822,6 @@ flutter_objc_library(
     }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_shell_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2037,19 +1835,6 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from :embedder_unittests_library
         ],
@@ -2058,25 +1843,9 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_gl": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_unittests_library
         ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_test_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
-        "//conditions:default": [],
-    }) + select({
-        ":when_test_enable_metal_and_not_is_mac": FLUTTER_CFLAGS_OBJC,
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES + [
@@ -2135,16 +1904,9 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2153,26 +1915,8 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2181,26 +1925,8 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2209,18 +1935,23 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
             "-Wno-deprecated-copy",  # from :embedder_unittests_library
             "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
@@ -2232,29 +1963,32 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_gl": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
-    }),
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
+    ],
     data = [
         ":gpu_test_backends",
         "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin",
@@ -2317,16 +2051,9 @@ flutter_cc_test(
     name = "embedder_a11y_unittests",
     size = "small",
     srcs = ["tests/embedder_a11y_unittests.cc"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2335,26 +2062,8 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2363,26 +2072,8 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
-            "-Wno-deprecated-copy",  # from :embedder_unittests_library
-            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
-            "-Wno-nullability-completeness",  # from :embedder_unittests_library
-            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
-            "-Wno-suggest-override",  # from :embedder_unittests_library
-            "-Wno-unused-private-field",  # from :embedder_unittests_library
-            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
@@ -2391,18 +2082,23 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_gl": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
             "-Wno-deprecated-copy",  # from :embedder_unittests_library
             "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
@@ -2414,29 +2110,32 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        "//engine/src/flutter/shell:test_enable_gl": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_test_enable_metal_and_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_unittests_library
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
     }) + select({
-        "//engine/src/flutter/shell:test_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :embedder_unittests_library
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
         ],
         "//conditions:default": [],
-    }),
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
+    ],
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES + select({
         "//engine/src/flutter/shell:enable_software": [
@@ -2476,16 +2175,9 @@ flutter_cc_test(
     name = "embedder_proctable_unittests",
     size = "small",
     srcs = ["tests/embedder_unittests_proctable.cc"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         ":when_shell_enable_software_and_shell_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_software_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -2494,26 +2186,8 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_gl_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_gl_and_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -2522,26 +2196,8 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_vulkan_and_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
-            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
-            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
-            "-Wno-suggest-override",  # from :embedder_gpu_configuration
-            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
-            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
@@ -2550,18 +2206,13 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_shell_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_shell_enable_metal_and_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
             "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
             "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
@@ -2573,14 +2224,32 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
         ],
         "//conditions:default": [],
-    }),
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_ENGINE_NO_PROTOTYPES"] + select({
         "//engine/src/flutter/shell:enable_software": [
             "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
@@ -2929,6 +2598,71 @@ selects.config_setting_group(
     ],
 )
 
+# `shell_enable_gl && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_gl_and_shell_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_gl",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `shell_enable_gl && impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_gl",
+        "//engine/src/flutter/impeller/tools:opengles",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `shell_enable_vulkan && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_vulkan_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_vulkan",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `shell_enable_metal && shell_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_shell_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/shell:enable_vulkan",
+    ],
+)
+
+# `shell_enable_metal && impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
+# `shell_enable_metal && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "@platforms//os:macos",
+    ],
+)
+
+# `shell_enable_metal && !is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_metal_and_not_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_metal",
+        "//engine/src/flutter/build/bazel:not_mac",
+    ],
+)
+
 # `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_is_mac_or_is_ios",
@@ -2944,15 +2678,6 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/shell:enable_software",
         ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `shell_enable_gl && shell_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_gl_and_shell_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/shell:enable_gl",
-        "//engine/src/flutter/shell:enable_vulkan",
     ],
 )
 
@@ -2975,16 +2700,6 @@ selects.config_setting_group(
     ],
 )
 
-# `shell_enable_gl && impeller_enable_opengles && impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/shell:enable_gl",
-        "//engine/src/flutter/impeller/tools:opengles",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
 # `shell_enable_vulkan && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_shell_enable_vulkan_and_is_mac_or_is_ios",
@@ -3001,24 +2716,6 @@ selects.config_setting_group(
         "//engine/src/flutter/shell:enable_vulkan",
         "//engine/src/flutter/impeller/tools:vulkan",
         ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `shell_enable_vulkan && impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_vulkan_and_impeller_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/shell:enable_vulkan",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
-# `shell_enable_metal && shell_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_metal_and_shell_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/shell:enable_metal",
-        "//engine/src/flutter/shell:enable_vulkan",
     ],
 )
 
@@ -3041,16 +2738,6 @@ selects.config_setting_group(
     ],
 )
 
-# `shell_enable_metal && impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/shell:enable_metal",
-        "//engine/src/flutter/impeller/tools:metal",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
 # `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
@@ -3067,24 +2754,6 @@ selects.config_setting_group(
         "//engine/src/flutter/shell:enable_vulkan",
         ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
         ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `shell_enable_metal && is_mac`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_metal_and_is_mac",
-    match_all = [
-        "//engine/src/flutter/shell:enable_metal",
-        "@platforms//os:macos",
-    ],
-)
-
-# `shell_enable_metal && !is_mac`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_shell_enable_metal_and_not_is_mac",
-    match_all = [
-        "//engine/src/flutter/shell:enable_metal",
-        "//engine/src/flutter/build/bazel:not_mac",
     ],
 )
 

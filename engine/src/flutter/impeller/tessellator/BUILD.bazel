@@ -63,15 +63,7 @@ flutter_shared_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list
-        ],
-        "//conditions:default": [],
-    }),
+    ] + FLUTTER_COPTS,
     interface_deps = ["//engine/src/flutter/impeller:impeller_public_config"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     output_name = "tessellator",
@@ -98,17 +90,10 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],

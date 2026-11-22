@@ -24,16 +24,13 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../../:interop_base
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../../:interop_base
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from ../../:interop_base
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from ../../:interop_base
             "-Wno-deprecated-copy",  # from ../../:interop_base
             "-Wno-implicit-fallthrough",  # from ../../:interop_base

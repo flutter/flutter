@@ -48,11 +48,19 @@ import 'gn_ast.dart';
 import 'gn_eval.dart';
 import 'manifest.dart';
 
-/// A compiler flag a target hands its dependents, and when: a string, or a
-/// string around references the Bazel side holds as constants
-/// ([GnExpandedString]; darwin/common's test_config names the Xcode
-/// platform's directories through `mac_platform_path`).
-typedef ForwardedFlag = ({Condition condition, GnValue flag});
+/// A compiler flag a target hands its dependents, when, and to which of
+/// their compiles: a string, or a string around references the Bazel side
+/// holds as constants ([GnExpandedString]; darwin/common's test_config
+/// names the Xcode platform's directories through `mac_platform_path`).
+/// `variable` is the GN variable the flag stands in: `cflags` (every
+/// compile), `cflags_c`, `cflags_cc`, `cflags_objc` or `cflags_objcc`. GN's
+/// tools read them by language, so a dependency's `cflags_cc` reach the
+/// dependent's C++ compiles and not its C ones.
+typedef ForwardedFlag = ({Condition condition, GnValue flag, String variable});
+
+/// [flag] as it is handed on under [condition] besides its own.
+ForwardedFlag forwardedUnder(Condition condition, ForwardedFlag flag) =>
+    (condition: condition.and(flag.condition), flag: flag.flag, variable: flag.variable);
 
 /// Resolves what other GN files say about their targets: the flags a target
 /// (`//dir:name`) hands its dependents, and the target itself.
@@ -253,7 +261,7 @@ List<ForwardedFlag> publicFlagsOf(
           continue;
         }
         for (final ForwardedFlag flag in flagsOfConfig(local)) {
-          flags.add((condition: item.condition.and(flag.condition), flag: flag.flag));
+          flags.add(forwardedUnder(item.condition, flag));
         }
         continue;
       }
@@ -268,13 +276,13 @@ List<ForwardedFlag> publicFlagsOf(
           : null;
       if (remote != null) {
         for (final ForwardedFlag flag in flagsOfConfig(remote)) {
-          flags.add((condition: item.condition.and(flag.condition), flag: flag.flag));
+          flags.add(forwardedUnder(item.condition, flag));
         }
         continue;
       }
       if (effect is ConfigDependency) {
         for (final String flag in effect.copts) {
-          flags.add((condition: item.condition, flag: GnStringValue(flag)));
+          flags.add((condition: item.condition, flag: GnStringValue(flag), variable: 'cflags'));
         }
       }
     }
@@ -288,7 +296,7 @@ List<ForwardedFlag> publicFlagsOf(
     for (final ForwardedFlag flag in forwarded(
       absoluteGnLabel(value.value, package: gnPackage, implicitName: true),
     )) {
-      flags.add((condition: item.condition.and(flag.condition), flag: flag.flag));
+      flags.add(forwardedUnder(item.condition, flag));
     }
   }
   return flags;
@@ -308,7 +316,7 @@ List<ForwardedFlag> flagsOfConfig(GnTarget config) {
         switch (item.value) {
           case GnStringValue(:final String value) when !value.startsWith('-std='):
           case GnExpandedString():
-            flags.add((condition: item.condition, flag: item.value));
+            flags.add((condition: item.condition, flag: item.value, variable: variable.name));
           default:
             break;
         }
@@ -325,6 +333,7 @@ List<ForwardedFlag> flagsOfConfig(GnTarget config) {
               else ...<GnValue>[const GnStringValue('-I'), first],
               ...parts.sublist(1),
             ]),
+            variable: 'cflags',
           ));
         }
       }

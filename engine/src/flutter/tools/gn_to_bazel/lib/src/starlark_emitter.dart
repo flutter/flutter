@@ -2283,7 +2283,7 @@ final class _Emitter {
     for (final name in const <String>['deps', 'public_deps']) {
       final GnVariable? deps = target.variables[name];
       if (deps != null) {
-        _propagatedFlagsInto(rule, deps);
+        _propagatedFlagsInto(rule, deps, byLanguage: false);
       }
     }
     copts.always.insertAll(0, own);
@@ -3999,9 +3999,12 @@ final class _Emitter {
             if (v is GnStringValue) v.value,
     };
 
-    // Two passes: the target's own variables, then its configs, so that a
-    // config's flags follow the target's own as they do in GN.
+    // Three passes: the target's own variables, then its configs, then what
+    // its dependencies hand it, so that the flags follow each other as they
+    // do on GN's command line: the target's own, its configs', and last the
+    // public configs of its dependencies.
     final configVariables = <GnVariable>[];
+    final depVariables = <GnVariable>[];
     // The compiler flags this target hands its dependents, for the check
     // against what they will derive from this file.
     final propagated = <ForwardedFlag>[];
@@ -4026,7 +4029,7 @@ final class _Emitter {
           // headers include. The defines dependents gain this way are what
           // the parity check against GN measures.
           _depsInto(rule, variable, target, links: true);
-          _propagatedFlagsInto(rule, variable);
+          depVariables.add(variable);
           if (variable.name == 'public_deps') {
             _forwardedFlagsInto(propagated, variable, target);
           }
@@ -4120,6 +4123,13 @@ final class _Emitter {
         publicConfigs: publicConfigs,
         propagatedFlags: propagated,
       );
+    }
+    // A dependency's flags come last. Where a config of the target turns a
+    // warning on and a dependency's public config turns it off for whoever
+    // includes its headers, off is what GN compiles with (ANGLE's extra
+    // warnings and the Vulkan headers' -Wno-redundant-parens).
+    for (final variable in depVariables) {
+      _propagatedFlagsInto(rule, variable);
     }
     // Nothing depends on a binary: what its public_deps would hand on goes
     // nowhere, and GN's own check only concerns dependents.
@@ -4824,6 +4834,19 @@ final class _Emitter {
     }
   }
 
+  /// The attribute the flags of a GN flag variable (`cflags`, `cflags_c`,
+  /// ...) collect in. GN's tools read the variables by language -- a C
+  /// compile gets `cflags` and `cflags_c`, a C++ one `cflags` and
+  /// `cflags_cc` -- and so do the attributes. The Objective-C flags go to
+  /// the target's Objective-C library ([_splitObjcSources]), not to its C++
+  /// compiles.
+  static String _flagAttribute(String variable) => switch (variable) {
+    'cflags_c' => 'conlyopts',
+    'cflags_cc' => 'cxxopts',
+    'cflags_objc' || 'cflags_objcc' => _objcCoptsAttribute,
+    _ => 'copts',
+  };
+
   /// `cflags*` of a target or a config into the rule's flag attributes,
   /// under [condition] on top of each item's own. A target's [own] flags
   /// come before every config's in GN's command line (lib/ui turns
@@ -4837,14 +4860,7 @@ final class _Emitter {
     Condition condition, {
     bool own = false,
   }) {
-    // The Objective-C flags go to the target's Objective-C library
-    // (_splitObjcSources), not to its C++ compiles.
-    final String attribute = switch (variable.name) {
-      'cflags_c' => 'conlyopts',
-      'cflags_cc' => 'cxxopts',
-      'cflags_objc' || 'cflags_objcc' => _objcCoptsAttribute,
-      _ => 'copts',
-    };
+    final String attribute = _flagAttribute(variable.name);
     _forEachItem(variable, into: rule.list(attribute), (_Element e) {
       final _Item item = _flagItem(e);
       // GN's compiler config fixes the language standard in its own
@@ -4865,8 +4881,13 @@ final class _Emitter {
 
   /// The flags a dependency hands its dependents through a public config
   /// ([forwarded]), added to the rule that lists the dependency, under the
-  /// dependency's condition and the flag's own.
-  void _propagatedFlagsInto(_Rule rule, GnVariable variable) {
+  /// dependency's condition and the flag's own, each to the attribute of
+  /// its GN variable ([_flagAttribute]): the Vulkan allocator's config
+  /// turns warnings off in `cflags_cc`, which GN gives the C++ compiles of
+  /// whoever depends on it and not the C ones (the Impeller SDK's C
+  /// examples). With [byLanguage] off they all go to `copts`, for a macro
+  /// that takes no other attribute ([_templateCoptsInto]).
+  void _propagatedFlagsInto(_Rule rule, GnVariable variable, {bool byLanguage = true}) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
       for (final ForwardedFlag flag in forwarded.flagsOf(_gnLabel(_string(e)))) {
         // The flag's condition under this file's assumptions (a platform
@@ -4883,7 +4904,7 @@ final class _Emitter {
           ),
           _ => _flagValueItem(flag.flag, e, comment: 'from ${_string(e)}'),
         };
-        rule.list('copts').addUnique(under, item);
+        rule.list(byLanguage ? _flagAttribute(flag.variable) : 'copts').addUnique(under, item);
       }
     });
   }
@@ -4898,7 +4919,7 @@ final class _Emitter {
         return;
       }
       for (final ForwardedFlag flag in forwarded.flagsOf(_gnLabel(_string(e)))) {
-        propagated.add((condition: e.condition.and(flag.condition), flag: flag.flag));
+        propagated.add(forwardedUnder(e.condition, flag));
       }
     });
   }
@@ -4930,7 +4951,11 @@ final class _Emitter {
   static String _describe(Set<ForwardedFlag> flags) {
     return <String>[
       for (final ForwardedFlag f in flags)
-        if (f.condition == Condition.always) '${f.flag}' else '${f.flag} under `${f.condition}`',
+        <String>[
+          '${f.flag}',
+          if (f.variable != 'cflags') '(${f.variable})',
+          if (f.condition != Condition.always) 'under `${f.condition}`',
+        ].join(' '),
     ].toString();
   }
 
@@ -6325,10 +6350,7 @@ final class _Emitter {
         if (local != null) {
           _inlineConfig(rule, local, assignment, flagsOnly: true);
           for (final ForwardedFlag flag in flagsOfConfig(local)) {
-            propagatedFlags.add((
-              condition: assignment.condition.and(flag.condition),
-              flag: flag.flag,
-            ));
+            propagatedFlags.add(forwardedUnder(assignment.condition, flag));
           }
         }
         // A config of another converted file (the macOS shell's Swift
@@ -6349,10 +6371,7 @@ final class _Emitter {
           _inlineConfig(rule, remote, assignment, flagsOnly: true);
           if (!private) {
             for (final ForwardedFlag flag in flagsOfConfig(remote)) {
-              propagatedFlags.add((
-                condition: assignment.condition.and(flag.condition),
-                flag: flag.flag,
-              ));
+              propagatedFlags.add(forwardedUnder(assignment.condition, flag));
             }
           }
           final String label = bazelLabel(
@@ -6398,7 +6417,11 @@ final class _Emitter {
             if (!private) {
               // Listed publicly, the config's flags reach dependents too.
               for (final flag in copts) {
-                propagatedFlags.add((condition: assignment.condition, flag: GnStringValue(flag)));
+                propagatedFlags.add((
+                  condition: assignment.condition,
+                  flag: GnStringValue(flag),
+                  variable: 'cflags',
+                ));
               }
             }
           case ConfigImplied():

@@ -66,27 +66,9 @@ flutter_objc_library(
     }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../entity
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../entity
-        ],
-        "//conditions:default": [],
-    }) + select({
+    ] + FLUTTER_COPTS + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from ../renderer/backend
-            "-Wno-c++98-compat-extra-semi",  # from ../renderer/backend
-            "-Wno-deprecated-copy",  # from ../renderer/backend
-            "-Wno-implicit-fallthrough",  # from ../renderer/backend
-            "-Wno-nullability-completeness",  # from ../renderer/backend
-            "-Wno-suggest-destructor-override",  # from ../renderer/backend
-            "-Wno-suggest-override",  # from ../renderer/backend
-            "-Wno-unused-private-field",  # from ../renderer/backend
-            "-Wno-unused-variable",  # from ../renderer/backend
         ],
         "//conditions:default": [],
     }) + select({
@@ -94,6 +76,14 @@ flutter_objc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:ios": FLUTTER_CFLAGS_OBJC,
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
+        "@platforms//os:ios": [
+            "-Wno-unguarded-availability",  # from ../entity
+        ],
         "//conditions:default": [],
     }),
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -191,19 +181,14 @@ cc_library(
     }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../entity
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../entity
-        ],
-        "//conditions:default": [],
-    }) + select({
+    ] + FLUTTER_COPTS + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from ../renderer/backend
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from ../renderer/backend
             "-Wno-deprecated-copy",  # from ../renderer/backend
             "-Wno-implicit-fallthrough",  # from ../renderer/backend
@@ -214,7 +199,9 @@ cc_library(
             "-Wno-unused-variable",  # from ../renderer/backend
         ],
         "//conditions:default": [],
-    }),
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
     linkopts = select({
         "@platforms//os:macos": [
             "-framework",
@@ -291,17 +278,10 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from :playground
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :playground
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :playground
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -324,15 +304,7 @@ cc_library(
     hdrs = ["pipeline_variant_recorder.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../entity
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../entity
-        ],
-        "//conditions:default": [],
-    }),
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -354,17 +326,10 @@ cc_library(
     srcs = ["pipeline_variant_recorder_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from ../renderer/testing:mocks
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :pipeline_variant_recorder
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :pipeline_variant_recorder
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],

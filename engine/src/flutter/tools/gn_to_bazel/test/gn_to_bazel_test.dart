@@ -6665,12 +6665,16 @@ source_set("maybe") {
       }
 
       // The owner compiles with what its public_deps hand it (the headers'
-      // flag, under is_clang, which the host assumptions settle).
+      // flag, under is_clang, which the host assumptions settle), each flag
+      // in the attribute of its GN variable: the allocator's is a cflags_cc,
+      // which GN gives C++ compiles alone.
       expect(
         convertIn('//flutter/flutter_vma'),
         contains('''
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+    ],
+    cxxopts = [
         "-Wno-unused-private-field",  # from //flutter/third_party/vulkan_memory_allocator
     ],
 '''),
@@ -6684,6 +6688,8 @@ source_set("maybe") {
     srcs = ["vulkan.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/flutter_vma
+    ],
+    cxxopts = [
         "-Wno-unused-private-field",  # from //flutter/flutter_vma
     ],
 '''),
@@ -6700,6 +6706,8 @@ source_set("maybe") {
     srcs = ["g.cc"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/vulkan:forwarding
+    ],
+    cxxopts = [
         "-Wno-unused-private-field",  # from //flutter/vulkan:forwarding
     ],
 '''),
@@ -6716,6 +6724,11 @@ source_set("maybe") {
     copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/common:runtime_mode_release": [
             "-Wno-redundant-parens",  # from //flutter/vulkan:in_release
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/common:runtime_mode_release": [
             "-Wno-unused-private-field",  # from //flutter/vulkan:in_release
         ],
         "//conditions:default": [],
@@ -6732,10 +6745,83 @@ source_set("maybe") {
     copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/common:runtime_mode_release": [
             "-Wno-redundant-parens",  # from //flutter/flutter_vma
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/common:runtime_mode_release": [
             "-Wno-unused-private-field",  # from //flutter/flutter_vma
         ],
         "//conditions:default": [],
     }),
+'''),
+      );
+    });
+
+    test("a dependency's flags follow the target's configs', each by its GN variable", () {
+      // ANGLE's shape: a config of the target turns a warning on, and the
+      // public config of a dependency turns it off for whoever includes its
+      // headers. GN's command line has the dependency's flags last, so off
+      // it is. The dependency's cflags_c and cflags_cc reach the C and the
+      // C++ compiles alone, as GN's tools read them (the Impeller SDK's C
+      // examples took the Vulkan allocator's cflags_cc until they did).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/headers/BUILD.gn': '''
+config("headers_config") {
+  cflags = [ "-Wno-redundant-parens" ]
+  cflags_c = [ "-Wno-c-only" ]
+  cflags_cc = [ "-Wno-cxx-only" ]
+}
+
+source_set("headers") {
+  public_configs = [ ":headers_config" ]
+}
+''',
+        'flutter/user/BUILD.gn': '''
+config("extra_warnings") {
+  cflags = [ "-Wredundant-parens" ]
+  cflags_cc = [ "-Wcxx-only" ]
+}
+
+source_set("user") {
+  sources = [
+    "u.c",
+    "u.cc",
+  ]
+  configs += [ ":extra_warnings" ]
+  deps = [ "//flutter/third_party/headers" ]
+}
+''',
+      });
+      final String user = emitBuildFile(
+        evaluateIn(tree, '//flutter/user/BUILD.gn'),
+        gnPackage: '//flutter/user',
+        tree: tree,
+      );
+      expect(
+        user,
+        contains('''
+    copts = CHROMIUM_CODE_COPTS + [
+        "-Wredundant-parens",
+        "-Wno-redundant-parens",  # from //flutter/third_party/headers
+    ],
+'''),
+      );
+      expect(
+        user,
+        contains('''
+    conlyopts = [
+        "-Wno-c-only",  # from //flutter/third_party/headers
+    ],
+'''),
+      );
+      expect(
+        user,
+        contains('''
+    cxxopts = [
+        "-Wcxx-only",
+        "-Wno-cxx-only",  # from //flutter/third_party/headers
+    ],
 '''),
       );
     });
@@ -6789,7 +6875,7 @@ source_set("b") {
         );
       }
       expect(resolver.flagsOf('//flutter/third_party/quiet:quiet'), <ForwardedFlag>[
-        (condition: Condition.always, flag: const GnStringValue('-Wno-shadow')),
+        (condition: Condition.always, flag: const GnStringValue('-Wno-shadow'), variable: 'cflags'),
       ]);
       expect(resolver.flagsOf('//flutter/nowhere:nothing'), isEmpty);
       expect(DependencyResolver.none().flagsOf('//flutter/third_party/quiet:quiet'), isEmpty);

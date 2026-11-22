@@ -161,17 +161,10 @@ flutter_cc_test(
         "flutter_window_unittests.cc",
         "plugin_registrar_glfw_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/testing
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
     deps = [
         ":client_wrapper_glfw",

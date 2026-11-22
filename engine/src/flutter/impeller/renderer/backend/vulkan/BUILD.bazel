@@ -19,6 +19,8 @@ cc_library(
     hdrs = ["test/mock_vulkan.h"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :vulkan
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from :vulkan
         "-Wno-deprecated-copy",  # from :vulkan
         "-Wno-implicit-fallthrough",  # from :vulkan
@@ -68,6 +70,8 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :vulkan
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from :vulkan
         "-Wno-deprecated-copy",  # from :vulkan
         "-Wno-implicit-fallthrough",  # from :vulkan
@@ -77,15 +81,7 @@ cc_library(
         "-Wno-unused-private-field",  # from :vulkan
         "-Wno-unused-variable",  # from :vulkan
         "-Wno-inconsistent-missing-override",  # from ../../../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../../../playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../../../playground:playground_test
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -228,6 +224,8 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/flutter_vma
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma
         "-Wno-deprecated-copy",  # from //flutter/flutter_vma
         "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma
@@ -288,6 +286,8 @@ cc_library(
     hdrs = ["android/android_test_utils.h"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :vulkan
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from :vulkan
         "-Wno-deprecated-copy",  # from :vulkan
         "-Wno-implicit-fallthrough",  # from :vulkan

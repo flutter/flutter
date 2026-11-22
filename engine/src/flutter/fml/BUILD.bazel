@@ -536,9 +536,7 @@ flutter_objc_library(
         "//conditions:default": [],
     }),
     hdrs = ["time/chrono_timestamp_provider.h"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing:run_all_unittests
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         "@platforms//os:macos": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
     }) + select({
@@ -602,7 +600,8 @@ flutter_cc_test(
         "time/time_point_unittest.cc",
         "time/time_unittest.cc",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:run_all_unittests
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,

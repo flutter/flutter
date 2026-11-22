@@ -27,6 +27,8 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
@@ -35,15 +37,7 @@ cc_library(
         "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -74,29 +68,19 @@ flutter_cc_test(
         "external_view_embedder_unittests.cc",
         "surface_pool_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/flow
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/shell/gpu:gpu_surface_gl
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
             "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
             "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
@@ -107,7 +91,9 @@ flutter_cc_test(
             "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
         ],
         "//conditions:default": [],
-    }),
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":external_view_embedder",
@@ -122,24 +108,6 @@ flutter_cc_test(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:dart",
         "//engine/src/flutter/testing:skia",
-    ],
-)
-
-# `is_mac || is_ios`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_mac_or_is_ios",
-    match_any = [
-        "@platforms//os:macos",
-        "@platforms//os:ios",
-    ],
-)
-
-# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
-    match_all = [
-        "//engine/src/flutter/impeller/tools:opengles",
-        ":when_is_mac_or_is_ios",
     ],
 )
 

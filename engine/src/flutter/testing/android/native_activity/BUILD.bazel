@@ -39,7 +39,8 @@ cc_library(
     testonly = True,
     srcs = ["gtest_activity.cc"],
     hdrs = ["gtest_activity.h"],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,

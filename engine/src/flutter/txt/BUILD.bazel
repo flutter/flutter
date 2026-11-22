@@ -182,20 +182,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
-        ],
-        "//conditions:default": [],
-    }),
+    copts = FLUTTER_COPTS,
     linkopts = select({
         "//engine/src/flutter/txt:fontconfig": [
             "-lfontconfig",  # flutter_use_fontconfig
@@ -262,17 +249,10 @@ cc_test(
         "tests/txt_test_utils.h",
     ],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :txt
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :txt
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [
@@ -313,17 +293,10 @@ flutter_cc_test(
         "//conditions:default": [],
     }),
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing:skia
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :txt
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :txt
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

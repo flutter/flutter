@@ -155,17 +155,10 @@ cc_library(
     }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -212,17 +205,10 @@ cc_library(
     }),
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "IMPELLER_GOLDEN_TESTS",
         "IMPELLER_ENABLE_VALIDATION=1",
@@ -253,22 +239,15 @@ cc_library(
     srcs = ["renderer_dart_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "//conditions:default": [],
-    }) + select({
+    ] + FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from //flutter/runtime
         ],
         "//conditions:default": [],
     }),
+    cxxopts = [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     data = ["//engine/src/flutter/impeller/fixtures:flutter_gpu_shaders"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

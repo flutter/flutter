@@ -206,21 +206,13 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/flow
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
             "-Wno-deprecated-copy",  # from //flutter/impeller
             "-Wno-implicit-fallthrough",  # from //flutter/impeller
@@ -309,22 +301,15 @@ cc_test(
     size = "enormous",
     srcs = ["ui_benchmarks.cc"],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing:fixture_test
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :ui
         ],
         "//conditions:default": [],
-    }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :ui
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :ui
-        ],
-        "//conditions:default": [],
     }),
+    cxxopts = [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:fixture_test
+    ],
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [
@@ -390,29 +375,36 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :ui
         ],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :ui
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :ui
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :ui_testing_mocks
-        ],
-        "//conditions:default": [],
-    }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:test_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/common:shell_test_fixture_sources
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_shell_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = [
+        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
+    ] + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
             "-Wno-deprecated-copy",  # from //flutter/impeller
             "-Wno-implicit-fallthrough",  # from //flutter/impeller
@@ -425,7 +417,6 @@ flutter_cc_test(
         "//conditions:default": [],
     }) + select({
         "//engine/src/flutter/shell:test_enable_vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
             "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
@@ -437,28 +428,7 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_test_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_test_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/shell/common:shell_test_fixture_sources
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/renderer/backend/gles:mock_gles
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_opengles_and_shell_enable_vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_opengles_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from //flutter/shell/gpu:gpu_surface_gl
             "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
             "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
             "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
@@ -527,27 +497,15 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
-    ] + select({
+    copts = FLUTTER_COPTS + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :ui
         ],
         "//conditions:default": [],
-    }) + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from :ui
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from :ui
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :ui_testing_mocks
-        ],
-        "//conditions:default": [],
     }),
+    cxxopts = [
+        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -592,61 +550,6 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-)
-
-# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-    match_any = [
-        "//engine/src/flutter/impeller/tools:metal",
-        "//engine/src/flutter/impeller/tools:opengles",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
-# `is_mac || is_ios`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_mac_or_is_ios",
-    match_any = [
-        "@platforms//os:macos",
-        "@platforms//os:ios",
-    ],
-)
-
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
-    match_all = [
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `test_enable_vulkan && (is_mac || is_ios)`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_test_enable_vulkan_and_is_mac_or_is_ios",
-    match_all = [
-        "//engine/src/flutter/shell:test_enable_vulkan",
-        ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `test_enable_metal && (is_mac || is_ios)`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_test_enable_metal_and_is_mac_or_is_ios",
-    match_all = [
-        "//engine/src/flutter/shell:test_enable_metal",
-        ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `impeller_enable_opengles && (is_mac || is_ios)`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_opengles_and_is_mac_or_is_ios",
-    match_all = [
-        "//engine/src/flutter/impeller/tools:opengles",
-        ":when_is_mac_or_is_ios",
-    ],
 )
 
 # `impeller_enable_opengles && shell_enable_vulkan`, for the select()s of this file.

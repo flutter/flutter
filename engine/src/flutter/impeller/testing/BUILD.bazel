@@ -21,15 +21,7 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
-        ],
-        "//conditions:default": [],
-    }),
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -71,17 +63,10 @@ cc_library(
     hdrs = ["impeller_unittest_suite.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/impeller/playground:playground_test
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -125,16 +110,9 @@ flutter_objc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
+    ] + MACOS_CFLAGS_OBJC + [
         "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
-    ] + MACOS_CFLAGS_OBJC,
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         ":when_is_mac_and_enable_unittests": [],
@@ -164,6 +142,8 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/impeller/renderer/backend/vulkan
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
@@ -172,7 +152,6 @@ cc_library(
         "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
         "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
-        "-Wno-unguarded-availability",  # from //flutter/impeller/display_list
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

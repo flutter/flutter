@@ -85,7 +85,6 @@ flutter_objc_library(
     testonly = True,
     srcs = ["SpringAnimationTest.mm"],
     copts = FLUTTER_COPTS + [
-        "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-Wno-unguarded-availability",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -106,9 +105,9 @@ flutter_objc_library(
 cc_test(
     name = "spring_animation_unittests",
     size = "small",
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from //flutter/testing
-        "-Wno-unguarded-availability",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({

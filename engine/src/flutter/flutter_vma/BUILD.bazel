@@ -16,6 +16,8 @@ cc_library(
     hdrs = ["flutter_vma.h"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from //flutter/third_party/vulkan_memory_allocator
         "-Wno-deprecated-copy",  # from //flutter/third_party/vulkan_memory_allocator
         "-Wno-implicit-fallthrough",  # from //flutter/third_party/vulkan_memory_allocator
@@ -49,6 +51,8 @@ cc_library(
     hdrs = ["flutter_skia_vma.h"],
     copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :flutter_vma
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from :flutter_vma
         "-Wno-deprecated-copy",  # from :flutter_vma
         "-Wno-implicit-fallthrough",  # from :flutter_vma
@@ -57,15 +61,7 @@ cc_library(
         "-Wno-suggest-override",  # from :flutter_vma
         "-Wno-unused-private-field",  # from :flutter_vma
         "-Wno-unused-variable",  # from :flutter_vma
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/skia
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/skia
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":flutter_vma",

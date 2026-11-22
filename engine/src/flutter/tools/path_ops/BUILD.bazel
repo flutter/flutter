@@ -15,15 +15,7 @@ flutter_shared_library(
         "path_ops.cc",
         "path_ops.h",
     ],
-    copts = FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/skia
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/skia
-        ],
-        "//conditions:default": [],
-    }),
+    copts = FLUTTER_COPTS,
     interface_deps = ["//engine/src/flutter:config"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     output_name = "path_ops",

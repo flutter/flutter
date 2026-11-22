@@ -23,6 +23,8 @@ cc_library(
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from ../../renderer/backend/vulkan
+    ],
+    cxxopts = [
         "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend/vulkan
         "-Wno-deprecated-copy",  # from ../../renderer/backend/vulkan
         "-Wno-implicit-fallthrough",  # from ../../renderer/backend/vulkan

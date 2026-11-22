@@ -4,7 +4,6 @@
 
 # Generated from //flutter/impeller/typographer/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//build_defs/cc:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
@@ -38,15 +37,7 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list:dl_path
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list:dl_path
-        ],
-        "//conditions:default": [],
-    }),
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -69,22 +60,10 @@ cc_library(
     srcs = ["typographer_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + [
+    ] + FLUTTER_COPTS,
+    cxxopts = [
         "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
-    ] + select({
-        "@platforms//os:macos": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "@platforms//os:ios": [
-            "-Wno-unguarded-availability",  # from ../playground:playground_test
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from //flutter/display_list/testing:display_list_testing
-        ],
-        "//conditions:default": [],
-    }),
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -99,32 +78,4 @@ cc_library(
         "//engine/src/flutter/txt",
     ],
     alwayslink = True,
-)
-
-# `impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-    match_any = [
-        "//engine/src/flutter/impeller/tools:metal",
-        "//engine/src/flutter/impeller/tools:opengles",
-        "//engine/src/flutter/impeller/tools:vulkan",
-    ],
-)
-
-# `is_mac || is_ios`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_is_mac_or_is_ios",
-    match_any = [
-        "@platforms//os:macos",
-        "@platforms//os:ios",
-    ],
-)
-
-# `(impeller_enable_metal || impeller_enable_opengles || impeller_enable_vulkan) && (is_mac || is_ios)`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan_and_is_mac_or_is_ios",
-    match_all = [
-        ":when_impeller_enable_metal_or_impeller_enable_opengles_or_impeller_enable_vulkan",
-        ":when_is_mac_or_is_ios",
-    ],
 )

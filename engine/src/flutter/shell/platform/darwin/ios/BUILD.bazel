@@ -242,27 +242,19 @@ flutter_objc_library(
             "-Wno-redundant-parens",  # from :ios_gpu_configuration
         ],
         "//conditions:default": [],
-    }) + [
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + FLUTTER_CFLAGS_OBJC + [
         "-Wno-unguarded-availability",  # from :ios_gpu_configuration
     ] + select({
         ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :ios_gpu_configuration
         ],
         "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :ios_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
-            "-Wno-deprecated-copy",  # from :ios_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
-            "-Wno-nullability-completeness",  # from :ios_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :ios_gpu_configuration
-            "-Wno-suggest-override",  # from :ios_gpu_configuration
-            "-Wno-unused-private-field",  # from :ios_gpu_configuration
-            "-Wno-unused-variable",  # from :ios_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + FLUTTER_CFLAGS_OBJC,
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_FRAMEWORK=1"],
     target_compatible_with = select({
         "@platforms//os:ios": [],
@@ -371,20 +363,19 @@ cc_library(
     ],
     copts = FLUTTER_COPTS + [
         "-fapplication-extension",  # from //build/config/ios:ios_application_extension
-        "-Wno-unguarded-availability",  # from :ios_gpu_configuration
     ] + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :ios_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :ios_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
             "-Wno-deprecated-copy",  # from :ios_gpu_configuration
             "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
@@ -730,47 +721,34 @@ flutter_objc_library(
         "framework/Source/SemanticsObjectTestMocks.h",
         "//engine/src/flutter/testing/ios:IosUnitTests/App/AppDelegate.h",
     ],
-    copts = ["-fvisibility=default"] + FLUTTER_COPTS + [
-        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-fvisibility=default",
-    ] + select({
+    copts = ["-fvisibility=default"] + FLUTTER_COPTS + ["-fvisibility=default"] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :ios_gpu_configuration
         ],
         "//conditions:default": [],
-    }) + [
+    }) + select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + FLUTTER_CFLAGS_OBJC + [
         "-Wno-unguarded-availability",  # from :ios_gpu_configuration
     ] + select({
         ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :ios_gpu_configuration
         ],
         "//conditions:default": [],
-    }) + select({
-        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
-            "-Wno-redundant-parens",  # from :ios_gpu_configuration
-            "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
-            "-Wno-deprecated-copy",  # from :ios_gpu_configuration
-            "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
-            "-Wno-nullability-completeness",  # from :ios_gpu_configuration
-            "-Wno-suggest-destructor-override",  # from :ios_gpu_configuration
-            "-Wno-suggest-override",  # from :ios_gpu_configuration
-            "-Wno-unused-private-field",  # from :ios_gpu_configuration
-            "-Wno-unused-variable",  # from :ios_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_is_ios_and_use_ios_simulator": [
-            "-mios-simulator-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_is_ios_and_not_use_ios_simulator": [
-            "-miphoneos-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
-        ],
-        "//conditions:default": [],
-    }) + FLUTTER_CFLAGS_OBJC,
+    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         ":when_is_ios_and_enable_ios_unittests": [],
@@ -803,12 +781,12 @@ flutter_objc_library(
         "@rapidjson",
     ] + select({
         ":when_is_ios_and_use_ios_simulator": [
-            "@macos_sdk//:ios_simulator_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
-            "@macos_sdk//:ios_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "@macos_sdk//:ios_developer",  # is_ios
         ],
         "//conditions:default": [],
     }),
@@ -837,23 +815,29 @@ flutter_shared_library(
     ],
     # Add platform frameworks directory to search path for test frameworks.
     # Add platform lib to search path for test libraries/Swift modules.
-    copts = ["-fvisibility=default"] + FLUTTER_COPTS + [
-        "-fvisibility=default",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-        "-fvisibility=default",
-        "-Wno-unguarded-availability",  # from :ios_gpu_configuration
-    ] + select({
+    copts = ["-fvisibility=default"] + FLUTTER_COPTS + ["-fvisibility=default"] + select({
+        ":when_is_ios_and_use_ios_simulator": [
+            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_is_ios_and_not_use_ios_simulator": [
+            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
+        ],
+        "//conditions:default": [],
+    }) + select({
         "//engine/src/flutter/shell:enable_vulkan": [
             "-Wno-redundant-parens",  # from :ios_gpu_configuration
         ],
         "//conditions:default": [],
     }) + select({
-        ":when_impeller_enable_metal_and_is_mac_or_is_ios": [
-            "-Wno-unguarded-availability",  # from :ios_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
         ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-redundant-parens",  # from :ios_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }),
+    cxxopts = select({
+        ":when_impeller_enable_metal_and_impeller_enable_vulkan": [
             "-Wno-c++98-compat-extra-semi",  # from :ios_gpu_configuration
             "-Wno-deprecated-copy",  # from :ios_gpu_configuration
             "-Wno-implicit-fallthrough",  # from :ios_gpu_configuration
@@ -862,18 +846,6 @@ flutter_shared_library(
             "-Wno-suggest-override",  # from :ios_gpu_configuration
             "-Wno-unused-private-field",  # from :ios_gpu_configuration
             "-Wno-unused-variable",  # from :ios_gpu_configuration
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_is_ios_and_use_ios_simulator": [
-            "-mios-simulator-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-mios-simulator-version-min=15.0",  # is_ios && use_ios_simulator
-        ],
-        "//conditions:default": [],
-    }) + select({
-        ":when_is_ios_and_not_use_ios_simulator": [
-            "-miphoneos-version-min=15.0",  # from //flutter/shell/platform/darwin/common:test_utils_swift
-            "-miphoneos-version-min=15.0",  # is_ios && !(use_ios_simulator)
         ],
         "//conditions:default": [],
     }),
@@ -921,12 +893,12 @@ flutter_shared_library(
         "@rapidjson",
     ] + select({
         ":when_is_ios_and_use_ios_simulator": [
-            "@macos_sdk//:ios_simulator_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "@macos_sdk//:ios_simulator_developer",  # is_ios
         ],
         "//conditions:default": [],
     }) + select({
         ":when_is_ios_and_not_use_ios_simulator": [
-            "@macos_sdk//:ios_developer",  # from //flutter/shell/platform/darwin/common:test_utils_swift
+            "@macos_sdk//:ios_developer",  # is_ios
         ],
         "//conditions:default": [],
     }),
@@ -946,9 +918,9 @@ flutter_objc_library(
         "framework/Source/FlutterFMLTaskRunner+FML.h",
         "framework/Source/FlutterFMLTaskRunners.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = FLUTTER_COPTS + FLUTTER_CFLAGS_OBJC + [
         "-Wno-unguarded-availability",  # from //flutter/shell/common
-    ] + FLUTTER_CFLAGS_OBJC,
+    ],
     includes = [
         # do not sort
         "framework/Headers",
@@ -979,9 +951,7 @@ cc_library(
         "framework/Source/FlutterFMLTaskRunner+FML.h",
         "framework/Source/FlutterFMLTaskRunners.h",
     ],
-    copts = FLUTTER_COPTS + [
-        "-Wno-unguarded-availability",  # from //flutter/shell/common
-    ],
+    copts = FLUTTER_COPTS,
     implementation_deps = ["//engine/src/flutter/shell/platform/darwin/common:config"],
     includes = [
         # do not sort
@@ -1289,6 +1259,15 @@ selects.config_setting_group(
     ],
 )
 
+# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
+    match_all = [
+        "//engine/src/flutter/impeller/tools:metal",
+        "//engine/src/flutter/impeller/tools:vulkan",
+    ],
+)
+
 # `is_mac || is_ios`, for the select()s of this file.
 selects.config_setting_group(
     name = "when_is_mac_or_is_ios",
@@ -1304,15 +1283,6 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/impeller/tools:metal",
         ":when_is_mac_or_is_ios",
-    ],
-)
-
-# `impeller_enable_metal && impeller_enable_vulkan`, for the select()s of this file.
-selects.config_setting_group(
-    name = "when_impeller_enable_metal_and_impeller_enable_vulkan",
-    match_all = [
-        "//engine/src/flutter/impeller/tools:metal",
-        "//engine/src/flutter/impeller/tools:vulkan",
     ],
 )
 
