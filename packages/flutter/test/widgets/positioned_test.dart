@@ -138,7 +138,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            children: [Positioned(top: 0.0, bottom: 1.0, left: 0.0, child: Placeholder())],
+            children: [
+              Positioned(top: 0.0, bottom: 1.0, left: 0.0, right: 1.0, child: Placeholder()),
+            ],
           ),
         ),
       ),
@@ -155,7 +157,13 @@ void main() {
         child: Center(
           child: Stack(
             children: [
-              PositionedDirectional(top: 0.0, bottom: 1.0, start: 0.0, child: Placeholder()),
+              PositionedDirectional(
+                top: 0.0,
+                bottom: 1.0,
+                start: 0.0,
+                end: 1.0,
+                child: Placeholder(),
+              ),
             ],
           ),
         ),
