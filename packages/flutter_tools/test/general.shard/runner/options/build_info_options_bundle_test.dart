@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/options/common_options.dart';
 import 'package:test/test.dart';
 
 import '../../../src/fakes.dart';
@@ -25,7 +26,40 @@ class DummyCommand extends FlutterCommand {
   }
 }
 
+class _BundleCommand extends FlutterCommand {
+  _BundleCommand(List<OptionBundle> bundles)
+    : super(toolContext: FakeToolContext()) {
+    registerOptionBundles(bundles);
+  }
+
+  @override
+  final String name = 'bundle';
+
+  @override
+  final String description = 'A bundle test command';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return FlutterCommandResult.success();
+  }
+}
+
 void main() {
+  test('build option bundles register frontend-server-starter-path', () {
+    for (final bundle in <OptionBundle>[
+      const AndroidBuildOptionsBundle(),
+      const AppleBuildOptionsBundle(),
+      const DesktopBuildOptionsBundle(),
+    ]) {
+      final command = _BundleCommand(<OptionBundle>[bundle]);
+      expect(
+        command.argParser.options.keys,
+        contains('frontend-server-starter-path'),
+        reason: bundle.runtimeType.toString(),
+      );
+    }
+  });
+
   test('BuildInfoOptionsBundle registers all descriptors successfully', () {
     final command = DummyCommand();
     final runner = CommandRunner<void>('test', 'test');
