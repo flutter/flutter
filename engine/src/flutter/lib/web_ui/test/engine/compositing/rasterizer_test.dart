@@ -196,5 +196,46 @@ void testMain() {
       expect(treesRenderedInView3.first, treesToRenderInView3.first);
       expect(treesRenderedInView3.last, treesToRenderInView3.last);
     });
+
+    test('a disposed view rasterizer is removed from OffscreenCanvasRasterizer', () {
+      renderer.rasterizer.dispose();
+      final offscreenRasterizer = OffscreenCanvasRasterizer(
+        (_) => throw StateError('Unexpected offscreen surface creation'),
+      );
+      renderer.debugOverrideRasterizer(offscreenRasterizer);
+
+      final testView = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('test-view'),
+      );
+      EnginePlatformDispatcher.instance.viewManager.registerView(testView);
+      final ViewRasterizer viewRasterizer = renderer.rasterizers[testView.viewId]!;
+
+      EnginePlatformDispatcher.instance.viewManager.disposeAndUnregisterView(testView.viewId);
+
+      final OffscreenCanvasViewRasterizer recreated = offscreenRasterizer.createViewRasterizer(
+        testView,
+      );
+      addTearDown(recreated.dispose);
+      expect(recreated, isNot(same(viewRasterizer)));
+    });
+
+    test('MultiSurfaceViewRasterizer.prepareToDraw does not allocate a surface', () async {
+      final multiSurfaceRasterizer = MultiSurfaceRasterizer(
+        (_) => throw StateError('Unexpected onscreen surface creation'),
+      );
+      addTearDown(multiSurfaceRasterizer.dispose);
+
+      final testView = EngineFlutterView(
+        EnginePlatformDispatcher.instance,
+        createDomElement('test-view'),
+      );
+      final MultiSurfaceViewRasterizer viewRasterizer = multiSurfaceRasterizer.createViewRasterizer(
+        testView,
+      );
+
+      await viewRasterizer.prepareToDraw();
+      expect(viewRasterizer.displayFactory.debugSurfaceCount, 0);
+    });
   });
 }
