@@ -159,9 +159,11 @@ sandbox contribute.
 ## Known gaps
 
 - No Windows, Fuchsia or riscv64 Linux build.
-- Without `gclient sync`, on a Mac, `flutter_tester`, nineteen of the
-  host's test targets and `et` have been built and run; an Android, iOS or
-  web build from a Mac has not.
+- Without `gclient sync`, on a Mac, the host build
+  (`//engine/src/flutter:flutter`), nineteen of the host's test targets and
+  `et` have been built and run, and a first module has been linked with the
+  Emscripten SDK the build fetched; an Android or iOS build from a Mac has
+  not, nor a whole web build (the web build's install is for a Linux host).
 - Golden images are compared with what was fetched from Flutter Gold
   beforehand (`docs/framework_tests.md`, "Golden files"): the tests run
   with the network blocked. Off a bot an image that does not match fails
@@ -171,10 +173,13 @@ sandbox contribute.
   post-submit they are neither compared nor uploaded under Bazel yet, and
   the Impeller runs compare nothing yet (Gold's Impeller images come from a
   Mac bot alone).
-- The Dart SDK is a GN build wrapped as a single Bazel action, as is ANGLE
-  on a Mac (Linux builds it from converted GN files, as both build the other
-  GPU test backends: SwiftShader, the Vulkan loader and the validation
-  layer). An edit inside them reruns the whole wrapped build.
+- The Dart SDK is a GN build wrapped as a single Bazel action: an edit
+  inside it reruns the whole wrapped build. (The GPU test backends -- ANGLE,
+  SwiftShader, the Vulkan loader and the validation layer -- are built from
+  their converted GN files on Linux and on a Mac.)
+- A Mac's ANGLE as converted -- its Metal backend, whose shaders the host
+  Xcode's Metal toolchain compiles at build time, and its two shared
+  libraries -- has not been built on a Mac yet.
 - The wrapped Dart SDK build compiles the VM without LTO in every build.
   GN compiles it with the engine's LTO: full in the Android AOT and iOS
   device builds, thin in the Linux profile and release builds.
@@ -192,7 +197,7 @@ sandbox contribute.
 |---|---|
 | `docs/dependencies.md` | How dependencies reach Bazel, with and without `gclient sync`; adding one |
 | `docs/toolchains.md` | The C/C++ toolchains: Linux, Android, macOS and iOS, Emscripten |
-| `docs/wrapped_gn_builds.md` | The Dart SDK as a wrapped GN build; the GPU test backends (converted on Linux, wrapped on a Mac) |
+| `docs/wrapped_gn_builds.md` | The Dart SDK as a wrapped GN build; the GPU test backends (converted trees on both hosts, a wrapped build before) |
 | `docs/engine_tests.md` | The engine's C++, Dart and Java tests |
 | `docs/framework_tests.md` | The framework's and the tool's tests; the prebuilt engine; `dev/bots/test.dart` |
 | `docs/web_tests.md` | The web engine's unit tests |

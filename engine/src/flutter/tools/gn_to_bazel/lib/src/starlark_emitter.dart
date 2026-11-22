@@ -515,7 +515,7 @@ String emitBuildFile(
   final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions, forwarded)
     ..inheritedConfigs.addAll(evaluation.inheritedConfigs);
   _localizeOwnLabels(evaluation.targets, gnPackage);
-  _rehomeGenDirs(evaluation.targets);
+  _rehomeGenDirs(evaluation.targets, gnPackage);
   for (final GnTarget target in evaluation.targets) {
     emitter.localTargets[target.name] = target;
     if (target.rule == 'config') {
@@ -683,24 +683,44 @@ const Set<String> _gnTargetVariables = <String>{
 /// GN's target variables (see [_gnTargetVariables]).
 bool _isHelperVariable(GnVariable variable) => !_gnTargetVariables.contains(variable.name);
 
+/// [text] with the paths under a generated directory that has a home in the
+/// repository's own ([genDirHomes]) rewritten to that home, as a file of
+/// [gnPackage] names them; null where it names none. The home is the
+/// directory of that name in the package's own generated tree, except for
+/// a file another package writes ([genDirFileOwners]), whose home is that
+/// package's.
+String? _rehomedGenPath(String text, String gnPackage) {
+  String homeIn(String directory, String package) =>
+      '$genDirRoot${package.substring(1)}/${p.basename(directory)}';
+  var result = text;
+  for (final MapEntry<String, String> owner in genDirFileOwners.entries) {
+    final String directory = p.dirname(owner.key);
+    result = result.replaceAll(
+      owner.key,
+      '${homeIn(directory, owner.value)}/${p.basename(owner.key)}',
+    );
+  }
+  for (final MapEntry<String, String> home in genDirHomes.entries) {
+    if (gnPackage != home.value && !gnPackage.startsWith('${home.value}/')) {
+      continue;
+    }
+    // The directory itself or a path below it, not a longer name.
+    result = result.replaceAllMapped(
+      RegExp('${RegExp.escape(home.key)}(?![A-Za-z0-9_.-])'),
+      (Match m) => homeIn(home.key, gnPackage),
+    );
+  }
+  return result == text ? null : result;
+}
+
 /// Rewrites the paths under a generated directory that has a home in the
-/// repository's own ([genDirHomes]) to that home, wherever a target of the
-/// file names one: an output, an include directory, an argument.
-void _rehomeGenDirs(List<GnTarget> targets) {
+/// repository's own ([_rehomedGenPath]), wherever a target of the file of
+/// [gnPackage] names one: an output, an include directory, an argument.
+void _rehomeGenDirs(List<GnTarget> targets, String gnPackage) {
   if (genDirHomes.isEmpty) {
     return;
   }
-  String? rehomed(String text) {
-    var result = text;
-    for (final MapEntry<String, String> home in genDirHomes.entries) {
-      // The directory itself or a path below it, not a longer name.
-      result = result.replaceAllMapped(
-        RegExp('${RegExp.escape(home.key)}(?![A-Za-z0-9_.-])'),
-        (Match m) => home.value,
-      );
-    }
-    return result == text ? null : result;
-  }
+  String? rehomed(String text) => _rehomedGenPath(text, gnPackage);
 
   GnValue? rehomedValue(GnValue value) {
     switch (value) {
@@ -1364,7 +1384,9 @@ final class _Emitter {
   /// group `flutter` and what it reaches; wasm links). With nothing to
   /// compile it cannot keep a private dependency private (Bazel's
   /// implementation_deps need sources), so `deps` and `public_deps` both
-  /// become `deps`.
+  /// become `deps`. A shared library among them is the library's import
+  /// where a compiled target of the file depends on the group
+  /// ([_isLinkedThrough]), and the library itself where none does.
   void _convertGroup(GnTarget target) {
     if (filesGroups.contains(target.name) || _isWasmGroup(target)) {
       _convertFilesGroup(target);
@@ -1373,12 +1395,13 @@ final class _Emitter {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
     final propagated = <ForwardedFlag>[];
+    final bool links = _isLinkedThrough(target);
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'deps':
-          _depsInto(rule, variable, target);
+          _depsInto(rule, variable, target, links: links);
         case 'public_deps':
-          _depsInto(rule, variable, target);
+          _depsInto(rule, variable, target, links: links);
           _forwardedFlagsInto(propagated, variable, target);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
@@ -1420,6 +1443,55 @@ final class _Emitter {
     _checkPropagatedFlags(target, propagated);
     _inheritedConfigsInto(rule, target);
     rules.add(rule);
+  }
+
+  /// The GN rules whose targets are compiled and linked.
+  static const Set<String> _compiledRules = <String>{
+    'executable',
+    'loadable_module',
+    'shared_library',
+    'source_set',
+    'static_library',
+  };
+
+  /// Whether a compiled target of this file depends on the group [group],
+  /// directly or through other groups of the file. GN links what a group
+  /// lists into the binary of whatever depends on it, so for such a group a
+  /// shared library among its dependencies is something to link against: a
+  /// Mac's ANGLE reaches the Vulkan loader through two groups its Vulkan
+  /// backend lists. A group that only groups and installs name is a set of
+  /// things to build (the embedder's `flutter_engine` over its dylib, which
+  /// the installs take from it), and holds the library itself.
+  bool _isLinkedThrough(GnTarget group) {
+    final pending = <String>[group.name];
+    final seen = <String>{};
+    while (pending.isNotEmpty) {
+      final String name = pending.removeLast();
+      if (!seen.add(name)) {
+        continue;
+      }
+      for (final GnTarget dependent in localTargets.values) {
+        final bool depends = <String>['deps', 'public_deps'].any(
+          (String edge) => (dependent.variables[edge]?.liveItems ?? const <GnListItem>[]).any(
+            (GnListItem item) => switch (item.value) {
+              GnStringValue(:final String value) =>
+                value.startsWith(':') && _localName(value) == name,
+              _ => false,
+            },
+          ),
+        );
+        if (!depends) {
+          continue;
+        }
+        if (_compiledRules.contains(dependent.rule)) {
+          return true;
+        }
+        if (dependent.rule == 'group') {
+          pending.add(dependent.name);
+        }
+      }
+    }
+    return false;
   }
 
   /// Whether a group stands for wasm modules: every dependency is a link in
@@ -1597,9 +1669,9 @@ final class _Emitter {
                 : '{\n${names.map((String name) => '        ${_starlarkString(name)}: ${entries[name]},\n').join()}    }';
           }
         case 'sources':
-          _actionFilesInto(rule, 'srcs', variable);
+          _actionFilesInto(rule, 'srcs', variable, target);
         case 'inputs':
-          _actionFilesInto(rule, 'inputs', variable);
+          _actionFilesInto(rule, 'inputs', variable, target);
         case 'outputs':
           _outputsInto(rule, variable, target);
         case 'args':
@@ -1701,10 +1773,13 @@ final class _Emitter {
 
   /// An action's `sources` or `inputs` into [attribute]: files, the outputs
   /// of another target (`sources += get_target_outputs(":gen")`) as the
-  /// target itself, and a file of the build directory (`inputs = [
-  /// "$root_build_dir/libflutter.so" ]`) as its path under it in
-  /// `build_inputs`, for the rule to find among what the deps place there.
-  void _actionFilesInto(_Rule rule, String attribute, GnVariable variable) {
+  /// target itself, a file of the generated tree that a target the
+  /// converter sees writes (the Metal shaders' `.air` file, the next
+  /// action's source) as that target too, and a file of the build
+  /// directory (`inputs = [ "$root_build_dir/libflutter.so" ]`) as its path
+  /// under it in `build_inputs`, for the rule to find among what the deps
+  /// place there.
+  void _actionFilesInto(_Rule rule, String attribute, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: rule.list(attribute), (_Element e) {
       if (e.value case GnTargetOutputsValue(:final String label, :final List<String> patterns)) {
         if (patterns.isNotEmpty) {
@@ -1736,9 +1811,17 @@ final class _Emitter {
               );
           continue;
         }
+        // gn_action declares its outputs by path, not as labels: the
+        // action that writes the file is what a rule can name.
+        final String? producer = path.startsWith('$genDirRoot/')
+            ? _producedOutputLabel(path, target, e.assignment.location, actionItself: true)
+            : null;
         rule
             .list(attribute)
-            .addUnique(element.condition, _item(_filePath(path, e.assignment.location), element));
+            .addUnique(
+              element.condition,
+              _item(producer ?? _filePath(path, e.assignment.location), element),
+            );
       }
     });
   }
@@ -2762,9 +2845,14 @@ final class _Emitter {
   /// a target of this file, or of another file that [bundle]'s `deps` name,
   /// read through the resolver; else the table of outputs the converter
   /// cannot see produced ([buildOutputLabels]: the wrapped and hand-written
-  /// trees).
-  String _buildOutputLabel(String path, GnTarget bundle, GnLocation location) {
-    final String? label = _producedOutputLabel(path, bundle, location);
+  /// trees). [actionItself] as in [_producedOutputLabel].
+  String _buildOutputLabel(
+    String path,
+    GnTarget bundle,
+    GnLocation location, {
+    bool actionItself = false,
+  }) {
+    final String? label = _producedOutputLabel(path, bundle, location, actionItself: actionItself);
     if (label != null) {
       return label;
     }
@@ -2779,9 +2867,19 @@ final class _Emitter {
   }
 
   /// [_buildOutputLabel], or null when nothing the converter can see
-  /// produces [path].
-  String? _producedOutputLabel(String path, GnTarget bundle, GnLocation location) {
-    String? label = _buildOutputs(localTargets.values.toList(), gnPackage)[path];
+  /// produces [path]. With [actionItself], a file an action writes is the
+  /// action, not the file's own label (see [_buildOutputs]).
+  String? _producedOutputLabel(
+    String path,
+    GnTarget bundle,
+    GnLocation location, {
+    bool actionItself = false,
+  }) {
+    String? label = _buildOutputs(
+      localTargets.values.toList(),
+      gnPackage,
+      actionItself: actionItself,
+    )[path];
     if (label == null) {
       // The bundle's deps in other files, and what a group among them
       // forwards (`//flutter/shell/testing` is a group over flutter_tester).
@@ -2818,7 +2916,23 @@ final class _Emitter {
           }
           continue;
         }
-        label = _buildOutputs(<GnTarget>[target], directory)[path];
+        // The dependency's outputs as its own file would write them (a
+        // generated directory with a home in the repository:
+        // _rehomedGenPath), which is how this file names them.
+        final Map<String, String> outputs = _buildOutputs(
+          <GnTarget>[target],
+          directory,
+          actionItself: actionItself,
+        );
+        label = outputs[path];
+        if (label == null) {
+          for (final MapEntry<String, String> output in outputs.entries) {
+            if (_rehomedGenPath(output.key, directory) == path) {
+              label = output.value;
+              break;
+            }
+          }
+        }
       }
     }
     if (label != null) {
@@ -2840,7 +2954,18 @@ final class _Emitter {
   /// keeps the file as it is, the output file for one that renames or an
   /// action that generates. The host's file names: these files are the
   /// Linux host's.
-  static Map<String, String> _buildOutputs(List<GnTarget> targets, String directory) {
+  ///
+  /// With [actionItself], every output of an action is the action instead
+  /// of a file's label: for a rule that takes the file from what the action
+  /// provides (gn_action's `srcs` and `inputs`; the rule declares its
+  /// outputs by path, so a file under its generated directory has no label
+  /// of its own), where the file's label is for one that names a declared
+  /// output (a renaming copy's, a hand-written rule's).
+  static Map<String, String> _buildOutputs(
+    List<GnTarget> targets,
+    String directory, {
+    bool actionItself = false,
+  }) {
     final outputs = <String, String>{};
     for (final target in targets) {
       final label = '$directory:${target.name}';
@@ -2896,7 +3021,9 @@ final class _Emitter {
                 sources != null && sources.length == files.length && sources[i] is GnStringValue
                 ? (sources[i] as GnStringValue).value
                 : null;
-            if (file.value.startsWith(genDir)) {
+            if (actionItself && target.rule == 'action') {
+              outputs[file.value] = label;
+            } else if (file.value.startsWith(genDir)) {
               outputs[file.value] = '$directory:${file.value.substring(genDir.length)}';
             } else if (files.length == 1) {
               outputs[file.value] = label;
@@ -3957,6 +4084,19 @@ final class _Emitter {
         case 'output_extension' when shared:
           // The macro's linux_output_extension (above).
           break;
+        case 'data_deps' when shared:
+          // What the library opens by name at run time (ANGLE's libEGL
+          // opens libGLESv2, which GN places beside it in the build
+          // directory): the library's `data`, with it wherever its
+          // runfiles go.
+          _forEachItem(variable, into: rule.list('data'), (_Element e) {
+            final String label = bazelLabel(
+              _string(e),
+              package: gnPackage,
+              location: e.assignment.location,
+            );
+            rule.list('data').addUnique(e.condition, _item(_localLabel(label), e));
+          });
         default:
           if (_ignoredVariables.contains(variable.name) ||
               variable.forwarded ||
@@ -5530,8 +5670,8 @@ final class _Emitter {
   /// GN's `deps`/`public_deps` into [rule]'s lists: actions of this file
   /// as sources, copies and files as data, the rest as deps. With
   /// [links], a dependency on a shared_library is the library's cc_import
-  /// (a compiled target links against it); a group's dependency on one is
-  /// the library itself, a thing to build.
+  /// (a compiled target links against it, and so does one that reaches it
+  /// through a group); without, the library itself, a thing to build.
   void _depsInto(_Rule rule, GnVariable variable, GnTarget target, {bool links = false}) {
     _forEachItem(variable, into: rule.list('deps'), (_Element e) {
       final String gnLabel = _string(e);
@@ -5560,10 +5700,14 @@ final class _Emitter {
       }
       // A dependency on a shared_library links against it: the macro's
       // cc_import of the library (flutter_shared_library's `<name>_import`),
-      // as Bazel's C++ rules take no cc_binary in deps.
+      // as Bazel's C++ rules link no cc_binary named in deps. A label the
+      // tables give another target for is that target as it is (ANGLE's
+      // shared libraries behind gl_wrap's facade, which carries them as
+      // run-time files for the suite that opens them by name).
       final bool sharedLibrary =
           links &&
           list == 'deps' &&
+          !hasLabelOverride(gnLabel, package: gnPackage) &&
           (_localRule(gnLabel) ?? _ruleElsewhere(gnLabel)) == 'shared_library';
       rule
           .list(list)
@@ -6076,13 +6220,21 @@ final class _Emitter {
       // A generated file named by its build-directory path (the embedder's
       // `$root_build_dir/gen/.../icudtl.dat.S`, the Android shell's assembly
       // of icudtl.dat): the target that produces it, as a zip_bundle's
-      // entries resolve (_buildOutputLabel).
+      // entries resolve (_buildOutputLabel) -- an action itself where an
+      // action writes it, since gn_action declares its outputs by path
+      // (the header ANGLE's Metal backend embeds its shader library in,
+      // one of the backend's sources).
       if (path.startsWith('$buildDirRoot/') || path.startsWith('$genDirRoot/')) {
         rule
             .list('srcs')
             .addUnique(
               e.condition,
-              _item(_localLabel(_buildOutputLabel(path, target, e.assignment.location)), e),
+              _item(
+                _localLabel(
+                  _buildOutputLabel(path, target, e.assignment.location, actionItself: true),
+                ),
+                e,
+              ),
             );
         for (final String input in buildOutputCompilerInputs[path] ?? const <String>[]) {
           rule.list('additional_compiler_inputs').addUnique(e.condition, _Item(input));

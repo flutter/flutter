@@ -9,8 +9,8 @@ target, no simulator -- and the SDK, platform and toolchain paths of the
 host's Xcode from @macos_sdk, which build/config/darwin/darwin_sdk.gni would
 otherwise ask xcrun for (build/mac/darwin_sdk.py): the same Xcode either way,
 named here so that the action's key carries it. The Dart wrap
-(engine/src/flutter/build/bazel/dart_wrap) and the GPU test backends' wrap
-(build/bazel/gl_wrap) select these for the macOS platforms.
+(engine/src/flutter/build/bazel/dart_wrap) selects these for the macOS
+platforms.
 
 For an iOS target (tools/gn --ios [--simulator]) the same Xcode's iPhoneOS
 and iPhoneSimulator SDKs and platforms besides (setup_apple_sdks names all

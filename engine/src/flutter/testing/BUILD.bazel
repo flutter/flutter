@@ -507,6 +507,12 @@ cc_library(
     srcs = ["test_swangle_utils.cc"],
     hdrs = ["test_swangle_utils.h"],
     copts = FLUTTER_COPTS + select({
+        "@platforms//os:macos": [
+            "-fno-sanitize=function",  # from //flutter/third_party/angle:libGLESv2_static
+            "-Wno-redundant-parens",  # from //flutter/third_party/angle:libGLESv2_static
+        ],
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:linux": [
             "-Wno-redundant-parens",  # from //flutter/third_party/angle:libGLESv2_static
         ],
@@ -549,6 +555,12 @@ cc_library(
         ],
         "@platforms//os:ios": [
             "-Wno-unguarded-availability",  # from :skia
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "-fno-sanitize=function",  # from :test_swangle_utils
+            "-Wno-redundant-parens",  # from :test_swangle_utils
         ],
         "//conditions:default": [],
     }) + select({

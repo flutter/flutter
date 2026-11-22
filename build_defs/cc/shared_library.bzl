@@ -34,7 +34,10 @@ with therefore names one (`apple_install_name`, from the converter's
 manifest: the Khronos loader's `@rpath/libvulkan.dylib`, which a dependent's
 rpaths resolve -- Bazel's to the library among its runfiles, and the one to
 the binary's own directory); a GN target that sets an install name itself
-(SwiftShader's driver, ANGLE's libraries) carries it in its link flags.
+(SwiftShader's driver) carries it in its link flags. ANGLE's libEGL and
+libGLESv2 set none and need none: nothing links against them (libEGL opens
+libGLESv2 from its own directory, a Mac's golden suite opens libGLESv2 by
+name).
 
 A library whose GN target sets `output_extension` for Linux (the Khronos
 loader: `so.1`, for libvulkan.so.1, the name its clients open) has a third

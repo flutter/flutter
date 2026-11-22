@@ -3017,25 +3017,34 @@ final class _Evaluator {
         // backend's own list (written relative to the backend's directory)
         // rebased to ANGLE's root, where the action that reads them is.
         // Below the base alone: the result is a file of that directory's
-        // for one of its targets to list.
+        // for one of its targets to list. The two directories may be
+        // variables written in the branch that reads them (a backend's
+        // directory under `if (angle_enable_metal)`): the string they agree
+        // on. A path of the build directory among the files (the Metal
+        // backend's generated header, `$root_gen_dir/angle/...`) stays what
+        // it is: GN would spell it from the base through the source root,
+        // and what reads the list takes it for the generated file.
         if (args.length == 3) {
-          final GnValue? base = _expression(args[1], scope).scalar;
-          final GnValue? from = _expression(args[2], scope).scalar;
-          if (base is GnStringValue &&
-              from is GnStringValue &&
-              base.value.startsWith('//') &&
-              !base.value.startsWith(buildDirRoot) &&
-              !from.value.startsWith(rebasedPathMarker)) {
-            final String fromDirectory = _absolutePath(from.value.isEmpty ? '.' : from.value, node);
-            final String prefix = base.value.endsWith('/') ? base.value : '${base.value}/';
+          final String? base = _agreedString(_expression(args[1], scope));
+          final String? from = _agreedString(_expression(args[2], scope));
+          if (base != null &&
+              from != null &&
+              base.startsWith('//') &&
+              !base.startsWith(buildDirRoot) &&
+              !from.startsWith(rebasedPathMarker)) {
+            final String fromDirectory = _absolutePath(from.isEmpty ? '.' : from, node);
+            final String prefix = base.endsWith('/') ? base : '$base/';
             String rebased(String path) {
+              if (path.startsWith(buildDirRoot) || path.startsWith(genDirRoot)) {
+                return path;
+              }
               final String absolute = path.startsWith('//')
                   ? path
                   : _normalizedPath('$fromDirectory/$path', node);
               if (!absolute.startsWith(prefix)) {
                 throw GnError(
                   node.location,
-                  'rebase_path() of $path against ${base.value}: $absolute is not below it',
+                  'rebase_path() of $path against $base: $absolute is not below it',
                 );
               }
               return absolute.substring(prefix.length);
@@ -4180,6 +4189,17 @@ final class _Evaluator {
         // test holds.
         return ConditionConstant(equals);
       }
+      if ((leftValue == null || rightValue == null) && _isTargetHostOsTest(left.name, right.name)) {
+        // `target_os == host_os`, "is this a build for the OS of the machine
+        // that builds it" (ANGLE compiles its Metal shaders at build time
+        // only then): decided where the assumptions say so
+        // ([targetOsIsHostOs], for a tree only the hosts build), and like
+        // any other comparison of two unknowns an error where they do not.
+        final GnValue? assumed = assumptions[targetOsIsHostOs];
+        if (assumed is GnBoolValue) {
+          return ConditionConstant(assumed.value == equals);
+        }
+      }
       if (leftValue == null || rightValue == null) {
         throw GnError(
           node.location,
@@ -4300,7 +4320,19 @@ final class _Evaluator {
     return (a == 'current_toolchain' && b == 'default_toolchain') ||
         (a == 'default_toolchain' && b == 'current_toolchain');
   }
+
+  static bool _isTargetHostOsTest(String a, String b) {
+    const targets = <String>{'target_os', 'current_os'};
+    return (targets.contains(a) && b == 'host_os') || (a == 'host_os' && targets.contains(b));
+  }
 }
+
+/// The assumption that decides GN's `target_os == host_os` where neither
+/// side is a known string: true for a file whose targets are only ever built
+/// for the OS of the machine that builds them (ANGLE, the hosts' GL
+/// implementation: a Linux host builds it for Linux, a Mac for macOS). Not
+/// a GN variable; no GN file can read it.
+const String targetOsIsHostOs = 'target_os is host_os';
 
 /// The converter's name for GN's `current_toolchain == host_toolchain` when
 /// neither toolchain is assumed: the build is the host's own. Its

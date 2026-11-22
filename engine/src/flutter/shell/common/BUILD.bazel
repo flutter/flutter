@@ -903,6 +903,12 @@ flutter_cc_test(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_shell_enable_gl_and_is_mac": [
+            "-fno-sanitize=function",  # from //flutter/third_party/angle:libGLESv2_static
+            "-Wno-redundant-parens",  # from //flutter/third_party/angle:libGLESv2_static
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_gl_and_is_linux": [
             "-Wno-redundant-parens",  # from //flutter/third_party/angle:libGLESv2_static
         ],
@@ -1120,6 +1126,15 @@ selects.config_setting_group(
     match_all = [
         "//engine/src/flutter/shell:test_enable_metal",
         "//engine/src/flutter/build/bazel:not_mac",
+    ],
+)
+
+# `shell_enable_gl && is_mac`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_shell_enable_gl_and_is_mac",
+    match_all = [
+        "//engine/src/flutter/shell:enable_gl",
+        "@platforms//os:macos",
     ],
 )
 

@@ -181,20 +181,24 @@ final class ConvertedFile {
 const Map<String, GnValue> macosDeferred = <String, GnValue>{'is_mac': GnBoolValue(false)};
 
 /// What ANGLE's files are evaluated under: ANGLE is the hosts' (the GPU
-/// suites' GL implementation), and a Mac's stays the wrapped GN build's
-/// until a Mac run has checked the converted one (as [macosDeferred]), so
-/// the target is Linux -- its Vulkan and desktop GL backends, no Metal --
-/// with tools/gn's arguments for ANGLE.
+/// suites' GL implementation), Linux's and a Mac's -- its Vulkan backend on
+/// both, the desktop GL backend on Linux and the Metal one on a Mac -- with
+/// tools/gn's arguments for ANGLE.
 const Map<String, GnValue> angleHosts = <String, GnValue>{
   'is_android': GnBoolValue(false),
   'is_ios': GnBoolValue(false),
-  'is_mac': GnBoolValue(false),
-  'is_apple': GnBoolValue(false),
-  'host_os': GnStringValue('linux'),
-  'target_os': GnStringValue('linux'),
+  // BUILDCONFIG.gn's is_apple (`is_ios || is_mac`) with iOS ruled out.
+  'is_apple': GnConditionValue(ConditionVariable('is_mac')),
+  // A host builds ANGLE for its own OS (a cross build that compiles it, the
+  // Linux arm64 desktop's, is Linux's too): metal_backend.gni's `target_os
+  // == host_os`, under which the Metal backend's shaders are compiled at
+  // build time.
+  targetOsIsHostOs: GnBoolValue(true),
   // tools/gn's arguments for ANGLE (to_gn_args): nothing beyond the
   // libraries, no X11 or Wayland, no validation layers, the Vulkan trees of
-  // vulkan-deps.
+  // vulkan-deps; and no GL backend where the host is a Mac (OpenGL is
+  // deprecated there) -- ANGLE being the host's, where the target is one.
+  'angle_enable_gl': GnConditionValue(ConditionNot(ConditionVariable('is_mac'))),
   'angle_build_all': GnBoolValue(false),
   'angle_enable_commit_id': GnBoolValue(false),
   'angle_enable_libdrm': GnBoolValue(false),
@@ -210,10 +214,12 @@ const Map<String, GnValue> angleHosts = <String, GnValue>{
   ),
 };
 
-/// Why ANGLE's shared libraries are not converted.
+/// Why ANGLE's GLES 1 library and the group over its shared libraries are
+/// not converted. (libEGL and libGLESv2 are: a Mac's Impeller golden suite
+/// loads them.)
 const String _angleSharedLibrary =
-    "the shared libraries, which no Linux build of the engine's links (its suites link "
-    'libEGL_static and libGLESv2_static)';
+    'the GLES 1 shared library and the group of the shared libraries for '
+    "ANGLE's own tests, which nothing the engine builds loads";
 
 /// Why ANGLE's frame capture is not converted.
 const String _angleFrameCapture =
@@ -3172,26 +3178,32 @@ cc_library(
 )
 ''',
   ),
-  // ANGLE (OpenGL ES over Vulkan and over the desktop's GL): libEGL_static
-  // and libGLESv2_static, which the GPU suites and flutter_tester link, from
-  // the tree's own GN -- the libraries, the translator and the preprocessor,
-  // the Vulkan and GL backends -- for Linux. A Mac's ANGLE stays the wrapped
-  // GN build's (build/bazel/gl_wrap), like the rest of its GPU backends, so
-  // the files are evaluated for Linux alone (angleHosts). The engine's labels
-  // for the two libraries are gl_wrap's facade, which takes these targets on
-  // Linux.
+  // ANGLE (OpenGL ES over Vulkan, over the desktop's GL and over Metal):
+  // libEGL_static and libGLESv2_static, which the GPU suites and
+  // flutter_tester link, and the shared libEGL and libGLESv2, which a Mac's
+  // golden suite opens by name -- from the tree's own GN: the libraries, the
+  // translator and the preprocessor, and the backends of the two hosts that
+  // build it (Vulkan on both, the desktop's GL on Linux, Metal on a Mac,
+  // where tools/gn turns the GL one off). The files are evaluated for those
+  // hosts alone (angleHosts). The engine's labels for the libraries are
+  // gl_wrap's facades, which take these targets.
   ConvertedFile(
     '//flutter/third_party/angle',
     assume: angleHosts,
     implicitDeps: <String>['@angle//:all_headers'],
+    // The shared libraries are defined on every platform, and the engine
+    // reaches them on a Mac alone (its golden suite): a Mac's, so that no
+    // target stands where nothing builds it.
+    targetConditions: <String, String>{
+      'libEGL': 'is_mac',
+      'libEGL_egl_loader': 'is_mac',
+      'libGLESv2': 'is_mac',
+    },
     skip: <String, String>{
       'xxhash_fuzzer': 'a fuzzer (fuzzer_test(), which no engine build has)',
       'translator_fuzzer': 'a fuzzer (which no engine build has)',
       'angle': _angleSharedLibrary,
-      'libEGL': _angleSharedLibrary,
-      'libGLESv2': _angleSharedLibrary,
       'libGLESv1_CM': _angleSharedLibrary,
-      'libEGL_egl_loader': _angleSharedLibrary,
       'libANGLE_with_capture': _angleFrameCapture,
       'angle_capture_common': _angleFrameCapture,
       'angle_frame_capture_shared': _angleFrameCapture,
@@ -3247,6 +3259,7 @@ cc_library(
         "//src/common/spirv:headers",
         "//src/common/vulkan:headers",
         "//src/libANGLE/renderer/gl:headers",
+        "//src/libANGLE/renderer/metal:headers",
         "//src/libANGLE/renderer/vulkan:headers",
         "//src/third_party/volk:headers",
     ],
@@ -3330,6 +3343,29 @@ cc_library(
 exports_files(glob([
     "**/*.cpp",
     "**/*.h",
+]))
+''',
+  ),
+  // The Metal backend, a Mac's (GN reaches the file under
+  // angle_enable_metal): its sources are Objective-C++, and three actions
+  // compile its internal shaders with the Metal toolchain of the host's
+  // Xcode (`xcrun metal`, `xcrun metallib`) into a header. The root file's
+  // program version hashes its sources, which it therefore exports.
+  ConvertedFile(
+    '//flutter/third_party/angle/src/libANGLE/renderer/metal',
+    assume: angleHosts,
+    condition: 'is_mac',
+    implicitDeps: <String>['@angle//:all_headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["**/*.h"]),
+)
+
+exports_files(glob([
+    "**/*.cpp",
+    "**/*.h",
+    "**/*.mm",
 ]))
 ''',
   ),

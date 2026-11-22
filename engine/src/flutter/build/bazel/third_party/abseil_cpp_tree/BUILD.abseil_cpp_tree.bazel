@@ -2,12 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Root BUILD file of @abseil_cpp_tree: the abseil-cpp tree as files (its
-# Chromium-style GN files included), for the wrapped GN build of the GPU
-# test backends (//engine/src/flutter/build/bazel/gl_wrap), whose ANGLE
-# depends on abseil. Bazel's own abseil is @abseil-cpp, upstream's rules
-# over the same tree; the wrap's archive stops at abseil, which the facades
-# take from there.
+# Root BUILD file of @abseil_cpp_tree: the abseil-cpp tree, for its headers
+# under the path the engine includes them by and for the two configs of its
+# Chromium-style GN file that ANGLE's GN names. Bazel's own abseil is
+# @abseil-cpp, upstream's rules over the same tree.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -49,25 +47,4 @@ cc_library(
 # the label exists so that the GN configs naming it have a home.
 cc_library(
     name = "absl_include_config",
-)
-
-filegroup(
-    name = "build_tree",
-    srcs = glob(
-        ["**"],
-        exclude = [
-            "BUILD.bazel",
-            "REPO.bazel",
-            "*.bzl",
-            # The checkout's git state is no input of the build.
-            "**/.git/**",
-            # Nor the bytecode caches a GN build in the same checkout
-            # leaves beside the Python scripts it runs (Bazel's own runs
-            # write none: PYTHONDONTWRITEBYTECODE).
-            "**/__pycache__/**",
-            "**/*_test.cc",
-            "**/*_benchmark.cc",
-            "absl/time/internal/cctz/testdata/**",
-        ],
-    ),
 )

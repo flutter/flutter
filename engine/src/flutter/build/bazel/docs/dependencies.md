@@ -173,9 +173,13 @@ unchanged; there is no Bazel build on a Windows host.
 
 **What it does not do.**
 
-- Windows hosts. On macOS (arm64) `flutter_tester`, nineteen of the host's
-  test targets and `et` have been built and run this way; an Android or iOS
-  build from a Mac has not.
+- Windows hosts. On macOS (arm64) the host build
+  (`//engine/src/flutter:flutter`), nineteen of the host's test targets and
+  `et` have been built and run this way, and a wasm analysis fetches and
+  installs the Emscripten SDK there, with which a first module links; an
+  Android or iOS build from a Mac has not been made this way, nor a whole
+  web build (`ci/builders:wasm_release`, the web build's install, is marked
+  for a Linux host).
 - A synced checkout that lacks one nested dependency (a roll added it and
   `gclient sync` has not run since) is not repaired: a tree comes from the
   checkout or from a fetch, whole.

@@ -570,6 +570,45 @@ if (current_toolchain == unknown_toolchain) {
     });
 
     test(
+      "`target_os == host_os` is decided where the assumptions say the tree is the hosts'",
+      () async {
+        // ANGLE's metal_backend.gni compiles the Metal backend's shaders at
+        // build time under `!is_ios && target_os == host_os`. Neither side is
+        // a string the generation scope can compare (the target OS is open,
+        // the host is the generation's own). For a tree only the hosts build
+        // the manifest says the two are one (targetOsIsHostOs); without that
+        // word the comparison is the error it was.
+        const gn = '''
+if (target_os == host_os) {
+  source_set("for_the_host") {
+    sources = [ "a.cc" ]
+  }
+}
+if (host_os != current_os) {
+  source_set("cross") {
+    sources = [ "b.cc" ]
+  }
+}
+''';
+        final GnFileEvaluation evaluation = await evaluate(
+          gn,
+          assumptions: generationAssumptions().withValues(<String, GnValue>{
+            targetOsIsHostOs: const GnBoolValue(true),
+          }),
+        );
+        expect(evaluation.targets.map((GnTarget t) => t.name), <String>['for_the_host']);
+        expect(evaluation.targets.single.condition, Condition.always);
+        await expectLater(
+          evaluate(gn, assumptions: generationAssumptions()),
+          throwsGnError(
+            line: 1,
+            message: 'comparison of target_os with host_os needs both values to be known',
+          ),
+        );
+      },
+    );
+
+    test(
       r'`current_toolchain == default_toolchain` holds; `($default_toolchain)` is dropped',
       () async {
         // glslang's shape: an action defined in the default toolchain alone
@@ -8751,6 +8790,116 @@ source_set("other") {
       );
     });
 
+    test("a shared library's data_deps are its data", () async {
+      // ANGLE's libEGL opens libGLESv2 by name at run time; GN's data_deps
+      // place it beside libEGL in the build directory. Bazel's word for a
+      // file a binary needs at run time is `data`, which the library's rule
+      // (a cc_binary) takes.
+      final String output = await convert('''
+shared_library("libEGL") {
+  sources = [ "egl.cc" ]
+  data_deps = [ ":libGLESv2" ]
+}
+shared_library("libGLESv2") {
+  sources = [ "gles.cc" ]
+}
+''', assumptions: generationAssumptions());
+      expect(output, contains('    data = [":libGLESv2"],\n'));
+      // On a library that is linked, not loaded, they are still not
+      // converted: its dependents' run-time files are another matter.
+      await expectLater(
+        convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  data_deps = [ ":y" ]
+}
+'''),
+        throwsGnError(line: 3, message: 'variable data_deps is not converted yet'),
+      );
+    });
+
+    test('a group that a compiled target depends on links its shared library through '
+        'the import', () async {
+      // On a Mac ANGLE reaches the Vulkan loader through two groups, one
+      // with the loader's shared library in `public_deps` and one in
+      // `deps`, which its Vulkan backend lists. GN links the library into
+      // whatever depends on such a group, so the group's cc_library names
+      // the library's import, as a compiled target does -- also where the
+      // compiled target reaches the group through another group. A group
+      // nothing compiled depends on is a set of things to build (the
+      // embedder's `flutter_engine` over its dylib, from which the installs
+      // take the file): the library itself.
+      final String output = await convert('''
+shared_library("libvulkan") {
+  output_name = "vulkan"
+  sources = [ "loader.c" ]
+}
+group("loader") {
+  public_deps = [ ":libvulkan" ]
+}
+group("entry_points") {
+  deps = [ ":libvulkan" ]
+}
+group("vulkan") {
+  public_deps = [ ":loader" ]
+}
+source_set("backend") {
+  sources = [ "backend.cc" ]
+  deps = [
+    ":entry_points",
+    ":vulkan",
+  ]
+}
+group("to_build") {
+  deps = [ ":libvulkan" ]
+}
+group("all") {
+  deps = [ ":to_build" ]
+}
+''', assumptions: generationAssumptions());
+      expect('    deps = [":libvulkan_import"],\n'.allMatches(output), hasLength(2));
+      expect('    deps = [":libvulkan"],\n'.allMatches(output), hasLength(1));
+    });
+
+    test('a shared library the tables give another target for takes no import', () {
+      // A Mac's golden suite lists ANGLE's shared libraries, which its
+      // playground opens by name: the tables name gl_wrap's facade for
+      // them, a library that carries the files at run time. That target is
+      // the dependency as it is; the import is for a shared library named
+      // by its own label.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/angle/BUILD.gn': '''
+shared_library("libEGL") {
+  sources = [ "egl.cc" ]
+}
+shared_library("other") {
+  sources = [ "other.cc" ]
+}
+''',
+        'flutter/example/a.cc': '',
+        'flutter/example/BUILD.gn': '''
+source_set("suite") {
+  sources = [ "a.cc" ]
+  deps = [
+    "//flutter/third_party/angle:libEGL",
+    "//flutter/third_party/angle:other",
+  ]
+}
+''',
+      });
+      final String output = emitBuildFile(
+        evaluateIn(tree, '//flutter/example/BUILD.gn'),
+        gnPackage: '//flutter/example',
+        tree: tree,
+      );
+      expect(
+        output,
+        contains('"//engine/src/flutter/build/bazel/gl_wrap:angle_shared_libraries",'),
+      );
+      expect(output, isNot(contains('angle_shared_libraries_import')));
+      expect(output, contains('"@angle//:other_import",'));
+    });
+
     test('an include directory outside the package needs a library that carries it', () async {
       // Bazel's `includes` is package-relative: a directory of another
       // package is a dependency on the library the table names for it, and
@@ -9133,6 +9282,51 @@ source_set("x") {
       );
     });
 
+    test('rebase_path(files, base, from): a directory written in the branch that reads it, '
+        'a generated file among the files', () {
+      // ANGLE's Metal backend joins the hashed sources under
+      // `if (angle_enable_metal)`, its directory a variable of that branch
+      // (one case, under the branch's condition: the string the cases agree
+      // on), and its list holds the header its shaders are compiled into
+      // (`$root_gen_dir/angle/...`): no file below the base, and the same
+      // file from wherever it is named, so it stays what it is.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'lib/src/sources.gni': r'''
+_backend_sources = [
+  "Context.mm",
+  "$root_gen_dir/lib/shaders.h",
+]
+hashed_sources = [ "src/common.cpp" ]
+if (is_mac) {
+  _backend_dir = "backend/"
+  hashed_sources += rebase_path(_backend_sources, "//lib", _backend_dir)
+}
+''',
+        'lib/BUILD.gn': '''
+import("//lib/src/sources.gni")
+
+source_set("x") {
+  sources = hashed_sources
+}
+''',
+      });
+      final GnFileEvaluation evaluation = evaluateIn(
+        tree,
+        '//lib/BUILD.gn',
+        assumptions: generationAssumptions(),
+      );
+      expect(
+        evaluation.targets.single.variables['sources']!.liveItems.map(
+          (GnListItem item) => '${item.condition}: ${item.value}',
+        ),
+        <String>[
+          'true: "src/common.cpp"',
+          'is_mac: "src/backend/Context.mm"',
+          'is_mac: "$genDirRoot/lib/shaders.h"',
+        ],
+      );
+    });
+
     test('filter_include() of the configs sees what the block added', () async {
       // angle.gni's "is the ARC config there?" comes after the template
       // appended the invocation's configs.
@@ -9300,6 +9494,169 @@ gn_action(
         contains('    srcs = [\n        "src/a.cpp",\n        ":version_id",\n    ],\n'),
       );
       expect('    deps = [":version_config"],\n'.allMatches(output), hasLength(2));
+    });
+
+    test("a generated directory's home is each package's own; "
+        "an action's generated input is the action that writes it", () {
+      // ANGLE's Metal backend compiles its shaders in three actions of its
+      // own package, each reading the file the one before wrote under
+      // `$root_gen_dir/angle` -- which an action of that package can only
+      // write within the package: a directory `angle` of the package's own
+      // generated tree (genDirHomes). gn_action declares its outputs by
+      // path, so the file a later action lists among its sources is the
+      // action that writes it, and so is the header the backend lists among
+      // its own. The root file's action that hashes the
+      // sources lists the header the last of them writes (genDirFileOwners
+      // names its package): the action again, by the dependency GN has on
+      // it, and in the response file the path of that package's home.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/angle/src/version.py': '',
+        'flutter/third_party/angle/src/common.cpp': '',
+        'flutter/third_party/angle/src/libANGLE/renderer/metal/wrapper.py': '',
+        'flutter/third_party/angle/src/libANGLE/renderer/metal/embed.py': '',
+        'flutter/third_party/angle/src/libANGLE/renderer/metal/shaders.metal': '',
+        'flutter/third_party/angle/src/libANGLE/renderer/metal/Context.mm': '',
+        'flutter/third_party/angle/src/libANGLE/renderer/metal/backend.cc': '',
+        'flutter/third_party/angle/src/libANGLE/renderer/metal/BUILD.gn': r'''
+_air = "$root_gen_dir/angle/shaders.air"
+_library = "$root_gen_dir/angle/shaders.metallib"
+_header = "$root_gen_dir/angle/mtl_internal_shaders_metallib.h"
+
+config("shaders_config") {
+  include_dirs = [ "$root_gen_dir/angle" ]
+}
+
+action("to_air") {
+  script = "wrapper.py"
+  sources = [ "shaders.metal" ]
+  outputs = [ _air ]
+  args = [
+    "metal",
+    rebase_path("shaders.metal", root_build_dir),
+    "-o",
+    rebase_path(_air, root_build_dir),
+  ]
+}
+
+action("to_library") {
+  script = "wrapper.py"
+  sources = [ _air ]
+  outputs = [ _library ]
+  deps = [ ":to_air" ]
+  args = [
+    "metallib",
+    rebase_path(_air, root_build_dir),
+    "-o",
+    rebase_path(_library, root_build_dir),
+  ]
+}
+
+action("shaders") {
+  script = "embed.py"
+  sources = [ _library ]
+  outputs = [ _header ]
+  deps = [ ":to_library" ]
+  args = [
+    rebase_path(_library, root_build_dir),
+    rebase_path(_header, root_build_dir),
+  ]
+  public_configs = [ ":shaders_config" ]
+}
+
+source_set("backend") {
+  sources = [
+    "backend.cc",
+    _header,
+  ]
+  deps = [ ":shaders" ]
+}
+''',
+        'flutter/third_party/angle/src/hashed.gni': r'''
+_metal_sources = [
+  "Context.mm",
+  "$root_gen_dir/angle/mtl_internal_shaders_metallib.h",
+]
+hashed_sources = [ "src/common.cpp" ]
+hashed_deps = []
+if (is_mac) {
+  _metal_dir = "libANGLE/renderer/metal/"
+  hashed_sources +=
+      rebase_path(_metal_sources, "//flutter/third_party/angle", _metal_dir)
+  hashed_deps += [ "src/libANGLE/renderer/metal:shaders" ]
+}
+''',
+        'flutter/third_party/angle/BUILD.gn': r'''
+import("src/hashed.gni")
+
+action("program_version") {
+  script = "src/version.py"
+  _header = "$root_gen_dir/angle/ProgramVersion.h"
+  outputs = [ _header ]
+  inputs = hashed_sources
+  deps = hashed_deps
+  response_file_contents = rebase_path(hashed_sources, root_build_dir)
+  args = [
+    rebase_path(_header, root_build_dir),
+    "{{response_file_name}}",
+  ]
+}
+''',
+      });
+      const metalPackage = '//flutter/third_party/angle/src/libANGLE/renderer/metal';
+      const layout = OutputLayout.repository(
+        '@angle',
+        repositoryGnRoot: '//flutter/third_party/angle',
+        packages: <String>{'', 'src/libANGLE/renderer/metal'},
+      );
+      final String metal = emitBuildFile(
+        evaluateIn(tree, '$metalPackage/BUILD.gn'),
+        gnPackage: metalPackage,
+        layout: layout,
+        tree: tree,
+      );
+      // The directory, the outputs and the paths the scripts are given: the
+      // package's own `angle`.
+      expect(metal, contains('    includes = ["angle"],\n'));
+      expect(metal, contains('    outputs = ["angle/shaders.air"],\n'));
+      expect(metal, contains('    outputs = ["angle/shaders.metallib"],\n'));
+      expect(metal, contains('    outputs = ["angle/mtl_internal_shaders_metallib.h"],\n'));
+      expect(metal, contains(r'"$(gen src/libANGLE/renderer/metal/angle/shaders.air)"'));
+      // The file the action before wrote: that action.
+      expect(metal, contains('    srcs = [":to_air"],\n'));
+      expect(metal, contains('    srcs = [":to_library"],\n'));
+      expect(metal, isNot(contains('"angle/shaders.air",')));
+      // The header among the backend's sources: the action again, which the
+      // dependency on it names already. No rule declares the file's label.
+      expect(metal, contains('    srcs = [\n        "backend.cc",\n        ":shaders",\n    ],\n'));
+      expect(metal, isNot(contains('":angle/mtl_internal_shaders_metallib.h"')));
+
+      final String root = emitBuildFile(
+        evaluateIn(
+          tree,
+          '//flutter/third_party/angle/BUILD.gn',
+          assumptions: generationAssumptions(),
+          importPolicy: const ImportPolicy(
+            evaluatedPrefixes: <String>{'//flutter/third_party/angle/'},
+          ),
+        ),
+        gnPackage: '//flutter/third_party/angle',
+        layout: layout,
+        tree: tree,
+      );
+      // The root file's own output stays in the root's `angle`.
+      expect(root, contains('    outputs = ["angle/ProgramVersion.h"],\n'));
+      final String inputs = root.substring(
+        root.indexOf('    inputs = '),
+        root.indexOf('    outputs = '),
+      );
+      expect(inputs, contains('"src/common.cpp"'));
+      expect(inputs, contains('"//src/libANGLE/renderer/metal:Context.mm"'));
+      expect(inputs, contains('"//src/libANGLE/renderer/metal:shaders"'));
+      expect(inputs, isNot(contains('mtl_internal_shaders_metallib.h')));
+      expect(
+        root,
+        contains(r'"$(gen src/libANGLE/renderer/metal/angle/mtl_internal_shaders_metallib.h)"'),
+      );
     });
 
     test("an action's public config of another file is not converted", () {

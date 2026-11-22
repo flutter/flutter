@@ -590,10 +590,11 @@ const Map<String, String> labelOverrides = <String, String>{
   '//third_party/abseil-cpp:absl_include_config': '@abseil_cpp_tree//:absl_include_config',
   // The GPU test backends as the engine's files name them
   // (build/bazel/gl_wrap): ANGLE's two static libraries behind one facade
-  // (the converted tree's on Linux, the wrapped GN build's archive on a
-  // Mac), its shared ones behind another (a Mac's golden suite names them:
-  // the wrapped build's products, which the conversion skips), and
-  // SwiftShader's group of runtime files and its static driver.
+  // (the converted tree's), its shared ones behind another (a Mac's golden
+  // suite names them and opens them by name: the converted tree's
+  // libraries as run-time files, which is why a dependency on them takes
+  // no import), and SwiftShader's group of runtime files and its static
+  // driver.
   '//flutter/third_party/angle:libEGL_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
   '//flutter/third_party/angle:libGLESv2_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
   '//flutter/third_party/angle:libEGL':
@@ -719,10 +720,22 @@ const Map<String, Map<String, String>> scriptEnvironment = <String, Map<String, 
   },
   // ANGLE's commit id (its version string): commit_id.py asks git, which a
   // sandboxed action has none of, unless the variable names the revision --
-  // the DEPS pin's, as the wrapped build of a Mac's ANGLE passes it.
+  // the DEPS pin's (gl_wrap/angle_version.bzl).
   '//flutter/third_party/angle/src/commit_id.py': <String, String>{
     'ANGLE_UPSTREAM_HASH': 'angle_upstream_hash',
   },
+  // ANGLE's Metal shaders are compiled by the Metal toolchain of the host's
+  // Xcode, which metal_wrapper.py reaches through `xcrun metal` and `xcrun
+  // metallib` (build_overrides/angle.gni's use_system_xcode). The Xcode is
+  // named, so that xcrun takes the one the toolchains' SDK is of (@macos_sdk:
+  // DEVELOPER_DIR where the build sets it, else xcode-select's) and the
+  // action's key says which; the SDK's version beside it, for an Xcode
+  // updated in place.
+  '//flutter/third_party/angle/src/libANGLE/renderer/metal/shaders/metal_wrapper.py':
+      <String, String>{
+        'DEVELOPER_DIR': 'xcode_developer_dir',
+        'FLUTTER_MACOS_SDK_VERSION': 'macos_sdk_version',
+      },
 };
 
 /// A program an action's script runs that GN does not name among its
@@ -812,12 +825,25 @@ const Map<String, String> genDirIncludeTargets = <String, String>{
 };
 
 /// Directories of GN's generated tree that a converted repository writes
-/// to outside its own (`$root_gen_dir/<its GN directory>`), with the place
-/// in its own they stand for: ANGLE generates its version headers into
-/// `$root_gen_dir/angle` whatever directory it is checked out in, a
-/// directory `angle` of the repository's generated tree here.
+/// to outside its own (`$root_gen_dir/<its GN directory>`), with the GN
+/// directory of the repository whose packages write there: ANGLE generates
+/// its version headers into `$root_gen_dir/angle` whatever directory it is
+/// checked out in. An action writes within its own package, so in the file
+/// of each package of that repository the directory stands for a directory
+/// of the same name in the package's own generated tree (`angle/` beside
+/// the root file's actions; `src/libANGLE/renderer/metal/angle/` beside the
+/// Metal backend's).
 const Map<String, String> genDirHomes = <String, String>{
-  '$genDirRoot/angle': '$genDirRoot/flutter/third_party/angle/angle',
+  '$genDirRoot/angle': '//flutter/third_party/angle',
+};
+
+/// Files of such a directory that another package than the one naming them
+/// writes, by the GN directory of the package that does: the root file's
+/// list of what ANGLE's program version hashes holds the header the Metal
+/// backend's actions generate, which is in that package's home.
+const Map<String, String> genDirFileOwners = <String, String>{
+  '$genDirRoot/angle/mtl_internal_shaders_metallib.h':
+      '//flutter/third_party/angle/src/libANGLE/renderer/metal',
 };
 
 /// Include directories in another repository that a Bazel library of that
@@ -1105,6 +1131,20 @@ String absoluteGnLabel(String gnLabel, {required String package, bool implicitNa
 /// [package] is the GN directory of the file being converted (`//flutter/fml`),
 /// for `:local` labels; [location] is where the label was written, for the
 /// error when it has no Bazel home.
+/// Whether [labelOverrides] names another target for the GN label [gnLabel]
+/// (as written in a file of [package]) itself, rather than for the
+/// directory it is in.
+bool hasLabelOverride(String gnLabel, {required String package}) {
+  if (gnLabel.startsWith(':')) {
+    return false;
+  }
+  final int paren = gnLabel.indexOf('(');
+  final String bare = paren > 0 && gnLabel.endsWith(')') ? gnLabel.substring(0, paren) : gnLabel;
+  final String absolute = absoluteGnLabel(bare, package: package);
+  return labelOverrides.containsKey(absolute) ||
+      (bare != gnLabel && labelOverrides.containsKey('$absolute${gnLabel.substring(paren)}'));
+}
+
 String bazelLabel(String gnLabel, {required String package, GnLocation? location}) {
   // `:x($default_toolchain)` is `:x` here: a Bazel build has one
   // configuration of each target -- unless the table names the label in
@@ -2186,6 +2226,10 @@ const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceCons
     '//engine/src/flutter/build/bazel/gl_wrap:angle_version.bzl',
     'ANGLE_UPSTREAM_HASH',
   ),
+  // No GN variables either: the host's Xcode and its macOS SDK's version,
+  // for the scripts that run its tools through xcrun (scriptEnvironment).
+  'xcode_developer_dir': ReferenceConstant('@macos_sdk//:sdk.bzl', 'XCODE_DEVELOPER_DIR'),
+  'macos_sdk_version': ReferenceConstant('@macos_sdk//:sdk.bzl', 'MACOS_SDK_VERSION'),
 };
 
 /// How a template argument translates to a macro attribute.
@@ -2883,6 +2927,11 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//flutter/third_party/angle/',
     '//build/config/dcheck_always_on.gni',
     '//flutter/third_party/dart/build/config/gclient_args.gni',
+    // The buildroot's stand-in for Chromium's mac_sdk.gni (mac_bin_path,
+    // empty), which ANGLE's Metal backend imports and reads in the branch
+    // for a hermetic Xcode alone; build_overrides/angle.gni says the
+    // system's (use_system_xcode), whose Metal tools run through xcrun.
+    '//build/config/mac/mac_sdk.gni',
     // What SwiftShader's files import of the engine's build configuration:
     // the sanitizers' arguments (is_ubsan_vptr and friends, all off), the
     // Ozone and UI switches (ozone_platform_gbm, use_x11, use_ozone: off)

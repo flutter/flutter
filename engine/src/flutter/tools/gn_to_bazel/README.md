@@ -419,7 +419,13 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    string plus an integer, a scope's member inside a string
    (`"${invoker.output_name}_autogen.def"`) and `rebase_path(x, base, from)`
    for a source directory `base` (the paths below it: ANGLE's backends'
-   source lists, rebased to its root) are understood too.
+   source lists, rebased to its root; the two directories may be variables
+   written in the branch that reads them, and a generated file among the
+   paths stays what it is) are understood too. `target_os == host_os`, of
+   which the generation knows neither side as a string, is decided by an
+   assumption of its own for a file whose targets are only ever the host's
+   (`targetOsIsHostOs`: ANGLE compiles its Metal shaders at build time
+   under it) and is an error elsewhere.
    `filter_include(configs, [...])` answers from what the block added to
    its configs, and of the default ones only that a config outside them is
    not there; `write_file()` is ignored for the generation log
@@ -428,7 +434,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `source_set`/`static_library` to `cc_library` (with headers in `hdrs`, or
    the `public` list when there is one; a `source_set` is `alwayslink`,
    since GN links all of its objects), `group` to a `cc_library` of only
-   `deps`, test executables to `cc_test`, `shared_library` to a
+   `deps` (a shared library among them as its `<name>_import` where a
+   compiled target of the file depends on the group, since GN links the
+   library through it -- a Mac's ANGLE and the Vulkan loader -- and as
+   itself where the group is only a set of things to build), test
+   executables to `cc_test`, `shared_library` to a
    `cc_binary(linkshared = True)` named after the file GN produces
    (`lib<output_name>.so`, which Bazel requires of a shared binary; GN adds
    the `lib` unless the name starts with it, so SwiftShader's
@@ -439,7 +449,8 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    own (`_font-subset`, producing `font-subset`) the same way, since a
    `cc_binary`'s file is its name -- the C++ runtime in a shared library's
    `deps` (GN's default deps; Bazel's `link_extra_libs` reaches executables
-   only) and any
+   only), its `data_deps` as the binary's `data` (ANGLE's libEGL opens
+   libGLESv2 from beside it) and any
    `cc_library` of the same file that would declare the same `.so` made
    `linkstatic`, `config` to a header-only
    `cc_library` carrying the defines, include directories and link flags that
@@ -542,7 +553,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    rule's attribute of that name: arguments too many for a command line,
    written to a file, shell-quoted, whose name `args` gets in place of
    `{{response_file_name}}` (ANGLE's program version is a hash of a
-   thousand sources). What a script would read outside its inputs comes
+   thousand sources). A file of the generated tree among an action's
+   `sources` or `inputs` is the action that writes it, where the converter
+   sees one (`gn_action` declares its outputs by path, not as labels: the
+   Metal shaders' `.air` file, which the next action links). What a script
+   would read outside its inputs comes
    through the rule's `env` from a Bazel-side constant
    (`scriptEnvironment`: the engine's revision for `copy_info_plist.py`;
    ANGLE's for its `commit_id.py`, which would ask git). A program the
@@ -572,7 +587,10 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `include_dirs` is the package's, as Bazel's `includes` spans the output
    tree; one outside its own generated tree that a converted repository
    writes to (`$root_gen_dir/angle`, wherever ANGLE is checked out) has a
-   home inside it (`genDirHomes`); an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
+   home in each package of the repository, the directory of that name in
+   the package's own generated tree, since an action writes within its
+   package (`genDirHomes`; a file there that another package writes is
+   named with its package in `genDirFileOwners`); an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
    the target whose `includes` already name that directory
    (`genDirIncludeTargets`); an include directory in another repository, or
    in another package of this one, is a dependency on the library that

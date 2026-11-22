@@ -345,13 +345,13 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn"],
         gn_repository = "@vulkan_memory_allocator=//flutter/third_party/vulkan_memory_allocator",
     ),
-    # ANGLE (OpenGL ES over Vulkan and over the desktop's GL), from the
-    # tree's own GN: the Khronos headers it ships (GLES2/GLES3/EGL/KHR), which
-    # Impeller's GLES backend includes on every platform, and libEGL_static
-    # and libGLESv2_static for Linux, the GPU suites' GL implementation -- the
-    # libraries, the translator, and the Vulkan and GL backends. A Mac's
-    # ANGLE is the wrapped GN build's (build/bazel/gl_wrap), from
-    # @angle_tree.
+    # ANGLE (OpenGL ES over Vulkan, over the desktop's GL and over Metal),
+    # from the tree's own GN: the Khronos headers it ships
+    # (GLES2/GLES3/EGL/KHR), which Impeller's GLES backend includes on every
+    # platform, and the GPU suites' GL implementation on the two hosts --
+    # libEGL_static and libGLESv2_static, the translator, the Vulkan backend,
+    # Linux's GL backend, a Mac's Metal backend, and the two shared libraries
+    # a Mac's golden suite opens by name.
     "angle": struct(
         path = "engine/src/flutter/third_party/angle",
         build_file = None,
@@ -361,6 +361,7 @@ _SOURCE_REPOSITORIES = {
             "engine/src/flutter/third_party/angle/src/common/spirv/BUILD.gn",
             "engine/src/flutter/third_party/angle/src/common/vulkan/BUILD.gn",
             "engine/src/flutter/third_party/angle/src/libANGLE/renderer/gl/BUILD.gn",
+            "engine/src/flutter/third_party/angle/src/libANGLE/renderer/metal/BUILD.gn",
             "engine/src/flutter/third_party/angle/src/libANGLE/renderer/vulkan/BUILD.gn",
             "engine/src/flutter/third_party/angle/src/third_party/volk/BUILD.gn",
         ],
@@ -388,22 +389,10 @@ _SOURCE_REPOSITORIES = {
         ],
         gn_repository = "@swiftshader=//flutter/third_party/swiftshader",
     ),
-    # Trees for the wrapped GN build of a Mac's ANGLE (build/bazel/gl_wrap),
-    # the one GPU test backend not taken from a converted tree there: ANGLE
-    # and SwiftShader, whose driver ANGLE's GN builds with it (their Bazel
-    # rules are @angle's and @swiftshader's), the vulkan-deps directory (over whose
+    # Two trees as directories, for their headers under the engine's
+    # root-relative spellings: the vulkan-deps directory (over whose
     # subdirectories @vulkan-headers, @spirv-tools, ... are separate
-    # repositories), abseil-cpp (whose Bazel rules are @abseil-cpp's) and the
-    # allocator (whose library is @vulkan_memory_allocator). Each is the
-    # synced directory as files, nothing more.
-    "angle_tree": struct(
-        path = "engine/src/flutter/third_party/angle",
-        build_file = _OVERLAYS + ":angle_tree/BUILD.angle_tree.bazel",
-    ),
-    "swiftshader_tree": struct(
-        path = "engine/src/flutter/third_party/swiftshader",
-        build_file = _OVERLAYS + ":swiftshader_tree/BUILD.swiftshader_tree.bazel",
-    ),
+    # repositories) and abseil-cpp (whose Bazel rules are @abseil-cpp's).
     "vulkan_deps_tree": struct(
         path = "engine/src/flutter/third_party/vulkan-deps",
         build_file = _OVERLAYS + ":vulkan_deps_tree/BUILD.vulkan_deps_tree.bazel",
@@ -418,10 +407,6 @@ _SOURCE_REPOSITORIES = {
     "googletest_tree": struct(
         path = "engine/src/flutter/third_party/googletest",
         build_file = _OVERLAYS + ":googletest_tree/BUILD.googletest_tree.bazel",
-    ),
-    "vulkan_memory_allocator_tree": struct(
-        path = "engine/src/flutter/third_party/vulkan_memory_allocator",
-        build_file = _OVERLAYS + ":vulkan_memory_allocator_tree/BUILD.vulkan_memory_allocator_tree.bazel",
     ),
     # package:vector_math, which lib/gpu's Dart library imports; the test
     # fixtures that compile that library to kernel need its sources.
@@ -507,6 +492,10 @@ _GN_TREES = {
         _VULKAN_DEPS + "spirv-headers/src",
         _VULKAN_DEPS + "spirv-tools/src",
         _VULKAN_DEPS + "vulkan-headers/src",
+        # A Mac's ANGLE links the loader (through two groups), so the
+        # conversion reads the loader's file for what its library hands a
+        # dependent.
+        _VULKAN_DEPS + "vulkan-loader/src",
     ],
     "freetype2": [_THIRD_PARTY + "libpng", _THIRD_PARTY + "zlib"],
     "glslang": [_VULKAN_DEPS + "spirv-tools/src"],

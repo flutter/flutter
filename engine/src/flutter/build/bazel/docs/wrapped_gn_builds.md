@@ -1,4 +1,4 @@
-# Wrapped GN builds: the Dart SDK and the GPU test backends
+# The Dart SDK as a wrapped GN build; the GPU test backends, which were one
 
 ## Wrapped GN builds: the Dart SDK
 
@@ -125,7 +125,7 @@ a possible follow-up), and
 the `dart_test`/`dart_vm_kernel` rules and the package tests, which run on the
 prebuilt SDK (the builder runs no tests).
 
-## Wrapped GN builds: the GPU test backends
+## The GPU test backends
 
 The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
 (Vulkan on the CPU): `//flutter/testing:opengl` links ANGLE's
@@ -138,23 +138,32 @@ the configuration of CI's `host_debug_unopt_impeller_tests` and, since
 flutter/flutter#196282, of `host_profile_test` and `host_release_test`,
 whose `run_tests.py --type impeller` runs need it for Vulkan validation).
 
-Three of the four are converted trees on Linux and on a Mac, their own GN
-files turned into BUILD files at fetch time like Skia's: SwiftShader
+All four are converted trees on Linux and on a Mac, their own GN files
+turned into BUILD files at fetch time like Skia's: SwiftShader
 (`@swiftshader`, eleven GN files: the driver, its pipeline and device, the
 Reactor JIT on Subzero for x64 and on LLVM for arm64, marl, and
 SwiftShader's own SPIRV-Tools and SPIRV-Headers), the loader
-(`@vulkan-loader`) and the layer (`@vulkan_validation_layers`, which the
-Android embedding's debug jar packs for arm64 as well). ANGLE is one on
-Linux (`@angle`, seven GN files behind the templates and arguments of
-`gni/angle.gni`: the two static libraries, the translator and the
-preprocessor, the Vulkan and desktop GL backends); a Mac's is still a
-wrapped GN build (below). `gl_wrap`'s `:angle` is ANGLE's two libraries; its
-products of the other three's names (a Mac's are `libvk_swiftshader.dylib`,
-`libvulkan.dylib` and `libVkLayer_khronos_validation.dylib`) are
-`build_root_binary` targets (//build_defs/gn:build_directory.bzl) over them:
-the file as GN's build root holds it, which is what a suite loads --
-stripped under `stripped_symbols` on Linux (the layer is 300 MB with its
-symbols), as linked on a Mac, whose GN toolchain strips nothing.
+(`@vulkan-loader`), the layer (`@vulkan_validation_layers`, which the
+Android embedding's debug jar packs for arm64 as well) and ANGLE (`@angle`,
+eight GN files behind the templates and arguments of `gni/angle.gni`: the
+two static libraries, the translator and the preprocessor, the Vulkan
+backend, Linux's desktop GL backend, a Mac's Metal backend, and the shared
+`libEGL` and `libGLESv2` that a Mac's Impeller golden suite opens by name).
+They were one wrapped GN build first, which `gl_wrap` is named for and why
+this section is in this file: about 1,100 compiles in a single action that
+no cache could split (669 s of `ninja` on 24 cores with the layer). As
+converted trees each compile is an action of its own, cached and
+distributed, and a roll of one tree rebuilds that tree alone. No GN runs
+for them now.
+
+`gl_wrap`'s `:angle` is ANGLE's two static libraries; its targets of the
+shared libraries' file names (a Mac's are `libvk_swiftshader.dylib`,
+`libvulkan.dylib`, `libVkLayer_khronos_validation.dylib`, `libEGL.dylib` and
+`libGLESv2.dylib`) are `build_root_binary` targets
+(//build_defs/gn:build_directory.bzl) over the converted ones: the file as
+GN's build root holds it, which is what a suite loads -- stripped under
+`stripped_symbols` on Linux (the layer is 300 MB with its symbols), as
+linked on a Mac, whose GN toolchain strips nothing.
 
 One thing differs from GN on a Mac, on purpose: the loader's install name.
 GN's mac toolchain names none, so a dylib's is the path its link wrote
@@ -165,8 +174,10 @@ the converted loader is linked with `-install_name @rpath/libvulkan.dylib`
 (the converter's manifest, `installNames`; `flutter_shared_library`'s
 `apple_install_name`), which the rpath of the binary's own directory finds
 at the suite's copy. SwiftShader's driver sets its own in GN
-(`@rpath/libvk_swiftshader.dylib`), and the layer is opened by the path its
-manifest names.
+(`@rpath/libvk_swiftshader.dylib`), the layer is opened by the path its
+manifest names, and nothing links against ANGLE's two shared libraries:
+`libEGL` opens `libGLESv2` from its own directory, and the golden suite
+opens `libGLESv2.dylib` by name.
 
 The converted trees are evaluated under `tools/gn`'s arguments for a host
 build (the converter's assumptions), and one GN default among them matters
@@ -176,11 +187,15 @@ a loader built without `VK_USE_PLATFORM_XCB_KHR` strips `VK_KHR_xcb_surface`
 from the extensions SwiftShader reports, after which GLFW cannot create the
 playground's Vulkan window surface.
 
-ANGLE's files are evaluated for Linux alone (the manifest's `angleHosts`),
-and only what `libEGL_static` and `libGLESv2_static` are made of is
-converted: its shared libraries, frame capture, second set of libraries for
-its own tests and command-line tools are skipped in the manifest, each with
-its reason. Three things in it are not plain compiles:
+ANGLE's files are evaluated for the two hosts that build it (the manifest's
+`angleHosts`). Its targets are always the host's own, which settles two
+things GN decides by the host: `tools/gn` turns ANGLE's GL backend off when
+the host is a Mac (the converter's `angle_enable_gl` is `!is_mac`), and
+ANGLE's own `target_os == host_os` holds. Only what the four libraries are
+made of is converted: the GLES 1 library, frame capture, the second set of
+libraries for ANGLE's own tests and its command-line tools are skipped in
+the manifest, each with its reason. Four things in it are not plain
+compiles:
 
 - Two actions write the headers its version string is made of.
   `commit_id.py` asks git for the commit, which a sandboxed action has none
@@ -191,6 +206,21 @@ its reason. Three things in it are not plain compiles:
   `response_file_contents`); the hash covers the paths as written, so the
   version differs from a GN build's of the same sources, which only keys
   ANGLE's program cache.
+- A Mac's Metal backend compiles its internal shaders at build time, as
+  GN's build does where the target is the host's own OS: three actions of
+  its package, `xcrun metal` to an `.air` file, `xcrun metallib` to a
+  library, and a script that embeds the library in a header, which the
+  program version above hashes too. GN writes all three under
+  `$root_gen_dir/angle`; an action writes within its own package, so here
+  that directory is `angle/` of the package's generated tree (the
+  converter's `genDirHomes`), and the file a later action reads is the
+  action that wrote it. The Metal toolchain is the host Xcode's -- since
+  Xcode 26 a component installed separately (`xcodebuild -downloadComponent
+  MetalToolchain`) -- and no file of the checkout. The two `xcrun` actions
+  name the Xcode and its SDK's version in their environment (`@macos_sdk`,
+  through `scriptEnvironment`), so their key changes with either; the
+  toolchain component itself is in no key. They run on the Mac that builds
+  (`rbe_mac` sends compiles alone to the workers).
 - GN's dependency edges do not carry every header the sources include, so
   every ANGLE target takes the tree's headers from one library
   (`@angle//:all_headers`, the manifest's `implicitDeps`), as SwiftShader's
@@ -200,38 +230,6 @@ its reason. Three things in it are not plain compiles:
   config), zlib and its gzip helpers (`@zlib`), SPIRV-Tools (`@spirv-tools`),
   the Vulkan headers and the engine's `flutter_vma`, which
   `build_overrides/angle.gni` names as ANGLE's VulkanMemoryAllocator.
-
-A Mac's ANGLE is built with its own GN rules in one `gn_build` action
-(`gl_wrap:gl_backends`, which only a macOS platform is compatible with), as
-`dart_wrap/` builds the Dart SDK: its Metal backend, and the two shared
-libraries the Impeller golden suite loads there, are not converted. The
-action builds SwiftShader's driver and the loader as well, which ANGLE's GN
-targets name as `data_deps`, and keeps neither. When Linux built all four
-this way the pruned graph was about 1,100 compiles without the layer and
-three times the time with it (224 s and 669 s of `ninja` on 24 cores);
-ANGLE alone was 387 compiles and 149 s.
-
-A Mac's `libangle.a` holds the object closure of the two static libraries
-up to the `archive_boundaries` the Bazel side provides -- abseil
-(`@abseil-cpp`), zlib (`@zlib`, with `google:compression_utils_portable`
-added to the overlay for ANGLE's shader cache), SPIRV-Tools (`@spirv-tools`,
-which Impeller links as well: a second copy of its objects would collide)
-and the C++ runtime; the `:angle` facade lists them there. One engine target
-is in the picture too: ANGLE's allocator wrapper compiles against the
-allocator's header through `//flutter/flutter_vma` and its implementation
-comes from `//engine/src/flutter/flutter_vma` (a dependency of the facade).
-Inside the wrapped build that directory is a stand-in GN file
-(`gl_wrap/stubs/`): a group with the real target's `public_deps` on the
-Vulkan headers and the allocator, and no sources. The trees are the
-overlays' `build_tree` filegroups (`@angle_tree`, `@swiftshader_tree` and
-`@vulkan_deps_tree` -- the ANGLE, SwiftShader and `vulkan-deps` directories
-as files, distinct from the repositories Bazel builds from them --,
-`@abseil_cpp_tree`, `@vulkan_memory_allocator_tree`), measured on the build
-as the Dart SDK's were, and without any `.git`: ANGLE's commit id comes
-from the `DEPS` pin through `ANGLE_UPSTREAM_HASH` there too (the rule's
-`env`). `gn_build` can also leave archives or everything but the archives'
-objects out of a configuration (`omit_archives`, `archives_only`), which is
-how Linux took its backends from the converted trees one at a time.
 
 At run time the files must sit **next to the test binary**. ANGLE opens
 the loader from, and points it (`VK_ICD_FILENAMES`) at the ICD manifest in,
@@ -257,9 +255,7 @@ bazelisk test  //engine/src/flutter/build/bazel/gl_wrap/tests:gl_backends_smoke_
 ```
 
 The smoke test clears and reads back a pixel through EGL on ANGLE and
-SwiftShader, and opens SwiftShader as a Vulkan driver. On a Mac, as with
-the Dart SDK, `--strategy=GnBuild=local` keeps a regular GN build directory
-under `bazel-bin/.../gl_wrap/gl_backends.gn/root/out/bazel` for iterating.
+SwiftShader, and opens SwiftShader as a Vulkan driver.
 
 The Impeller playground (`impeller/playground`, on `@glfw` and `@imgui` --
 the secondary tree's GN over the synced trees, converted at fetch time like

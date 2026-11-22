@@ -47,10 +47,10 @@ _RELEASE_MODES = _PRODUCT_MODES
 # its ICD manifest and the Vulkan loader, which a suite needs in the
 # directory of its binary, and the Khronos validation layer with its
 # manifest, for the Vulkan playground, which requires validation.
-# Each as gl_wrap's product (by base name) and its path next to the binary:
-# GN's layout, which the manifests' library_path entries are relative to
-# (the layer's is ../libVkLayer_khronos_validation.<so|dylib> from
-# vulkan-data/), by the OS whose names the libraries carry: Linux's
+# Each as gl_wrap's target (by the file's base name) and its path next to
+# the binary: GN's layout, which the manifests' library_path entries are
+# relative to (the layer's is ../libVkLayer_khronos_validation.<so|dylib>
+# from vulkan-data/), by the OS whose names the libraries carry: Linux's
 # (.so, the loader libvulkan.so.1) or macOS's (.dylib). The manifests are
 # the same on both.
 _GPU_TEST_BACKEND_MANIFESTS = {
