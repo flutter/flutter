@@ -13,14 +13,6 @@
 #import "FlutterPluginRegistrarMacOS.h"
 
 /**
- * A unique identifier for a view within which Flutter content is hosted.
- *
- * Identifiers are guaranteed to be unique for views owned by a given engine but
- * may collide for views owned by different engines.
- */
-typedef int64_t FlutterViewIdentifier;
-
-/**
  * Values for the `mouseTrackingMode` property.
  */
 typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {

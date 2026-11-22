@@ -311,8 +311,6 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (instancetype)initWithPlugin:(nonnull NSString*)pluginKey
                  flutterEngine:(nonnull FlutterEngine*)flutterEngine;
 
-- (nullable NSView*)viewForIdentifier:(FlutterViewIdentifier)viewIdentifier;
-
 /**
  * The value published by this plugin, or NSNull if nothing has been published.
  *
