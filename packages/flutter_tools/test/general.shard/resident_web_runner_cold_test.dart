@@ -85,6 +85,7 @@ void main() {
       generator: null,
       targetPlatform: TargetPlatform.web_javascript,
       toolContext: toolContext,
+      useWasm: debuggingOptions.webConfig.useWasm,
       webDefines: webDefines,
     );
     if (prePopulateDevFS) {
@@ -231,9 +232,27 @@ void main() {
       stayResident: false,
     );
 
+    expect(profileRunner.isRunningProfile, true);
     expect(profileRunner.supportsServiceProtocol, false);
     expect(profileRunner.canHotReload, false);
     expect(profileRunner.supportsRestart, true);
+  });
+
+  testWithoutContext('Wasm web builds disable debug/profile runtime and service protocol', () {
+    for (final buildInfo in const <BuildInfo>[BuildInfo.debug, BuildInfo.profile]) {
+      final ColdRunner wasmRunner = createWebColdRunner(
+        debuggingOptions: DebuggingOptions.enabled(
+          buildInfo,
+          webConfig: const WebDebugConfig(useWasm: true),
+        ),
+        stayResident: false,
+      );
+
+      expect(wasmRunner.isRunningDebug, false);
+      expect(wasmRunner.isRunningProfile, false);
+      expect(wasmRunner.supportsServiceProtocol, false);
+      expect(wasmRunner.supportsRestart, true);
+    }
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/167887.

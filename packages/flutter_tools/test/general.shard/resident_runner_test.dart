@@ -2072,10 +2072,6 @@ flutter:
   testUsingContext(
     'HotRunner evicts a changed .shaderbundle asset generically on web',
     () => testbed.run(() async {
-      final webFlutterDevice = FakeFlutterDevice()
-        ..vmServiceHost = (() => fakeVmServiceHost)
-        ..fakeDevFS = devFS
-        ..targetPlatform = TargetPlatform.web_javascript;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
@@ -2085,6 +2081,18 @@ flutter:
           ),
         ],
       );
+      final webFlutterDevice =
+          WebFlutterDevice(
+              device,
+              buildInfo: BuildInfo.debug,
+              developmentShaderCompiler: const FakeShaderCompiler(),
+              flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+              generator: FakeResidentCompiler(),
+              targetPlatform: TargetPlatform.web_javascript,
+              toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fs),
+            )
+            ..devFS = devFS
+            ..vmService = fakeVmServiceHost!.vmService;
       residentRunner = createHotRunner(
         <FlutterDevice>[webFlutterDevice],
         stayResident: false,
@@ -2246,7 +2254,8 @@ flutter:
     late TestBed testbed;
     late Config localConfig;
     late FileSystem localFs;
-    late FakeFlutterDevice flutterDevice;
+    late FakeFlutterDevice fakeFlutterDevice;
+    late FlutterDevice flutterDevice;
     late FakeDevFS devFS;
     late TestHotRunner residentRunner;
     late FakeDevice device;
@@ -2292,16 +2301,24 @@ flutter:
       );
       device = FakeDevice();
       devFS = FakeDevFS();
-      flutterDevice = FakeFlutterDevice()
+      fakeFlutterDevice = FakeFlutterDevice()
         ..testUri = testUri
         ..device = device
         ..fakeDevFS = devFS;
+      flutterDevice = fakeFlutterDevice;
     });
 
-    testUsingContext(
-      'correctly caches Web Device compilation',
-      () => testbed.run(() {
-        flutterDevice.targetPlatform = TargetPlatform.web_javascript;
+    testWithoutContext('correctly caches Web Device compilation', () {
+      flutterDevice = WebFlutterDevice(
+        device,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        flutterProject: FlutterProject.fromDirectoryTest(localFs.currentDirectory),
+        generator: FakeResidentCompiler(),
+        targetPlatform: TargetPlatform.web_javascript,
+        toolContext: FakeToolContext(config: localConfig, fs: localFs),
+      );
+      return testbed.run(() {
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
@@ -2315,13 +2332,13 @@ flutter:
 
         expect(localFs.file(expectedPath), exists);
         expect(localFs.file(expectedPath).readAsStringSync(), 'ABC');
-      }),
-    );
+      });
+    });
 
     testUsingContext(
       'correctly caches Fuchsia Device compilation',
       () => testbed.run(() {
-        flutterDevice.targetPlatform = TargetPlatform.fuchsia_arm64;
+        fakeFlutterDevice.targetPlatform = TargetPlatform.fuchsia_arm64;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
@@ -2341,7 +2358,7 @@ flutter:
     testUsingContext(
       'correctly caches Android Device compilation',
       () => testbed.run(() {
-        flutterDevice.targetPlatform = TargetPlatform.android_arm;
+        fakeFlutterDevice.targetPlatform = TargetPlatform.android_arm;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(

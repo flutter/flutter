@@ -919,7 +919,6 @@ class AppDomain extends Domain {
     final UrlTunneller? urlTunneller = webConfig.enableExposeUrl
         ? daemon.daemonDomain.exposeUrl
         : null;
-    final isWeb = await device.targetPlatform == TargetPlatform.web_javascript;
     final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: buildInfo,
       flutterProject: flutterProject,
@@ -930,7 +929,7 @@ class AppDomain extends Domain {
       webDefines: webDefines,
     );
 
-    final bool useHotRunner = isWeb ? buildInfo.isDebug && !webConfig.useWasm : enableHotReload;
+    final bool useHotRunner = flutterDevice.usesHotRunner(hotMode: enableHotReload);
     final ResidentRunner runner = useHotRunner
         ? HotRunner(
             <FlutterDevice>[flutterDevice],

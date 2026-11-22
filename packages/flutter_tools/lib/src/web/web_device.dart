@@ -93,6 +93,7 @@ abstract class WebDevice extends Device {
       toolContext: toolContext,
       urlTunneller: urlTunneller,
       userIdentifier: userIdentifier,
+      useWasm: useWasm,
       webDefines: webDefines,
     );
   }

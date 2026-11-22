@@ -105,7 +105,7 @@ class WebDriverService extends DriverService {
             webConfig: webConfig,
           );
     final String target = mainPath ?? fs.path.join('lib', 'main.dart');
-    if (resolvedDebuggingOptions.buildInfo.isDebug && !resolvedDebuggingOptions.webConfig.useWasm) {
+    if (flutterDevice.usesHotRunner(hotMode: true)) {
       _residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         analytics: _analytics,

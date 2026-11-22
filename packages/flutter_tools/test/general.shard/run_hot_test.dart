@@ -343,6 +343,24 @@ class _FakeFlutterDevice extends Fake implements FlutterDevice {
   final FlutterVmService? vmService = _FakeFlutterVmService();
 
   @override
+  bool get supportsDebugRuntime => true;
+
+  @override
+  bool get supportsProfileServiceProtocol => true;
+
+  @override
+  bool get usesSharedDartPluginRegistry => true;
+
+  @override
+  bool get supportsShaderReload => true;
+
+  @override
+  bool get supportsSetAssetDirectory => true;
+
+  @override
+  bool get supportsIsolatePauseEventLookup => true;
+
+  @override
   Future<List<Future<vm_service.ReloadReport>>?> reloadDeviceSources(
     String entryPath, {
     bool? pause = false,
@@ -367,6 +385,27 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   bool get defersServiceProtocolConnection => false;
+
+  @override
+  bool get supportsDebugRuntime => true;
+
+  @override
+  bool get supportsProfileServiceProtocol => true;
+
+  @override
+  bool get usesSharedDartPluginRegistry => true;
+
+  @override
+  bool get supportsShaderReload => true;
+
+  @override
+  bool get supportsSetAssetDirectory => true;
+
+  @override
+  bool get supportsIsolatePauseEventLookup => true;
+
+  @override
+  List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) => buildInfo.extraFrontEndOptions;
 
   @override
   bool get alwaysReloadSources => false;

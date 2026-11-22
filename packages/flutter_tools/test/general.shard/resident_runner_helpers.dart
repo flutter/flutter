@@ -385,6 +385,36 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   bool supportsColdRestart = false;
 
   @override
+  bool supportsPerformanceOverlay = true;
+
+  @override
+  bool supportsVmServiceScreenshot = false;
+
+  @override
+  bool supportsDebugRuntime = true;
+
+  @override
+  bool supportsProfileServiceProtocol = true;
+
+  @override
+  bool usesSharedDartPluginRegistry = true;
+
+  @override
+  bool supportsShaderReload = true;
+
+  @override
+  bool supportsSetAssetDirectory = true;
+
+  @override
+  bool supportsIsolatePauseEventLookup = true;
+
+  @override
+  bool usesHotRunner({required bool hotMode}) => hotMode;
+
+  @override
+  List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) => buildInfo.extraFrontEndOptions;
+
+  @override
   bool get defersServiceProtocolConnection => false;
 
   @override

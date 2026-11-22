@@ -2230,10 +2230,15 @@ class FakeRestartableResidentRunner extends FakeResidentRunner {
 class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
 
 class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
-  _FakeDaemonWebFlutterDevice(this.device);
+  _FakeDaemonWebFlutterDevice(this.device, {required this.buildInfo, this._useWasm = false});
 
   @override
   final Device device;
+
+  @override
+  final BuildInfo buildInfo;
+
+  final bool _useWasm;
 
   @override
   DevFS? devFS;
@@ -2252,6 +2257,18 @@ class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   bool get supportsColdRestart => true;
+
+  @override
+  bool get supportsDebugRuntime => !_useWasm;
+
+  @override
+  bool get supportsProfileServiceProtocol => false;
+
+  @override
+  bool get usesSharedDartPluginRegistry => false;
+
+  @override
+  bool usesHotRunner({required bool hotMode}) => buildInfo.isDebug && !_useWasm;
 
   @override
   Future<int> runHot({required HotRunner hotRunner, String? route}) async => 0;
@@ -2296,11 +2313,12 @@ class _FakeDaemonWebFlutterDeviceFactory extends Fake implements WebFlutterDevic
     Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     String? userIdentifier,
+    bool useWasm = false,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     lastGeneratorWasNull = generator == null;
     lastUrlTunneller = urlTunneller;
     lastWebDefines = webDefines;
-    return _FakeDaemonWebFlutterDevice(device);
+    return _FakeDaemonWebFlutterDevice(device, buildInfo: buildInfo, useWasm: useWasm);
   }
 }

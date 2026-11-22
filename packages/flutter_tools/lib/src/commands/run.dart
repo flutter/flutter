@@ -669,14 +669,13 @@ class RunCommand extends RunCommandBase {
     final FileSystem fs = toolContext.fs;
 
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
-    final webMode = webDevServerConfig != null;
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
       webDevServerConfig: webDevServerConfig,
     );
 
     final bool useHotRunner =
         hotMode ||
-        (webMode && debuggingOptions.buildInfo.isDebug && !debuggingOptions.webConfig.useWasm);
+        flutterDevices.any((FlutterDevice device) => device.usesHotRunner(hotMode: hotMode));
     if (useHotRunner) {
       return HotRunner(
         flutterDevices,

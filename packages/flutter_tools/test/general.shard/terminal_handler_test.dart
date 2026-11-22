@@ -19,6 +19,8 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/web_flutter_device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -1810,24 +1812,37 @@ TerminalHandler setUpTerminalHandler(
   final terminal = Terminal.test();
   final FileSystem localFileSystem = fileSystem ?? MemoryFileSystem.test();
   final processInfo = ProcessInfo.test(MemoryFileSystem.test());
-  final device = FlutterDevice(
-    FakeDevice()..supportsScreenshot = supportsScreenshot,
-    toolContext: FakeToolContext(
-      artifacts: Artifacts.test(),
-      fs: localFileSystem,
-      logger: testLogger,
-      processInfo: processInfo,
-    ),
-    buildInfo: BuildInfo(
-      buildMode,
-      '',
-      treeShakeIcons: false,
-      packageConfigPath: '.dart_tool/package_config.json',
-    ),
-    generator: FakeResidentCompiler(),
-    developmentShaderCompiler: const FakeShaderCompiler(),
-    targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
+  final toolContext = FakeToolContext(
+    artifacts: Artifacts.test(),
+    fs: localFileSystem,
+    logger: testLogger,
+    processInfo: processInfo,
   );
+  final buildInfo = BuildInfo(
+    buildMode,
+    '',
+    treeShakeIcons: false,
+    packageConfigPath: '.dart_tool/package_config.json',
+  );
+  final fakeDevice = FakeDevice()..supportsScreenshot = supportsScreenshot;
+  final FlutterDevice device = web
+      ? WebFlutterDevice(
+          fakeDevice,
+          buildInfo: buildInfo,
+          developmentShaderCompiler: const FakeShaderCompiler(),
+          flutterProject: FlutterProject.fromDirectoryTest(localFileSystem.currentDirectory),
+          generator: FakeResidentCompiler(),
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: toolContext,
+        )
+      : FlutterDevice(
+          fakeDevice,
+          toolContext: toolContext,
+          buildInfo: buildInfo,
+          generator: FakeResidentCompiler(),
+          developmentShaderCompiler: const FakeShaderCompiler(),
+          targetPlatform: TargetPlatform.android_arm,
+        );
   device.vmService = nullVmService ? null : FakeVmServiceHost(requests: requests).vmService;
   final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
     ..supportsServiceProtocol = supportsServiceProtocol
@@ -1955,6 +1970,15 @@ class _ColdRestartFakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   TargetPlatform get targetPlatform =>
       supportsColdRestart ? TargetPlatform.web_javascript : TargetPlatform.android_arm64;
+
+  @override
+  bool get supportsDebugRuntime => true;
+
+  @override
+  bool get supportsProfileServiceProtocol => !supportsColdRestart;
+
+  @override
+  bool get usesSharedDartPluginRegistry => !supportsColdRestart;
 
   @override
   Future<void> restartCold({required ColdRunner coldRunner}) async {

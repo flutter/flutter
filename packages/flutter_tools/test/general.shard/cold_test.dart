@@ -349,6 +349,15 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   bool supportsColdRestart = false;
 
+  @override
+  bool get supportsDebugRuntime => true;
+
+  @override
+  bool get supportsProfileServiceProtocol => true;
+
+  @override
+  bool get usesSharedDartPluginRegistry => true;
+
   bool wasDisposed = false;
   int restartColdCount = 0;
   Future<void> Function()? onRestartCold;

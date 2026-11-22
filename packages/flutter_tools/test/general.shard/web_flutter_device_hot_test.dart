@@ -170,6 +170,7 @@ void main() {
       platformArgs: platformArgs,
       targetPlatform: TargetPlatform.web_javascript,
       toolContext: toolContext,
+      useWasm: options.webConfig.useWasm,
     );
     if (prePopulateDevFS) {
       webFlutterDevice.devFS = fakeWebDevFS;
@@ -1600,6 +1601,152 @@ flutter:
         expect(fakeWebDevice.stopCount, 0);
       },
     );
+
+    testWithoutContext('reports web capabilities and runner selection accurately', () {
+      final FakeToolContext toolContext = createToolContext();
+      final FlutterProject project = toolContext.projectFactory.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      WebFlutterDevice makeWebDevice(BuildInfo buildInfo, {bool useWasm = false}) {
+        return WebFlutterDevice(
+          fakeWebDevice,
+          buildInfo: buildInfo,
+          developmentShaderCompiler: const FakeShaderCompiler(),
+          flutterProject: project,
+          generator: residentCompiler,
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: toolContext,
+          useWasm: useWasm,
+        );
+      }
+
+      final WebFlutterDevice debugJs = makeWebDevice(BuildInfo.debug);
+      expect(debugJs.supportsPerformanceOverlay, isFalse);
+      expect(debugJs.supportsVmServiceScreenshot, isTrue);
+      expect(debugJs.supportsDebugRuntime, isTrue);
+      expect(debugJs.supportsProfileServiceProtocol, isFalse);
+      expect(debugJs.usesSharedDartPluginRegistry, isFalse);
+      expect(debugJs.supportsShaderReload, isFalse);
+      expect(debugJs.supportsSetAssetDirectory, isFalse);
+      expect(debugJs.supportsIsolatePauseEventLookup, isFalse);
+      expect(debugJs.usesHotRunner(hotMode: true), isTrue);
+      expect(debugJs.usesHotRunner(hotMode: false), isTrue);
+      expect(debugJs.launchDevToolsInBrowser(), isTrue);
+
+      final WebFlutterDevice debugWasm = makeWebDevice(BuildInfo.debug, useWasm: true);
+      expect(debugWasm.supportsDebugRuntime, isFalse);
+      expect(debugWasm.usesHotRunner(hotMode: true), isFalse);
+      expect(debugWasm.launchDevToolsInBrowser(), isFalse);
+
+      final WebFlutterDevice profileJs = makeWebDevice(BuildInfo.profile);
+      expect(profileJs.supportsDebugRuntime, isTrue);
+      expect(profileJs.usesHotRunner(hotMode: true), isFalse);
+      expect(profileJs.launchDevToolsInBrowser(), isFalse);
+
+      final nativeDevice = FlutterDevice(
+        fakeWebDevice,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        generator: residentCompiler,
+        targetPlatform: TargetPlatform.android_arm,
+        toolContext: toolContext,
+      );
+      expect(nativeDevice.supportsPerformanceOverlay, isTrue);
+      expect(nativeDevice.supportsVmServiceScreenshot, isFalse);
+      expect(nativeDevice.supportsDebugRuntime, isTrue);
+      expect(nativeDevice.supportsProfileServiceProtocol, isTrue);
+      expect(nativeDevice.usesSharedDartPluginRegistry, isTrue);
+      expect(nativeDevice.supportsShaderReload, isTrue);
+      expect(nativeDevice.supportsSetAssetDirectory, isTrue);
+      expect(nativeDevice.supportsIsolatePauseEventLookup, isTrue);
+      expect(nativeDevice.usesHotRunner(hotMode: true), isTrue);
+      expect(nativeDevice.usesHotRunner(hotMode: false), isFalse);
+    });
+
+    testWithoutContext('DartDevelopmentService.maybeCallDevToolsUriServiceExtension dispatches extension RPCs polymorphically', () async {
+      const devToolsExtension = 'ext.flutter.activeDevToolsServerAddress';
+      final FakeToolContext toolContext = createToolContext();
+      final FlutterProject project = toolContext.projectFactory.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final isolateWithExtension = vm_service.Isolate(
+        id: _kIsolateId,
+        pauseEvent: vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0),
+        breakpoints: <vm_service.Breakpoint>[],
+        extensionRPCs: <String>[devToolsExtension],
+        libraries: <vm_service.LibraryRef>[],
+        livePorts: 0,
+        name: 'main',
+        number: '1',
+        pauseOnExit: false,
+        runnable: true,
+        startTime: 0,
+        isSystemIsolate: false,
+        isolateFlags: <vm_service.IsolateFlag>[],
+      );
+      final Uri devToolsUri = Uri.parse('http://127.0.0.1:9100');
+      final waitForExtensionRequests = <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{'streamId': 'Isolate'},
+        ),
+        listViews,
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          args: <String, Object>{'isolateId': _kIsolateId},
+          jsonResponse: isolateWithExtension.toJson(),
+        ),
+      ];
+
+      // WebFlutterDevice calls `callMethodWrapper` directly without a second `listViews` or `isolateId`.
+      final webVmHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...waitForExtensionRequests,
+          FakeVmServiceRequest(
+            method: devToolsExtension,
+            args: <String, Object>{'value': devToolsUri.toString()},
+            jsonResponse: <String, Object>{'type': 'Success'},
+          ),
+        ],
+      );
+      final webDevice = WebFlutterDevice(
+        fakeWebDevice,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        flutterProject: project,
+        generator: residentCompiler,
+        targetPlatform: TargetPlatform.web_javascript,
+        toolContext: toolContext,
+      )..vmService = webVmHost.vmService;
+
+      final dds = DartDevelopmentService(logger: logger);
+      await dds.maybeCallDevToolsUriServiceExtension(device: webDevice, uri: devToolsUri);
+      expect(webVmHost.hasRemainingExpectations, isFalse);
+
+      // Native FlutterDevice looks up the first Flutter view and passes `isolateId`.
+      final nativeVmHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...waitForExtensionRequests,
+          listViews,
+          FakeVmServiceRequest(
+            method: devToolsExtension,
+            args: <String, Object>{'isolateId': _kIsolateId, 'value': devToolsUri.toString()},
+            jsonResponse: <String, Object>{'type': 'Success'},
+          ),
+        ],
+      );
+      final nativeDevice = FlutterDevice(
+        fakeWebDevice,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        generator: residentCompiler,
+        targetPlatform: TargetPlatform.android_arm,
+        toolContext: toolContext,
+      )..vmService = nativeVmHost.vmService;
+
+      await dds.maybeCallDevToolsUriServiceExtension(device: nativeDevice, uri: devToolsUri);
+      expect(nativeVmHost.hasRemainingExpectations, isFalse);
+    });
   });
 }
 

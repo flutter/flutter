@@ -26,6 +26,7 @@ abstract interface class WebFlutterDeviceFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     String? userIdentifier,
+    bool useWasm = false,
     Map<String, String> webDefines = const <String, String>{},
   });
 }

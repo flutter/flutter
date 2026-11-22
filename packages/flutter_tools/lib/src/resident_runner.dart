@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -36,7 +37,6 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'context/tool_context.dart';
-import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'features.dart' show FeatureFlags;
@@ -633,6 +633,69 @@ class FlutterDevice {
   /// Whether this device supports restarting while running under [ColdRunner].
   bool get supportsColdRestart => false;
 
+  /// Whether this device supports the Flutter performance overlay.
+  bool get supportsPerformanceOverlay => true;
+
+  /// Whether this device supports capturing screenshots through the VM Service
+  /// when native device screenshots are unavailable.
+  bool get supportsVmServiceScreenshot => false;
+
+  /// Captures a PNG screenshot over the VM Service, or returns `null` when
+  /// unavailable or when the RPC fails.
+  Future<Uint8List?> takeVmServiceScreenshot() async => null;
+
+  /// Whether this device supports VM debug and profile runtime capabilities
+  /// (false for static compilation targets such as WebAssembly).
+  bool get supportsDebugRuntime => true;
+
+  /// Whether this device exposes the VM Service protocol in profile mode.
+  bool get supportsProfileServiceProtocol => true;
+
+  /// Whether this device uses the shared Dart plugin registry during source
+  /// generation.
+  bool get usesSharedDartPluginRegistry => true;
+
+  /// Whether this device supports reloading shaders and shader bundles during
+  /// hot reload.
+  bool get supportsShaderReload => true;
+
+  /// Whether [HotRunner] should invoke `setAssetDirectory` before evicting
+  /// dirty assets on this device.
+  bool get supportsSetAssetDirectory => true;
+
+  /// Whether this device's VM Service supports querying an isolate's pause
+  /// event via `getIsolatePauseEvent`.
+  bool get supportsIsolatePauseEventLookup => true;
+
+  /// Whether this device should run under [HotRunner] instead of [ColdRunner]
+  /// given whether hot reload was requested via [hotMode].
+  bool usesHotRunner({required bool hotMode}) => hotMode;
+
+  /// Launches DevTools in a browser for this device, returning whether the
+  /// launch is supported and succeeded.
+  bool launchDevToolsInBrowser() => device!.dds.launchDevToolsInBrowser(this);
+
+  /// Returns the extra front-end compiler options used to compute the cached
+  /// initial dill path for [buildInfo].
+  List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) => buildInfo.extraFrontEndOptions;
+
+  /// Invokes the Flutter service extension [method] with [params] on the first
+  /// available Flutter view for this device.
+  Future<void> invokeExtensionRpcOnFirstView(
+    String method, {
+    required Map<String, Object?> params,
+  }) async {
+    final List<FlutterView> views = await vmService!.getFlutterViews();
+    if (views.isEmpty) {
+      return;
+    }
+    await vmService!.invokeFlutterExtensionRpcRaw(
+      method,
+      args: params,
+      isolateId: views.first.uiIsolate!.id,
+    );
+  }
+
   /// Recompiles and restarts the application while running under [ColdRunner].
   Future<void> restartCold({required ColdRunner coldRunner}) {
     throw StateError('Cold restart is not supported by ${device?.displayName}.');
@@ -798,13 +861,13 @@ abstract class ResidentHandlers {
 
   /// Toggle the performance overlay.
   ///
-  /// This is not supported in web mode.
+  /// Devices where [FlutterDevice.supportsPerformanceOverlay] is false are skipped.
   Future<bool> debugTogglePerformanceOverlayOverride() async {
     if (!supportsServiceProtocol) {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.targetPlatform == TargetPlatform.web_javascript) {
+      if (!device!.supportsPerformanceOverlay) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -927,7 +990,8 @@ abstract class ResidentHandlers {
   /// if an error occurs after the data has already been received, such as
   /// from restoring the debug banner.
   Future<void> screenshot(FlutterDevice device) async {
-    if (!device.device!.supportsScreenshot && !supportsServiceProtocol) {
+    if (!device.device!.supportsScreenshot &&
+        !(supportsServiceProtocol && device.supportsVmServiceScreenshot)) {
       return;
     }
     final Status status = logger.startProgress(
@@ -940,7 +1004,14 @@ abstract class ResidentHandlers {
       if (device.device!.supportsScreenshot) {
         result = await _toggleDebugBanner(device, () => device.device!.takeScreenshot(outputFile));
       } else {
-        result = await _takeVmServiceScreenshot(device, outputFile);
+        assert(supportsServiceProtocol);
+        result = await _toggleDebugBanner(device, () async {
+          final Uint8List? bytes = await device.takeVmServiceScreenshot();
+          if (bytes == null) {
+            throw Exception('Failed to take screenshot');
+          }
+          outputFile.writeAsBytesSync(bytes);
+        });
       }
       if (!result) {
         return;
@@ -954,24 +1025,6 @@ abstract class ResidentHandlers {
       status.cancel();
       logger.printError('Error taking screenshot: $error');
     }
-  }
-
-  Future<bool> _takeVmServiceScreenshot(FlutterDevice device, File outputFile) async {
-    if (device.targetPlatform != TargetPlatform.web_javascript) {
-      return false;
-    }
-    assert(supportsServiceProtocol);
-
-    return _toggleDebugBanner(device, () async {
-      final vm_service.Response? response = await device.vmService!.callMethodWrapper(
-        'ext.dwds.screenshot',
-      );
-      if (response == null) {
-        throw Exception('Failed to take screenshot');
-      }
-      final data = response.json!['data'] as String;
-      outputFile.writeAsBytesSync(base64.decode(data));
-    });
   }
 
   Future<bool> _toggleDebugBanner(FlutterDevice device, Future<void> Function() cb) async {
@@ -1185,29 +1238,29 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   bool get isRunningDebug =>
-      !debuggingOptions.webConfig.useWasm && debuggingOptions.buildInfo.isDebug;
+      debuggingOptions.buildInfo.isDebug &&
+      flutterDevices.every((FlutterDevice device) => device.supportsDebugRuntime);
 
   @override
   bool get isRunningProfile =>
-      !debuggingOptions.webConfig.useWasm && debuggingOptions.buildInfo.isProfile;
+      debuggingOptions.buildInfo.isProfile &&
+      flutterDevices.every((FlutterDevice device) => device.supportsDebugRuntime);
 
   @override
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
 
-  bool get _isRunningOnWeb => flutterDevices.every(
-    (FlutterDevice device) => device.targetPlatform == TargetPlatform.web_javascript,
-  );
-
   @override
-  bool get supportsServiceProtocol => isRunningDebug || (isRunningProfile && !_isRunningOnWeb);
+  bool get supportsServiceProtocol =>
+      isRunningDebug ||
+      (isRunningProfile &&
+          flutterDevices.any((FlutterDevice device) => device.supportsProfileServiceProtocol));
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
-  /// True if the shared Dart plugin registry (which is different than the one
-  /// used for web) should be generated during source generation.
-  bool get generateDartPluginRegistry => flutterDevices.any(
-    (FlutterDevice? device) => device!.targetPlatform != TargetPlatform.web_javascript,
-  );
+  /// True if the shared Dart plugin registry should be generated during source
+  /// generation.
+  bool get generateDartPluginRegistry =>
+      flutterDevices.any((FlutterDevice device) => device.usesSharedDartPluginRegistry);
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -1351,17 +1404,16 @@ abstract class ResidentRunner extends ResidentHandlers {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final File outputDill = fs.file(dillOutputPath);
     if (outputDill.existsSync()) {
-      final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
-      final TargetModel targetModel = TargetModel.fromTargetPlatform(targetPlatform);
+      final FlutterDevice? firstDevice = flutterDevices.firstOrNull;
+      final TargetModel targetModel = TargetModel.fromTargetPlatform(firstDevice?.targetPlatform);
       final BuildInfo buildInfo = debuggingOptions.buildInfo;
       final String copyPath = getDefaultCachedKernelPath(
         trackWidgetCreation: trackWidgetCreation,
         dartDefines: buildInfo.dartDefines,
         // Must match the options the resident compiler uses to compute the
         // path it initializes from.
-        extraFrontEndOptions: targetModel == TargetModel.dartdevc
-            ? ddcFrontEndOptions(buildInfo)
-            : buildInfo.extraFrontEndOptions,
+        extraFrontEndOptions:
+            firstDevice?.extraFrontEndOptionsForCache(buildInfo) ?? buildInfo.extraFrontEndOptions,
         config: config,
         fileSystem: fs,
         targetModel: targetModel,
@@ -1615,12 +1667,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         commandHelp.o.print();
         commandHelp.b.print();
       } else {
-        final bool isRunningOnWeb = flutterDevices.every((FlutterDevice? flutterDevice) {
-          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
-        });
-
-        if (!isRunningOnWeb) {
-          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
+        if (flutterDevices.any((FlutterDevice device) => device.supportsProfileServiceProtocol)) {
           commandHelp.v.print();
         }
 
@@ -1684,14 +1731,14 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
 
       // 3. Perform the standard, cross-platform eviction calls.
-      final supportsShaderReload = device.targetPlatform != TargetPlatform.web_javascript;
+      final bool supportsShaderReload = device.supportsShaderReload;
       for (final String assetPath in devFS.assetPathsToEvict) {
         // Flutter GPU shader bundles reload the compiled ShaderLibrary in place
         // via the `ext.ui.gpu.reinitializeShaderLibrary` extension. It is
         // registered lazily on the first `ShaderLibrary.fromAsset` and the engine
         // no-ops if nothing is registered at the asset key, so dispatch is gated
-        // only by the `.shaderbundle` suffix. The extension is unavailable on the
-        // web engine, where the bundle falls back to the generic asset eviction.
+        // only by the `.shaderbundle` suffix. Devices without shader reload
+        // support fall back to generic asset eviction.
         if (supportsShaderReload && assetPath.endsWith('.shaderbundle')) {
           futures.add(
             vmService.flutterReinitializeShaderLibrary(assetPath, isolateId: firstUiIsolate.id!),
@@ -1700,13 +1747,7 @@ abstract class ResidentRunner extends ResidentHandlers {
           futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
         }
       }
-      // Shaders are not supported during hot reload on the web yet. Attempting
-      // to evict shaders will call the `ext.ui.window.reinitializeShader` service
-      // extension which is not registered/supported by the Web engine. On web clients,
-      // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
-      // error, which would break the hot reload.
-      // See https://github.com/flutter/flutter/issues/137265
-      if (device.targetPlatform != TargetPlatform.web_javascript) {
+      if (supportsShaderReload) {
         for (final String assetPath in devFS.shaderPathsToEvict) {
           futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
         }
@@ -2031,24 +2072,13 @@ class TerminalHandler {
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
       case 'V':
-        final bool isRunningOnWeb = residentRunner.flutterDevices.every((
-          FlutterDevice? flutterDevice,
-        ) {
-          return flutterDevice?.targetPlatform == TargetPlatform.web_javascript;
-        });
-        if (residentRunner.isRunningDebug || !isRunningOnWeb) {
-          // DevTools are only supported in debug mode for web, see https://docs.flutter.dev/testing/build-modes#profile
-          return residentRunner.flutterDevices
-              .where(
-                (FlutterDevice? device) => device?.targetPlatform != TargetPlatform.web_javascript,
-              )
-              .fold<bool>(
-                true,
-                (bool s, FlutterDevice? device) =>
-                    s && device!.device!.dds.launchDevToolsInBrowser(device),
-              );
+        if (residentRunner.flutterDevices.isEmpty) {
+          return residentRunner.isRunningDebug;
         }
-        return false;
+        return residentRunner.flutterDevices.fold<bool>(
+          true,
+          (bool s, FlutterDevice? device) => s && device!.launchDevToolsInBrowser(),
+        );
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
@@ -24,6 +25,7 @@ import '../build_system/tools/shader_compiler.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
+import '../convert.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
@@ -66,6 +68,7 @@ class DwdsWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     String? userIdentifier,
+    bool useWasm = false,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     return WebFlutterDevice(
@@ -79,6 +82,7 @@ class DwdsWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
       toolContext: toolContext,
       urlTunneller: urlTunneller,
       userIdentifier: userIdentifier,
+      useWasm: useWasm,
       webDefines: webDefines,
     );
   }
@@ -97,6 +101,7 @@ class WebFlutterDevice extends FlutterDevice {
     this._platformArgs = const <String, Object?>{},
     this._urlTunneller,
     super.userIdentifier,
+    this._useWasm = false,
     this._webDefines = const <String, String>{},
   });
 
@@ -118,10 +123,13 @@ class WebFlutterDevice extends FlutterDevice {
   static const _kWsPathSuffix = '/ws';
   static const _kRunCommandName = 'run';
   static const _kWebIncrementalRestartVariable = 'web-incremental-restart';
+  static const _kDwdsScreenshotMethod = 'ext.dwds.screenshot';
+  static const _kScreenshotDataKey = 'data';
 
   final FlutterProject _flutterProject;
   final Map<String, Object?> _platformArgs;
   final UrlTunneller? _urlTunneller;
+  final bool _useWasm;
   final Map<String, String> _webDefines;
 
   WipConnection? _wipConnection;
@@ -161,6 +169,64 @@ class WebFlutterDevice extends FlutterDevice {
 
   @override
   bool get supportsColdRestart => true;
+
+  @override
+  bool get supportsPerformanceOverlay => false;
+
+  @override
+  bool get supportsVmServiceScreenshot => true;
+
+  @override
+  Future<Uint8List?> takeVmServiceScreenshot() async {
+    final vmservice.Response? response = await vmService!.callMethodWrapper(_kDwdsScreenshotMethod);
+    if (response == null) {
+      return null;
+    }
+    final data = response.json![_kScreenshotDataKey] as String;
+    return base64.decode(data);
+  }
+
+  @override
+  bool get supportsDebugRuntime => !_useWasm;
+
+  @override
+  bool get supportsProfileServiceProtocol => false;
+
+  @override
+  bool get usesSharedDartPluginRegistry => false;
+
+  // Shaders are not supported during hot reload on the web yet. Attempting to
+  // evict shaders calls `ext.ui.window.reinitializeShader`, which is not
+  // supported by the web engine and throws an internal RPCError (-32603).
+  // See https://github.com/flutter/flutter/issues/137265.
+  @override
+  bool get supportsShaderReload => false;
+
+  @override
+  bool get supportsSetAssetDirectory => false;
+
+  // DWDS does not implement `getIsolatePauseEvent`.
+  @override
+  bool get supportsIsolatePauseEventLookup => false;
+
+  @override
+  bool usesHotRunner({required bool hotMode}) => buildInfo.isDebug && !_useWasm;
+
+  // DevTools are only supported in debug mode for JS web builds, and DWDS owns
+  // DevTools serving rather than `device.dds`.
+  @override
+  bool launchDevToolsInBrowser() => buildInfo.isDebug && !_useWasm;
+
+  @override
+  List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) => ddcFrontEndOptions(buildInfo);
+
+  @override
+  Future<void> invokeExtensionRpcOnFirstView(
+    String method, {
+    required Map<String, Object?> params,
+  }) async {
+    await vmService!.callMethodWrapper(method, args: params);
+  }
 
   @override
   void onDetach() {

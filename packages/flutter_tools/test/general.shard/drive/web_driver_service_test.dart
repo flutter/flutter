@@ -574,11 +574,17 @@ class FakeWebFlutterDeviceFactory implements WebFlutterDeviceFactory {
     Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     String? userIdentifier,
+    bool useWasm = false,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     lastPlatformArgs = platformArgs;
     lastWebDefines = webDefines;
-    return lastDevice = FakeColdWebFlutterDevice(device, doResolveToError: doResolveToError);
+    return lastDevice = FakeColdWebFlutterDevice(
+      device,
+      buildInfo: buildInfo,
+      doResolveToError: doResolveToError,
+      useWasm: useWasm,
+    );
   }
 }
 
@@ -599,13 +605,22 @@ class FakeDriverDevFS extends Fake implements DevFS {
 }
 
 class FakeColdWebFlutterDevice extends Fake implements FlutterDevice {
-  FakeColdWebFlutterDevice(this.device, {required this.doResolveToError}) {
+  FakeColdWebFlutterDevice(
+    this.device, {
+    required this.buildInfo,
+    required this.doResolveToError,
+    this._useWasm = false,
+  }) {
     devFS = FakeDriverDevFS(callLog);
   }
 
   @override
   final Device device;
 
+  @override
+  final BuildInfo buildInfo;
+
+  final bool _useWasm;
   final bool doResolveToError;
   final callLog = <String>[];
   DebuggingOptions? lastDebuggingOptions;
@@ -627,6 +642,18 @@ class FakeColdWebFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   bool get supportsColdRestart => true;
+
+  @override
+  bool get supportsDebugRuntime => !_useWasm;
+
+  @override
+  bool get supportsProfileServiceProtocol => false;
+
+  @override
+  bool get usesSharedDartPluginRegistry => false;
+
+  @override
+  bool usesHotRunner({required bool hotMode}) => buildInfo.isDebug && !_useWasm;
 
   @override
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
