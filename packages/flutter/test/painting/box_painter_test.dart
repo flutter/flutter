@@ -134,10 +134,19 @@ void main() {
       for (final endStyle in BlurStyle.values) {
         final start = BoxShadow(blurStyle: startStyle);
         final end = BoxShadow(blurStyle: endStyle);
-        expect(BoxShadow.lerp(start, end, 0.0), start);
-        expect(BoxShadow.lerp(start, end, 1.0), end);
+        expect(BoxShadow.lerp(start, end, 0.0), same(start));
+        expect(BoxShadow.lerp(start, end, 1.0), same(end));
       }
     }
+  });
+
+  test('BoxShadow.lerp handles a null shadow at either endpoint', () {
+    const shadow = BoxShadow(blurRadius: 4.0, blurStyle: BlurStyle.outer);
+    final BoxShadow zero = shadow.scale(0.0);
+    expect(BoxShadow.lerp(shadow, null, 0.0), same(shadow));
+    expect(BoxShadow.lerp(null, shadow, 1.0), same(shadow));
+    expect(BoxShadow.lerp(null, shadow, 0.0), zero);
+    expect(BoxShadow.lerp(shadow, null, 1.0), zero);
   });
 
   test('BoxShadowList.lerp identical a,b', () {

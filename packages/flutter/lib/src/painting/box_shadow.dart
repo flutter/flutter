@@ -121,17 +121,17 @@ class BoxShadow extends ui.Shadow {
     if (identical(a, b)) {
       return a;
     }
+    if (t == 0.0 && a != null) {
+      return a;
+    }
+    if (t == 1.0 && b != null) {
+      return b;
+    }
     if (a == null) {
       return b!.scale(t);
     }
     if (b == null) {
       return a.scale(1.0 - t);
-    }
-    if (t == 0.0) {
-      return a;
-    }
-    if (t == 1.0) {
-      return b;
     }
     return BoxShadow(
       color: Color.lerp(a.color, b.color, t)!,
