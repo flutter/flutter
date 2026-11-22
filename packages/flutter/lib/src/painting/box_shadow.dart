@@ -127,6 +127,12 @@ class BoxShadow extends ui.Shadow {
     if (b == null) {
       return a.scale(1.0 - t);
     }
+    if (t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
+      return b;
+    }
     return BoxShadow(
       color: Color.lerp(a.color, b.color, t)!,
       offset: Offset.lerp(a.offset, b.offset, t)!,

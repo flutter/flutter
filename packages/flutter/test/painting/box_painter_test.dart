@@ -129,6 +129,17 @@ void main() {
     expect(identical(BoxShadow.lerp(border, border, 0.5), border), true);
   });
 
+  test('BoxShadow.lerp preserves the blur style at each endpoint', () {
+    for (final startStyle in BlurStyle.values) {
+      for (final endStyle in BlurStyle.values) {
+        final start = BoxShadow(blurStyle: startStyle);
+        final end = BoxShadow(blurStyle: endStyle);
+        expect(BoxShadow.lerp(start, end, 0.0), start);
+        expect(BoxShadow.lerp(start, end, 1.0), end);
+      }
+    }
+  });
+
   test('BoxShadowList.lerp identical a,b', () {
     expect(BoxShadow.lerpList(null, null, 0), null);
     const border = <BoxShadow>[BoxShadow()];
