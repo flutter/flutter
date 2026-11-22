@@ -221,7 +221,7 @@ Bazel builds it.
 ### Compile-command parity
 
 ```sh
-(cd ../.. && ./flutter/third_party/gn/gn gen out/host_debug_unopt --export-compile-commands)
+(cd ../../.. && ./flutter/third_party/gn/gn gen out/host_debug_unopt --export-compile-commands)
 bazel aquery --output=jsonproto -c dbg \
     'mnemonic("CppCompile", deps(//engine/src/flutter/display_list:display_list_unittests))' \
     > /tmp/aquery.json
@@ -232,13 +232,66 @@ python3 tool/compile_command_diff.py --aquery=/tmp/aquery.json \
 checks the other end: for every source file both systems compile, the flags of
 the two compiler invocations, normalized (paths engine-relative, outputs and
 depfiles dropped, each build system's own include mechanics ignored, the exec
-configuration left out). The accepted differences are a dependency's public
-defines reaching transitive dependents in Bazel where GN stops them after a
-private edge (`U_STATIC_IMPLEMENTATION`, `XML_STATIC`, `SK_SHAPER_*`; GN's
-`deps` and `public_deps` both become `deps`, see "How it works"), GN's `-I` for
-directories Bazel serves through `include_prefix`, and GN carrying a shader
-*tool*'s `all_dependent_configs` into `impeller/renderer`. Anything else is a
-converter gap or a GN oddity worth a look; `--full` lists every class.
+configuration left out). With `--engine-only` the accepted differences are:
+
+- a dependency's public defines reaching transitive dependents in Bazel where
+  GN stops them after a private edge (`U_STATIC_IMPLEMENTATION`,
+  `XML_STATIC`, `SK_SHAPER_*`; GN's `deps` and `public_deps` both become
+  `deps`, see "How it works");
+- GN's `-I` for directories Bazel serves another way: through
+  `include_prefix`, or as a repository of its own (`third_party/abseil-cpp`);
+- GN carrying a shader *tool*'s `all_dependent_configs` (Skia's public
+  defines, by way of `impellerc`) into `impeller/renderer` and what depends
+  on it;
+- the flags that take back a toolchain config a target removes
+  (`configs -= [ "//build/config/clang:extra_warnings" ]`: GN's command
+  line loses `-Wstring-conversion`, Bazel's gains `-Wno-string-conversion`
+  after it);
+- the paths of generated files in defines (the embedder suite's snapshots),
+  and the revision defines, which an unstamped Bazel build leaves at zeros.
+
+Anything else is a converter gap or a GN oddity worth a look; `--full` lists
+every class. Without `--engine-only` the third-party trees come in, each
+with classes of its own: abseil is compiled by its own Bazel files, with
+their warning set and without `-Werror`; ICU, libc++ and libc++abi name RTTI
+and exceptions twice (the toolchain's default, then their own).
+
+The second part of the report is about order, which a set of flags cannot
+show: the compiles where a flag both builds pass ends up differently because
+the flags come in another order (`-Wx` against `-Wno-x`, `-O`, `-g`, a
+define given twice). GN's command line has a target's own flags first, then
+its configs', then the public configs of its dependencies, and the C++-only
+ones (`cflags_cc`) on C++ compiles alone; the emitter lays the attributes
+out the same way, and this is the check that it does. With
+`--warning-groups` the warning flags are compared as clang applies them, a
+group flag (`-Wextra`) setting every warning it controls:
+
+```sh
+python3 tool/clang_warning_groups.py > /tmp/clang_warning_groups.json
+python3 tool/compile_command_diff.py --warning-groups=/tmp/clang_warning_groups.json ...
+```
+
+Over the whole host build, GN's side is a `gn gen` (a second; nothing is
+built) and Bazel's an aquery of the command lines alone:
+
+```sh
+(cd ../../.. && ./flutter/tools/gn --runtime-mode debug --unoptimized --prebuilt-dart-sdk \
+    --use-glfw-swiftshader --no-rbe --target-dir parity)
+bazel aquery --config=host_debug_unopt_impeller_tests --output=jsonproto --noinclude_artifacts \
+    'mnemonic("CppCompile", deps(//engine/src/flutter:flutter) +
+     deps(//engine/src/flutter/ci/builders:host_debug_unopt_impeller_tests) +
+     deps(//engine/src/flutter/ci/builders:host_debug_unopt_impeller_tests_tests))' \
+    > /tmp/aquery.json
+python3 tool/compile_command_diff.py --aquery=/tmp/aquery.json \
+    --compile-commands=../../../out/parity/compile_commands.json \
+    --warning-groups=/tmp/clang_warning_groups.json
+```
+
+Run it after a roll of a tree whose flags the converter holds as a copy
+(`configEffects` in `bazel_mapping.dart`: the Dart runtime's `dart_config`,
+the configs of `//build/config/compiler`): a roll that changes such a config
+changes GN's command lines and not the copy. That is how `lib/io` came to
+compile with a `-g3 -ggdb3` Dart's config had dropped.
 
 The same against a GN Android build directory (`out/android_debug_arm64`,
 made with `tools/gn --android --android-cpu=arm64` and `ninja`) and
@@ -271,7 +324,7 @@ third-party files' `-Werror`/runtime-mode defines.
 ### Artifact parity
 
 ```sh
-(cd ../.. && ninja -C out/host_debug_unopt flutter/build/archives:artifacts ...)
+(cd ../../.. && ninja -C out/host_debug_unopt flutter/build/archives:artifacts ...)
 bazel build //engine/src/flutter/build/archives:all //engine/src/flutter/tools/font_subset:font_subset ...
 python3 tool/artifact_diff.py --gn=../../../out/host_debug_unopt \
     --bazel=../../../out/bazel-bin/engine/src/flutter \

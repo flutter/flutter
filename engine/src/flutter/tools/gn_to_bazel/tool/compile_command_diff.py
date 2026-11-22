@@ -29,7 +29,15 @@ configurations, the command line's compile is compared (a transition's only
 when there is no other); actions of Bazel's exec configuration (host tools and
 their closure, built with -c opt by design) are left out.
 The report lists, per distinct difference, how many files have it and one
-example; `--gn-toolchain=canvaskit` compares one web variant (an aquery of
+example. A second part is about order, which a set cannot show: for the
+flags of which the last one on the command line wins (-Wx against -Wno-x,
+-fx against -fno-x, -O, -g, -std=, -D), the compiles where a flag both
+builds pass ends up differently. With `--warning-groups` (the group tree
+tool/clang_warning_groups.py makes from clang's own list) warning flags are
+applied as clang applies them, each to every group it controls, so that a
+-Wextra after a -Wno-unused-parameter is seen to turn the warning back on;
+without it only a flag against its own negation is seen.
+`--gn-toolchain=canvaskit` compares one web variant (an aquery of
 the module's target, built for its platform) with the GN toolchain of that
 name; `--full` prints every class including Bazel-only include
 directories, which are mostly decision 14's (a dependency's public config
@@ -40,47 +48,52 @@ import argparse
 import collections
 import json
 import os
+import re
 import shlex
 import sys
 
-# Bazel's name for a synced tree -> its path under engine/src. Mirrors the
-# source trees of build_defs/repositories/extensions.bzl (the toolchains are not compiled
-# code and are left out); a repository missing here is reported once, so that
-# drift shows up in the output rather than as silently unmatched files.
-SYNCED_REPOSITORIES = {
-    'abseil-cpp': 'third_party/abseil-cpp',
-    'boringssl': 'flutter/third_party/boringssl/src',
-    'dart': 'flutter/third_party/dart',
-    'expat': 'flutter/third_party/expat',
-    'flatbuffers': 'flutter/third_party/flatbuffers',
-    'freetype2': 'flutter/third_party/freetype2',
-    'glslang': 'flutter/third_party/vulkan-deps/glslang/src',
-    'googletest': 'flutter/third_party/googletest',
-    'harfbuzz': 'flutter/third_party/harfbuzz',
-    'icu': 'flutter/third_party/icu',
-    'inja': 'flutter/third_party/inja',
-    'json': 'flutter/third_party/json',
-    'libcxx': 'flutter/third_party/libcxx',
-    'libcxxabi': 'flutter/third_party/libcxxabi',
-    'libjpeg-turbo': 'flutter/third_party/libjpeg-turbo',
-    'libpng': 'flutter/third_party/libpng',
-    'libtess2': 'flutter/third_party/libtess2',
-    'libwebp': 'flutter/third_party/libwebp',
-    'rapidjson': 'flutter/third_party/rapidjson',
-    'llvm_libc': 'flutter/third_party/llvm_libc',
-    're2': 'flutter/third_party/re2',
-    'shaderc': 'flutter/third_party/shaderc',
-    'skia': 'flutter/third_party/skia',
-    'spirv-cross': 'flutter/third_party/vulkan-deps/spirv-cross/src',
-    'spirv-headers': 'flutter/third_party/vulkan-deps/spirv-headers/src',
-    'spirv-tools': 'flutter/third_party/vulkan-deps/spirv-tools/src',
-    # The Debian sysroot: GN's pkg_config() passes its include directories
-    # as -isystem relative to the source tree; the overlay's libraries as
-    # `includes`.
+# The repositories that are not synced trees of extensions.bzl's table.
+# The Debian sysroot: GN's pkg_config() passes its include directories as
+# -isystem relative to the source tree; the overlay's libraries as
+# `includes`.
+OTHER_REPOSITORIES = {
     'sysroot_linux_x64': 'build/linux/debian_bullseye_amd64-sysroot',
-    'wuffs': 'flutter/third_party/wuffs',
-    'zlib': 'flutter/third_party/zlib',
 }
+
+
+def synced_repositories():
+  """Bazel's name for a synced tree -> its path under engine/src.
+
+  Read off build_defs/repositories/extensions.bzl (`"name": struct(` and the
+  `path = "engine/src/..."` under it), so that a tree added there is known
+  here: a copy of the table kept by hand lacked the GPU test backends'
+  trees, and no file of ANGLE's matched. A repository that is still missing
+  is reported once, so that drift shows up in the output rather than as
+  silently unmatched files.
+  """
+  repositories = dict(OTHER_REPOSITORIES)
+  extensions = os.path.join(
+      os.path.dirname(os.path.abspath(__file__)), *(['..'] * 6), 'build_defs', 'repositories',
+      'extensions.bzl'
+  )
+  name = None
+  try:
+    with open(extensions, encoding='utf-8') as f:
+      for line in f:
+        match = re.match(r'\s+"([\w.+-]+)": struct\($', line.rstrip())
+        if match:
+          name = match.group(1)
+          continue
+        match = re.match(r'\s+path = "engine/src/([^"]+)",$', line.rstrip())
+        if match and name:
+          repositories.setdefault(name, match.group(1))
+          name = None
+  except OSError:
+    pass
+  return repositories
+
+
+SYNCED_REPOSITORIES = synced_repositories()
 EXTERNAL_PREFIX = 'external/+synced_deps+'
 MAIN_PREFIX = 'engine/src/'
 SOURCE_SUFFIXES = ('.cpp', '.cc', '.c', '.S', '.mm', '.m')
@@ -124,9 +137,29 @@ def normalize_include(path, side, out_dir):
   return path
 
 
+class Flags(frozenset):
+  """The flags of a compile as a set, with the arguments in order (`ordered`)."""
+  ordered = ()
+
+
 def normalize(args, side, out_dir):
-  """The set of flags that matter, from a compiler command line (sans compiler)."""
+  """The set of flags that matter, from a compiler command line (sans compiler).
+
+  The result also has the arguments in their order (`ordered`: outputs and
+  the values of -o, -MF, -x, -I and their like left out), for the report
+  on the flags of which the last one wins.
+  """
   flags = set()
+  ordered = []
+  skip = False
+  for token in args:
+    token = token.strip('"').strip("'")
+    if skip:
+      skip = False
+    elif token in ('-o', '-MF', '-c', '-x', '-I', '-isystem', '-iquote', '-include', '--em-config'):
+      skip = token != '-c'
+    else:
+      ordered.append(token.replace('"', '').replace("'", ''))
   it = iter(args)
   for token in it:
     token = token.strip('"').strip("'")
@@ -170,7 +203,9 @@ def normalize(args, side, out_dir):
       flags.add(token.replace('"', '').replace("'", ''))
       continue
     flags.add(token)
-  return flags
+  result = Flags(flags)
+  result.ordered = tuple(ordered)
+  return result
 
 
 def bazel_commands(aquery_path):
@@ -356,6 +391,184 @@ def _object_directory(argv):
   return None
 
 
+def by_count(counter):
+  """A counter's items, the most frequent first, ties in a fixed order (two runs print the same)."""
+  return sorted(counter.items(), key=lambda item: (-item[1], item[0]))
+
+
+class WarningGroups:
+  """clang's warning groups: what a -W option controls besides itself.
+
+  From the file tool/clang_warning_groups.py writes (`children`: group ->
+  the groups it controls; `synonym`: a name -> the name it stands for).
+  Without a file every name controls itself alone.
+  """
+
+  def __init__(self, path=None):
+    self._children = {}
+    self._synonym = {}
+    self._closures = {}
+    self.unknown = set()
+    self.known = path is not None
+    if path is not None:
+      with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+      self._children = data['children']
+      self._synonym = data['synonym']
+
+  def controlled(self, name):
+    """The groups -W<name> sets: the group itself and every group under it."""
+    name = self._synonym.get(name, name)
+    found = self._closures.get(name)
+    if found is None:
+      if self.known and name not in self._children:
+        self.unknown.add(name)
+      seen = set()
+      stack = [name]
+      while stack:
+        group = stack.pop()
+        group = self._synonym.get(group, group)
+        if group not in seen:
+          seen.add(group)
+          stack.extend(self._children.get(group, ()))
+      found = frozenset(seen)
+      self._closures[name] = found
+    return found
+
+
+def effective(ordered, groups):
+  """(family, name) -> the value the compile ends up with.
+
+  Families: `W` (a warning group, on or off), `E` (a group promoted to an
+  error or not), `w`, `f`, `m`, `O`, `g`, `std`, `D`. Warning options are
+  applied in order, each to every group it controls, as clang applies
+  them; of the others the last one wins.
+  """
+  state = {}
+
+  def set_groups(family, name, value):
+    if name == 'everything':
+      for key in [key for key in state if key[0] == family]:
+        del state[key]
+      state[(family, '*')] = value
+      return
+    for group in groups.controlled(name):
+      state[(family, group)] = value
+
+  for token in ordered:
+    if token.startswith(('-Wl,', '-Wa,', '-Wp,')):
+      continue
+    if token == '-w':
+      state[('w', '')] = 'on'
+    elif token.startswith('-Wno-error='):
+      set_groups('E', token[len('-Wno-error='):], 'off')
+    elif token.startswith('-Werror='):
+      set_groups('E', token[len('-Werror='):], 'on')
+      set_groups('W', token[len('-Werror='):], 'on')
+    elif token == '-Werror':
+      set_groups('E', 'everything', 'on')
+    elif token == '-Wno-error':
+      set_groups('E', 'everything', 'off')
+    elif token.startswith('-Wno-') and len(token) > 5:
+      set_groups('W', token[5:], 'off')
+    elif token.startswith('-W') and len(token) > 2:
+      set_groups('W', token[2:], 'on')
+    elif token.startswith('-fno-') and len(token) > 5:
+      state[('f', token[5:])] = 'off'
+    elif token.startswith('-f') and len(token) > 2:
+      name, equals, value = token[2:].partition('=')
+      state[('f', name)] = value if equals else 'on'
+    elif token.startswith('-mno-') and len(token) > 5:
+      state[('m', token[5:])] = 'off'
+    elif token.startswith('-m') and len(token) > 2:
+      name, equals, value = token[2:].partition('=')
+      state[('m', name)] = value if equals else 'on'
+    elif token.startswith('-O'):
+      state[('O', '')] = token[2:] or '1'
+    elif re.fullmatch(r'-g\d?', token):
+      state[('g', '')] = token[2:] or '2'
+    elif token.startswith('-std='):
+      state[('std', '')] = token[5:]
+    elif token.startswith('-D') and len(token) > 2:
+      name, equals, value = token[2:].partition('=')
+      state[('D', name)] = value if equals else '1'
+    elif token.startswith('-U') and len(token) > 2:
+      state[('D', token[2:])] = '<undefined>'
+  return state
+
+
+def effective_differences(bazel_flags, gn_flags, groups):
+  """The (family, name, GN's value, Bazel's value) both builds set and end differently.
+
+  A flag only one build passes is the set comparison's business. Of the
+  warning groups that differ, a group under another that differs the same
+  way is left out: the outermost one names the difference.
+  """
+  bazel_state = effective(bazel_flags.ordered, groups)
+  gn_state = effective(gn_flags.ordered, groups)
+  differing = collections.defaultdict(set)
+  for family, name in set(bazel_state) | set(gn_state):
+    bazel_value = bazel_state.get((family, name), bazel_state.get((family, '*')))
+    gn_value = gn_state.get((family, name), gn_state.get((family, '*')))
+    if bazel_value is None or gn_value is None or bazel_value == gn_value:
+      continue
+    differing[(family, gn_value, bazel_value)].add(name)
+  result = []
+  for (family, gn_value, bazel_value), names in differing.items():
+    for name in names:
+      inner = family in ('W', 'E') and any(
+          other != name and name in groups.controlled(other) for other in names
+      )
+      if not inner:
+        result.append((family, name, gn_value, bazel_value))
+  return sorted(result)
+
+
+FAMILY_FLAGS = {
+    'W': '-W',
+    'E': '-Werror=',
+    'w': '-w',
+    'f': '-f',
+    'm': '-m',
+    'O': '-O',
+    'g': '-g',
+    'std': '-std=',
+    'D': '-D',
+}
+
+
+def report_effective(compared, groups):
+  """Prints where a flag both builds set ends up differently."""
+  counts = collections.Counter()
+  examples = {}
+  sources = set()
+  for source, (bazel_flags, gn_flags, target) in compared:
+    if target:
+      source = f'{source} ({target})'
+    for difference in effective_differences(bazel_flags, gn_flags, groups):
+      counts[difference] += 1
+      examples.setdefault(difference, source)
+      sources.add(source)
+  print(
+      f'compiles where a flag both builds set ends up differently: {len(sources)} of {len(compared)}'
+  )
+  if not groups.known:
+    print(
+        '  (without --warning-groups: a group flag against a member, -Wextra after '
+        '-Wno-unused-parameter, is not seen)'
+    )
+  for (family, name, gn_value, bazel_value), count in by_count(counts):
+    print(
+        f'  {count:5} {FAMILY_FLAGS[family]}{name}: GN {gn_value}, Bazel {bazel_value}, '
+        f'e.g. {examples[(family, name, gn_value, bazel_value)]}'
+    )
+  if groups.unknown:
+    print(
+        '  warning names not in the group tree (each taken as a group of its own):',
+        ', '.join(sorted(groups.unknown))
+    )
+
+
 def main():
   parser = argparse.ArgumentParser(description=__doc__.split('\n', maxsplit=1)[0])
   parser.add_argument('--aquery', required=True, help='bazel aquery --output=jsonproto output')
@@ -367,6 +580,12 @@ def main():
   )
   parser.add_argument(
       '--full', action='store_true', help='every difference class, include directories included'
+  )
+  parser.add_argument(
+      '--warning-groups',
+      help="clang's warning groups as tool/clang_warning_groups.py writes them, for the "
+      'report on the order of warning flags; without it a flag is compared with its own '
+      'negation alone'
   )
   parser.add_argument(
       '--gn-toolchain',
@@ -435,19 +654,20 @@ def main():
       f'identical ignoring Bazel-only -I directories: {identical_modulo_includes} of {len(compared)}'
   )
   print('Bazel-only defines (files):')
-  for define, count in bazel_only_defines.most_common():
+  for define, count in by_count(bazel_only_defines):
     print(f'  {count:5} {define}')
   print('other differences:')
-  for key, count in classes.most_common(25):
+  for key, count in by_count(classes)[:25]:
     print(f'  {count} files, e.g. {class_examples[key]}')
     for flag in key[0]:
       print(f'     only Bazel: {flag}')
     for flag in key[1]:
       print(f'     only GN   : {flag}')
+  report_effective(compared, WarningGroups(options.warning_groups))
   if not options.full:
     return 0
   print('\nevery difference class:')
-  for key, count in full_classes.most_common():
+  for key, count in by_count(full_classes):
     print(f'\n{count} files, e.g. {full_examples[key]}')
     for flag in key[0]:
       print(f'   only Bazel: {flag}')
