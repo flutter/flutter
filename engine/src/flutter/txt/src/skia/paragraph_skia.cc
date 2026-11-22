@@ -297,76 +297,10 @@ bool ParagraphSkia::DidExceedMaxLines() {
   return paragraph_->didExceedMaxLines();
 }
 
-void ParagraphSkia::LayoutInternal(double width) {
+void ParagraphSkia::Layout(double width) {
   line_metrics_.reset();
   line_metrics_styles_.clear();
   paragraph_->layout(width);
-}
-
-void ParagraphSkia::Layout(double width) {
-  locked_max_width_ = 0.0;
-  locked_max_height_ = 0.0;
-  LayoutInternal(width);
-}
-
-void ParagraphSkia::LayoutWithShrinkLock(double width, bool lock_width) {
-  if (!lock_width) {
-    Layout(width);
-    return;
-  }
-
-  if (std::isfinite(width) && width > locked_max_width_) {
-    locked_max_width_ = width;
-  }
-
-  const double target_width =
-      locked_max_width_ > width ? locked_max_width_ : width;
-  LayoutInternal(target_width);
-
-  // If the paragraph was born inside an already-collapsed single-line slot,
-  // use its single-line intrinsic width as the high-water-mark floor.
-  const double intrinsic_w = GetMaxIntrinsicWidth();
-  if (GetNumberOfLines() <= 1 && std::isfinite(intrinsic_w) &&
-      intrinsic_w > locked_max_width_) {
-    locked_max_width_ = intrinsic_w;
-    if (locked_max_width_ > target_width) {
-      LayoutInternal(locked_max_width_);
-    }
-  }
-
-  const double natural_h = GetHeight();
-  if (std::isfinite(natural_h) && natural_h > locked_max_height_) {
-    locked_max_height_ = natural_h;
-  }
-}
-
-double ParagraphSkia::ComputeScrollFadeOpacity(double current_width,
-                                               double current_height,
-                                               double fade_end_fraction) {
-  const double safe_end =
-      std::isfinite(fade_end_fraction) ? fade_end_fraction : 0.5;
-  const double denom_frac = std::clamp(1.0 - safe_end, 0.0001, 1.0);
-  double width_alpha = 1.0;
-  const double intrinsic_w = GetMaxIntrinsicWidth();
-  const double ref_w = (std::isfinite(intrinsic_w) && intrinsic_w > 0.0 &&
-                        locked_max_width_ > 0.0)
-                           ? std::min(locked_max_width_, intrinsic_w)
-                           : locked_max_width_;
-  if (ref_w > 0.0 && std::isfinite(current_width) && current_width < ref_w) {
-    const double shrink_progress =
-        std::clamp(1.0 - (current_width / ref_w), 0.0, 1.0);
-    width_alpha = std::clamp(1.0 - (shrink_progress / denom_frac), 0.0, 1.0);
-  }
-
-  double height_alpha = 1.0;
-  const double ref_h = locked_max_height_;
-  if (ref_h > 0.0 && std::isfinite(current_height) && current_height < ref_h) {
-    const double shrink_progress =
-        std::clamp(1.0 - (current_height / ref_h), 0.0, 1.0);
-    height_alpha = std::clamp(1.0 - (shrink_progress / denom_frac), 0.0, 1.0);
-  }
-
-  return std::min(width_alpha, height_alpha);
 }
 
 bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
@@ -457,6 +391,8 @@ bool ParagraphSkia::PaintMasked(DisplayListBuilder* builder,
 
   if (fade_horizontal) {
     const std::vector<LineMetrics>& lines = GetLineMetrics();
+    // Default 14.0 logical-pixel font size fallback when no line metrics are
+    // available.
     double fade_width = 14.0;
     if (!lines.empty()) {
       const LineMetrics& last_line = lines.back();

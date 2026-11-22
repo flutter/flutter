@@ -51,12 +51,6 @@ class ParagraphSkia : public Paragraph {
 
   void Layout(double width) override;
 
-  void LayoutWithShrinkLock(double width, bool lock_width) override;
-
-  double ComputeScrollFadeOpacity(double current_width,
-                                  double current_height,
-                                  double fade_end_fraction = 0.5) override;
-
   bool Paint(flutter::DisplayListBuilder* builder, double x, double y) override;
 
   bool PaintMasked(
@@ -94,8 +88,6 @@ class ParagraphSkia : public Paragraph {
   Range<size_t> GetWordBoundary(size_t offset) override;
 
  private:
-  void LayoutInternal(double width);
-
   void PaintAlignedOrSplit(flutter::DisplayListBuilder* builder,
                            double x,
                            double y,
@@ -110,8 +102,6 @@ class ParagraphSkia : public Paragraph {
   std::vector<TextStyle> line_metrics_styles_;
   const bool impeller_enabled_;
   const TextDirection text_direction_;
-  double locked_max_width_ = 0.0;
-  double locked_max_height_ = 0.0;
 };
 
 }  // namespace txt

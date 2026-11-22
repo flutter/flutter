@@ -466,6 +466,7 @@ class EngineCanvas implements LayerCanvas {
 
     if (fadeHorizontal) {
       final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+      // Default 14.0 logical-pixel font size fallback when no line metrics are available.
       var fadeWidth = 14.0;
       if (lines.isNotEmpty) {
         final ui.LineMetrics lastLine = lines.last;

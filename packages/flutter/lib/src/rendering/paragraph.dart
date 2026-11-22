@@ -1128,6 +1128,7 @@ class RenderParagraph extends RenderBox
   }
 
   bool _needsClipping = false;
+  bool _fadeHorizontal = false;
   ui.Shader? _overflowShader;
   Rect? _overflowShaderRect;
 
@@ -1136,7 +1137,7 @@ class RenderParagraph extends RenderBox
   ///
   /// Used to test this object. Not for use in production.
   @visibleForTesting
-  bool get debugHasOverflowShader => _overflowShader != null;
+  bool get debugHasOverflowShader => _overflowShader != null || _fadeHorizontal;
 
   /// The current scroll-shrink fade opacity (`0.0` to `1.0`) when
   /// [scrollOverflow] is [TextScrollOverflow.fade].
@@ -1761,6 +1762,7 @@ class RenderParagraph extends RenderBox
     // that affects the actual (but undetected) vertical overflow.
     final bool hasVisualOverflow = didOverflowWidth || didOverflowHeight;
     _overflowShaderRect = null;
+    _fadeHorizontal = false;
     if (hasVisualOverflow) {
       switch (_overflow) {
         case TextOverflow.visible:
@@ -1772,6 +1774,31 @@ class RenderParagraph extends RenderBox
           _overflowShader = null;
         case TextOverflow.fade:
           _needsClipping = true;
+          final bool delegatesPaintMasked =
+              !size.isEmpty && firstChild == null && _lastSelectableFragments == null;
+          if (didOverflowWidth && delegatesPaintMasked) {
+            _fadeHorizontal = true;
+            _overflowShader = null;
+            break;
+          }
+          final List<ui.LineMetrics> lines = !didOverflowWidth
+              ? _textPainter.computeLineMetrics()
+              : const <ui.LineMetrics>[];
+          final bool useHorizontalLastLineFade =
+              !didOverflowWidth &&
+              maxLines != null &&
+              maxLines! > 1 &&
+              lines.length > 1 &&
+              _textPainter.didExceedMaxLines &&
+              size.height >= textSize.height;
+          if (useHorizontalLastLineFade && delegatesPaintMasked) {
+            final ui.LineMetrics lastLine = lines.last;
+            final double lineLeft = math.max(0.0, lastLine.left);
+            final double lineRight = math.min(size.width, lastLine.left + lastLine.width);
+            _fadeHorizontal = lineRight > lineLeft;
+            _overflowShader = null;
+            break;
+          }
           final TextStyle? effectiveFadeStyle =
               _textPainter.text!.style ?? _styleAtOffset(_rawText, 0);
           final fadeSizePainter = TextPainter(
@@ -1825,63 +1852,54 @@ class RenderParagraph extends RenderBox
                   <double>[0.0, stop1, 0.5, stop2, 1.0],
                 );
             }
-          } else {
-            final List<ui.LineMetrics> lines = _textPainter.computeLineMetrics();
-            final bool useHorizontalLastLineFade =
-                maxLines != null &&
-                maxLines! > 1 &&
-                lines.length > 1 &&
-                _textPainter.didExceedMaxLines &&
-                size.height >= textSize.height;
-            if (useHorizontalLastLineFade) {
-              final ui.LineMetrics lastLine = lines.last;
-              final double lineLeft = math.max(0.0, lastLine.left);
-              final double lineRight = math.min(size.width, lastLine.left + lastLine.width);
-              if (lineRight > lineLeft) {
-                final double lineTop = math.max(
-                  0.0,
-                  math.min(lastLine.baseline - lastLine.ascent, size.height - lastLine.height),
-                );
-                _overflowShaderRect = Rect.fromLTRB(0.0, lineTop, size.width, size.height);
-                final double effectiveFadeWidth = fadeWidth * 2.0;
-                final (double fadeStart, double fadeEnd) = switch ((
-                  _overflowPosition,
-                  textDirection,
-                )) {
-                  (TextOverflowPosition.start, TextDirection.ltr) ||
-                  (
-                    TextOverflowPosition.end,
-                    TextDirection.rtl,
-                  ) => (math.min(lineRight, lineLeft + effectiveFadeWidth), lineLeft),
-                  (TextOverflowPosition.end, TextDirection.ltr) ||
-                  (TextOverflowPosition.start, TextDirection.rtl) ||
-                  (
-                    TextOverflowPosition.middle,
-                    _,
-                  ) => (math.max(lineLeft, lineRight - effectiveFadeWidth), lineRight),
-                };
-                _overflowShader = ui.Gradient.linear(
-                  Offset(fadeStart, 0.0),
-                  Offset(fadeEnd, 0.0),
-                  <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
-                );
-              } else {
-                _overflowShader = null;
-              }
-            } else {
-              final (double fadeStart, double fadeEnd) = switch (_overflowPosition) {
-                TextOverflowPosition.start => (fadeSizePainter.height / 2.0, 0.0),
-                TextOverflowPosition.end || TextOverflowPosition.middle => (
-                  size.height - fadeSizePainter.height / 2.0,
-                  size.height,
-                ),
+          } else if (useHorizontalLastLineFade) {
+            final ui.LineMetrics lastLine = lines.last;
+            final double lineLeft = math.max(0.0, lastLine.left);
+            final double lineRight = math.min(size.width, lastLine.left + lastLine.width);
+            if (lineRight > lineLeft) {
+              final double lineTop = math.max(
+                0.0,
+                math.min(lastLine.baseline - lastLine.ascent, size.height - lastLine.height),
+              );
+              _overflowShaderRect = Rect.fromLTRB(0.0, lineTop, size.width, size.height);
+              final double effectiveFadeWidth = fadeWidth * 2.0;
+              final (double fadeStart, double fadeEnd) = switch ((
+                _overflowPosition,
+                textDirection,
+              )) {
+                (TextOverflowPosition.start, TextDirection.ltr) ||
+                (
+                  TextOverflowPosition.end,
+                  TextDirection.rtl,
+                ) => (math.min(lineRight, lineLeft + effectiveFadeWidth), lineLeft),
+                (TextOverflowPosition.end, TextDirection.ltr) ||
+                (TextOverflowPosition.start, TextDirection.rtl) ||
+                (
+                  TextOverflowPosition.middle,
+                  _,
+                ) => (math.max(lineLeft, lineRight - effectiveFadeWidth), lineRight),
               };
               _overflowShader = ui.Gradient.linear(
-                Offset(0.0, fadeStart),
-                Offset(0.0, fadeEnd),
+                Offset(fadeStart, 0.0),
+                Offset(fadeEnd, 0.0),
                 <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
               );
+            } else {
+              _overflowShader = null;
             }
+          } else {
+            final (double fadeStart, double fadeEnd) = switch (_overflowPosition) {
+              TextOverflowPosition.start => (fadeSizePainter.height / 2.0, 0.0),
+              TextOverflowPosition.end || TextOverflowPosition.middle => (
+                size.height - fadeSizePainter.height / 2.0,
+                size.height,
+              ),
+            };
+            _overflowShader = ui.Gradient.linear(
+              Offset(0.0, fadeStart),
+              Offset(0.0, fadeEnd),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
+            );
           }
           fadeSizePainter.dispose();
       }
@@ -1967,13 +1985,13 @@ class RenderParagraph extends RenderBox
         !size.isEmpty &&
         firstChild == null &&
         _lastSelectableFragments == null &&
-        (_overflowShader == null || overflowWidth > 0.0 || _overflowShaderRect != null);
+        _overflowShader == null;
     if (canDelegateToParagraphPaintMasked) {
       _textPainter.paintMasked(
         context.canvas,
         offset,
         clipRect: offset & size,
-        fadeHorizontal: _overflowShader != null,
+        fadeHorizontal: _fadeHorizontal,
         overflowPosition: _overflowPosition,
       );
       return;

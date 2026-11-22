@@ -134,21 +134,6 @@ class Paragraph {
   // before Painting and getting any statistics from this class.
   virtual void Layout(double width) = 0;
 
-  // Lays out the paragraph while optionally locking the layout width to the
-  // high-water-mark width seen so far, preventing line re-wrapping while the
-  // available width shrinks during layout or scroll transitions.
-  virtual void LayoutWithShrinkLock(double width, bool lock_width) {
-    Layout(width);
-  }
-
-  // Computes the scroll-shrink fade opacity in [0.0, 1.0] based on the locked
-  // high-water-mark dimensions and the current visible container dimensions.
-  virtual double ComputeScrollFadeOpacity(double current_width,
-                                          double current_height,
-                                          double fade_end_fraction = 0.5) {
-    return 1.0;
-  }
-
   // Paints the laid out text onto the supplied DisplayListBuilder at
   // (x, y) offset from the origin. Only valid after Layout() is called.
   virtual bool Paint(flutter::DisplayListBuilder* builder,

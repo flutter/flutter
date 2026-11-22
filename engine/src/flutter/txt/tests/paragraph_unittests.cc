@@ -376,47 +376,24 @@ TEST_F(PainterTest, DrawTextBlobNoImpeller) {
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
-TEST_F(PainterTest, PaintMaskedScrollShrinkLockAndOpacity) {
+TEST_F(PainterTest, PaintMaskedOpacityAndNoOp) {
   PretendImpellerIsEnabled(false);
 
   auto paragraph = buildParagraph(
       makeStyle(), u"Sample headline text that locks its layout width");
-  // Initial layout at expanded width (300px).
-  paragraph->LayoutWithShrinkLock(300.0, /*lock_width=*/true);
-  const size_t initial_lines = paragraph->GetNumberOfLines();
+  paragraph->Layout(300.0);
   const double initial_height = paragraph->GetHeight();
-
-  // Shrinking container to 150px with lock_width=true preserves the 300px line
-  // metrics without re-wrapping.
-  paragraph->LayoutWithShrinkLock(150.0, /*lock_width=*/true);
-  EXPECT_EQ(paragraph->GetNumberOfLines(), initial_lines);
-  EXPECT_DOUBLE_EQ(paragraph->GetHeight(), initial_height);
-
-  // Scroll fade reaches 0.0 at 50% width (150px / 300px).
-  const double alpha_at_half =
-      paragraph->ComputeScrollFadeOpacity(150.0, initial_height, 0.5);
-  EXPECT_NEAR(alpha_at_half, 0.0, 1e-4);
-
-  // At 225px (25% shrunk), opacity is 0.5.
-  const double alpha_at_quarter =
-      paragraph->ComputeScrollFadeOpacity(225.0, initial_height, 0.5);
-  EXPECT_NEAR(alpha_at_quarter, 0.5, 1e-4);
 
   // PaintMasked with opacity 0.5 records a clipRect and a saveLayer.
   auto builder = DisplayListBuilder();
   paragraph->PaintMasked(&builder, 0, 0, 0, 0, 225.0, initial_height,
-                         alpha_at_quarter, /*fade_horizontal=*/false);
+                         /*opacity=*/0.5, /*fade_horizontal=*/false);
   auto recorder = DlOpRecorder();
   builder.Build()->Dispatch(recorder);
   EXPECT_EQ(recorder.clipRectCount(), 1);
   EXPECT_EQ(recorder.saveLayerCount(), 1);
-  // Layout() resets the shrink lock so subsequent ComputeScrollFadeOpacity
-  // starts fresh.
-  paragraph->Layout(150.0);
-  EXPECT_DOUBLE_EQ(paragraph->ComputeScrollFadeOpacity(150.0, initial_height),
-                   1.0);
 
-  // Zero and NaN opacities record no draw operations.
+  // Zero, negative, and NaN opacities record no draw operations.
   for (const double invalid_opacity :
        {0.0, -0.5, std::numeric_limits<double>::quiet_NaN()}) {
     auto noop_builder = DisplayListBuilder();
