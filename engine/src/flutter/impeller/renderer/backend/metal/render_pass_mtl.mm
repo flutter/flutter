@@ -230,8 +230,14 @@ static bool Bind(PassBindingsCacheMTL& pass,
 
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
-  const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
   CountPipelineUse(pipeline);
+  has_valid_pipeline_ = true;
+  if (pipeline.get() == bound_pipeline_) {
+    return;
+  }
+  bound_pipeline_ = pipeline.get();
+
+  const PipelineDescriptor& pipeline_desc = pipeline->GetDescriptor();
   primitive_type_ = pipeline_desc.GetPrimitiveType();
   pass_bindings_.SetRenderPipelineState(
       PipelineMTL::Cast(*pipeline).GetMTLRenderPipelineState());
@@ -245,7 +251,6 @@ void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   [encoder_ setCullMode:ToMTLCullMode(pipeline_desc.GetCullMode())];
   [encoder_ setTriangleFillMode:ToMTLTriangleFillMode(
                                     pipeline_desc.GetPolygonMode())];
-  has_valid_pipeline_ = true;
 }
 
 // |RenderPass|
