@@ -5,48 +5,76 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 import 'test_utils.dart';
 
 void main() {
-  late FileSystem fileSystem;
-
   group('analyze --suggestions command integration', () {
-    setUp(() {
-      fileSystem = globals.localFileSystem;
-    });
-
-    testUsingContext('General Info Project Validator', () async {
+    testWithoutContext('General Info Project Validator', () async {
+      Cache.disableLocking();
+      addTearDown(Cache.enableLocking);
       final loggerTest = BufferLogger.test();
+      final String flutterRoot = getFlutterRoot();
+      final cache = Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
+        flutterRoot: flutterRoot,
+        fileSystem: fileSystem,
+        logger: loggerTest,
+        platform: platform,
+        processManager: processManager,
+      );
+      final artifacts = CachedArtifacts(
+        fileSystem: fileSystem,
+        cache: cache,
+        platform: platform,
+        operatingSystemUtils: cache.osUtils,
+      );
+      final config = Config.test(logger: loggerTest);
+      final toolContext = FakeToolContext(
+        artifacts: artifacts,
+        cache: cache,
+        config: config,
+        fs: fileSystem,
+        logger: loggerTest,
+        os: cache.osUtils,
+        platform: platform,
+        processManager: processManager,
+        terminal: AnsiTerminal(stdio: Stdio(), platform: platform),
+      );
+      final Java? java = Java.find(
+        androidStudioBuilder: () => AndroidStudio.latestValid(toolContext: toolContext),
+        config: config,
+        fileSystem: fileSystem,
+        logger: loggerTest,
+        platform: platform,
+        processManager: processManager,
+      );
       final command = AnalyzeCommand(
         allProjectValidators: <ProjectValidator>[
           GeneralInfoProjectValidator(
-            androidContext: FakeAndroidContext(java: globals.java),
+            androidContext: FakeAndroidContext(java: java),
             logger: loggerTest,
-            processManager: globals.processManager,
+            processManager: processManager,
           ),
         ],
         suppressAnalytics: true,
-        toolContext: FakeToolContext(
-          artifacts: globals.artifacts,
-          fs: fileSystem,
-          logger: loggerTest,
-          platform: globals.platform,
-          processManager: globals.processManager,
-          terminal: globals.terminal,
-        ),
+        toolContext: toolContext,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -81,7 +109,7 @@ void main() {
     setUpAll(() async {
       platform = const LocalPlatform();
       tempDir = createResolvedTempDirectorySync('run_test.');
-      await globals.processManager.run(<String>[
+      await processManager.run(<String>[
         'flutter',
         'create',
         'test_project',
@@ -92,8 +120,8 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('analyze --suggestions --machine produces expected values', () async {
-      final ProcessResult result = await globals.processManager.run(<String>[
+    testWithoutContext('analyze --suggestions --machine produces expected values', () async {
+      final ProcessResult result = await processManager.run(<String>[
         'flutter',
         'analyze',
         '--suggestions',
@@ -105,7 +133,7 @@ void main() {
       expect(result.stdout, isNot(contains(',\n}'))); // No trailing commas allowed in JSON
       expect((result.stdout as String).endsWith('}\n'), true);
 
-      final decoded = jsonDecode(result.stdout as String) as Map<String, dynamic>;
+      final decoded = jsonDecode(result.stdout as String) as Map<String, Object?>;
 
       expect(decoded.containsKey('FlutterProject.android.exists'), true);
       expect(decoded.containsKey('FlutterProject.ios.exists'), true);
@@ -151,6 +179,6 @@ void main() {
       expect(decoded['Platform.isMacOS'], platform.isMacOS);
       expect(decoded['Platform.isFuchsia'], platform.isFuchsia);
       expect(decoded['Platform.pathSeparator'], platform.pathSeparator);
-    }, overrides: <Type, Generator>{});
+    });
   });
 }

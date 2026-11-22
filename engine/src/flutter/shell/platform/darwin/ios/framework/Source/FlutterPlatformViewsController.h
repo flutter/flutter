@@ -35,7 +35,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
-/// The flutter view.
+/// The view that displays the Flutter content, to which platform views are added as subviews.
+///
+/// `FlutterViewController` sets this when its surface appears, and sets it to nil when the surface
+/// is destroyed.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
 
 /// @brief The flutter view controller.
@@ -47,8 +50,9 @@ NS_ASSUME_NONNULL_BEGIN
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
-/// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
+/// @brief Mark the beginning of a frame and record the size of the onscreen and the device pixel
+/// ratio (the number of physical pixels per point).
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -76,7 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// @brief Discards all platform views instances and auxiliary resources.
 ///
-/// Called from the raster thread.
+/// Called from the platform thread during hot restart.
 - (void)reset;
 
 /// @brief Encode rendering for the Flutter overlay views and queue up perform platform view
@@ -133,12 +137,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Composite the PlatformView with `viewId`.
 //
-// Every frame, during the paint traversal of the layer tree, this method is called for all
-// the PlatformViews in `_viewsToRecomposite`.
+// This method converts `params` to a `FlutterPlatformViewLayer` with the main screen's scale and
+// composites the view from it.
 //
-// Note that `_viewsToRecomposite` does not represent all the views in the view hierarchy,
-// if a PlatformView does not change its composition parameter from last frame, it is not
-// included in the `views_to_recomposite_`.
+// `presentFrame:` composites views with the device pixel ratio of their frame.
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params;
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;

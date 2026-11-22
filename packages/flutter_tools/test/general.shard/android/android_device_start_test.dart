@@ -12,12 +12,15 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show DelegatingToolContext, FakePlistParser;
 
 const kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
@@ -135,6 +138,13 @@ void main() {
     () async {
       final device = AndroidDevice(
         '1234',
+        androidBuilder: fakeAndroidBuilder,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => androidSdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+        ),
         modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -225,7 +235,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      AndroidBuilder: () => fakeAndroidBuilder,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     },
@@ -236,6 +245,13 @@ void main() {
     () async {
       final device = AndroidDevice(
         '1234',
+        androidBuilder: fakeAndroidBuilder,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => androidSdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+        ),
         modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -325,7 +341,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      AndroidBuilder: () => fakeAndroidBuilder,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     },
@@ -336,6 +351,13 @@ void main() {
     () async {
       final device = AndroidDevice(
         '1234',
+        androidBuilder: fakeAndroidBuilder,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => androidSdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+        ),
         modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -424,7 +446,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      AndroidBuilder: () => fakeAndroidBuilder,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     },
@@ -435,6 +456,13 @@ void main() {
     () async {
       final device = AndroidDevice(
         '1234',
+        androidBuilder: fakeAndroidBuilder,
+        applicationPackageFactory: FlutterApplicationPackageFactory(
+          androidSdkBuilder: () => androidSdk,
+          plistParserBuilder: FakePlistParser.new,
+          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+          toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+        ),
         modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -524,7 +552,6 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      AndroidBuilder: () => fakeAndroidBuilder,
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     },
@@ -829,6 +856,13 @@ void main() {
       () async {
         final device = AndroidDevice(
           '1234',
+          androidBuilder: fakeAndroidBuilder,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => androidSdk,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+          ),
           modelID: 'TestModel',
           fileSystem: fileSystem,
           processManager: processManager,
@@ -918,7 +952,6 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => fakeAndroidBuilder,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -929,6 +962,13 @@ void main() {
       () async {
         final device = AndroidDevice(
           '1234',
+          androidBuilder: fakeAndroidBuilder,
+          applicationPackageFactory: FlutterApplicationPackageFactory(
+            androidSdkBuilder: () => androidSdk,
+            plistParserBuilder: FakePlistParser.new,
+            templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+            toolContext: DelegatingToolContext(fs: fileSystem, processManager: processManager),
+          ),
           modelID: 'TestModel',
           fileSystem: fileSystem,
           processManager: processManager,
@@ -1026,7 +1066,6 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
-        AndroidBuilder: () => fakeAndroidBuilder,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },

@@ -10,6 +10,7 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/testing/testing.h"
 
@@ -152,6 +153,36 @@ TEST_P(AiksTest, DilatedContentOutsideClip) {
   // The rectangle is outside the clip, but its dilated right edge is inside.
   builder.DrawRect(DlRect::MakeXYWH(15, 45, 4, 10),
                    DlPaint().setColor(DlColor::kWhite()));
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderClippedBackdropFilterWithSuperellipse) {
+  SetWindowSize({400, 400});
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawPaint(DlPaint(DlColor::kBlack()));
+
+  // Clip to a centered superellipse with large rounded corners.
+  DlRect rect = DlRect::MakeXYWH(50, 50, 300, 300);
+  builder.ClipRoundSuperellipse(DlRoundSuperellipse::MakeRectXY(rect, 80, 80));
+
+  // Draw backdrop content inside a child DisplayList with a containing
+  // ClipRect; restoring its scope must preserve the parent superellipse clip.
+  DisplayListBuilder child_builder;
+  child_builder.ClipRect(DlRect::MakeXYWH(0, 0, 400, 400));
+  child_builder.DrawRect(DlRect::MakeXYWH(50, 50, 150, 300),
+                         DlPaint(DlColor::kCornflowerBlue()));
+  child_builder.DrawRect(DlRect::MakeXYWH(200, 50, 150, 300),
+                         DlPaint(DlColor::kOrange()));
+  builder.DrawDisplayList(child_builder.Build());
+
+  // Apply a BackdropFilter with a translucent white fill across the full rect.
+  // Its corners remain rounded only if the superellipse clip is replayed.
+  auto filter = DlImageFilter::MakeBlur(20.0f, 20.0f, DlTileMode::kClamp);
+  builder.SaveLayer(rect, nullptr, filter.get());
+  builder.DrawPaint(DlPaint(DlColor::kWhite().withAlpha(160)));
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
