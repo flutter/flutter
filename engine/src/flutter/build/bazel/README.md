@@ -122,7 +122,7 @@ including which `flutter precache` options the tool's shards need.
 
 | You changed | Run | To check without writing |
 |---|---|---|
-| A `BUILD.gn` or `.gni`, a builder file under `ci/builders`, or `lib/web_ui/test/felt_config.yaml` | In `engine/src/flutter/tools/gn_to_bazel`: `../../prebuilts/<host>/dart-sdk/bin/dart bin/gn_to_bazel.dart --buildifier=none` | Add `--check` |
+| A `BUILD.gn` or `.gni`, a builder file under `ci/builders`, or `lib/web_ui/test/felt_config.yaml` | In `engine/src/flutter/tools/gn_to_bazel`: `../../prebuilts/<host>/dart-sdk/bin/dart bin/gn_to_bazel.dart` | Add `--check` |
 | `DEPS` | In `engine/src/flutter/tools/bazel_tools`: `../../prebuilts/<host>/dart-sdk/bin/dart bin/gen_deps.dart` | Add `--check` |
 | `pubspec.lock` | `dart pub get` at the repository root and in `engine/src/flutter/lib/web_ui`, then in `tools/bazel_tools`: `dart bin/gen_pub_lock.dart` | Add `--check` |
 

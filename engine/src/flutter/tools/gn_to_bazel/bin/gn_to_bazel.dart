@@ -63,9 +63,12 @@ Future<int> run(List<String> arguments) async {
     )
     ..addOption(
       'buildifier',
+      defaultsTo: 'none',
       help:
-          'Format the output with this buildifier (default: the one on PATH, if any; '
-          '`none` for no formatting).',
+          'Pipe the output through this buildifier, to see whether a release agrees with '
+          'the format the emitter writes. The default, `none`, writes what the emitter '
+          'writes, which is what --check compares and what is checked in: the output must '
+          'not depend on the buildifier a machine has on PATH.',
     )
     ..addOption(
       'repository',
@@ -121,9 +124,7 @@ Future<int> run(List<String> arguments) async {
   }
   final Set<String> extraSkips = options.multiOption('skip').toSet();
   final String? buildifierOption = options.option('buildifier');
-  final String? buildifier = buildifierOption == 'none'
-      ? null
-      : buildifierOption ?? await _findOnPath('buildifier');
+  final String? buildifier = buildifierOption == 'none' ? null : buildifierOption;
   final String? outDir = options.option('out-dir');
   final bool check = options.flag('check');
   final String? repository = options.option('repository');
@@ -528,11 +529,6 @@ Map<String, GnValue> _hostAssumptions(String host) {
     'host_prebuilt_dart_sdk': GnStringValue(sdk),
     'target_prebuilt_dart_sdk': GnStringValue(sdk),
   };
-}
-
-Future<String?> _findOnPath(String name) async {
-  final ProcessResult which = await Process.run('which', <String>[name]);
-  return which.exitCode == 0 ? (which.stdout as String).trim() : null;
 }
 
 Future<String> _format(String buildifier, String content, {String type = 'build'}) async {

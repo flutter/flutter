@@ -31,14 +31,21 @@ out by GN package). `--check` compares with the existing file instead and
 fails on a difference; `ci/check_generated_bazel_files.sh` runs it on every
 PR (a step of `Linux linux_unopt`, on the checkout's prebuilt Dart SDK and
 without buildifier), so a `BUILD.gn` or builder-file change lands with its
-regeneration or not at all. The output is piped through `buildifier` when one is
-on `PATH` (or named by `--buildifier`; `--buildifier=none` for none); the
-emitter already writes buildifier's format, so the result is the same either
-way -- it sorts the lists buildifier sorts (`srcs`, `deps`, `data`, ...),
-except `includes`, whose order is the compiler's search order and GN's
-(freetype2's `include/freetype-flutter-config` ahead of `include`, so that
-Flutter's `public-macros.h` is found first): that list keeps GN's order and
-leads with `# do not sort` when buildifier would reorder it. `--depfile` writes the GN files read (the inputs and every imported
+regeneration or not at all. The emitter writes buildifier's format itself, as
+the releases up to 10.2.0 have it: it sorts the lists buildifier sorts
+(`srcs`, `deps`, `data`, ...), except `includes`, whose order is the
+compiler's search order and GN's (freetype2's
+`include/freetype-flutter-config` ahead of `include`, so that Flutter's
+`public-macros.h` is found first): that list keeps GN's order and leads with
+`# do not sort` when buildifier would reorder it. The output goes through no
+buildifier of the machine's: what is checked in must not depend on which one
+a machine has, and they differ (buildifier's main branch, after 10.2.0, ranks
+`implementation_deps` with `deps`; a build of it rewrites eight of the
+generated files, and `--check` then fails). `--buildifier=<path>` pipes the
+output through one all the same, to see whether a release still agrees with
+the emitter; when one no longer does, the emitter's order
+(`_attributeRank`) follows it, together with the hand-written files.
+`--depfile` writes the GN files read (the inputs and every imported
 `.gni`), one per line. A run over the manifest also checks the hand-written
 files that repeat a list of their GN file (`mirroredLists`: the Dart test
 packages' `tests`, GN's `foreach` over it being what keeps those files

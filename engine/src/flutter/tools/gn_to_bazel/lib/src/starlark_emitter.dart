@@ -6748,7 +6748,10 @@ final class _Emitter {
     'hdrs',
   ];
   // buildifier's order: `deps` and `alwayslink` trail; `implementation_deps`
-  // is not in its priority table and sorts with the rest.
+  // is not in its priority table and sorts with the rest. (So in every
+  // release up to 10.2.0; buildifier's main branch has since ranked
+  // `implementation_deps` with `deps`. When a release does, this follows,
+  // with the hand-written files that list the attribute.)
   static const List<String> _trailingAttributes = <String>['deps', 'alwayslink'];
 
   static int _attributeRank(String attribute) {
