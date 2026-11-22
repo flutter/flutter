@@ -21,9 +21,11 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -35,9 +37,12 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
@@ -1991,6 +1996,66 @@ server:
         },
       );
     });
+
+    testWithoutContext(
+      'routes profile, release, and --wasm web runs to ColdRunner with WebFlutterDeviceFactory',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.file('lib/main.dart').createSync(recursive: true);
+        fs.file('pubspec.yaml').writeAsStringSync('name: my_app\n');
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'my_app');
+
+        final webDevice = FakeDevice(
+          isLocalEmulator: true,
+          platformType: PlatformType.web,
+          targetPlatform: TargetPlatform.web_javascript,
+        )..supportsHotReload = true;
+        final deviceManager = FakeDeviceManager()..attachedDevices = <Device>[webDevice];
+        final toolContext = FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        );
+
+        for (final modeFlags in const <List<String>>[
+          <String>['--profile'],
+          <String>['--release'],
+          <String>['--wasm'],
+        ]) {
+          final fakeWebRunnerFactory = FakeWebRunnerFactory();
+          final fakeWebDeviceFactory = _FakeRunWebFlutterDeviceFactory();
+          final command = _RunnerCapturingRunCommand(
+            appleContext: FakeAppleContext(),
+            assetBundleFactory: _FakeAssetBundleFactory(),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            buildTargets: const BuildTargetsImpl(),
+            deviceManager: deviceManager,
+            devtoolsLauncher: FakeDevtoolsLauncher(),
+            toolContext: toolContext,
+            webFlutterDeviceFactory: fakeWebDeviceFactory,
+            webRunnerFactory: fakeWebRunnerFactory,
+          );
+          final runner = TestFlutterCommandRunner(
+            deviceManager: deviceManager,
+            featureFlags: FakeFeatureFlags(),
+            toolContext: toolContext,
+          )..addCommand(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--no-resident',
+            '--web-define=FOO=BAR',
+            ...modeFlags,
+          ]);
+
+          expect(command.capturedRunner, isA<ColdRunner>(), reason: 'flags: $modeFlags');
+          expect(fakeWebRunnerFactory.lastOptions, isNull, reason: 'flags: $modeFlags');
+          expect(fakeWebDeviceFactory.lastWebDefines, const <String, String>{'FOO': 'BAR'});
+        }
+      },
+    );
   });
 
   group('terminal', () {
@@ -2569,6 +2634,9 @@ class FakeDevice extends Fake implements Device {
   bool get supportsHotRestart => true;
 
   @override
+  Future<void> dispose() async {}
+
+  @override
   bool get supportsFlavors => _supportsFlavors;
 
   @override
@@ -2937,4 +3005,89 @@ class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
     logger: BufferLogger.test(),
     platform: FakePlatform(),
   ).createBundle();
+}
+
+class _RunnerCapturingRunCommand extends RunCommand {
+  _RunnerCapturingRunCommand({
+    required super.appleContext,
+    required super.assetBundleFactory,
+    required super.buildSystem,
+    required super.buildTargets,
+    required super.devtoolsLauncher,
+    required super.toolContext,
+    super.deviceManager,
+    super.webFlutterDeviceFactory,
+    super.webRunnerFactory,
+  });
+
+  ResidentRunner? capturedRunner;
+
+  @override
+  Future<ResidentRunner> createRunner({
+    required bool hotMode,
+    required List<FlutterDevice> flutterDevices,
+    required String? applicationBinaryPath,
+    required FlutterProject flutterProject,
+  }) async {
+    return capturedRunner = await super.createRunner(
+      hotMode: hotMode,
+      flutterDevices: flutterDevices,
+      applicationBinaryPath: applicationBinaryPath,
+      flutterProject: flutterProject,
+    );
+  }
+}
+
+class _FakeRunWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFactory {
+  Map<String, String>? lastWebDefines;
+
+  @override
+  FlutterDevice createWebFlutterDevice(
+    Device device, {
+    required BuildInfo buildInfo,
+    required DevelopmentShaderCompiler developmentShaderCompiler,
+    required FlutterProject flutterProject,
+    required ResidentCompiler? generator,
+    required TargetPlatform targetPlatform,
+    required ToolContext toolContext,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    Future<String> Function(String)? urlTunneller,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) {
+    expect(generator, isNull);
+    lastWebDefines = webDefines;
+    return _NoOpColdWebFlutterDevice(device);
+  }
+}
+
+class _NoOpColdWebFlutterDevice extends Fake implements FlutterDevice {
+  _NoOpColdWebFlutterDevice(this.device);
+
+  @override
+  final Device device;
+
+  @override
+  DevFS? devFS;
+
+  @override
+  Future<Uri>? get vmServiceUri => null;
+
+  @override
+  FlutterVmService? get vmService => null;
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
+
+  @override
+  bool get supportsColdRestart => true;
+
+  @override
+  Future<int> runCold({required ColdRunner coldRunner, String? route}) async => 0;
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {}
 }

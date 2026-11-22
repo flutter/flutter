@@ -4,8 +4,12 @@
 
 import 'dart:async';
 
+import 'base/common.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
+import 'base/time.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
@@ -30,20 +34,28 @@ class ColdRunner extends ResidentRunner {
     this.awaitFirstFrameWhenTracing = true,
     super.dartBuilder,
     super.machine,
+    super.projectRootPath,
     super.stayResident,
     this.traceStartup = false,
   }) : super(hotMode: false);
+
+  static const _kHotRestartProgressId = 'hot.restart';
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
   final File? applicationBinary;
   var _didAttach = false;
+  var _isRestarting = false;
 
   @override
   bool get canHotReload => false;
 
   @override
-  bool get reloadIsRestart => false;
+  bool get reloadIsRestart => supportsRestart;
+
+  @override
+  bool get supportsRestart =>
+      flutterDevices.every((FlutterDevice device) => device.supportsColdRestart);
 
   @override
   bool get supportsDetach => _didAttach;
@@ -62,6 +74,9 @@ class ColdRunner extends ResidentRunner {
           return result;
         }
       }
+    } on ToolExit {
+      appFailedToStart();
+      rethrow;
     } on Exception catch (err, stack) {
       logger.printError('$err\n$stack');
       appFailedToStart();
@@ -69,7 +84,7 @@ class ColdRunner extends ResidentRunner {
     }
 
     // Connect to the VM Service.
-    if (debuggingEnabled) {
+    if (debuggingEnabled && supportsServiceProtocol) {
       try {
         await connectToServiceProtocol();
       } on Exception catch (exception) {
@@ -133,6 +148,46 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
+  Future<OperationResult> restart({
+    bool fullRestart = false,
+    bool pause = false,
+    String? reason,
+  }) async {
+    if (!supportsRestart) {
+      return super.restart(fullRestart: fullRestart, pause: pause, reason: reason);
+    }
+    if (exited) {
+      return OperationResult(1, 'Application has exited.');
+    }
+    if (_isRestarting) {
+      return OperationResult(1, 'A restart is already in progress.');
+    }
+    _isRestarting = true;
+    final SystemClock systemClock = toolContext.systemClock;
+    final DateTime start = systemClock.now();
+    final Status status = logger.startProgress(
+      'Performing hot restart...',
+      progressId: _kHotRestartProgressId,
+    );
+    try {
+      for (final FlutterDevice device in flutterDevices) {
+        await device.restartCold(coldRunner: this);
+      }
+    } on ToolExit {
+      return OperationResult(1, 'Failed to recompile application.');
+    } on Exception catch (err) {
+      return OperationResult(1, err.toString(), fatal: true);
+    } finally {
+      _isRestarting = false;
+      status.stop();
+    }
+
+    final Duration elapsed = systemClock.now().difference(start);
+    logger.printStatus('Restarted application in ${getElapsedAsMilliseconds(elapsed)}.');
+    return OperationResult.ok;
+  }
+
+  @override
   Future<int> attach({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
@@ -172,8 +227,10 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
-    for (final FlutterDevice? flutterDevice in flutterDevices) {
-      await flutterDevice!.device!.dispose();
+    for (final FlutterDevice flutterDevice in flutterDevices) {
+      await flutterDevice.dispose();
+      await flutterDevice.devFS?.destroy();
+      await flutterDevice.device!.dispose();
     }
     await stopEchoingDeviceLog();
   }

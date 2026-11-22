@@ -380,6 +380,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Device? device;
 
   @override
+  bool supportsColdRestart = false;
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
   Future<void> stopEchoingDeviceLog() async {}
 
   @override

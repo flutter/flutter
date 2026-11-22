@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
@@ -71,8 +75,138 @@ void main() {
 
       expect(flutterDevice1.stopEchoingDeviceLogCount, 1);
       expect(flutterDevice2.stopEchoingDeviceLogCount, 1);
+      expect(flutterDevice1.wasDisposed, true);
+      expect(flutterDevice2.wasDisposed, true);
       expect(device2.wasDisposed, true);
       expect(device1.wasDisposed, true);
+    });
+
+    testWithoutContext('destroys devFS when present', () async {
+      final fs = MemoryFileSystem.test();
+      final devFS = FakeDevFS();
+      final device = FakeDevice();
+      final flutterDevice = FakeFlutterDevice(device)..devFS = devFS;
+      final ColdRunner runner = createColdRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        stayResident: false,
+        target: 'main.dart',
+        toolContext: FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+        ),
+      );
+
+      await runner.cleanupAtFinish();
+
+      expect(devFS.wasDestroyed, true);
+      expect(flutterDevice.wasDisposed, true);
+      expect(device.wasDisposed, true);
+    });
+  });
+
+  group('cold restart', () {
+    testWithoutContext('supportsRestart reflects device supportsColdRestart', () {
+      final fs = MemoryFileSystem.test();
+      final toolContext = FakeToolContext(
+        cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+        fs: fs,
+      );
+      final nativeDevice = FakeFlutterDevice(FakeDevice());
+      final coldRestartDevice = FakeFlutterDevice(FakeDevice())..supportsColdRestart = true;
+
+      expect(
+        createColdRunner(
+          <FlutterDevice>[nativeDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          target: 'main.dart',
+          toolContext: toolContext,
+        ).supportsRestart,
+        false,
+      );
+      expect(
+        createColdRunner(
+          <FlutterDevice>[coldRestartDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          target: 'main.dart',
+          toolContext: toolContext,
+        ).supportsRestart,
+        true,
+      );
+      expect(
+        createColdRunner(
+          <FlutterDevice>[nativeDevice, coldRestartDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          target: 'main.dart',
+          toolContext: toolContext,
+        ).supportsRestart,
+        false,
+      );
+    });
+
+    testWithoutContext('restart invokes restartCold and handles ToolExit and Exception', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final flutterDevice = FakeFlutterDevice(FakeDevice())..supportsColdRestart = true;
+      final ColdRunner runner = createColdRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        stayResident: false,
+        target: 'main.dart',
+        toolContext: FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: logger,
+        ),
+      );
+
+      final OperationResult okResult = await runner.restart(fullRestart: true);
+      expect(okResult.code, 0);
+      expect(flutterDevice.restartColdCount, 1);
+      expect(logger.statusText, contains('Restarted application in'));
+
+      flutterDevice.onRestartCold = () => throwToolExit('compile failed');
+      final OperationResult compileFailure = await runner.restart(fullRestart: true);
+      expect(compileFailure.code, 1);
+      expect(compileFailure.message, 'Failed to recompile application.');
+      expect(compileFailure.fatal, false);
+
+      flutterDevice.onRestartCold = () => throw Exception('wip disconnected');
+      final OperationResult reloadFailure = await runner.restart(fullRestart: true);
+      expect(reloadFailure.code, 1);
+      expect(reloadFailure.message, contains('wip disconnected'));
+      expect(reloadFailure.fatal, true);
+    });
+
+    testWithoutContext('restart rejects concurrent and post-exit requests', () async {
+      final fs = MemoryFileSystem.test();
+      final completer = Completer<void>();
+      final flutterDevice = FakeFlutterDevice(FakeDevice())
+        ..supportsColdRestart = true
+        ..onRestartCold = () => completer.future;
+      final ColdRunner runner = createColdRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        stayResident: false,
+        target: 'main.dart',
+        toolContext: FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+        ),
+      );
+
+      final Future<OperationResult> first = runner.restart(fullRestart: true);
+      final OperationResult concurrent = await runner.restart(fullRestart: true);
+      expect(concurrent.code, 1);
+      expect(concurrent.message, 'A restart is already in progress.');
+
+      completer.complete();
+      expect((await first).code, 0);
+
+      await runner.exit();
+      final OperationResult exited = await runner.restart(fullRestart: true);
+      expect(exited.code, 1);
+      expect(exited.message, 'Application has exited.');
     });
   });
 
@@ -163,7 +297,38 @@ void main() {
         Platform: () => fakePlatform,
       },
     );
+
+    testWithoutContext(
+      'calls appFailedToStart and rethrows when runCold throws ToolExit',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final flutterDevice = FakeFlutterDevice(FakeDevice())
+          ..onRunCold = () => throwToolExit('device launch failed');
+        final ColdRunner runner = createColdRunner(
+          <FlutterDevice>[flutterDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: FakeToolContext(
+            cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+            fs: fs,
+          ),
+        );
+
+        await expectLater(runner.run(), throwsToolExit(message: 'device launch failed'));
+        expect(await runner.waitForAppToFinish(), 1);
+      },
+    );
   });
+}
+
+class FakeDevFS extends Fake implements DevFS {
+  bool wasDestroyed = false;
+
+  @override
+  Future<void> destroy() async {
+    wasDestroyed = true;
+  }
 }
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
@@ -174,6 +339,33 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   final Device device;
+
+  @override
+  DevFS? devFS;
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.tester;
+
+  @override
+  bool supportsColdRestart = false;
+
+  bool wasDisposed = false;
+  int restartColdCount = 0;
+  Future<void> Function()? onRestartCold;
+
+  @override
+  Future<void> dispose() async {
+    wasDisposed = true;
+  }
+
+  @override
+  Future<void> restartCold({required ColdRunner coldRunner}) async {
+    restartColdCount += 1;
+    await onRestartCold?.call();
+  }
+
+  @override
+  Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async {}
 
   int stopEchoingDeviceLogCount = 0;
 
@@ -186,9 +378,13 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FlutterVmService get vmService => FakeFlutterVmService();
 
   int runColdCode = 0;
+  Future<int> Function()? onRunCold;
 
   @override
   Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
+    if (onRunCold != null) {
+      return onRunCold!();
+    }
     return runColdCode;
   }
 }

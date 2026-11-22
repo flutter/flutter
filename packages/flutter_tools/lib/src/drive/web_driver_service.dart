@@ -28,7 +28,9 @@ import '../features.dart' show FeatureFlags;
 import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
+import '../run_cold.dart';
 import '../web/chrome_constants.dart';
+import '../web/web_flutter_device.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -44,6 +46,7 @@ class WebDriverService extends DriverService {
     required this._featureFlags,
     required super.toolContext,
     this._flutterHookRunner,
+    this._webFlutterDeviceFactory,
     this._webRunnerFactory,
   });
 
@@ -55,6 +58,7 @@ class WebDriverService extends DriverService {
   final String _dartSdkPath;
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
+  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
   final WebRunnerFactory? _webRunnerFactory;
 
   late ResidentRunner _residentRunner;
@@ -82,42 +86,66 @@ class WebDriverService extends DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
-      buildInfo: buildInfo,
-      target: mainPath,
-      userIdentifier: userIdentifier,
-    );
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
     final webConfig = WebDebugConfig(
       devServerConfig: debuggingOptions.webConfig.devServerConfig,
       renderer: debuggingOptions.webConfig.renderer,
       useWasm: debuggingOptions.webConfig.useWasm,
     );
-    _residentRunner = _webRunnerFactory!.createWebRunner(
-      flutterDevice,
-      analytics: _analytics,
-      applicationPackageFactory: _applicationPackageFactory,
-      assetBundleFactory: _assetBundleFactory,
-      buildSystem: buildSystem,
-      buildTargets: buildTargets,
-      debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
-          : DebuggingOptions.enabled(
-              buildInfo,
-              disablePortPublication: debuggingOptions.disablePortPublication,
-              webConfig: webConfig,
-            ),
-      featureFlags: _featureFlags,
-      flutterHookRunner: _flutterHookRunner,
-      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
-      platformArgs: platformArgs,
-      stayResident: true,
-      target: mainPath,
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
+      device,
       toolContext: toolContext,
+      buildInfo: buildInfo,
+      flutterProject: flutterProject,
+      platformArgs: platformArgs,
+      target: mainPath,
+      useWasm: webConfig.useWasm,
+      userIdentifier: userIdentifier,
       webDefines: webDefines,
+      webFlutterDeviceFactory: _webFlutterDeviceFactory,
     );
+    final resolvedDebuggingOptions = buildInfo.isRelease
+        ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
+        : DebuggingOptions.enabled(
+            buildInfo,
+            disablePortPublication: debuggingOptions.disablePortPublication,
+            webConfig: webConfig,
+          );
+    if (!buildInfo.isDebug || webConfig.useWasm) {
+      _residentRunner = ColdRunner(
+        <FlutterDevice>[flutterDevice],
+        analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: resolvedDebuggingOptions,
+        featureFlags: _featureFlags,
+        target: mainPath ?? fs.path.join('lib', 'main.dart'),
+        toolContext: toolContext,
+        xcode: null,
+      );
+    } else {
+      _residentRunner = _webRunnerFactory!.createWebRunner(
+        flutterDevice,
+        analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        debuggingOptions: resolvedDebuggingOptions,
+        featureFlags: _featureFlags,
+        flutterHookRunner: _flutterHookRunner,
+        flutterProject: flutterProject,
+        platformArgs: platformArgs,
+        stayResident: true,
+        target: mainPath,
+        toolContext: toolContext,
+        webDefines: webDefines,
+      );
+    }
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,

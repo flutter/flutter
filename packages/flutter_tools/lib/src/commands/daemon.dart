@@ -19,6 +19,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -45,6 +46,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
+import '../web/web_flutter_device.dart';
 import '../web/web_runner.dart';
 
 const protocolVersion = '0.6.1';
@@ -69,6 +71,7 @@ class DaemonCommand extends FlutterCommand {
     this._deviceManager,
     this._flutterHookRunner,
     this.hidden = false,
+    this._webFlutterDeviceFactory,
     this._webRunnerFactory,
   }) {
     argParser.addOption(
@@ -84,6 +87,7 @@ class DaemonCommand extends FlutterCommand {
   final BuildTargets _buildTargets;
   final DevtoolsLauncher _devtoolsLauncher;
   final FlutterHookRunner? _flutterHookRunner;
+  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
   final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
   final AndroidWorkflow? _androidWorkflow;
@@ -142,6 +146,7 @@ class DaemonCommand extends FlutterCommand {
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         port: port,
         toolContext: toolContext,
+        webFlutterDeviceFactory: _webFlutterDeviceFactory,
         webRunnerFactory: _webRunnerFactory,
         xcode: _xcode,
       ).run();
@@ -166,6 +171,7 @@ class DaemonCommand extends FlutterCommand {
       java: _java,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
       toolContext: toolContext,
+      webFlutterDeviceFactory: _webFlutterDeviceFactory,
       webRunnerFactory: _webRunnerFactory,
       xcode: _xcode,
     );
@@ -199,6 +205,7 @@ class DaemonServer {
     this.java,
     this.notifyingLogger,
     this.port,
+    this.webFlutterDeviceFactory,
     this.webRunnerFactory,
   });
 
@@ -210,6 +217,7 @@ class DaemonServer {
   final DevtoolsLauncher devtoolsLauncher;
   final FlutterHookRunner? flutterHookRunner;
   final ToolContext toolContext;
+  final WebFlutterDeviceFactory? webFlutterDeviceFactory;
   final WebRunnerFactory? webRunnerFactory;
   final Xcode? xcode;
 
@@ -272,6 +280,7 @@ class DaemonServer {
         java: java,
         notifyingLogger: notifyingLogger,
         toolContext: toolContext,
+        webFlutterDeviceFactory: webFlutterDeviceFactory,
         webRunnerFactory: webRunnerFactory,
         xcode: xcode,
       );
@@ -314,6 +323,7 @@ class Daemon {
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
+    WebFlutterDeviceFactory? webFlutterDeviceFactory,
     WebRunnerFactory? webRunnerFactory,
   }) {
     final Platform platform = _toolContext.platform;
@@ -336,6 +346,7 @@ class Daemon {
         buildTargets: buildTargets,
         featureFlags: featureFlags,
         flutterHookRunner: flutterHookRunner,
+        webFlutterDeviceFactory: webFlutterDeviceFactory,
         webRunnerFactory: webRunnerFactory,
         xcode: xcode,
       ),
@@ -387,6 +398,7 @@ class Daemon {
     DeviceManager? deviceManager,
     FlutterHookRunner? flutterHookRunner,
     Java? java,
+    WebFlutterDeviceFactory? webFlutterDeviceFactory,
     WebRunnerFactory? webRunnerFactory,
   }) {
     final ToolContext(:Logger logger, :Stdio stdio) = toolContext;
@@ -412,6 +424,7 @@ class Daemon {
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       toolContext: toolContext,
+      webFlutterDeviceFactory: webFlutterDeviceFactory,
       webRunnerFactory: webRunnerFactory,
       xcode: xcode,
     );
@@ -870,6 +883,7 @@ class AppDomain extends Domain {
     required this._featureFlags,
     required this._xcode,
     this._flutterHookRunner,
+    this._webFlutterDeviceFactory,
     this._webRunnerFactory,
   }) : super(daemon, 'app') {
     registerHandler('restart', restart);
@@ -885,6 +899,7 @@ class AppDomain extends Domain {
   final BuildTargets _buildTargets;
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
+  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
   final WebRunnerFactory? _webRunnerFactory;
   final Xcode? _xcode;
 
@@ -928,17 +943,27 @@ class AppDomain extends Domain {
     fs.currentDirectory = fs.directory(projectDirectory);
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
 
+    final DebuggingOptions(:BuildInfo buildInfo, :WebDebugConfig webConfig) = options;
+    final UrlTunneller? urlTunneller = webConfig.enableExposeUrl
+        ? daemon.daemonDomain.exposeUrl
+        : null;
+    final isWeb = await device.targetPlatform == TargetPlatform.web_javascript;
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       toolContext: toolContext,
-      buildInfo: options.buildInfo,
+      buildInfo: buildInfo,
+      flutterProject: flutterProject,
       target: target,
+      urlTunneller: urlTunneller,
+      useWasm: webConfig.useWasm,
       userIdentifier: userIdentifier,
+      webDefines: webDefines,
+      webFlutterDeviceFactory: _webFlutterDeviceFactory,
     );
 
-    ResidentRunner runner;
+    final ResidentRunner runner;
 
-    if (await device.targetPlatform == TargetPlatform.web_javascript) {
+    if (isWeb && buildInfo.isDebug && !webConfig.useWasm) {
       runner = _webRunnerFactory!.createWebRunner(
         flutterDevice,
         analytics: _analytics,
@@ -954,10 +979,10 @@ class AppDomain extends Domain {
         stayResident: true,
         target: target,
         toolContext: toolContext,
-        urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
+        urlTunneller: urlTunneller,
         webDefines: webDefines,
       );
-    } else if (enableHotReload) {
+    } else if (enableHotReload && !isWeb) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
         analytics: _analytics,
@@ -990,6 +1015,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         featureFlags: _featureFlags,
         machine: machine,
+        projectRootPath: projectRootPath,
         target: target,
         toolContext: toolContext,
         xcode: _xcode,

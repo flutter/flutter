@@ -21,6 +21,7 @@ import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
@@ -49,13 +50,14 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'vmservice.dart';
+import 'web/web_flutter_device.dart';
 import 'windows/visual_studio.dart';
 
 class FlutterDevice {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
-    required this._toolContext,
+    required this.toolContext,
     required this.developmentShaderCompiler,
     required this.generator,
     required this.targetPlatform,
@@ -71,8 +73,14 @@ class FlutterDevice {
     required ToolContext toolContext,
     required BuildInfo buildInfo,
     required String? target,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    bool useWasm = false,
     String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+    WebFlutterDeviceFactory? webFlutterDeviceFactory,
   }) async {
     final ToolContext(
       :Artifacts artifacts,
@@ -98,18 +106,40 @@ class FlutterDevice {
       logger: logger,
     );
 
-    final ResidentCompiler generator = residentCompilerFactory.create(
-      artifacts: artifacts,
-      processManager: processManager,
-      logger: logger,
-      fileSystem: fs,
-      platform: platform,
-      shutdownHooks: shutdownHooks,
-      config: config,
-      targetPlatform: targetPlatform,
-      buildInfo: buildInfo,
-      targetModelOverride: targetModelOverride,
-    );
+    final isWeb = targetPlatform == TargetPlatform.web_javascript;
+    final ResidentCompiler? generator = isWeb && (!buildInfo.isDebug || useWasm)
+        ? null
+        : residentCompilerFactory.create(
+            artifacts: artifacts,
+            processManager: processManager,
+            logger: logger,
+            fileSystem: fs,
+            platform: platform,
+            shutdownHooks: shutdownHooks,
+            config: config,
+            targetPlatform: targetPlatform,
+            buildInfo: buildInfo,
+            targetModelOverride: targetModelOverride,
+          );
+
+    if (isWeb && webFlutterDeviceFactory != null) {
+      if (flutterProject == null) {
+        throw StateError('flutterProject is required when webFlutterDeviceFactory is provided.');
+      }
+      return webFlutterDeviceFactory.createWebFlutterDevice(
+        device,
+        buildInfo: buildInfo,
+        developmentShaderCompiler: shaderCompiler,
+        flutterProject: flutterProject,
+        generator: generator,
+        platformArgs: platformArgs,
+        targetPlatform: targetPlatform,
+        toolContext: toolContext,
+        urlTunneller: urlTunneller,
+        userIdentifier: userIdentifier,
+        webDefines: webDefines,
+      );
+    }
 
     return FlutterDevice(
       device,
@@ -126,7 +156,7 @@ class FlutterDevice {
   final Device? device;
   final ResidentCompiler? generator;
   final BuildInfo buildInfo;
-  final ToolContext _toolContext;
+  final ToolContext toolContext;
   final String? userIdentifier;
   final DevelopmentShaderCompiler developmentShaderCompiler;
 
@@ -163,7 +193,7 @@ class FlutterDevice {
       :FileSystem fs,
       :Logger logger,
       :FlutterProjectFactory projectFactory,
-    ) = _toolContext;
+    ) = toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -326,13 +356,13 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
     return devFS!.create();
   }
 
   Future<void> startEchoingDeviceLog(DebuggingOptions debuggingOptions) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     if (_loggingSubscription != null) {
       return;
     }
@@ -371,7 +401,7 @@ class FlutterDevice {
 
   Future<int> runHot({required HotRunner hotRunner, String? route}) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+        toolContext;
     final prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.mode.friendlyName;
     logger.printStatus(
@@ -432,7 +462,7 @@ class FlutterDevice {
 
   Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+        toolContext;
     final TargetPlatform targetPlatform = await device!.targetPlatform;
     package = await coldRunner.applicationPackageFactory.getPackageForPlatform(
       targetPlatform,
@@ -503,7 +533,7 @@ class FlutterDevice {
     required PackageConfig packageConfig,
   }) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+        toolContext;
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device!.displayName}...',
       progressId: 'devFS.update',
@@ -549,6 +579,17 @@ class FlutterDevice {
   Future<void> handleHotRestart() async {
     await device?.dds.handleHotRestart(this);
   }
+
+  /// Whether this device supports restarting while running under [ColdRunner].
+  bool get supportsColdRestart => false;
+
+  /// Recompiles and restarts the application while running under [ColdRunner].
+  Future<void> restartCold({required ColdRunner coldRunner}) {
+    throw StateError('Cold restart is not supported by ${device?.displayName}.');
+  }
+
+  /// Releases any resources owned by this [FlutterDevice] wrapper.
+  Future<void> dispose() async {}
 }
 
 /// A subset of the [ResidentRunner] for delegating to attached flutter devices.
@@ -1103,8 +1144,12 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
 
+  bool get _isRunningOnWeb => flutterDevices.every(
+    (FlutterDevice device) => device.targetPlatform == TargetPlatform.web_javascript,
+  );
+
   @override
-  bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+  bool get supportsServiceProtocol => isRunningDebug || (isRunningProfile && !_isRunningOnWeb);
 
   bool get trackWidgetCreation => debuggingOptions.buildInfo.trackWidgetCreation;
 
@@ -1180,7 +1225,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final address = flutterDevices.first.vmService!.wsAddress.toString();
+        final address = flutterDevices.first.vmService?.wsAddress.toString();
+        if (address == null) {
+          return;
+        }
         final File vmserviceOutFile = fileSystem.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -1896,7 +1944,8 @@ class TerminalHandler {
         return true;
       case 'R':
         // If hot restart is not supported for all devices, ignore the command.
-        if (!residentRunner.supportsRestart || !residentRunner.hotMode) {
+        if (!residentRunner.supportsRestart ||
+            !(residentRunner.hotMode || residentRunner.reloadIsRestart)) {
           return false;
         }
         final OperationResult result = await residentRunner.restart(fullRestart: true);

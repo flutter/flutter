@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -27,6 +28,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import 'resident_runner_helpers.dart' show createColdRunner;
 
 final fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -999,6 +1001,62 @@ void main() {
       expect(runner.calledRestart, true);
     });
 
+    testWithoutContext(
+      'R and r trigger restartCold on ColdRunner when supportsColdRestart is true',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final toolContext = FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: logger,
+        );
+        final coldRestartDevice = _ColdRestartFakeFlutterDevice(supportsColdRestart: true);
+        final ColdRunner webColdRunner = createColdRunner(
+          <FlutterDevice>[coldRestartDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: toolContext,
+        );
+        final webHandler = TerminalHandler(
+          webColdRunner,
+          logger: logger,
+          terminal: Terminal.test(),
+          signals: Signals.test(),
+          processInfo: ProcessInfo.test(fs),
+          reportReady: false,
+        );
+
+        await webHandler.processTerminalInput('R');
+        expect(coldRestartDevice.restartColdCount, 1);
+
+        await webHandler.processTerminalInput('r');
+        expect(coldRestartDevice.restartColdCount, 2);
+
+        final nativeDevice = _ColdRestartFakeFlutterDevice(supportsColdRestart: false);
+        final ColdRunner nativeColdRunner = createColdRunner(
+          <FlutterDevice>[nativeDevice],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: toolContext,
+        );
+        final nativeHandler = TerminalHandler(
+          nativeColdRunner,
+          logger: logger,
+          terminal: Terminal.test(),
+          signals: Signals.test(),
+          processInfo: ProcessInfo.test(fs),
+          reportReady: false,
+        );
+
+        await nativeHandler.processTerminalInput('R');
+        await nativeHandler.processTerminalInput('r');
+        expect(nativeDevice.restartColdCount, 0);
+      },
+    );
+
     testWithoutContext('r - hotReload with non-fatal error', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(
         <FakeVmServiceRequest>[],
@@ -1884,4 +1942,22 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   bool areDependenciesModified(DevFSContent shaderContent) => false;
+}
+
+class _ColdRestartFakeFlutterDevice extends Fake implements FlutterDevice {
+  _ColdRestartFakeFlutterDevice({required this.supportsColdRestart});
+
+  @override
+  final bool supportsColdRestart;
+
+  int restartColdCount = 0;
+
+  @override
+  TargetPlatform get targetPlatform =>
+      supportsColdRestart ? TargetPlatform.web_javascript : TargetPlatform.android_arm64;
+
+  @override
+  Future<void> restartCold({required ColdRunner coldRunner}) async {
+    restartColdCount += 1;
+  }
 }

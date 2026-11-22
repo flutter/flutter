@@ -71,6 +71,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/web/web_flutter_device.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
@@ -1284,6 +1285,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._templatePathProvider,
     this._templateRenderer,
     this._toolContext,
+    this.webFlutterDeviceFactory,
     this.webRunnerFactory,
     this._windowsWorkflow,
   });
@@ -1407,6 +1409,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   late final ToolContext toolContext = _toolContext ?? FakeToolContext();
+
+  @override
+  final WebFlutterDeviceFactory? webFlutterDeviceFactory;
 
   @override
   final WebRunnerFactory? webRunnerFactory;

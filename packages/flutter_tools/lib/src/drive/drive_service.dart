@@ -28,6 +28,7 @@ import '../hook_runner.dart' show FlutterHookRunner;
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
+import '../web/web_flutter_device.dart';
 import '../web/web_runner.dart';
 import 'web_driver_service.dart';
 
@@ -43,6 +44,7 @@ class FlutterDriverFactory {
     required this._featureFlags,
     required this._toolContext,
     this._flutterHookRunner,
+    this._webFlutterDeviceFactory,
     this._webRunnerFactory,
   });
 
@@ -56,6 +58,7 @@ class FlutterDriverFactory {
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
   final ToolContext _toolContext;
+  final WebFlutterDeviceFactory? _webFlutterDeviceFactory;
   final WebRunnerFactory? _webRunnerFactory;
 
   /// Create a driver service for running `flutter drive`.
@@ -71,6 +74,7 @@ class FlutterDriverFactory {
         featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         toolContext: _toolContext,
+        webFlutterDeviceFactory: _webFlutterDeviceFactory,
         webRunnerFactory: _webRunnerFactory,
       );
     }

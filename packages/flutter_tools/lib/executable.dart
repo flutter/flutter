@@ -58,6 +58,7 @@ import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
+import 'src/isolated/web_flutter_device.dart';
 import 'src/native_assets.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
@@ -138,6 +139,7 @@ Future<void> main(List<String> args) async {
     templateRenderer: const MustacheTemplateRenderer(),
     terminal: terminal,
     // The web runner is not supported in google3 because it depends on dwds.
+    webFlutterDeviceFactory: const DwdsWebFlutterDeviceFactory(),
     webRunnerFactory: DwdsWebRunnerFactory(),
   );
 
@@ -271,6 +273,7 @@ List<FlutterCommand> generateCommands({
       flutterHookRunner: toolDependencies.flutterHookRunner,
       hidden: !verboseHelp,
       toolContext: toolContext,
+      webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
       webRunnerFactory: toolDependencies.webRunnerFactory,
       xcode: toolDependencies.appleContext.xcode,
     ),
@@ -298,6 +301,7 @@ List<FlutterCommand> generateCommands({
       flutterHookRunner: toolDependencies.flutterHookRunner,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
+      webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
       webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     EmulatorsCommand(
@@ -343,6 +347,7 @@ List<FlutterCommand> generateCommands({
       devtoolsLauncher: toolDependencies.devtoolsLauncher,
       flutterHookRunner: toolDependencies.flutterHookRunner,
       verboseHelp: verboseHelp,
+      webFlutterDeviceFactory: toolDependencies.webFlutterDeviceFactory,
       webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     ScreenshotCommand(toolContext: toolContext),

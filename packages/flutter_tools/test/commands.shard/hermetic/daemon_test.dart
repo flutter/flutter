@@ -16,17 +16,29 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
+import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/daemon.dart';
+import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_flutter_device.dart';
+import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1612,6 +1624,89 @@ void main() {
     );
   });
 
+  testWithoutContext(
+    'AppDomain.startApp routes profile, release, and --wasm web runs to ColdRunner',
+    () async {
+      const projectDirPath = '/project';
+      const customRootPath = '/custom_root';
+      final fs = MemoryFileSystem.test();
+      fs.file('$projectDirPath/pubspec.yaml').createSync(recursive: true);
+      fs.file('$projectDirPath/lib/main.dart').createSync(recursive: true);
+      fs.directory(customRootPath).createSync(recursive: true);
+
+      final webDevice = _FakeDaemonWebDevice();
+      for (final (DebuggingOptions options, bool expectTunneller) in <(DebuggingOptions, bool)>[
+        (
+          DebuggingOptions.enabled(
+            BuildInfo.profile,
+            webConfig: const WebDebugConfig(enableExposeUrl: true),
+          ),
+          true,
+        ),
+        (DebuggingOptions.disabled(BuildInfo.release), false),
+        (
+          DebuggingOptions.enabled(BuildInfo.debug, webConfig: const WebDebugConfig(useWasm: true)),
+          false,
+        ),
+      ]) {
+        final bufferLogger = BufferLogger.test();
+        final testNotifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
+        final streams = FakeDaemonStreams();
+        final connection = DaemonConnection(daemonStreams: streams, logger: bufferLogger);
+        final webDeviceFactory = _FakeDaemonWebFlutterDeviceFactory();
+        final webRunnerFactory = _FakeDaemonWebRunnerFactory();
+        final toolContext = FakeToolContext(
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: MachineOutputLogger(parent: testNotifyingLogger),
+        );
+        final testDaemon = Daemon(
+          connection,
+          analytics: const NoOpAnalytics(),
+          applicationPackageFactory: FakeApplicationPackageFactory(),
+          assetBundleFactory: AssetBundleFactory.defaultInstance(
+            fileSystem: fs,
+            flutterRoot: '/flutter',
+            logger: testNotifyingLogger,
+            platform: toolContext.platform,
+          ),
+          buildSystem: buildSystem,
+          buildTargets: buildTargets,
+          devtoolsLauncher: FakeDevtoolsLauncher(),
+          featureFlags: TestFeatureFlags(),
+          notifyingLogger: testNotifyingLogger,
+          toolContext: toolContext,
+          webFlutterDeviceFactory: webDeviceFactory,
+          webRunnerFactory: webRunnerFactory,
+          xcode: null,
+        );
+
+        final AppInstance app = await testDaemon.appDomain.startApp(
+          webDevice,
+          projectDirPath,
+          'lib/main.dart',
+          null,
+          options,
+          options.buildInfo.isDebug,
+          projectRootPath: customRootPath,
+          trackWidgetCreation: options.buildInfo.isDebug,
+          webDefines: const <String, String>{'FOO': 'BAR'},
+        );
+        expect(app.runner, isA<ColdRunner>());
+        expect(app.runner.projectRootPath, customRootPath);
+        expect(webDeviceFactory.lastUrlTunneller != null, expectTunneller);
+        expect(webDeviceFactory.lastWebDefines, const <String, String>{'FOO': 'BAR'});
+        expect(webRunnerFactory.createCalled, isFalse);
+
+        await app.runner.exitApp();
+        await testDaemon.shutdown();
+        testNotifyingLogger.dispose();
+        await connection.dispose();
+      }
+      await pumpEventQueue();
+    },
+  );
+
   group('notifyingLogger', () {
     late BufferLogger bufferLogger;
     setUp(() {
@@ -2075,3 +2170,116 @@ class FakeRestartableResidentRunner extends FakeResidentRunner {
 }
 
 class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {}
+
+class _FakeDaemonWebDevice extends Fake implements Device {
+  @override
+  String get id => 'chrome';
+
+  @override
+  String get name => 'Chrome';
+
+  @override
+  String get displayName => name;
+
+  @override
+  bool get supportsHotReload => true;
+
+  @override
+  bool get supportsHotRestart => true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
+
+  @override
+  Future<bool> supportsRuntimeMode(BuildMode buildMode) async => true;
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _FakeDaemonWebFlutterDevice extends Fake implements FlutterDevice {
+  _FakeDaemonWebFlutterDevice(this.device);
+
+  @override
+  final Device device;
+
+  @override
+  DevFS? devFS;
+
+  @override
+  Future<Uri>? get vmServiceUri => null;
+
+  @override
+  FlutterVmService? get vmService => null;
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
+
+  @override
+  bool get supportsColdRestart => true;
+
+  @override
+  Future<int> runCold({required ColdRunner coldRunner, String? route}) async => 0;
+
+  @override
+  Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async {}
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {}
+}
+
+class _FakeDaemonWebFlutterDeviceFactory extends Fake implements WebFlutterDeviceFactory {
+  UrlTunneller? lastUrlTunneller;
+  Map<String, String>? lastWebDefines;
+
+  @override
+  FlutterDevice createWebFlutterDevice(
+    Device device, {
+    required BuildInfo buildInfo,
+    required DevelopmentShaderCompiler developmentShaderCompiler,
+    required FlutterProject flutterProject,
+    required ResidentCompiler? generator,
+    required TargetPlatform targetPlatform,
+    required ToolContext toolContext,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    UrlTunneller? urlTunneller,
+    String? userIdentifier,
+    Map<String, String> webDefines = const <String, String>{},
+  }) {
+    expect(generator, isNull);
+    lastUrlTunneller = urlTunneller;
+    lastWebDefines = webDefines;
+    return _FakeDaemonWebFlutterDevice(device);
+  }
+}
+
+class _FakeDaemonWebRunnerFactory extends Fake implements WebRunnerFactory {
+  bool createCalled = false;
+
+  @override
+  ResidentRunner createWebRunner(
+    FlutterDevice device, {
+    required Analytics analytics,
+    required ApplicationPackageFactory applicationPackageFactory,
+    required AssetBundleFactory assetBundleFactory,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
+    required FeatureFlags featureFlags,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
+    FlutterHookRunner? flutterHookRunner,
+    bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
+    Map<String, String> webDefines = const <String, String>{},
+  }) {
+    createCalled = true;
+    throw StateError('Unexpected createWebRunner call');
+  }
+}
