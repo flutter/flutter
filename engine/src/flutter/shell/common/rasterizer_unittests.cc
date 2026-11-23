@@ -175,7 +175,7 @@ TEST(RasterizerTest, isAiksContextInitialized) {
 }
 
 #if IMPELLER_SUPPORTS_RENDERING
-TEST(RasterizerTest, GetHeadlessAiksContextWithoutContextReturnsNull) {
+TEST(RasterizerTest, GetAiksContextWithoutImpellerContextReturnsNull) {
   NiceMock<MockDelegate> delegate;
   Settings settings;
   ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
@@ -183,7 +183,6 @@ TEST(RasterizerTest, GetHeadlessAiksContextWithoutContextReturnsNull) {
 
   auto& snapshot_delegate =
       static_cast<SnapshotController::Delegate&>(rasterizer);
-  EXPECT_EQ(snapshot_delegate.GetHeadlessAiksContext(), nullptr);
   EXPECT_EQ(snapshot_delegate.GetAiksContext(), nullptr);
 }
 
