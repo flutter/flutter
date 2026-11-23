@@ -330,7 +330,32 @@ Future<void> testMain() async {
         expect(activeSource.debugIsClosed, isTrue);
       },
     );
+
+    test('EngineImage releases ImageSource even when BackendImage.dispose throws', () async {
+      final ImageSource source = ImageBitmapImageSource(
+        await createImageBitmap(createBlankDomImageData(4, 4)),
+      );
+      final image = EngineImage(_ThrowingBackendImage(), 4, 4, imageSource: source);
+      expect(image.dispose, throwsStateError);
+      expect(source.debugIsClosed, isTrue);
+    });
   });
+}
+
+class _ThrowingBackendImage implements BackendImage {
+  @override
+  int get width => 4;
+
+  @override
+  int get height => 4;
+
+  @override
+  void dispose() {
+    throw StateError('Simulated backend disposal failure');
+  }
+
+  @override
+  bool isCloneOf(BackendImage other) => identical(this, other);
 }
 
 Future<EngineImage> _createBitmapBackedImage() async {

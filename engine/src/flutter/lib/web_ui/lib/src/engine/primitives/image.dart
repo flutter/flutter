@@ -57,8 +57,11 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       return (BackendImage backendImage) => backendImage.dispose();
     }
     return (BackendImage backendImage) {
-      backendImage.dispose();
-      source.release();
+      try {
+        backendImage.dispose();
+      } finally {
+        source.release();
+      }
     };
   }
 

@@ -33,11 +33,14 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
   /// [box] and prevent garbage collection.
   static void Function(PictureHandle) _createDisposer(PictureImageTracker? tracker) {
     if (tracker == null) {
-      return pictureDispose;
+      return (PictureHandle h) => pictureDispose(h);
     }
     return (PictureHandle h) {
-      pictureDispose(h);
-      tracker.releaseAll();
+      try {
+        pictureDispose(h);
+      } finally {
+        tracker.releaseAll();
+      }
     };
   }
 
@@ -147,7 +150,7 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
       );
 
   @visibleForTesting
-  static Finalizer finalizer = NativeMemoryFinalizer((Object tracker) {
+  static NativeMemoryFinalizer finalizer = NativeMemoryFinalizer((Object tracker) {
     (tracker as PictureImageTracker).releaseAll();
   });
 

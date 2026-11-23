@@ -140,7 +140,7 @@ void testMain() {
     );
 
     test('Abandoned SkwasmPictureRecorder releases retained ImageSource via finalizer', () async {
-      final Finalizer originalFinalizer = SkwasmPictureRecorder.finalizer;
+      final NativeMemoryFinalizer originalFinalizer = SkwasmPictureRecorder.finalizer;
       final mockFinalizer = _MockFinalizer();
       SkwasmPictureRecorder.finalizer = mockFinalizer;
       try {
@@ -169,7 +169,8 @@ void testMain() {
   });
 }
 
-class _MockFinalizer implements Finalizer {
+class _MockFinalizer extends NativeMemoryFinalizer {
+  _MockFinalizer() : super((_) {});
   final List<({Object target, Object value, Object? detach})> registeredPairs =
       <({Object target, Object value, Object? detach})>[];
 
