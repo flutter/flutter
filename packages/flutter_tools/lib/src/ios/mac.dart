@@ -453,8 +453,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     deviceId: deviceID,
   );
   if (hasWatchCompanion) {
-    // The -sdk argument has to be omitted if a watchOS companion app exists.
-    // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
     logger.printStatus('Watch companion app found.');
     if (environmentType == EnvironmentType.simulator && (deviceID == null || deviceID == '')) {
       logger.printError('No simulator device ID has been set.');
@@ -465,6 +463,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   }
 
+  // -destination already determines the SDK, so -sdk is not passed. An explicit -sdk would also be
+  // applied to host tools of Swift package plugins and build them with the simulator SDK.
   buildCommands.add('-destination');
   if (deviceID != null) {
     buildCommands.add('id=$deviceID');
