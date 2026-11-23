@@ -24,7 +24,6 @@ import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
@@ -35,13 +34,6 @@ void main() {
     late FakeProcessManager fakeProcessManager;
     late MemoryFileSystem fs;
     late Cache cache;
-
-    final overrides = <Type, Generator>{
-      AndroidSdk: () => sdk,
-      ProcessManager: () => fakeProcessManager,
-      FileSystem: () => fs,
-      Cache: () => cache,
-    };
 
     setUp(() async {
       sdk = FakeAndroidSdk();
@@ -59,7 +51,7 @@ void main() {
           .createSync(recursive: true);
     });
 
-    testUsingContext('does not throw and exception when build info is null', () async {
+    test('does not throw and exception when build info is null', () async {
       const aaptPath = 'aaptPath';
       final File apkFile = fs.file('app.apk');
       final sdkVersion = FakeAndroidSdkVersion();
@@ -92,7 +84,7 @@ void main() {
         androidSdkBuilder: () => sdk,
         plistParserBuilder: FakePlistParser.new,
         templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(cache: cache, fs: fs, processManager: fakeProcessManager),
       ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile);
       final logger = BufferLogger.test();
       final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
@@ -120,13 +112,11 @@ void main() {
           processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
           userMessages: UserMessages(),
         ),
-
-        // ignore: avoid_redundant_argument_values
       );
       expect(androidApk, isNotNull);
-    }, overrides: overrides);
+    });
 
-    testUsingContext('correct debug filename in module projects', () async {
+    test('correct debug filename in module projects', () async {
       const aaptPath = 'aaptPath';
       final File apkFile = fs.file('app-debug.apk');
       final sdkVersion = FakeAndroidSdkVersion();
@@ -167,7 +157,7 @@ void main() {
         androidSdkBuilder: () => sdk,
         plistParserBuilder: FakePlistParser.new,
         templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(cache: cache, fs: fs, processManager: fakeProcessManager),
       ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile);
       final logger = BufferLogger.test();
       final FlutterProject project = await aModuleProject(fs: fs, logger: logger);
@@ -204,7 +194,7 @@ void main() {
         ),
       );
       expect(androidApk, isNotNull);
-    }, overrides: overrides);
+    });
 
     test('AndroidApk.fromAndroidProject parses manifest with activity-alias', () async {
       final logger = BufferLogger.test();
@@ -315,42 +305,38 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'Licenses not available, platform and buildtools available, apk exists',
-      () async {
-        const aaptPath = 'aaptPath';
-        final File apkFile = fs.file('app-debug.apk');
-        final sdkVersion = FakeAndroidSdkVersion();
-        sdkVersion.aaptPath = aaptPath;
-        sdk.latestVersion = sdkVersion;
-        sdk.platformToolsAvailable = true;
-        sdk.licensesAvailable = false;
+    test('Licenses not available, platform and buildtools available, apk exists', () async {
+      const aaptPath = 'aaptPath';
+      final File apkFile = fs.file('app-debug.apk');
+      final sdkVersion = FakeAndroidSdkVersion();
+      sdkVersion.aaptPath = aaptPath;
+      sdk.latestVersion = sdkVersion;
+      sdk.platformToolsAvailable = true;
+      sdk.licensesAvailable = false;
 
-        fakeProcessManager.addCommand(
-          FakeCommand(
-            command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
-            stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
-          ),
-        );
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[aaptPath, 'dump', 'xmltree', apkFile.path, 'AndroidManifest.xml'],
+          stdout: _aaptDataWithDefaultEnabledAndMainLauncherActivity,
+        ),
+      );
 
-        final ApplicationPackage applicationPackage = (await FlutterApplicationPackageFactory(
-          androidSdkBuilder: () => sdk,
-          plistParserBuilder: FakePlistParser.new,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: const DelegatingToolContext(),
-        ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile))!;
-        expect(applicationPackage.name, 'app-debug.apk');
-        expect(applicationPackage, isA<PrebuiltApplicationPackage>());
-        expect(
-          (applicationPackage as PrebuiltApplicationPackage).applicationPackage.path,
-          apkFile.path,
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: overrides,
-    );
+      final ApplicationPackage applicationPackage = (await FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => sdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(cache: cache, fs: fs, processManager: fakeProcessManager),
+      ).getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile))!;
+      expect(applicationPackage.name, 'app-debug.apk');
+      expect(applicationPackage, isA<PrebuiltApplicationPackage>());
+      expect(
+        (applicationPackage as PrebuiltApplicationPackage).applicationPackage.path,
+        apkFile.path,
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext('Licenses available, build tools not, apk exists', () async {
+    test('Licenses available, build tools not, apk exists', () async {
       sdk.latestVersion = null;
       final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
       project.android.hostAppGradleRoot
@@ -369,30 +355,26 @@ void main() {
         androidSdkBuilder: () => sdk,
         plistParserBuilder: FakePlistParser.new,
         templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-        toolContext: const DelegatingToolContext(),
+        toolContext: FakeToolContext(cache: cache, fs: fs, processManager: fakeProcessManager),
       ).getPackageForPlatform(
         TargetPlatform.android_arm,
         applicationBinary: fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
-    }, overrides: overrides);
+    });
 
-    testUsingContext(
-      'Licenses available, build tools available, does not call gradle dependencies',
-      () async {
-        final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
-        sdk.latestVersion = sdkVersion;
+    test('Licenses available, build tools available, does not call gradle dependencies', () async {
+      final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
+      sdk.latestVersion = sdkVersion;
 
-        await FlutterApplicationPackageFactory(
-          androidSdkBuilder: () => sdk,
-          plistParserBuilder: FakePlistParser.new,
-          templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
-          toolContext: const DelegatingToolContext(),
-        ).getPackageForPlatform(TargetPlatform.android_arm);
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: overrides,
-    );
+      await FlutterApplicationPackageFactory(
+        androidSdkBuilder: () => sdk,
+        plistParserBuilder: FakePlistParser.new,
+        templatePathProvider: const TemplatePathProvider(flutterRoot: ''),
+        toolContext: FakeToolContext(cache: cache, fs: fs, processManager: fakeProcessManager),
+      ).getPackageForPlatform(TargetPlatform.android_arm);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
 
     test('returns null when failed to extract manifest', () async {
       final Logger logger = BufferLogger.test();
@@ -677,11 +659,6 @@ void main() {
     late FakePlistParser testPlistParser;
     late FakeToolContext toolContext;
 
-    final overrides = <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    };
-
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       logger = BufferLogger.test();
@@ -926,10 +903,10 @@ void main() {
       expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
     });
 
-    testUsingContext('returns template app icon dirname for Contents.json', () async {
+    test('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
         IosProject.fromFlutter(
-          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: logger),
         ),
         'com.foo.bar',
         'Runner',
@@ -953,9 +930,9 @@ void main() {
           iconDirSuffix,
         ),
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns template app icon dirname for images', () async {
+    test('returns template app icon dirname for images', () async {
       final String toolsDir = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
       final String packageConfigPath = fileSystem.path.join(
         toolsDir,
@@ -979,7 +956,7 @@ void main() {
 ''');
       final iosApp = BuildableIOSApp(
         IosProject.fromFlutter(
-          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: logger),
         ),
         'com.foo.bar',
         'Runner',
@@ -1001,7 +978,7 @@ void main() {
           iconDirSuffix,
         ),
       );
-    }, overrides: overrides);
+    });
 
     test('returns project launch image dirname', () async {
       final iosApp = BuildableIOSApp(
@@ -1019,10 +996,10 @@ void main() {
       expect(iosApp.projectLaunchImageDirName, fileSystem.path.join('ios', launchImageDirSuffix));
     });
 
-    testUsingContext('returns template launch image dirname for Contents.json', () async {
+    test('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
         IosProject.fromFlutter(
-          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: logger),
         ),
         'com.foo.bar',
         'Runner',
@@ -1046,9 +1023,9 @@ void main() {
           launchImageDirSuffix,
         ),
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns template launch image dirname for images', () async {
+    test('returns template launch image dirname for images', () async {
       final String toolsDir = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools');
       final String packageConfigPath = fileSystem.path.join(
         toolsDir,
@@ -1072,7 +1049,7 @@ void main() {
 ''');
       final iosApp = BuildableIOSApp(
         IosProject.fromFlutter(
-          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: testLogger),
+          FlutterProject.fromDirectory(fileSystem.currentDirectory, logger: logger),
         ),
         'com.foo.bar',
         'Runner',
@@ -1094,7 +1071,7 @@ void main() {
           launchImageDirSuffix,
         ),
       );
-    }, overrides: overrides);
+    });
   });
 }
 
