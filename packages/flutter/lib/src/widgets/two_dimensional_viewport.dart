@@ -532,8 +532,7 @@ class TwoDimensionalViewportParentData extends ParentData with KeepAliveParentDa
 abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
-  /// The [cacheExtent], if null, defaults to
-  /// [RenderAbstractViewport.defaultCacheExtent].
+  /// The [scrollCacheExtent], if null, defaults to 250 pixels
   RenderTwoDimensionalViewport({
     required this._horizontalOffset,
     required AxisDirection horizontalAxisDirection,
@@ -572,12 +571,15 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
                    CacheExtentStyle.pixel || null => ScrollCacheExtent.pixels(cacheExtent),
                    CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
                  }
-               : const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent)) {
+               : _defaultScrollCacheExtent) {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
       return true;
     }());
   }
+
+  /// The default [scrollCacheExtent] for a [RenderTwoDimensionalViewport].
+  static const ScrollCacheExtent _defaultScrollCacheExtent = ScrollCacheExtent.pixels(250.0);
 
   /// Which part of the content inside the viewport should be visible in the
   /// horizontal axis.
@@ -715,9 +717,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     if (value == null) {
-      _scrollCacheExtent = const ScrollCacheExtent.pixels(
-        RenderAbstractViewport.defaultCacheExtent,
-      );
+      _scrollCacheExtent = _defaultScrollCacheExtent;
     } else {
       _scrollCacheExtent = switch (cacheExtentStyle) {
         CacheExtentStyle.pixel => ScrollCacheExtent.pixels(value),
@@ -760,9 +760,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       return;
     }
     if (value == null) {
-      _scrollCacheExtent = const ScrollCacheExtent.pixels(
-        RenderAbstractViewport.defaultCacheExtent,
-      );
+      _scrollCacheExtent = _defaultScrollCacheExtent;
     } else {
       _scrollCacheExtent = value;
     }
