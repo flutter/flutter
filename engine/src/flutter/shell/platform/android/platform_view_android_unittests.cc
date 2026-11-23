@@ -7,15 +7,24 @@
 #include <android/api-level.h>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "flutter/common/settings.h"
+#include "flutter/common/task_runners.h"
+#include "flutter/fml/thread.h"
+#include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/testing/post_task_sync.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "impeller/base/promise.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/capabilities.h"
+#include "impeller/renderer/testing/mocks.h"
 #include "shell/platform/android/flutter_main.h"
 
 #include "third_party/googletest/googlemock/include/gmock/gmock-nice-strict.h"
@@ -173,6 +182,124 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
               (const, override));
 };
 
+using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+
+class MockPlatformViewDelegate : public PlatformView::Delegate {
+ public:
+  MOCK_METHOD(void,
+              OnPlatformViewCreated,
+              (std::unique_ptr<Surface>),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewCreatedDeferred,
+              (PlatformView::SurfaceFactory surface_factory),
+              (override));
+  MOCK_METHOD(void, OnPlatformViewDestroyed, (), (override));
+  MOCK_METHOD(void, OnPlatformViewScheduleFrame, (), (override));
+  MOCK_METHOD(void,
+              OnPlatformViewAddView,
+              (int64_t view_id,
+               const ViewportMetrics& viewport_metrics,
+               AddViewCallback callback),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewRemoveView,
+              (int64_t view_id, RemoveViewCallback callback),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSendViewFocusEvent,
+              (const ViewFocusEvent& event),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetNextFrameCallback,
+              (const fml::closure& closure),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetViewportMetrics,
+              (int64_t view_id, const ViewportMetrics& metrics),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchPlatformMessage,
+              (std::unique_ptr<PlatformMessage> message),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchPointerDataPacket,
+              (std::unique_ptr<PointerDataPacket> packet),
+              (override));
+  MOCK_METHOD(HitTestResponse,
+              OnPlatformViewHitTest,
+              (int64_t view_id, const flutter::PointData offset),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchSemanticsAction,
+              (int64_t view_id,
+               int32_t node_id,
+               SemanticsAction action,
+               fml::MallocMapping args),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetSemanticsEnabled,
+              (bool enabled),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetAccessibilityFeatures,
+              (int32_t flags),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewRegisterTexture,
+              (std::shared_ptr<Texture> texture),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewUnregisterTexture,
+              (int64_t texture_id),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewMarkTextureFrameAvailable,
+              (int64_t texture_id),
+              (override));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibrary,
+              (intptr_t loading_unit_id,
+               std::unique_ptr<const fml::Mapping> snapshot_data,
+               std::unique_ptr<const fml::Mapping> snapshot_instructions),
+              (override));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibraryError,
+              (intptr_t loading_unit_id,
+               const std::string error_message,
+               bool transient),
+              (override));
+  MOCK_METHOD(void,
+              UpdateAssetResolverByType,
+              (std::unique_ptr<AssetResolver> updated_asset_resolver,
+               AssetResolver::AssetResolverType type),
+              (override));
+  MOCK_METHOD(const Settings&,
+              OnPlatformViewGetSettings,
+              (),
+              (const, override));
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
+              (),
+              (const, override));
+};
+
+/// An Android context that renders in software, so that a platform view can
+/// be created without a GPU, but that hands out the given Impeller context.
+class FakeAndroidContext final : public AndroidContext {
+ public:
+  explicit FakeAndroidContext(
+      const std::shared_ptr<impeller::Context>& impeller_context)
+      : AndroidContext(AndroidRenderingAPI::kSoftware) {
+    SetImpellerContext(impeller_context);
+  }
+};
+
 }  // namespace
 
 // TODO(matanlurey): Re-enable.
@@ -268,6 +395,167 @@ TEST(AndroidPlatformView,
     EXPECT_EQ(holder->IsSurfaceControlEnabled(), supports_external_semaphore);
   }
 }
+
+// The software backend is needed to create a platform view without a GPU.
+#if !SLIMPELLER
+namespace {
+
+/// Creates an Impeller context of the given backend with no GPU behind it,
+/// whose shader library resolves every shader.
+std::shared_ptr<impeller::testing::MockImpellerContext>
+CreateImpellerContextWithoutGPU(
+    impeller::Context::BackendType backend_type,
+    const std::shared_ptr<impeller::PipelineLibrary>& pipeline_library) {
+  std::shared_ptr<const impeller::Capabilities> capabilities =
+      impeller::CapabilitiesBuilder()
+          .SetDefaultColorFormat(impeller::PixelFormat::kR8G8B8A8UNormInt)
+          .SetDefaultDepthStencilFormat(impeller::PixelFormat::kD24UnormS8Uint)
+          .SetDefaultGlyphAtlasFormat(impeller::PixelFormat::kA8UNormInt)
+          .Build();
+  auto shader_library =
+      std::make_shared<NiceMock<impeller::testing::MockShaderLibrary>>();
+  ON_CALL(*shader_library, GetFunction(_, _))
+      .WillByDefault([](std::string_view name, impeller::ShaderStage stage) {
+        return std::make_shared<impeller::testing::MockShaderFunction>(
+            std::string(name), stage);
+      });
+  auto impeller_context =
+      std::make_shared<NiceMock<impeller::testing::MockImpellerContext>>();
+  ON_CALL(*impeller_context, IsValid()).WillByDefault(Return(true));
+  ON_CALL(*impeller_context, GetBackendType())
+      .WillByDefault(Return(backend_type));
+  ON_CALL(*impeller_context, GetCapabilities())
+      .WillByDefault(ReturnRefOfCopy(capabilities));
+  ON_CALL(*impeller_context, GetShaderLibrary())
+      .WillByDefault(Return(shader_library));
+  ON_CALL(*impeller_context, GetPipelineLibrary())
+      .WillByDefault(Return(pipeline_library));
+  return impeller_context;
+}
+
+/// Returns a future for a pipeline that is never created.
+impeller::PipelineFuture<impeller::PipelineDescriptor> ReturnNullPipeline(
+    impeller::PipelineDescriptor descriptor,
+    bool /*async*/,
+    bool /*threadsafe*/) {
+  return impeller::PipelineFuture<impeller::PipelineDescriptor>{
+      std::move(descriptor),
+      impeller::RealizedFuture<
+          std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>(
+          nullptr)};
+}
+
+}  // namespace
+
+/// Has a real raster thread for the default pipelines to be warmed on.
+class DefaultPipelineWarmUpTest : public ::testing::Test {
+ protected:
+  DefaultPipelineWarmUpTest()
+      : raster_thread_("raster"),
+        task_runners_("DefaultPipelineWarmUpTest",
+                      nullptr,
+                      raster_thread_.GetTaskRunner(),
+                      nullptr,
+                      nullptr) {
+    ON_CALL(delegate_, OnPlatformViewGetSettings())
+        .WillByDefault(ReturnRef(settings_));
+  }
+
+  std::unique_ptr<PlatformViewAndroid> CreatePlatformView(
+      const std::shared_ptr<AndroidContext>& android_context) {
+    return std::make_unique<PlatformViewAndroid>(
+        delegate_, task_runners_, std::make_shared<JNIMock>(), android_context);
+  }
+
+  /// Waits for the tasks posted to the raster thread so far to run.
+  void FlushRasterThread() {
+    PostTaskSync(GetRasterTaskRunner(), []() {});
+  }
+
+  fml::RefPtr<fml::TaskRunner> GetRasterTaskRunner() const {
+    return task_runners_.GetRasterTaskRunner();
+  }
+
+ private:
+  fml::Thread raster_thread_;
+  TaskRunners task_runners_;
+  Settings settings_;
+  NiceMock<MockPlatformViewDelegate> delegate_;
+};
+
+// Warming the default pipelines from SetupImpellerContext deadlocks startup.
+// See |PlatformViewAndroid::CreateResourceContext|.
+TEST_F(DefaultPipelineWarmUpTest,
+       SetupImpellerContextDoesNotWarmDefaultPipelines) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  EXPECT_CALL(*pipeline_library, GetPipeline(_, _, _)).Times(0);
+  std::unique_ptr<PlatformViewAndroid> platform_view = CreatePlatformView(
+      std::make_shared<FakeAndroidContext>(CreateImpellerContextWithoutGPU(
+          impeller::Context::BackendType::kOpenGLES, pipeline_library)));
+
+  PostTaskSync(GetRasterTaskRunner(),
+               [&platform_view]() { platform_view->SetupImpellerContext(); });
+  FlushRasterThread();
+}
+
+TEST_F(DefaultPipelineWarmUpTest, WarmsDefaultPipelinesOnRasterThreadForGLES) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  // The pipelines are requested asynchronously on the raster thread.
+  EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/false, _)).Times(0);
+  EXPECT_CALL(*pipeline_library, GetPipeline(_, /*async=*/true, _))
+      .Times(AtLeast(1))
+      .WillRepeatedly([this](impeller::PipelineDescriptor descriptor,
+                             bool async, bool threadsafe) {
+        EXPECT_TRUE(GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+        return ReturnNullPipeline(std::move(descriptor), async, threadsafe);
+      });
+  FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
+      impeller::Context::BackendType::kOpenGLES, pipeline_library));
+
+  // Called on this thread, standing in for the IO thread.
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
+}
+
+// Platform views that share an Android context, such as those of spawned
+// engines, only warm its default pipelines once.
+TEST_F(DefaultPipelineWarmUpTest, WarmsDefaultPipelinesOnlyOnce) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  size_t requested_pipelines = 0;
+  ON_CALL(*pipeline_library, GetPipeline(_, _, _))
+      .WillByDefault(
+          [&requested_pipelines](impeller::PipelineDescriptor descriptor,
+                                 bool async, bool threadsafe) {
+            requested_pipelines++;
+            return ReturnNullPipeline(std::move(descriptor), async, threadsafe);
+          });
+  FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
+      impeller::Context::BackendType::kOpenGLES, pipeline_library));
+
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
+  const size_t requested_by_first_warm_up = requested_pipelines;
+  EXPECT_GT(requested_by_first_warm_up, 0u);
+
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
+  EXPECT_EQ(requested_pipelines, requested_by_first_warm_up);
+}
+
+TEST_F(DefaultPipelineWarmUpTest, DoesNotWarmDefaultPipelinesForVulkan) {
+  auto pipeline_library =
+      std::make_shared<NiceMock<impeller::testing::MockPipelineLibrary>>();
+  EXPECT_CALL(*pipeline_library, GetPipeline(_, _, _)).Times(0);
+  FakeAndroidContext android_context(CreateImpellerContextWithoutGPU(
+      impeller::Context::BackendType::kVulkan, pipeline_library));
+
+  android_context.StartWarmingDefaultPipelines(GetRasterTaskRunner());
+  FlushRasterThread();
+}
+#endif  // !SLIMPELLER
 
 }  // namespace testing
 }  // namespace flutter

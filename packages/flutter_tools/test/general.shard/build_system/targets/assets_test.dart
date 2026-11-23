@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 
 void main() {
@@ -34,6 +35,7 @@ void main() {
       fileSystem.currentDirectory,
       processManager: FakeProcessManager.any(),
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform(),
@@ -214,6 +216,7 @@ flutter:
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.any(),
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
@@ -263,6 +266,7 @@ flutter:
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.any(),
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
@@ -316,6 +320,7 @@ flutter:
         fileSystem.currentDirectory,
         processManager: FakeProcessManager.any(),
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(),
@@ -403,6 +408,7 @@ flutter:
       fileSystem.currentDirectory,
       processManager: processManager,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform(),
@@ -498,6 +504,7 @@ flutter:
       fileSystem.currentDirectory,
       processManager: processManager,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform(),
@@ -555,6 +562,7 @@ flutter:
       fileSystem.currentDirectory,
       processManager: processManager,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform(),
@@ -625,6 +633,7 @@ flutter:
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: Artifacts.test(),
+        featureFlags: TestFeatureFlags(),
         fileSystem: fileSystem,
         logger: logger,
         platform: FakePlatform(numberOfProcessors: 64),
@@ -832,6 +841,7 @@ flutter:
       fileSystem.currentDirectory,
       processManager: processManager,
       artifacts: Artifacts.test(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fileSystem,
       logger: logger,
       platform: FakePlatform(numberOfProcessors: 4),

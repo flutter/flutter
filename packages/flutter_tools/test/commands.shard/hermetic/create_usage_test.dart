@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -25,6 +26,7 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
+import '../../src/throwing_pub.dart';
 
 class FakePub extends Fake implements Pub {
   int calledGetOffline = 0;
@@ -177,10 +179,13 @@ void main() {
       );
     });
 
-    CreateCommand createCreateCommand({Pub? pub}) {
+    CreateCommand createCreateCommand({FeatureFlags? featureFlags, Pub? pub}) {
       return CreateCommand(
         androidContext: FakeAndroidContext(),
         appleContext: FakeAppleContext(),
+        featureFlags: featureFlags ?? TestFeatureFlags(isNativeAssetsEnabled: true),
+        pub: pub ?? const ThrowingPub(),
+        templatePathProvider: TemplatePathProvider(flutterRoot: cache.flutterRoot),
         templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: fs,
@@ -192,7 +197,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger, config: config),
         ),
-        pub: pub,
       );
     }
 
@@ -274,25 +278,17 @@ void main() {
       }),
     );
 
-    testUsingContext(
-      'package_ffi template not enabled',
-      () async {
-        final CreateCommand command = createCreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
+    testUsingContext('package_ffi template not enabled', () async {
+      final CreateCommand command = createCreateCommand(featureFlags: TestFeatureFlags());
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        expect(
-          runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'my_ffi_package']),
-          throwsUsageException(
-            message: '"package_ffi" is not an allowed value for option "--template"',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(
-          isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+      expect(
+        runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'my_ffi_package']),
+        throwsUsageException(
+          message: '"package_ffi" is not an allowed value for option "--template"',
         ),
-      },
-    );
+      );
+    });
 
     testUsingContext('plugin_ffi template is marked as deprecated in help', () {
       final CreateCommand command = createCreateCommand();
