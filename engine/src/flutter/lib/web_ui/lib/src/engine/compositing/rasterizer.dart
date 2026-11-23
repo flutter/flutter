@@ -56,7 +56,11 @@ abstract class SurfaceRasterizer<V extends ViewRasterizer> extends Rasterizer {
     });
   }
 
-  void _releaseFactory(ViewRasterizer rasterizer) {
+  void _unregisterView(EngineFlutterView view) {
+    _views.remove(view);
+  }
+
+  void _disposeViewFactory(ViewRasterizer rasterizer) {
     try {
       rasterizer.displayFactory.dispose();
     } finally {
@@ -175,7 +179,7 @@ abstract class ViewRasterizer {
     } finally {
       _submittingFrame = false;
       if (_isDisposed) {
-        _owner?._releaseFactory(this);
+        _owner?._disposeViewFactory(this);
       }
     }
     if (presentationTimer != null) {
@@ -230,10 +234,10 @@ abstract class ViewRasterizer {
       return;
     }
     _isDisposed = true;
-    _owner?._views.remove(view);
+    _owner?._unregisterView(view);
     viewEmbedder.dispose();
     if (!_submittingFrame) {
-      _owner?._releaseFactory(this);
+      _owner?._disposeViewFactory(this);
     }
   }
 

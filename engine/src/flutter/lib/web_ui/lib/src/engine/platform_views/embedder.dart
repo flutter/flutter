@@ -888,18 +888,6 @@ class PlatformViewSceneElement extends SceneElement {
 
 /// The state for the current frame.
 class EmbedderFrameContext {
-  /// Ends recordings left open when preparation or canvas allocation is interrupted.
-  void disposeRecorders() {
-    optimizedCanvasRecorders?.forEach(_disposeRecording);
-    measuringPictureRecorders.values.forEach(_disposeRecording);
-  }
-
-  static void _disposeRecording(ui.PictureRecorder recorder) {
-    if (recorder.isRecording) {
-      recorder.endRecording().dispose();
-    }
-  }
-
   /// Picture recorders which were created to measure the final bounds of the
   /// picture in the scene.
   final Map<PictureLayer, LayerPictureRecorder> measuringPictureRecorders =
@@ -925,4 +913,16 @@ class EmbedderFrameContext {
   /// into in the optimized composition. This is set by calling
   /// [optimizeComposition].
   Map<PictureLayer, LayerCanvas>? pictureToOptimizedCanvasMap;
+
+  /// Ends recordings left open when preparation or canvas allocation is interrupted.
+  void disposeRecorders() {
+    optimizedCanvasRecorders?.forEach(_disposeRecording);
+    measuringPictureRecorders.values.forEach(_disposeRecording);
+  }
+
+  static void _disposeRecording(ui.PictureRecorder recorder) {
+    if (recorder.isRecording) {
+      recorder.endRecording().dispose();
+    }
+  }
 }
