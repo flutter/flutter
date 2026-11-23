@@ -394,7 +394,9 @@ TEST(ContextVKTest, RetainHostBufferUntilFenceCompletion) {
   auto completion = std::make_shared<fml::AutoResetWaitableEvent>();
   ASSERT_TRUE(context->GetCommandQueue()
                   ->Submit({command_buffer},
-                           [completion](CommandBuffer::Status) {
+                           [completion](CommandBuffer::Status status) {
+                             EXPECT_EQ(status,
+                                       CommandBuffer::Status::kCompleted);
                              completion->Signal();
                            })
                   .ok());
@@ -409,6 +411,7 @@ TEST(ContextVKTest, RetainHostBufferUntilFenceCompletion) {
   EXPECT_EQ(
       GetMockVulkanFunctionCallCount(context->GetDevice(), "vkDeviceWaitIdle"),
       wait_idle_calls_before_destroy);
+  EXPECT_FALSE(completion->IsSignaledForTest());
   EXPECT_FALSE(weak_backing_buffer.expired());
 
   submitted_fence->SetStatus(vk::Result::eSuccess);

@@ -247,7 +247,8 @@ TEST(RasterizerTest, ClearRenderTargetCacheClearsImpellerCache) {
 }
 
 #if IMPELLER_ENABLE_VULKAN
-TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWhenProducerFails) {
+static void ExpectHeadlessVulkanSnapshot(
+    std::unique_ptr<SnapshotSurfaceProducer> producer) {
   NiceMock<MockDelegate> delegate;
   Settings settings;
   settings.enable_impeller = true;
@@ -265,10 +266,6 @@ TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWhenProducerFails) {
       std::make_shared<impeller::ImpellerContextFuture>(
           context_promise.get_future()));
 
-  auto producer = std::make_unique<NiceMock<MockSnapshotSurfaceProducer>>();
-  MockSnapshotSurfaceProducer* producer_ptr = producer.get();
-  EXPECT_CALL(*producer_ptr, CreateSnapshotSurface())
-      .WillOnce(Return(ByMove(std::unique_ptr<Surface>())));
   rasterizer.SetSnapshotSurfaceProducer(std::move(producer));
 
   bool received_expected_context = false;
@@ -285,6 +282,16 @@ TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWhenProducerFails) {
 
   EXPECT_EQ(result, nullptr);
   EXPECT_TRUE(received_expected_context);
+}
+
+TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWithoutProducer) {
+  ExpectHeadlessVulkanSnapshot(nullptr);
+}
+
+TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWhenProducerFails) {
+  auto producer = std::make_unique<MockSnapshotSurfaceProducer>();
+  EXPECT_CALL(*producer, CreateSnapshotSurface()).WillOnce(Return(nullptr));
+  ExpectHeadlessVulkanSnapshot(std::move(producer));
 }
 #endif  // IMPELLER_ENABLE_VULKAN
 #endif  // IMPELLER_SUPPORTS_RENDERING
