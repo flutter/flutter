@@ -4890,6 +4890,45 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
   XCTAssertEqual(flutterView.subviews.firstObject, someView);
 }
 
+- (void)testResetRemovesPlatformViewsNotInFrameBeingBuilt {
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      CreateTestPlatformViewsController(self.name);
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id value) {
+  };
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                     arguments:@{
+                                                       @"id" : @0,
+                                                       @"viewType" : @"MockFlutterPlatformView",
+                                                       @"gestureBlockingPolicy" : @"eager"
+                                                     }]
+            result:result];
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  [self submitFrameWithController:flutterPlatformViewsController
+                           viewId:0
+                           offset:10
+                   backdropFilter:NO];
+  UIView* rootView = FindTouchInterceptingView(gMockPlatformView).superview;
+  XCTAssertEqual(rootView.superview, flutterView);
+
+  // Begin a frame that doesn't include the view.
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)
+                                    devicePixelRatio:[UIScreen mainScreen].scale];
+
+  // Verify that reset removes the view from the Flutter view, even though it isn't in the frame
+  // being built.
+  [flutterPlatformViewsController reset];
+  XCTAssertNil(rootView.superview);
+}
+
 - (void)testResetClearsPreviousCompositionOrder {
   FlutterPlatformViewsController* flutterPlatformViewsController =
       CreateTestPlatformViewsController(self.name);
