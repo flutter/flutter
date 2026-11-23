@@ -14,9 +14,14 @@ source_set("mock_vulkan") {
     "test/mock_vulkan.h",
   ]
 
+  public_deps = [ ":vulkan" ]
+
   deps = [
-    ":vulkan",
     "//flutter/fml",
+    "//flutter/impeller/entity:entity_shaders",
+    "//flutter/impeller/entity:framebuffer_blend_entity_shaders",
+    "//flutter/impeller/entity:modern_entity_shaders",
+    "//flutter/impeller/renderer:compute_shaders",
   ]
 }
 
@@ -49,6 +54,7 @@ impeller_component("vulkan_unittests") {
   deps = [
     ":mock_vulkan",
     ":vulkan",
+    "../../../entity",
     "../../../playground:playground_test",
     "//flutter/testing:testing_lib",
   ]

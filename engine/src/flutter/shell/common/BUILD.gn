@@ -347,6 +347,10 @@ if (enable_unittests) {
       "//flutter/third_party/googletest:gmock",
     ]
 
+    if (impeller_enable_vulkan) {
+      deps += [ "//flutter/impeller/renderer/backend/vulkan:mock_vulkan" ]
+    }
+
     if (is_fuchsia) {
       sources += [ "shell_fuchsia_unittests.cc" ]
 

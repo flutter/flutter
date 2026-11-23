@@ -722,48 +722,46 @@ class Rasterizer final : public SnapshotDelegate,
     if (surface_) {
       return surface_->GetAiksContext();
     }
-    // There is no surface to get an AiksContext from, so construct a new one.
-    // On OpenGL ES, that requires a current context, so we can't construct one
-    // directly. Create a snapshot surface to make an offscreen context current,
-    // then return the snapshot surface's AiksContext. Only OpenGL ES provides a
-    // snapshot surface, so other backends skip this.
+    // On OpenGL ES the producer makes an offscreen context current before
+    // constructing the surface's AiksContext.
     if (snapshot_surface_producer_) {
       if (std::unique_ptr<Surface> snapshot_surface =
               snapshot_surface_producer_->CreateSnapshotSurface()) {
         return snapshot_surface->GetAiksContext();
       }
     }
-    // A headless Vulkan context submits through the command queue, which keeps
-    // each referenced buffer alive until the submission fence signals.
-    if (auto context = impeller_context_->GetContext()) {
-      const auto lifetime =
-          context->GetBackendType() == impeller::Context::BackendType::kVulkan
-              ? impeller::HostBuffer::Lifetime::kRetainInCommandBuffer
-              : impeller::HostBuffer::Lifetime::kWaitForIdle;
-      return std::make_shared<impeller::AiksContext>(
-          context, impeller::TypographerContextSkia::Make(), std::nullopt,
-          lifetime);
-    }
-#endif
+    return GetHeadlessAiksContext();
+#else
     return nullptr;
+#endif
+  }
+
+  // |SnapshotController::Delegate|
+  std::shared_ptr<impeller::AiksContext> GetHeadlessAiksContext()
+      const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    auto context =
+        impeller_context_ ? impeller_context_->GetContext() : nullptr;
+    if (!context || context->GetBackendType() ==
+                        impeller::Context::BackendType::kOpenGLES) {
+      return nullptr;
+    }
+    // Vulkan retains submitted buffers until their fence signals.
+    const auto lifetime =
+        context->GetBackendType() == impeller::Context::BackendType::kVulkan
+            ? impeller::HostBuffer::Lifetime::kRetainInCommandBuffer
+            : impeller::HostBuffer::Lifetime::kWaitForIdle;
+    return std::make_shared<impeller::AiksContext>(
+        context, impeller::TypographerContextSkia::Make(), std::nullopt,
+        lifetime);
+#else
+    return nullptr;
+#endif
   }
 
   // |SnapshotController::Delegate|
   const std::unique_ptr<SnapshotSurfaceProducer>& GetSnapshotSurfaceProducer()
       const override {
-#if IMPELLER_SUPPORTS_RENDERING
-    // Android supplies a producer even when the selected Vulkan backend
-    // cannot create a snapshot surface. Select the headless context in that
-    // case.
-    if (snapshot_surface_producer_ && impeller_context_) {
-      if (auto context = impeller_context_->GetContext();
-          context && context->GetBackendType() ==
-                         impeller::Context::BackendType::kVulkan) {
-        static const std::unique_ptr<SnapshotSurfaceProducer> kNoProducer;
-        return kNoProducer;
-      }
-    }
-#endif
     return snapshot_surface_producer_;
   }
 

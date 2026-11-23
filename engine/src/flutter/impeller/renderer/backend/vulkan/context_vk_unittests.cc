@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <memory>
 #include <optional>
 #include <string_view>
 
@@ -9,6 +11,7 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -351,6 +354,66 @@ TEST(ContextVKTest, BatchSubmitCommandBuffersOnArm) {
   functions = GetMockVulkanFunctions(context->GetDevice());
   EXPECT_TRUE(std::find(functions->begin(), functions->end(),
                         "vkCreateFence") != functions->end());
+}
+
+TEST(ContextVKTest, RetainHostBufferUntilFenceCompletion) {
+  auto context = CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(context);
+
+  auto content_context = std::make_unique<ContentContext>(
+      context, nullptr, nullptr, HostBuffer::Lifetime::kRetainInCommandBuffer);
+  ASSERT_TRUE(content_context->IsValid());
+
+  BufferView buffer_view =
+      content_context->GetTransientsDataBuffer().EmplaceUniform(0.0f);
+  ASSERT_TRUE(buffer_view);
+  std::weak_ptr<const DeviceBuffer> weak_backing_buffer =
+      buffer_view.GetSharedBuffer();
+  ASSERT_FALSE(weak_backing_buffer.expired());
+
+  auto command_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(command_buffer);
+  auto blit_pass = command_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.size = ISize{1, 1};
+  auto texture =
+      context->GetResourceAllocator()->CreateTexture(texture_descriptor);
+  ASSERT_TRUE(texture);
+  ASSERT_TRUE(blit_pass->AddCopy(std::move(buffer_view), texture));
+  ASSERT_TRUE(blit_pass->EncodeCommands());
+  blit_pass.reset();
+
+  MockFence* submitted_fence = nullptr;
+  SetMockVulkanQueueSubmitCallback(context->GetDevice(), [&](MockFence* fence) {
+    fence->SetStatus(vk::Result::eNotReady);
+    submitted_fence = fence;
+  });
+  auto completion = std::make_shared<fml::AutoResetWaitableEvent>();
+  ASSERT_TRUE(context->GetCommandQueue()
+                  ->Submit({command_buffer},
+                           [completion](CommandBuffer::Status) {
+                             completion->Signal();
+                           })
+                  .ok());
+  command_buffer.reset();
+  ASSERT_NE(submitted_fence, nullptr);
+
+  const size_t wait_idle_calls_before_destroy =
+      GetMockVulkanFunctionCallCount(context->GetDevice(), "vkDeviceWaitIdle");
+  // Destroying the retain-mode context must not force an idle wait, and the
+  // command-buffer's tracked reference must keep the buffer alive.
+  content_context.reset();
+  EXPECT_EQ(
+      GetMockVulkanFunctionCallCount(context->GetDevice(), "vkDeviceWaitIdle"),
+      wait_idle_calls_before_destroy);
+  EXPECT_FALSE(weak_backing_buffer.expired());
+
+  submitted_fence->SetStatus(vk::Result::eSuccess);
+  ASSERT_FALSE(completion->WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  EXPECT_TRUE(weak_backing_buffer.expired());
 }
 
 TEST(ContextVKTest, BatchSubmitCommandBuffersOnNonArm) {

@@ -28,6 +28,11 @@ struct BufferView {
 
   const DeviceBuffer* GetBuffer() const;
 
+  /// Returns the owning reference, or an empty pointer for a borrowed view.
+  const std::shared_ptr<const DeviceBuffer>& GetSharedBuffer() const {
+    return buffer_;
+  }
+
   std::shared_ptr<const DeviceBuffer> TakeBuffer();
 
   explicit operator bool() const;

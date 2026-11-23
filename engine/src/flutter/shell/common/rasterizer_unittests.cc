@@ -7,6 +7,7 @@
 #include "flow/surface_frame.h"
 #include "flutter/shell/common/rasterizer.h"
 
+#include <future>
 #include <memory>
 #include <optional>
 
@@ -24,6 +25,10 @@
 #include "gmock/gmock.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/aiks_context.h"  // nogncheck
+#if IMPELLER_ENABLE_VULKAN
+#include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"  // nogncheck
+#include "impeller/renderer/context.h"                          // nogncheck
+#endif                                           // IMPELLER_ENABLE_VULKAN
 #endif                                           // IMPELLER_SUPPORTS_RENDERING
 
 using testing::_;
@@ -140,6 +145,12 @@ class MockAiksContext : public impeller::AiksContext {
   MOCK_METHOD(void, ClearRenderTargetCache, (), (const, override));
   MOCK_METHOD(void, ClearCachedTextures, (), (const, override));
 };
+
+class MockSnapshotSurfaceProducer : public SnapshotSurfaceProducer {
+ public:
+  MOCK_METHOD(std::unique_ptr<Surface>, CreateSnapshotSurface, (), (override));
+};
+
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }  // namespace
 
@@ -164,6 +175,18 @@ TEST(RasterizerTest, isAiksContextInitialized) {
 }
 
 #if IMPELLER_SUPPORTS_RENDERING
+TEST(RasterizerTest, GetHeadlessAiksContextWithoutContextReturnsNull) {
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  Rasterizer rasterizer(delegate);
+
+  auto& snapshot_delegate =
+      static_cast<SnapshotController::Delegate&>(rasterizer);
+  EXPECT_EQ(snapshot_delegate.GetHeadlessAiksContext(), nullptr);
+  EXPECT_EQ(snapshot_delegate.GetAiksContext(), nullptr);
+}
+
 TEST(RasterizerTest, NotifyLowMemoryWarningClearsImpellerCache) {
   std::string test_name =
       ::testing::UnitTest::GetInstance()->current_test_info()->name();
@@ -223,6 +246,48 @@ TEST(RasterizerTest, ClearRenderTargetCacheClearsImpellerCache) {
   rasterizer->Setup(std::move(surface));
   rasterizer->ClearRenderTargetCache();
 }
+
+#if IMPELLER_ENABLE_VULKAN
+TEST(RasterizerTest, SnapshotUsesHeadlessVulkanContextWhenProducerFails) {
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  settings.enable_impeller = true;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+
+  auto vulkan_context = impeller::testing::CreateMockVulkanContextWithShaders();
+  ASSERT_TRUE(vulkan_context);
+  ASSERT_EQ(vulkan_context->GetBackendType(),
+            impeller::Context::BackendType::kVulkan);
+  std::promise<std::shared_ptr<impeller::Context>> context_promise;
+  context_promise.set_value(vulkan_context);
+
+  Rasterizer rasterizer(delegate);
+  rasterizer.SetImpellerContext(
+      std::make_shared<impeller::ImpellerContextFuture>(
+          context_promise.get_future()));
+
+  auto producer = std::make_unique<NiceMock<MockSnapshotSurfaceProducer>>();
+  MockSnapshotSurfaceProducer* producer_ptr = producer.get();
+  EXPECT_CALL(*producer_ptr, CreateSnapshotSurface())
+      .WillOnce(Return(ByMove(std::unique_ptr<Surface>())));
+  rasterizer.SetSnapshotSurfaceProducer(std::move(producer));
+
+  bool received_expected_context = false;
+  auto& snapshot_delegate = static_cast<SnapshotDelegate&>(rasterizer);
+  auto result = snapshot_delegate.MakeImpellerSnapshotSync(
+      [&received_expected_context,
+       vulkan_context](impeller::AiksContext* aiks_context) {
+        received_expected_context =
+            aiks_context != nullptr &&
+            aiks_context->GetContext() == vulkan_context;
+        return sk_sp<DisplayList>();
+      },
+      DlISize{1, 1}, SnapshotPixelFormat::kDontCare);
+
+  EXPECT_EQ(result, nullptr);
+  EXPECT_TRUE(received_expected_context);
+}
+#endif  // IMPELLER_ENABLE_VULKAN
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 static std::unique_ptr<FrameTimingsRecorder> CreateFinishedBuildRecorder(

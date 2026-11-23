@@ -445,10 +445,9 @@ bool RenderPassVK::SetVertexBuffer(BufferView vertex_buffers[],
     buffers[i] =
         DeviceBufferVK::Cast(*vertex_buffers[i].GetBuffer()).GetBuffer();
     vertex_buffer_offsets[i] = vertex_buffers[i].GetRange().offset;
-    std::shared_ptr<const DeviceBuffer> device_buffer =
-        vertex_buffers[i].TakeBuffer();
-    if (device_buffer) {
-      command_buffer_->Track(device_buffer);
+    const auto& device_buffer = vertex_buffers[i].GetSharedBuffer();
+    if (device_buffer && !command_buffer_->Track(device_buffer)) {
+      return false;
     }
   }
 

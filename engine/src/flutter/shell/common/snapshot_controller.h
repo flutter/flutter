@@ -35,6 +35,10 @@ class SnapshotController {
     /// need a current context (OpenGL ES), make a rendering context current
     /// before calling this when |GetSurface| is null.
     virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
+    /// Creates an AiksContext without a surface. Returns nullptr when the
+    /// backend requires a current rendering context.
+    virtual std::shared_ptr<impeller::AiksContext> GetHeadlessAiksContext()
+        const = 0;
     virtual const std::unique_ptr<SnapshotSurfaceProducer>&
     GetSnapshotSurfaceProducer() const = 0;
     virtual std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch()

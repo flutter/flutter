@@ -94,26 +94,27 @@ SnapshotContext MakeSnapshotContextCurrent(
       return result;
     }
     result.aiks_context = delegate.GetAiksContext();
-  } else if (const std::unique_ptr<SnapshotSurfaceProducer>& producer =
-                 delegate.GetSnapshotSurfaceProducer()) {
+    return result;
+  }
+  if (const auto& producer = delegate.GetSnapshotSurfaceProducer()) {
     // The producer makes its offscreen surface current before it constructs
     // the surface's AiksContext, so reuse that AiksContext rather than asking
     // the delegate, which would construct yet another one.
     result.pbuffer_surface = producer->CreateSnapshotSurface();
-    if (!result.pbuffer_surface) {
+    if (result.pbuffer_surface) {
+      result.context_result =
+          result.pbuffer_surface->MakeRenderContextCurrent();
+      if (!result.context_result || !result.context_result->GetResult()) {
+        return result;
+      }
+      result.aiks_context = result.pbuffer_surface->GetAiksContext();
       return result;
     }
-    result.context_result = result.pbuffer_surface->MakeRenderContextCurrent();
-    if (!result.context_result || !result.context_result->GetResult()) {
-      return result;
-    }
-    result.aiks_context = result.pbuffer_surface->GetAiksContext();
-  } else {
-    // No surface and no way to make one. Backends that get here (Metal,
-    // Vulkan) have no notion of a current context, so constructing an
-    // AiksContext is safe.
-    result.aiks_context = delegate.GetAiksContext();
   }
+  // Some backends have a producer object but cannot create an offscreen
+  // surface. Backends without a thread-local rendering context, such as
+  // Vulkan, can construct the headless AiksContext directly.
+  result.aiks_context = delegate.GetHeadlessAiksContext();
   return result;
 }
 

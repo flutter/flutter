@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEST_MOCK_VULKAN_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEST_MOCK_VULKAN_H_
 
+#include <atomic>
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
@@ -55,6 +57,18 @@ class MockFence final {
 
   MockFence& operator=(const MockFence&) = delete;
 };
+
+// Installs a one-shot callback for the next queue submission on this device.
+// The callback runs synchronously from vkQueueSubmit, after the fence has been
+// created and before the fence waiter can observe it.
+void SetMockVulkanQueueSubmitCallback(VkDevice device,
+                                      std::function<void(MockFence*)> callback);
+
+size_t GetMockVulkanFunctionCallCount(VkDevice device,
+                                      const std::string& function);
+
+// Creates a mock device with the shader libraries needed by ContentContext.
+std::shared_ptr<ContextVK> CreateMockVulkanContextWithShaders();
 
 class MockVulkanContextBuilder {
  public:
