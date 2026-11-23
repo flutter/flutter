@@ -157,6 +157,9 @@ class LinkHooks extends Target {
   static const String recordedUsesWasmFileName = 'recorded_uses_wasm.json';
   static const String recordedUsesJsFileName = 'recorded_uses_js.json';
 
+  @override
+  String? get buildKey => recordedUsesFileNames?.join(',');
+
   List<String> get _recordedUsesFileNames {
     if (recordedUsesFileNames case final List<String> fileNames) {
       return fileNames;

@@ -2160,7 +2160,8 @@ _flutter.loader.load();
       );
       expect(target.buildPatternStems, contains('main.dart.wasm.map'));
       expect(target.buildPatternStems, isNot(contains('main.dart.*.wasm.map')));
-      expect(target.buildPatternStems, contains('main.dart.*.mjs.map'));
+      expect(target.buildPatternStems, isNot(contains('main.dart.*.mjs.map')));
+      expect(target.buildPatternStems, isNot(contains('main.dart.mjs.map')));
     }),
   );
 
@@ -2192,21 +2193,11 @@ _flutter.loader.load();
       environment.buildDir.childFile('main.dart.22222222.wasm').createSync(recursive: true);
       final File mapFile = environment.buildDir.childFile('main.dart.wasm.map')
         ..createSync(recursive: true);
-      // Produce the mjs and its map with the real rename logic instead of
-      // hand-picked names, so the discovery logic is tested against what the
-      // build actually writes.
-      const mjsMapContent = '{"version":3,"sources":["main.dart"]}';
       final File mjsFile = environment.buildDir.childFile('main.dart.mjs')
         ..createSync(recursive: true)
-        ..writeAsStringSync('export function main() {}\n//# sourceMappingURL=main.dart.mjs.map\n');
-      final File mjsMapFile = environment.buildDir.childFile('main.dart.mjs.map')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(mjsMapContent);
-      final String expectedMjsMapHash = crypto.sha256
-          .convert(utf8.encode(mjsMapContent))
-          .toString()
-          .substring(0, 8);
-      hashAndRenameWebOutput(file: mjsFile, sourceMapFile: mjsMapFile);
+        ..writeAsStringSync('export function main() {}\n');
+      final String newMjsBasename = hashAndRenameWebOutput(file: mjsFile);
+      environment.buildDir.childFile('main.dart.mjs.map').createSync(recursive: true);
 
       final target = Dart2WasmTarget(
         const WasmCompilerConfig(webContentHash: true),
@@ -2218,8 +2209,8 @@ _flutter.loader.load();
           .buildFiles(environment)
           .map((File f) => f.basename)
           .toList();
-      expect(files, contains(mapFile.basename));
-      expect(files, contains('main.dart.$expectedMjsMapHash.mjs.map'));
+      expect(files, containsAll(<String>[mapFile.basename, newMjsBasename]));
+      expect(files, isNot(contains('main.dart.mjs.map')));
     }),
   );
 
@@ -2749,16 +2740,10 @@ console.log(mapName);
         ..writeAsStringSync('{"version":3,"sources":["main.dart"]}');
       final File mjsFile = environment.outputDir.childFile('main.dart.mjs')
         ..createSync(recursive: true)
-        ..writeAsStringSync('export function main() {}\n//# sourceMappingURL=main.dart.mjs.map\n');
-      final File mjsMapFile = environment.outputDir.childFile('main.dart.mjs.map')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"version":3,"sources":["main.dart"]}');
+        ..writeAsStringSync('export function main() {}\n');
 
       final String newJsBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
-      final String newMjsBasename = hashAndRenameWebOutput(
-        file: mjsFile,
-        sourceMapFile: mjsMapFile,
-      );
+      final String newMjsBasename = hashAndRenameWebOutput(file: mjsFile);
 
       final File manifestFile = updatePrecacheManifest(
         environment.outputDir,
@@ -4648,14 +4633,16 @@ flutter:
           expect(environment.buildDir.childFile('main.dart.wasm'), exists);
           expect(environment.buildDir.childFile('dart2wasm.d'), exists);
 
-          // Switching to default JS (with wasm dryRun) skips dart2js (same config)
-          // and runs only the wasm dry-run, cleaning stale wasm outputs from buildDir.
+          // Switching to default JS (with wasm dryRun) skips dart2js (same config),
+          // invalidates link_hooks so recorded_uses_js.json replaces recorded_uses_wasm.json,
+          // and runs the wasm dry-run, cleaning stale wasm outputs from buildDir.
           queueDart2WasmCompile(sourceMaps: false, dryRun: true);
           final BuildResult dryRunResult = await runWebBuild(const <WebCompilerConfig>[
             JsCompilerConfig(sourceMaps: false),
             WasmCompilerConfig(sourceMaps: false, dryRun: true),
           ]);
           expect(dryRunResult.performance['dart2js']!.skipped, isTrue);
+          expect(dryRunResult.performance['link_hooks']!.skipped, isFalse);
 
           expect(environment.buildDir.childFile('recorded_uses_wasm.json'), isNot(exists));
           expect(environment.buildDir.childFile('main.dart.wasm'), isNot(exists));
@@ -4705,7 +4692,7 @@ flutter:
             contains('_flutter.supportsDart2Wasm'),
           );
 
-          // 3. Consecutive unhashed --wasm with sourceMaps: true skips compile and bundle targets (no missing mjs.map rebuild).
+          // 3. Consecutive unhashed --wasm with sourceMaps: true skips compile and bundle targets.
           final BuildResult wasmPlain2 = await runWebBuild(wasmPlainConfigs);
           expect(wasmPlain2.success, isTrue);
           expect(wasmPlain2.performance['dart2wasm']!.skipped, isTrue);
@@ -4809,40 +4796,6 @@ flutter:
     );
   });
 
-  testWithoutContext('Dart2WebTarget.buildStemSource marks unhashed main.dart.mjs.map optional and resolves absent wildcard stems empty', () {
-    final fileSystem = MemoryFileSystem.test();
-    final testEnvironment = Environment.test(
-      fileSystem.currentDirectory,
-      artifacts: Artifacts.test(),
-      featureFlags: TestFeatureFlags(),
-      processManager: FakeProcessManager.any(),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
-    );
-    testEnvironment.buildDir.createSync(recursive: true);
-
-    final mjsMapVisitor = SourceVisitor(testEnvironment);
-    Dart2WebTarget.buildStemSource(
-      Environment.kBuildDirectory,
-      'main.dart.mjs.map',
-    ).accept(mjsMapVisitor);
-    expect(mjsMapVisitor.sources, isEmpty);
-
-    final hashedMjsMapVisitor = SourceVisitor(testEnvironment);
-    Dart2WebTarget.buildStemSource(
-      Environment.kBuildDirectory,
-      'main.dart.*.mjs.map',
-    ).accept(hashedMjsMapVisitor);
-    expect(hashedMjsMapVisitor.sources, isEmpty);
-
-    final dumpInfoVisitor = SourceVisitor(testEnvironment);
-    Dart2WebTarget.buildStemSource(
-      Environment.kBuildDirectory,
-      'main.dart.js.info.json',
-    ).accept(dumpInfoVisitor);
-    expect(dumpInfoVisitor.sources.single.basename, 'main.dart.js.info.json');
-  });
-
   testWithoutContext(
     'WebCompiledArtifact.tryParse classifies hashed, unhashed, multi-dot, and negative basenames',
     () {
@@ -4859,11 +4812,8 @@ flutter:
         ('main.dart.wasm', WebCompiledArtifact.mainWasm),
         ('main.dart.01234567.wasm', WebCompiledArtifact.mainWasm),
         ('main.dart.wasm.map', WebCompiledArtifact.mainWasmMap),
-        ('main.dart.89abcdef.wasm.map', WebCompiledArtifact.mainWasmMap),
         ('main.dart.mjs', WebCompiledArtifact.mainMjs),
         ('main.dart.cafebabe.mjs', WebCompiledArtifact.mainMjs),
-        ('main.dart.mjs.map', WebCompiledArtifact.mainMjsMap),
-        ('main.dart.feedface.mjs.map', WebCompiledArtifact.mainMjsMap),
         ('main.dart_module1.wasm', WebCompiledArtifact.wasmModule),
         ('main.dart_module12.extra.wasm', WebCompiledArtifact.wasmModule),
         ('main.dart_module1.wasm.map', WebCompiledArtifact.wasmModuleMap),
@@ -4892,6 +4842,9 @@ flutter:
         'main.dart',
         'main.dart.dill',
         'main.dart.support.js',
+        'main.dart.mjs.map',
+        'main.dart.feedface.mjs.map',
+        'main.dart.89abcdef.wasm.map',
         'main.dart.js.deps',
         'main.dart.js.resources.json',
         'main.dart.deadbeef.js.info.json',

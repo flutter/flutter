@@ -458,7 +458,8 @@ void main() {
     },
   );
 
-  testWithoutContext('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and ignores stale recorded_uses_wasm.json', () {
+  testWithoutContext('Web LinkHooks tracks only active compileTargets recordedUsesFileNames and invalidates across compiler transitions', () async {
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     final webEnv = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{kBuildMode: BuildMode.release.cliName},
@@ -471,6 +472,8 @@ void main() {
     webEnv.buildDir.createSync(recursive: true);
     final File wasmUses = webEnv.buildDir.childFile(LinkHooks.recordedUsesWasmFileName);
     final File jsUses = webEnv.buildDir.childFile(LinkHooks.recordedUsesJsFileName);
+
+    expect(const LinkHooks().buildKey, isNull);
 
     // Required inputs are non-optional even before the compiler writes them.
     final LinkHooks wasmLinkHooks = WebReleaseBundle(
@@ -506,6 +509,48 @@ void main() {
     expect(_resolvedInputs(jsOnlyLinkHooks, webEnv), contains(jsUses.path));
     expect(_resolvedInputs(jsOnlyLinkHooks, webEnv), isNot(contains(wasmUses.path)));
     expect(jsOnlyLinkHooks.getRecordedUsesFile(webEnv, BuildMode.release)?.path, jsUses.path);
+
+    // Verify FlutterBuildSystem invalidates link_hooks when dropping recorded_uses_wasm.json.
+    final buildRunner = FakeFlutterNativeAssetsBuildRunner();
+    final buildSystem = FlutterBuildSystem(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: webEnv.platform,
+    );
+    await BuildHooks(platform: HookPlatform.web, buildRunner: buildRunner).build(webEnv);
+
+    final BuildResult wasmBuild = await buildSystem.build(
+      LinkHooks(
+        platform: HookPlatform.web,
+        recordedUsesFileNames: wasmLinkHooks.recordedUsesFileNames,
+        buildRunner: buildRunner,
+      ),
+      webEnv,
+    );
+    expect(wasmBuild.success, isTrue);
+    expect(wasmBuild.performance['link_hooks']!.skipped, isFalse);
+
+    final BuildResult jsTransitionBuild = await buildSystem.build(
+      LinkHooks(
+        platform: HookPlatform.web,
+        recordedUsesFileNames: dryRunLinkHooks.recordedUsesFileNames,
+        buildRunner: buildRunner,
+      ),
+      webEnv,
+    );
+    expect(jsTransitionBuild.success, isTrue);
+    expect(jsTransitionBuild.performance['link_hooks']!.skipped, isFalse);
+
+    final BuildResult jsRepeatBuild = await buildSystem.build(
+      LinkHooks(
+        platform: HookPlatform.web,
+        recordedUsesFileNames: dryRunLinkHooks.recordedUsesFileNames,
+        buildRunner: buildRunner,
+      ),
+      webEnv,
+    );
+    expect(jsRepeatBuild.success, isTrue);
+    expect(jsRepeatBuild.performance['link_hooks']!.skipped, isTrue);
   });
 }
 

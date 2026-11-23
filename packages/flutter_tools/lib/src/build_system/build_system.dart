@@ -503,41 +503,11 @@ class Environment implements AndroidSdkProvider {
   });
 
   static Directory _resolveDirectory(Directory directory) {
-    final FileSystem fileSystem = directory.fileSystem;
-    Directory current = directory.absolute;
-    final trailingSegments = <String>[];
-    var linkHops = 0;
-    while (!current.existsSync()) {
-      if (linkHops < 40 && fileSystem.isLinkSync(current.path)) {
-        linkHops++;
-        final String linkTarget = fileSystem.link(current.path).targetSync();
-        current = fileSystem
-            .directory(
-              fileSystem.path.isAbsolute(linkTarget)
-                  ? linkTarget
-                  : fileSystem.path.join(current.parent.path, linkTarget),
-            )
-            .absolute;
-        continue;
-      }
-      final Directory parent = current.parent;
-      if (parent.path == current.path) {
-        return fileSystem.directory(fileSystem.path.normalize(directory.absolute.path));
-      }
-      trailingSegments.add(fileSystem.path.basename(current.path));
-      current = parent;
-    }
-    String resolvedBase;
     try {
-      resolvedBase = current.resolveSymbolicLinksSync();
+      return directory.fileSystem.directory(directory.resolveSymbolicLinksSync());
     } on FileSystemException {
-      resolvedBase = current.path;
+      return directory.absolute;
     }
-    return fileSystem.directory(
-      fileSystem.path.normalize(
-        fileSystem.path.joinAll(<String>[resolvedBase, ...trailingSegments.reversed]),
-      ),
-    );
   }
 
   Environment copyWith({FeatureFlags? featureFlags, Directory? outputDir}) {
@@ -686,14 +656,12 @@ class Environment implements AndroidSdkProvider {
 
   late final depFileService = DepfileService(logger: logger, fileSystem: fileSystem);
 
-  /// Returns [projectDir] with symlinks and relative segments resolved.
-  ///
-  /// Trailing segments that do not yet exist are preserved and normalized.
+  /// Returns [projectDir] with symlinks and relative segments resolved,
+  /// falling back to [Directory.absolute] if [projectDir] does not yet exist.
   Directory get resolvedProjectDir => _resolveDirectory(projectDir);
 
-  /// Returns [outputDir] with symlinks and relative segments resolved.
-  ///
-  /// Trailing segments that do not yet exist are preserved and normalized.
+  /// Returns [outputDir] with symlinks and relative segments resolved,
+  /// falling back to [Directory.absolute] if [outputDir] does not yet exist.
   Directory get resolvedOutputDir => _resolveDirectory(outputDir);
 }
 
