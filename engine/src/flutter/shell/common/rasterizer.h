@@ -7,7 +7,6 @@
 
 #include <future>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <unordered_map>
 
@@ -21,7 +20,6 @@
 #include "flutter/flow/surface.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/time/time_delta.h"
@@ -56,29 +54,19 @@ enum class DrawStatus {
   kDone,
   // Failed to rasterize the frame because the Rasterizer is not set up.
   kNotSetUp,
-  // Nothing was done, because the call was not on the raster thread. Yielded to
-  // let this frame be serviced on the right thread.
-  kYielded,
   // Nothing was done, because the pipeline was empty.
   kPipelineEmpty,
   // Nothing was done, because the GPU was unavailable.
   kGpuUnavailable,
+  // Nothing was done, because the external view embedder is not ready for the
+  // next frame. The frame stays queued and drawing resumes via callback.
+  kDeferred,
 };
 
 // The result status of drawing to a view. This is only used for unit tests.
 enum class DrawSurfaceStatus {
   // The layer tree was successfully rasterized.
   kSuccess,
-  // The layer tree must be submitted again.
-  //
-  // This can occur on Android when switching the background surface to
-  // FlutterImageView.  On Android, the first frame doesn't make the image
-  // available to the ImageReader right away. The second frame does.
-  // TODO(egarciad): https://github.com/flutter/flutter/issues/65652
-  //
-  // This can also occur when the frame is dropped to wait for the thread
-  // merger to merge the raster and platform threads.
-  kRetry,
   // Failed to rasterize the frame.
   kFailed,
   // Layer tree was discarded because its size does not match the view size.
@@ -156,10 +144,6 @@ class Rasterizer final : public SnapshotDelegate,
     /// Task runners used by the shell.
     virtual const TaskRunners& GetTaskRunners() const = 0;
 
-    /// The raster thread merger from parent shell's rasterizer.
-    virtual const fml::RefPtr<fml::RasterThreadMerger>
-    GetParentRasterThreadMerger() const = 0;
-
     /// Accessor for the shell's GPU sync switch, which determines whether GPU
     /// operations are allowed on the current thread.
     ///
@@ -172,6 +156,9 @@ class Rasterizer final : public SnapshotDelegate,
 
     virtual bool ShouldDiscardLayerTree(int64_t view_id,
                                         const flutter::LayerTree& tree) = 0;
+
+    /// Called on the raster task runner when a `Rasterizer::Draw` attempt ends.
+    virtual void OnDrawFinished(DrawStatus status) {}
   };
 
   //----------------------------------------------------------------------------
@@ -238,8 +225,10 @@ class Rasterizer final : public SnapshotDelegate,
   //----------------------------------------------------------------------------
   /// @brief      Releases any resource used by the external view embedder.
   ///             For example, overlay surfaces or Android views.
-  ///             On Android, this method post a task to the platform thread,
-  ///             and waits until it completes.
+  ///             Must be called on the platform thread; on Android, this
+  ///             synchronizes with the raster thread to release GPU overlay
+  ///             layers before destroying Java overlay surfaces on the platform
+  ///             thread.
   void TeardownExternalViewEmbedder();
 
   //----------------------------------------------------------------------------
@@ -525,14 +514,6 @@ class Rasterizer final : public SnapshotDelegate,
   }
 
   //----------------------------------------------------------------------------
-  /// @brief      Returns the raster thread merger used by this rasterizer.
-  ///             This may be `nullptr`.
-  ///
-  /// @return     The raster thread merger used by this rasterizer.
-  ///
-  fml::RefPtr<fml::RasterThreadMerger> GetRasterThreadMerger();
-
-  //----------------------------------------------------------------------------
   /// @brief      Skia has no notion of time. To work around the performance
   ///             implications of this, it may cache GPU resources to reference
   ///             them from one frame to the next. Using this call, embedders
@@ -572,31 +553,6 @@ class Rasterizer final : public SnapshotDelegate,
   std::optional<size_t> GetResourceCacheMaxBytes() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Enables the thread merger if the external view embedder
-  ///             supports dynamic thread merging.
-  ///
-  /// @attention  This method is thread-safe. When the thread merger is enabled,
-  ///             the raster task queue can run in the platform thread at any
-  ///             time.
-  ///
-  /// @see        `ExternalViewEmbedder`
-  ///
-  void EnableThreadMergerIfNeeded();
-
-  //----------------------------------------------------------------------------
-  /// @brief      Disables the thread merger if the external view embedder
-  ///             supports dynamic thread merging, or ensures a merger created
-  ///             later by `Rasterizer::Setup` starts disabled.
-  ///
-  /// @attention  This method is thread-safe. When the thread merger is
-  ///             disabled, the raster task queue will continue to run in the
-  ///             same thread until |EnableThreadMergerIfNeeded| is called.
-  ///
-  /// @see        `ExternalViewEmbedder`
-  ///
-  void DisableThreadMergerIfNeeded();
-
-  //----------------------------------------------------------------------------
   /// @brief      Returns whether TearDown has been called.
   ///
   ///             This method is used only in unit tests.
@@ -611,34 +567,14 @@ class Rasterizer final : public SnapshotDelegate,
   std::optional<DrawSurfaceStatus> GetLastDrawStatus(int64_t view_id);
 
  private:
-  // The result status of DoDraw, DrawToSurfaces, and DrawToSurfacesUnsafe.
+  // The result status of DoDraw and DrawToSurfaces.
   enum class DoDrawStatus {
     // The drawing was done without any specified status.
     kDone,
-    // Frame has been successfully rasterized, but there are additional items
-    // in the pipeline waiting to be consumed. This is currently only used when
-    // thread configuration change occurs.
-    kEnqueuePipeline,
     // Failed to rasterize the frame because the Rasterizer is not set up.
     kNotSetUp,
     // Nothing was done, because GPU was unavailable.
     kGpuUnavailable,
-  };
-
-  // The result of DoDraw.
-  struct DoDrawResult {
-    // The overall status of the drawing process.
-    //
-    // The status of drawing a specific view is available at GetLastDrawStatus.
-    DoDrawStatus status = DoDrawStatus::kDone;
-
-    // The frame item that needs to be submitted again.
-    //
-    // See RasterStatus::kResubmit and kSkipAndRetry for when it happens.
-    //
-    // If `resubmitted_item` is not null, its `tasks` is guaranteed to be
-    // non-empty.
-    std::unique_ptr<FrameItem> resubmitted_item;
   };
 
   struct ViewRecord {
@@ -762,28 +698,27 @@ class Rasterizer final : public SnapshotDelegate,
   // This method starts with the frame timing recorder at build end. This
   // method might push it to raster end and get the recorded time, or abort in
   // the middle and not get the recorded time.
-  DoDrawResult DoDraw(
+  DoDrawStatus DoDraw(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder,
       std::vector<std::unique_ptr<LayerTreeTask>> tasks);
 
   // This method pushes the frame timing recorder from build end to raster end.
-  DoDrawResult DrawToSurfaces(
+  // Tasks that complete successfully are moved out of |tasks|; failed or
+  // GPU-unavailable tasks remain in |tasks| so callers like
+  // |DrawLastLayerTrees| can preserve them.
+  DoDrawStatus DrawToSurfaces(
       FrameTimingsRecorder& frame_timings_recorder,
-      std::vector<std::unique_ptr<LayerTreeTask>> tasks);
+      std::vector<std::unique_ptr<LayerTreeTask>>& tasks);
 
   // Draws the specified layer trees to views, assuming we have access to the
   // GPU.
-  //
-  // If any layer trees need resubmitting, this method returns the frame item to
-  // be resubmitted. Otherwise, it returns nullptr.
   //
   // Unsafe because it assumes we have access to the GPU which isn't the case
   // when iOS is backgrounded, for example.
   //
   // This method pushes the frame timing recorder from build end to raster end.
-  std::unique_ptr<FrameItem> DrawToSurfacesUnsafe(
-      FrameTimingsRecorder& frame_timings_recorder,
-      std::vector<std::unique_ptr<LayerTreeTask>> tasks);
+  void DrawToSurfacesUnsafe(FrameTimingsRecorder& frame_timings_recorder,
+                            std::vector<std::unique_ptr<LayerTreeTask>>& tasks);
 
   // Draws the layer tree to the specified view, assuming we have access to the
   // GPU.
@@ -800,7 +735,9 @@ class Rasterizer final : public SnapshotDelegate,
 
   void FireNextFrameCallbackIfPresent();
 
-  static bool ShouldResubmitFrame(const DoDrawResult& result);
+  fml::closure MakeResumeDeferredDrawCallback();
+  void ResumeDeferredDraw();
+
   static DrawStatus ToDrawStatus(DoDrawStatus status);
 
   bool is_torn_down_ = false;
@@ -814,13 +751,10 @@ class Rasterizer final : public SnapshotDelegate,
   fml::closure next_frame_callback_;
   bool user_override_resource_cache_bytes_ = false;
   std::optional<size_t> max_cache_bytes_;
-  // Guards cross-thread access to `raster_thread_merger_` and
-  // `thread_merger_disabled_` (raster-thread reads of `raster_thread_merger_`
-  // are unlocked since `Setup` on the raster thread is the sole writer).
-  std::mutex raster_thread_merger_mutex_;
-  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
-  bool thread_merger_disabled_ = false;
   std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
+  std::weak_ptr<FramePipeline> deferred_pipeline_;
+  bool has_deferred_pipeline_ = false;
+  std::unique_ptr<FrameTimingsRecorder> deferred_last_layer_trees_recorder_;
   std::unique_ptr<SnapshotController> snapshot_controller_;
 
   // WeakPtrFactory must be the last member.

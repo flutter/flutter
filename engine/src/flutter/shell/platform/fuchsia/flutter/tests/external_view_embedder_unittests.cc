@@ -333,14 +333,13 @@ void DrawSimpleFrame(ExternalViewEmbedder& external_view_embedder,
                      DlISize frame_size,
                      float frame_dpr,
                      std::function<void(flutter::DlCanvas*)> draw_callback) {
-  external_view_embedder.BeginFrame(nullptr, nullptr);
+  external_view_embedder.BeginFrame(nullptr);
   external_view_embedder.PrepareFlutterView(frame_size, frame_dpr);
   {
     flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
-    external_view_embedder.PostPrerollAction(nullptr);
     draw_callback(root_canvas);
   }
-  external_view_embedder.EndFrame(false, nullptr);
+  external_view_embedder.EndFrame();
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
   external_view_embedder.SubmitFlutterView(
@@ -361,19 +360,18 @@ void DrawFrameWithView(
     flutter::EmbeddedViewParams& view_params,
     std::function<void(flutter::DlCanvas*)> background_draw_callback,
     std::function<void(flutter::DlCanvas*)> overlay_draw_callback) {
-  external_view_embedder.BeginFrame(nullptr, nullptr);
+  external_view_embedder.BeginFrame(nullptr);
   external_view_embedder.PrepareFlutterView(frame_size, frame_dpr);
   {
     flutter::DlCanvas* root_canvas = external_view_embedder.GetRootCanvas();
     external_view_embedder.PrerollCompositeEmbeddedView(
         view_id, std::make_unique<flutter::EmbeddedViewParams>(view_params));
-    external_view_embedder.PostPrerollAction(nullptr);
     background_draw_callback(root_canvas);
     flutter::DlCanvas* overlay_canvas =
         external_view_embedder.CompositeEmbeddedView(view_id);
     overlay_draw_callback(overlay_canvas);
   }
-  external_view_embedder.EndFrame(false, nullptr);
+  external_view_embedder.EndFrame();
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
   external_view_embedder.SubmitFlutterView(

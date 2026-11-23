@@ -67,23 +67,14 @@ class ExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
   flutter::DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
 
   // |ExternalViewEmbedder|
-  flutter::PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
-      override;
-
-  // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(flutter::DlISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override;
+  void EndFrame() override;
 
   // |ExternalViewEmbedder|
   void SubmitFlutterView(
@@ -94,9 +85,6 @@ class ExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void CancelFrame() override { Reset(); }
-
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override { return false; }
 
   // View manipulation.
   // |SetViewProperties| doesn't manipulate the view directly -- it sets pending

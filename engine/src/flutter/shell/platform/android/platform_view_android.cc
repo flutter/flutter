@@ -262,14 +262,16 @@ void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
     return;
   }
   const uint64_t generation = surface_generation_->load();
-  // Always post, even when the raster task queue is merged onto this thread
-  // (hybrid composition). Running inline would let this resize overtake the
-  // surface setup or an earlier resize still waiting in the raster queue.
+  // Always post rather than RunNowOrPostTask so a resize queued right after
+  // deferred surface creation or an earlier resize never overtakes it, even
+  // if platform and raster task runners share a thread (e.g., static queue
+  // merging in tests).
   //
-  // The task does not capture `this`: while the queues are merged,
-  // `Shell::~Shell()` runs its raster work inline without draining the raster
-  // queue, so the task can run after this object is gone. The destructor bumps
-  // the shared generation, which keeps `surface` from being used after that.
+  // The task does not capture `this`: when platform and raster queues share a
+  // thread or are merged, `Shell::~Shell()` runs its raster work inline
+  // without draining posted tasks, so this task can run after
+  // `PlatformViewAndroid` is destroyed. The destructor bumps the shared
+  // generation so stale resize tasks become no-ops.
   task_runners_.GetRasterTaskRunner()->PostTask(
       [surface = android_surface_.get(),
        surface_generation = surface_generation_, generation, size]() {
@@ -469,7 +471,11 @@ std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
   return std::make_shared<AndroidExternalViewEmbedderWrapper>(
       android_meets_hcpp_criteria_, *android_context_, jni_facade_,
-      surface_factory_, task_runners_);
+      surface_factory_, task_runners_, [weak_platform_view = GetWeakPtr()]() {
+        if (weak_platform_view) {
+          weak_platform_view->ScheduleFrame();
+        }
+      });
 }
 
 // |PlatformView|

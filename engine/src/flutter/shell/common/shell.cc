@@ -235,24 +235,20 @@ std::unique_ptr<Shell> Shell::Create(
       std::make_shared<ResourceCacheLimitCalculator>(
           settings.resource_cache_max_bytes_threshold);
 
-  return CreateWithSnapshot(platform_data,                       //
-                            task_runners,                        //
-                            /*parent_thread_merger=*/nullptr,    //
-                            /*parent_rasterizer=*/std::nullopt,  //
-                            /*parent_io_manager=*/nullptr,       //
-                            resource_cache_limit_calculator,     //
-                            settings,                            //
-                            std::move(vm),                       //
-                            std::move(isolate_snapshot),         //
-                            on_create_platform_view,             //
-                            on_create_rasterizer,                //
+  return CreateWithSnapshot(platform_data,                    //
+                            task_runners,                     //
+                            /*parent_io_manager=*/nullptr,    //
+                            resource_cache_limit_calculator,  //
+                            settings,                         //
+                            std::move(vm),                    //
+                            std::move(isolate_snapshot),      //
+                            on_create_platform_view,          //
+                            on_create_rasterizer,             //
                             CreateEngine, is_gpu_disabled);
 }
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
-    fml::RefPtr<fml::RasterThreadMerger> parent_merger,
-    std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>> parent_rasterizer,
     std::shared_ptr<ShellIOManager> parent_io_manager,
     const std::shared_ptr<ResourceCacheLimitCalculator>&
         resource_cache_limit_calculator,
@@ -269,10 +265,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     return nullptr;
   }
 
-  auto shell = std::unique_ptr<Shell>(
-      new Shell(std::move(vm), task_runners, std::move(parent_merger),
-                std::move(parent_rasterizer), resource_cache_limit_calculator,
-                settings, is_gpu_disabled));
+  auto shell = std::unique_ptr<Shell>(new Shell(std::move(vm), task_runners,
+                                                resource_cache_limit_calculator,
+                                                settings, is_gpu_disabled));
 
   // Create the platform view on the platform thread (this thread).
   auto platform_view = on_create_platform_view(*shell.get());
@@ -444,8 +439,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 std::unique_ptr<Shell> Shell::CreateWithSnapshot(
     const PlatformData& platform_data,
     const TaskRunners& task_runners,
-    const fml::RefPtr<fml::RasterThreadMerger>& parent_thread_merger,
-    std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>> parent_rasterizer,
     const std::shared_ptr<ShellIOManager>& parent_io_manager,
     const std::shared_ptr<ResourceCacheLimitCalculator>&
         resource_cache_limit_calculator,
@@ -474,8 +467,6 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
       platform_task_runner,
       fml::MakeCopyable([&latch,                                             //
                          &shell,                                             //
-                         parent_thread_merger,                               //
-                         parent_rasterizer = std::move(parent_rasterizer),   //
                          parent_io_manager,                                  //
                          resource_cache_limit_calculator,                    //
                          task_runners = task_runners,                        //
@@ -488,8 +479,6 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
                          on_create_engine = on_create_engine,
                          is_gpu_disabled]() mutable {
         shell = CreateShellOnPlatformThread(std::move(vm),                    //
-                                            parent_thread_merger,             //
-                                            std::move(parent_rasterizer),     //
                                             parent_io_manager,                //
                                             resource_cache_limit_calculator,  //
                                             task_runners,                     //
@@ -506,18 +495,13 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
   return shell;
 }
 
-Shell::Shell(
-    DartVMRef vm,
-    const TaskRunners& task_runners,
-    fml::RefPtr<fml::RasterThreadMerger> parent_merger,
-    std::optional<fml::TaskRunnerAffineWeakPtr<Rasterizer>> parent_rasterizer,
-    const std::shared_ptr<ResourceCacheLimitCalculator>&
-        resource_cache_limit_calculator,
-    const Settings& settings,
-    bool is_gpu_disabled)
+Shell::Shell(DartVMRef vm,
+             const TaskRunners& task_runners,
+             const std::shared_ptr<ResourceCacheLimitCalculator>&
+                 resource_cache_limit_calculator,
+             const Settings& settings,
+             bool is_gpu_disabled)
     : task_runners_(task_runners),
-      parent_raster_thread_merger_(std::move(parent_merger)),
-      parent_rasterizer_(std::move(parent_rasterizer)),
       resource_cache_limit_calculator_(resource_cache_limit_calculator),
       settings_(settings),
       vm_(std::move(vm)),
@@ -717,10 +701,10 @@ std::unique_ptr<Shell> Shell::Spawn(
           .SetIfFalse([&is_gpu_disabled] { is_gpu_disabled = false; })
           .SetIfTrue([&is_gpu_disabled] { is_gpu_disabled = true; }));
   std::unique_ptr<Shell> result = CreateWithSnapshot(
-      PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
-      weak_rasterizer_, io_manager_, resource_cache_limit_calculator_,
-      GetSettings(), vm_, vm_->GetVMData()->GetIsolateSnapshot(),
-      on_create_platform_view, on_create_rasterizer,
+      PlatformData{}, task_runners_, io_manager_,
+      resource_cache_limit_calculator_, GetSettings(), vm_,
+      vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
+      on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
           Engine::Delegate& delegate, DartVM& vm,
           const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
@@ -945,25 +929,6 @@ const TaskRunners& Shell::GetTaskRunners() const {
   return task_runners_;
 }
 
-const fml::RefPtr<fml::RasterThreadMerger> Shell::GetParentRasterThreadMerger()
-    const {
-  if (parent_raster_thread_merger_) {
-    return parent_raster_thread_merger_;
-  }
-  // If the parent's `Rasterizer::Setup()` was still deferred on the raster
-  // thread when `Shell::Spawn()` ran, resolve the immediate parent's merger
-  // lazily on the raster thread. (Note: for >=3-deep spawn chains where an
-  // intermediate child also has no merger yet at grandchild setup time, only
-  // the immediate parent's rasterizer is consulted, matching prior behavior
-  // when an intermediate shell never attached a view.)
-  if (parent_rasterizer_.has_value() &&
-      task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread() &&
-      *parent_rasterizer_) {
-    return (*parent_rasterizer_)->GetRasterThreadMerger();
-  }
-  return nullptr;
-}
-
 fml::TaskRunnerAffineWeakPtr<Rasterizer> Shell::GetRasterizer() const {
   FML_DCHECK(is_set_up_);
   return weak_rasterizer_;
@@ -998,17 +963,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  // Prevent any request to change the thread configuration for raster and
-  // platform queues while the platform view is being created.
-  //
-  // This prevents false positives such as this method starts assuming that the
-  // raster and platform queues have a given thread configuration, but then the
-  // configuration is changed by a task, and the assumption is no longer true.
-  //
-  // This incorrect assumption can lead to deadlock.
-  // See `should_post_raster_task` for more.
-  rasterizer_->DisableThreadMergerIfNeeded();
-
   // The normal flow executed by this method is that the platform thread is
   // starting the sequence and waiting on the latch. Later the UI thread posts
   // raster_task to the raster thread which signals the latch. If the raster and
@@ -1028,9 +982,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
        surface = std::move(surface)                          //
   ]() mutable {
         if (rasterizer) {
-          // Enables the thread merger which may be used by the external view
-          // embedder.
-          rasterizer->EnableThreadMergerIfNeeded();
           rasterizer->Setup(std::move(surface));
         }
 
@@ -1122,10 +1073,6 @@ void Shell::OnPlatformViewCreatedDeferred(
                 io_manager->NotifyResourceContextAvailable(resource_context);
               }
             });
-        // `DisableThreadMergerIfNeeded()` is not called on the deferred path;
-        // if `OnPlatformViewDestroyed()` set `thread_merger_disabled_` while
-        // `surface_factory()` was in flight, `Rasterizer::Setup()` creates the
-        // merger already disabled.
         rasterizer->Setup(std::move(surface));
         waiting_for_first_frame.store(true);
       }));
@@ -1143,16 +1090,6 @@ void Shell::OnPlatformViewDestroyed() {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-
-  // Prevent any request to change the thread configuration for raster and
-  // platform queues while the platform view is being destroyed.
-  //
-  // This prevents false positives such as this method starts assuming that the
-  // raster and platform queues have a given thread configuration, but then the
-  // configuration is changed by a task, and the assumption is no longer true.
-  //
-  // This incorrect assumption can lead to deadlock.
-  rasterizer_->DisableThreadMergerIfNeeded();
 
   // Note:
   // This is a synchronous operation because certain platforms depend on
@@ -1179,10 +1116,6 @@ void Shell::OnPlatformViewDestroyed() {
                       io_task_runner = task_runners_.GetIOTaskRunner(),
                       io_task]() {
     if (rasterizer) {
-      // Enables the thread merger which is required prior tearing down the
-      // rasterizer. If the raster and platform threads are merged, tearing down
-      // the rasterizer unmerges the threads.
-      rasterizer->EnableThreadMergerIfNeeded();
       rasterizer->Teardown();
     }
     // Step 2: Tell the IO thread to complete its remaining work.
@@ -1194,13 +1127,9 @@ void Shell::OnPlatformViewDestroyed() {
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetRasterTaskRunner(),
                                     raster_task);
   latch.Wait();
-  // On Android, the external view embedder may post a task to the platform
-  // thread, and wait until it completes if overlay surfaces must be released.
-  // However, the platform thread might be blocked when Dart is initializing.
-  // In this situation, calling TeardownExternalViewEmbedder is safe because no
-  // platform views have been created before Flutter renders the first frame.
-  // Overall, the longer term plan is to remove this implementation once
-  // https://github.com/flutter/flutter/issues/96679 is fixed.
+  // Tear down the external view embedder on the platform thread after raster
+  // teardown completes so embedders can release both raster-side and
+  // platform-thread resources without cross-thread deadlocks.
   rasterizer_->TeardownExternalViewEmbedder();
 }
 
@@ -1522,34 +1451,14 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
   FML_DCHECK(is_set_up_);
 
   task_runners_.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
-      [&waiting_for_first_frame = waiting_for_first_frame_,
-       &waiting_for_first_frame_mutex = waiting_for_first_frame_mutex_,
-       &waiting_for_first_frame_callbacks = waiting_for_first_frame_callbacks_,
-       rasterizer = rasterizer_->GetWeakPtr(),
+      [this, rasterizer = rasterizer_->GetWeakPtr(),
        weak_pipeline = std::weak_ptr<FramePipeline>(pipeline)]() mutable {
         if (rasterizer) {
           std::shared_ptr<FramePipeline> pipeline = weak_pipeline.lock();
           if (pipeline) {
             rasterizer->Draw(pipeline);
-          }
-
-          // waiting_for_first_frame is set to true during shell startup, and
-          // after the first frame is drawn it is set fo false and will remain
-          // false.
-          // AddFirstFrameCallback reads waiting_for_first_frame while holding
-          // the waiting_for_first_frame_mutex, and it adds entries to
-          // waiting_for_first_frame_callbacks only if waiting_for_first_frame
-          // is true.
-          if (waiting_for_first_frame.load()) {
-            std::vector<std::function<void()>> callbacks;
-            {
-              std::scoped_lock lock(waiting_for_first_frame_mutex);
-              waiting_for_first_frame.store(false);
-              std::swap(waiting_for_first_frame_callbacks, callbacks);
-            }
-            for (const auto& callback : callbacks) {
-              callback();
-            }
+          } else {
+            FlushFirstFrameCallbacks();
           }
         }
       }));
@@ -1971,6 +1880,31 @@ bool Shell::ShouldDiscardLayerTree(int64_t view_id,
   auto expected_frame_constraints = ExpectedFrameConstraints(view_id);
   return !expected_frame_constraints.IsSatisfiedBy(
       Size(tree.frame_size().width, tree.frame_size().height));
+}
+
+// |Rasterizer::Delegate|
+void Shell::OnDrawFinished(DrawStatus status) {
+  if (status != DrawStatus::kDeferred) {
+    FlushFirstFrameCallbacks();
+  }
+}
+
+void Shell::FlushFirstFrameCallbacks() {
+  // waiting_for_first_frame_ is set to true during shell startup, and after
+  // the first frame is drawn it is set to false and will remain false.
+  // AddFirstFrameCallback reads waiting_for_first_frame_ while holding
+  // waiting_for_first_frame_mutex_ and adds entries only if it is true.
+  if (waiting_for_first_frame_.load()) {
+    std::vector<std::function<void()>> callbacks;
+    {
+      std::scoped_lock lock(waiting_for_first_frame_mutex_);
+      waiting_for_first_frame_.store(false);
+      std::swap(waiting_for_first_frame_callbacks_, callbacks);
+    }
+    for (const auto& callback : callbacks) {
+      callback();
+    }
+  }
 }
 
 // |ServiceProtocol::Handler|

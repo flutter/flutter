@@ -18,16 +18,22 @@ AndroidExternalViewEmbedderWrapper::AndroidExternalViewEmbedderWrapper(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-    const TaskRunners& task_runners)
+    const TaskRunners& task_runners,
+    fml::closure schedule_frame)
     : ExternalViewEmbedder(),
       meets_hcpp_criteria_(meets_hcpp_criteria),
       android_context_(android_context),
       task_runners_(task_runners),
       jni_facade_(std::move(jni_facade)),
-      surface_factory_(std::move(surface_factory)) {}
+      surface_factory_(std::move(surface_factory)),
+      schedule_frame_(std::move(schedule_frame)) {}
 
 void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
-  if (non_hcpp_view_embedder_ || hcpp_view_embedder_) {
+  if (initialized_.load(std::memory_order_acquire)) {
+    return;
+  }
+  std::lock_guard lock(init_mutex_);
+  if (initialized_.load(std::memory_order_relaxed)) {
     return;
   }
   if (meets_hcpp_criteria_ &&
@@ -38,7 +44,20 @@ void AndroidExternalViewEmbedderWrapper::EnsureInitialized() {
         android_context_, jni_facade_, surface_factory_, task_runners_);
   } else {
     non_hcpp_view_embedder_ = std::make_unique<AndroidExternalViewEmbedder>(
-        android_context_, jni_facade_, surface_factory_, task_runners_);
+        android_context_, jni_facade_, surface_factory_, task_runners_,
+        schedule_frame_);
+  }
+  initialized_.store(true, std::memory_order_release);
+}
+
+// |ExternalViewEmbedder|
+bool AndroidExternalViewEmbedderWrapper::ReadyForNextFrame(
+    const fml::closure& resume) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    return hcpp_view_embedder_->ReadyForNextFrame(resume);
+  } else {
+    return non_hcpp_view_embedder_->ReadyForNextFrame(resume);
   }
 }
 
@@ -83,31 +102,18 @@ void AndroidExternalViewEmbedderWrapper::SubmitFlutterView(
   }
 }
 
-// |ExternalViewEmbedder|
-PostPrerollResult AndroidExternalViewEmbedderWrapper::PostPrerollAction(
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-  EnsureInitialized();
-  if (hcpp_view_embedder_) {
-    return hcpp_view_embedder_->PostPrerollAction(raster_thread_merger);
-  } else {
-    return non_hcpp_view_embedder_->PostPrerollAction(raster_thread_merger);
-  }
-}
-
 DlCanvas* AndroidExternalViewEmbedderWrapper::GetRootCanvas() {
   // On Android, the root surface is created from the on-screen render target.
   return nullptr;
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedderWrapper::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void AndroidExternalViewEmbedderWrapper::BeginFrame(GrDirectContext* context) {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->BeginFrame(context, raster_thread_merger);
+    hcpp_view_embedder_->BeginFrame(context);
   } else {
-    non_hcpp_view_embedder_->BeginFrame(context, raster_thread_merger);
+    non_hcpp_view_embedder_->BeginFrame(context);
   }
 }
 
@@ -134,35 +140,28 @@ void AndroidExternalViewEmbedderWrapper::CancelFrame() {
 }
 
 // |ExternalViewEmbedder|
-void AndroidExternalViewEmbedderWrapper::EndFrame(
-    bool should_resubmit_frame,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
+void AndroidExternalViewEmbedderWrapper::EndFrame() {
   EnsureInitialized();
   if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->EndFrame(should_resubmit_frame, raster_thread_merger);
+    hcpp_view_embedder_->EndFrame();
   } else {
-    non_hcpp_view_embedder_->EndFrame(should_resubmit_frame,
-                                      raster_thread_merger);
-  }
-}
-
-// |ExternalViewEmbedder|
-bool AndroidExternalViewEmbedderWrapper::SupportsDynamicThreadMerging() {
-  EnsureInitialized();
-  if (hcpp_view_embedder_) {
-    return hcpp_view_embedder_->SupportsDynamicThreadMerging();
-  } else {
-    return non_hcpp_view_embedder_->SupportsDynamicThreadMerging();
+    non_hcpp_view_embedder_->EndFrame();
   }
 }
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::Teardown() {
-  EnsureInitialized();
-  if (hcpp_view_embedder_) {
-    hcpp_view_embedder_->Teardown();
-  } else {
-    non_hcpp_view_embedder_->Teardown();
+  ExternalViewEmbedder* active_embedder = nullptr;
+  {
+    std::lock_guard lock(init_mutex_);
+    if (hcpp_view_embedder_) {
+      active_embedder = hcpp_view_embedder_.get();
+    } else if (non_hcpp_view_embedder_) {
+      active_embedder = non_hcpp_view_embedder_.get();
+    }
+  }
+  if (active_embedder) {
+    active_embedder->Teardown();
   }
 }
 

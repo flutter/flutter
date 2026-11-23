@@ -18,6 +18,11 @@ namespace flutter {
 class AndroidSurfaceMock final : public GPUSurfaceGLDelegate,
                                  public AndroidSurface {
  public:
+  AndroidSurfaceMock() {
+    ON_CALL(*this, SetNativeWindow(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+  }
+
   MOCK_METHOD(bool, IsValid, (), (const, override));
 
   MOCK_METHOD(void, TeardownOnScreenContext, (), (override));

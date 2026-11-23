@@ -24,9 +24,7 @@ DlCanvas* MockViewEmbedder::GetRootCanvas() {
 void MockViewEmbedder::CancelFrame() {}
 
 // |ExternalViewEmbedder|
-void MockViewEmbedder::BeginFrame(
-    GrDirectContext* context,
-    const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {}
+void MockViewEmbedder::BeginFrame(GrDirectContext* context) {}
 
 // |ExternalViewEmbedder|
 void MockViewEmbedder::PrepareFlutterView(DlISize frame_size,

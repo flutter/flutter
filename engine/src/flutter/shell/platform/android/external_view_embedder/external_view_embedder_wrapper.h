@@ -5,8 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
+#include <atomic>
+#include <mutex>
+
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
+#include "flutter/fml/closure.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
@@ -28,7 +32,11 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-      const TaskRunners& task_runners);
+      const TaskRunners& task_runners,
+      fml::closure schedule_frame = {});
+
+  // |ExternalViewEmbedder|
+  bool ReadyForNextFrame(const fml::closure& resume) override;
 
   // |ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(
@@ -46,17 +54,10 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
-      override;
-
-  // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,
@@ -66,12 +67,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override;
-
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override;
+  void EndFrame() override;
 
   // |ExternalViewEmbedder|
   void Teardown() override;
@@ -85,6 +81,9 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   const TaskRunners& task_runners_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  fml::closure schedule_frame_;
+  std::mutex init_mutex_;
+  std::atomic<bool> initialized_{false};
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
   std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };

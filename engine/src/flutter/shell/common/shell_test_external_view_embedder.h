@@ -5,8 +5,13 @@
 #ifndef FLUTTER_SHELL_COMMON_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_COMMON_SHELL_TEST_EXTERNAL_VIEW_EMBEDDER_H_
 
+#include <atomic>
+#include <functional>
+#include <map>
+#include <memory>
+#include <vector>
+
 #include "flutter/flow/embedded_views.h"
-#include "flutter/fml/raster_thread_merger.h"
 
 namespace flutter {
 
@@ -15,18 +20,12 @@ namespace flutter {
 ///
 class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
  public:
-  using EndFrameCallBack =
-      std::function<void(bool, fml::RefPtr<fml::RasterThreadMerger>)>;
+  using EndFrameCallBack = std::function<void()>;
 
-  ShellTestExternalViewEmbedder(const EndFrameCallBack& end_frame_call_back,
-                                PostPrerollResult post_preroll_result,
-                                bool support_thread_merging);
+  explicit ShellTestExternalViewEmbedder(
+      const EndFrameCallBack& end_frame_call_back);
 
   ~ShellTestExternalViewEmbedder() = default;
-
-  // Updates the post preroll result so the |PostPrerollAction| after always
-  // returns the new `post_preroll_result`.
-  void UpdatePostPrerollResult(PostPrerollResult post_preroll_result);
 
   // Gets the number of times the SubmitFlutterView method has been called in
   // the external view embedder.
@@ -46,9 +45,7 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   void CancelFrame() override;
 
   // |ExternalViewEmbedder|
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override;
+  void BeginFrame(GrDirectContext* context) override;
 
   // |ExternalViewEmbedder|
   void PrepareFlutterView(DlISize frame_size,
@@ -58,11 +55,6 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
   void PrerollCompositeEmbeddedView(
       int64_t view_id,
       std::unique_ptr<EmbeddedViewParams> params) override;
-
-  // |ExternalViewEmbedder|
-  PostPrerollResult PostPrerollAction(
-      const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger)
-      override;
 
   // |ExternalViewEmbedder|
   DlCanvas* CompositeEmbeddedView(int64_t view_id) override;
@@ -83,21 +75,13 @@ class ShellTestExternalViewEmbedder final : public ExternalViewEmbedder {
       std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override;
+  void EndFrame() override;
 
   // |ExternalViewEmbedder|
   DlCanvas* GetRootCanvas() override;
 
-  // |ExternalViewEmbedder|
-  bool SupportsDynamicThreadMerging() override;
-
   const EndFrameCallBack end_frame_call_back_;
 
-  PostPrerollResult post_preroll_result_;
-
-  bool support_thread_merging_;
   DlISize frame_size_;
   std::map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices_;
   std::map<int64_t, MutatorsStack> mutators_stacks_;

@@ -1336,15 +1336,47 @@ public class FlutterJNI {
     return platformViewsController.createOverlaySurface();
   }
 
+  /**
+   * Allocates an {@link android.media.ImageReader} overlay surface directly on the calling thread
+   * (typically the raster thread) without blocking on the platform thread.
+   */
+  @SuppressWarnings("unused")
+  @Nullable
+  public FlutterOverlaySurface createOverlaySurface(int width, int height) {
+    if (platformViewsController == null) {
+      return null;
+    }
+    return platformViewsController.createOverlaySurface(width, height);
+  }
+
   @SuppressWarnings("unused")
   @UiThread
   public void destroyOverlaySurfaces() {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
-      throw new RuntimeException(
-          "platformViewsController must be set before attempting to destroy an overlay surface");
+      return;
     }
     platformViewsController.destroyOverlaySurfaces();
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void destroyOverlaySurfacesByIds(@NonNull int[] ids) {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      return;
+    }
+    platformViewsController.destroyOverlaySurfacesByIds(ids);
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void drainAbortedFrame(@NonNull int[] overlayIds) {
+    ensureRunningOnMainThread();
+    if (platformViewsController == null) {
+      return;
+    }
+    platformViewsController.drainAbortedFrame(overlayIds);
   }
 
   @SuppressWarnings("unused")

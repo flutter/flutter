@@ -994,20 +994,16 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
+TEST_F(ShellTest, ExternalEmbedderEndFrameIsCalled) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
   bool end_frame_called = false;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        ASSERT_TRUE(raster_thread_merger.get() == nullptr);
-        ASSERT_FALSE(should_resubmit_frame);
-        end_frame_called = true;
-        end_frame_latch.Signal();
-      };
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kResubmitFrame, false);
+  auto end_frame_callback = [&]() {
+    end_frame_called = true;
+    end_frame_latch.Signal();
+  };
+  auto external_view_embedder =
+      std::make_shared<ShellTestExternalViewEmbedder>(end_frame_callback);
   auto shell = CreateShell({
       .settings = settings,
       .platform_view_create_callback = ShellTestPlatformViewBuilder({
@@ -1037,11 +1033,6 @@ TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
 }
 
 TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
   auto settings = CreateSettingsForFixture();
 
   std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
@@ -1051,24 +1042,19 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   std::vector<int64_t> visited_platform_views;
   MutatorsStack stack_50;
   MutatorsStack stack_75;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        if (end_frame_called) {
-          return;
-        }
-        ASSERT_TRUE(raster_thread_merger.get() == nullptr);
-        ASSERT_FALSE(should_resubmit_frame);
-        end_frame_called = true;
-        visited_platform_views =
-            external_view_embedder->GetVisitedPlatformViews();
-        stack_50 = external_view_embedder->GetStack(50);
-        stack_75 = external_view_embedder->GetStack(75);
-        end_frame_latch.Signal();
-      };
+  auto end_frame_callback = [&]() {
+    if (end_frame_called) {
+      return;
+    }
+    end_frame_called = true;
+    visited_platform_views = external_view_embedder->GetVisitedPlatformViews();
+    stack_50 = external_view_embedder->GetStack(50);
+    stack_75 = external_view_embedder->GetStack(75);
+    end_frame_latch.Signal();
+  };
 
-  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kResubmitFrame, false);
+  external_view_embedder =
+      std::make_shared<ShellTestExternalViewEmbedder>(end_frame_callback);
   auto shell = CreateShell({
       .settings = settings,
       .platform_view_create_callback = ShellTestPlatformViewBuilder({
@@ -1119,326 +1105,9 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
             DlRect::MakeLTRB(1, 1, 31, 31));
 
   DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
 }
 
-// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
-TEST_F(ShellTest,
-       ExternalEmbedderEndFrameIsCalledWhenPostPrerollResultIsResubmit) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
-  auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent end_frame_latch;
-  bool end_frame_called = false;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        ASSERT_TRUE(raster_thread_merger.get() != nullptr);
-        ASSERT_TRUE(should_resubmit_frame);
-        end_frame_called = true;
-        end_frame_latch.Signal();
-      };
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kResubmitFrame, true);
-  auto shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  LayerTreeBuilder builder = [&](const std::shared_ptr<ContainerLayer>& root) {
-    auto display_list_layer = std::make_shared<DisplayListLayer>(
-        DlPoint(10, 10), MakeSizedDisplayList(80, 80), false, false);
-    root->Add(display_list_layer);
-  };
-
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-  end_frame_latch.Wait();
-
-  ASSERT_TRUE(end_frame_called);
-
-  DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
-}
-
-TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
-  auto settings = CreateSettingsForFixture();
-  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          fml::RefPtr<fml::RasterThreadMerger> thread_merger) {
-        raster_thread_merger = std::move(thread_merger);
-      };
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSuccess, true);
-
-  auto shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  LayerTreeBuilder builder = [&](const std::shared_ptr<ContainerLayer>& root) {
-    auto display_list_layer = std::make_shared<DisplayListLayer>(
-        DlPoint(10, 10), MakeSizedDisplayList(80, 80), false, false);
-    root->Add(display_list_layer);
-  };
-
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-
-  fml::AutoResetWaitableEvent first_frame_event;
-  shell->AddFirstFrameCallback(
-      [&first_frame_event] { first_frame_event.Signal(); });
-  first_frame_event.Wait();
-  // Wait for the rasterizer to process the frame. AddFirstFrameCallback only
-  // waits for the Animator, but end_frame_callback is called by the Rasterizer.
-  PostSync(shell->GetTaskRunners().GetRasterTaskRunner(), [] {});
-
-  ASSERT_TRUE(raster_thread_merger->IsEnabled());
-
-  ValidateDestroyPlatformView(shell.get());
-  ASSERT_TRUE(raster_thread_merger->IsEnabled());
-
-  // Validate the platform view can be recreated and destroyed again
-  ValidateShell(shell.get());
-  ASSERT_TRUE(raster_thread_merger->IsEnabled());
-  DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
-}
-
-TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
-  const int ThreadMergingLease = 10;
-  auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent end_frame_latch;
-  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
-
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        if (should_resubmit_frame && !raster_thread_merger->IsMerged()) {
-          raster_thread_merger->MergeWithLease(ThreadMergingLease);
-
-          ASSERT_TRUE(raster_thread_merger->IsMerged());
-          external_view_embedder->UpdatePostPrerollResult(
-              PostPrerollResult::kSuccess);
-        }
-        end_frame_latch.Signal();
-      };
-  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSuccess, true);
-  // Set resubmit once to trigger thread merging.
-  external_view_embedder->UpdatePostPrerollResult(
-      PostPrerollResult::kResubmitFrame);
-  auto shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  LayerTreeBuilder builder = [&](const std::shared_ptr<ContainerLayer>& root) {
-    auto display_list_layer = std::make_shared<DisplayListLayer>(
-        DlPoint(10, 10), MakeSizedDisplayList(80, 80), false, false);
-    root->Add(display_list_layer);
-  };
-
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-  // Pump one frame to trigger thread merging.
-  end_frame_latch.Wait();
-  // Pump another frame to ensure threads are merged and a regular layer tree is
-  // submitted.
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-  // Threads are merged here. PlatformViewNotifyDestroy should be executed
-  // successfully.
-  ASSERT_TRUE(fml::TaskRunnerChecker::RunsOnTheSameThread(
-      shell->GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId(),
-      shell->GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId()));
-  ValidateDestroyPlatformView(shell.get());
-
-  // Ensure threads are unmerged after platform view destroy
-  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
-      shell->GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId(),
-      shell->GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId()));
-
-  // Validate the platform view can be recreated and destroyed again
-  ValidateShell(shell.get());
-
-  DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
-}
-
-TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
-  const int kThreadMergingLease = 10;
-  auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent end_frame_latch;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        if (should_resubmit_frame && !raster_thread_merger->IsMerged()) {
-          raster_thread_merger->MergeWithLease(kThreadMergingLease);
-        }
-        end_frame_latch.Signal();
-      };
-  // Start with a regular layer tree with `PostPrerollResult::kSuccess` so we
-  // can later check if the rasterizer is tore down using
-  // |ValidateDestroyPlatformView|
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSuccess, true);
-
-  auto shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  LayerTreeBuilder builder = [&](const std::shared_ptr<ContainerLayer>& root) {
-    auto display_list_layer = std::make_shared<DisplayListLayer>(
-        DlPoint(10, 10), MakeSizedDisplayList(80, 80), false, false);
-    root->Add(display_list_layer);
-  };
-
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-  // Pump one frame and threads aren't merged
-  end_frame_latch.Wait();
-  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
-      shell->GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId(),
-      shell->GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId()));
-
-  // Pump a frame with `PostPrerollResult::kResubmitFrame` to start merging
-  // threads
-  external_view_embedder->UpdatePostPrerollResult(
-      PostPrerollResult::kResubmitFrame);
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-
-  // Now destroy the platform view immediately.
-  // Two things can happen here:
-  // 1. Threads haven't merged. 2. Threads has already merged.
-  // |Shell:OnPlatformViewDestroy| should be able to handle both cases.
-  ValidateDestroyPlatformView(shell.get());
-
-  // Ensure threads are unmerged after platform view destroy
-  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
-      shell->GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId(),
-      shell->GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId()));
-
-  // Validate the platform view can be recreated and destroyed again
-  ValidateShell(shell.get());
-
-  DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
-}
-
-TEST_F(ShellTest,
-       OnPlatformViewDestroyWithThreadMergerWhileThreadsAreUnmerged) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
-  auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent end_frame_latch;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        end_frame_latch.Signal();
-      };
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSuccess, true);
-  auto shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  LayerTreeBuilder builder = [&](const std::shared_ptr<ContainerLayer>& root) {
-    auto display_list_layer = std::make_shared<DisplayListLayer>(
-        DlPoint(10, 10), MakeSizedDisplayList(80, 80), false, false);
-    root->Add(display_list_layer);
-  };
-  PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
-  end_frame_latch.Wait();
-
-  // Threads should not be merged.
-  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
-      shell->GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId(),
-      shell->GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId()));
-  ValidateDestroyPlatformView(shell.get());
-
-  // Ensure threads are unmerged after platform view destroy
-  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
-      shell->GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId(),
-      shell->GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId()));
-
-  // Validate the platform view can be recreated and destroyed again
-  ValidateShell(shell.get());
-
-  DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
-}
-
-TEST_F(ShellTest, OnPlatformViewDestroyWithoutRasterThreadMerger) {
+TEST_F(ShellTest, OnPlatformViewDestroyWithUnmergedPlatformAndRasterThreads) {
   auto settings = CreateSettingsForFixture();
 
   auto shell = CreateShell(settings);
@@ -1475,22 +1144,12 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithoutRasterThreadMerger) {
   DestroyShell(std::move(shell));
 }
 
-// TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
 TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        end_frame_latch.Signal();
-      };
-  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSuccess, true);
+  auto end_frame_callback = [&]() { end_frame_latch.Signal(); };
+  auto external_view_embedder =
+      std::make_shared<ShellTestExternalViewEmbedder>(end_frame_callback);
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
                          ThreadHost::Type::kPlatform | ThreadHost::Type::kIo |
                              ThreadHost::Type::kUi);
@@ -1531,7 +1190,6 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
   ValidateShell(shell.get());
 
   DestroyShell(std::move(shell), task_runners);
-#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
@@ -1539,15 +1197,13 @@ TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
   fml::AutoResetWaitableEvent end_frame_latch;
   std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
   bool used_this_frame = true;
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        // We expect `used_this_frame` to be false.
-        used_this_frame = external_view_embedder->GetUsedThisFrame();
-        end_frame_latch.Signal();
-      };
-  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSuccess, true);
+  auto end_frame_callback = [&]() {
+    // We expect `used_this_frame` to be false.
+    used_this_frame = external_view_embedder->GetUsedThisFrame();
+    end_frame_latch.Signal();
+  };
+  external_view_embedder =
+      std::make_shared<ShellTestExternalViewEmbedder>(end_frame_callback);
   auto shell = CreateShell({
       .settings = settings,
       .platform_view_create_callback = ShellTestPlatformViewBuilder({
@@ -1576,63 +1232,6 @@ TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
   ValidateShell(shell.get());
 
   DestroyShell(std::move(shell));
-}
-
-// TODO(https://github.com/flutter/flutter/issues/66056): Deflake on all other
-// platforms
-TEST_F(ShellTest, DISABLED_SkipAndSubmitFrame) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-
-  auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent end_frame_latch;
-  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
-
-  auto end_frame_callback =
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        if (should_resubmit_frame && !raster_thread_merger->IsMerged()) {
-          raster_thread_merger->MergeWithLease(10);
-          external_view_embedder->UpdatePostPrerollResult(
-              PostPrerollResult::kSuccess);
-        }
-        end_frame_latch.Signal();
-      };
-  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      end_frame_callback, PostPrerollResult::kSkipAndRetryFrame, true);
-
-  auto shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-  RunEngine(shell.get(), std::move(configuration));
-
-  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
-
-  PumpOneFrame(shell.get());
-
-  // `EndFrame` changed the post preroll result to `kSuccess`.
-  end_frame_latch.Wait();
-
-  // Let the resubmitted frame to run and `GetSubmittedFrameCount` should be
-  // called.
-  end_frame_latch.Wait();
-  // 2 frames are submitted because `kSkipAndRetryFrame`, but only the 2nd frame
-  // should be submitted with `external_view_embedder`, hence the below check.
-  ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
-
-  PlatformViewNotifyDestroyed(shell.get());
-  DestroyShell(std::move(shell));
-#endif  // OS_FUCHSIA
 }
 
 TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
@@ -2714,13 +2313,9 @@ TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
   DlISize expected_size = DlISize(400, 200);
 
   fml::AutoResetWaitableEvent end_frame_latch;
-  auto end_frame_callback =
-      [&](bool should_merge_thread,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        end_frame_latch.Signal();
-      };
+  auto end_frame_callback = [&]() { end_frame_latch.Signal(); };
   auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      std::move(end_frame_callback), PostPrerollResult::kSuccess, false);
+      std::move(end_frame_callback));
   std::unique_ptr<Shell> shell = CreateShell({
       .settings = settings,
       .platform_view_create_callback = ShellTestPlatformViewBuilder({
@@ -2759,102 +2354,6 @@ TEST_F(ShellTest, DISABLED_DiscardLayerTreeOnResize) {
   // Expected size, 1 frame submitted.
   ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
   ASSERT_EQ(expected_size, external_view_embedder->GetLastSubmittedFrameSize());
-
-  PlatformViewNotifyDestroyed(shell.get());
-  DestroyShell(std::move(shell));
-}
-
-// TODO(https://github.com/flutter/flutter/issues/100273): Disabled due to
-// flakiness.
-// TODO(https://github.com/flutter/flutter/issues/100299): Fix it when
-// re-enabling.
-TEST_F(ShellTest, DISABLED_DiscardResubmittedLayerTreeOnResize) {
-  auto settings = CreateSettingsForFixture();
-
-  DlISize origin_size = DlISize(400, 100);
-  DlISize new_size = DlISize(400, 200);
-
-  fml::AutoResetWaitableEvent end_frame_latch;
-
-  fml::AutoResetWaitableEvent resize_latch;
-
-  std::shared_ptr<ShellTestExternalViewEmbedder> external_view_embedder;
-  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_ref;
-  auto end_frame_callback =
-      [&](bool should_merge_thread,
-          const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
-        if (!raster_thread_merger_ref) {
-          raster_thread_merger_ref = raster_thread_merger;
-        }
-        if (should_merge_thread) {
-          raster_thread_merger->MergeWithLease(10);
-          external_view_embedder->UpdatePostPrerollResult(
-              PostPrerollResult::kSuccess);
-        }
-        end_frame_latch.Signal();
-
-        if (should_merge_thread) {
-          resize_latch.Wait();
-        }
-      };
-
-  external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
-      std::move(end_frame_callback), PostPrerollResult::kResubmitFrame, true);
-
-  std::unique_ptr<Shell> shell = CreateShell({
-      .settings = settings,
-      .platform_view_create_callback = ShellTestPlatformViewBuilder({
-          .shell_test_external_view_embedder = external_view_embedder,
-      }),
-  });
-
-  // Create the surface needed by rasterizer
-  PlatformViewNotifyCreated(shell.get());
-
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetPlatformTaskRunner(),
-      [&shell, &origin_size]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            kImplicitViewId, {1.0, static_cast<double>(origin_size.width),
-                              static_cast<double>(origin_size.height), 22, 0});
-      });
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-
-  RunEngine(shell.get(), std::move(configuration));
-
-  PumpOneFrame(shell.get(),
-               ViewContent::DummyView(static_cast<double>(origin_size.width),
-                                      static_cast<double>(origin_size.height)));
-
-  end_frame_latch.Wait();
-  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
-
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetPlatformTaskRunner(),
-      [&shell, &new_size, &resize_latch]() {
-        shell->GetPlatformView()->SetViewportMetrics(
-            kImplicitViewId, {1.0, static_cast<double>(new_size.width),
-                              static_cast<double>(new_size.height), 22, 0});
-        resize_latch.Signal();
-      });
-
-  end_frame_latch.Wait();
-
-  // The frame resubmitted with origin size should be discarded after the
-  // viewport metrics changed.
-  ASSERT_EQ(0, external_view_embedder->GetSubmittedFrameCount());
-
-  // Threads will be merged at the end of this frame.
-  PumpOneFrame(shell.get(),
-               ViewContent::DummyView(static_cast<double>(new_size.width),
-                                      static_cast<double>(new_size.height)));
-
-  end_frame_latch.Wait();
-  ASSERT_TRUE(raster_thread_merger_ref->IsMerged());
-  ASSERT_EQ(1, external_view_embedder->GetSubmittedFrameCount());
-  ASSERT_EQ(new_size, external_view_embedder->GetLastSubmittedFrameSize());
 
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
@@ -5318,10 +4817,8 @@ TEST_F(ShellTest, MakePipelineUsageJsonReportsEachPipeline) {
 
 namespace {
 
-// Wraps a real `fml::TaskRunner` (preserving its `TaskQueueId` for
-// `RasterThreadMerger`) and fires a one-shot callback when a task is posted
-// from `source_runner` (e.g., inside `Shell::OnPlatformViewDestroyed` after
-// `DisableThreadMergerIfNeeded()` and after its teardown task is enqueued).
+// Wraps a real `fml::TaskRunner` (preserving its `TaskQueueId`) and fires a
+// one-shot callback when a task is posted from `source_runner`.
 class ObservingTaskRunner final : public fml::TaskRunner {
  public:
   static fml::RefPtr<ObservingTaskRunner> Create(
@@ -5465,66 +4962,6 @@ class DeferredTestPlatformView : public PlatformView {
   fml::closure setup_impeller_callback_;
   fml::closure create_resource_context_callback_;
   CreateVsyncWaiter create_vsync_waiter_callback_;
-};
-
-// Simulates AndroidExternalViewEmbedderWrapper on an HCPP-eligible device:
-// SupportsDynamicThreadMerging() requires SetupImpellerContext() to have
-// completed on the raster thread and must never run on the platform thread.
-class BackendDependentExternalViewEmbedder : public ExternalViewEmbedder {
- public:
-  using EndFrameCallback =
-      std::function<void(bool, const fml::RefPtr<fml::RasterThreadMerger>&)>;
-
-  BackendDependentExternalViewEmbedder(const TaskRunners& task_runners,
-                                       const std::atomic<bool>& backend_ready,
-                                       bool support_thread_merging,
-                                       EndFrameCallback end_frame_callback)
-      : task_runners_(task_runners),
-        backend_ready_(backend_ready),
-        support_thread_merging_(support_thread_merging),
-        end_frame_callback_(std::move(end_frame_callback)) {}
-
-  size_t GetSupportsMergingCalls() const {
-    return supports_merging_calls_.load();
-  }
-
-  // |ExternalViewEmbedder|
-  DlCanvas* GetRootCanvas() override { return nullptr; }
-  void CancelFrame() override {}
-  void BeginFrame(GrDirectContext* context,
-                  const fml::RefPtr<fml::RasterThreadMerger>&
-                      raster_thread_merger) override {}
-  void PrerollCompositeEmbeddedView(
-      int64_t platform_view_id,
-      std::unique_ptr<EmbeddedViewParams> params) override {}
-  DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) override {
-    return nullptr;
-  }
-  void PrepareFlutterView(DlISize frame_size,
-                          double device_pixel_ratio) override {}
-  void EndFrame(bool should_resubmit_frame,
-                const fml::RefPtr<fml::RasterThreadMerger>&
-                    raster_thread_merger) override {
-    if (end_frame_callback_) {
-      end_frame_callback_(should_resubmit_frame, raster_thread_merger);
-    }
-  }
-  bool SupportsDynamicThreadMerging() override {
-    supports_merging_calls_.fetch_add(1);
-    EXPECT_FALSE(
-        task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
-    EXPECT_TRUE(
-        task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
-    EXPECT_TRUE(backend_ready_.load());
-    return support_thread_merging_;
-  }
-
- private:
-  TaskRunners task_runners_;
-  const std::atomic<bool>& backend_ready_;
-  bool support_thread_merging_ = false;
-  EndFrameCallback end_frame_callback_;
-  std::atomic<size_t> supports_merging_calls_{0};
 };
 
 std::unique_ptr<::testing::NiceMock<MockSurface>> MakeValidMockSurface() {
@@ -5773,132 +5210,6 @@ TEST_F(
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(
-    ShellTest,
-    OnPlatformViewCreatedDeferredWithDestroyBeforeSetupOrdersTeardownAndKeepsMergerDisabled) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
-  Settings settings = CreateSettingsForFixture();
-  TaskRunners base_runners = GetTaskRunnersForFixture();
-  auto observing_raster =
-      ObservingTaskRunner::Create(base_runners.GetRasterTaskRunner());
-  TaskRunners task_runners("test", base_runners.GetPlatformTaskRunner(),
-                           observing_raster, base_runners.GetUITaskRunner(),
-                           base_runners.GetIOTaskRunner());
-
-  std::atomic<bool> backend_ready{false};
-  fml::AutoResetWaitableEvent setup_impeller_entered;
-  fml::AutoResetWaitableEvent unblock_setup_impeller;
-  std::vector<std::string> events;
-  std::atomic<bool> enabled_during_inflight_destroy{true};
-  std::atomic<bool> merged_during_inflight_destroy{true};
-
-  auto embedder = std::make_shared<BackendDependentExternalViewEmbedder>(
-      task_runners, backend_ready, /*support_thread_merging=*/true,
-      [&](bool should_resubmit_frame,
-          const fml::RefPtr<fml::RasterThreadMerger>& merger) {
-        ASSERT_NE(merger.get(), nullptr);
-        enabled_during_inflight_destroy.store(merger->IsEnabled());
-        merger->MergeWithLease(10);
-        merged_during_inflight_destroy.store(merger->IsMerged());
-        events.emplace_back("end_frame");
-      });
-
-  DeferredTestPlatformView* platform_view_ptr = nullptr;
-  ShellTest::Config config{
-      .settings = settings,
-      .task_runners = task_runners,
-      .platform_view_create_callback =
-          [&](Shell& shell) {
-            auto view = std::make_unique<DeferredTestPlatformView>(
-                shell, task_runners, embedder, [&]() {
-                  setup_impeller_entered.Signal();
-                  unblock_setup_impeller.Wait();
-                  backend_ready.store(true);
-                });
-            platform_view_ptr = view.get();
-            return view;
-          },
-  };
-  std::unique_ptr<Shell> shell = CreateShell(config);
-  ASSERT_NE(shell, nullptr);
-  ASSERT_NE(platform_view_ptr, nullptr);
-  setup_impeller_entered.Wait();
-  EXPECT_EQ(embedder->GetSupportsMergingCalls(), 0u);
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-  RunEngine(shell.get(), std::move(configuration));
-
-  fml::AutoResetWaitableEvent factory_entered;
-  fml::AutoResetWaitableEvent unblock_factory;
-  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
-    platform_view_ptr->TriggerNotifyCreatedDeferred(
-        [&]() -> std::unique_ptr<Surface> {
-          EXPECT_EQ(shell->GetRasterizer()->GetRasterThreadMerger().get(),
-                    nullptr);
-          events.emplace_back("factory");
-          factory_entered.Signal();
-          unblock_factory.Wait();
-          auto surface = MakeValidMockSurface();
-          EXPECT_CALL(*surface, MakeRenderContextCurrent())
-              .WillRepeatedly([&events]() {
-                events.emplace_back("make_current");
-                return std::make_unique<GLContextDefaultResult>(true);
-              });
-          EXPECT_CALL(*surface, ClearRenderContext()).WillOnce([&events]() {
-            events.emplace_back("teardown_clear");
-            return true;
-          });
-          return surface;
-        });
-  });
-  // SupportsDynamicThreadMerging() must still not have been queried on the
-  // platform thread during Shell::Create or NotifyCreatedDeferred.
-  EXPECT_EQ(embedder->GetSupportsMergingCalls(), 0u);
-
-  unblock_setup_impeller.Signal();
-  factory_entered.Wait();
-
-  // Queue a frame draw behind the paused deferred-creation task on the raster
-  // FIFO queue, then invoke `NotifyDestroyed()` on the platform thread.
-  // `ObservingTaskRunner` unblocks `surface_factory` deterministically right
-  // after `OnPlatformViewDestroyed` disables the merger and enqueues teardown.
-  PumpOneFrame(shell.get());
-  PostSync(task_runners.GetUITaskRunner(), [] {});
-
-  observing_raster->SetOnPostFromSourceRunner(
-      task_runners.GetPlatformTaskRunner(),
-      [&unblock_factory]() { unblock_factory.Signal(); });
-
-  fml::AutoResetWaitableEvent destroy_done;
-  task_runners.GetPlatformTaskRunner()->PostTask([&shell, &destroy_done]() {
-    shell->GetPlatformView()->NotifyDestroyed();
-    destroy_done.Signal();
-  });
-  ASSERT_FALSE(destroy_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
-
-  EXPECT_GE(embedder->GetSupportsMergingCalls(), 1u);
-  ASSERT_GE(events.size(), 4u);
-  EXPECT_EQ(events.front(), "factory");
-  EXPECT_EQ(events.back(), "teardown_clear");
-  EXPECT_NE(std::find(events.begin(), events.end(), "end_frame"), events.end());
-  EXPECT_FALSE(enabled_during_inflight_destroy.load());
-  EXPECT_FALSE(merged_during_inflight_destroy.load());
-  EXPECT_TRUE(RasterizerIsTornDown(shell.get()));
-
-  PostSync(task_runners.GetRasterTaskRunner(), [&]() {
-    auto merger = shell->GetRasterizer()->GetRasterThreadMerger();
-    ASSERT_NE(merger.get(), nullptr);
-    EXPECT_TRUE(merger->IsEnabled());
-  });
-
-  DestroyShell(std::move(shell), task_runners);
-#endif  // OS_FUCHSIA
-}
-
 TEST_F(ShellTest, DestroyShellWithPendingDeferredPlatformViewCreation) {
   Settings settings = CreateSettingsForFixture();
   TaskRunners base_runners = GetTaskRunnersForFixture();
@@ -5959,97 +5270,146 @@ TEST_F(ShellTest, DestroyShellWithPendingDeferredPlatformViewCreation) {
   EXPECT_TRUE(factory_ran.load());
 }
 
-TEST_F(ShellTest, SpawnedShellSharesThreadMergerWhenParentSetupIsDeferred) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
-                  "https://github.com/flutter/flutter/issues/59816 ";
-#else
+namespace {
+
+class DeferringExternalViewEmbedder final : public ExternalViewEmbedder {
+ public:
+  explicit DeferringExternalViewEmbedder(
+      fml::AutoResetWaitableEvent& deferred_event)
+      : deferred_event_(deferred_event) {}
+
+  bool ReadyForNextFrame(const fml::closure& resume) override {
+    ready_calls_.fetch_add(1);
+    if (allow_draw_.load()) {
+      return true;
+    }
+    {
+      std::scoped_lock lock(mutex_);
+      if (resume) {
+        pending_resumes_.push_back(resume);
+      }
+    }
+    deferred_event_.Signal();
+    return false;
+  }
+
+  bool ResumeDeferred(const fml::RefPtr<fml::TaskRunner>& raster_runner) {
+    allow_draw_.store(true);
+    std::vector<fml::closure> resumes;
+    {
+      std::scoped_lock lock(mutex_);
+      resumes.swap(pending_resumes_);
+    }
+    for (const fml::closure& resume : resumes) {
+      if (resume) {
+        raster_runner->PostTask(resume);
+      }
+    }
+    return !resumes.empty();
+  }
+
+  DlCanvas* GetRootCanvas() override { return nullptr; }
+  void CancelFrame() override {}
+  void BeginFrame(GrDirectContext* context) override {
+    begin_frame_calls_.fetch_add(1);
+  }
+  void PrerollCompositeEmbeddedView(
+      int64_t platform_view_id,
+      std::unique_ptr<EmbeddedViewParams> params) override {}
+  DlCanvas* CompositeEmbeddedView(int64_t platform_view_id) override {
+    return nullptr;
+  }
+  void SubmitFlutterView(
+      int64_t flutter_view_id,
+      GrDirectContext* context,
+      const std::shared_ptr<impeller::AiksContext>& aiks_context,
+      std::unique_ptr<SurfaceFrame> frame) override {
+    submit_count_.fetch_add(1);
+    if (frame) {
+      frame->Submit();
+    }
+  }
+  int ready_calls() const { return ready_calls_.load(); }
+  int begin_frame_calls() const { return begin_frame_calls_.load(); }
+  int submit_count() const { return submit_count_.load(); }
+  void PrepareFlutterView(DlISize frame_size,
+                          double device_pixel_ratio) override {}
+  void EndFrame() override {}
+
+ private:
+  fml::AutoResetWaitableEvent& deferred_event_;
+  std::atomic<bool> allow_draw_{false};
+  std::atomic<int> ready_calls_{0};
+  std::atomic<int> begin_frame_calls_{0};
+  std::atomic<int> submit_count_{0};
+  std::mutex mutex_;
+  std::vector<fml::closure> pending_resumes_;
+};
+
+}  // namespace
+
+TEST_F(ShellTest, AddFirstFrameCallbackWaitsAcrossDeferredDraws) {
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners = GetTaskRunnersForFixture();
 
-  auto make_embedder = []() {
-    return std::make_shared<ShellTestExternalViewEmbedder>(
-        [](bool, const fml::RefPtr<fml::RasterThreadMerger>&) {},
-        PostPrerollResult::kSuccess, /*support_thread_merging=*/true);
-  };
-
-  DeferredTestPlatformView* parent_view_ptr = nullptr;
+  fml::AutoResetWaitableEvent deferred_event;
+  auto embedder =
+      std::make_shared<DeferringExternalViewEmbedder>(deferred_event);
+  DeferredTestPlatformView* view_ptr = nullptr;
   ShellTest::Config config{
       .settings = settings,
       .task_runners = task_runners,
       .platform_view_create_callback =
-          [&parent_view_ptr, &task_runners, &make_embedder](Shell& shell) {
+          [&view_ptr, &task_runners, &embedder](Shell& shell) {
             auto view = std::make_unique<DeferredTestPlatformView>(
-                shell, task_runners, make_embedder());
-            parent_view_ptr = view.get();
+                shell, task_runners, embedder);
+            view_ptr = view.get();
             return view;
           },
   };
-  std::unique_ptr<Shell> parent_shell = CreateShell(config);
-  ASSERT_NE(parent_shell, nullptr);
+  std::unique_ptr<Shell> shell = CreateShell(config);
+  ASSERT_NE(shell, nullptr);
 
-  auto parent_config = RunConfiguration::InferFromSettings(settings);
-  parent_config.SetEntrypoint("emptyMain");
-  RunEngine(parent_shell.get(), std::move(parent_config));
-
-  fml::AutoResetWaitableEvent parent_factory_entered;
-  fml::AutoResetWaitableEvent unblock_parent_factory;
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+  RunEngine(shell.get(), std::move(configuration));
 
   PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
-    parent_view_ptr->TriggerNotifyCreatedDeferred(
-        [&parent_factory_entered, &unblock_parent_factory]() {
-          parent_factory_entered.Signal();
-          unblock_parent_factory.Wait();
-          return MakeValidMockSurface();
-        });
+    view_ptr->SetViewportMetrics(0, ViewportMetrics{1.0, 100, 100, 22, 0});
+    view_ptr->TriggerNotifyCreatedDeferred(
+        []() { return MakeValidMockSurface(); });
   });
-  parent_factory_entered.Wait();
+  PostSync(task_runners.GetRasterTaskRunner(), []() {});
 
-  std::unique_ptr<Shell> child_shell;
-  DeferredTestPlatformView* child_view_ptr = nullptr;
-  fml::AutoResetWaitableEvent child_setup_done;
+  fml::AutoResetWaitableEvent first_frame_fired;
+  shell->AddFirstFrameCallback([&]() { first_frame_fired.Signal(); });
 
-  PostSync(task_runners.GetPlatformTaskRunner(), [&]() {
-    auto child_config = RunConfiguration::InferFromSettings(settings);
-    child_config.SetEntrypoint("emptyMain");
-    child_shell = parent_shell->Spawn(
-        std::move(child_config), "",
-        [&child_view_ptr, &task_runners, &make_embedder,
-         &unblock_parent_factory](Shell& shell) {
-          unblock_parent_factory.Signal();
-          auto view = std::make_unique<DeferredTestPlatformView>(
-              shell, task_runners, make_embedder());
-          child_view_ptr = view.get();
-          return view;
-        },
-        [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
-    ASSERT_NE(child_shell, nullptr);
-    ASSERT_NE(child_view_ptr, nullptr);
+  PumpOneFrame(shell.get(),
+               ViewContent::ImplicitView(
+                   100, 100, [](const std::shared_ptr<ContainerLayer>&) {}));
+  EXPECT_FALSE(deferred_event.WaitWithTimeout(fml::TimeDelta::FromSeconds(2)));
+  const int calls_before_resume = embedder->ready_calls();
+  EXPECT_GE(calls_before_resume, 1);
+  EXPECT_EQ(embedder->begin_frame_calls(), 0);
+  EXPECT_EQ(embedder->submit_count(), 0);
 
-    child_view_ptr->TriggerNotifyCreatedDeferred([&child_setup_done]() {
-      auto surface = MakeValidMockSurface();
-      child_setup_done.Signal();
-      return surface;
-    });
-  });
+  // First-frame callback must NOT fire while Rasterizer::Draw returned
+  // DrawStatus::kDeferred (V4/X11).
+  EXPECT_TRUE(
+      first_frame_fired.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(50)));
 
-  ASSERT_FALSE(
-      child_setup_done.WaitWithTimeout(fml::TimeDelta::FromSeconds(5)));
+  embedder->ResumeDeferred(task_runners.GetRasterTaskRunner());
+  // ResumeDeferred posts `resume()`, which posts `weak_this->Draw(pipeline)`.
+  PostSync(task_runners.GetRasterTaskRunner(), []() {});
+  PostSync(task_runners.GetRasterTaskRunner(), []() {});
+  EXPECT_GT(embedder->ready_calls(), calls_before_resume);
+  EXPECT_EQ(embedder->begin_frame_calls(), 1);
+  EXPECT_EQ(embedder->submit_count(), 1);
+  EXPECT_FALSE(
+      first_frame_fired.WaitWithTimeout(fml::TimeDelta::FromSeconds(2)));
 
-  PostSync(task_runners.GetRasterTaskRunner(), [&]() {
-    auto parent_merger = parent_shell->GetRasterizer()->GetRasterThreadMerger();
-    auto child_merger = child_shell->GetRasterizer()->GetRasterThreadMerger();
-    ASSERT_NE(parent_merger.get(), nullptr);
-    ASSERT_NE(child_merger.get(), nullptr);
-    EXPECT_EQ(parent_merger->GetSharedRasterThreadMerger().get(),
-              child_merger->GetSharedRasterThreadMerger().get());
-  });
-
-  ShellTest::PlatformViewNotifyDestroyed(child_shell.get());
-  ShellTest::PlatformViewNotifyDestroyed(parent_shell.get());
-  DestroyShell(std::move(child_shell), task_runners);
-  DestroyShell(std::move(parent_shell), task_runners);
-#endif  // OS_FUCHSIA
+  ShellTest::PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell), task_runners);
 }
 
 }  // namespace testing
