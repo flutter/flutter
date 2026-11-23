@@ -2,18 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:package_config/package_config.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -649,4 +657,241 @@ name: my_app
       expect(flutterDevice2.stoppedEchoingDeviceLog, true);
     });
   });
+
+  group('deferred service protocol connection', () {
+    testWithoutContext(
+      'runs inverted startup sequence, wires callbacks, and propagates reloadSources errors',
+      () async {
+        final fs = MemoryFileSystem.test();
+        fs.file('lib/main.dart').createSync(recursive: true);
+        fs.file('pubspec.yaml').writeAsStringSync('name: test_app\n');
+        writePackageConfigFiles(directory: fs.currentDirectory, mainLibName: 'test_app');
+
+        final logger = BufferLogger.test();
+        final events = <String>[];
+        final fakeGenerator = _RecordingResidentCompiler(events);
+        final deferredDevice = _DeferredFlutterDevice(
+          FakeDevice(),
+          events: events,
+          generator: fakeGenerator,
+        );
+        final buildSystem = _RecordingBuildSystem(events);
+        final toolContext = FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: logger,
+        );
+        final File vmServiceOutFile = fs.file('vmservice.txt');
+        final HotRunner runner = createHotRunner(
+          <FlutterDevice>[deferredDevice],
+          buildSystem: buildSystem,
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(
+              BuildMode.debug,
+              '',
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+            ),
+            vmserviceOutFile: vmServiceOutFile.path,
+          ),
+          target: 'lib/main.dart',
+          toolContext: toolContext,
+        );
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        final appStartedCompleter = Completer<void>();
+        final Future<int> runFuture = runner.run(
+          connectionInfoCompleter: connectionInfoCompleter,
+          appStartedCompleter: appStartedCompleter,
+        );
+
+        await appStartedCompleter.future;
+
+        expect(events, <String>[
+          'prepareHotLaunch',
+          'runSourceGenerators',
+          'updateDevFS',
+          'onInitialDevFSUpdate',
+          'generator.accept',
+          'runHot',
+          'attachDeferredConnection',
+        ]);
+        expect(deferredDevice.capturedReloadSources, isNotNull);
+
+        final connectionInfo = DebugConnectionInfo(
+          httpUri: Uri.parse('http://127.0.0.1:8181/'),
+          wsUri: Uri.parse('ws://127.0.0.1:8181/ws'),
+        );
+        deferredDevice.capturedOnConnected!(connectionInfo);
+        expect(await connectionInfoCompleter.future, connectionInfo);
+        expect(vmServiceOutFile.existsSync(), true);
+        expect(vmServiceOutFile.readAsStringSync(), 'ws://127.0.0.1:8181/ws');
+
+        // Reload failure through the reloadSources callback surfaces an RPCError.
+        deferredDevice.nextUpdateReport = UpdateFSReport();
+        await expectLater(
+          deferredDevice.capturedReloadSources!('isolate/1'),
+          throwsA(
+            isA<vm_service.RPCError>()
+                .having(
+                  (vm_service.RPCError e) => e.callingMethod,
+                  'callingMethod',
+                  'Unable to reload sources',
+                )
+                .having(
+                  (vm_service.RPCError e) => e.code,
+                  'code',
+                  vm_service.RPCErrorKind.kInternalError.code,
+                ),
+          ),
+        );
+
+        // Disconnecting finishes waitForAppToFinish cleanly.
+        deferredDevice.capturedOnDisconnected!();
+        expect(await runFuture, 0);
+        expect(deferredDevice.exitAppsCount, 1);
+        expect(logger.statusText, contains('Lost connection to device.'));
+      },
+    );
+
+    testWithoutContext('throws ToolExit when multiple devices include a deferred device', () async {
+      final fs = MemoryFileSystem.test();
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(),
+        cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+        fs: fs,
+      );
+      final deferredDevice = _DeferredFlutterDevice(FakeDevice(), events: <String>[]);
+      final nativeDevice = FakeFlutterDevice(FakeDevice());
+      final HotRunner runner = createHotRunner(
+        <FlutterDevice>[deferredDevice, nativeDevice],
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        stayResident: false,
+        target: 'lib/main.dart',
+        toolContext: toolContext,
+      );
+
+      await expectLater(
+        runner.run(),
+        throwsToolExit(
+          message:
+              'Running on multiple devices is not supported when a device requires a '
+              'deferred service protocol connection.',
+        ),
+      );
+    });
+  });
+}
+
+class _RecordingBuildSystem extends Fake implements BuildSystem {
+  _RecordingBuildSystem(this.events);
+
+  final List<String> events;
+
+  @override
+  Future<BuildResult> buildIncremental(
+    Target target,
+    Environment environment,
+    BuildResult? previousBuild,
+  ) async {
+    events.add('runSourceGenerators');
+    return BuildResult(success: true);
+  }
+}
+
+class _RecordingResidentCompiler extends Fake implements ResidentCompiler {
+  _RecordingResidentCompiler(this.events);
+
+  final List<String> events;
+
+  @override
+  void accept() {
+    events.add('generator.accept');
+  }
+
+  @override
+  Future<CompilerOutput?> reject() async {
+    events.add('generator.reject');
+    return null;
+  }
+}
+
+class _DeferredVmService extends Fake implements FlutterVmService {
+  @override
+  Uri get wsAddress => Uri.parse('ws://127.0.0.1:8181/ws');
+
+  @override
+  Uri get httpAddress => Uri.parse('http://127.0.0.1:8181/');
+}
+
+class _DeferredFlutterDevice extends FakeFlutterDevice {
+  _DeferredFlutterDevice(super.device, {required this.events, ResidentCompiler? generator}) {
+    this.generator = generator;
+  }
+
+  final List<String> events;
+  UpdateFSReport nextUpdateReport = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
+  int exitAppsCount = 0;
+  ReloadSources? capturedReloadSources;
+  void Function(DebugConnectionInfo)? capturedOnConnected;
+  void Function()? capturedOnDisconnected;
+
+  @override
+  Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async {
+    exitAppsCount += 1;
+  }
+
+  @override
+  final FlutterVmService vmService = _DeferredVmService();
+
+  @override
+  bool get defersServiceProtocolConnection => true;
+
+  @override
+  Future<void> prepareHotLaunch({required HotRunner hotRunner}) async {
+    events.add('prepareHotLaunch');
+  }
+
+  @override
+  Future<UpdateFSReport> updateDevFS({
+    Uri? mainUri,
+    String? target,
+    AssetBundle? bundle,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
+    bool fullRestart = false,
+    String? projectRootPath,
+    String? pathToReload,
+    required String dillOutputPath,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
+  }) async {
+    events.add('updateDevFS');
+    return nextUpdateReport;
+  }
+
+  @override
+  void onInitialDevFSUpdate(UpdateFSReport report, {required Analytics analytics}) {
+    events.add('onInitialDevFSUpdate');
+  }
+
+  @override
+  Future<int> runHot({required HotRunner hotRunner, String? route}) async {
+    events.add('runHot');
+    return 0;
+  }
+
+  @override
+  void attachDeferredConnection({
+    required HotRunner hotRunner,
+    required void Function(DebugConnectionInfo) onConnected,
+    required void Function() onDisconnected,
+    ReloadSources? reloadSources,
+  }) {
+    events.add('attachDeferredConnection');
+    capturedReloadSources = reloadSources;
+    capturedOnConnected = onConnected;
+    capturedOnDisconnected = onDisconnected;
+  }
 }

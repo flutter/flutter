@@ -134,6 +134,12 @@ class ResidentWebRunner extends ResidentRunner {
   // and platform initialization.
   Directory? _generatedEntrypointDirectory;
 
+  @override
+  bool get isRunningDebug => !debuggingOptions.webConfig.useWasm && super.isRunningDebug;
+
+  @override
+  bool get isRunningProfile => !debuggingOptions.webConfig.useWasm && super.isRunningProfile;
+
   // Only non-wasm debug builds of the web support the service protocol.
   @override
   late final bool supportsServiceProtocol =

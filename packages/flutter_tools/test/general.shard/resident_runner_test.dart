@@ -27,10 +27,13 @@ import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -1321,8 +1324,8 @@ flutter:
   testUsingContext(
     'ResidentRunner printHelpDetails hides v on web in profile mode',
     () => testbed.run(() async {
-      final FlutterDevice flutterDevice =
-          await FakeDevice(targetPlatform: TargetPlatform.web_javascript).createFlutterDevice(
+      final FlutterDevice flutterDevice = await WebServerDevice(logger: testLogger)
+          .createFlutterDevice(
             toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
             buildInfo: BuildInfo.profile,
           );
@@ -1339,7 +1342,8 @@ flutter:
       final CommandHelp commandHelp = residentRunner.commandHelp;
 
       expect(residentRunner.isRunningDebug, false);
-      expect(testLogger.statusText, isNot(contains(commandHelp.v)));
+      expect(residentRunner.supportsServiceProtocol, false);
+      expect(testLogger.statusText, isNot(contains(commandHelp.v.toString())));
     }),
   );
 
@@ -2062,20 +2066,22 @@ flutter:
   testUsingContext(
     'HotRunner evicts a changed .shaderbundle asset generically on web',
     () => testbed.run(() async {
-      final webFlutterDevice = FakeFlutterDevice()
-        ..vmServiceHost = (() => fakeVmServiceHost)
-        ..fakeDevFS = devFS
-        ..targetPlatform = TargetPlatform.web_javascript;
+      final FlutterDevice webFlutterDevice =
+          await WebServerDevice(logger: testLogger).createFlutterDevice(
+              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+              buildInfo: BuildInfo.debug,
+            )
+            ..devFS = devFS;
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           listViews,
-          setAssetBundlePath,
           const FakeVmServiceRequest(
             method: 'ext.flutter.evict',
             args: <String, Object>{'value': 'foo.shaderbundle', 'isolateId': '1'},
           ),
         ],
       );
+      webFlutterDevice.vmService = fakeVmServiceHost!.vmService;
       residentRunner = createHotRunner(
         <FlutterDevice>[webFlutterDevice],
         stayResident: false,
@@ -2084,11 +2090,15 @@ flutter:
         analytics: fakeAnalytics,
       );
 
-      // The Flutter GPU reload extension is unavailable on web, so the bundle
-      // falls back to the generic asset eviction.
-      (webFlutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+      // The Flutter GPU reload extension and setAssetDirectory are unavailable
+      // on web, so the bundle falls back to generic asset eviction and shaders
+      // are skipped.
+      (webFlutterDevice.devFS! as FakeDevFS)
+        ..assetPathsToEvict = <String>{'foo.shaderbundle'}
+        ..shaderPathsToEvict = <String>{'foo.frag'};
 
       await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(webFlutterDevice.devFS!.hasSetAssetDirectory, false);
       expect(fakeVmServiceHost!.hasRemainingExpectations, false);
     }),
   );
@@ -2292,7 +2302,9 @@ flutter:
     testUsingContext(
       'correctly caches Web Device compilation',
       () => testbed.run(() {
-        flutterDevice.targetPlatform = TargetPlatform.web_javascript;
+        flutterDevice
+          ..targetPlatform = TargetPlatform.web_javascript
+          ..extraFrontEndOptionsForCacheOverride = kDdcLibraryBundleFlags;
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
@@ -2349,6 +2361,253 @@ flutter:
       }),
     );
   });
+
+  group('Runner seams', () {
+    testWithoutContext(
+      'detach followed by exit leaves app running and keeps exited false',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final fakeDevice = FakeDevice();
+        var exitAppsCount = 0;
+        final device = _LifecycleFakeFlutterDevice(
+          fakeDevice,
+          onExitApps: () => exitAppsCount += 1,
+        );
+        final HotRunner runner = createHotRunner(
+          <FlutterDevice>[device],
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: FakeToolContext(
+            cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+            fs: fs,
+          ),
+        );
+
+        await runner.detach();
+        await runner.exit();
+
+        expect(exitAppsCount, 0);
+        expect(runner.exited, false);
+      },
+    );
+
+    testWithoutContext(
+      'evictDirtyAssets skips null vmService and delegates confirmAssetDirectory to FlutterDevice',
+      () async {
+        final fs = MemoryFileSystem.test();
+        var confirmCalls = 0;
+        final nullVmDevice = _LifecycleFakeFlutterDevice(
+          FakeDevice(),
+          onConfirmAssetDirectory: (_) => confirmCalls += 1,
+        )..fakeDevFS = (FakeDevFS()..assetPathsToEvict = <String>{'asset'});
+
+        final HotRunner nullVmRunner = createHotRunner(
+          <FlutterDevice>[nullVmDevice],
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: FakeToolContext(
+            cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+            fs: fs,
+          ),
+        );
+
+        await nullVmRunner.evictDirtyAssets();
+        expect(confirmCalls, 0);
+        expect(nullVmDevice.devFS!.assetPathsToEvict, contains('asset'));
+
+        final vmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, evict]);
+        final connectedDevice =
+            _LifecycleFakeFlutterDevice(
+                FakeDevice(),
+                onConfirmAssetDirectory: (_) => confirmCalls += 1,
+              )
+              ..vmServiceHost = (() => vmServiceHost)
+              ..fakeDevFS = (FakeDevFS()..assetPathsToEvict = <String>{'asset'});
+
+        final HotRunner connectedRunner = createHotRunner(
+          <FlutterDevice>[connectedDevice],
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          stayResident: false,
+          target: 'main.dart',
+          toolContext: FakeToolContext(
+            cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+            fs: fs,
+          ),
+        );
+
+        await connectedRunner.evictDirtyAssets();
+        expect(confirmCalls, 1);
+        expect(vmServiceHost.hasRemainingExpectations, false);
+      },
+    );
+
+    testWithoutContext('FlutterDevice capability defaults and base behavior', () async {
+      final fs = MemoryFileSystem.test();
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(),
+        cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+        fs: fs,
+      );
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        '',
+        extraFrontEndOptions: <String>['--extra'],
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+      );
+      final device = FlutterDevice(
+        FakeDevice(),
+        buildInfo: buildInfo,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        generator: FakeResidentCompiler(),
+        targetPlatform: TargetPlatform.android_arm,
+        toolContext: toolContext,
+      );
+
+      expect(device.defersServiceProtocolConnection, false);
+      expect(device.alwaysReloadSources, false);
+      expect(device.hotRestartTimingVariableName, 'restart');
+      expect(device.supportsColdRestart, false);
+      expect(device.supportsPerformanceOverlay, true);
+      expect(device.supportsVmServiceScreenshot, false);
+      expect(device.supportsDebugRuntime, true);
+      expect(device.supportsProfileServiceProtocol, true);
+      expect(device.usesSharedDartPluginRegistry, true);
+      expect(device.supportsShaderReload, true);
+      expect(device.supportsIsolatePauseEventLookup, true);
+      expect(device.usesHotRunner(hotMode: true), true);
+      expect(device.usesHotRunner(hotMode: false), false);
+      expect(device.extraFrontEndOptionsForCache(buildInfo), <String>['--extra']);
+      expect(await device.performHotRestart(), isNull);
+      expect(await device.takeVmServiceScreenshot(), isNull);
+      expect(
+        () => device.handleConnectionException(Exception('boom'), StackTrace.current),
+        throwsA(isA<Exception>()),
+      );
+
+      final ColdRunner coldRunner = createColdRunner(
+        <FlutterDevice>[device],
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        target: 'main.dart',
+        toolContext: toolContext,
+      );
+      expect(() => device.restartCold(coldRunner: coldRunner), throwsA(isA<StateError>()));
+
+      final vmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          listViews,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.connectedVmServiceUri',
+            args: <String, Object>{'value': 'ws://localhost:1234/ws', 'isolateId': '1'},
+          ),
+        ],
+      );
+      device.vmService = vmServiceHost.vmService;
+      await device.invokeExtensionRpcOnFirstView(
+        'ext.flutter.connectedVmServiceUri',
+        params: <String, Object?>{'value': 'ws://localhost:1234/ws'},
+      );
+      expect(vmServiceHost.hasRemainingExpectations, false);
+    });
+
+    testWithoutContext(
+      'WebDevice.createFlutterDevice returns WebCapabilityFlutterDevice with web overrides',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final toolContext = FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
+          fs: fs,
+          logger: logger,
+        );
+        const debugBuildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        );
+        final webServer = WebServerDevice(logger: logger);
+
+        final FlutterDevice profileDevice = await webServer.createFlutterDevice(
+          buildInfo: BuildInfo.profile,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+          toolContext: toolContext,
+        );
+        expect(profileDevice, isA<WebCapabilityFlutterDevice>());
+        expect(profileDevice.supportsProfileServiceProtocol, false);
+        expect(profileDevice.launchDevToolsInBrowser(), false);
+
+        final FlutterDevice wasmDevice = await webServer.createFlutterDevice(
+          buildInfo: debugBuildInfo,
+          debuggingOptions: DebuggingOptions.enabled(
+            debugBuildInfo,
+            platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
+          ),
+          toolContext: toolContext,
+        );
+        expect(wasmDevice, isA<WebCapabilityFlutterDevice>());
+        expect(wasmDevice.supportsDebugRuntime, false);
+        expect(wasmDevice.launchDevToolsInBrowser(), false);
+
+        final jsDevice = WebCapabilityFlutterDevice(
+          webServer,
+          buildInfo: debugBuildInfo,
+          developmentShaderCompiler: const FakeShaderCompiler(),
+          generator: FakeResidentCompiler(),
+          targetPlatform: TargetPlatform.web_javascript,
+          toolContext: toolContext,
+        );
+        expect(jsDevice.supportsPerformanceOverlay, false);
+        expect(jsDevice.supportsVmServiceScreenshot, true);
+        expect(jsDevice.supportsDebugRuntime, true);
+        expect(jsDevice.supportsProfileServiceProtocol, false);
+        expect(jsDevice.usesSharedDartPluginRegistry, false);
+        expect(jsDevice.supportsShaderReload, false);
+        expect(jsDevice.launchDevToolsInBrowser(), true);
+        expect(
+          jsDevice.extraFrontEndOptionsForCache(debugBuildInfo),
+          ddcFrontEndOptions(debugBuildInfo),
+        );
+
+        final vmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'ext.flutter.connectedVmServiceUri',
+              args: <String, Object>{'value': 'ws://localhost:1234/ws'},
+            ),
+          ],
+        );
+        jsDevice.vmService = vmServiceHost.vmService;
+        await jsDevice.invokeExtensionRpcOnFirstView(
+          'ext.flutter.connectedVmServiceUri',
+          params: <String, Object?>{'value': 'ws://localhost:1234/ws'},
+        );
+        expect(vmServiceHost.hasRemainingExpectations, false);
+      },
+    );
+  });
+}
+
+class _LifecycleFakeFlutterDevice extends FakeFlutterDevice {
+  _LifecycleFakeFlutterDevice(Device rawDevice, {this.onConfirmAssetDirectory, this.onExitApps}) {
+    device = rawDevice;
+  }
+
+  final void Function(List<FlutterView> views)? onConfirmAssetDirectory;
+  final void Function()? onExitApps;
+
+  @override
+  Future<void> confirmAssetDirectory(List<FlutterView> views) async {
+    onConfirmAssetDirectory?.call(views);
+  }
+
+  @override
+  Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async {
+    onExitApps?.call();
+  }
 }
 
 class TestHotRunner extends HotRunner {

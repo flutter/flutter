@@ -3265,25 +3265,30 @@ class TestChromiumLauncher implements ChromiumLauncher {
   }
 }
 
-class FakeFlutterDevice extends Fake implements FlutterDevice {
+class FakeFlutterDevice extends WebCapabilityFlutterDevice {
+  FakeFlutterDevice()
+    : super(
+        null,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        generator: null,
+        targetPlatform: TargetPlatform.web_javascript,
+        toolContext: test_fakes.FakeToolContext(),
+      );
+
   Uri? testUri;
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
 
-  @override
-  TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
+  ResidentCompiler? _generator;
 
   @override
-  ResidentCompiler? generator;
+  ResidentCompiler? get generator => _generator;
+
+  set generator(ResidentCompiler? value) => _generator = value;
 
   @override
   Future<Uri>? get vmServiceUri => testUri != null ? Future<Uri>.value(testUri!) : null;
-
-  @override
-  DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
-
-  @override
-  FlutterVmService? vmService;
 
   DevFS? _devFS;
 
@@ -3293,8 +3298,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   set devFS(DevFS? value) {}
 
+  Device? _device;
+
   @override
-  Device? device;
+  Device? get device => _device;
+
+  set device(Device? value) => _device = value;
 
   @override
   Future<void> stopEchoingDeviceLog() async {}
