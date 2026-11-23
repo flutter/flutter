@@ -284,7 +284,7 @@ void main() {
       });
     });
 
-    testUsingContext('createSourcesSymlink', () async {
+    test('createSourcesSymlink', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list([]);
@@ -301,7 +301,7 @@ void main() {
       expect(generatedSourcesLink.targetSync(), './Debug');
     });
 
-    testUsingContext('generateLLDBInitFile', () async {
+    test('generateLLDBInitFile', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final processManager = FakeProcessManager.list([]);
@@ -1824,7 +1824,7 @@ let package = Package(
         expect(processManager, hasNoRemainingExpectations);
       });
 
-      testUsingContext('processPods forwards injected cocoaPods', () async {
+      test('processPods forwards injected cocoaPods', () async {
         final fs = MemoryFileSystem.test();
         final logger = BufferLogger.test();
         final processManager = FakeProcessManager.empty();
@@ -2855,7 +2855,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   });
 
   group('FlutterNativeIntegrationSwiftPackage', () {
-    testUsingContext(
+    test(
       'generateSwiftPackage without tests',
       () async {
         final FileSystem fs = MemoryFileSystem.test();
@@ -3097,7 +3097,7 @@ let package = Package(
       skip: !platform.isMacOS,
     );
 
-    testUsingContext(
+    test(
       'generateSwiftPackage with tests',
       () async {
         final FileSystem fs = MemoryFileSystem.test();
