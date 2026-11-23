@@ -1073,6 +1073,11 @@ void FlutterWindow::OnImeEndComposition(UINT const message,
 }
 
 void FlutterWindow::BeginImeComposition() {
+  if (ime_composing_) {
+    // Beginning the composition again would leave the composing text applied
+    // so far behind as plain text.
+    return;
+  }
   ime_composing_ = true;
   text_input_manager_->CreateImeWindow();
   OnComposeBegin();
