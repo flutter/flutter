@@ -222,6 +222,140 @@ TEST(GlyphAtlasMembershipTest, CacheBelongsToOneAtlasGeneration) {
   EXPECT_TRUE(weak.expired());
 }
 
+TEST(GlyphAtlasPreparedCacheTest, MatchesRawTransformBasisAndProperties) {
+  GlyphAtlas atlas(GlyphAtlas::Type::kAlphaBitmap, 0);
+  auto frame = std::make_shared<TextFrame>();
+  // An empty frame has no active subpixel axis, so its translation is
+  // intentionally normalized out of the membership key. Use scale here to
+  // exercise a raw transform component that remains significant.
+  const Matrix frame_transform = Matrix::MakeScale({1.25f, 0.875f, 1.0f});
+  const Matrix basis = Matrix::MakeScale({2.0f, 3.0f, 1.0f});
+
+  atlas.AddCachedFrame(frame, frame_transform, {});
+  std::vector<PreparedGlyphQuad> quads;
+  quads.reserve(1);
+  quads.emplace_back();
+  quads.front().unrounded_origin = Point(1.0f, 2.0f);
+  atlas.StorePreparedGlyphs(frame, frame_transform, basis, {},
+                            std::move(quads));
+
+  const auto* hit = atlas.FindPreparedGlyphs(frame, frame_transform, basis, {});
+  ASSERT_NE(hit, nullptr);
+  ASSERT_EQ(hit->size(), 1u);
+  EXPECT_EQ(hit->front().unrounded_origin, Point(1.0f, 2.0f));
+
+  EXPECT_EQ(atlas.FindPreparedGlyphs(
+                frame, Matrix::MakeScale({1.5f, 0.875f, 1.0f}), basis, {}),
+            nullptr);
+  EXPECT_EQ(atlas.FindPreparedGlyphs(frame, frame_transform,
+                                     Matrix::MakeScale({3.0f, 2.0f, 1.0f}), {}),
+            nullptr);
+
+  GlyphProperties stroked;
+  stroked.stroke = StrokeParameters{.width = 1.0f};
+  EXPECT_EQ(atlas.FindPreparedGlyphs(frame, frame_transform, basis, stroked),
+            nullptr);
+
+  atlas.AddCachedFrame(frame, frame_transform, stroked);
+  EXPECT_EQ(atlas.FindPreparedGlyphs(frame, frame_transform, basis, {}),
+            nullptr);
+}
+
+TEST(GlyphAtlasPreparedCacheTest, InvalidatesOnGenerationAndTextureChange) {
+  GlyphAtlas atlas(GlyphAtlas::Type::kAlphaBitmap, 0);
+  auto frame = std::make_shared<TextFrame>();
+  const Matrix transform;
+  const Matrix basis;
+
+  auto store_one = [&] {
+    atlas.AddCachedFrame(frame, transform, {});
+    std::vector<PreparedGlyphQuad> quads;
+    quads.reserve(1);
+    quads.emplace_back();
+    atlas.StorePreparedGlyphs(frame, transform, basis, {}, std::move(quads));
+  };
+
+  store_one();
+  ASSERT_NE(atlas.FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+  atlas.SetAtlasGeneration(1);
+  EXPECT_EQ(atlas.FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+
+  store_one();
+  ASSERT_NE(atlas.FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+  atlas.SetTexture(nullptr);
+  EXPECT_EQ(atlas.FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+}
+
+TEST(GlyphAtlasPreparedCacheTest, RejectsOversizedPreparedFrame) {
+  GlyphAtlas atlas(GlyphAtlas::Type::kAlphaBitmap, 0);
+  auto frame = std::make_shared<TextFrame>();
+  const Matrix transform;
+  const Matrix basis;
+  atlas.AddCachedFrame(frame, transform, {});
+
+  std::vector<PreparedGlyphQuad> oversized;
+  oversized.reserve(GlyphAtlas::kMaxPreparedGlyphsPerFrame + 1);
+  oversized.emplace_back();
+  atlas.StorePreparedGlyphs(frame, transform, basis, {}, std::move(oversized));
+  EXPECT_EQ(atlas.FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+
+  std::vector<PreparedGlyphQuad> within_budget;
+  within_budget.reserve(GlyphAtlas::kMaxPreparedGlyphsPerFrame);
+  within_budget.emplace_back();
+  atlas.StorePreparedGlyphs(frame, transform, basis, {},
+                            std::move(within_budget));
+  EXPECT_NE(atlas.FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+}
+
+TEST_P(TypographerTest,
+       GlyphAtlasPreparedCacheInvalidatesOnResidentReplacement) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto frame =
+      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
+  auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                                GlyphAtlas::Type::kAlphaBitmap, Matrix(),
+                                atlas_context, frame);
+  ASSERT_TRUE(atlas);
+
+  std::optional<ScaledFont> scaled_font;
+  std::optional<SubpixelGlyph> glyph;
+  Rect atlas_rect;
+  atlas->IterateGlyphs([&](const ScaledFont& font,
+                           const SubpixelGlyph& subpixel_glyph,
+                           const Rect& rect) -> bool {
+    scaled_font = font;
+    glyph = subpixel_glyph;
+    atlas_rect = rect;
+    return false;
+  });
+  ASSERT_TRUE(scaled_font.has_value());
+  ASSERT_TRUE(glyph.has_value());
+  auto old_bounds = atlas->FindFontGlyphBounds({*scaled_font, *glyph});
+  ASSERT_TRUE(old_bounds.has_value());
+
+  const Matrix transform;
+  const Matrix basis;
+  atlas->AddCachedFrame(frame, transform, {});
+  std::vector<PreparedGlyphQuad> quads;
+  quads.reserve(1);
+  quads.emplace_back();
+  atlas->StorePreparedGlyphs(frame, transform, basis, {}, std::move(quads));
+  ASSERT_NE(atlas->FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+
+  // The same resident glyph now points to a different atlas rectangle. Any
+  // prepared UVs for the old resident mapping must be discarded.
+  atlas->AddTypefaceGlyphPositionAndBounds({*scaled_font, *glyph},
+                                           atlas_rect.Shift(1.0f, 0.0f),
+                                           old_bounds->glyph_bounds);
+  EXPECT_EQ(atlas->FindPreparedGlyphs(frame, transform, basis, {}), nullptr);
+}
+
 TEST_P(TypographerTest, LazyAtlasTracksColor) {
   auto data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),

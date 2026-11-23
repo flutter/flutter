@@ -40,6 +40,10 @@ class TextFrame {
       AxisAlignment alignment,
       const Matrix& transform);
 
+  // Transform components that determine this frame's scaled and subpixel glyph
+  // keys.
+  Matrix GetGlyphCacheTransform(const Matrix& transform) const;
+
   static Rational RoundScaledFontSize(Scalar scale);
   static Rational RoundScaledFontSize(Rational scale);
 

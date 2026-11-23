@@ -485,39 +485,6 @@ static Rect ComputeGlyphSize(const SkFont& font,
                         scaled_bounds.fBottom);
 };
 
-// Only translation along an axis that no run uses can be omitted from the
-// membership key. Integer translation on an active axis is kept exact because
-// changing it can affect the floating-point subpixel bucket at a boundary.
-static Matrix NormalizeGlyphCacheTransform(const TextFrame& text_frame,
-                                           const Matrix& transform) {
-  bool uses_x = false;
-  bool uses_y = false;
-  for (const auto& run : text_frame.GetRuns()) {
-    switch (run.GetFont().GetAxisAlignment()) {
-      case AxisAlignment::kNone:
-        break;
-      case AxisAlignment::kX:
-        uses_x = true;
-        break;
-      case AxisAlignment::kY:
-        uses_y = true;
-        break;
-      case AxisAlignment::kAll:
-        uses_x = true;
-        uses_y = true;
-        break;
-    }
-  }
-  Matrix result = transform;
-  if (!uses_x) {
-    result.m[12] = 0;
-  }
-  if (!uses_y) {
-    result.m[13] = 0;
-  }
-  return result;
-}
-
 std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
 TypographerContextSkia::CollectNewGlyphs(
     const std::shared_ptr<GlyphAtlas>& atlas,
@@ -526,7 +493,7 @@ TypographerContextSkia::CollectNewGlyphs(
   std::vector<Rect> glyph_sizes;
   for (const auto& frame : renderable_texts) {
     const Matrix cache_transform =
-        NormalizeGlyphCacheTransform(*frame.text_frame, frame.origin_transform);
+        frame.text_frame->GetGlyphCacheTransform(frame.origin_transform);
     if (atlas->HasCachedFrame(frame.text_frame, cache_transform,
                               frame.properties)) {
       continue;
