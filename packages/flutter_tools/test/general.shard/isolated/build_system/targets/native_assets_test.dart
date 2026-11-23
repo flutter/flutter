@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 
 import '../../../../src/common.dart';
-import '../../../../src/context.dart';
 import '../../../../src/fake_process_manager.dart';
 import '../../../../src/fakes.dart';
 import '../../../../src/package_config.dart';
@@ -78,7 +77,7 @@ void main() {
     expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets defaults to ios archs if missing', () async {
+  test('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     iosEnvironment.defines.remove(kIosArchs);
@@ -92,7 +91,7 @@ void main() {
     expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
   });
 
-  testUsingContext('NativeAssets throws error if missing sdk root', () async {
+  test('NativeAssets throws error if missing sdk root', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
@@ -106,7 +105,7 @@ void main() {
     expect(BuildHooks(buildRunner: buildRunner).build(env), throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets throws error if sdk root is unrecognized iOS SDK', () async {
+  test('NativeAssets throws error if sdk root is unrecognized iOS SDK', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
     final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
@@ -132,12 +131,8 @@ void main() {
   // The caching logic depends on this.
   for (final isNativeAssetsEnabled in <bool>[true, false]) {
     final postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
-    testUsingContext(
+    test(
       'Successful native_assets.json and native_assets.d creation with feature $postFix',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
       () async {
         writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
@@ -169,12 +164,8 @@ void main() {
   for (final buildMode in <BuildMode>[BuildMode.profile, BuildMode.debug]) {
     final bool linkingEnabled = nativeAssetsLinkingEnabled(buildMode);
     final testName = linkingEnabled ? 'enabled' : 'disabled';
-    testUsingContext(
+    test(
       'NativeAssets depfile filtering avoids circular cycles in Xcode when link hooks are $testName',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
       () async {
         writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
 
@@ -227,7 +218,7 @@ void main() {
     );
   }
 
-  testUsingContext('NativeAssets with an asset', () async {
+  test('NativeAssets with an asset', () async {
     processManager.addCommands(<FakeCommand>[
       // Create the framework dylib.
       FakeCommand(
@@ -384,43 +375,32 @@ void main() {
 
   for (final hasAssets in <bool>[true, false]) {
     final withOrWithout = hasAssets ? 'with' : 'without';
-    testUsingContext(
-      'flutter build $withOrWithout native assets',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-      () async {
-        writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
-        await fileSystem.file('libfoo.so').create();
+    test('flutter build $withOrWithout native assets', () async {
+      writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+      await fileSystem.file('libfoo.so').create();
 
-        final codeAssets = <CodeAsset>[
-          if (hasAssets)
-            CodeAsset(
-              package: 'foo',
-              name: 'foo.dart',
-              linkMode: DynamicLoadingBundled(),
-              file: Uri.file('libfoo.so'),
-            ),
-        ];
-        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <String>['foo'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            dependencies: <Uri>[Uri.file('src/foo.c')],
+      final codeAssets = <CodeAsset>[
+        if (hasAssets)
+          CodeAsset(
+            package: 'foo',
+            name: 'foo.dart',
+            linkMode: DynamicLoadingBundled(),
+            file: Uri.file('libfoo.so'),
           ),
-          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
-        );
-        await BuildHooks(buildRunner: buildRunner).build(androidEnvironment);
-      },
-    );
+      ];
+      final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <String>['foo'],
+        buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+          dependencies: <Uri>[Uri.file('src/foo.c')],
+        ),
+        linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+      );
+      await BuildHooks(buildRunner: buildRunner).build(androidEnvironment);
+    });
   }
 
-  testUsingContext(
+  test(
     'createFlutterNativeAssetsBuildRunner includes dev dependencies for release test targets',
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
     () async {
       writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
       androidEnvironment.defines[kBuildMode] = BuildMode.release.cliName;

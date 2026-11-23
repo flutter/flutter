@@ -24,7 +24,7 @@ import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -55,11 +55,10 @@ void main() {
   });
 
   for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
-    testUsingContext(
+    test(
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
@@ -145,32 +144,28 @@ void main() {
 
   // Ensure no exceptions for a non installed NDK are thrown if no native
   // assets have to be build.
-  testUsingContext(
-    'does not throw if NDK not present but no native assets present',
-    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
-    () async {
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.create(recursive: true);
-      await runFlutterSpecificHooks(
-        environmentDefines: <String, String>{
-          kBuildMode: BuildMode.debug.cliName,
-          kMinSdkVersion: minSdkVersion,
-        },
-        targetPlatform: TargetPlatform.android_x64,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
-        logger: logger,
-        buildRunner: _BuildRunnerWithoutNdk(),
-        buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
-        buildDataAssets: true,
-        recordedUsesFile: null,
-      );
-      expect(logger.traceText, isNot(contains('Running build hooks for ')));
-    },
-  );
+  test('does not throw if NDK not present but no native assets present', () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.create(recursive: true);
+    await runFlutterSpecificHooks(
+      environmentDefines: <String, String>{
+        kBuildMode: BuildMode.debug.cliName,
+        kMinSdkVersion: minSdkVersion,
+      },
+      targetPlatform: TargetPlatform.android_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
+      logger: logger,
+      buildRunner: _BuildRunnerWithoutNdk(),
+      buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+      buildDataAssets: true,
+      recordedUsesFile: null,
+    );
+    expect(logger.traceText, isNot(contains('Running build hooks for ')));
+  });
 
-  testUsingContext('throw if NDK not present and there are native assets', () async {
+  test('throw if NDK not present and there are native assets', () async {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();

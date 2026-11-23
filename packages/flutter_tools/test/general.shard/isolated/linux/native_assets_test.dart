@@ -19,7 +19,7 @@ import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
@@ -49,31 +49,24 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  testUsingContext(
-    'does not throw if clang not present but no native assets present',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.empty(),
-      FileSystem: () => fileSystem,
-    },
-    () async {
-      final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
-      await packageConfig.create(recursive: true);
+  test('does not throw if clang not present but no native assets present', () async {
+    final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
+    await packageConfig.create(recursive: true);
 
-      await runFlutterSpecificHooks(
-        environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
-        targetPlatform: TargetPlatform.linux_x64,
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
-        logger: logger,
-        buildRunner: _BuildRunnerWithoutClang(),
-        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
-        buildDataAssets: true,
-        recordedUsesFile: null,
-      );
-      expect(logger.traceText, isNot(contains('Running build hooks for ')));
-    },
-  );
+    await runFlutterSpecificHooks(
+      environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      targetPlatform: TargetPlatform.linux_x64,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      featureFlags: TestFeatureFlags(isNativeAssetsEnabled: true),
+      logger: logger,
+      buildRunner: _BuildRunnerWithoutClang(),
+      buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+      buildDataAssets: true,
+      recordedUsesFile: null,
+    );
+    expect(logger.traceText, isNot(contains('Running build hooks for ')));
+  });
 
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
