@@ -1197,17 +1197,12 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _updateInvertColors();
     _resolveImage();
     _disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    // _ImageState always has inherited dependencies (MediaQuery and
+    // createLocalImageConfiguration), so Element.activate calls
+    // didChangeDependencies after reparenting; no activate override is needed.
     _updateTickerModeNotifier();
     _updatePaused();
     super.didChangeDependencies();
-  }
-
-  @override
-  void activate() {
-    super.activate();
-    // We may have a new TickerMode ancestor.
-    _updateTickerModeNotifier();
-    _updatePaused();
   }
 
   void _updateTickerModeNotifier() {
