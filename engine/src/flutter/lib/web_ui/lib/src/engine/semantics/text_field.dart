@@ -554,18 +554,16 @@ class SemanticTextField extends SemanticRole {
     if (semanticsObject.flags.isObscured) {
       input.type = 'password';
     } else {
-      // For email inputs, prefer type="text" with inputmode="email" so that
-      // browsers keep selection APIs enabled while still providing email
-      // keyboards and hints. This avoids InvalidStateError and enables
-      // proper selection/cursor operations.
-      // When this field is the active editor, [SemanticsTextEditingStrategy]
-      // owns its `inputmode` attribute via [applyConfiguration] (e.g. for
+      // While this field is the active editor, [SemanticsTextEditingStrategy]
+      // owns `inputmode` and `autocapitalize` via [applyConfiguration] (e.g.
       // `numeric`, `decimal`, or `none`, which `SemanticsInputType` does not
-      // distinguish). Do not strip it during a semantics update.
-      if (SemanticsTextEditingStrategy._instance?.activeTextField != this) {
+      // distinguish, and `TextCapitalization`). Do not strip or overwrite them
+      // during a semantics update.
+      final isActiveEditor = SemanticsTextEditingStrategy._instance?.activeTextField == this;
+      if (!isActiveEditor) {
         input.removeAttribute('inputmode');
+        input.removeAttribute('autocapitalize');
       }
-      input.removeAttribute('autocapitalize');
       if (!_isAutofillOwned) {
         input.autocomplete = 'off';
       }
@@ -579,8 +577,14 @@ class SemanticTextField extends SemanticRole {
         case ui.SemanticsInputType.phone:
           input.type = 'tel';
         case ui.SemanticsInputType.email:
-          input.setAttribute('inputmode', 'email');
-          input.setAttribute('autocapitalize', 'none');
+          // For email inputs, prefer type="text" with inputmode="email" so that
+          // browsers keep selection APIs enabled while still providing email
+          // keyboards and hints. This avoids InvalidStateError and enables
+          // proper selection/cursor operations.
+          if (!isActiveEditor) {
+            input.setAttribute('inputmode', 'email');
+            input.setAttribute('autocapitalize', 'none');
+          }
           if (!_isAutofillOwned) {
             input.autocomplete = 'email';
           }

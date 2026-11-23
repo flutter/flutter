@@ -146,11 +146,14 @@ void testMain() {
       expect(inputElement.autocomplete, 'email');
     });
 
-    test('active editing preserves strategy inputmode across semantics updates', () {
+    test('active editing preserves strategy inputmode and autocapitalize across updates', () {
       final config = InputConfiguration(
         viewId: kImplicitViewId,
         inputType: EngineInputType.number,
         inputAction: 'TextInputAction.next',
+        textCapitalization: const TextCapitalizationConfig.fromInputConfiguration(
+          'TextCapitalization.words',
+        ),
       );
       strategy.enable(config, onChange: (_, _) {}, onAction: (_) {});
 
@@ -160,19 +163,41 @@ void testMain() {
 
       expect(inputElement.getAttribute('inputmode'), 'numeric');
       expect(inputElement.getAttribute('enterkeyhint'), 'next');
+      expect(inputElement.getAttribute('autocapitalize'), 'words');
 
-      // A subsequent semantics update must not wipe `inputmode` while focused.
+      // A subsequent semantics update must not wipe `inputmode` or
+      // `autocapitalize` while focused.
       createTextFieldSemantics(value: '423', isFocused: true);
       expect(inputElement.getAttribute('inputmode'), 'numeric');
+      expect(inputElement.getAttribute('autocapitalize'), 'words');
 
-      // Reconfiguring via `applyConfiguration` clears stale attributes.
+      // An email semantics update while focused must not overwrite them either.
+      createTextFieldSemantics(
+        value: '4234',
+        isFocused: true,
+        inputType: ui.SemanticsInputType.email,
+      );
+      expect(inputElement.getAttribute('inputmode'), 'numeric');
+      expect(inputElement.getAttribute('autocapitalize'), 'words');
+
+      // Reconfiguring via `applyConfiguration` updates/clears stale attributes.
       strategy.applyConfiguration(
         InputConfiguration(viewId: kImplicitViewId, inputAction: 'TextInputAction.none'),
       );
       expect(inputElement.getAttribute('inputmode'), isNull);
       expect(inputElement.getAttribute('enterkeyhint'), isNull);
+      expect(inputElement.getAttribute('autocapitalize'), 'off');
 
       strategy.disable();
+
+      // Once inactive, semantics updates restore email defaults / clear non-email.
+      createTextFieldSemantics(value: '423', inputType: ui.SemanticsInputType.email);
+      expect(inputElement.getAttribute('inputmode'), 'email');
+      expect(inputElement.getAttribute('autocapitalize'), 'none');
+
+      createTextFieldSemantics(value: '423');
+      expect(inputElement.getAttribute('inputmode'), isNull);
+      expect(inputElement.getAttribute('autocapitalize'), isNull);
     });
 
     test('renders a disabled text field', () {
