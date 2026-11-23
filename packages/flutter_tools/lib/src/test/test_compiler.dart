@@ -349,12 +349,15 @@ class TestCompiler {
         }
         await _shutdown();
       } finally {
+        // Only remove now when we finished processing the element. Do it
+        // first so that nothing below can skip it and stall the queue.
+        compilationQueue.removeAt(0);
         logger.printTrace(
           'Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms',
         );
-        testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
-        // Only remove now when we finished processing the element
-        compilationQueue.removeAt(0);
+        if (testTimeRecorderStopwatch != null) {
+          testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch);
+        }
       }
     }
   }
