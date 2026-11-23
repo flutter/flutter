@@ -35,7 +35,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// The task runner used to post rendering tasks to the platform thread.
 @property(nonatomic, strong) FlutterFMLTaskRunner* taskRunner;
 
-/// The flutter view.
+/// The view that displays the Flutter content, to which platform views are added as subviews.
+///
+/// `FlutterViewController` sets this when its surface appears, and sets it to nil when the surface
+/// is destroyed.
 @property(nonatomic, weak) UIView* _Nullable flutterView;
 
 /// @brief The flutter view controller.
@@ -47,8 +50,9 @@ NS_ASSUME_NONNULL_BEGIN
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy;
 
-/// @brief Mark the beginning of a frame and record the size of the onscreen.
-- (void)beginFrameWithSize:(flutter::DlISize)frameSize;
+/// @brief Mark the beginning of a frame and record the size of the onscreen and the device pixel
+/// ratio (the number of physical pixels per point).
+- (void)beginFrameWithSize:(flutter::DlISize)frameSize devicePixelRatio:(CGFloat)devicePixelRatio;
 
 /// @brief Cancel the current frame, indicating that no platform views are composited.
 ///
@@ -133,8 +137,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Composite the PlatformView with `viewId`.
 //
-// This method is called from `performSubmit:` on the platform thread for each platform view whose
-// composition parameters changed since the previous frame.
+// This method converts `params` to a `FlutterPlatformViewLayer` with the main screen's scale and
+// composites the view from it.
+//
+// `presentFrame:` composites views with the device pixel ratio of their frame.
 - (void)compositeView:(int64_t)viewId withParams:(const flutter::EmbeddedViewParams&)params;
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
