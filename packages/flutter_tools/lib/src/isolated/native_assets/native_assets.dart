@@ -897,7 +897,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
     return const <File>[];
   }
 
-  logger.printTrace('Copying native assets to ${targetUri.toFilePath()}.');
+  logger.printTrace('Copying native assets to ${targetDir.path}.');
   final processUtils = ProcessUtils(processManager: processManager, logger: logger);
   final List<File> installedFiles;
   switch (targetOS) {
@@ -1018,8 +1018,9 @@ Future<List<File>> _copyNativeCodeAssetsToBundleOnWindowsLinux(
     final Uri source = assetMapping.key.codeAsset.file!;
     final Uri target = assetMapping.value.bundlePath!;
     final Uri assetTargetUri = targetUri.resolveUri(target);
-    final String targetFullPath = assetTargetUri.toFilePath();
-    final File installedFile = await fileSystem.file(source).copy(targetFullPath);
+    final File installedFile = await fileSystem
+        .file(source)
+        .copy(fileSystem.file(assetTargetUri).path);
     installedFiles.add(installedFile);
   }
   return installedFiles;

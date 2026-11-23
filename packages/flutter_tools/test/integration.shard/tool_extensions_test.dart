@@ -312,9 +312,9 @@ flutter:
       directory: projectDir,
       mainLibName: 'my_app',
       packages: <String, String>{
-        'flutter': flutterStubDir.path,
-        'path_provider_custom_os': customPluginDir.path,
-        'path_provider_other': otherPluginDir.path,
+        'flutter': flutterStubDir.uri.toString(),
+        'path_provider_custom_os': customPluginDir.uri.toString(),
+        'path_provider_other': otherPluginDir.uri.toString(),
       },
     );
 

@@ -2088,6 +2088,13 @@ environment:
 
         expect(buildRunner.buildInvocations, 1);
         expect(buildRunner.linkInvocations, 1);
+        expect(
+          environment.outputDir
+              .childDirectory('native_assets')
+              .childDirectory('linux')
+              .childFile('libmy_native_lib.so'),
+          exists,
+        );
         expect(environment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
         final File manifestFile = environment.buildDir.childFile(
           InstallCodeAssets.nativeAssetsFilename,
@@ -2283,63 +2290,76 @@ environment:
           isNativeAssetsEnabled: true,
           isDartDataAssetsEnabled: true,
         );
-        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
-        writePackageConfigFiles(directory: projectDir, mainLibName: 'my_app');
+        for (final style in const <FileSystemStyle>[.posix, .windows]) {
+          final styledFileSystem = MemoryFileSystem.test(style: style);
+          final isWindows = style == .windows;
+          final Directory projectDir = styledFileSystem.directory(
+            isWindows ? r'C:\project' : '/project',
+          )..createSync(recursive: true);
+          writePackageConfigFiles(directory: projectDir, mainLibName: 'my_app');
 
-        final environment = Environment.test(
-          projectDir,
-          artifacts: artifacts,
-          defines: <String, String>{
-            kBuildMode: BuildMode.release.cliName,
-            kTargetPlatform: 'custom-arm64',
-            kExtensionHookTargetOs: 'fuchsia',
-            kExtensionHookTargetArch: 'arm64',
-            kExtensionCCompilerCc: '/opt/custom-sdk/llvm/bin/clang',
-            kExtensionCCompilerAr: '/opt/custom-sdk/llvm/bin/llvm-ar',
-            kExtensionCCompilerLd: '/opt/custom-sdk/llvm/bin/ld.lld',
-          },
-          featureFlags: testFeatureFlags,
-          fileSystem: fileSystem,
-          inputs: <String, String>{},
-          logger: logger,
-          processManager: FakeProcessManager.empty(),
-        );
-        environment.buildDir.createSync(recursive: true);
+          final environment = Environment.test(
+            projectDir,
+            artifacts: artifacts,
+            defines: <String, String>{
+              kBuildMode: BuildMode.release.cliName,
+              kTargetPlatform: 'custom-arm64',
+              kExtensionHookTargetOs: 'fuchsia',
+              kExtensionHookTargetArch: 'arm64',
+              kExtensionCCompilerCc: isWindows
+                  ? r'C:\opt\custom-sdk\llvm\bin\clang.exe'
+                  : '/opt/custom-sdk/llvm/bin/clang',
+              kExtensionCCompilerAr: isWindows
+                  ? r'C:\opt\custom-sdk\llvm\bin\llvm-ar.exe'
+                  : '/opt/custom-sdk/llvm/bin/llvm-ar',
+              kExtensionCCompilerLd: isWindows
+                  ? r'C:\opt\custom-sdk\llvm\bin\ld.lld.exe'
+                  : '/opt/custom-sdk/llvm/bin/ld.lld',
+            },
+            featureFlags: testFeatureFlags,
+            fileSystem: styledFileSystem,
+            inputs: <String, String>{},
+            logger: logger,
+            processManager: FakeProcessManager.empty(),
+          );
+          environment.buildDir.createSync(recursive: true);
 
-        final buildRunner = FakeFlutterNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <String>['my_app'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: <CodeAsset>[
-              CodeAsset(
-                package: 'my_app',
-                name: 'custom_ffi.dart',
-                linkMode: DynamicLoadingBundled(),
-                file: environment.buildDir.childFile('libcustom_ffi.so').uri,
-              ),
-            ],
-          ),
-          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
-        );
-        environment.buildDir.childFile('libcustom_ffi.so').writeAsStringSync('elf');
+          final buildRunner = FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['my_app'],
+            buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+              codeAssets: <CodeAsset>[
+                CodeAsset(
+                  package: 'my_app',
+                  name: 'custom_ffi.dart',
+                  linkMode: DynamicLoadingBundled(),
+                  file: environment.buildDir.childFile('libcustom_ffi.so').uri,
+                ),
+              ],
+            ),
+            linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
+          );
+          environment.buildDir.childFile('libcustom_ffi.so').writeAsStringSync('elf');
 
-        await runHooksAndInstallCodeAssets(
-          buildRunner: buildRunner,
-          environment: environment,
-          featureFlags: testFeatureFlags,
-        );
+          await runHooksAndInstallCodeAssets(
+            buildRunner: buildRunner,
+            environment: environment,
+            featureFlags: testFeatureFlags,
+          );
 
-        expect(
-          environment.outputDir
-              .childDirectory('native_assets')
-              .childDirectory('fuchsia')
-              .childFile('libcustom_ffi.so'),
-          exists,
-        );
-        final File manifestFile = environment.buildDir.childFile(
-          InstallCodeAssets.nativeAssetsFilename,
-        );
-        expect(manifestFile, exists);
-        expect(manifestFile.readAsStringSync(), contains('custom_ffi.dart'));
+          expect(
+            environment.outputDir
+                .childDirectory('native_assets')
+                .childDirectory('fuchsia')
+                .childFile('libcustom_ffi.so'),
+            exists,
+            reason: 'Expected bundled code asset for $style',
+          );
+          final File manifestFile = environment.buildDir.childFile(
+            InstallCodeAssets.nativeAssetsFilename,
+          );
+          expect(manifestFile, exists);
+          expect(manifestFile.readAsStringSync(), contains('custom_ffi.dart'));
+        }
       },
     );
 
