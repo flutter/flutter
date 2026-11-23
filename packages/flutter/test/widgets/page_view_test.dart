@@ -139,11 +139,7 @@ void main() {
     expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
 
     // Change the page through the page controller when zero viewport
-    controller.animateToPage(
-      kStates.indexOf('Iowa'),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.ease,
-    );
+    controller.animateToPage(kStates.indexOf('Iowa'));
     expect(controller.page, kStates.indexOf('Iowa'));
 
     controller.jumpToPage(kStates.indexOf('Illinois'));
@@ -329,7 +325,7 @@ void main() {
 
     expect(find.text('California'), findsOneWidget);
 
-    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    controller.nextPage(duration: const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
     expect(find.text('Colorado'), findsOneWidget);
@@ -352,7 +348,7 @@ void main() {
 
     expect(find.text('Colorado'), findsOneWidget);
 
-    controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    controller.previousPage(duration: const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
     expect(find.text('California'), findsOneWidget);
@@ -429,7 +425,7 @@ void main() {
     var nextPageCompleted = false;
     unawaited(
       controller
-          .nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+          .nextPage(duration: const Duration(milliseconds: 150))
           .then((_) => nextPageCompleted = true),
     );
 
@@ -442,7 +438,7 @@ void main() {
     var previousPageCompleted = false;
     unawaited(
       controller
-          .previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+          .previousPage(duration: const Duration(milliseconds: 150))
           .then((_) => previousPageCompleted = true),
     );
 
@@ -451,6 +447,58 @@ void main() {
     expect(previousPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
     expect(previousPageCompleted, true);
+  });
+
+  testWidgets('PageController animation methods use default duration and curve', (
+    WidgetTester tester,
+  ) async {
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 600.0,
+            height: 400.0,
+            child: PageView(
+              controller: controller,
+              children: kStates.map<Widget>((String state) => Text(state)).toList(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    var animateCompleted = false;
+    unawaited(controller.animateToPage(2).then((_) => animateCompleted = true));
+
+    await tester.pump();
+    expect(animateCompleted, isFalse);
+    await tester.pump(const Duration(milliseconds: 299));
+    expect(animateCompleted, isFalse);
+    await tester.pumpAndSettle();
+    expect(animateCompleted, isTrue);
+    expect(controller.page, 2.0);
+
+    var nextCompleted = false;
+    unawaited(controller.nextPage().then((_) => nextCompleted = true));
+
+    await tester.pump(const Duration(milliseconds: 299));
+    expect(nextCompleted, isFalse);
+    await tester.pumpAndSettle();
+    expect(nextCompleted, isTrue);
+    expect(controller.page, 3.0);
+
+    var previousCompleted = false;
+    unawaited(controller.previousPage().then((_) => previousCompleted = true));
+
+    await tester.pump(const Duration(milliseconds: 299));
+    expect(previousCompleted, isFalse);
+    await tester.pumpAndSettle();
+    expect(previousCompleted, isTrue);
+    expect(controller.page, 2.0);
   });
 
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
@@ -1172,7 +1220,7 @@ void main() {
       isNot(includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden])),
     );
 
-    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    controller.nextPage(duration: const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
     expect(
       semantics,
@@ -1188,7 +1236,7 @@ void main() {
       isNot(includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden])),
     );
 
-    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    controller.nextPage(duration: const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
     expect(
       semantics,
@@ -1329,7 +1377,7 @@ void main() {
       ),
     );
 
-    controller.animateToPage(2, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+    controller.animateToPage(2);
     await tester.pumpAndSettle();
 
     await expectLater(
@@ -1505,11 +1553,7 @@ void main() {
           await tester.pumpWidget(createMultiplePageViews(controller));
 
           expect(
-            () => controller.animateToPage(
-              2,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.ease,
-            ),
+            () => controller.animateToPage(2),
             throwsA(
               isAssertionError.having(
                 (AssertionError error) => error.message,
@@ -1556,11 +1600,7 @@ void main() {
         // pageController is not attached to PageView
         await tester.pumpWidget(createPageView());
         expect(
-          () => controller.animateToPage(
-            2,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.ease,
-          ),
+          () => controller.animateToPage(2),
           throwsA(
             isAssertionError.having(
               (AssertionError error) => error.message,
@@ -1572,14 +1612,7 @@ void main() {
 
         // pageController is attached to PageView
         await tester.pumpWidget(createPageView(controller));
-        expect(
-          () => controller.animateToPage(
-            2,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.ease,
-          ),
-          returnsNormally,
-        );
+        expect(() => controller.animateToPage(2), returnsNormally);
       });
 
       testWidgets('Assert behavior of jumpToPage works properly', (WidgetTester tester) async {
