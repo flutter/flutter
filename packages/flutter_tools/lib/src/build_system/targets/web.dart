@@ -178,6 +178,9 @@ abstract class Dart2WebTarget extends Target {
   Iterable<File> buildFiles(Environment environment);
   Iterable<String> buildPatternStemsFor({required bool isRecordUseEnabled});
 
+  /// The recorded uses file consumed by link hooks, if any.
+  String? get recordedUsesFileName;
+
   List<String> computeDartDefines(Environment environment) {
     final List<String> dartDefines = compilerConfig.renderer.updateDartDefines(
       decodeDartDefines(environment.defines, kDartDefines),
@@ -287,6 +290,9 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   @override
   String get name => 'dart2js';
+
+  @override
+  String get recordedUsesFileName => LinkHooks.recordedUsesJsFileName;
 
   @override
   List<String> get depfiles => const <String>['dart2js.d'];
@@ -486,7 +492,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       if (compilerConfig.webContentHash) 'main.dart.*.js.map' else 'main.dart.js.map',
       'main.dart.js_*.part.js.map',
     ],
-    if (isRecordUseEnabled) LinkHooks.recordedUsesJsFileName,
+    if (isRecordUseEnabled) recordedUsesFileName,
   ];
 }
 
@@ -671,6 +677,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
   String get name => 'dart2wasm';
 
   @override
+  String? get recordedUsesFileName =>
+      compilerConfig.dryRun ? null : LinkHooks.recordedUsesWasmFileName;
+
+  @override
   List<String> get depfiles => const <String>['dart2wasm.d'];
 
   @override
@@ -750,7 +760,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
             if (compilerConfig.webContentHash) 'main.dart.*.mjs.map' else 'main.dart.mjs.map',
             'main.dart_module*.wasm.map',
           ],
-          if (isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
+          if (isRecordUseEnabled) ?recordedUsesFileName,
         ];
 
   @visibleForTesting
@@ -1174,7 +1184,13 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    LinkHooks(platform: HookPlatform.web, extraDependencies: compileTargets),
+    LinkHooks(
+      platform: HookPlatform.web,
+      extraDependencies: compileTargets,
+      webRecordedUsesFileNames: <String>[
+        for (final Dart2WebTarget target in compileTargets) ?target.recordedUsesFileName,
+      ],
+    ),
   ];
 
   Iterable<String> buildPatternStemsFor({required bool isRecordUseEnabled}) =>

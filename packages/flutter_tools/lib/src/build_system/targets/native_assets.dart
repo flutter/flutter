@@ -129,11 +129,15 @@ class LinkHooks extends Target {
   const LinkHooks({
     this.platform = HookPlatform.native,
     this.extraDependencies = const <Target>[],
+    this.webRecordedUsesFileNames = const <String>[],
     this._buildRunner,
   });
 
   final HookPlatform platform;
   final List<Target> extraDependencies;
+
+  /// The recorded uses files produced by the active web compilers.
+  final List<String> webRecordedUsesFileNames;
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
   @override
@@ -157,7 +161,7 @@ class LinkHooks extends Target {
 
   List<String> get _recordedUsesFileNames {
     if (platform == HookPlatform.web) {
-      return const <String>[recordedUsesWasmFileName, recordedUsesJsFileName];
+      return webRecordedUsesFileNames;
     }
     return const <String>[KernelSnapshot.recordedUsesFileName];
   }
