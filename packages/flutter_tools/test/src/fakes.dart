@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -34,10 +35,12 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/context/web_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -71,7 +74,8 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/local_engine.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1181,6 +1185,16 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
   bool get appliesToHostPlatform => false;
 }
 
+class FakeChromiumLauncher extends Fake implements ChromiumLauncher {
+  @override
+  bool canFindExecutable() => false;
+}
+
+class FakeWebWorkflow extends Fake implements WebWorkflow {
+  @override
+  bool get appliesToHostPlatform => false;
+}
+
 class FakeXCDevice extends Fake implements XCDevice {}
 
 class FakeBuildSystem extends Fake implements BuildSystem {}
@@ -1284,7 +1298,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._templatePathProvider,
     this._templateRenderer,
     this._toolContext,
-    this.webRunnerFactory,
+    this._webContext,
     this._windowsWorkflow,
   });
 
@@ -1309,6 +1323,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final TemplatePathProvider? _templatePathProvider;
   final TemplateRenderer? _templateRenderer;
   final ToolContext? _toolContext;
+  final WebContext? _webContext;
   final WindowsWorkflow? _windowsWorkflow;
 
   @override
@@ -1409,7 +1424,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   late final ToolContext toolContext = _toolContext ?? FakeToolContext();
 
   @override
-  final WebRunnerFactory? webRunnerFactory;
+  late final WebContext webContext = _webContext ?? FakeWebContext();
 
   @override
   late final WindowsWorkflow windowsWorkflow =
@@ -1846,4 +1861,39 @@ class FakeAppleContext extends Fake implements AppleContext {
   @override
   late final XcodeProjectInterpreter xcodeProjectInterpreter =
       _xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
+}
+
+class FakeWebContext extends Fake implements WebContext {
+  FakeWebContext({this._chromiumLauncher, this.webFlutterDeviceBuilder, this._webWorkflow});
+
+  final ChromiumLauncher? _chromiumLauncher;
+  final WebWorkflow? _webWorkflow;
+
+  @override
+  late final ChromiumLauncher chromiumLauncher = _chromiumLauncher ?? FakeChromiumLauncher();
+
+  @override
+  final WebFlutterDeviceBuilder? webFlutterDeviceBuilder;
+
+  @override
+  late final WebWorkflow webWorkflow = _webWorkflow ?? FakeWebWorkflow();
+}
+
+mixin DefaultCreateFlutterDevice on Fake {
+  Future<FlutterDevice> createFlutterDevice({
+    required BuildInfo buildInfo,
+    required ToolContext toolContext,
+    DebuggingOptions? debuggingOptions,
+    FlutterProject? flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    TargetModel? targetModelOverride,
+    UrlTunneller? urlTunneller,
+    String? userIdentifier,
+  }) => FlutterDevice.createDefault(
+    this as Device,
+    buildInfo: buildInfo,
+    targetModelOverride: targetModelOverride,
+    toolContext: toolContext,
+    userIdentifier: userIdentifier,
+  );
 }

@@ -1958,7 +1958,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
-class FakeAndroidDevice extends Fake implements AndroidDevice {
+class FakeAndroidDevice extends Fake with DefaultCreateFlutterDevice implements AndroidDevice {
   FakeAndroidDevice({required this.id});
 
   @override
@@ -2054,7 +2054,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   }
 }
 
-class FakeIOSDevice extends Fake implements IOSDevice {
+class FakeIOSDevice extends Fake with DefaultCreateFlutterDevice implements IOSDevice {
   FakeIOSDevice({
     this._mdnsVmServiceDiscovery,
     this._portForwarder,
@@ -2166,7 +2166,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   }
 }
 
-class FakeIOSSimulator extends Fake implements IOSSimulator {
+class FakeIOSSimulator extends Fake with DefaultCreateFlutterDevice implements IOSSimulator {
   @override
   final name = 'name';
 

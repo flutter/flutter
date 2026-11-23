@@ -10,6 +10,9 @@ import 'package:pool/pool.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'asset.dart';
+import 'base/async_guard.dart';
+import 'base/common.dart';
 import 'base/dds.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -55,6 +58,7 @@ class HotRunnerConfig {
 }
 
 const kHotReloadDefault = true;
+const kNoClientConnectedMessage = 'Recompile complete. No client connected.';
 
 class DeviceReloadReport {
   DeviceReloadReport(this.device, this.reports);
@@ -81,6 +85,7 @@ class HotRunner extends ResidentRunner {
     super.dartBuilder,
     super.dillOutputPath,
     this.hostIsIde = false,
+    super.hotMode,
     HotRunnerConfig? hotRunnerConfig,
     super.machine,
     this._nativeAssetsYamlFile,
@@ -97,8 +102,7 @@ class HotRunner extends ResidentRunner {
              fileSystem: toolContext.fs,
              platform: toolContext.platform,
              logger: toolContext.logger,
-           ),
-       super(hotMode: true);
+           );
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
@@ -123,6 +127,19 @@ class HotRunner extends ResidentRunner {
   /// This is only used for hot restart, incremental dills uploaded as part of the hot
   /// reload process do not have this issue.
   var _swap = false;
+  var _isRestarting = false;
+
+  bool get _anyDeferredDevice =>
+      flutterDevices.any((FlutterDevice? device) => device!.defersServiceProtocolConnection);
+
+  void _checkSupportedDeferredDeviceConfiguration() {
+    if (_anyDeferredDevice && flutterDevices.length > 1) {
+      throwToolExit(
+        'Running on multiple devices is not supported when a device requires a '
+        'deferred service protocol connection.',
+      );
+    }
+  }
 
   final benchmarkData = <String, List<int>>{};
 
@@ -138,6 +155,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   bool get supportsDetach => stopAppDuringCleanup;
+
+  @override
+  bool get supportsRestart => hotMode && super.supportsRestart;
 
   @override
   bool get reloadIsRestart => false;
@@ -261,6 +281,11 @@ class HotRunner extends ResidentRunner {
     Completer<void>? appStartedCompleter,
     bool needsFullRestart = true,
   }) async {
+    if (_anyDeferredDevice) {
+      throw StateError(
+        'Attaching to a device with a deferred service protocol connection is not yet supported.',
+      );
+    }
     try {
       await connectToServiceProtocol(
         reloadSources: _reloadSourcesService,
@@ -374,6 +399,25 @@ class HotRunner extends ResidentRunner {
     Completer<void>? appStartedCompleter,
     String? route,
   }) async {
+    _checkSupportedDeferredDeviceConfiguration();
+    if (_anyDeferredDevice) {
+      try {
+        return await asyncGuard(
+          () => _runDeferred(
+            connectionInfoCompleter: connectionInfoCompleter,
+            appStartedCompleter: appStartedCompleter,
+            route: route,
+          ),
+        );
+      } on ToolExit {
+        appFailedToStart();
+        rethrow;
+      } on Exception catch (error, stackTrace) {
+        appFailedToStart();
+        flutterDevices.single.handleConnectionException(error, stackTrace);
+      }
+    }
+
     await _calculateTargetPlatform();
 
     final Uri? nativeAssetsYaml = _nativeAssetsYamlFile != null
@@ -469,6 +513,65 @@ class HotRunner extends ResidentRunner {
     );
   }
 
+  Future<int> _runDeferred({
+    Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    Completer<void>? appStartedCompleter,
+    String? route,
+  }) async {
+    await _calculateTargetPlatform();
+    for (final FlutterDevice device in flutterDevices) {
+      await device.prepareHotLaunch(hotRunner: this);
+    }
+    await runSourceGenerators();
+    final UpdateFSReport report = await _updateDevFS(
+      fullRestart: true,
+      targetPlatforms: _targetPlatforms,
+    );
+    for (final FlutterDevice device in flutterDevices) {
+      device.onInitialDevFSUpdate(report, analytics: analytics);
+    }
+    if (!report.success) {
+      logger.printError('Failed to compile application.');
+      appFailedToStart();
+      return 1;
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      device.generator?.accept();
+    }
+    cacheInitialDillCompilation();
+    for (final FlutterDevice device in flutterDevices) {
+      final int result = await device.runHot(hotRunner: this, route: route);
+      if (result != 0) {
+        appFailedToStart();
+        return result;
+      }
+    }
+    for (final FlutterDevice device in flutterDevices) {
+      device.attachDeferredConnection(
+        hotRunner: this,
+        reloadSources: canHotReload ? _reloadSourcesService : null,
+        onConnected: (DebugConnectionInfo info) {
+          if (supportsServiceProtocol) {
+            writeVmServiceFile();
+            printDebuggerList(connectionInfo: info);
+          }
+          if (connectionInfoCompleter != null && !connectionInfoCompleter.isCompleted) {
+            connectionInfoCompleter.complete(info);
+          }
+        },
+        onDisconnected: onServiceDisconnected,
+      );
+    }
+    appStartedCompleter?.complete();
+    if (stayResident) {
+      return waitForAppToFinish();
+    }
+    await stopEchoingDeviceLog();
+    await exitApp();
+    await cleanupAtFinish();
+    return 0;
+  }
+
   Future<List<Uri?>> _initDevFS() async {
     final String fsName = fileSystem.path.basename(projectRootPath);
     return <Uri?>[
@@ -482,7 +585,10 @@ class HotRunner extends ResidentRunner {
     required Set<TargetPlatform> targetPlatforms,
   }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
-    final bool rebuildBundle = assetBundle.needsBuild();
+    final String manifestPath = projectRootPath == fileSystem.currentDirectory.path
+        ? defaultManifestPath
+        : fileSystem.path.join(projectRootPath, defaultManifestPath);
+    final bool rebuildBundle = assetBundle.needsBuild(manifestPath: manifestPath);
     if (rebuildBundle) {
       for (final targetPlatform in targetPlatforms) {
         logger.printTrace('Updating assets for ${targetPlatform.osName}');
@@ -492,6 +598,7 @@ class HotRunner extends ResidentRunner {
             environment: environment,
             logger: logger,
           ),
+          manifestPath: manifestPath,
           packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
           flavor: debuggingOptions.buildInfo.flavor,
           targetPlatform: targetPlatform,
@@ -590,10 +697,10 @@ class HotRunner extends ResidentRunner {
     ]);
   }
 
-  Future<void> _launchFromDevFS() async {
+  Future<void> _launchFromDevFS(List<FlutterDevice> devices) async {
     final futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      final Uri deviceEntryUri = device!.devFS!.baseUri!.resolve(
+    for (final device in devices) {
+      final Uri deviceEntryUri = device.devFS!.baseUri!.resolve(
         _swap ? 'main.dart.swap.dill' : 'main.dart.dill',
       );
       final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
@@ -628,11 +735,26 @@ class HotRunner extends ResidentRunner {
         device.generator!.accept();
       }
     }
+    var restartedAnyClient = false;
+    final nativeDevices = <FlutterDevice>[];
+    for (final FlutterDevice? device in flutterDevices) {
+      final bool? customRestart = await device!.performHotRestart();
+      if (customRestart != null) {
+        restartedAnyClient = restartedAnyClient || customRestart;
+      } else {
+        restartedAnyClient = true;
+        nativeDevices.add(device);
+      }
+    }
+    if (!restartedAnyClient) {
+      logger.printStatus(kNoClientConnectedMessage);
+      return OperationResult(0, '', noClientsConnected: true, updateFSReport: updatedDevFS);
+    }
     // Check if the isolate is paused and resume it.
     final operations = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
+    for (final device in nativeDevices) {
       final uiIsolatesIds = <String?>{};
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         if (view.uiIsolate == null) {
           continue;
@@ -714,9 +836,13 @@ class HotRunner extends ResidentRunner {
         );
       }
     }
-    await Future.wait(operations);
-    logger.printTrace('Finished waiting on operations.');
-    await _launchFromDevFS();
+    if (nativeDevices.isNotEmpty) {
+      await Future.wait(operations);
+      logger.printTrace('Finished waiting on operations.');
+      await _launchFromDevFS(nativeDevices);
+      // Toggle the main dill name after successfully uploading.
+      _swap = !_swap;
+    }
     restartTimer.stop();
     logger.printTrace(
       'Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.',
@@ -728,13 +854,10 @@ class HotRunner extends ResidentRunner {
     analytics.send(
       Event.timing(
         workflow: 'hot',
-        variableName: 'restart',
+        variableName: flutterDevices.first.hotRestartTimingVariableName,
         elapsedMilliseconds: elapsedDuration.inMilliseconds,
       ),
     );
-
-    // Toggle the main dill name after successfully uploading.
-    _swap = !_swap;
 
     return OperationResult(
       OperationResult.ok.code,
@@ -776,52 +899,68 @@ class HotRunner extends ResidentRunner {
     bool silent = false,
     bool pause = false,
   }) async {
+    _checkSupportedDeferredDeviceConfiguration();
+    if (exited) {
+      return OperationResult(1, 'Application has exited.');
+    }
+    if (_isRestarting) {
+      return OperationResult(1, 'A restart is already in progress.');
+    }
     if (flutterDevices.any((FlutterDevice? device) => device!.devFS == null)) {
       return OperationResult(1, 'Device initialization has not completed.');
     }
-    await _calculateTargetPlatform();
-    final timer = Stopwatch()..start();
+    _isRestarting = true;
+    try {
+      await _calculateTargetPlatform();
+      final timer = Stopwatch()..start();
 
-    // Run source generation if needed.
-    await runSourceGenerators();
+      // Run source generation if needed.
+      await runSourceGenerators();
 
-    if (fullRestart) {
-      final OperationResult result = await _fullRestartHelper(
+      if (fullRestart) {
+        final OperationResult result = await _fullRestartHelper(
+          targetPlatform: _targetPlatformName,
+          sdkName: _sdkName,
+          emulator: _emulator,
+          reason: reason,
+          silent: silent,
+        );
+        if (!result.noClientsConnected) {
+          if (!silent) {
+            logger.printStatus(
+              'Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.',
+            );
+          }
+          for (final FlutterDevice? device in flutterDevices) {
+            unawaited(device?.handleHotRestart());
+          }
+        }
+        return result;
+      }
+      final OperationResult result = await _hotReloadHelper(
         targetPlatform: _targetPlatformName,
         sdkName: _sdkName,
         emulator: _emulator,
         reason: reason,
-        silent: silent,
+        pause: pause,
       );
-      if (!silent) {
-        logger.printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      }
-      for (final FlutterDevice? device in flutterDevices) {
-        unawaited(device?.handleHotRestart());
-      }
-      return result;
-    }
-    final OperationResult result = await _hotReloadHelper(
-      targetPlatform: _targetPlatformName,
-      sdkName: _sdkName,
-      emulator: _emulator,
-      reason: reason,
-      pause: pause,
-    );
-    if (result.isOk) {
-      final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
-      if (!silent) {
-        if (result.extraTimings.isNotEmpty) {
-          final String extraTimingsString = result.extraTimings
-              .map((OperationResultExtraTiming e) => '${e.description}: ${e.timeInMs} ms')
-              .join(', ');
-          logger.printStatus('${result.message} in $elapsed ($extraTimingsString).');
-        } else {
-          logger.printStatus('${result.message} in $elapsed.');
+      if (result.isOk && !result.noClientsConnected) {
+        final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
+        if (!silent) {
+          if (result.extraTimings.isNotEmpty) {
+            final String extraTimingsString = result.extraTimings
+                .map((OperationResultExtraTiming e) => '${e.description}: ${e.timeInMs} ms')
+                .join(', ');
+            logger.printStatus('${result.message} in $elapsed ($extraTimingsString).');
+          } else {
+            logger.printStatus('${result.message} in $elapsed.');
+          }
         }
       }
+      return result;
+    } finally {
+      _isRestarting = false;
     }
-    return result;
   }
 
   Future<OperationResult> _fullRestartHelper({
@@ -850,7 +989,7 @@ class HotRunner extends ResidentRunner {
       restartTimer.stop();
       if (!result.isOk) {
         restartEvent = 'restart-failed';
-      } else {
+      } else if (!result.noClientsConnected) {
         analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
@@ -965,7 +1104,10 @@ class HotRunner extends ResidentRunner {
   }) async {
     final viewCache = <FlutterDevice?, List<FlutterView>>{};
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.defersServiceProtocolConnection) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       viewCache[device] = views;
       for (final view in views) {
         if (view.uiIsolate == null) {
@@ -990,6 +1132,23 @@ class HotRunner extends ResidentRunner {
     var shouldReportReloadTime = true;
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS.success) {
+      for (final FlutterDevice? device in flutterDevices) {
+        if (device!.generator != null) {
+          await device.generator!.reject();
+        }
+      }
+      if (updatedDevFS.hotReloadRejected) {
+        analytics.send(
+          Event.hotRunnerInfo(
+            label: 'reload-reject',
+            targetPlatform: targetPlatform!,
+            sdkName: sdkName!,
+            emulator: emulator!,
+            fullRestart: false,
+            reason: reason,
+          ),
+        );
+      }
       return OperationResult(1, 'DevFS synchronization failed');
     }
 
@@ -1001,7 +1160,10 @@ class HotRunner extends ResidentRunner {
     var reloadMessage = 'Reloaded 0 libraries';
     final Stopwatch reloadVMTimer = _stopwatchFactory.createStopwatch('reloadSources:vm')..start();
     final firstReloadDetails = <String, Object?>{};
-    if (updatedDevFS.invalidatedSourcesCount > 0) {
+    final bool shouldReloadSources =
+        updatedDevFS.invalidatedSourcesCount > 0 ||
+        flutterDevices.any((FlutterDevice? device) => device!.alwaysReloadSources);
+    if (shouldReloadSources) {
       final OperationResult result = await _reloadSourcesHelper(
         this,
         flutterDevices,
@@ -1013,7 +1175,7 @@ class HotRunner extends ResidentRunner {
         reason,
         analytics,
       );
-      if (result.code != 0) {
+      if (result.code != 0 || result.noClientsConnected) {
         return result;
       }
       reloadMessage = result.message;
@@ -1024,6 +1186,24 @@ class HotRunner extends ResidentRunner {
     extraTimings.add(OperationResultExtraTiming('reload', reloadVMTimer.elapsedMilliseconds));
 
     await evictDirtyAssets();
+
+    for (final FlutterDevice? device in flutterDevices) {
+      if (!viewCache.containsKey(device)) {
+        final List<FlutterView>? views = await device!.vmService?.getFlutterViews(
+          returnEarly: true,
+        );
+        if (views == null || views.isEmpty) {
+          logger.printStatus(kNoClientConnectedMessage);
+          return OperationResult(0, '', noClientsConnected: true);
+        }
+        for (final FlutterView view in views) {
+          if (view.uiIsolate == null) {
+            return OperationResult(2, 'Application isolate not found', fatal: true);
+          }
+        }
+        viewCache[device] = views;
+      }
+    }
 
     final Stopwatch reassembleTimer = _stopwatchFactory.createStopwatch('reloadSources:reassemble')
       ..start();
@@ -1101,36 +1281,11 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {
-    if (!device.devFS!.hasSetAssetDirectory) {
-      final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
-        fileSystem.path.toUri(getAssetBuildDirectory(config, fileSystem)),
-      );
-      final List<FlutterView> activeViews = views
-          .where((FlutterView view) => view.uiIsolate != null)
-          .toList();
-      await Future.wait<void>(
-        activeViews.map<Future<void>>(
-          (FlutterView view) => device.vmService!.setAssetDirectory(
-            assetsDirectory: deviceAssetsDirectoryUri,
-            uiIsolateId: view.uiIsolate!.id,
-            viewId: view.id,
-            windows:
-                (device.targetPlatform == TargetPlatform.tester && platform.isWindows) ||
-                device.targetPlatform.os == .windows,
-          ),
-        ),
-      );
-      for (final view in activeViews) {
-        logger.printTrace('Set asset directory in $view.');
-      }
-      device.devFS!.hasSetAssetDirectory = true;
-    }
-  }
-
-  @override
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
+    for (final FlutterDevice? flutterDevice in flutterDevices) {
+      await flutterDevice!.dispose();
+    }
     await hotRunnerConfig.runPreShutdownOperations();
     await shutdownDartDevelopmentService();
     if (stopAppDuringCleanup) {
@@ -1141,6 +1296,9 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<void> preExit() async {
+    for (final FlutterDevice? flutterDevice in flutterDevices) {
+      await flutterDevice!.dispose();
+    }
     await _cleanupDevFS();
     await hotRunnerConfig.runPreShutdownOperations();
     await super.preExit();
@@ -1149,7 +1307,11 @@ class HotRunner extends ResidentRunner {
   @override
   Future<void> cleanupAtFinish() async {
     for (final FlutterDevice? flutterDevice in flutterDevices) {
-      await flutterDevice!.device!.dispose();
+      if (stopAppDuringCleanup && flutterDevice!.defersServiceProtocolConnection) {
+        await flutterDevice.exitApps();
+      }
+      await flutterDevice!.dispose();
+      await flutterDevice.device!.dispose();
     }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
@@ -1184,12 +1346,17 @@ Future<OperationResult> defaultReloadSourcesHelper(
   const entryPath = 'main.dart.incremental.dill';
   final allReportsFutures = <Future<DeviceReloadReport?>>[];
 
+  var connectedDeviceCount = 0;
   for (final device in flutterDevices) {
-    final List<Future<vm_service.ReloadReport>> reportFutures = await _reloadDeviceSources(
-      device!,
+    final List<Future<vm_service.ReloadReport>>? reportFutures = await device!.reloadDeviceSources(
       entryPath,
       pause: pause,
     );
+    if (reportFutures == null) {
+      await device.updateReloadStatus(true);
+      continue;
+    }
+    connectedDeviceCount += 1;
     allReportsFutures.add(
       Future.wait(reportFutures)
           .then<DeviceReloadReport?>((List<vm_service.ReloadReport> reports) async {
@@ -1207,6 +1374,10 @@ Future<OperationResult> defaultReloadSourcesHelper(
             return DeviceReloadReport(device, reports);
           }),
     );
+  }
+  if (connectedDeviceCount == 0) {
+    hotRunner.logger.printStatus(kNoClientConnectedMessage);
+    return OperationResult(0, '', noClientsConnected: true);
   }
   final Iterable<DeviceReloadReport> reports = (await Future.wait(allReportsFutures))
       .whereType<DeviceReloadReport>();
@@ -1235,35 +1406,23 @@ Future<OperationResult> defaultReloadSourcesHelper(
   // Collect stats only from the first device. If/when run -d all is
   // refactored, we'll probably need to send one hot reload/restart event
   // per device to analytics.
-  firstReloadDetails.addAll(castStringKeyedMap(reloadReport.json!['details'])!);
-  final details = reloadReport.json!['details'] as Map<String, dynamic>;
-  final loadedLibraryCount = details['loadedLibraryCount'] as int?;
-  final finalLibraryCount = details['finalLibraryCount'] as int?;
-  hotRunner.logger.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
-  // reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+  final Map<String, Object?>? details = castStringKeyedMap(reloadReport.json!['details']);
+  final String reloadSummary;
+  if (details != null) {
+    firstReloadDetails.addAll(details);
+    final loadedLibraryCount = details['loadedLibraryCount'] as int?;
+    final finalLibraryCount = details['finalLibraryCount'] as int?;
+    hotRunner.logger.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
+    reloadSummary = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+  } else {
+    reloadSummary = 'Reloaded application';
+  }
   // Record time it took for the VM to reload the sources.
   hotRunner._addBenchmarkData(
     'hotReloadVMReloadMilliseconds',
     vmReloadTimer.elapsed.inMilliseconds,
   );
-  return OperationResult(0, 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries');
-}
-
-Future<List<Future<vm_service.ReloadReport>>> _reloadDeviceSources(
-  FlutterDevice device,
-  String entryPath, {
-  bool? pause = false,
-}) async {
-  final deviceEntryUri = device.devFS!.baseUri!.resolve(entryPath).toString();
-  final vm_service.VM vm = await device.vmService!.service.getVM();
-  return <Future<vm_service.ReloadReport>>[
-    for (final vm_service.IsolateRef isolateRef in vm.isolates!)
-      device.vmService!.service.reloadSources(
-        isolateRef.id!,
-        pause: pause,
-        rootLibUri: deviceEntryUri,
-      ),
-  ];
+  return OperationResult(0, reloadSummary);
 }
 
 void _resetDevFSCompileTime(List<FlutterDevice?> flutterDevices) {
@@ -1297,19 +1456,21 @@ Future<ReassembleResult> _defaultReassembleHelper(
   final Logger logger = hotRunner.logger;
   // Check if any isolates are paused and reassemble those that aren't.
   final reassembleViews = <FlutterView, FlutterVmService?>{};
+  final viewsSupportingPauseEventLookup = <FlutterView>{};
   final reassembleFutures = <Future<void>>[];
   String? serviceEventKind;
   var pausedIsolatesFound = 0;
   var failedReassemble = false;
   var shouldReportReloadTime = true;
   for (final device in flutterDevices) {
+    final bool canQueryPauseEvent = device!.supportsIsolatePauseEventLookup;
     final List<FlutterView> views = viewCache[device]!;
     for (final view in views) {
       // Check if the isolate is paused, and if so, don't reassemble. Ignore the
       // PostPauseEvent event - the client requesting the pause will resume the app.
-      final vm_service.Event? pauseEvent = await device!.vmService!.getIsolatePauseEventOrNull(
-        view.uiIsolate!.id!,
-      );
+      final vm_service.Event? pauseEvent = canQueryPauseEvent
+          ? await device.vmService!.getIsolatePauseEventOrNull(view.uiIsolate!.id!)
+          : null;
       if (pauseEvent != null &&
           isPauseEvent(pauseEvent.kind!) &&
           pauseEvent.kind != vm_service.EventKind.kPausePostRequest) {
@@ -1321,6 +1482,9 @@ Future<ReassembleResult> _defaultReassembleHelper(
         }
       } else {
         reassembleViews[view] = device.vmService;
+        if (canQueryPauseEvent) {
+          viewsSupportingPauseEventLookup.add(view);
+        }
         // If the tool identified a change in a single widget, do a fast instead
         // of a full reassemble.
         final Future<void> reassembleWork = device.vmService!.flutterReassemble(
@@ -1369,6 +1533,9 @@ Future<ReassembleResult> _defaultReassembleHelper(
       var postReloadPausedIsolatesFound = 0;
       String? serviceEventKind;
       for (final FlutterView view in reassembleViews.keys) {
+        if (!viewsSupportingPauseEventLookup.contains(view)) {
+          continue;
+        }
         final vm_service.Event? pauseEvent = await reassembleViews[view]!
             .getIsolatePauseEventOrNull(view.uiIsolate!.id!);
         if (pauseEvent != null && isPauseEvent(pauseEvent.kind!)) {

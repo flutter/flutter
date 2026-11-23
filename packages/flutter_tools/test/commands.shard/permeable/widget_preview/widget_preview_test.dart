@@ -126,7 +126,9 @@ class FakeAnalysisServer extends Fake implements AnalysisServer {
   }
 }
 
-class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
+class FakeGoogleChromeDevice extends Fake
+    with DefaultCreateFlutterDevice
+    implements GoogleChromeDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
@@ -137,7 +139,9 @@ class FakeGoogleChromeDevice extends Fake implements GoogleChromeDevice {
   String get displayName => GoogleChromeDevice.kChromeDeviceName;
 }
 
-class FakeMicrosoftEdgeDevice extends Fake implements MicrosoftEdgeDevice {
+class FakeMicrosoftEdgeDevice extends Fake
+    with DefaultCreateFlutterDevice
+    implements MicrosoftEdgeDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
@@ -148,7 +152,9 @@ class FakeMicrosoftEdgeDevice extends Fake implements MicrosoftEdgeDevice {
   String get displayName => MicrosoftEdgeDevice.kEdgeDeviceName;
 }
 
-class FakeCustomBrowserDevice extends Fake implements ChromiumDevice {
+class FakeCustomBrowserDevice extends Fake
+    with DefaultCreateFlutterDevice
+    implements ChromiumDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 

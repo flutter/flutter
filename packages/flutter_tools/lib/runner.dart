@@ -74,7 +74,6 @@ import 'src/runner/flutter_command_runner.dart';
 import 'src/runner/local_engine.dart';
 import 'src/template.dart';
 import 'src/version.dart';
-import 'src/web/web_runner.dart';
 import 'src/windows/windows_workflow.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
@@ -126,7 +125,6 @@ Future<int> run(
     :TemplatePathProvider templatePathProvider,
     :TemplateRenderer templateRenderer,
     :ToolContext toolContext,
-    :WebRunnerFactory? webRunnerFactory,
     :WindowsWorkflow windowsWorkflow,
   ) = toolDependencies;
   final ToolContext(
@@ -216,7 +214,6 @@ Future<int> run(
       TemplatePathProvider: () => templatePathProvider,
       TemplateRenderer: () => templateRenderer,
       UserMessages: () => userMessages,
-      WebRunnerFactory: () => webRunnerFactory,
       WindowsWorkflow: () => windowsWorkflow,
       XCDevice: () => appleContext.xcdevice,
       Xcode: () => appleContext.xcode,

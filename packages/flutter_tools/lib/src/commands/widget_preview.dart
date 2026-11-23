@@ -30,12 +30,13 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
 import '../hook_runner.dart';
-import '../isolated/resident_web_runner.dart';
 import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../web/web_debug_config.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
 import '../widget_preview/dependency_graph.dart';
@@ -673,10 +674,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             useLocalCanvasKit: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webConfig: WebDebugConfig(
-            enableExpressionEvaluation: true,
-            runHeadless: boolArg(kHeadless),
-          ),
+          platformOptions: <PlatformDebuggingOptions>[
+            WebDebugConfig(enableExpressionEvaluation: true, runHeadless: boolArg(kHeadless)),
+          ],
           devToolsServerAddress: devToolsServerAddress,
         );
         final String target = widgetPreviewScaffoldProject.directory
@@ -684,11 +684,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             .childFile('main.dart')
             .absolute
             .path;
-        final FlutterDevice flutterDevice = await FlutterDevice.create(
-          device,
-          toolContext: toolContext,
+        final FlutterDevice flutterDevice = await device.createFlutterDevice(
           buildInfo: debuggingOptions.buildInfo,
-          target: target,
+          debuggingOptions: debuggingOptions,
+          flutterProject: widgetPreviewScaffoldProject,
+          toolContext: toolContext,
         );
 
         if (boolArg(kLaunchPreviewer)) {
@@ -702,19 +702,16 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                   flutterProject: widgetPreviewScaffoldProject,
                   projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
                 )
-              : ResidentWebRunner(
-                  flutterDevice,
+              : HotRunner(
+                  <FlutterDevice>[flutterDevice],
+                  analytics: analytics,
                   applicationPackageFactory: applicationPackages,
                   assetBundleFactory: _assetBundleFactory,
                   buildSystem: _buildSystem,
                   buildTargets: _buildTargets,
                   dartBuilder: _flutterHookRunner,
-                  featureFlags: featureFlags,
-                  toolContext: toolContext,
-                  target: target,
                   debuggingOptions: debuggingOptions,
-                  analytics: analytics,
-                  flutterProject: widgetPreviewScaffoldProject,
+                  featureFlags: featureFlags,
                   // Explicitly provide the project root path rather than relying on the current directory
                   // as the current directory exists within $TMP. At least on MacOS, when setting the
                   // current directory to the widget_preview_scaffold project created under
@@ -724,6 +721,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                   // TODO(bkonyi): consider removing if we stop placing the scaffold in $TMP.
                   // See https://github.com/flutter/flutter/issues/179036
                   projectRootPath: widgetPreviewScaffoldProject.directory.absolute.path,
+                  target: target,
+                  toolContext: toolContext,
+                  xcode: null,
                 );
           unawaited(
             _widgetPreviewApp!.run(

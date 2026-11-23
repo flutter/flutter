@@ -28,7 +28,6 @@ import '../hook_runner.dart' show FlutterHookRunner;
 import '../resident_runner.dart';
 import '../version.dart';
 import '../vmservice.dart';
-import '../web/web_runner.dart';
 import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
@@ -43,7 +42,6 @@ class FlutterDriverFactory {
     required this._featureFlags,
     required this._toolContext,
     this._flutterHookRunner,
-    this._webRunnerFactory,
   });
 
   final Analytics _analytics;
@@ -56,7 +54,6 @@ class FlutterDriverFactory {
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
   final ToolContext _toolContext;
-  final WebRunnerFactory? _webRunnerFactory;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
@@ -71,7 +68,6 @@ class FlutterDriverFactory {
         featureFlags: _featureFlags,
         flutterHookRunner: _flutterHookRunner,
         toolContext: _toolContext,
-        webRunnerFactory: _webRunnerFactory,
       );
     }
     return FlutterDriverService(
@@ -134,7 +130,6 @@ abstract class DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
-    Map<String, String> webDefines = const <String, String>{},
   });
 
   /// If --use-existing-app is provided, configured the correct VM Service URI.
@@ -186,7 +181,6 @@ class FlutterDriverService extends DriverService {
     String? userIdentifier,
     Map<String, Object> platformArgs = const <String, Object>{},
     String? mainPath,
-    Map<String, String> webDefines = const <String, String>{},
   }) async {
     if (buildInfo.isRelease) {
       throwToolExit(

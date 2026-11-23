@@ -27,7 +27,6 @@ import '../runner/flutter_command.dart';
 import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import '../web/web_options.dart';
-import '../web/web_runner.dart';
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -63,7 +62,6 @@ class DriveCommand extends RunCommandBase {
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     super.verboseHelp = false,
-    this._webRunnerFactory,
   }) {
     requiresPubspecYaml();
 
@@ -225,7 +223,6 @@ class DriveCommand extends RunCommandBase {
   final DevtoolsLauncher _devtoolsLauncher;
   FlutterDriverFactory? _flutterDriverFactory;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebRunnerFactory? _webRunnerFactory;
 
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
@@ -356,9 +353,7 @@ class DriveCommand extends RunCommandBase {
       logger.printError('Screenshot not supported for ${device.displayName}.');
     }
 
-    final WebDevServerConfig? webDevServerConfig =
-        // TODO(kevmoo): Not sure why we're not just checking `WebDevice` here
-        (device is WebServerDevice || device is ChromiumDevice)
+    final WebDevServerConfig? webDevServerConfig = device is WebDevice
         ? await webDevServerConfigCore()
         : null;
 
@@ -375,7 +370,6 @@ class DriveCommand extends RunCommandBase {
       featureFlags: runner!.featureFlags,
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
-      webRunnerFactory: _webRunnerFactory,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
 
@@ -409,7 +403,6 @@ class DriveCommand extends RunCommandBase {
             if (traceStartup) 'trace-startup': traceStartup,
             if (web) 'no-launch-chrome': true,
           },
-          webDefines: extractWebDefines(),
         );
       } else {
         final Uri? uri = Uri.tryParse(useExistingApp);

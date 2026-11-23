@@ -9,12 +9,15 @@ import 'runner.dart' as runner;
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/net.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
 import 'src/base/signals.dart';
 import 'src/base/terminal.dart';
 import 'src/base/time.dart';
+import 'src/build_info.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
+import 'src/build_system/tools/shader_compiler.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
@@ -47,8 +50,10 @@ import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
+import 'src/compile.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
+import 'src/device.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
@@ -57,12 +62,14 @@ import 'src/features.dart';
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
-import 'src/isolated/resident_web_runner.dart';
+import 'src/isolated/web_flutter_device.dart';
 import 'src/native_assets.dart';
 import 'src/pre_run_validator.dart';
+import 'src/project.dart';
 import 'src/project_validator.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
+import 'src/web/web_debug_config.dart';
 
 /// Main entry point for commands.
 ///
@@ -137,8 +144,34 @@ Future<void> main(List<String> args) async {
     stdio: stdio,
     templateRenderer: const MustacheTemplateRenderer(),
     terminal: terminal,
-    // The web runner is not supported in google3 because it depends on dwds.
-    webRunnerFactory: DwdsWebRunnerFactory(),
+    // Web devices are not supported in google3 because WebFlutterDevice depends on dwds.
+    webFlutterDeviceBuilder:
+        (
+          Device device, {
+          required BuildInfo buildInfo,
+          required DevelopmentShaderCompiler developmentShaderCompiler,
+          required FlutterProject flutterProject,
+          required ResidentCompiler? generator,
+          required TargetPlatform targetPlatform,
+          required ToolContext toolContext,
+          Map<String, Object?> platformArgs = const <String, Object?>{},
+          UrlTunneller? urlTunneller,
+          String? userIdentifier,
+          WebDebugConfig webConfig = const WebDebugConfig(),
+        }) => WebFlutterDevice(
+          device,
+          buildInfo: buildInfo,
+          developmentShaderCompiler: developmentShaderCompiler,
+          flutterProject: flutterProject,
+          generator: generator,
+          platformArgs: platformArgs,
+          targetPlatform: targetPlatform,
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          urlTunneller: urlTunneller,
+          userIdentifier: userIdentifier,
+          webConfig: webConfig,
+        ),
   );
 
   await runner.run(
@@ -271,7 +304,6 @@ List<FlutterCommand> generateCommands({
       flutterHookRunner: toolDependencies.flutterHookRunner,
       hidden: !verboseHelp,
       toolContext: toolContext,
-      webRunnerFactory: toolDependencies.webRunnerFactory,
       xcode: toolDependencies.appleContext.xcode,
     ),
     DebugAdapterCommand(toolContext: toolContext, verboseHelp: verboseHelp),
@@ -298,7 +330,6 @@ List<FlutterCommand> generateCommands({
       flutterHookRunner: toolDependencies.flutterHookRunner,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
-      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     EmulatorsCommand(
       doctor: toolDependencies.doctor,
@@ -343,7 +374,6 @@ List<FlutterCommand> generateCommands({
       devtoolsLauncher: toolDependencies.devtoolsLauncher,
       flutterHookRunner: toolDependencies.flutterHookRunner,
       verboseHelp: verboseHelp,
-      webRunnerFactory: toolDependencies.webRunnerFactory,
     ),
     ScreenshotCommand(toolContext: toolContext),
     ShellCompletionCommand(toolContext: toolContext),

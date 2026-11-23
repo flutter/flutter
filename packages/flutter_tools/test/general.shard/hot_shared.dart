@@ -83,6 +83,9 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
+  Uri? get devToolsUri => null;
+
+  @override
   Future<void> dispose() async {
     disposed = true;
   }
@@ -90,6 +93,12 @@ class FakeDevice extends Fake implements Device {
 
 class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
   bool wasShutdown = false;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Uri? get devToolsUri => null;
 
   @override
   Future<void> shutdown() async {
@@ -137,6 +146,39 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> handleHotRestart() async {}
+
+  @override
+  bool get defersServiceProtocolConnection => false;
+
+  @override
+  bool get alwaysReloadSources => false;
+
+  @override
+  String get hotRestartTimingVariableName => 'restart';
+
+  @override
+  bool get supportsDebugRuntime => true;
+
+  @override
+  bool get supportsProfileServiceProtocol => true;
+
+  @override
+  bool get usesSharedDartPluginRegistry => true;
+
+  @override
+  bool get supportsShaderReload => true;
+
+  @override
+  bool get supportsIsolatePauseEventLookup => true;
+
+  @override
+  Future<bool?> performHotRestart() async => null;
+
+  @override
+  Future<void> confirmAssetDirectory(List<FlutterView> views) async {}
+
+  @override
+  Future<void> dispose() async {}
 
   @override
   TargetPlatform get targetPlatform => device._targetPlatform;

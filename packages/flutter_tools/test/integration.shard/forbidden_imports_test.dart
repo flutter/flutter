@@ -240,7 +240,6 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'isolated'),
       fileSystem.path.join(flutterTools, 'lib', 'executable.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'devfs_web.dart'),
-      fileSystem.path.join(flutterTools, 'lib', 'resident_web_runner.dart'),
     ];
     bool isNotAllowed(FileSystemEntity entity) =>
         allowedPaths.every((String path) => !entity.path.contains(path));

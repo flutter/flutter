@@ -78,20 +78,22 @@ import '../resident_runner.dart';
 import '../runner/local_engine.dart';
 import '../template.dart';
 import '../version.dart';
-import '../web/web_runner.dart';
+import '../web/chrome.dart';
+import '../web/workflow.dart';
 import '../windows/windows_workflow.dart';
 import 'android_context.dart';
 import 'apple_context.dart';
 import 'tool_context.dart';
+import 'web_context.dart';
 
 /// The root of the Flutter tool's dependency graph.
 ///
 /// [ToolDependencies.bootstrap] is called once per tool invocation, before any
 /// command runs, and constructs the tool's long-lived services in dependency
 /// order. The result holds the [ToolContext], the platform-specific
-/// [AndroidContext] and [AppleContext], and services that don't belong to a
-/// single context (such as [Analytics], [BuildSystem], [Doctor], and
-/// [FeatureFlags]).
+/// [AndroidContext], [AppleContext], and [WebContext], and services that don't
+/// belong to a single context (such as [Analytics], [BuildSystem], [Doctor],
+/// and [FeatureFlags]).
 ///
 /// Like [ToolContext], it only holds instances that live for the whole tool
 /// invocation; the two differ in what they expose, not in lifetime.
@@ -123,12 +125,12 @@ class ToolDependencies {
     required this.templatePathProvider,
     required this.templateRenderer,
     required this.toolContext,
+    required this.webContext,
     required this.windowsWorkflow,
     this.extensionBuildManager,
     this.extensionCleanManager,
     this.extensionManager,
     this.flutterHookRunner,
-    this.webRunnerFactory,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -206,13 +208,13 @@ class ToolDependencies {
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
 
-  /// Factory for creating web resident runners when supported by the embedder.
-  final WebRunnerFactory? webRunnerFactory;
+  /// Sub-context containing web platform services.
+  final WebContext webContext;
 
   /// Evaluates host readiness and toolchain requirements for Windows workflows.
   final WindowsWorkflow windowsWorkflow;
 
-  /// Bootstraps the dependency graph and constructs all three contexts.
+  /// Bootstraps the dependency graph and constructs all contexts.
   ///
   /// [FlutterVersion] uses [Git], which runs processes through the
   /// [ErrorHandlingProcessManager], which reads [Analytics] to propagate the
@@ -288,7 +290,8 @@ class ToolDependencies {
     TemplatePathProvider? templatePathProvider,
     AnsiTerminal? terminal,
     UserMessages? userMessages,
-    WebRunnerFactory? webRunnerFactory,
+    WebContext? webContext,
+    WebFlutterDeviceBuilder? webFlutterDeviceBuilder,
     WindowsWorkflow? windowsWorkflow,
     XCDevice? xcdevice,
     XCDevice? Function()? xcdeviceBuilder,
@@ -352,6 +355,10 @@ class ToolDependencies {
     assert(
       cache == null || flutterRoot == null,
       'Cannot provide both cache and flutterRoot to ToolDependencies.bootstrap.',
+    );
+    assert(
+      webContext == null || webFlutterDeviceBuilder == null,
+      'Cannot provide both webContext and webFlutterDeviceBuilder to ToolDependencies.bootstrap.',
     );
 
     // 1. Core Platform Inputs
@@ -854,6 +861,22 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
+    final WebContext finalWebContext =
+        webContext ??
+        WebContext(
+          chromiumLauncherBuilder: () => ChromiumLauncher(
+            browserFinder: findChromeExecutable,
+            fileSystem: finalFS,
+            logger: finalLogger,
+            operatingSystemUtils: finalOS,
+            platform: finalPlatform,
+            processManager: finalProcessManager,
+          ),
+          webFlutterDeviceBuilder: webFlutterDeviceBuilder,
+          webWorkflowBuilder: () =>
+              WebWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform),
+        );
+
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
@@ -872,6 +895,7 @@ class ToolDependencies {
           mdnsVmServiceDiscovery: finalMDnsVmServiceDiscovery,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
+          webContext: finalWebContext,
           windowsWorkflow: finalWindowsWorkflow,
         );
 
@@ -894,6 +918,7 @@ class ToolDependencies {
                 featureFlags: finalFeatureFlags,
                 httpClientFactory: httpClientFactory,
                 toolContext: finalToolContext,
+                webContext: finalWebContext,
                 windowsWorkflow: finalWindowsWorkflow,
               ),
         );
@@ -924,7 +949,7 @@ class ToolDependencies {
       templatePathProvider: finalTemplatePathProvider,
       templateRenderer: templateRenderer,
       toolContext: finalToolContext,
-      webRunnerFactory: webRunnerFactory,
+      webContext: finalWebContext,
       windowsWorkflow: finalWindowsWorkflow,
     );
   }

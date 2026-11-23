@@ -10,7 +10,6 @@ import 'package:dds/dds_launcher.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
-import '../build_info.dart';
 import '../device.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
@@ -240,7 +239,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
       await _invokeRpcOnFirstView(
         'ext.flutter.activeDevToolsServerAddress',
         device: device,
-        params: <String, dynamic>{'value': uri.toString()},
+        params: <String, Object?>{'value': uri.toString()},
       );
     } on Exception catch (e) {
       logger.printError(
@@ -258,7 +257,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
       await _invokeRpcOnFirstView(
         'ext.flutter.connectedVmServiceUri',
         device: device,
-        params: <String, dynamic>{'value': uri.toString()},
+        params: <String, Object?>{'value': uri.toString()},
       );
     } on Exception catch (e) {
       logger.printError(e.toString());
@@ -272,23 +271,11 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
   Future<void> _invokeRpcOnFirstView(
     String method, {
     required FlutterDevice device,
-    required Map<String, dynamic> params,
+    required Map<String, Object?> params,
   }) async {
     if (!(await _waitForExtensionsForDevice(device, method))) {
       return;
     }
-    if (device.targetPlatform == TargetPlatform.web_javascript) {
-      await device.vmService!.callMethodWrapper(method, args: params);
-      return;
-    }
-    final List<FlutterView> views = await device.vmService!.getFlutterViews();
-    if (views.isEmpty) {
-      return;
-    }
-    await device.vmService!.invokeFlutterExtensionRpcRaw(
-      method,
-      args: params,
-      isolateId: views.first.uiIsolate!.id,
-    );
+    await device.invokeExtensionRpcOnFirstView(method, params: params);
   }
 }
