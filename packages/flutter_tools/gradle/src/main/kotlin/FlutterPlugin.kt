@@ -17,6 +17,7 @@ import com.flutter.gradle.tasks.CopyFlutterApksTask
 import com.flutter.gradle.tasks.CopyFlutterAssetsTask
 import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
+import com.flutter.gradle.tasks.ManifestVersionCodeTaskHelper
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -315,13 +316,6 @@ class FlutterPlugin : Plugin<Project> {
         // `this` is shadowed inside the task configuration blocks reached from here, so capture the
         // plugin instance that owns the resolved Flutter SDK and local engine paths.
         val flutterGradlePlugin = this
-        val isApplicationProject = FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)
-        // Set in finalizeDsl, which AGP runs before any onVariants callback.
-        var dslVersionCodes: DslVersionCodes? = null
-        if (isApplicationProject) {
-            val appExtension = FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo)
-            androidComponents.finalizeDsl { dslVersionCodes = DslVersionCodes.from(appExtension) }
-        }
         androidComponents.onVariants { variant ->
             if (shouldCompileFlutterForVariant(projectToAddTasksTo, variant)) {
                 val compileTaskProvider =
@@ -334,13 +328,11 @@ class FlutterPlugin : Plugin<Project> {
                 registerFlutterAssetTasks(projectToAddTasksTo, variant, compileTaskProvider)
                 registerFlutterJniLibsTask(projectToAddTasksTo, variant, compileTaskProvider, targetPlatforms)
                 if (variant is ApplicationVariant) {
-                    configureApplicationOutputs(
-                        projectToAddTasksTo,
-                        variant,
-                        checkNotNull(dslVersionCodes) {
-                            "Flutter read the DSL versionCodes before AGP ran finalizeDsl."
-                        }
-                    )
+                    // Read the DSL inside `onVariants`, which AGP runs after all `finalizeDsl`
+                    // callbacks have finished configuring `versionCode`.
+                    val dslVersionCodes =
+                        DslVersionCodes.from(FlutterPluginUtils.getAndroidApplicationExtension(projectToAddTasksTo))
+                    configureApplicationOutputs(projectToAddTasksTo, variant, dslVersionCodes)
                 }
             }
         }
@@ -656,11 +648,16 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         /**
-         * For `--split-per-abi`, sets each output's versionCode to
-         * `ABI_VERSION[abi] * 1000 + baseVersionCode`, where [baseVersionCode] comes from the DSL
-         * (see [DslVersionCodes]). A versionCode set only in the manifest is not offset.
+         * Sets each `--split-per-abi` output's `versionCode` to `ABI_VERSION[abi] * 1000 + base`.
          *
-         * Skipped with `force-version-code-ignoring-abi`. Outputs without an ABI filter are left
+         * Uses [baseVersionCode] from the DSL ([DslVersionCodes]), or falls back to
+         * `android:versionCode` in the main `AndroidManifest.xml`
+         * ([ManifestVersionCodeTaskHelper]). If neither sets a valid `versionCode`, the build fails
+         * (see [ManifestVersionCodeTaskHelper.errorMessage]).
+         *
+         * With `force-version-code-ignoring-abi`, no ABI offset is added, and AGP applies
+         * [baseVersionCode] if set. If the DSL sets none, each ABI output gets the main-manifest
+         * `versionCode` after the same validity check. Outputs without an ABI filter are left
          * unchanged. An `onVariants` block in the app's build script runs after this one, so a
          * value it sets wins. See the "Flutter Gradle Plugin uses the Android Gradle Plugin
          * Variant API" breaking-change page (https://github.com/flutter/website/pull/14053).
@@ -673,29 +670,67 @@ class FlutterPlugin : Plugin<Project> {
             variant: ApplicationVariant,
             baseVersionCode: Int?
         ) {
-            if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project) ||
-                FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)
-            ) {
+            if (!FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 return
             }
-            if (baseVersionCode == null) {
-                // logger.error, not warn: the flutter tool runs Gradle with -q, which hides warn.
-                project.logger.error(
-                    "Warning: Flutter could not give each split APK of variant '${variant.name}' a " +
-                        "distinct versionCode because its android {} block declares no versionCode, " +
-                        "so Google Play will not accept these APKs together. Set " +
-                        "versionCode = flutter.versionCode in defaultConfig, or set versionCode on " +
-                        "each product flavor."
-                )
+            val ignoreAbi = FlutterPluginUtils.shouldForceVersionCodeIgnoringAbi(project)
+            if (ignoreAbi && baseVersionCode != null) {
                 return
             }
+            // Lazily register the manifest fallback task so it is only created when the DSL omits
+            // versionCode and at least one output has an ABI filter.
+            val manifestVersionCode by lazy { ManifestVersionCodeTaskHelper.registerTask(project, variant) }
+            // Captured by the provider below instead of variant, which the configuration cache
+            // cannot store.
+            val variantName = variant.name
             variant.outputs.forEach { output ->
-                val abiVersionCode =
-                    FlutterPluginConstants.ABI_VERSION[CopyFlutterApksTask.abiOf(output.filters)]
-                        ?: return@forEach
-                output.versionCode.set(abiVersionCode * 1000 + baseVersionCode)
+                val abi = CopyFlutterApksTask.abiOf(output.filters)
+                val abiVersionCode = FlutterPluginConstants.ABI_VERSION[abi] ?: return@forEach
+                when {
+                    ignoreAbi -> {
+                        // Wiring the provider makes ManifestVersionCodeTask validate the
+                        // versionCode before AGP's manifest task runs.
+                        output.versionCode.set(manifestVersionCode)
+                    }
+
+                    baseVersionCode != null -> {
+                        output.versionCode.set(splitApkVersionCode(variantName, abi, abiVersionCode, baseVersionCode))
+                    }
+
+                    else -> {
+                        output.versionCode.set(
+                            manifestVersionCode.map { splitApkVersionCode(variantName, abi, abiVersionCode, it) }
+                        )
+                    }
+                }
             }
         }
+
+        /**
+         * Returns `abiVersionCode * 1000 + baseVersionCode` as the `versionCode` for the [abi]
+         * split APK of [variantName].
+         *
+         * @throws GradleException if the sum exceeds [Int.MAX_VALUE].
+         */
+        internal fun splitApkVersionCode(
+            variantName: String,
+            abi: String,
+            abiVersionCode: Int,
+            baseVersionCode: Int
+        ): Int =
+            try {
+                Math.addExact(abiVersionCode * 1000, baseVersionCode)
+            } catch (e: ArithmeticException) {
+                throw GradleException(
+                    "Flutter cannot give the $abi split APK of variant '$variantName' a versionCode: " +
+                        "${abiVersionCode * 1000} + $baseVersionCode is larger than ${Int.MAX_VALUE}, " +
+                        "the largest versionCode Android allows. Lower the versionCode. If you do " +
+                        "not publish these APKs on Google Play, you can instead pass " +
+                        "-P ${FlutterPluginUtils.PROP_FORCE_VERSION_CODE_IGNORING_ABI}=true to give " +
+                        "every split APK the versionCode $baseVersionCode.",
+                    e
+                )
+            }
 
         /** Registers the copy of [variant]'s APKs into flutter-apk, run by `assemble<Variant>`. */
         private fun registerCopyFlutterApksTask(

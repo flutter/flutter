@@ -335,9 +335,9 @@ Future<int> run(
             // This catches all exceptions to send to crash logging, etc.
             // ignore: avoid_catches_without_on_clauses
           } catch (error, stackTrace) {
-            firstError = error;
-            firstStackTrace = stackTrace;
-            return handleError(error, stackTrace);
+            firstError ??= error;
+            firstStackTrace ??= stackTrace;
+            return handleError(firstError!, firstStackTrace);
           }
         },
         (Object error, StackTrace stackTrace) async {
