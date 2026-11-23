@@ -249,7 +249,7 @@ suites, and the Linux and Mac builder files carry `--bazel` among their
 builds' flags, in place (the `*_bazel.json` variants they started as were
 folded into the originals). The converter
 writes the table the scripts read (`build/bazel/builds.json`) with the two
-files above. [ci.md](ci.md) has the
+files above. [ci.md](../ci.md) has the
 design, the limits of the first version and what a recipe change would do
 differently.
 
