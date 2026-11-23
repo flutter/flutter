@@ -995,7 +995,6 @@ void FlutterWindow::OnImeComposition(UINT const message,
   // string that arrives after the composition has ended is ignored. The legacy
   // Microsoft Korean IME may send the composing text that way when the window
   // loses focus.
-  bool has_composing_text = false;
 
   // Process GCS_RESULTSTR at fisrt, because Google Japanese Input and ATOK
   // send both GCS_RESULTSTR and GCS_COMPSTR to commit composed text and send
@@ -1016,32 +1015,38 @@ void FlutterWindow::OnImeComposition(UINT const message,
       OnComposeCommit();
     }
   }
+  std::optional<std::u16string> composing_text;
   if (lparam & GCS_COMPSTR) {
     // Read the in-progress composing string.
-    std::optional<std::u16string> text =
-        text_input_manager_->GetComposingString();
-    if (text) {
+    composing_text = text_input_manager_->GetComposingString();
+    if (composing_text) {
       if (!ime_composing_) {
         BeginImeComposition();
         ime_composing_implicitly_ = true;
       }
       int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
-                                                text->length());
-      OnComposeChange(text.value(), pos);
-      has_composing_text = !text->empty();
+                                                composing_text->length());
+      OnComposeChange(*composing_text, pos);
     }
   }
 
   if (ime_end_composition_deferred_) {
     // This is the result that WM_IME_ENDCOMPOSITION was waiting for.
     EndImeComposition();
-  } else if (ime_composing_implicitly_ && !has_composing_text) {
-    // WM_IME_ENDCOMPOSITION may never arrive for a composition that was begun
-    // implicitly, so end it once no composing text is left. The IME window
-    // stays active so that later strings can still be read.
-    ime_composing_ = false;
-    ime_composing_implicitly_ = false;
-    OnComposeEnd();
+  } else if (ime_composing_implicitly_) {
+    if (!(lparam & GCS_COMPSTR)) {
+      // A message without GCS_COMPSTR, such as one that only moves the cursor,
+      // says nothing about the composing text, so read it.
+      composing_text = text_input_manager_->GetComposingString();
+    }
+    if (!composing_text || composing_text->empty()) {
+      // WM_IME_ENDCOMPOSITION may never arrive for a composition that was begun
+      // implicitly, so end it once no composing text is left. The IME window
+      // stays active so that later strings can still be read.
+      ime_composing_ = false;
+      ime_composing_implicitly_ = false;
+      OnComposeEnd();
+    }
   }
 }
 
