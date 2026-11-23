@@ -447,6 +447,7 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
   FlutterSemanticsNode2 node{sizeof(FlutterSemanticsNode2), 0};
   node.label = "name";
   node.value = "value";
+  node.hint = "description";
   node.platform_view_id = -1;
   auto flags = FlutterSemanticsFlags{};
   node.flags2 = &flags;
@@ -479,6 +480,15 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
   std::string value(_com_util::ConvertBSTRToString(bvalue));
   EXPECT_EQ(value, "value");
 
+  // Verify the semantics hint is exposed as the accessible description.
+  BSTR bdescription = nullptr;
+  ASSERT_EQ(native_view->get_accDescription(varchild, &bdescription), S_OK);
+  char* description_chars = _com_util::ConvertBSTRToString(bdescription);
+  std::string description(description_chars);
+  delete[] description_chars;
+  SysFreeString(bdescription);
+  EXPECT_EQ(description, "description");
+
   // Verify node type is static text.
   VARIANT varrole{};
   varrole.vt = VT_I4;
@@ -504,6 +514,19 @@ TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
   EXPECT_EQ(varvalue.vt, VT_BSTR);
   value = _com_util::ConvertBSTRToString(varvalue.bstrVal);
   EXPECT_EQ(value, "value");
+
+  // Verify the AX description reaches UI Automation.
+  VARIANT vardescription{};
+  ASSERT_EQ(uia_view->GetPropertyValue(UIA_FullDescriptionPropertyId,
+                                       &vardescription),
+            S_OK);
+  EXPECT_EQ(vardescription.vt, VT_BSTR);
+  description_chars =
+      _com_util::ConvertBSTRToString(vardescription.bstrVal);
+  description = description_chars;
+  delete[] description_chars;
+  VariantClear(&vardescription);
+  EXPECT_EQ(description, "description");
 
   // Verify node control type is text.
   varrole = {};
