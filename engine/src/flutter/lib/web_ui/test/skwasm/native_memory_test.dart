@@ -166,6 +166,81 @@ void testMain() {
         SkwasmPictureRecorder.finalizer = originalFinalizer;
       }
     });
+
+    test(
+      'SkwasmPicture.toImageSync retains ImageSource after picture and source image disposal',
+      () async {
+        final DomImageData greenData = createBlankDomImageData(4, 4);
+        for (var i = 0; i < greenData.data.length; i += 4) {
+          greenData.data[i] = 0;
+          greenData.data[i + 1] = 255;
+          greenData.data[i + 2] = 0;
+          greenData.data[i + 3] = 255;
+        }
+        final DomImageBitmap bitmap = await createImageBitmap(greenData);
+        final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+        final ImageSource source = image.imageSource!;
+
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
+        final ui.Picture picture = recorder.endRecording();
+
+        // Dispose source image before converting picture to a deferred image.
+        image.dispose();
+        expect(source.debugIsClosed, isFalse);
+
+        final snapshot = picture.toImageSync(4, 4) as EngineImage;
+        // Disposing the intermediate picture (as Scene.toImageSync does) must not
+        // close the ImageSource while the deferred snapshot still needs it.
+        picture.dispose();
+        expect(source.debugIsClosed, isFalse);
+
+        // Drawing snapshot into a second picture propagates the retained ImageSource.
+        final secondRecorder = ui.PictureRecorder();
+        ui.Canvas(secondRecorder).drawImage(snapshot, ui.Offset.zero, ui.Paint());
+        final ui.Picture secondPicture = secondRecorder.endRecording();
+
+        final ByteData? pixels = await snapshot.toByteData();
+        expect(pixels, isNotNull);
+        expect(pixels!.getUint8(0), 0);
+        expect(pixels.getUint8(1), 255);
+        expect(pixels.getUint8(2), 0);
+        expect(pixels.getUint8(3), 255);
+
+        snapshot.dispose();
+        expect(source.debugIsClosed, isFalse);
+
+        secondPicture.dispose();
+        expect(source.debugIsClosed, isTrue);
+      },
+    );
+
+    test('Undisposed SkwasmPicture.toImageSync releases retained ImageSource on GC', () async {
+      final Finalizer originalFinalizer = UniqueRef.finalizer;
+      final mockFinalizer = _MockFinalizer();
+      UniqueRef.finalizer = mockFinalizer;
+      try {
+        final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+        final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+        final ImageSource source = image.imageSource!;
+
+        final recorder = ui.PictureRecorder();
+        ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
+        final picture = recorder.endRecording() as SkwasmPicture;
+        final snapshot = picture.toImageSync(4, 4) as EngineImage;
+
+        // Collect undisposed source image and dispose intermediate picture.
+        mockFinalizer.trigger(image.box);
+        picture.dispose();
+        expect(source.debugIsClosed, isFalse);
+
+        // Collecting the undisposed deferred snapshot releases the ImageSource.
+        mockFinalizer.trigger(snapshot.box);
+        expect(source.debugIsClosed, isTrue);
+      } finally {
+        UniqueRef.finalizer = originalFinalizer;
+      }
+    });
   });
 }
 

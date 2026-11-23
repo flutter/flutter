@@ -1533,6 +1533,46 @@ Future<void> testMain() async {
         },
       );
 
+      test(
+        'setImageSampler retains bitmap ImageSource when source image is disposed before recording',
+        () async {
+          final DomImageData greenData = createBlankDomImageData(4, 4);
+          for (var i = 0; i < greenData.data.length; i += 4) {
+            greenData.data[i] = 0;
+            greenData.data[i + 1] = 255;
+            greenData.data[i + 2] = 0;
+            greenData.data[i + 3] = 255;
+          }
+          final DomImageBitmap bitmap = await createImageBitmap(greenData);
+          final image = renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+          final ImageSource source = image.imageSource!;
+
+          final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
+          final ui.FragmentShader shader = program.fragmentShader();
+          shader.getUniformVec2('u_size').set(4, 4);
+          shader.setImageSampler(0, image);
+
+          // Disposing the original image handle before recording any picture must keep
+          // the underlying ImageSource open while the shader retains its sampler clone.
+          image.dispose();
+          expect(source.debugIsClosed, isFalse);
+
+          final recorder = ui.PictureRecorder();
+          ui.Canvas(recorder)
+              .drawRect(const ui.Rect.fromLTWH(0, 0, 4, 4), ui.Paint()..shader = shader);
+          final ui.Picture picture = recorder.endRecording();
+
+          shader.dispose();
+          expect(source.debugIsClosed, isFalse);
+
+          final ByteData pixels = await _rasterizePicture(picture, width: 4, height: 4);
+          expect(_rgbaAt(pixels, width: 4, x: 2, y: 2), <int>[0, 255, 0, 255]);
+
+          picture.dispose();
+          expect(source.debugIsClosed, isTrue);
+        },
+      );
+
       test('slots for the same sampler and setImageSampler share one binding', () async {
         final images = <ui.Image>[
           for (var i = 0; i < 3; i++) _createOvalGradientImage(imageDimension: 16),

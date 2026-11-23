@@ -339,6 +339,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   final ShaderData _shaderData;
   final Map<int, BackendImageShader> _imageSamplers = <int, BackendImageShader>{};
   final Map<int, ui.Image> _samplerImages = <int, ui.Image>{};
+  final Map<int, EngineImage> _retainedSamplerImages = <int, EngineImage>{};
 
   /// The images currently assigned to samplers in this shader.
   Iterable<ui.Image> get samplerImages => _samplerImages.values;
@@ -365,20 +366,29 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
     ui.FilterQuality filterQuality = ui.FilterQuality.none,
   }) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
-    final BackendImageShader sampler = renderer.createImageShader(
-      image as EngineImage,
-      ui.TileMode.clamp,
-      ui.TileMode.clamp,
-      null,
-      filterQuality,
-    );
+    final EngineImage clonedImage = (image as EngineImage).clone();
+    final BackendImageShader sampler;
+    try {
+      sampler = renderer.createImageShader(
+        clonedImage,
+        ui.TileMode.clamp,
+        ui.TileMode.clamp,
+        null,
+        filterQuality,
+      );
+    } catch (_) {
+      clonedImage.dispose();
+      rethrow;
+    }
     final BackendImageShader? oldSampler = _imageSamplers[index];
     if (oldSampler != null) {
       _shaderFinalizer.detach(oldSampler);
       oldSampler.dispose();
     }
+    _retainedSamplerImages[index]?.dispose();
     _imageSamplers[index] = sampler;
     _samplerImages[index] = image;
+    _retainedSamplerImages[index] = clonedImage;
     _shaderFinalizer.attach(this, sampler, detach: sampler);
     _backendShader.setImageSampler(index, sampler, image.width.toDouble(), image.height.toDouble());
   }
@@ -394,6 +404,10 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
         sampler.dispose();
       }
       _imageSamplers.clear();
+      for (final EngineImage retainedImage in _retainedSamplerImages.values) {
+        retainedImage.dispose();
+      }
+      _retainedSamplerImages.clear();
       _samplerImages.clear();
     }
   }

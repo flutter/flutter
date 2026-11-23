@@ -28,13 +28,21 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
     _init();
   }
 
+  static void _disposePictureHandle(PictureHandle h) {
+    pictureDispose(h);
+  }
+
   /// Builds the [UniqueRef] disposal callback without capturing `this`, so
   /// [DomFinalizationRegistry]'s strongly held [UniqueRef] does not retain
   /// [box] and prevent garbage collection.
   static void Function(PictureHandle) _createDisposer(PictureImageTracker? tracker) {
     if (tracker == null) {
-      return (PictureHandle h) => pictureDispose(h);
+      return _disposePictureHandle;
     }
+    return _createTrackedDisposer(tracker);
+  }
+
+  static void Function(PictureHandle) _createTrackedDisposer(PictureImageTracker tracker) {
     return (PictureHandle h) {
       try {
         pictureDispose(h);
@@ -90,7 +98,7 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
     ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
   }) {
     final ImageHandle handleImg = imageCreateFromPicture(handle, width, height);
-    return EngineImage(SkwasmImage(handleImg), width, height);
+    return EngineImage(SkwasmImage(handleImg), width, height, imageTracker: imageTracker);
   }
 
   @override

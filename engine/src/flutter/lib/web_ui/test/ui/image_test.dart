@@ -335,9 +335,23 @@ Future<void> testMain() async {
       final ImageSource source = ImageBitmapImageSource(
         await createImageBitmap(createBlankDomImageData(4, 4)),
       );
-      final image = EngineImage(_ThrowingBackendImage(), 4, 4, imageSource: source);
+      final trackedSource = ImageBitmapImageSource(
+        await createImageBitmap(createBlankDomImageData(4, 4)),
+      );
+      final tracker = PictureImageTracker()..recordSource(trackedSource);
+      final image = EngineImage(
+        _ThrowingBackendImage(),
+        4,
+        4,
+        imageSource: source,
+        imageTracker: tracker,
+      );
+      tracker.releaseAll();
+      expect(trackedSource.debugIsClosed, isFalse);
+
       expect(image.dispose, throwsStateError);
       expect(source.debugIsClosed, isTrue);
+      expect(trackedSource.debugIsClosed, isTrue);
     });
   });
 }

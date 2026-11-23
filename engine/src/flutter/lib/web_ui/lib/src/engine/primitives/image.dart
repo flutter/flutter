@@ -18,9 +18,16 @@ import 'package:ui/ui.dart' as ui;
 class EngineImage implements ui.Image, StackTraceDebugger {
   /// Creates an [EngineImage] wrapping a [BackendImage].
   ///
-  /// Increments the reference count of the optional [imageSource] to prevent it
-  /// from being eagerly closed until [box] is disposed or collected.
-  EngineImage(BackendImage backendImage, this.width, this.height, {this.imageSource}) {
+  /// Increments the reference count of the optional [imageSource] and any
+  /// sources in [imageTracker] to prevent them from being eagerly closed until
+  /// [box] is disposed or collected.
+  EngineImage(
+    BackendImage backendImage,
+    this.width,
+    this.height, {
+    this.imageSource,
+    PictureImageTracker? imageTracker,
+  }) : imageTracker = _retainTracker(imageTracker) {
     // Retain the image source for the lifetime of the shared reference box so
     // both explicit disposal and GC finalization release it deterministically.
     imageSource?.retain();
@@ -29,7 +36,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       backendImage,
       this,
       'BackendImage',
-      onDispose: _createDisposer(imageSource),
+      onDispose: _createDisposer(imageSource, this.imageTracker),
       onDisposed: _notifyDisposed,
     );
     // Initialize the debug stack trace.
@@ -40,27 +47,52 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   /// Creates a clone of an existing [EngineImage] sharing the same [box].
   ///
-  /// Increments the reference count of [box], which retains [imageSource] until
-  /// all clones sharing [box] are disposed or collected.
-  EngineImage.cloneOf(this.box, this.width, this.height, {this.imageSource}) {
+  /// Increments the reference count of [box], which retains [imageSource] and
+  /// [imageTracker] until all clones sharing [box] are disposed or collected.
+  EngineImage.cloneOf(this.box, this.width, this.height, {this.imageSource, this.imageTracker}) {
     // Initialize the debug stack trace.
     _init();
     // Reference the shared box.
     box.ref(this);
   }
 
+  static PictureImageTracker? _retainTracker(PictureImageTracker? tracker) {
+    if (tracker == null || tracker.isEmpty) {
+      return null;
+    }
+    return PictureImageTracker()..recordFrom(tracker);
+  }
+
+  static void _disposeBackendImage(BackendImage backendImage) {
+    backendImage.dispose();
+  }
+
   /// Builds the [UniqueRef] disposal callback without capturing `this`, so
   /// [DomFinalizationRegistry]'s strongly held [UniqueRef] does not retain
   /// [box] and prevent garbage collection.
-  static void Function(BackendImage) _createDisposer(ImageSource? source) {
-    if (source == null) {
-      return (BackendImage backendImage) => backendImage.dispose();
+  static void Function(BackendImage) _createDisposer(
+    ImageSource? source,
+    PictureImageTracker? tracker,
+  ) {
+    if (source == null && tracker == null) {
+      return _disposeBackendImage;
     }
+    return _createTrackedDisposer(source, tracker);
+  }
+
+  static void Function(BackendImage) _createTrackedDisposer(
+    ImageSource? source,
+    PictureImageTracker? tracker,
+  ) {
     return (BackendImage backendImage) {
       try {
         backendImage.dispose();
       } finally {
-        source.release();
+        try {
+          source?.release();
+        } finally {
+          tracker?.releaseAll();
+        }
       }
     };
   }
@@ -96,6 +128,10 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   /// An optional [ImageSource] from which this image was loaded.
   final ImageSource? imageSource;
+
+  /// Retained [ImageSource]s from a recorded picture when this image is backed
+  /// by a deferred picture (such as `SkwasmPicture.toImageSync`).
+  final PictureImageTracker? imageTracker;
 
   // Track whether this image has been disposed to prevent double disposal and use-after-free bugs.
   bool _disposed = false;
@@ -134,7 +170,13 @@ class EngineImage implements ui.Image, StackTraceDebugger {
   @override
   EngineImage clone() {
     assert(_debugCheckIsNotDisposed());
-    return EngineImage.cloneOf(box, width, height, imageSource: imageSource);
+    return EngineImage.cloneOf(
+      box,
+      width,
+      height,
+      imageSource: imageSource,
+      imageTracker: imageTracker,
+    );
   }
 
   @override
