@@ -1632,7 +1632,13 @@ void _paragraphTests() {
     expect(lineMetrics.isHardBreak, isTrue);
     expectAlmost(lineMetrics.baseline, 78.6);
     expectAlmost(lineMetrics.height, 108);
-    expectAlmost(lineMetrics.left, 2.5);
+    // The line starts with letterSpacing 5 and ends with an unspaced "!", so capping the line
+    // shift by the half spacing of the visually last cluster reduces left from 2.5 to 0.
+    // TODO(Rusino): Expect only 0 once https://github.com/flutter/flutter/issues/184815 rolls in.
+    expect(
+      lineMetrics.left,
+      anyOf(within<double>(distance: 0.025, from: 2.5), within<double>(distance: 0.025, from: 0)),
+    );
     expectAlmost(lineMetrics.width, 263);
     expect(lineMetrics.lineNumber, 0);
 

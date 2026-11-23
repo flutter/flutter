@@ -6,7 +6,6 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -78,7 +77,7 @@ void main() {
     late File infoPlist;
 
     setUp(() {
-      buildDirectory = globals.fs.systemTempDirectory.createTempSync(
+      buildDirectory = fileSystem.systemTempDirectory.createTempSync(
         'flutter_tools_xcode_backend_test.',
       );
       infoPlist = buildDirectory.childFile('Info.plist');

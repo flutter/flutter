@@ -31,5 +31,18 @@ FlutterPlatformViewsController* CreateTestPlatformViewsController(NSString* labe
   return controller;
 }
 
+std::unique_ptr<Texture> FakeIOSContext::CreateExternalTexture(int64_t texture_id,
+                                                               NSObject<FlutterTexture>* texture) {
+  return nullptr;
+}
+
+std::unique_ptr<SurfaceFrame> CreateTestSurfaceFrame() {
+  return std::make_unique<SurfaceFrame>(
+      nullptr, SurfaceFrame::FramebufferInfo{},
+      [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
+      [](const SurfaceFrame& surface_frame) { return true; },
+      /*frame_size=*/DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+}
+
 }  // namespace testing
 }  // namespace flutter

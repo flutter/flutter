@@ -20,6 +20,7 @@ impeller_shaders("entity_shaders") {
     "shaders/circle.vert",
     "shaders/complex_rse.frag",
     "shaders/uber_sdf.frag",
+    "shaders/uber_sdf.vert",
     "shaders/clip.frag",
     "shaders/clip.vert",
     "shaders/glyph_atlas.frag",
@@ -98,9 +99,9 @@ impeller_shaders("framebuffer_blend_entity_shaders") {
   name = "framebuffer_blend"
   require_framebuffer_fetch = true
 
-  # malioc does not support analyzing shaders that use the framebuffer fetch
-  # extension on some GPUs.
-  analyze = false
+  if (impeller_enable_vulkan) {
+    vulkan_language_version = 130
+  }
 
   if (is_mac && !is_ios) {
     # Note: this needs to correspond to the Apple7 Support family
@@ -286,6 +287,7 @@ impeller_component("entity_unittests") {
 
   sources = [
     "clip_stack_unittests.cc",
+    "contents/content_context_unittests.cc",
     "contents/filters/blend_filter_contents_unittests.cc",
     "contents/filters/gaussian_blur_filter_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",

@@ -7,32 +7,16 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/base/template.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/emulator.dart';
-import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
-import 'package:flutter_tools/src/experimental/extension_clean_manager.dart';
-import 'package:flutter_tools/src/experimental/extension_manager.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/isolated/mustache_template.dart';
-import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
+import '../src/test_flutter_command_runner.dart';
 import '../src/testbed.dart';
 import 'runner/utils.dart';
 
@@ -56,7 +40,7 @@ void main() {
         appleContext: fakeAppleContext,
         toolContext: fakeToolContext,
       );
-      final runner = FlutterCommandRunner(
+      final runner = TestFlutterCommandRunner(
         analytics: fakeToolDependencies.analytics,
         toolContext: fakeToolContext,
         verboseHelp: true,
@@ -89,7 +73,7 @@ void main() {
       },
     );
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -118,7 +102,7 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -142,7 +126,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -172,7 +156,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -198,7 +182,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -229,7 +213,7 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(
+    final runner = TestFlutterCommandRunner(
       analytics: FakeAnalytics(),
       toolContext: FakeToolContext(),
       verboseHelp: true,
@@ -490,86 +474,4 @@ class FakeAnalytics extends Fake implements Analytics {
 
   @override
   bool get okToSend => false;
-}
-
-class FakeBuildSystem extends Fake implements BuildSystem {}
-
-class FakeBuildTargets extends Fake implements BuildTargets {}
-
-class FakeCrashReporter extends Fake implements CrashReporter {}
-
-class FakeToolDependencies extends Fake implements ToolDependencies {
-  FakeToolDependencies({
-    Analytics? analytics,
-    AndroidContext? androidContext,
-    AppleContext? appleContext,
-    BuildSystem? buildSystem,
-    BuildTargets? buildTargets,
-    CrashReporter? crashReporter,
-    DeviceManager? deviceManager,
-    Doctor? doctor,
-    EmulatorManager? emulatorManager,
-    this.extensionBuildManager,
-    this.extensionCleanManager,
-    this.extensionManager,
-    FeatureFlags? featureFlags,
-    TemplateRenderer? templateRenderer,
-    ToolContext? toolContext,
-  }) : analytics = analytics ?? FakeAnalytics(),
-       androidContext = androidContext ?? FakeAndroidContext(),
-       appleContext = appleContext ?? FakeAppleContext(),
-       buildSystem = buildSystem ?? FakeBuildSystem(),
-       buildTargets = buildTargets ?? FakeBuildTargets(),
-       crashReporter = crashReporter ?? FakeCrashReporter(),
-       deviceManager = deviceManager ?? FakeDeviceManager(),
-       doctor = doctor ?? FakeDoctor(),
-       emulatorManager = emulatorManager ?? FakeEmulatorManager(),
-       featureFlags = featureFlags ?? TestFeatureFlags(),
-       templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
-       toolContext = toolContext ?? FakeToolContext();
-
-  @override
-  final Analytics analytics;
-
-  @override
-  final AndroidContext androidContext;
-
-  @override
-  final AppleContext appleContext;
-
-  @override
-  final BuildSystem buildSystem;
-
-  @override
-  final BuildTargets buildTargets;
-
-  @override
-  final CrashReporter crashReporter;
-
-  @override
-  final DeviceManager deviceManager;
-
-  @override
-  final Doctor doctor;
-
-  @override
-  final EmulatorManager emulatorManager;
-
-  @override
-  final ExtensionBuildManager? extensionBuildManager;
-
-  @override
-  final ExtensionCleanManager? extensionCleanManager;
-
-  @override
-  final ExtensionManager? extensionManager;
-
-  @override
-  final FeatureFlags featureFlags;
-
-  @override
-  final TemplateRenderer templateRenderer;
-
-  @override
-  final ToolContext toolContext;
 }
