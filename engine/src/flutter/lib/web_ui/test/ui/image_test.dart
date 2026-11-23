@@ -228,6 +228,140 @@ Future<void> testMain() async {
     descriptor.dispose();
     imageBuffer.dispose();
   });
+
+  group('ImageSource and Picture finalization', () {
+    late _MockFinalizer mockFinalizer;
+    late Finalizer originalFinalizer;
+
+    setUp(() {
+      originalFinalizer = UniqueRef.finalizer;
+      UniqueRef.finalizer = mockFinalizer = _MockFinalizer();
+    });
+
+    tearDown(() {
+      UniqueRef.finalizer = originalFinalizer;
+    });
+
+    test('undisposed EngineImage and clone release ImageSource when collected', () async {
+      final EngineImage image = await _createBitmapBackedImage();
+      final ImageSource source = image.imageSource!;
+      final EngineImage clone = image.clone();
+
+      // Disposing one handle leaves the shared box and ImageSource alive.
+      image.dispose();
+      expect(source.debugIsClosed, isFalse);
+
+      // Simulate GC collection of the shared CountedRef box after the remaining
+      // clone becomes unreachable without dispose().
+      expect(
+        mockFinalizer.registeredPairs.where((pair) => identical(pair.target, clone.box)),
+        hasLength(1),
+      );
+      mockFinalizer.trigger(clone.box);
+      expect(source.debugIsClosed, isTrue);
+    });
+
+    test('undisposed ImageShader releases cloned EngineImage ImageSource when collected', () async {
+      final EngineImage image = await _createBitmapBackedImage();
+      final ImageSource source = image.imageSource!;
+      final shader = ui.ImageShader(image, ui.TileMode.clamp, ui.TileMode.clamp, Float64List(16));
+      expect(shader.debugDisposed, isFalse);
+
+      // Disposing the original image leaves the shader's internal clone alive.
+      image.dispose();
+      expect(source.debugIsClosed, isFalse);
+
+      // Simulate GC collection of the shared CountedRef box once shader is unreachable.
+      mockFinalizer.trigger(image.box);
+      expect(source.debugIsClosed, isTrue);
+    });
+
+    test('undisposed Picture and cloned Picture release ImageSource when collected', () async {
+      final EngineImage image = await _createBitmapBackedImage();
+      final ImageSource source = image.imageSource!;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+      final ui.Picture picture = recorder.endRecording();
+      final LayerPicture pictureClone = (picture as LayerPicture).clone();
+      expect(pictureClone.isDisposed, isFalse);
+
+      // Disposing the image detaches image.box, leaving only the picture's CountedRef
+      // registered in UniqueRef.finalizer.
+      image.dispose();
+      expect(source.debugIsClosed, isFalse);
+
+      // Disposing one picture handle leaves the shared CountedRef alive for pictureClone.
+      picture.dispose();
+      expect(source.debugIsClosed, isFalse);
+
+      expect(mockFinalizer.registeredPairs, hasLength(1));
+      mockFinalizer.trigger(mockFinalizer.registeredPairs.single.target);
+      expect(source.debugIsClosed, isTrue);
+    });
+
+    test(
+      'EngineCodec.staticImage releases ImageSource on GC and ignores duplicate dispose',
+      () async {
+        final ImageSource collectedSource = ImageBitmapImageSource(
+          await createImageBitmap(createBlankDomImageData(4, 4)),
+        );
+        final ui.Codec collectedCodec = EngineCodec.staticImage(collectedSource);
+        expect(collectedCodec.frameCount, 1);
+        expect(collectedSource.debugIsClosed, isFalse);
+
+        mockFinalizer.trigger(collectedCodec);
+        expect(collectedSource.debugIsClosed, isTrue);
+
+        final ImageSource activeSource = ImageBitmapImageSource(
+          await createImageBitmap(createBlankDomImageData(4, 4)),
+        );
+        final ui.Codec codec = EngineCodec.staticImage(activeSource);
+        final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+        // Disposing the codec twice must not decrement activeSource a second time
+        // while frameInfo.image still retains it.
+        codec.dispose();
+        codec.dispose();
+        expect(activeSource.debugIsClosed, isFalse);
+
+        frameInfo.image.dispose();
+        expect(activeSource.debugIsClosed, isTrue);
+      },
+    );
+  });
+}
+
+Future<EngineImage> _createBitmapBackedImage() async {
+  final DomImageBitmap bitmap = await createImageBitmap(createBlankDomImageData(4, 4));
+  return renderer.createImageFromImageBitmap(bitmap) as EngineImage;
+}
+
+class _MockFinalizer implements Finalizer {
+  final List<({Object target, Object value, Object? detach})> registeredPairs =
+      <({Object target, Object value, Object? detach})>[];
+
+  @override
+  void attach(Object target, Object value, {Object? detach}) {
+    registeredPairs.add((target: target, value: value, detach: detach));
+  }
+
+  @override
+  void detach(Object detach) {
+    registeredPairs.removeWhere((pair) => identical(pair.detach, detach));
+  }
+
+  void trigger(Object target) {
+    final List<({Object target, Object value, Object? detach})> matches = registeredPairs
+        .where((pair) => identical(pair.target, target))
+        .toList();
+    for (final match in matches) {
+      if (match.value is UniqueRef<dynamic>) {
+        (match.value as UniqueRef<dynamic>).collect();
+      }
+    }
+  }
 }
 
 Future<ui.ImmutableBuffer> _createImageBuffer() async {

@@ -19,36 +19,52 @@ class EngineImage implements ui.Image, StackTraceDebugger {
   /// Creates an [EngineImage] wrapping a [BackendImage].
   ///
   /// Increments the reference count of the optional [imageSource] to prevent it
-  /// from being eagerly closed.
+  /// from being eagerly closed until [box] is disposed or collected.
   EngineImage(BackendImage backendImage, this.width, this.height, {this.imageSource}) {
+    // Retain the image source for the lifetime of the shared reference box so
+    // both explicit disposal and GC finalization release it deterministically.
+    imageSource?.retain();
     // Wrap the backend image in a reference-counted box.
     box = CountedRef<EngineImage, BackendImage>(
       backendImage,
       this,
       'BackendImage',
-      onDispose: (BackendImage backendImage) => backendImage.dispose(),
-      onDisposed: (EngineImage image) {
-        ui.Image.onDispose?.call(image);
-      },
+      onDispose: _createDisposer(imageSource),
+      onDisposed: _notifyDisposed,
     );
     // Initialize the debug stack trace.
     _init();
     // Notify the creation listeners.
     ui.Image.onCreate?.call(this);
-    // Retain a reference to the image source.
-    imageSource?.retain();
   }
 
   /// Creates a clone of an existing [EngineImage] sharing the same [box].
   ///
-  /// Increments the reference count of the optional [imageSource] and of the [box].
+  /// Increments the reference count of [box], which retains [imageSource] until
+  /// all clones sharing [box] are disposed or collected.
   EngineImage.cloneOf(this.box, this.width, this.height, {this.imageSource}) {
     // Initialize the debug stack trace.
     _init();
     // Reference the shared box.
     box.ref(this);
-    // Retain a reference to the image source.
-    imageSource?.retain();
+  }
+
+  /// Builds the [UniqueRef] disposal callback without capturing `this`, so
+  /// [DomFinalizationRegistry]'s strongly held [UniqueRef] does not retain
+  /// [box] and prevent garbage collection.
+  static void Function(BackendImage) _createDisposer(ImageSource? source) {
+    if (source == null) {
+      return (BackendImage backendImage) => backendImage.dispose();
+    }
+    return (BackendImage backendImage) {
+      backendImage.dispose();
+      source.release();
+    };
+  }
+
+  /// Notifies [ui.Image.onDispose] listeners when the last handle is disposed.
+  static void _notifyDisposed(EngineImage image) {
+    ui.Image.onDispose?.call(image);
   }
 
   // Initialize debug fields, such as capturing the stack trace when the image is created.
@@ -97,7 +113,6 @@ class EngineImage implements ui.Image, StackTraceDebugger {
     }
     _disposed = true;
     box.unref(this);
-    imageSource?.release();
   }
 
   @override
