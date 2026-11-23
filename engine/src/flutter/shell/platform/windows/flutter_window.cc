@@ -342,6 +342,10 @@ void FlutterWindow::OnResetImeComposing() {
   if (ime_end_composition_deferred_) {
     EndImeComposition();
   }
+  // The text input client is no longer composing, whether or not the IME goes
+  // on to end the composition.
+  ime_composing_ = false;
+  ime_composing_implicitly_ = false;
 }
 
 bool FlutterWindow::OnBitmapSurfaceCleared() {
