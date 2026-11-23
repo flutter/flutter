@@ -63,6 +63,84 @@ void main() {
       },
     );
 
+    test(
+      'FeatureFlag.fromJson and ConfigOption.fromJson throw FormatException on invalid fields',
+      () {
+        expect(
+          () => FeatureFlag.fromJson(const <String, Object?>{
+            FeatureFlag.helpKey: 'Help',
+            FeatureFlag.enabledByDefaultKey: false,
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => FeatureFlag.fromJson(const <String, Object?>{
+            FeatureFlag.nameKey: '',
+            FeatureFlag.helpKey: 'Help',
+            FeatureFlag.enabledByDefaultKey: false,
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => FeatureFlag.fromJson(const <String, Object?>{
+            FeatureFlag.nameKey: 'enable-flag',
+            FeatureFlag.helpKey: 'Help',
+            FeatureFlag.enabledByDefaultKey: 'true',
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => FeatureFlag.fromJson(const <String, Object?>{
+            FeatureFlag.nameKey: 'enable-flag',
+            FeatureFlag.helpKey: 'Help',
+            FeatureFlag.enabledByDefaultKey: false,
+            FeatureFlag.environmentOverrideKey: 42,
+          }),
+          throwsFormatException,
+        );
+        expect(() => FeatureFlag.listFromJson(const <Object?>['not-a-map']), throwsFormatException);
+        expect(
+          () => ConfigOption.fromJson(const <String, Object?>{ConfigOption.helpKey: 'Help'}),
+          throwsFormatException,
+        );
+        expect(
+          () => ConfigOption.fromJson(const <String, Object?>{
+            ConfigOption.nameKey: '',
+            ConfigOption.helpKey: 'Help',
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => ConfigOption.fromJson(const <String, Object?>{
+            ConfigOption.nameKey: 'sdk-path',
+            ConfigOption.helpKey: 'Help',
+            ConfigOption.valueKey: 42,
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => ConfigOption.fromJson(const <String, Object?>{
+            ConfigOption.nameKey: 'sdk-path',
+            ConfigOption.helpKey: 'Help',
+            ConfigOption.environmentOverrideKey: 42,
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => ConfigOption.fromJson(const <String, Object?>{
+            ConfigOption.nameKey: 'sdk-path',
+            ConfigOption.helpKey: 'Help',
+            ConfigOption.aliasesKey: <Object?>[123],
+          }),
+          throwsFormatException,
+        );
+        expect(
+          () => ConfigOption.listFromJson(const <Object?>['not-a-map']),
+          throwsFormatException,
+        );
+      },
+    );
+
     test('ConfigAction serializes and deserializes correctly', () {
       const action = ConfigAction(
         name: 'select-custom-signing-settings',
@@ -93,76 +171,7 @@ void main() {
       expect(list, <ConfigAction>[action]);
     });
 
-    test('FeatureFlag.fromJson, ConfigOption.fromJson, and ConfigAction.fromJson throw FormatException on missing or invalid fields', () {
-      expect(
-        () => FeatureFlag.fromJson(const <String, Object?>{
-          FeatureFlag.helpKey: 'Help',
-          FeatureFlag.enabledByDefaultKey: false,
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => FeatureFlag.fromJson(const <String, Object?>{
-          FeatureFlag.nameKey: '',
-          FeatureFlag.helpKey: 'Help',
-          FeatureFlag.enabledByDefaultKey: false,
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => FeatureFlag.fromJson(const <String, Object?>{
-          FeatureFlag.nameKey: 'enable-flag',
-          FeatureFlag.helpKey: 'Help',
-          FeatureFlag.enabledByDefaultKey: 'true',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => FeatureFlag.fromJson(const <String, Object?>{
-          FeatureFlag.nameKey: 'enable-flag',
-          FeatureFlag.helpKey: 'Help',
-          FeatureFlag.enabledByDefaultKey: false,
-          FeatureFlag.environmentOverrideKey: 42,
-        }),
-        throwsFormatException,
-      );
-      expect(() => FeatureFlag.listFromJson(const <Object?>['not-a-map']), throwsFormatException);
-      expect(
-        () => ConfigOption.fromJson(const <String, Object?>{ConfigOption.helpKey: 'Help'}),
-        throwsFormatException,
-      );
-      expect(
-        () => ConfigOption.fromJson(const <String, Object?>{
-          ConfigOption.nameKey: '',
-          ConfigOption.helpKey: 'Help',
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ConfigOption.fromJson(const <String, Object?>{
-          ConfigOption.nameKey: 'sdk-path',
-          ConfigOption.helpKey: 'Help',
-          ConfigOption.valueKey: 42,
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ConfigOption.fromJson(const <String, Object?>{
-          ConfigOption.nameKey: 'sdk-path',
-          ConfigOption.helpKey: 'Help',
-          ConfigOption.environmentOverrideKey: 42,
-        }),
-        throwsFormatException,
-      );
-      expect(
-        () => ConfigOption.fromJson(const <String, Object?>{
-          ConfigOption.nameKey: 'sdk-path',
-          ConfigOption.helpKey: 'Help',
-          ConfigOption.aliasesKey: <Object?>[123],
-        }),
-        throwsFormatException,
-      );
-      expect(() => ConfigOption.listFromJson(const <Object?>['not-a-map']), throwsFormatException);
+    test('ConfigAction.fromJson throws FormatException on invalid fields', () {
       expect(
         () => ConfigAction.fromJson(const <String, Object?>{ConfigAction.helpKey: 'Missing name'}),
         throwsFormatException,

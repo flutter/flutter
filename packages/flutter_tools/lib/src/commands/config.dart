@@ -212,6 +212,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         return false;
       }
 
+      List<String> claimAliases(String kind, String parentName, List<String> aliases) => <String>[
+        for (final String alias in aliases)
+          if (claimName(kind, alias, aliasFor: parentName)) alias,
+      ];
+
       for (final flag in featureFlags) {
         if (claimName('feature flag', flag.name)) {
           ensureSeparator();
@@ -221,10 +226,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
       for (final option in configOptions) {
         if (claimName('config option', option.name)) {
-          final availableAliases = <String>[
-            for (final String alias in option.aliases)
-              if (claimName('config option', alias, aliasFor: option.name)) alias,
-          ];
+          final List<String> availableAliases = claimAliases(
+            'config option',
+            option.name,
+            option.aliases,
+          );
           ensureSeparator();
           dynamicParser.addOption(
             option.name,
@@ -237,10 +243,11 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
       for (final action in configActions) {
         if (claimName('config action', action.name)) {
-          final availableAliases = <String>[
-            for (final String alias in action.aliases)
-              if (claimName('config action', alias, aliasFor: action.name)) alias,
-          ];
+          final List<String> availableAliases = claimAliases(
+            'config action',
+            action.name,
+            action.aliases,
+          );
           ensureSeparator();
           dynamicParser.addFlag(
             action.name,
@@ -433,16 +440,10 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     }
     for (final (:ConfigAction action, :ExtensionSettingsGroup group) in _acceptedExtensionActions) {
       if (argResults!.wasParsed(action.name)) {
-        final Map<String, String?> currentSettings = ExtensionConfiguration.collectActionSettings(
-          config,
-          configActions: <ConfigAction>[action],
-          configOptions: group.configOptions,
-          extensionName: group.extensionName,
-        );
         try {
           final Map<String, String?> updates = await ExtensionConfiguration.runConfigAction(
             action: action,
-            currentSettings: currentSettings,
+            config: config,
             group: group,
           );
           final aliasesByOptionName = <String, List<String>>{

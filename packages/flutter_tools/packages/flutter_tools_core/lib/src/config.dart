@@ -227,17 +227,8 @@ class ConfigAction {
   }
 
   /// Deserializes a list of [ConfigAction]s from a JSON list.
-  static List<ConfigAction> listFromJson(List<Object?> jsonList) {
-    return <ConfigAction>[
-      for (final Object? element in jsonList)
-        switch (element) {
-          final Map<String, Object?> map => ConfigAction.fromJson(map),
-          _ => throw FormatException(
-            'Invalid ConfigAction element: expected Map<String, Object?>, got ${element.runtimeType}.',
-          ),
-        },
-    ];
-  }
+  static List<ConfigAction> listFromJson(List<Object?> jsonList) =>
+      _parseObjectList(jsonList, ConfigAction.fromJson, 'ConfigAction');
 
   /// Map key for [aliases].
   static const String aliasesKey = 'aliases';

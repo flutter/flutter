@@ -265,20 +265,16 @@ class ExtensionConfiguration {
     return const <String, Map<String, Object?>>{};
   }
 
-  /// Collects the persisted setting values scoped to [configOptions] and
-  /// [configActions]'s [ConfigAction.settingsKeys] (excluding feature flags
-  /// unless explicitly listed in [ConfigAction.settingsKeys]), normalized to
-  /// `String?` for passing to [ConfigurationExtension.runConfigAction].
-  static Map<String, String?> collectActionSettings(
+  static Map<String, String?> _collectActionSettings(
     Config config, {
-    required List<ConfigAction> configActions,
+    required ConfigAction action,
     required List<ConfigOption> configOptions,
     required String extensionName,
   }) {
     final values = <String, String?>{};
-    final aliasesByOptionName = <String, List<String>>{};
+    final seenKeys = <String>{};
     for (final ConfigOption(:name, :aliases) in configOptions) {
-      aliasesByOptionName[name] = aliases;
+      seenKeys.add(name);
       final Object? rawValue = lookupSettingValue(
         config,
         name,
@@ -289,20 +285,13 @@ class ExtensionConfiguration {
         values[name] = rawValue.toString();
       }
     }
-    for (final ConfigAction(:settingsKeys) in configActions) {
-      for (final key in settingsKeys) {
-        if (values.containsKey(key)) {
-          continue;
-        }
-        final Object? rawValue = lookupSettingValue(
-          config,
-          key,
-          extensionName: extensionName,
-          aliases: aliasesByOptionName[key] ?? const <String>[],
-        );
-        if (rawValue != null) {
-          values[key] = rawValue.toString();
-        }
+    for (final String key in action.settingsKeys) {
+      if (!seenKeys.add(key)) {
+        continue;
+      }
+      final Object? rawValue = lookupSettingValue(config, key, extensionName: extensionName);
+      if (rawValue != null) {
+        values[key] = rawValue.toString();
       }
     }
     return values;
@@ -322,14 +311,18 @@ class ExtensionConfiguration {
     final List<FeatureFlag> flags = await extension.getFeatureFlags();
     final List<ConfigOption> options = await extension.getConfigurations();
     final List<ConfigAction> actions = await extension.getConfigActions();
-    final values = <String, Object?>{
-      ...collectActionSettings(
-        config,
-        configActions: actions,
-        configOptions: options,
-        extensionName: extensionName,
-      ),
-    };
+    final values = <String, Object?>{};
+    for (final ConfigAction(:settingsKeys) in actions) {
+      for (final key in settingsKeys) {
+        if (values.containsKey(key)) {
+          continue;
+        }
+        final value = lookupSettingValue(config, key, extensionName: extensionName)?.toString();
+        if (value != null) {
+          values[key] = value;
+        }
+      }
+    }
     for (final flag in flags) {
       values[flag.settingName] = resolveFeatureFlagValue(
         config,
@@ -352,14 +345,21 @@ class ExtensionConfiguration {
     return values;
   }
 
-  /// Executes [action] on [group]'s extension with [currentSettings] and
-  /// validates that every returned setting key belongs to the extension's
-  /// declared [ConfigOption] names or [ConfigAction.settingsKeys].
+  /// Executes [action] on [group]'s extension with its scoped persisted
+  /// settings from [config] and validates that every returned setting key
+  /// belongs to the extension's declared [ConfigOption] names or
+  /// [ConfigAction.settingsKeys].
   static Future<Map<String, String?>> runConfigAction({
     required ConfigAction action,
-    required Map<String, String?> currentSettings,
+    required Config config,
     required ExtensionSettingsGroup group,
   }) async {
+    final Map<String, String?> currentSettings = _collectActionSettings(
+      config,
+      action: action,
+      configOptions: group.configOptions,
+      extensionName: group.extensionName,
+    );
     final Map<String, String?> updates = await group.extension.runConfigAction(
       action.name,
       currentSettings: currentSettings,

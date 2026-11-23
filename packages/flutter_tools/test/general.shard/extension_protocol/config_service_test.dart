@@ -594,10 +594,16 @@ void main() {
   });
 
   group('ConfigAction Host & RPC Validation', () {
-    testWithoutContext('collectActionSettings scopes to ConfigOptions and settingsKeys and runConfigAction validates returned keys', () async {
+    testWithoutContext('runConfigAction scopes currentSettings to ConfigOptions and settingsKeys and validates returned keys', () async {
       final fs = MemoryFileSystem.test();
       final config = Config.test(directory: fs.directory('/'));
       ExtensionConfiguration.setSettingValue(config, 'enable-flag', true, extensionName: 'act');
+      ExtensionConfiguration.setSettingValue(
+        config,
+        'undeclared-key',
+        'ignored',
+        extensionName: 'act',
+      );
       ExtensionConfiguration.setSettingValue(config, 'sdk-dir', '/sdk', extensionName: 'act');
       ExtensionConfiguration.setSettingValue(config, 'cert-id', 'c1', extensionName: 'act');
 
@@ -614,14 +620,6 @@ void main() {
         settingsKeys: <String>['cert-id'],
       );
 
-      final Map<String, String?> collected = ExtensionConfiguration.collectActionSettings(
-        config,
-        configActions: const <ConfigAction>[validAction],
-        configOptions: const <ConfigOption>[option],
-        extensionName: 'act',
-      );
-      expect(collected, const <String, String?>{'sdk-dir': '/sdk', 'cert-id': 'c1'});
-
       final group = ExtensionSettingsGroup(
         configActions: const <ConfigAction>[validAction, invalidAction],
         configOptions: const <ConfigOption>[option],
@@ -635,17 +633,14 @@ void main() {
       expect(
         await ExtensionConfiguration.runConfigAction(
           action: validAction,
-          currentSettings: collected,
+          config: config,
           group: group,
         ),
         const <String, String?>{'sdk-dir': '/new-sdk', 'cert-id': 'c2'},
       );
+      expect(ext.lastCurrentSettings, const <String, String?>{'sdk-dir': '/sdk', 'cert-id': 'c1'});
       await expectLater(
-        ExtensionConfiguration.runConfigAction(
-          action: invalidAction,
-          currentSettings: collected,
-          group: group,
-        ),
+        ExtensionConfiguration.runConfigAction(action: invalidAction, config: config, group: group),
         throwsA(
           isA<ToolExtensionException>().having(
             (ToolExtensionException e) => e.message,
@@ -739,6 +734,8 @@ class _FakeEchoStdio extends FakeStdio {
 }
 
 final class _TinyActionExtension extends ConfigurationExtension {
+  Map<String, String?>? lastCurrentSettings;
+
   @override
   String get title => 'Tiny';
 
@@ -747,6 +744,7 @@ final class _TinyActionExtension extends ConfigurationExtension {
     String name, {
     required Map<String, String?> currentSettings,
   }) async {
+    lastCurrentSettings = currentSettings;
     return switch (name) {
       'update' => const <String, String?>{'sdk-dir': '/new-sdk', 'cert-id': 'c2'},
       'bad' => const <String, String?>{'rogue-key': 'bad'},
