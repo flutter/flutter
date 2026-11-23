@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.
@@ -13,6 +15,8 @@ typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> pa
 /// Callback signature for sending a JSON-RPC 2.0 notification from an extension
 /// service to the host tool.
 typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
+
+typedef _ExtensionRequestSender = Future<Object?> Function(String method, [Object? parameters]);
 
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
@@ -26,6 +30,13 @@ abstract base class ToolExtensionService {
   /// listening for RPC requests.
   @internal
   ExtensionNotificationSender? notificationSender;
+
+  /// Internal JSON-RPC request sender callback used by [sendHostRequest].
+  ///
+  /// Wired by `ToolExtensionEntryPoint.run` to `peer.sendRequest` before the
+  /// extension peer begins listening for RPC requests.
+  @internal
+  _ExtensionRequestSender? requestSender;
 
   /// The namespace string of the service (e.g. `'diagnostics'`).
   String get namespace;
@@ -48,6 +59,31 @@ abstract base class ToolExtensionService {
       );
     }
     sender(method, params);
+  }
+
+  /// Sends a JSON-RPC 2.0 request to the host tool over the bidirectional
+  /// `Peer` and returns the decoded result payload.
+  ///
+  /// Throws a [StateError] if called before this service has been attached to
+  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  @protected
+  @nonVirtual
+  Future<Object?> sendHostRequest(String method, Map<String, Object?> params) async {
+    final _ExtensionRequestSender? sender = requestSender;
+    if (sender == null) {
+      throw StateError(
+        'Cannot send request "$method": service "$namespace" is not attached to an active peer.',
+      );
+    }
+    try {
+      return await sender(method, params);
+    } on json_rpc.RpcException catch (error) {
+      if (tryParseToolExtensionRpcError(code: error.code, message: error.message, data: error.data)
+          case final ToolExtensionException translated) {
+        throw translated;
+      }
+      rethrow;
+    }
   }
 
   /// Cleans up resources held by the service when the extension is shut down.
