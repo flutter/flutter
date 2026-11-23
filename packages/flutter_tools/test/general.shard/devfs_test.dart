@@ -171,6 +171,162 @@ void main() {
     },
   );
 
+  DevFS createTestDevFS(FakeVmServiceHost host) {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    return DevFS(
+      host.vmService,
+      'test',
+      fileSystem.currentDirectory,
+      buildMode: .debug,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.empty(),
+      ),
+      httpClient: FakeHttpClient.any(),
+    );
+  }
+
+  testWithoutContext(
+    'DevFS create translates target VM filesystem RPCError into DevFSException',
+    () async {
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: FakeRPCError(
+              code: vm_service.RPCErrorKind.kInternalError.code,
+              data: const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception:PathAccessException: '
+                    r"Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' "
+                    '(OS Error: Access is denied, errno = 5)\n'
+                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)\n'
+                    '#1      _Directory.createTemp.<anonymous closure> (dart:io/directory_impl.dart:163:7)',
+              },
+            ),
+          ),
+        ],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+
+      await expectLater(
+        createTestDevFS(fakeVmServiceHost).create(),
+        throwsA(
+          isA<DevFSException>()
+              .having(
+                (DevFSException e) => e.message,
+                'message',
+                'Failed to create DevFS on device',
+              )
+              .having(
+                (DevFSException e) => e.error,
+                'error',
+                r"PathAccessException: Creation of temporary directory failed, path = 'C:\Users\user\AppData\Local\Temp' (OS Error: Access is denied, errno = 5)",
+              ),
+        ),
+      );
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    },
+  );
+
+  testWithoutContext(
+    'DevFS create translates target VM filesystem RPCError on retry after existing filesystem',
+    () async {
+      // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h.
+      const kFileSystemAlreadyExists = 1001;
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: <String, Object>{'fsName': 'test'},
+            error: FakeRPCError(code: kFileSystemAlreadyExists),
+          ),
+          const FakeVmServiceRequest(
+            method: '_deleteDevFS',
+            args: <String, Object>{'fsName': 'test'},
+          ),
+          FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: FakeRPCError(
+              code: vm_service.RPCErrorKind.kInternalError.code,
+              data: const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception: FileSystemException: '
+                    "Creation of temporary directory failed, path = '/tmp' "
+                    '(OS Error: No space left on device, errno = 28)\n'
+                    '#0      _checkForErrorResponse (dart:io/common.dart:58:9)',
+              },
+            ),
+          ),
+        ],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+
+      await expectLater(
+        createTestDevFS(fakeVmServiceHost).create(),
+        throwsA(
+          isA<DevFSException>()
+              .having(
+                (DevFSException e) => e.message,
+                'message',
+                'Failed to create DevFS on device',
+              )
+              .having(
+                (DevFSException e) => e.error,
+                'error',
+                "FileSystemException: Creation of temporary directory failed, path = '/tmp' (OS Error: No space left on device, errno = 28)",
+              ),
+        ),
+      );
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    },
+  );
+
+  testWithoutContext(
+    'DevFS create rethrows non-filesystem internal RPCError from target VM',
+    () async {
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            method: '_createDevFS',
+            args: const <String, Object>{'fsName': 'test'},
+            error: FakeRPCError(
+              code: vm_service.RPCErrorKind.kInternalError.code,
+              data: const <String, Object?>{
+                'details':
+                    '_createDevFS: Unexpected exception:Bad state: Unexpected VM state\n'
+                    '#0      DevFS._createDevFS (dart:_vmservice/devfs.dart:197:21)',
+              },
+            ),
+          ),
+        ],
+        httpAddress: Uri.parse('http://localhost'),
+      );
+
+      await expectLater(
+        createTestDevFS(fakeVmServiceHost).create(),
+        throwsA(isA<vm_service.RPCError>()),
+      );
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    },
+  );
+
+  testWithoutContext('DevFSException.toString omits null error and stackTrace', () {
+    expect(
+      DevFSException('Failed to create DevFS').toString(),
+      'DevFSException(Failed to create DevFS)',
+    );
+    expect(
+      DevFSException('Service disconnected', StateError('disconnected')).toString(),
+      'DevFSException(Service disconnected, Bad state: disconnected)',
+    );
+  });
+
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();

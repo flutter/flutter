@@ -53,8 +53,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
+    // Release the WebGL contexts held by the previous rasterizer.
+    _pictureToImageSurface.dispose();
+    rasterizer.dispose();
     rasterizer = _createRasterizer();
     _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
+    debugClear();
   }
 
   @override
@@ -78,7 +82,8 @@ class CanvasKitRenderer extends Renderer {
   }
 
   @override
-  ui.Paint createPaint() => CkPaint();
+  BackendPaint createPaint(EnginePaint paint, {required ui.TileMode defaultBlurTileMode}) =>
+      CkPaint(paint, defaultBlurTileMode: defaultBlurTileMode);
 
   @override
   BackendVertices createVertices(
@@ -96,8 +101,10 @@ class CanvasKitRenderer extends Renderer {
   );
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CkCanvas(recorder, cullRect);
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as CkPictureRecorder).beginRecording(rect);
+  }
 
   @override
   BackendGradient createGradientLinear(
@@ -184,7 +191,11 @@ class CanvasKitRenderer extends Renderer {
     required double sigmaX,
     required double sigmaY,
     required ui.TileMode tileMode,
+    ui.Rect? bounds,
   }) {
+    // TODO(harryterkelsen): CanvasKit cannot express bounded blur; falls back
+    // to unbounded like native Skia.
+    // https://github.com/flutter/flutter/issues/175899
     return CkBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
   }
 
