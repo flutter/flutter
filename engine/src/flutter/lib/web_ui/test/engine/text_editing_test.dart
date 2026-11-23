@@ -219,14 +219,43 @@ Future<void> testMain() async {
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
       final DomElement input = defaultTextEditingRoot.querySelector('input')!;
       expect(editingStrategy!.domElement, input);
-      if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs ||
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.android) {
-        expect(input.getAttribute('enterkeyhint'), 'send');
-      } else {
-        expect(input.getAttribute('enterkeyhint'), null);
-      }
+      expect(input.getAttribute('enterkeyhint'), 'send');
+
+      // Reconfiguring to an unmapped action removes the stale attribute.
+      editingStrategy!.applyConfiguration(
+        InputConfiguration(viewId: kImplicitViewId, inputAction: 'TextInputAction.none'),
+      );
+      expect(input.getAttribute('enterkeyhint'), isNull);
 
       editingStrategy!.disable();
+    });
+
+    test('Sets and clears inputmode regardless of detected operating system', () {
+      for (final os in <ui_web.OperatingSystem>[
+        ui_web.OperatingSystem.linux,
+        ui_web.OperatingSystem.windows,
+        ui_web.OperatingSystem.macOs,
+        ui_web.OperatingSystem.android,
+        ui_web.OperatingSystem.iOs,
+      ]) {
+        ui_web.browser.debugOperatingSystemOverride = os;
+        final config = InputConfiguration(
+          viewId: kImplicitViewId,
+          inputType: EngineInputType.emailAddress,
+          inputAction: 'TextInputAction.next',
+        );
+        editingStrategy!.enable(config, onChange: trackEditingState, onAction: trackInputAction);
+        final DomElement input = editingStrategy!.domElement!;
+        expect(input.getAttribute('inputmode'), 'email', reason: 'os=$os');
+        expect(input.getAttribute('enterkeyhint'), 'next', reason: 'os=$os');
+
+        editingStrategy!.applyConfiguration(InputConfiguration(viewId: kImplicitViewId));
+        expect(input.getAttribute('inputmode'), isNull, reason: 'os=$os');
+        expect(input.getAttribute('enterkeyhint'), 'done', reason: 'os=$os');
+
+        editingStrategy!.disable();
+      }
+      ui_web.browser.debugOperatingSystemOverride = null;
     });
 
     test('Knows to turn autocorrect off', () {
@@ -3278,6 +3307,36 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('sets correct input type on desktop Linux (e.g. Android Desktop site)', () {
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.linux;
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
+
+      textEditing = HybridTextEditing();
+
+      showKeyboard(inputType: 'text');
+      expect(getEditingInputMode(), isNull);
+
+      showKeyboard(inputType: 'number');
+      expect(getEditingInputMode(), 'numeric');
+
+      showKeyboard(inputType: 'number', decimal: true);
+      expect(getEditingInputMode(), 'decimal');
+
+      showKeyboard(inputType: 'phone');
+      expect(getEditingInputMode(), 'tel');
+
+      showKeyboard(inputType: 'emailAddress');
+      expect(getEditingInputMode(), 'email');
+
+      showKeyboard(inputType: 'url');
+      expect(getEditingInputMode(), 'url');
+
+      showKeyboard(inputType: 'none');
+      expect(getEditingInputMode(), 'none');
+
+      hideKeyboard();
+    });
+
     test('sets correct input type for Firefox on Android', () {
       ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
       ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.firefox;
@@ -3826,8 +3885,11 @@ Future<void> testMain() async {
       // Editing state is applied to the element.
       expect(passwordElement.value, 'Test');
       // Without semantics, password manager extensions fill these elements,
-      // and some skip elements hidden from assistive technology.
+      // and some skip elements hidden from assistive technology. Keep them out
+      // of the sequential focus order via tabIndex = -1 so keyboard/IME focus
+      // traversal cannot land on them.
       expect(passwordElement.getAttribute('aria-hidden'), isNull);
+      expect(passwordElement.tabIndex, -1);
       // When we only set the `value` without changing selection, the browser
       // automatically sets the selection to the end of the value.
       expect(passwordElement.selectionStart, 4);

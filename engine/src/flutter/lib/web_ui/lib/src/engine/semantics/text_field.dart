@@ -558,7 +558,13 @@ class SemanticTextField extends SemanticRole {
       // browsers keep selection APIs enabled while still providing email
       // keyboards and hints. This avoids InvalidStateError and enables
       // proper selection/cursor operations.
-      input.removeAttribute('inputmode');
+      // When this field is the active editor, [SemanticsTextEditingStrategy]
+      // owns its `inputmode` attribute via [applyConfiguration] (e.g. for
+      // `numeric`, `decimal`, or `none`, which `SemanticsInputType` does not
+      // distinguish). Do not strip it during a semantics update.
+      if (SemanticsTextEditingStrategy._instance?.activeTextField != this) {
+        input.removeAttribute('inputmode');
+      }
       input.removeAttribute('autocapitalize');
       if (!_isAutofillOwned) {
         input.autocomplete = 'off';

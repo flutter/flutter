@@ -146,6 +146,35 @@ void testMain() {
       expect(inputElement.autocomplete, 'email');
     });
 
+    test('active editing preserves strategy inputmode across semantics updates', () {
+      final config = InputConfiguration(
+        viewId: kImplicitViewId,
+        inputType: EngineInputType.number,
+        inputAction: 'TextInputAction.next',
+      );
+      strategy.enable(config, onChange: (_, _) {}, onAction: (_) {});
+
+      final SemanticsObject node = createTextFieldSemantics(value: '42', isFocused: true);
+      final inputElement =
+          (node.semanticRole! as SemanticTextField).editableElement as DomHTMLInputElement;
+
+      expect(inputElement.getAttribute('inputmode'), 'numeric');
+      expect(inputElement.getAttribute('enterkeyhint'), 'next');
+
+      // A subsequent semantics update must not wipe `inputmode` while focused.
+      createTextFieldSemantics(value: '423', isFocused: true);
+      expect(inputElement.getAttribute('inputmode'), 'numeric');
+
+      // Reconfiguring via `applyConfiguration` clears stale attributes.
+      strategy.applyConfiguration(
+        InputConfiguration(viewId: kImplicitViewId, inputAction: 'TextInputAction.none'),
+      );
+      expect(inputElement.getAttribute('inputmode'), isNull);
+      expect(inputElement.getAttribute('enterkeyhint'), isNull);
+
+      strategy.disable();
+    });
+
     test('renders a disabled text field', () {
       createTextFieldSemantics(isEnabled: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input /></sem>''');
