@@ -72,7 +72,12 @@ build --notrim_test_configuration
 # once per output base); with the cache a second cold build of the same
 # inputs -- after `bazel clean`, in another checkout, after a branch switch
 # and back -- is a hit for every action (measured: 78 s against 772 s for the
-# Phase 0 exit test). CI runs on RBE instead (build:rbe below).
+# Phase 0 exit test). That is a developer's cache. On a bot the home
+# directory outlives the task (a Mac bot's for years) and no server idles
+# there long enough to collect it, so an engine build's disk cache on a bot
+# is in its task's directory and gone with it (bazel_ci.py's
+# bot_cache_options), and a test shard, which is one command, has none
+# (dev/bots/bazel.dart's bazelBotCacheOptions).
 build --disk_cache=~/.cache/flutter_engine_bazel
 build --experimental_disk_cache_gc_max_size=20G
 
@@ -93,9 +98,12 @@ common --repository_cache=~/.cache/flutter_engine_bazel/repository_cache
 # and fetched_archive say which of them are the same wherever they are
 # fetched). A second checkout, a new output base, the build after `bazel
 # clean --expunge` then fetch none of those again. This Bazel leaves the
-# cache off unless it is named. Beside the repository cache, for the same
-# reason; Bazel refuses one inside the checkout. Its idle server drops what
-# no output base has used for two weeks (--repo_contents_cache_gc_max_age).
+# cache off unless it is named. Beside the repository cache, outside every
+# output root; Bazel refuses one inside the checkout. Its idle server drops
+# what no output base has used for two weeks
+# (--repo_contents_cache_gc_max_age). A bot turns it off, for the disk
+# cache's reason (above): its repositories are laid in the task's output
+# base.
 common --repo_contents_cache=~/.cache/flutter_engine_bazel/repo_contents_cache
 
 # The checkout's revision in the build (common:stamp). Unstamped, the
@@ -117,11 +125,13 @@ common:stamp --repo_env=FLUTTER_BAZEL_STAMP=1
 # through engine/src/flutter/build/bazel/bazel_ci.py; see ci.md there): plain
 # output for a log, a progress line every 30 s rather than five a second,
 # failures spelled out, every failing test's log in the output, and the
-# checkout's revision in the artifacts (common:stamp). A bot's
-# state lives under the checkout's .bazel_ci, where bazel_ci.py puts the
-# output root and, on the command line, the disk cache (bazel_ci.py's
-# build_options: the builders' builds alternate flags the exec configuration
-# shares, and the cache serves the repeats).
+# checkout's revision in the artifacts (common:stamp). The state of these
+# builds lives in a bot's task directory, and under the checkout's .bazel_ci
+# for a developer (bazel_ci.py's bazel_home): the output root and, on the
+# command line, the disk cache (bazel_ci.py's build_options: a developer
+# runs the builders' builds one after another, they alternate flags the exec
+# configuration shares, and the cache serves the repeats; a bot's serves the
+# steps of its one build).
 common:ci --color=no --curses=no --show_timestamps --show_progress_rate_limit=30 --announce_rc
 common:ci --config=stamp
 build:ci --verbose_failures

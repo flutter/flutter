@@ -508,8 +508,14 @@ Bazel's state goes where `bazel_ci.py` keeps it for this checkout, so that
 the two share a server and its caches: `.bazel_ci/` in the checkout for a
 developer (git ignores it), the task's temporary directory on a bot
 (`--max_idle_secs=300` there, and `--sandbox_base=/dev/shm` when the bot has
-16 GB of it, as bazel_ci does), `BAZEL_CI_HOME` overriding both; the root
-`.bazelrc`'s disk cache under `~/.cache` applies as for any build. bazelisk
+16 GB of it, as bazel_ci does), `BAZEL_CI_HOME` overriding both. The root
+`.bazelrc`'s disk cache under `~/.cache` applies for a developer as for any
+build. A shard on a bot has no disk cache and no repo contents cache
+(`bazelBotCacheOptions`): nothing collects either in a bot's home
+directory, and a shard is one build, which nothing reads a disk cache for
+again -- on a Mac, where the kernels are compiled on the bot, it would only
+take a second copy of each. (An engine build keeps a disk cache in its
+task's directory, for the test steps after its install: `ci.md`.) bazelisk
 is what `BAZELISK` names, else the one on `PATH`, else the engine checkout's
 `third_party/bazelisk` (DEPS' `download_bazelisk`), else a download of the
 release DEPS pins (1.30.0, the asset for the host's ABI, checked against its
@@ -526,9 +532,9 @@ reads its CIPD package or tarball, downloaded and checked against the lock's
 sha256, when
 the checkout has not got the directory (`fetched_archive`; cpython3 for
 the pub repositories and the package configurations, clang and the
-sysroots for the desktop shard; the unpacked package is kept in the repo
-contents cache, which like the repository cache lies under the home
-directory and outlasts a task's output root: `docs/dependencies.md`),
+sysroots for the desktop shard; the download is kept in the repository
+cache, which lies under the home directory and outlasts a task's output
+root, and is unpacked into each task's output base: `docs/dependencies.md`),
 which a bare worktree of this checkout verified end to end (the engine's
 artifacts.zip carries shader_lib's BUILD files, which must not make
 packages inside the cache repository; the tool shards see JAVA_HOME and

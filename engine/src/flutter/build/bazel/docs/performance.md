@@ -12,7 +12,8 @@ configuration included. It also covers a case the local action cache does
 not: setting a Starlark flag (`--//engine/src/flutter/impeller/tools:
 enable_vulkan=false`) and setting it back re-runs the affected actions
 (`fml`'s 674 compiles) without the disk cache, and takes 7 s with it. On
-CI a Linux bot does not cache but executes remotely, on Flutter's RBE
+CI a bot keeps no disk cache beyond its task (ci.md), and a Linux
+bot executes remotely, on Flutter's RBE
 instance (`build:rbe` in the root `.bazelrc`: the reclient instance of the
 GN builds, the builders' debian11 image, 200 jobs, Application Default
 Credentials -- a bot's emulated GCE metadata server, a developer's `gcloud

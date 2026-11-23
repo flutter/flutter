@@ -272,9 +272,12 @@ class BuildDirectoryTest(unittest.TestCase):
   def test_a_bots_state_is_in_the_tasks_temporary_directory(self):
     # The recipe clobbers the builder cache (the checkout) at the start of
     # every build: Bazel's state goes where swarming cleans up after the
-    # task, and there is no disk cache to keep.
+    # task, the disk cache with it -- the root .bazelrc's is in the home
+    # directory, which on a bot outlives the task and nothing bounds -- and
+    # the repo contents cache, which is in the home directory too, is off.
     root = os.path.join(self.tmp.name, 'checkout')
     out_dir = os.path.join(self.engine_src, 'out', 'ci', 'host_debug_unopt')
+    caches = ['--disk_cache=/b/s/w/ir/tmp/t/bazel_ci/disk_cache', '--repo_contents_cache=']
     with unittest.mock.patch.dict(
         os.environ,
         {'LUCI_CONTEXT': '/b/s/w/ir/tmp/t/luci_context.json', 'TMPDIR': '/b/s/w/ir/tmp/t'}):
@@ -289,11 +292,14 @@ class BuildDirectoryTest(unittest.TestCase):
         self.assertEqual(rbe, ['--config=rbe_mac', bazel_ci.WRAP_RBE_FLAG])
       else:
         self.assertEqual(rbe, [])
+      self.assertEqual(bazel_ci.bot_cache_options(self.engine_src), caches)
       self.assertEqual(
           description['build_options'],
-          bazel_ci.rbe_options(True) + bazel_ci.bot_sandbox_options()
+          bazel_ci.rbe_options(True) + bazel_ci.bot_sandbox_options() + caches
       )
-      self.assertIn(description['build_options'], [rbe, rbe + ['--sandbox_base=/dev/shm']])
+      self.assertIn(
+          description['build_options'], [rbe + caches, rbe + ['--sandbox_base=/dev/shm'] + caches]
+      )
       # RBE is what the build's flags say (rbe_flag), on Linux and on a Mac
       # each with its own config, never elsewhere. A bot's build whose flags
       # say no, or nothing, runs on the bot: nothing but the flags makes it
@@ -308,7 +314,9 @@ class BuildDirectoryTest(unittest.TestCase):
             self.engine_src, HOST_DEBUG_UNOPT, out_dir, '/tools/bazelisk', rbe=say
         )
         local = bazel_ci.read_build_directory(out_dir)['build_options']
-        self.assertEqual(local, bazel_ci.bot_sandbox_options())
+        # Off RBE the caches are the task's all the same: such a build takes
+        # nothing from the builds the bot ran before it.
+        self.assertEqual(local, bazel_ci.bot_sandbox_options() + caches)
         self.assertFalse([option for option in local if 'rbe' in option])
     self.assertEqual(
         description['startup_options'],

@@ -100,9 +100,10 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   landed two directories above it (`repo_root` of a root), and the tests
   rebuilt the build in a second output root -- outside the bot's cache,
   25 GB under a developer's home.
-- **Bazel's state** -- the output root, bazelisk's download -- lives, on a
-  bot, in the task's temporary directory (`TMPDIR`, which the recipe engine
-  sets for every step; swarming removes it with the task). Nothing under
+- **Bazel's state** -- the output root, bazelisk's download, the disk cache
+  -- lives, on a bot, in the task's temporary directory (`TMPDIR`, which the
+  recipe engine sets for every step; swarming removes it with the task).
+  Nothing under
   the checkout outlives a build: the recipe force-mounts the `builder`
   cache at the start of every build (`repo_util`: `mount_cache('builder',
   force=True)` clobbers it and downloads a fresh checkout from CAS), and
@@ -114,7 +115,34 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   dart_debug) reach the exec configuration, whose output directory does
   not spell them -- without the cache each switch rebuilds the host tools
   (10 minutes between `ci/host_debug` and a second `ci/host_debug_unopt`
-  on 10-31). `BAZEL_CI_HOME` overrides the location. `--config=ci` (the
+  on 10-31). `BAZEL_CI_HOME` overrides the location. A bot's disk cache is
+  the task's too (`--disk_cache=<TMPDIR>/bazel_ci/disk_cache`), and its repo
+  contents cache is off (test.dart's shards, one command each, run without
+  a disk cache at all: `docs/framework_tests.md`). The root `.bazelrc` keeps both in the home
+  directory, which is the place for a developer's: a Mac bot's home is
+  years old (the try pool on 11-22: 188 Macs, first seen 3.8 years ago at
+  the median, with 200 GB to 1.8 TB free; of 404 Linux bots 364 were VMs
+  less than a day old and 16 older than a month), Bazel collects either
+  cache only in a server that has idled for
+  five minutes, and a bot's exits after five idle minutes or with its task;
+  and a build the infrastructure takes off RBE, an official one above all,
+  would still read what earlier builds on its bot left there. Through the
+  presubmits of 11-21 a bot's disk cache was the home directory's (found at
+  492, below, and left as a bonus of the pool). What it gave in the
+  presubmit of 11-21: of 40 Linux installs one found anything in it; of 41
+  Mac installs 28 did, a median of 2,218 actions beside 3,046 from the
+  remote cache -- the objects an earlier build had downloaded for the Mac's
+  local links, which such a build now downloads again -- and at least two
+  of the 41 took their Dart wrap from it, a minute or two each. Within a
+  task the cache does what it did: a
+  test step looks thousands of compiles up in the caches again and finds
+  them there (5,060 in the test step of
+  `mac_ios_debug_unopt_sim_arm64_extension_safe` on 11-21, every one from
+  the disk cache; on a Linux bot, whose links run on the workers, they come
+  from the remote cache, 7,188 in `ci/host_debug_unopt`'s). By their number
+  they are the install's compiles, whose records of the toolchain's headers
+  do not hold from one analysis to the next. The repository cache alone stays in the
+  home directory: downloads by their sha256, checked when read. `--config=ci` (the
   root `.bazelrc`) keeps the output readable in a log and stamps the build
   (`--config=stamp`: the checkout's revision and content hash in
   shell/version, the frameworks' Info.plist and the Maven artifacts' names,
@@ -322,7 +350,7 @@ the test for real, and so does the command from `engine/src`.
   stays on the bot: the wrapped GN builds (the Dart runtime, the GL stack:
   `gn_build.bzl`'s `no-remote-exec`, their inputs being a synced tree --
   `ninja -j8` 442 s for the Dart runtime on an 8-core bot, 84–155 s on 32
-  cores, unless the bot's own disk cache has them, below) and the engine's
+  cores, before their compiles went to the workers, next) and the engine's
   tests (a display, a GPU, a device: run_tests.py's `TEST_OPTIONS`,
   `--strategy=TestRunner=sandboxed,local`). The wrapped builds run on the
   bot, but their compiles do not, since 510: the action runs reclient's
@@ -406,7 +434,11 @@ the test for real, and so does the command from `engine/src`.
   (gn_build.py printed its input trees' digests with its timing line, 501,
   which is how three drones of one presubmit showed the one directory
   that differed; 511 took the diagnostic out again, its cause found and its
-  cost 38 s a wrap). Sent to a worker as they are
+  cost 38 s a wrap). Since a bot's disk cache is its task's ("Bazel's
+  state", above) neither holds any more: a wrap runs in every build that
+  needs one, about a minute of ninja on an 8-core bot now that its compiles
+  are on the workers, and half a minute on a 32-core one (the presubmit of
+  11-21). Sent to a worker as they are
   (`--modify_execution_info=GnBuild=-no-remote-exec --remote_timeout=3600`
   on a `--config=rbe` build, plus a `git` stub on the action's PATH, the
   image having none and Dart's `tools/make_version.py` running git whatever
@@ -545,13 +577,19 @@ simpler, faster and better reported:
    outlives a build, which the recipe's clobber of the `builder` cache
    today denies to anything under the checkout. With it a bot's second
    build of a configuration is incremental; today every build is cold.
-   The repository cache (`--repository_cache`, the downloaded external
-   repositories) belongs in the same named cache: today every run of a
-   linux_unopt Java drone downloads the Android embedding's test
-   dependencies again -- 99 Maven files, 2.2 GB, the Robolectric
+   The caches belong in named caches too. The repository cache
+   (`--repository_cache`, the downloaded external repositories) is in a
+   bot's home directory today, which on nine Linux bots in ten is less than
+   a day old: a linux_unopt Java drone on a VM that has not run one
+   downloads the Android embedding's test
+   dependencies -- 99 Maven files, 2.2 GB, the Robolectric
    android-all jars most of it -- about 40 s of the step on a bot (and the
    reason 531 fetches Maven Central through Google's mirror: repo1.maven.org
-   rate-limits the bots' shared addresses).
+   rate-limits the bots' shared addresses). The disk cache and the repo
+   contents cache, which nothing bounds in a home directory, are the
+   task's and off ("Bazel's state", above): in a named cache a Mac would
+   keep the objects its links read and its wraps from build to build, and
+   every bot its unpacked repositories.
 4. **The rest of remote execution.** The execution itself is in, above: the
    RBE instance needed nothing outside this repository, since every bot
    already holds the credentials for reclient. What a recipe change adds:

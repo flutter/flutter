@@ -206,6 +206,32 @@ void main() {
     });
   });
 
+  group('bazelBotCacheOptions', () {
+    test("leaves a bot's shard without a disk cache and without the repo contents cache", () {
+      expect(bazelBotCacheOptions(onBot: true), <String>[
+        '--disk_cache=',
+        '--repo_contents_cache=',
+      ]);
+      // A query and `bazel info` build nothing and take no disk cache option;
+      // about the repositories they say what the test command says.
+      expect(bazelBotCacheOptions(onBot: true, build: false), <String>['--repo_contents_cache=']);
+    });
+
+    test("leaves a developer's caches where the root .bazelrc puts them", () {
+      expect(bazelBotCacheOptions(onBot: false), isEmpty);
+      expect(bazelBotCacheOptions(onBot: false, build: false), isEmpty);
+    });
+
+    test('is what bazelTestOptions gives a bot', () {
+      final List<String> options = bazelTestOptions();
+      expect(
+        options.where((String option) => option.startsWith('--disk_cache')),
+        isLuci ? <String>['--disk_cache='] : isEmpty,
+      );
+      expect(options.contains('--repo_contents_cache='), isLuci);
+    });
+  });
+
   group('golden images for Flutter Gold', () {
     test('goldTryjobChangelist is the pull request of a presubmit that can reach Gold', () {
       const tryjob = <String, String>{

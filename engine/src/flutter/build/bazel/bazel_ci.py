@@ -281,8 +281,35 @@ def startup_options(engine_src):
 DISK_CACHE_GC_MAX_SIZE = '40G'
 
 
+def bot_cache_options(engine_src):
+  """A bot's caches: the disk cache in the task's directory, no repo contents cache.
+
+  The root .bazelrc names both under the user's home directory, for a
+  developer's builds. A bot's home outlives its tasks -- a Mac bot's for
+  years -- and nothing there bounds either cache: Bazel collects them in a
+  server that has idled for five minutes, and a bot's server exits after
+  five idle minutes or with its task. The home directory's caches would
+  also make a build depend on the builds the bot ran before it, which a
+  build that the infrastructure takes off RBE (an official one) must not.
+  So a bot's disk cache is under bazel_home, the task's like the output
+  root, and gone with it. It is still a cache between the steps of one
+  build: a test step looks thousands of compiles up in the caches again
+  (5,060 in a Mac builder's test step on 11-21, every one found in the
+  disk cache; by their number the install's, whose records of the
+  toolchain's headers do not hold from one analysis to the next) and
+  finds them there rather than downloading or compiling them a second
+  time. The repo contents cache is off, so every repository is laid in the
+  task's output base as before there was one. The repository cache stays
+  in the home directory: downloads by their sha256, checked when read.
+  """
+  return [
+      '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
+      '--repo_contents_cache=',
+  ]
+
+
 def build_options(engine_src, rbe=None):
-  """The options of every build command: a developer's disk cache under .bazel_ci.
+  """The options of every build command: RBE when the flags say so, and the caches.
 
   A developer runs a builder file's builds one after another in one
   checkout, and the flags that tell them apart -- asan, unoptimized,
@@ -296,12 +323,12 @@ def build_options(engine_src, rbe=None):
   10 minutes). A disk cache under .bazel_ci -- the checkout's, persisting
   with it, bounded -- serves every such repeat; the root .bazelrc's
   home-directory cache is the developer's own builds'. A bot builds one
-  build per task from nothing and keeps nothing (bazel_home): no disk cache;
-  it runs on RBE instead when its flags say so (rbe_options; `rbe` is the
-  flags' say, rbe_flag).
+  build per task from nothing and keeps nothing of it (bazel_home): its
+  disk cache is the task's (bot_cache_options); it runs on RBE when its
+  flags say so (rbe_options; `rbe` is the flags' say, rbe_flag).
   """
   if on_bot():
-    return rbe_options(rbe) + bot_sandbox_options()
+    return rbe_options(rbe) + bot_sandbox_options() + bot_cache_options(engine_src)
   return rbe_options(rbe) + [
       '--disk_cache=' + os.path.join(bazel_home(engine_src), 'disk_cache'),
       '--experimental_disk_cache_gc_max_size=' + DISK_CACHE_GC_MAX_SIZE,
@@ -433,7 +460,7 @@ def described_command(description, command, arguments):
   `bazelisk <startup options> <command> --config=ci <build options>
   --config=<name> <options> <arguments>`. The description holds the
   options as tools/gn computed them from the checkout -- the output root
-  and the disk cache under its .bazel_ci -- so
+  and the disk cache under bazel_home -- so
   that the install and the tests run in one output root: computing them
   again from the description's repo_root is what put run_tests.py's
   output root two directories above the checkout (repo_root of a root).
@@ -555,8 +582,9 @@ def write_build_directory(engine_src, build, out_dir, bazelisk, rbe=None):
   os.makedirs(out_dir, exist_ok=True)
   # The install's edge has no inputs ninja could compare -- Bazel knows what
   # changed -- so its stamp alone would keep ninja from running it again
-  # ("no work to do") in a build directory that outlives one run: the bots'
-  # checkout persists between builds, as does a developer's. tools/gn runs
+  # ("no work to do") in a build directory that outlives one run, as a
+  # developer's does (a bot's does not: the recipe removes out/ before every
+  # build). tools/gn runs
   # before ninja in every build, and removing the stamp here makes each
   # one's ninja run the install once.
   stamp = os.path.join(out_dir, STAMP)

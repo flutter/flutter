@@ -133,7 +133,8 @@ String? goldTryjobChangelist([Map<String, String>? environment]) {
 /// `bazelisk test`'s options: the prebuilt engine; every target built and
 /// run whatever fails, failures' output only; the targets of another host
 /// skipped rather than refused (the tool's apple shard is declared on every
-/// host); the bots' .bazelrc config, remote execution and sandbox location.
+/// host); the bots' .bazelrc config, remote execution, sandbox location and
+/// caches.
 ///
 /// The golden comparisons (`//build_defs/dart:golden_comparisons`): a test
 /// compares its images with those Flutter Gold accepts. They are on off a
@@ -162,6 +163,7 @@ List<String> bazelTestOptions() {
     '--skip_incompatible_explicit_targets',
     ...bazelRbeOptions(),
     ..._botSandboxOptions(),
+    ...bazelBotCacheOptions(),
   ];
 }
 
@@ -244,6 +246,29 @@ List<String> _botSandboxOptions() {
     return const <String>[];
   }
   return const <String>['--sandbox_base=$base'];
+}
+
+/// What a bot's Bazel commands say about the two caches the root .bazelrc
+/// keeps in the home directory. A bot's home outlives its tasks -- a Mac
+/// bot's for years -- and nothing there bounds either cache: Bazel collects
+/// them in a server that has idled for five minutes, and a bot's exits after
+/// five idle minutes or with its task. So a shard on a bot has no disk cache
+/// ([build]: only a command that builds takes the option). A shard is one
+/// build, which nothing reads a cache for again; on a Mac, where the kernels
+/// are compiled on the bot, the cache would only take a second copy of each.
+/// (An engine build keeps one in its task's directory, for the test steps
+/// that follow its install: bazel_ci.py's bot_cache_options.) The repo
+/// contents cache is off, for the query and `bazel info` too: the query is a
+/// shard's first command and fetches repositories of its own. The repository
+/// cache stays in the home directory: downloads by their sha256, checked
+/// when read. Nothing off a bot ([onBot]), where the home directory's caches
+/// are the developer's.
+List<String> bazelBotCacheOptions({bool? onBot, bool build = true}) {
+  onBot ??= isLuci;
+  if (!onBot) {
+    return const <String>[];
+  }
+  return <String>[if (build) '--disk_cache=', '--repo_contents_cache='];
 }
 
 /// bazelisk: what BAZELISK names, else the one on PATH, else the engine
@@ -626,7 +651,13 @@ class BazelShard {
   Future<String?> _bazelInfo(String bazelisk, String key) async {
     final CommandResult result = await runCommand(
       bazelisk,
-      <String>[...bazelStartupOptions(), 'info', if (isLuci) '--config=ci', key],
+      <String>[
+        ...bazelStartupOptions(),
+        'info',
+        if (isLuci) '--config=ci',
+        ...bazelBotCacheOptions(build: false),
+        key,
+      ],
       workingDirectory: flutterRoot,
       environment: bazelEnvironment(),
       outputMode: OutputMode.capture,
@@ -646,6 +677,7 @@ class BazelShard {
         ...bazelStartupOptions(),
         'query',
         if (isLuci) '--config=ci',
+        ...bazelBotCacheOptions(build: false),
         '--output=label',
         'tests(set(${suites.join(' ')}))',
       ],

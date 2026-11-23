@@ -150,12 +150,16 @@ hooks write included (83,475 files; `.git` and Python's bytecode aside), and
 the Emscripten SDK's installation is a synced checkout's file for file. One
 tree is not, and is fetched for each output base as before: vulkan-deps,
 whose ten members, which are in the cache, are links into other
-repositories of its output base. On a bot
-nothing can be counted on to collect the cache: Bazel's collector runs in
-a server that has been idle for five minutes, and a bot's server exits
-after five idle minutes or with its task. What the bots fetch this way
-today is a few tools that roll rarely; before they fetch source trees this
-way, which roll daily, something has to bound the directory.
+repositories of its output base. A bot runs
+without this cache (`--repo_contents_cache=` on its command lines, from
+`bazel_ci.py` and `dev/bots/bazel.dart`): nothing there would collect it --
+Bazel's collector runs in a server that has been idle for five minutes, and
+a bot's server exits after five idle minutes or with its task -- and a Mac
+bot's home directory is years old. A bot's repositories are laid in its
+task's output base, the downloaded ones from the repository cache. Before
+bots fetch source trees in place of `gclient sync`, which roll daily, a
+cache that the infrastructure sizes and evicts has to hold them: a named
+cache, which takes a recipe change ([ci.md](../ci.md)).
 
 Measured on Linux x64. In a checkout that never ran `gclient sync`, a C++
 library (`@abseil-cpp//absl/strings`) built in a new output base in 22 s
