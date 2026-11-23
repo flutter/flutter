@@ -2581,7 +2581,7 @@ _flutter.loader.load();
     }),
   );
 
-  testWithoutContext('WebTemplatedFiles and WebReleaseBundle include recorded uses files only when recordUse is enabled', () {
+  test('WebTemplatedFiles and WebReleaseBundle include recorded uses files only when recordUse is enabled', () {
     final fileSystem = MemoryFileSystem.test();
     Environment createEnv({required bool isRecordUseEnabled}) {
       final env = Environment.test(
@@ -3716,7 +3716,7 @@ _flutter.loader.load({
     }),
   );
 
-  testWithoutContext('WebReleaseBundle propagates engineRevision to Dart2JSTarget and WebTemplatedFiles', () {
+  test('WebReleaseBundle propagates engineRevision to Dart2JSTarget and WebTemplatedFiles', () {
     final fileSystem = MemoryFileSystem.test();
     final testEnvironment = Environment.test(
       fileSystem.currentDirectory,

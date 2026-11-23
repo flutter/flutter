@@ -51,7 +51,7 @@ void main() {
   });
 
   group('GitHub template creator', () {
-    testWithoutContext('similar issues URL', () {
+    test('similar issues URL', () {
       expect(
         GitHubTemplateCreator.toolCrashSimilarIssuesURL('this is a 100% error'),
         'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error',
@@ -59,7 +59,7 @@ void main() {
     });
 
     group('sanitized error message', () {
-      testWithoutContext('ProcessException', () {
+      test('ProcessException', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             const ProcessException('cd', <String>['path/to/something']),
@@ -80,7 +80,7 @@ void main() {
         );
       });
 
-      testWithoutContext('FileSystemException', () {
+      test('FileSystemException', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             const FileSystemException('delete failed', 'path/to/something'),
@@ -99,7 +99,7 @@ void main() {
         );
       });
 
-      testWithoutContext('SocketException', () {
+      test('SocketException', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             SocketException(
@@ -113,7 +113,7 @@ void main() {
         );
       });
 
-      testWithoutContext('DevFSException', () {
+      test('DevFSException', () {
         final stackTrace = StackTrace.fromString('''
 #0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9)
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
@@ -125,21 +125,21 @@ void main() {
         );
       });
 
-      testWithoutContext('ArgumentError', () {
+      test('ArgumentError', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(ArgumentError('argument error message')),
           'ArgumentError: Invalid argument(s): argument error message',
         );
       });
 
-      testWithoutContext('Error', () {
+      test('Error', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(FakeError()),
           'FakeError: (#0      _File.open.<anonymous closure> (dart:io/file_impl.dart:366:9))',
         );
       });
 
-      testWithoutContext('String', () {
+      test('String', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b' // ignore: missing_whitespace_between_adjacent_strings
@@ -160,7 +160,7 @@ void main() {
         );
       });
 
-      testWithoutContext('Exception', () {
+      test('Exception', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
             Exception('May have non-tool-internal info'),
@@ -169,7 +169,7 @@ void main() {
         );
       });
 
-      testWithoutContext('custom Exception', () {
+      test('custom Exception', () {
         expect(GitHubTemplateCreator.sanitizedCrashException(FakeException()), 'FakeException');
       });
     });

@@ -113,7 +113,7 @@ void main() {
   }
 
   group('config', () {
-    testWithoutContext('machine flag displays values in json format', () async {
+    test('machine flag displays values in json format', () async {
       final ConfigCommand configCommand = createConfigCommand(
         androidStudio: fakeAndroidStudio,
         androidSdk: fakeAndroidSdk,
@@ -134,7 +134,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('machine flag outputs empty json when tools are not found', () async {
+    test('machine flag outputs empty json when tools are not found', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -144,7 +144,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('machine flag includes custom values in output', () async {
+    test('machine flag includes custom values in output', () async {
       final ConfigCommand configCommand = createConfigCommand(
         androidStudio: fakeAndroidStudio,
         androidSdk: fakeAndroidSdk,
@@ -169,7 +169,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('Can set build-dir', () async {
+    test('Can set build-dir', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -179,7 +179,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('throws error on absolute path to build-dir', () async {
+    test('throws error on absolute path to build-dir', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -187,7 +187,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('allows setting and removing feature flags', () async {
+    test('allows setting and removing feature flags', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -241,7 +241,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('displays notice when setting is changed', () async {
+    test('displays notice when setting is changed', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -253,7 +253,7 @@ void main() {
       );
     });
 
-    testWithoutContext('warns when Swift Package Manager is disabled', () async {
+    test('warns when Swift Package Manager is disabled', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -262,7 +262,7 @@ void main() {
       expect(testLogger.warningText, contains(kSwiftPackageManagerDisabledWarning));
     });
 
-    testWithoutContext('displays which config settings are available on stable', () async {
+    test('displays which config settings are available on stable', () async {
       fakeFlutterVersion.channel = 'stable';
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
@@ -284,7 +284,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('analytics flag enables/disables analytics', () async {
+    test('analytics flag enables/disables analytics', () async {
       final ConfigCommand configCommand = createConfigCommand();
       final CommandRunner<void> commandRunner = createRunner(configCommand);
 
@@ -297,7 +297,7 @@ void main() {
       expect(fakeAnalytics.telemetryEnabled, true);
     });
 
-    testWithoutContext(
+    test(
       'analytics flag warns and does not change telemetry when DASH__SUPPRESS_ANALYTICS=true',
       () async {
         final ConfigCommand configCommand = createConfigCommand(
@@ -322,7 +322,7 @@ void main() {
       },
     );
 
-    testWithoutContext('analytics reported with help usages', () async {
+    test('analytics reported with help usages', () async {
       final ConfigCommand configCommand = createConfigCommand();
       createRunner(configCommand);
 
@@ -339,7 +339,7 @@ void main() {
       );
     });
 
-    testWithoutContext('analytics usage mentions feature branch when on a user branch', () async {
+    test('analytics usage mentions feature branch when on a user branch', () async {
       fakeFlutterVersion.channel = kUserBranch;
       final ConfigCommand configCommand = createConfigCommand();
       createRunner(configCommand);
@@ -352,7 +352,7 @@ void main() {
       );
     });
 
-    testWithoutContext('resolves dependencies from injected ToolContext on write', () async {
+    test('resolves dependencies from injected ToolContext on write', () async {
       final fakeInjectedConfig = Config.test(name: 'injected', directory: fs.directory('/'));
       final fakeInjectedLogger = BufferLogger.test();
 
@@ -371,7 +371,7 @@ void main() {
       expect(testLogger.statusText, isNot(contains('Setting "enable-web" value to "true"')));
     });
 
-    testWithoutContext('resolves dependencies from injected ToolContext on read', () async {
+    test('resolves dependencies from injected ToolContext on read', () async {
       final fakeLocalConfig = FakeConfig();
       final fakeLocalLogger = BufferLogger.test();
       final ConfigCommand configCommand = createConfigCommand(
@@ -385,53 +385,50 @@ void main() {
       expect(fakeLocalConfig.keysQueried, isTrue);
     });
 
-    testWithoutContext(
-      'custom configuration options and feature flags are registered in parser',
-      () async {
-        final mockExtension = FakeConfigurationExtension(
-          title: 'My Extension',
-          featureFlags: <FeatureFlag>[
-            const FeatureFlag(
-              name: 'my-ext-feature',
-              help: 'My extension feature help',
-              enabledByDefault: true,
-            ),
-          ],
-          configOptions: <ConfigOption>[
-            const ConfigOption(
-              name: 'my-ext-option',
-              help: 'My extension option help',
-              value: 'default-value',
-            ),
-          ],
-        );
-        final fakeExtensionManager = FakeExtensionManager(
-          extensions: <ConfigurationExtension>[mockExtension],
-        );
+    test('custom configuration options and feature flags are registered in parser', () async {
+      final mockExtension = FakeConfigurationExtension(
+        title: 'My Extension',
+        featureFlags: <FeatureFlag>[
+          const FeatureFlag(
+            name: 'my-ext-feature',
+            help: 'My extension feature help',
+            enabledByDefault: true,
+          ),
+        ],
+        configOptions: <ConfigOption>[
+          const ConfigOption(
+            name: 'my-ext-option',
+            help: 'My extension option help',
+            value: 'default-value',
+          ),
+        ],
+      );
+      final fakeExtensionManager = FakeExtensionManager(
+        extensions: <ConfigurationExtension>[mockExtension],
+      );
 
-        final ConfigCommand configCommand = createConfigCommand(
-          extensionManager: fakeExtensionManager,
-          featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
-        );
-        createRunner(configCommand);
+      final ConfigCommand configCommand = createConfigCommand(
+        extensionManager: fakeExtensionManager,
+        featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+      );
+      createRunner(configCommand);
 
-        await configCommand.initializeDynamicOptions();
-        final ArgParser parser = configCommand.argParser;
+      await configCommand.initializeDynamicOptions();
+      final ArgParser parser = configCommand.argParser;
 
-        expect(parser.options, contains('my-ext-feature'));
-        expect(parser.options, contains('my-ext-option'));
+      expect(parser.options, contains('my-ext-feature'));
+      expect(parser.options, contains('my-ext-option'));
 
-        expect(parser.options['my-ext-feature']!.isFlag, true);
-        expect(parser.options['my-ext-feature']!.help, 'My extension feature help');
-        expect(parser.options['my-ext-feature']!.defaultsTo, true);
+      expect(parser.options['my-ext-feature']!.isFlag, true);
+      expect(parser.options['my-ext-feature']!.help, 'My extension feature help');
+      expect(parser.options['my-ext-feature']!.defaultsTo, true);
 
-        expect(parser.options['my-ext-option']!.isFlag, false);
-        expect(parser.options['my-ext-option']!.help, 'My extension option help');
-        expect(parser.options['my-ext-option']!.defaultsTo, 'default-value');
-      },
-    );
+      expect(parser.options['my-ext-option']!.isFlag, false);
+      expect(parser.options['my-ext-option']!.help, 'My extension option help');
+      expect(parser.options['my-ext-option']!.defaultsTo, 'default-value');
+    });
 
-    testWithoutContext(
+    test(
       'custom configuration options and feature flags can be set/cleared via runCommand',
       () async {
         final mockExtension = FakeConfigurationExtension(
@@ -471,33 +468,30 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'conflicting extension options and feature flags are skipped without throwing',
-      () async {
-        final mockExtension = FakeConfigurationExtension(
-          title: 'Conflicting Extension',
-          featureFlags: <FeatureFlag>[
-            const FeatureFlag(name: 'analytics', help: 'Conflicting analytics flag'),
-          ],
-          configOptions: <ConfigOption>[
-            const ConfigOption(name: 'android-sdk', help: 'Conflicting android-sdk option'),
-          ],
-        );
-        final fakeExtensionManager = FakeExtensionManager(
-          extensions: <ConfigurationExtension>[mockExtension],
-        );
+    test('conflicting extension options and feature flags are skipped without throwing', () async {
+      final mockExtension = FakeConfigurationExtension(
+        title: 'Conflicting Extension',
+        featureFlags: <FeatureFlag>[
+          const FeatureFlag(name: 'analytics', help: 'Conflicting analytics flag'),
+        ],
+        configOptions: <ConfigOption>[
+          const ConfigOption(name: 'android-sdk', help: 'Conflicting android-sdk option'),
+        ],
+      );
+      final fakeExtensionManager = FakeExtensionManager(
+        extensions: <ConfigurationExtension>[mockExtension],
+      );
 
-        final ConfigCommand configCommand = createConfigCommand(
-          extensionManager: fakeExtensionManager,
-          featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
-        );
-        await configCommand.initializeDynamicOptions();
-        final ArgParser parser = configCommand.argParser;
+      final ConfigCommand configCommand = createConfigCommand(
+        extensionManager: fakeExtensionManager,
+        featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+      );
+      await configCommand.initializeDynamicOptions();
+      final ArgParser parser = configCommand.argParser;
 
-        expect(parser.options.containsKey('analytics'), isTrue);
-        expect(parser.options.containsKey('android-sdk'), isTrue);
-      },
-    );
+      expect(parser.options.containsKey('analytics'), isTrue);
+      expect(parser.options.containsKey('android-sdk'), isTrue);
+    });
   });
 }
 

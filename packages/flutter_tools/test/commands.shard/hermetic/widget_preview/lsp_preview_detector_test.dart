@@ -107,7 +107,7 @@ void main() {
       await detector.mutex.runGuarded(() async {});
     }
 
-    testWithoutContext('reports preview reload timing when files are modified', () async {
+    test('reports preview reload timing when files are modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
@@ -125,21 +125,18 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 2);
     });
 
-    testWithoutContext(
-      'does not report preview reload timing when pubspec.yaml is modified',
-      () async {
-        expectNPreviewReloadTimingEvents(0);
-        expect(detectedPubspecChanges, isEmpty);
+    test('does not report preview reload timing when pubspec.yaml is modified', () async {
+      expectNPreviewReloadTimingEvents(0);
+      expect(detectedPubspecChanges, isEmpty);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kPubspecPath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kPubspecPath));
 
-        expect(detectedPubspecChanges, <String>[_kPubspecPath]);
-        expectNPreviewReloadTimingEvents(0);
-        expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
-      },
-    );
+      expect(detectedPubspecChanges, <String>[_kPubspecPath]);
+      expectNPreviewReloadTimingEvents(0);
+      expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
+    });
 
-    testWithoutContext('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
+    test('notifies onNonDartFileChangeDetected and does not report preview reload timing when non-Dart file is modified', () async {
       expectNPreviewReloadTimingEvents(0);
       expect(detectedChanges, isEmpty);
       expect(detectedPubspecChanges, isEmpty);
@@ -154,7 +151,7 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
-    testWithoutContext('does not report preview reload timing for ignored directories', () async {
+    test('does not report preview reload timing for ignored directories', () async {
       expectNPreviewReloadTimingEvents(0);
 
       await emitEvent(WatchEvent(ChangeType.MODIFY, _kIgnoredDartToolPath));
@@ -166,26 +163,23 @@ void main() {
       expect(fakeAnalysisServer.waitForAnalysisCallCount, 0);
     });
 
-    testWithoutContext(
-      'resets reload timing stopwatch on DTD exception and does not report timing',
-      () async {
-        fakeDtd.shouldThrow = true;
-        expectNPreviewReloadTimingEvents(0);
+    test('resets reload timing stopwatch on DTD exception and does not report timing', () async {
+      fakeDtd.shouldThrow = true;
+      expectNPreviewReloadTimingEvents(0);
 
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
 
-        expect(detectedChanges, isEmpty);
-        expectNPreviewReloadTimingEvents(0);
+      expect(detectedChanges, isEmpty);
+      expectNPreviewReloadTimingEvents(0);
 
-        fakeDtd.shouldThrow = false;
-        await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
+      fakeDtd.shouldThrow = false;
+      await emitEvent(WatchEvent(ChangeType.MODIFY, _kDartFilePath));
 
-        expect(detectedChanges, hasLength(1));
-        expectNPreviewReloadTimingEvents(1);
-      },
-    );
+      expect(detectedChanges, hasLength(1));
+      expectNPreviewReloadTimingEvents(1);
+    });
 
-    testWithoutContext(
+    test(
       'resets reload timing stopwatch on analysis server exception and does not report timing',
       () async {
         fakeAnalysisServer.shouldThrow = true;
@@ -204,7 +198,7 @@ void main() {
       },
     );
 
-    testWithoutContext('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
+    test('does not launch analysis server and waits for analysis over DTD when connected to an existing DTD instance', () async {
       await detector.dispose();
 
       fakeDtd = FakeWidgetPreviewDtdServices()..dtdUri = Uri.parse('ws://127.0.0.1:12345');

@@ -41,14 +41,14 @@ Future<FeatureFlags> _bootstrapFeatureFlags(FileSystem fs) async {
 
 void main() {
   group('Features', () {
-    testWithoutContext('setting has safe defaults', () {
+    test('setting has safe defaults', () {
       const featureSetting = FeatureChannelSetting();
 
       expect(featureSetting.available, false);
       expect(featureSetting.enabledByDefault, false);
     });
 
-    testWithoutContext('has safe defaults', () {
+    test('has safe defaults', () {
       const feature = Feature(name: 'example');
 
       expect(feature.name, 'example');
@@ -57,7 +57,7 @@ void main() {
       expect(feature.warningMessageOnDisable, null);
     });
 
-    testWithoutContext('retrieves the correct setting for each branch', () {
+    test('retrieves the correct setting for each branch', () {
       const masterSetting = FeatureChannelSetting(available: true);
       const betaSetting = FeatureChannelSetting(available: true);
       const stableSetting = FeatureChannelSetting(available: true);
@@ -74,7 +74,7 @@ void main() {
       expect(feature.getSettingForChannel('unknown'), masterSetting);
     });
 
-    testWithoutContext('reads from configuration if available', () {
+    test('reads from configuration if available', () {
       const exampleFeature = Feature(
         name: 'example',
         master: FeatureChannelSetting(available: true),
@@ -88,7 +88,7 @@ void main() {
       expect(flags.isEnabled(exampleFeature), true);
     });
 
-    testWithoutContext('returns false if not available', () {
+    test('returns false if not available', () {
       const exampleFeature = Feature(name: 'example');
 
       final flags = FlutterFeatureFlags(
@@ -111,7 +111,7 @@ void main() {
       return fs;
     }
 
-    testWithoutContext('FeatureFlags is influenced by the CWD', () async {
+    test('FeatureFlags is influenced by the CWD', () async {
       final FeatureFlags resolvedFlags = await _bootstrapFeatureFlags(createFsWithPubspec());
 
       // Try a few flags that don't actually exist, but we want to check configuration more e2e-y.
@@ -158,7 +158,7 @@ void main() {
       return fs;
     }
 
-    testWithoutContext(
+    test(
       'FeatureFlags finds pubspec.yaml in parent directory when CWD is a subdirectory',
       () async {
         // This test verifies that findProjectRoot is used to locate pubspec.yaml
@@ -189,7 +189,7 @@ void main() {
       },
     );
 
-    testWithoutContext('Test feature flags match feature flags', () {
+    test('Test feature flags match feature flags', () {
       final FeatureFlags flags = _createDefaultFeatureFlags();
       final FeatureFlags testFeatureFlags = TestFeatureFlags();
 
@@ -205,7 +205,7 @@ void main() {
       expect(featureNames, unorderedEquals(testFeatureNames));
     });
 
-    testWithoutContext('Feature runtime IDs are valid', () {
+    test('Feature runtime IDs are valid', () {
       // Verify features' runtime IDs can be encoded into a Dart define.
       final runtimeIdPattern = RegExp(r'^[a-zA-Z_]+$');
       assert(runtimeIdPattern.hasMatch('multi_window'));
@@ -224,7 +224,7 @@ void main() {
   });
 
   group('Linux Destkop', () {
-    testWithoutContext('is fully enabled', () {
+    test('is fully enabled', () {
       expect(flutterLinuxDesktopFeature, _isFullyEnabled);
       expect(_createDefaultFeatureFlags().allEnabledFeatures, contains(flutterLinuxDesktopFeature));
     });
@@ -241,7 +241,7 @@ void main() {
   });
 
   group('MacOS Desktop', () {
-    testWithoutContext('is fully enabled', () {
+    test('is fully enabled', () {
       expect(flutterMacOSDesktopFeature, _isFullyEnabled);
       expect(_createDefaultFeatureFlags().allEnabledFeatures, contains(flutterMacOSDesktopFeature));
     });
@@ -258,7 +258,7 @@ void main() {
   });
 
   group('Windows Desktop', () {
-    testWithoutContext('is fully enabled', () {
+    test('is fully enabled', () {
       expect(flutterWindowsDesktopFeature, _isFullyEnabled);
       expect(
         _createDefaultFeatureFlags().allEnabledFeatures,
@@ -278,7 +278,7 @@ void main() {
   });
 
   group('Web', () {
-    testWithoutContext('is fully enabled', () {
+    test('is fully enabled', () {
       expect(flutterWebFeature, _isFullyEnabled);
       expect(_createDefaultFeatureFlags().allEnabledFeatures, contains(flutterWebFeature));
     });
@@ -295,7 +295,7 @@ void main() {
   });
 
   group('Android', () {
-    testWithoutContext('is fully enabled', () {
+    test('is fully enabled', () {
       expect(flutterAndroidFeature, _isFullyEnabled);
       expect(_createDefaultFeatureFlags().allEnabledFeatures, contains(flutterAndroidFeature));
     });
@@ -312,7 +312,7 @@ void main() {
   });
 
   group('iOS', () {
-    testWithoutContext('is fully enabled', () {
+    test('is fully enabled', () {
       expect(flutterIOSFeature, _isFullyEnabled);
       expect(_createDefaultFeatureFlags().allEnabledFeatures, contains(flutterIOSFeature));
     });
@@ -375,7 +375,7 @@ void main() {
   });
 
   group('CLI Animations', () {
-    testWithoutContext('is always enabled', () {
+    test('is always enabled', () {
       expect(cliAnimation, _isFullyEnabled);
       expect(_createDefaultFeatureFlags().allEnabledFeatures, contains(cliAnimation));
     });

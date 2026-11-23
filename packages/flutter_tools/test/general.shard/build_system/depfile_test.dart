@@ -18,7 +18,7 @@ void main() {
     depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
   });
 
-  testWithoutContext('Can parse depfile from file', () {
+  test('Can parse depfile from file', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync('''
 a.txt: b.txt
@@ -29,7 +29,7 @@ a.txt: b.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
-  testWithoutContext('Can parse depfile with relative paths and baseDirectory', () {
+  test('Can parse depfile with relative paths and baseDirectory', () {
     final Directory baseDirectory = fileSystem.directory('project')..createSync();
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync('''
@@ -41,7 +41,7 @@ relative/a.txt: relative/b.txt
     expect(depfile.outputs.single.path, fileSystem.path.join('project', 'relative', 'a.txt'));
   });
 
-  testWithoutContext('Can parse depfile with multiple inputs', () {
+  test('Can parse depfile with multiple inputs', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync('''
 a.txt: b.txt c.txt d.txt
@@ -52,7 +52,7 @@ a.txt: b.txt c.txt d.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
-  testWithoutContext('Can parse depfile with multiple outputs', () {
+  test('Can parse depfile with multiple outputs', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync('''
 a.txt c.txt d.txt: b.txt
@@ -63,7 +63,7 @@ a.txt c.txt d.txt: b.txt
     expect(depfile.outputs.map((File file) => file.path), <String>['a.txt', 'c.txt', 'd.txt']);
   });
 
-  testWithoutContext('Can parse depfile with windows file paths', () {
+  test('Can parse depfile with windows file paths', () {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
     final File depfileSource = fileSystem.file('example.d')
@@ -82,7 +82,7 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     ]);
   });
 
-  testWithoutContext('Can parse depfile with windows UNC file paths', () {
+  test('Can parse depfile with windows UNC file paths', () {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
     final File depfileSource = fileSystem.file('example.d')
@@ -95,7 +95,7 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     expect(depfile.outputs.map((File e) => e.path).toList(), <String>[r'\\server\share\a1.txt']);
   });
 
-  testWithoutContext('Can parse depfile with windows long UNC file paths', () {
+  test('Can parse depfile with windows long UNC file paths', () {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
     final File depfileSource = fileSystem.file('example.d')
@@ -112,23 +112,20 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     ]);
   });
 
-  testWithoutContext(
-    'Can parse depfile with windows root-relative UNC file paths (issue 43594)',
-    () {
-      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
-      final File depfileSource = fileSystem.file('example.d')
-        ..writeAsStringSync(r'''
+  test('Can parse depfile with windows root-relative UNC file paths (issue 43594)', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+    final File depfileSource = fileSystem.file('example.d')
+      ..writeAsStringSync(r'''
 \\UNC\\server\\share\\a1.txt: \\UNC\\server\\share\\b1.txt
 ''');
-      final Depfile depfile = depfileService.parse(depfileSource);
+    final Depfile depfile = depfileService.parse(depfileSource);
 
-      expect(depfile.inputs.map((File e) => e.path).toList(), <String>[r'\\server\share\b1.txt']);
-      expect(depfile.outputs.map((File e) => e.path).toList(), <String>[r'\\server\share\a1.txt']);
-    },
-  );
+    expect(depfile.inputs.map((File e) => e.path).toList(), <String>[r'\\server\share\b1.txt']);
+    expect(depfile.outputs.map((File e) => e.path).toList(), <String>[r'\\server\share\a1.txt']);
+  });
 
-  testWithoutContext('Can write depfile with windows UNC file paths', () {
+  test('Can write depfile with windows UNC file paths', () {
     final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
     final File inputFile = fileSystem.file(r'\\server\share\b1.txt');
@@ -141,26 +138,23 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     expect(output, contains(r' \\\\server\\share\\a1.txt:  \\\\server\\share\\b1.txt'));
   });
 
-  testWithoutContext(
-    'Can escape depfile with windows file paths and spaces in directory names',
-    () {
-      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
-      final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
-        ..createSync(recursive: true);
-      final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
-        ..createSync();
-      final depfile = Depfile(<File>[inputFile], <File>[outputFile]);
-      final File outputDepfile = fileSystem.file('depfile');
-      depfileService.writeToFile(depfile, outputDepfile);
+  test('Can escape depfile with windows file paths and spaces in directory names', () {
+    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    final depfileService = DepfileService(logger: BufferLogger.test(), fileSystem: fileSystem);
+    final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
+      ..createSync(recursive: true);
+    final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
+      ..createSync();
+    final depfile = Depfile(<File>[inputFile], <File>[outputFile]);
+    final File outputDepfile = fileSystem.file('depfile');
+    depfileService.writeToFile(depfile, outputDepfile);
 
-      final String output = outputDepfile.readAsStringSync();
-      expect(output, contains(r'C:\\Hello\ Flutter\\a.txt'));
-      expect(output, contains(r'C:\\Hello\ Flutter\\b.txt'));
-    },
-  );
+    final String output = outputDepfile.readAsStringSync();
+    expect(output, contains(r'C:\\Hello\ Flutter\\a.txt'));
+    expect(output, contains(r'C:\\Hello\ Flutter\\b.txt'));
+  });
 
-  testWithoutContext('Can escape depfile with spaces in directory names', () {
+  test('Can escape depfile with spaces in directory names', () {
     final File inputFile = fileSystem.directory(r'Hello Flutter').childFile('a.txt').absolute
       ..createSync(recursive: true);
     final File outputFile = fileSystem.directory(r'Hello Flutter').childFile('b.txt').absolute
@@ -174,7 +168,7 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     expect(output, contains(r'/Hello\ Flutter/b.txt'));
   });
 
-  testWithoutContext('Can produce normalized paths', () {
+  test('Can produce normalized paths', () {
     final pairs = <(FileSystemStyle style, String input, String output, List<String> expects)>[
       (
         FileSystemStyle.posix,
@@ -207,7 +201,7 @@ C:\\a1.txt C:\\a2/a3.txt: C:\\b1.txt C:\\b2/b3.txt
     }
   });
 
-  testWithoutContext('Resilient to weird whitespace', () {
+  test('Resilient to weird whitespace', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync(r'''
 a.txt
@@ -220,7 +214,7 @@ a.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
-  testWithoutContext('Resilient to duplicate files', () {
+  test('Resilient to duplicate files', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync(r'''
 a.txt: b.txt b.txt
@@ -231,7 +225,7 @@ a.txt: b.txt b.txt
     expect(depfile.outputs.single.path, 'a.txt');
   });
 
-  testWithoutContext('Resilient to malformed file, missing :', () {
+  test('Resilient to malformed file, missing :', () {
     final File depfileSource = fileSystem.file('example.d')
       ..writeAsStringSync(r'''
 a.text b.txt
@@ -242,7 +236,7 @@ a.text b.txt
     expect(depfile.outputs, isEmpty);
   });
 
-  testWithoutContext('Can parse dart2js output format', () {
+  test('Can parse dart2js output format', () {
     final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')
       ..writeAsStringSync(r'''
 file:///Users/foo/collection.dart
@@ -263,7 +257,7 @@ file:///Users/foo/canonicalized_map.dart
     expect(depfile.outputs.single.path, 'foo.dart.js');
   });
 
-  testWithoutContext('Can parse handle invalid uri', () {
+  test('Can parse handle invalid uri', () {
     final File dart2jsDependencyFile = fileSystem.file('main.dart.js.deps')
       ..writeAsStringSync('''
 file:///Users/foo/collection.dart

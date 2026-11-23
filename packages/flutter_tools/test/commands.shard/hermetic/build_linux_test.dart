@@ -707,14 +707,14 @@ set(BINARY_NAME "fizz_bar")
     expect(() => runner.run(<String>['build', 'linux', '--no-pub']), throwsToolExit());
   });
 
-  testWithoutContext('hidden when not enabled on Linux host', () {
+  test('hidden when not enabled on Linux host', () {
     expect(
       createBuildLinuxCommand(featureFlags: TestFeatureFlags(), platform: notLinuxPlatform).hidden,
       true,
     );
   });
 
-  testWithoutContext('Not hidden when enabled and on Linux host', () {
+  test('Not hidden when enabled and on Linux host', () {
     expect(createBuildLinuxCommand().hidden, false);
   });
 

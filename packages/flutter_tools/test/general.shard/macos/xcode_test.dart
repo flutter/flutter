@@ -53,7 +53,7 @@ void main() {
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
       });
 
-      testWithoutContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
+      test('isInstalledAndMeetsVersionCheck is false when not macOS', () {
         final xcode = Xcode.test(
           toolContext: FakeToolContext.macosHost(
             platform: FakePlatform(operatingSystem: 'windows'),
@@ -65,7 +65,7 @@ void main() {
         expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
       });
 
-      testWithoutContext('isSimctlInstalled is true when simctl list succeeds', () {
+      test('isSimctlInstalled is true when simctl list succeeds', () {
         fakeProcessManager.addCommand(
           const FakeCommand(command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted']),
         );
@@ -78,7 +78,7 @@ void main() {
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
 
-      testWithoutContext('isSimctlInstalled is false when simctl list fails', () {
+      test('isSimctlInstalled is false when simctl list fails', () {
         fakeProcessManager.addCommand(
           const FakeCommand(
             command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
@@ -100,33 +100,30 @@ void main() {
         expect(logger.errorText, isEmpty);
       });
 
-      testWithoutContext(
-        'isSimctlInstalled is false when simctl list throws process exception',
-        () {
-          fakeProcessManager.addCommand(
-            const FakeCommand(
-              command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
-              exception: ProcessException('xcrun', <String>['simctl']),
-            ),
-          );
-          final xcode = Xcode.test(
-            toolContext: FakeToolContext.macosHost(
-              logger: logger,
-              processManager: fakeProcessManager,
-            ),
-            xcodeProjectInterpreter: xcodeProjectInterpreter,
-          );
+      test('isSimctlInstalled is false when simctl list throws process exception', () {
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
+            exception: ProcessException('xcrun', <String>['simctl']),
+          ),
+        );
+        final xcode = Xcode.test(
+          toolContext: FakeToolContext.macosHost(
+            logger: logger,
+            processManager: fakeProcessManager,
+          ),
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
 
-          expect(xcode.isSimctlInstalled, isFalse);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-          expect(logger.statusText, isEmpty);
-          expect(logger.errorText, isEmpty);
-          expect(logger.traceText, contains('ProcessException'));
-        },
-      );
+        expect(xcode.isSimctlInstalled, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.statusText, isEmpty);
+        expect(logger.errorText, isEmpty);
+        expect(logger.traceText, contains('ProcessException'));
+      });
 
       group('isDevicectlInstalled', () {
-        testWithoutContext('is true when Xcode is 15+ and devicectl succeeds', () {
+        test('is true when Xcode is 15+ and devicectl succeeds', () {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version']),
           );
@@ -141,7 +138,7 @@ void main() {
           expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
-        testWithoutContext('is false when devicectl fails', () {
+        test('is false when devicectl fails', () {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version'], exitCode: 1),
           );
@@ -161,7 +158,7 @@ void main() {
           expect(logger.errorText, isEmpty);
         });
 
-        testWithoutContext('is false when devicectl throws process exception', () {
+        test('is false when devicectl throws process exception', () {
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['xcrun', 'devicectl', '--version'],
@@ -194,7 +191,7 @@ void main() {
           userMessages = UserMessages();
         });
 
-        testWithoutContext('parses correctly', () {
+        test('parses correctly', () {
           final xcode = Xcode.test(
             toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
@@ -211,7 +208,7 @@ void main() {
           expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
-        testWithoutContext('throws error if not found', () {
+        test('throws error if not found', () {
           final xcode = Xcode.test(
             toolContext: FakeToolContext.macosHost(processManager: FakeProcessManager.any()),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
@@ -220,7 +217,7 @@ void main() {
           expect(() => xcode.xcodeAppPath, throwsToolExit(message: userMessages.xcodeMissing));
         });
 
-        testWithoutContext('throws error with unexpected outcome', () {
+        test('throws error with unexpected outcome', () {
           final xcode = Xcode.test(
             toolContext: FakeToolContext.macosHost(processManager: fakeProcessManager),
             xcodeProjectInterpreter: xcodeProjectInterpreter,
@@ -247,7 +244,7 @@ void main() {
           fileSystem = MemoryFileSystem.test();
         });
 
-        testWithoutContext('returns path when file is found', () {
+        test('returns path when file is found', () {
           final xcode = Xcode.test(
             toolContext: FakeToolContext.macosHost(
               flutterRoot: flutterRoot,
@@ -267,7 +264,7 @@ void main() {
           );
         });
 
-        testWithoutContext('throws error when not found', () {
+        test('throws error when not found', () {
           final xcode = Xcode.test(
             toolContext: FakeToolContext.macosHost(
               flutterRoot: flutterRoot,
@@ -297,7 +294,7 @@ void main() {
           );
         });
 
-        testWithoutContext('xcodeSelectPath returns path when xcode-select is installed', () {
+        test('xcodeSelectPath returns path when xcode-select is installed', () {
           const xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
           fakeProcessManager.addCommand(
             const FakeCommand(
@@ -310,7 +307,7 @@ void main() {
           expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
-        testWithoutContext('xcodeSelectPath returns null when xcode-select is not installed', () {
+        test('xcodeSelectPath returns null when xcode-select is not installed', () {
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['/usr/bin/xcode-select', '--print-path'],
@@ -334,7 +331,7 @@ void main() {
           expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
-        testWithoutContext('version checks fail when version is less than minimum', () {
+        test('version checks fail when version is less than minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(14, null, null);
 
@@ -342,46 +339,43 @@ void main() {
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
-        testWithoutContext('version checks fail when xcodebuild tools are not installed', () {
+        test('version checks fail when xcodebuild tools are not installed', () {
           xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isRequiredVersionSatisfactory, isFalse);
           expect(xcode.isRecommendedVersionSatisfactory, isFalse);
         });
 
-        testWithoutContext(
-          'version checks pass when version meets minimum but not recommended',
-          () {
-            xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(15, 4, null);
+        test('version checks pass when version meets minimum but not recommended', () {
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(15, 4, null);
 
-            expect(xcode.isRequiredVersionSatisfactory, isTrue);
-            expect(xcode.isRecommendedVersionSatisfactory, isFalse);
-          },
-        );
+          expect(xcode.isRequiredVersionSatisfactory, isTrue);
+          expect(xcode.isRecommendedVersionSatisfactory, isFalse);
+        });
 
-        testWithoutContext('version checks pass when major version exceeds minimum', () {
+        test('version checks pass when major version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(26, 0, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('version checks pass when minor version exceeds minimum', () {
+        test('version checks pass when minor version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 4, 0);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('version checks pass when patch version exceeds minimum', () {
+        test('version checks pass when patch version exceeds minimum', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 2);
 
           expect(xcode.isRequiredVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('version checks pass when major version exceeds recommendation', () {
+        test('version checks pass when major version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(26, 0, 0);
 
@@ -389,7 +383,7 @@ void main() {
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('version checks pass when minor version exceeds recommendation', () {
+        test('version checks pass when minor version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(16, 4, 0);
 
@@ -397,7 +391,7 @@ void main() {
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('version checks pass when patch version exceeds recommendation', () {
+        test('version checks pass when patch version exceeds recommendation', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(16, 0, 1);
 
@@ -405,25 +399,22 @@ void main() {
           expect(xcode.isRecommendedVersionSatisfactory, isTrue);
         });
 
-        testWithoutContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
+        test('isInstalledAndMeetsVersionCheck is false when not installed', () {
           xcodeProjectInterpreter.isInstalled = false;
 
           expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
           expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
-        testWithoutContext(
-          'isInstalledAndMeetsVersionCheck is false when version not satisfied',
-          () {
-            xcodeProjectInterpreter.isInstalled = true;
-            xcodeProjectInterpreter.version = Version(14, 2, 0);
+        test('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
+          xcodeProjectInterpreter.isInstalled = true;
+          xcodeProjectInterpreter.version = Version(14, 2, 0);
 
-            expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-            expect(fakeProcessManager, hasNoRemainingExpectations);
-          },
-        );
+          expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
 
-        testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
+        test('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, null, null);
 
@@ -431,23 +422,20 @@ void main() {
           expect(fakeProcessManager, hasNoRemainingExpectations);
         });
 
-        testWithoutContext(
-          'eulaSigned is false when clang output indicates EULA not yet accepted',
-          () {
-            fakeProcessManager.addCommands(const <FakeCommand>[
-              FakeCommand(
-                command: <String>['xcrun', 'clang'],
-                exitCode: 1,
-                stderr: 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.',
-              ),
-            ]);
+        test('eulaSigned is false when clang output indicates EULA not yet accepted', () {
+          fakeProcessManager.addCommands(const <FakeCommand>[
+            FakeCommand(
+              command: <String>['xcrun', 'clang'],
+              exitCode: 1,
+              stderr: 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.',
+            ),
+          ]);
 
-            expect(xcode.eulaSigned, isFalse);
-            expect(fakeProcessManager, hasNoRemainingExpectations);
-          },
-        );
+          expect(xcode.eulaSigned, isFalse);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
 
-        testWithoutContext('eulaSigned is false when clang is not installed', () {
+        test('eulaSigned is false when clang is not installed', () {
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['xcrun', 'clang'],
@@ -458,22 +446,19 @@ void main() {
           expect(xcode.eulaSigned, isFalse);
         });
 
-        testWithoutContext(
-          'eulaSigned is true when clang output indicates EULA has been accepted',
-          () {
-            fakeProcessManager.addCommands(const <FakeCommand>[
-              FakeCommand(
-                command: <String>['xcrun', 'clang'],
-                exitCode: 1,
-                stderr: 'clang: error: no input files',
-              ),
-            ]);
-            expect(xcode.eulaSigned, isTrue);
-            expect(fakeProcessManager, hasNoRemainingExpectations);
-          },
-        );
+        test('eulaSigned is true when clang output indicates EULA has been accepted', () {
+          fakeProcessManager.addCommands(const <FakeCommand>[
+            FakeCommand(
+              command: <String>['xcrun', 'clang'],
+              exitCode: 1,
+              stderr: 'clang: error: no input files',
+            ),
+          ]);
+          expect(xcode.eulaSigned, isTrue);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
 
-        testWithoutContext('SDK name', () {
+        test('SDK name', () {
           expect(getSDKNameForIOSEnvironmentType(EnvironmentType.physical), 'iphoneos');
           expect(getSDKNameForIOSEnvironmentType(EnvironmentType.simulator), 'iphonesimulator');
         });
@@ -482,7 +467,7 @@ void main() {
           const sdkroot =
               'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
 
-          testWithoutContext('--show-sdk-path iphoneos', () async {
+          test('--show-sdk-path iphoneos', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
                 command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
@@ -494,7 +479,7 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
-          testWithoutContext('--show-sdk-path fails', () async {
+          test('--show-sdk-path fails', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
                 command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
@@ -512,7 +497,7 @@ void main() {
         });
 
         group('SDK Platform Version', () {
-          testWithoutContext('--show-sdk-platform-version iphonesimulator', () async {
+          test('--show-sdk-platform-version iphonesimulator', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
                 command: <String>[
@@ -529,7 +514,7 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
-          testWithoutContext(
+          test(
             '--show-sdk-platform-version iphonesimulator with leading and trailing new line',
             () async {
               fakeProcessManager.addCommand(
@@ -552,30 +537,27 @@ void main() {
             },
           );
 
-          testWithoutContext(
-            '--show-sdk-platform-version returns version followed by text',
-            () async {
-              fakeProcessManager.addCommand(
-                const FakeCommand(
-                  command: <String>[
-                    'xcrun',
-                    '--sdk',
-                    'iphonesimulator',
-                    '--show-sdk-platform-version',
-                  ],
-                  stdout: '13.2 (a) 12344',
-                ),
-              );
+          test('--show-sdk-platform-version returns version followed by text', () async {
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>[
+                  'xcrun',
+                  '--sdk',
+                  'iphonesimulator',
+                  '--show-sdk-platform-version',
+                ],
+                stdout: '13.2 (a) 12344',
+              ),
+            );
 
-              expect(
-                await xcode.sdkPlatformVersion(EnvironmentType.simulator),
-                Version(13, 2, null, text: '13.2 (a) 12344'),
-              );
-              expect(fakeProcessManager, hasNoRemainingExpectations);
-            },
-          );
+            expect(
+              await xcode.sdkPlatformVersion(EnvironmentType.simulator),
+              Version(13, 2, null, text: '13.2 (a) 12344'),
+            );
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
 
-          testWithoutContext('--show-sdk-platform-version returns something unexpected', () async {
+          test('--show-sdk-platform-version returns something unexpected', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
                 command: <String>[
@@ -592,7 +574,7 @@ void main() {
             expect(fakeProcessManager, hasNoRemainingExpectations);
           });
 
-          testWithoutContext('--show-sdk-platform-version fails', () async {
+          test('--show-sdk-platform-version fails', () async {
             fakeProcessManager.addCommand(
               const FakeCommand(
                 command: <String>[
@@ -615,7 +597,7 @@ void main() {
           const xcodePath = '/Applications/Xcode.app/Contents/Developer';
           const xcodeContentsPath = '/Applications/Xcode.app/Contents';
 
-          testWithoutContext('returns DeviceHub.app when it exists', () {
+          test('returns DeviceHub.app when it exists', () {
             final fileSystem = MemoryFileSystem.test();
             final xcode = Xcode.test(
               toolContext: FakeToolContext.macosHost(
@@ -635,7 +617,7 @@ void main() {
             expect(xcode.getSimulatorPath(), '$xcodeContentsPath/Applications/DeviceHub.app');
           });
 
-          testWithoutContext('falls back to Simulator.app when DeviceHub does not exist', () {
+          test('falls back to Simulator.app when DeviceHub does not exist', () {
             final fileSystem = MemoryFileSystem.test();
             final xcode = Xcode.test(
               toolContext: FakeToolContext.macosHost(
@@ -655,7 +637,7 @@ void main() {
             expect(xcode.getSimulatorPath(), '$xcodePath/Applications/Simulator.app');
           });
 
-          testWithoutContext('returns null when neither app directory exists', () {
+          test('returns null when neither app directory exists', () {
             final xcode = Xcode.test(
               toolContext: FakeToolContext.macosHost(
                 fs: MemoryFileSystem.test(),
@@ -671,7 +653,7 @@ void main() {
             expect(xcode.getSimulatorPath(), isNull);
           });
 
-          testWithoutContext('returns null when xcode-select path is unavailable', () {
+          test('returns null when xcode-select path is unavailable', () {
             final xcode = Xcode.test(
               toolContext: FakeToolContext.macosHost(
                 fs: MemoryFileSystem.test(),
@@ -733,7 +715,7 @@ void main() {
         );
       });
 
-      testWithoutContext('Xcode not installed', () async {
+      test('Xcode not installed', () async {
         expect(xcode.isInstalled, false);
 
         expect(xcdevice.isInstalled, false);
@@ -747,7 +729,7 @@ void main() {
       });
     });
 
-    testWithoutContext('shutdown hooks disposes xcdevice observers', () async {
+    test('shutdown hooks disposes xcdevice observers', () async {
       final shutdownHooks = ShutdownHooks();
 
       final xcdevice = XCDevice(
@@ -1261,7 +1243,7 @@ void main() {
           },
         );
 
-        testWithoutContext('available devices xcdevice fails', () async {
+        test('available devices xcdevice fails', () async {
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
@@ -1272,7 +1254,7 @@ void main() {
           expect(await xcdevice.getAvailableIOSDevices(), isEmpty);
         });
 
-        testWithoutContext('uses timeout', () async {
+        test('uses timeout', () async {
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '20'],
@@ -1944,7 +1926,7 @@ void main() {
           expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
 
-        testWithoutContext('diagnostics xcdevice fails', () async {
+        test('diagnostics xcdevice fails', () async {
           fakeProcessManager.addCommand(
             const FakeCommand(
               command: <String>['xcrun', 'xcdevice', 'list', '--timeout', '2'],
@@ -2103,7 +2085,7 @@ void main() {
         fileSystem = MemoryFileSystem.test();
       });
 
-      testWithoutContext('returns EnvironmentType.physical for iPhoneOS sdk', () {
+      test('returns EnvironmentType.physical for iPhoneOS sdk', () {
         expect(
           environmentTypeFromSdkroot('/path/to/iPhoneOS.sdk', fileSystem),
           EnvironmentType.physical,
@@ -2114,7 +2096,7 @@ void main() {
         );
       });
 
-      testWithoutContext('returns EnvironmentType.simulator for iPhoneSimulator sdk', () {
+      test('returns EnvironmentType.simulator for iPhoneSimulator sdk', () {
         expect(
           environmentTypeFromSdkroot('/path/to/iPhoneSimulator.sdk', fileSystem),
           EnvironmentType.simulator,
@@ -2125,7 +2107,7 @@ void main() {
         );
       });
 
-      testWithoutContext('throws ToolExit for non-iOS sdk', () {
+      test('throws ToolExit for non-iOS sdk', () {
         expect(
           () => environmentTypeFromSdkroot('/path/to/MacOSX.sdk', fileSystem),
           throwsToolExit(

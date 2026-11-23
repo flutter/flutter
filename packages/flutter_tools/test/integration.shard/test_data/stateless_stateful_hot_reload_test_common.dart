@@ -33,7 +33,7 @@ void testAll({bool chrome = false, List<String> additionalCommandArgs = const <S
       tryToDelete(tempDir);
     });
 
-    testWithoutContext('Can switch from stateless to stateful', () async {
+    test('Can switch from stateless to stateful', () async {
       final completer = Completer<void>();
       StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         if (line.contains('STATELESS')) {

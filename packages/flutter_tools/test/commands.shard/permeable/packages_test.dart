@@ -686,7 +686,7 @@ flutter:
       );
     }
 
-    testWithoutContext('test without bot', () async {
+    test('test without bot', () async {
       final fs = MemoryFileSystem.test();
       final processManager = FakeProcessManager.empty();
       fs.directory('/packages/flutter_tools').createSync(recursive: true);
@@ -709,7 +709,7 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('test with bot', () async {
+    test('test with bot', () async {
       final fs = MemoryFileSystem.test();
       final processManager = FakeProcessManager.empty();
       fs.file('pubspec.yaml').createSync();
@@ -732,7 +732,7 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('run pass arguments through to pub', () async {
+    test('run pass arguments through to pub', () async {
       final fs = MemoryFileSystem.test();
       final processManager = FakeProcessManager.empty();
       fs.file('pubspec.yaml').createSync();
@@ -757,7 +757,7 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('token pass arguments through to pub', () async {
+    test('token pass arguments through to pub', () async {
       final fs = MemoryFileSystem.test();
       final processManager = FakeProcessManager.empty();
       fs.file('pubspec.yaml').createSync();
@@ -781,7 +781,7 @@ flutter:
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
+    test('upgrade does not check for pubspec.yaml if -h/--help is passed', () async {
       final processManager = FakeProcessManager.empty();
       processManager.addCommand(
         FakeCommand(

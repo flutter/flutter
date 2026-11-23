@@ -68,7 +68,7 @@ void main() {
     vmServiceHost: vmServiceHost,
   );
 
-  testWithoutContext('Missing dir error caught for FontConfigManger.dispose', () async {
+  test('Missing dir error caught for FontConfigManger.dispose', () async {
     final fontConfigManager = FontConfigManager(
       toolContext: FakeToolContext(
         cache: Cache.test(processManager: processManager),
@@ -339,89 +339,86 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/192470.
-  testWithoutContext(
-    'waits for the UI isolate to reach PauseStart when startPaused is true',
-    () async {
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            '/',
-            '--vm-service-port=1234',
-            '--start-paused',
-            '--ipv6',
-            '--enable-checked-mode',
-            '--verify-entry-points',
-            '--enable-software-rendering',
-            '--skia-deterministic-rendering',
-            '--enable-dart-profiling',
-            '--non-interactive',
-            '--use-test-fonts',
-            '--disable-asset-fonts',
-            '--packages=.dart_tool/package_config.json',
-            'example.dill',
-          ],
-          stdout: 'The Dart VM service is listening on http://localhost:1234',
-          stderr: 'failure',
-        ),
-      ]);
-      final isolate = vm_service.Isolate(
-        id: '1',
-        pauseEvent: vm_service.Event(kind: vm_service.EventKind.kNone, timestamp: 0),
-        breakpoints: <vm_service.Breakpoint>[],
-        libraries: <vm_service.LibraryRef>[],
-        livePorts: 0,
-        name: 'main',
-        number: '1',
-        pauseOnExit: false,
-        runnable: true,
-        startTime: 0,
-        isSystemIsolate: false,
-        isolateFlags: <vm_service.IsolateFlag>[],
-      );
-      final fakeFlutterView = FlutterView(id: 'a', uiIsolate: isolate);
-      final fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[
-          const FakeVmServiceRequest(
-            method: 'streamListen',
-            args: <String, Object>{'streamId': 'Debug'},
-          ),
-          FakeVmServiceRequest(
-            method: kListViewsMethod,
-            jsonResponse: <String, Object>{
-              'views': <Object>[fakeFlutterView.toJson()],
-            },
-          ),
-          FakeVmServiceRequest(
-            method: 'getIsolate',
-            jsonResponse: isolate.toJson(),
-            args: <String, Object>{'isolateId': '1'},
-          ),
-          FakeVmServiceStreamResponse(
-            streamId: 'Debug',
-            event: vm_service.Event(
-              kind: vm_service.EventKind.kPauseStart,
-              isolate: isolate,
-              timestamp: 1,
-            ),
-          ),
+  test('waits for the UI isolate to reach PauseStart when startPaused is true', () async {
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>[
+          '/',
+          '--vm-service-port=1234',
+          '--start-paused',
+          '--ipv6',
+          '--enable-checked-mode',
+          '--verify-entry-points',
+          '--enable-software-rendering',
+          '--skia-deterministic-rendering',
+          '--enable-dart-profiling',
+          '--non-interactive',
+          '--use-test-fonts',
+          '--disable-asset-fonts',
+          '--packages=.dart_tool/package_config.json',
+          'example.dill',
         ],
-      );
-      device = createDevice(
-        enableVmService: true,
-        enableDds: false,
-        startPaused: true,
-        fontConfigManager: FakeFontConfigManager(fileSystem),
-        vmServiceHost: fakeVmServiceHost,
-      );
+        stdout: 'The Dart VM service is listening on http://localhost:1234',
+        stderr: 'failure',
+      ),
+    ]);
+    final isolate = vm_service.Isolate(
+      id: '1',
+      pauseEvent: vm_service.Event(kind: vm_service.EventKind.kNone, timestamp: 0),
+      breakpoints: <vm_service.Breakpoint>[],
+      libraries: <vm_service.LibraryRef>[],
+      livePorts: 0,
+      name: 'main',
+      number: '1',
+      pauseOnExit: false,
+      runnable: true,
+      startTime: 0,
+      isSystemIsolate: false,
+      isolateFlags: <vm_service.IsolateFlag>[],
+    );
+    final fakeFlutterView = FlutterView(id: 'a', uiIsolate: isolate);
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'streamListen',
+          args: <String, Object>{'streamId': 'Debug'},
+        ),
+        FakeVmServiceRequest(
+          method: kListViewsMethod,
+          jsonResponse: <String, Object>{
+            'views': <Object>[fakeFlutterView.toJson()],
+          },
+        ),
+        FakeVmServiceRequest(
+          method: 'getIsolate',
+          jsonResponse: isolate.toJson(),
+          args: <String, Object>{'isolateId': '1'},
+        ),
+        FakeVmServiceStreamResponse(
+          streamId: 'Debug',
+          event: vm_service.Event(
+            kind: vm_service.EventKind.kPauseStart,
+            isolate: isolate,
+            timestamp: 1,
+          ),
+        ),
+      ],
+    );
+    device = createDevice(
+      enableVmService: true,
+      enableDds: false,
+      startPaused: true,
+      fontConfigManager: FakeFontConfigManager(fileSystem),
+      vmServiceHost: fakeVmServiceHost,
+    );
 
-      await device.start('example.dill');
-      final Uri? uri = await device.vmServiceUri;
+    await device.start('example.dill');
+    final Uri? uri = await device.vmServiceUri;
 
-      expect(uri!.port, 1234);
-      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(uri!.port, 1234);
+    expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 /// A Flutter Tester device.

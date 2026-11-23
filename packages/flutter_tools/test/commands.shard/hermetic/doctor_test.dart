@@ -49,7 +49,7 @@ void main() {
     fs = MemoryFileSystem.test();
   });
 
-  testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
+  test('ValidationMessage equality and hashCode includes contextUrl', () {
     const messageA = ValidationMessage('ab', contextUrl: 'a');
     const messageB = ValidationMessage('ab', contextUrl: 'b');
 
@@ -61,7 +61,7 @@ void main() {
 
   group('doctor', () {
     group('device validator', () {
-      testWithoutContext('no devices', () async {
+      test('no devices', () async {
         final deviceManager = FakeDeviceManager();
         final deviceValidator = DeviceValidator(deviceManager: deviceManager);
         final ValidationResult result = await deviceValidator.validate();
@@ -72,7 +72,7 @@ void main() {
         expect(result.statusInfo, isNull);
       });
 
-      testWithoutContext('diagnostic message', () async {
+      test('diagnostic message', () async {
         final deviceManager = FakeDeviceManager()..diagnostics = <String>['Device locked'];
 
         final deviceValidator = DeviceValidator(deviceManager: deviceManager);
@@ -82,7 +82,7 @@ void main() {
         expect(result.statusInfo, isNull);
       });
 
-      testWithoutContext('diagnostic message and devices', () async {
+      test('diagnostic message and devices', () async {
         final device = FakeDevice();
         final deviceManager = FakeDeviceManager()
           ..devices = <Device>[device]
@@ -101,7 +101,7 @@ void main() {
   });
 
   group('doctor with overridden validators', () {
-    testWithoutContext('validate non-verbose output format for run without issues', () async {
+    test('validate non-verbose output format for run without issues', () async {
       final doctor = Doctor(
         analytics: const NoOpAnalytics(),
         cache: Cache.test(processManager: fakeProcessManager),
@@ -339,7 +339,7 @@ void main() {
       logger = BufferLogger.test(verbose: true);
     });
 
-    testWithoutContext('PII separated, events only sent once', () async {
+    test('PII separated, events only sent once', () async {
       final fakeDate = DateTime(1995, 3, 3);
       final systemClock = SystemClock.fixed(fakeDate);
 
@@ -375,7 +375,7 @@ void main() {
       ]);
     });
 
-    testWithoutContext('without PII has same text and PII-stripped text', () async {
+    test('without PII has same text and PII-stripped text', () async {
       final Doctor fakeDoctor = FakePassingDoctor(logger);
       final doctorText = DoctorText(logger, doctor: fakeDoctor);
       final String piiText = await doctorText.text;
@@ -674,12 +674,12 @@ void main() {
       );
     });
 
-    testWithoutContext('ensure fake is being used and initialized', () {
+    test('ensure fake is being used and initialized', () {
       expect(fakeAnalytics.sentEvents.length, 0);
       expect(fakeAnalytics.okToSend, true);
     });
 
-    testWithoutContext('contains installed', () async {
+    test('contains installed', () async {
       final doctor = Doctor(
         cache: Cache.test(processManager: fakeProcessManager),
         logger: logger,
@@ -702,7 +702,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, contains(eventToFind));
     });
 
-    testWithoutContext('contains installed and partial', () async {
+    test('contains installed and partial', () async {
       await FakePassingDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -743,7 +743,7 @@ void main() {
       );
     });
 
-    testWithoutContext('contains installed, missing and partial', () async {
+    test('contains installed, missing and partial', () async {
       await FakeDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -789,7 +789,7 @@ void main() {
       );
     });
 
-    testWithoutContext('events for grouped validators are properly decomposed', () async {
+    test('events for grouped validators are properly decomposed', () async {
       await FakeGroupedDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -828,7 +828,7 @@ void main() {
       );
     });
 
-    testWithoutContext('grouped validator subresult and subvalidators different lengths', () async {
+    test('grouped validator subresult and subvalidators different lengths', () async {
       final fakeDoctor = FakeGroupedDoctorWithCrash(
         logger,
         analytics: fakeAnalytics,
@@ -849,7 +849,7 @@ void main() {
       expect(fakeAnalytics.sentEvents, contains(testEvent));
     });
 
-    testWithoutContext('sending events can be skipped', () async {
+    test('sending events can be skipped', () async {
       await FakePassingDoctor(
         logger,
         analytics: fakeAnalytics,
@@ -859,7 +859,7 @@ void main() {
   });
 
   group('DoctorCommand', () {
-    testWithoutContext('executes diagnose via injected Doctor', () async {
+    test('executes diagnose via injected Doctor', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(
@@ -876,7 +876,7 @@ void main() {
       expect(fakeDoctor.verbosePassed, isFalse);
     });
 
-    testWithoutContext('passes verbose flag to doctor.diagnose', () async {
+    test('passes verbose flag to doctor.diagnose', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(
@@ -893,7 +893,7 @@ void main() {
       expect(fakeDoctor.verbosePassed, isTrue);
     });
 
-    testWithoutContext('passes --android-licenses to doctor.diagnose', () async {
+    test('passes --android-licenses to doctor.diagnose', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(
@@ -910,7 +910,7 @@ void main() {
       expect(fakeDoctor.androidLicenseValidatorPassed, isA<AndroidLicenseValidator>());
     });
 
-    testWithoutContext(
+    test(
       'lazily constructs AndroidLicenseValidator from AndroidContext only for --android-licenses',
       () async {
         var sdkEvaluations = 0;
@@ -948,7 +948,7 @@ void main() {
       },
     );
 
-    testWithoutContext('checks remote artifacts when flag provided', () async {
+    test('checks remote artifacts when flag provided', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(
@@ -963,7 +963,7 @@ void main() {
       expect(fakeDoctor.checkRemoteArtifactsRevision, '1234567890abcdef');
     });
 
-    testWithoutContext('throws ToolExit on missing remote artifacts', () async {
+    test('throws ToolExit on missing remote artifacts', () async {
       final fakeDoctor = FakeDiagnoseDoctor(checkRemoteArtifactsResult: true);
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(

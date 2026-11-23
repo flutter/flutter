@@ -73,7 +73,7 @@ void main() {
       debugIgnorePackageConfigSync = false;
     });
 
-    testWithoutContext('should load from CWD if Isolate.packageConfigSync is null', () async {
+    test('should load from CWD if Isolate.packageConfigSync is null', () async {
       debugIgnorePackageConfigSync = true;
 
       // Create a valid package config in CWD
@@ -91,7 +91,7 @@ void main() {
       expect(config.version, 2);
     });
 
-    testWithoutContext('should load from script directory if CWD has no package config', () async {
+    test('should load from script directory if CWD has no package config', () async {
       debugIgnorePackageConfigSync = true;
 
       // CWD = '/cwd_dir'
@@ -115,7 +115,7 @@ void main() {
       expect(config.version, 2);
     });
 
-    testWithoutContext('should throw ToolExit if package config cannot be found', () async {
+    test('should throw ToolExit if package config cannot be found', () async {
       debugIgnorePackageConfigSync = true;
 
       await expectLater(
@@ -132,7 +132,7 @@ void main() {
   });
 
   group('PackageConfigWorkspaceExtension', () {
-    testWithoutContext('toPackageUriForWorkspace finds most specific package in pub workspace', () {
+    test('toPackageUriForWorkspace finds most specific package in pub workspace', () {
       final packageConfig = PackageConfig(<Package>[
         Package(
           'root',
@@ -172,7 +172,7 @@ void main() {
       logger = BufferLogger.test();
     });
 
-    testWithoutContext('loads valid package_config.json', () async {
+    test('loads valid package_config.json', () async {
       final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{"configVersion": 2, "packages": []}');
@@ -187,7 +187,7 @@ void main() {
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext('throws ToolExit with pub get suggestion when file is invalid', () async {
+    test('throws ToolExit with pub get suggestion when file is invalid', () async {
       final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('{invalid json}');
@@ -204,38 +204,32 @@ void main() {
       expect(logger.errorText, contains('Try running "flutter pub get" to regenerate it.'));
     });
 
-    testWithoutContext(
-      'returns empty PackageConfig when file missing and throwOnError is false',
-      () async {
-        final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json');
+    test('returns empty PackageConfig when file missing and throwOnError is false', () async {
+      final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json');
 
-        final PackageConfig config = await loadPackageConfigWithLogging(
-          packageConfigFile,
-          logger: logger,
-          throwOnError: false,
-        );
+      final PackageConfig config = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: logger,
+        throwOnError: false,
+      );
 
-        expect(config, PackageConfig.empty);
-        expect(logger.errorText, isEmpty);
-      },
-    );
+      expect(config, PackageConfig.empty);
+      expect(logger.errorText, isEmpty);
+    });
 
-    testWithoutContext(
-      'returns empty PackageConfig when file is invalid and throwOnError is false',
-      () async {
-        final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{invalid json}');
+    test('returns empty PackageConfig when file is invalid and throwOnError is false', () async {
+      final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{invalid json}');
 
-        final PackageConfig config = await loadPackageConfigWithLogging(
-          packageConfigFile,
-          logger: logger,
-          throwOnError: false,
-        );
+      final PackageConfig config = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: logger,
+        throwOnError: false,
+      );
 
-        expect(config, PackageConfig.empty);
-        expect(logger.errorText, isEmpty);
-      },
-    );
+      expect(config, PackageConfig.empty);
+      expect(logger.errorText, isEmpty);
+    });
   });
 }

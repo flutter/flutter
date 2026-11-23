@@ -27,7 +27,7 @@ void main() {
       MacOSDesignedForIPadDevices.allowDiscovery = false;
     });
 
-    testWithoutContext('does not support non-macOS platforms', () async {
+    test('does not support non-macOS platforms', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
@@ -48,7 +48,7 @@ void main() {
       expect(discoverer.supportsPlatform, isFalse);
     });
 
-    testWithoutContext('discovery not allowed', () async {
+    test('discovery not allowed', () async {
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
         mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
@@ -70,7 +70,7 @@ void main() {
       expect(devices, isEmpty);
     });
 
-    testWithoutContext('no device on x86', () async {
+    test('no device on x86', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
@@ -93,7 +93,7 @@ void main() {
       expect(devices, isEmpty);
     });
 
-    testWithoutContext('no device on when iOS development off', () async {
+    test('no device on when iOS development off', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: false),
@@ -116,7 +116,7 @@ void main() {
       expect(devices, isEmpty);
     });
 
-    testWithoutContext('device discovery on arm', () async {
+    test('device discovery on arm', () async {
       MacOSDesignedForIPadDevices.allowDiscovery = true;
       final discoverer = MacOSDesignedForIPadDevices(
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
@@ -148,7 +148,7 @@ void main() {
     });
   });
 
-  testWithoutContext('MacOSDesignedForIPadDevice properties', () async {
+  test('MacOSDesignedForIPadDevice properties', () async {
     final device = MacOSDesignedForIPadDevice(
       mdnsVmServiceDiscovery: MDnsVmServiceDiscovery(
         analytics: const NoOpAnalytics(),

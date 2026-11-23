@@ -58,7 +58,7 @@ void main() {
     androidContext = FakeAndroidContext(androidSdk: FakeAndroidSdk());
   });
 
-  testWithoutContext('will not build an AAR for a plugin', () async {
+  test('will not build an AAR for a plugin', () async {
     fs.file('pubspec.yaml').writeAsStringSync('''
 name: foo_bar
 
@@ -115,7 +115,7 @@ flutter:
     );
   }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('throws ToolExit if androidSdk is null', () async {
+  test('throws ToolExit if androidSdk is null', () async {
     fs.file('pubspec.yaml').writeAsStringSync('''
 name: foo_bar
 

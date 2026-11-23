@@ -53,7 +53,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter assemble can run a build', () async {
+  test('flutter assemble can run a build', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -68,7 +68,7 @@ void main() {
     expect(logger.traceText, contains('build succeeded.'));
   });
 
-  testWithoutContext('flutter assemble can parse defines whose values contain =', () async {
+  test('flutter assemble can parse defines whose values contain =', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -93,7 +93,7 @@ void main() {
     expect(logger.traceText, contains('build succeeded.'));
   });
 
-  testWithoutContext('flutter assemble can parse empty defines', () async {
+  test('flutter assemble can parse empty defines', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -118,7 +118,7 @@ void main() {
     expect(logger.traceText, contains('build succeeded.'));
   });
 
-  testWithoutContext('flutter assemble can parse inputs', () async {
+  test('flutter assemble can parse inputs', () async {
     final command = AssembleCommand(
       androidContext: FakeAndroidContext(),
       featureFlags: TestFeatureFlags(),
@@ -143,7 +143,7 @@ void main() {
     expect(await command.requiredArtifacts, isEmpty);
   });
 
-  testWithoutContext('flutter assemble sets required artifacts from target platform', () async {
+  test('flutter assemble sets required artifacts from target platform', () async {
     final command = AssembleCommand(
       androidContext: FakeAndroidContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -163,7 +163,7 @@ void main() {
     expect(await command.requiredArtifacts, <DevelopmentArtifact>{DevelopmentArtifact.macOS});
   });
 
-  testWithoutContext('flutter assemble sends assemble-deferred-components', () async {
+  test('flutter assemble sends assemble-deferred-components', () async {
     final command = AssembleCommand(
       androidContext: FakeAndroidContext(),
       featureFlags: TestFeatureFlags(),
@@ -191,7 +191,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter assemble sends usage values correctly with platform', () async {
+  test('flutter assemble sends usage values correctly with platform', () async {
     final command = AssembleCommand(
       androidContext: FakeAndroidContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -221,7 +221,7 @@ void main() {
     );
   });
 
-  testWithoutContext('flutter assemble throws ToolExit if not provided with output', () async {
+  test('flutter assemble throws ToolExit if not provided with output', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -238,94 +238,88 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'flutter assemble can run a build if dart-defines are base64 encoded',
-    () async {
-      final CommandRunner<void> commandRunner = createTestCommandRunner(
-        AssembleCommand(
-          androidContext: FakeAndroidContext(),
-          featureFlags: TestFeatureFlags(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: toolContext,
-          xcode: null,
-        ),
-      );
+  test('flutter assemble can run a build if dart-defines are base64 encoded', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        toolContext: toolContext,
+        xcode: null,
+      ),
+    );
 
-      await commandRunner.run([
+    await commandRunner.run([
+      'assemble',
+      '--output',
+      'Output',
+      '--dart-define=${base64.encode(utf8.encode('flutter.inspector.structuredErrors=true'))}',
+      'debug_macos_bundle_flutter_assets',
+    ]);
+
+    expect(logger.traceText, contains('build succeeded.'));
+  });
+
+  test('flutter assemble throws ToolExit if dart-defines are not base64 encoded', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        toolContext: toolContext,
+        xcode: null,
+      ),
+    );
+
+    const invalidDartDefines = [
+      'flutter.inspector.structuredErrors%3Dtrue',
+      '///',
+      '@@@@',
+      "'",
+      '"',
+      '`',
+      r'\',
+      r'$',
+      ';',
+      '/*',
+      '*/',
+      '//',
+      '\n',
+      '\r',
+      '<',
+      '>',
+      '{',
+      '}',
+      '[',
+      ']',
+      '(',
+      ')',
+      '%',
+      '=',
+      '&',
+      '?',
+      '#',
+    ];
+    for (final invalidDartDefine in invalidDartDefines) {
+      final command = <String>[
         'assemble',
         '--output',
         'Output',
-        '--dart-define=${base64.encode(utf8.encode('flutter.inspector.structuredErrors=true'))}',
+        '-DartDefines=$invalidDartDefine',
         'debug_macos_bundle_flutter_assets',
-      ]);
-
-      expect(logger.traceText, contains('build succeeded.'));
-    },
-  );
-
-  testWithoutContext(
-    'flutter assemble throws ToolExit if dart-defines are not base64 encoded',
-    () async {
-      final CommandRunner<void> commandRunner = createTestCommandRunner(
-        AssembleCommand(
-          androidContext: FakeAndroidContext(),
-          featureFlags: TestFeatureFlags(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          toolContext: toolContext,
-          xcode: null,
+      ];
+      expect(
+        commandRunner.run(command),
+        throwsToolExit(
+          message:
+              'Error parsing assemble command: The -Pdart-defines argument contains non-base64 encoded data. '
+              'Check your build command and try again.',
         ),
       );
+    }
+  });
 
-      const invalidDartDefines = [
-        'flutter.inspector.structuredErrors%3Dtrue',
-        '///',
-        '@@@@',
-        "'",
-        '"',
-        '`',
-        r'\',
-        r'$',
-        ';',
-        '/*',
-        '*/',
-        '//',
-        '\n',
-        '\r',
-        '<',
-        '>',
-        '{',
-        '}',
-        '[',
-        ']',
-        '(',
-        ')',
-        '%',
-        '=',
-        '&',
-        '?',
-        '#',
-      ];
-      for (final invalidDartDefine in invalidDartDefines) {
-        final command = <String>[
-          'assemble',
-          '--output',
-          'Output',
-          '-DartDefines=$invalidDartDefine',
-          'debug_macos_bundle_flutter_assets',
-        ];
-        expect(
-          commandRunner.run(command),
-          throwsToolExit(
-            message:
-                'Error parsing assemble command: The -Pdart-defines argument contains non-base64 encoded data. '
-                'Check your build command and try again.',
-          ),
-        );
-      }
-    },
-  );
-
-  testWithoutContext('flutter assemble throws ToolExit if called with non-existent rule', () async {
+  test('flutter assemble throws ToolExit if called with non-existent rule', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -339,7 +333,7 @@ void main() {
     expect(commandRunner.run(<String>['assemble', '-o Output', 'undefined']), throwsToolExit());
   });
 
-  testWithoutContext('flutter assemble does not log stack traces during build failure', () async {
+  test('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -365,7 +359,7 @@ void main() {
     expect(logger.errorText, isNot(contains(stackTrace.toString())));
   });
 
-  testWithoutContext('flutter assemble outputs JSON performance data to provided file', () async {
+  test('flutter assemble outputs JSON performance data to provided file', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -403,43 +397,36 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'flutter assemble does not inject engine revision with local-engine',
-    () async {
-      final localArtifacts = Artifacts.testLocalEngine(
-        localEngine: 'out/host_release',
-        localEngineHost: 'out/host_release',
-      );
-      final localToolContext = FakeToolContext(
-        artifacts: localArtifacts,
-        cache: cache,
-        fs: fileSystem,
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(
-        AssembleCommand(
-          androidContext: FakeAndroidContext(),
-          featureFlags: TestFeatureFlags(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
-            Target target,
-            Environment environment,
-          ) {
-            expect(environment.engineVersion, isNull);
-          }),
-          toolContext: localToolContext,
-          xcode: null,
-        ),
-      );
-      await commandRunner.run(<String>[
-        'assemble',
-        '-o Output',
-        'debug_macos_bundle_flutter_assets',
-      ]);
-    },
-  );
+  test('flutter assemble does not inject engine revision with local-engine', () async {
+    final localArtifacts = Artifacts.testLocalEngine(
+      localEngine: 'out/host_release',
+      localEngineHost: 'out/host_release',
+    );
+    final localToolContext = FakeToolContext(
+      artifacts: localArtifacts,
+      cache: cache,
+      fs: fileSystem,
+      logger: logger,
+      processManager: FakeProcessManager.any(),
+    );
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          expect(environment.engineVersion, isNull);
+        }),
+        toolContext: localToolContext,
+        xcode: null,
+      ),
+    );
+    await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
+  });
 
-  testWithoutContext('flutter assemble propagates local-engine flags to environment when passed via CLI with DeferredArtifacts', () async {
+  test('flutter assemble propagates local-engine flags to environment when passed via CLI with DeferredArtifacts', () async {
     fileSystem
         .directory('engine')
         .childDirectory('src')
@@ -486,81 +473,77 @@ void main() {
     expect(buildInvoked, isTrue);
   });
 
-  testWithoutContext(
-    'flutter assemble only writes input and output files when the values change',
-    () async {
-      final BuildSystem buildSystem = TestBuildSystem.list(<BuildResult>[
-        BuildResult(
-          success: true,
-          inputFiles: <File>[fileSystem.file('foo')..createSync()],
-          outputFiles: <File>[fileSystem.file('bar')..createSync()],
-        ),
-        BuildResult(
-          success: true,
-          inputFiles: <File>[fileSystem.file('foo')..createSync()],
-          outputFiles: <File>[fileSystem.file('bar')..createSync()],
-        ),
-        BuildResult(
-          success: true,
-          inputFiles: <File>[fileSystem.file('foo'), fileSystem.file('fizz')..createSync()],
-          outputFiles: <File>[
-            fileSystem.file('bar'),
-            fileSystem.file(fileSystem.path.join('.dart_tool', 'fizz2'))
-              ..createSync(recursive: true),
-          ],
-        ),
-      ]);
-      final CommandRunner<void> commandRunner = createTestCommandRunner(
-        AssembleCommand(
-          androidContext: FakeAndroidContext(),
-          featureFlags: TestFeatureFlags(),
-          buildSystem: buildSystem,
-          toolContext: toolContext,
-          xcode: null,
-        ),
-      );
-      await commandRunner.run(<String>[
-        'assemble',
-        '-o Output',
-        '--build-outputs=outputs',
-        '--build-inputs=inputs',
-        'debug_macos_bundle_flutter_assets',
-      ]);
+  test('flutter assemble only writes input and output files when the values change', () async {
+    final BuildSystem buildSystem = TestBuildSystem.list(<BuildResult>[
+      BuildResult(
+        success: true,
+        inputFiles: <File>[fileSystem.file('foo')..createSync()],
+        outputFiles: <File>[fileSystem.file('bar')..createSync()],
+      ),
+      BuildResult(
+        success: true,
+        inputFiles: <File>[fileSystem.file('foo')..createSync()],
+        outputFiles: <File>[fileSystem.file('bar')..createSync()],
+      ),
+      BuildResult(
+        success: true,
+        inputFiles: <File>[fileSystem.file('foo'), fileSystem.file('fizz')..createSync()],
+        outputFiles: <File>[
+          fileSystem.file('bar'),
+          fileSystem.file(fileSystem.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true),
+        ],
+      ),
+    ]);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        androidContext: FakeAndroidContext(),
+        featureFlags: TestFeatureFlags(),
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        xcode: null,
+      ),
+    );
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--build-outputs=outputs',
+      '--build-inputs=inputs',
+      'debug_macos_bundle_flutter_assets',
+    ]);
 
-      final File inputs = fileSystem.file('inputs');
-      final File outputs = fileSystem.file('outputs');
-      expect(inputs.readAsStringSync(), contains('foo'));
-      expect(outputs.readAsStringSync(), contains('bar'));
+    final File inputs = fileSystem.file('inputs');
+    final File outputs = fileSystem.file('outputs');
+    expect(inputs.readAsStringSync(), contains('foo'));
+    expect(outputs.readAsStringSync(), contains('bar'));
 
-      final theDistantPast = DateTime(1991, 8, 23);
-      inputs.setLastModifiedSync(theDistantPast);
-      outputs.setLastModifiedSync(theDistantPast);
-      await commandRunner.run(<String>[
-        'assemble',
-        '-o Output',
-        '--build-outputs=outputs',
-        '--build-inputs=inputs',
-        'debug_macos_bundle_flutter_assets',
-      ]);
+    final theDistantPast = DateTime(1991, 8, 23);
+    inputs.setLastModifiedSync(theDistantPast);
+    outputs.setLastModifiedSync(theDistantPast);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--build-outputs=outputs',
+      '--build-inputs=inputs',
+      'debug_macos_bundle_flutter_assets',
+    ]);
 
-      expect(inputs.lastModifiedSync(), theDistantPast);
-      expect(outputs.lastModifiedSync(), theDistantPast);
+    expect(inputs.lastModifiedSync(), theDistantPast);
+    expect(outputs.lastModifiedSync(), theDistantPast);
 
-      await commandRunner.run(<String>[
-        'assemble',
-        '-o Output',
-        '--build-outputs=outputs',
-        '--build-inputs=inputs',
-        'debug_macos_bundle_flutter_assets',
-      ]);
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--build-outputs=outputs',
+      '--build-inputs=inputs',
+      'debug_macos_bundle_flutter_assets',
+    ]);
 
-      expect(inputs.readAsStringSync(), contains('foo'));
-      expect(inputs.readAsStringSync(), contains('fizz'));
-      expect(inputs.lastModifiedSync(), isNot(theDistantPast));
-    },
-  );
+    expect(inputs.readAsStringSync(), contains('foo'));
+    expect(inputs.readAsStringSync(), contains('fizz'));
+    expect(inputs.lastModifiedSync(), isNot(theDistantPast));
+  });
 
-  testWithoutContext('writePerformanceData outputs performance data in JSON form', () {
+  test('writePerformanceData outputs performance data in JSON form', () {
     final performanceMeasurement = <PerformanceMeasurement>[
       PerformanceMeasurement(
         analyticsName: 'foo',
@@ -590,7 +573,7 @@ void main() {
     });
   });
 
-  testWithoutContext('hides itself from usage unless --verbose', () async {
+  test('hides itself from usage unless --verbose', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -608,7 +591,7 @@ void main() {
     expect(logger.statusText, isNot(contains('assemble')));
   });
 
-  testWithoutContext('describes itself from usage if --verbose', () async {
+  test('describes itself from usage if --verbose', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
         androidContext: FakeAndroidContext(),
@@ -627,7 +610,7 @@ void main() {
     expect(logger.statusText, contains('assemble'));
   });
 
-  testWithoutContext('flutter assemble fails if pubspec.yaml is missing', () async {
+  test('flutter assemble fails if pubspec.yaml is missing', () async {
     final emptyFs = MemoryFileSystem.test();
     final emptyToolContext = FakeToolContext(
       artifacts: artifacts,

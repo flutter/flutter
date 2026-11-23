@@ -20,7 +20,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('environment variables are passed to the drive script', () async {
+  test('environment variables are passed to the drive script', () async {
     final Project project = _PrintEnvironmentVariablesInTestDriverProject();
     await project.setUpIn(tempDir);
 
