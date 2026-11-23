@@ -63,7 +63,7 @@ final kChromeArgs = <String>[
 void main() {
   late FakeWebRunnerFactory fakeWebRunnerFactory;
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
+  test('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
@@ -95,7 +95,7 @@ void main() {
     expect(getDesiredCapabilities(Browser.chrome, true, platform: const LocalPlatform()), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
+  test('getDesiredCapabilities Chrome with headless off', () {
     const chromeBinary = 'random-binary';
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -128,7 +128,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
+  test('getDesiredCapabilities Chrome with browser flags', () {
     const webBrowserFlags = <String>[
       '--autoplay-policy=no-user-gesture-required',
       '--incognito',
@@ -169,7 +169,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
+  test('getDesiredCapabilities Firefox with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -195,7 +195,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
+  test('getDesiredCapabilities Firefox with headless off', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -221,7 +221,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
+  test('getDesiredCapabilities Firefox with browser flags', () {
     const webBrowserFlags = <String>['-url=https://example.com', '-private'];
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -253,13 +253,13 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities Edge', () {
+  test('getDesiredCapabilities Edge', () {
     final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
     expect(getDesiredCapabilities(Browser.edge, false, platform: const LocalPlatform()), expected);
   });
 
-  testWithoutContext('getDesiredCapabilities macOS Safari', () {
+  test('getDesiredCapabilities macOS Safari', () {
     final expected = <String, dynamic>{'browserName': 'safari'};
 
     expect(
@@ -268,7 +268,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities iOS Safari', () {
+  test('getDesiredCapabilities iOS Safari', () {
     final expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
@@ -281,7 +281,7 @@ void main() {
     );
   });
 
-  testWithoutContext('getDesiredCapabilities android chrome', () {
+  test('getDesiredCapabilities android chrome', () {
     const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
     final expected = <String, dynamic>{
       'browserName': 'chrome',
@@ -307,7 +307,7 @@ void main() {
     );
   });
 
-  // TODO(bkonyi): Convert WebDriverService.start tests to testWithoutContext once
+  // TODO(bkonyi): Convert WebDriverService.start tests to plain `test` once
   // FlutterDevice.create no longer reads ambient residentCompilerFactory,
   // https://github.com/flutter/flutter/issues/47161.
   testUsingContext('WebDriverService starts and stops an app', () async {
@@ -424,7 +424,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  test(
     'WebDriverService exits the tool when the WebDriver server cannot create a session',
     () async {
       // A fake WebDriver server that rejects every session request, the way

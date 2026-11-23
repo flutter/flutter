@@ -88,7 +88,7 @@ void _linuxOnlyExtensionEntryPoint(SendPort sendPort) {
 
 void main() {
   group('ExtensionManager Integration', () {
-    testWithoutContext('ExtensionManager loads extension compatible with hostPlatform', () async {
+    test('ExtensionManager loads extension compatible with hostPlatform', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
@@ -102,48 +102,42 @@ void main() {
       expect(manager.connections, isEmpty);
     });
 
-    testWithoutContext(
-      'ExtensionManager filters out extension incompatible with hostPlatform',
-      () async {
-        final logger = BufferLogger.test();
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.darwin_arm64,
-          logger: logger,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        );
-        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
+    test('ExtensionManager filters out extension incompatible with hostPlatform', () async {
+      final logger = BufferLogger.test();
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.darwin_arm64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+      );
+      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_linuxOnlyExtensionEntryPoint]);
 
-        expect(manager.connections, isEmpty);
-        await manager.dispose();
-      },
-    );
+      expect(manager.connections, isEmpty);
+      await manager.dispose();
+    });
 
-    testWithoutContext(
-      'ensureInitialized skips spawning when tool extensions are disabled',
-      () async {
-        final logger = BufferLogger.test();
-        var spawned = false;
+    test('ensureInitialized skips spawning when tool extensions are disabled', () async {
+      final logger = BufferLogger.test();
+      var spawned = false;
 
-        final disabledManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          featureFlags: TestFeatureFlags(),
-          entryPoints: <ExtensionEntryPoint>[
-            (SendPort sendPort) {
-              spawned = true;
-              _dummyExtensionEntryPoint(sendPort);
-            },
-          ],
-        );
+      final disabledManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(),
+        entryPoints: <ExtensionEntryPoint>[
+          (SendPort sendPort) {
+            spawned = true;
+            _dummyExtensionEntryPoint(sendPort);
+          },
+        ],
+      );
 
-        await disabledManager.ensureInitialized();
-        expect(spawned, isFalse);
-        expect(disabledManager.connections, isEmpty);
-        await disabledManager.dispose();
-      },
-    );
+      await disabledManager.ensureInitialized();
+      expect(spawned, isFalse);
+      expect(disabledManager.connections, isEmpty);
+      await disabledManager.dispose();
+    });
 
-    testWithoutContext(
+    test(
       'disable and initialize throw AssertionError when called after initialization has started',
       () async {
         final logger = BufferLogger.test();
@@ -162,7 +156,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'ToolDependencies.bootstrap registers extensionManager.dispose on shutdownHooks',
       () async {
         final logger = BufferLogger.test();
@@ -201,39 +195,36 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'hostPlatformName maps built-in and custom darwin/non-darwin host platforms',
-      () {
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        expect(
-          ExtensionManager(
-            hostPlatform: HostPlatform.darwin_arm64,
-            logger: logger,
-            featureFlags: featureFlags,
-          ).hostPlatformName,
-          'macos',
-        );
-        expect(
-          ExtensionManager(
-            hostPlatform: HostPlatform('darwin', .riscv64),
-            logger: logger,
-            featureFlags: featureFlags,
-          ).hostPlatformName,
-          'macos',
-        );
-        expect(
-          ExtensionManager(
-            hostPlatform: HostPlatform('freebsd', .x64),
-            logger: logger,
-            featureFlags: featureFlags,
-          ).hostPlatformName,
-          'freebsd',
-        );
-      },
-    );
+    test('hostPlatformName maps built-in and custom darwin/non-darwin host platforms', () {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      expect(
+        ExtensionManager(
+          hostPlatform: HostPlatform.darwin_arm64,
+          logger: logger,
+          featureFlags: featureFlags,
+        ).hostPlatformName,
+        'macos',
+      );
+      expect(
+        ExtensionManager(
+          hostPlatform: HostPlatform('darwin', .riscv64),
+          logger: logger,
+          featureFlags: featureFlags,
+        ).hostPlatformName,
+        'macos',
+      );
+      expect(
+        ExtensionManager(
+          hostPlatform: HostPlatform('freebsd', .x64),
+          logger: logger,
+          featureFlags: featureFlags,
+        ).hostPlatformName,
+        'freebsd',
+      );
+    });
 
-    testWithoutContext('dispose awaits in-flight ensureInitialized, shuts down spawned connection, and skips remaining entrypoints', () async {
+    test('dispose awaits in-flight ensureInitialized, shuts down spawned connection, and skips remaining entrypoints', () async {
       final logger = BufferLogger.test();
       final initStartedPort = ReceivePort();
       final shutdownStartedPort = ReceivePort();
@@ -303,84 +294,81 @@ void main() {
       expect(manager.isInitialized, isFalse);
     });
 
-    testWithoutContext(
-      'ensureInitialized and initialize are no-ops after dispose begins or completes',
-      () async {
-        final logger = BufferLogger.test();
-        final spawnedPort = ReceivePort();
-        final shutdownStartedPort = ReceivePort();
-        addTearDown(spawnedPort.close);
-        addTearDown(shutdownStartedPort.close);
-        final SendPort spawnedSendPort = spawnedPort.sendPort;
-        final SendPort shutdownStartedSendPort = shutdownStartedPort.sendPort;
-        var spawnCount = 0;
-        spawnedPort.listen((Object? _) {
-          spawnCount++;
-        });
-        void countingEntryPoint(SendPort sendPort) {
-          spawnedSendPort.send(null);
-          unawaited(
-            ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-              _GatedLifecycleService(shutdownStartedPort: shutdownStartedSendPort),
-            ]),
-          );
-        }
-
-        final preDisposedManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
+    test('ensureInitialized and initialize are no-ops after dispose begins or completes', () async {
+      final logger = BufferLogger.test();
+      final spawnedPort = ReceivePort();
+      final shutdownStartedPort = ReceivePort();
+      addTearDown(spawnedPort.close);
+      addTearDown(shutdownStartedPort.close);
+      final SendPort spawnedSendPort = spawnedPort.sendPort;
+      final SendPort shutdownStartedSendPort = shutdownStartedPort.sendPort;
+      var spawnCount = 0;
+      spawnedPort.listen((Object? _) {
+        spawnCount++;
+      });
+      void countingEntryPoint(SendPort sendPort) {
+        spawnedSendPort.send(null);
+        unawaited(
+          ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+            _GatedLifecycleService(shutdownStartedPort: shutdownStartedSendPort),
+          ]),
         );
+      }
 
-        await preDisposedManager.dispose();
-        await preDisposedManager.ensureInitialized();
-        await preDisposedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
-        expect(spawnCount, 0);
-        expect(preDisposedManager.connections, isEmpty);
-        expect(preDisposedManager.isInitialized, isFalse);
-        expect(preDisposedManager.deviceExtensions, isEmpty);
+      final preDisposedManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
+      );
 
-        final initializedManager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
-        );
+      await preDisposedManager.dispose();
+      await preDisposedManager.ensureInitialized();
+      await preDisposedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
+      expect(spawnCount, 0);
+      expect(preDisposedManager.connections, isEmpty);
+      expect(preDisposedManager.isInitialized, isFalse);
+      expect(preDisposedManager.deviceExtensions, isEmpty);
 
-        await initializedManager.ensureInitialized();
-        expect(spawnCount, 1);
-        expect(initializedManager.connections, hasLength(1));
-        expect(initializedManager.isInitialized, isTrue);
+      final initializedManager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[countingEntryPoint],
+      );
 
-        final Future<void> disposeFuture = initializedManager.dispose();
-        expect(initializedManager.connections, isEmpty);
-        expect(initializedManager.isInitialized, isFalse);
-        expect(initializedManager.diagnosticsExtensions, isEmpty);
-        expect(initializedManager.configurationExtensions, isEmpty);
-        expect(initializedManager.deviceExtensions, isEmpty);
-        final shutdownGateSendPort = await shutdownStartedPort.first as SendPort;
+      await initializedManager.ensureInitialized();
+      expect(spawnCount, 1);
+      expect(initializedManager.connections, hasLength(1));
+      expect(initializedManager.isInitialized, isTrue);
 
-        // Calling ensureInitialized() or initialize() while dispose() is in flight is a no-op.
-        await initializedManager.ensureInitialized();
-        await initializedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
-        expect(spawnCount, 1);
+      final Future<void> disposeFuture = initializedManager.dispose();
+      expect(initializedManager.connections, isEmpty);
+      expect(initializedManager.isInitialized, isFalse);
+      expect(initializedManager.diagnosticsExtensions, isEmpty);
+      expect(initializedManager.configurationExtensions, isEmpty);
+      expect(initializedManager.deviceExtensions, isEmpty);
+      final shutdownGateSendPort = await shutdownStartedPort.first as SendPort;
 
-        shutdownGateSendPort.send(null);
-        await disposeFuture;
-        expect(initializedManager.connections, isEmpty);
-        expect(initializedManager.isInitialized, isFalse);
+      // Calling ensureInitialized() or initialize() while dispose() is in flight is a no-op.
+      await initializedManager.ensureInitialized();
+      await initializedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
+      expect(spawnCount, 1);
 
-        // Calling ensureInitialized() or initialize() after dispose() completes is also a no-op.
-        await initializedManager.ensureInitialized();
-        await initializedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
-        expect(spawnCount, 1);
-        expect(initializedManager.connections, isEmpty);
-        expect(initializedManager.isInitialized, isFalse);
-      },
-    );
+      shutdownGateSendPort.send(null);
+      await disposeFuture;
+      expect(initializedManager.connections, isEmpty);
+      expect(initializedManager.isInitialized, isFalse);
 
-    testWithoutContext('dispose aborts in-flight service title fetching without leaking clients or skipping shutdown', () async {
+      // Calling ensureInitialized() or initialize() after dispose() completes is also a no-op.
+      await initializedManager.ensureInitialized();
+      await initializedManager.initialize(entryPoints: <ExtensionEntryPoint>[countingEntryPoint]);
+      expect(spawnCount, 1);
+      expect(initializedManager.connections, isEmpty);
+      expect(initializedManager.isInitialized, isFalse);
+    });
+
+    test('dispose aborts in-flight service title fetching without leaking clients or skipping shutdown', () async {
       final logger = BufferLogger.test();
       final diagnosticsTitleStartedPort = ReceivePort();
       final configTitleCalledPort = ReceivePort();
@@ -457,7 +445,7 @@ void main() {
       expect(manager.isInitialized, isFalse);
     });
 
-    testWithoutContext('dispose completes cleanly when in-flight initialize throws and concurrent dispose calls await cleanup', () async {
+    test('dispose completes cleanly when in-flight initialize throws and concurrent dispose calls await cleanup', () async {
       final logger = BufferLogger.test();
       final secondInitStartedPort = ReceivePort();
       final firstShutdownStartedPort = ReceivePort();

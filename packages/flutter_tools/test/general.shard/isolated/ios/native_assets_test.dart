@@ -362,7 +362,7 @@ void main() {
     },
   );
 
-  testWithoutContext('iOS builds fail when the install name does not fit', () async {
+  test('iOS builds fail when the install name does not fit', () async {
     if (const LocalPlatform().isWindows) {
       return; // Backslashes in commands, but we will never run these commands on Windows.
     }

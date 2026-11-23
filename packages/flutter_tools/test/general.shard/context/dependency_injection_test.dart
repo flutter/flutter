@@ -464,7 +464,7 @@ void main() {
       expect(gradleEvaluations, 1);
     });
 
-    testWithoutContext(
+    test(
       'does not eagerly evaluate FlutterVersion.channel or enable PreRunValidator by default',
       () async {
         final emptyFs = MemoryFileSystem.test();
@@ -486,7 +486,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'does not eagerly evaluate AndroidSdk, AndroidStudio, or Java when creating Doctor',
       () async {
         var sdkEvaluations = 0;
@@ -526,7 +526,7 @@ void main() {
       },
     );
 
-    testWithoutContext('default Linux AndroidStudio and Java discovery stays lazy during bootstrap and memoizes Studio', () async {
+    test('default Linux AndroidStudio and Java discovery stays lazy during bootstrap and memoizes Studio', () async {
       fs.directory('/home/user').createSync(recursive: true);
       fs.directory('/opt/android-studio/jbr/bin').createSync(recursive: true);
       final strictProcessManager = FakeProcessManager.empty();
@@ -624,7 +624,7 @@ void main() {
   });
 
   group('AndroidContext', () {
-    testWithoutContext(
+    test(
       'evaluates androidSdk, androidStudio, gradleUtils, and java lazily and memoizes results',
       () {
         var sdkEvaluations = 0;
@@ -690,7 +690,7 @@ void main() {
       },
     );
 
-    testWithoutContext('memoizes null results without re-invoking factory closures', () {
+    test('memoizes null results without re-invoking factory closures', () {
       var sdkEvaluations = 0;
       var studioEvaluations = 0;
       var javaEvaluations = 0;
@@ -726,7 +726,7 @@ void main() {
   });
 
   group('AppleContext', () {
-    testWithoutContext('evaluates all dependencies lazily and memoizes results', () {
+    test('evaluates all dependencies lazily and memoizes results', () {
       var cocoaPodsEvaluations = 0;
       var cocoapodsValidatorEvaluations = 0;
       var iosSimulatorUtilsEvaluations = 0;

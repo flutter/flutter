@@ -36,7 +36,7 @@ Matcher _first(Object matcher) => const TypeMatcher<Iterable<Object?>>().having(
 );
 
 void main() {
-  testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
+  test('FlutterValidator shows an error message if gen_snapshot is '
       'downloaded and exits with code 1', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
     final fileSystem = MemoryFileSystem.test();
@@ -74,7 +74,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator shows an error message if Rosetta is needed', () async {
+  test('FlutterValidator shows an error message if Rosetta is needed', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
     final fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();
@@ -117,7 +117,7 @@ void main() {
     );
   });
 
-  testWithoutContext(
+  test(
     'FlutterValidator does not run gen_snapshot binary check if it is not already downloaded',
     () async {
       final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
@@ -150,7 +150,7 @@ void main() {
     },
   );
 
-  testWithoutContext('FlutterValidator handles exception thrown by version checking', () async {
+  test('FlutterValidator handles exception thrown by version checking', () async {
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeThrowingFlutterVersion(),
@@ -176,7 +176,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
+  test('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
     final Platform platform = FakePlatform(
       operatingSystem: 'windows',
@@ -213,7 +213,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator shows enabled (by default) feature flags', () async {
+  test('FlutterValidator shows enabled (by default) feature flags', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
     final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
     final fileSystem = MemoryFileSystem.test();
@@ -244,7 +244,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator shows enabled (by user) feature flags', () async {
+  test('FlutterValidator shows enabled (by user) feature flags', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
     final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
     final fileSystem = MemoryFileSystem.test();
@@ -275,7 +275,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator shows disabled (by user) feature flags', () async {
+  test('FlutterValidator shows disabled (by user) feature flags', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0');
     final Platform platform = FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8');
     final fileSystem = MemoryFileSystem.test();
@@ -306,7 +306,7 @@ void main() {
     );
   });
 
-  testWithoutContext(
+  test(
     'FlutterValidator shows FLUTTER_GIT_URL when set and fails if upstream is not the same',
     () async {
       final flutterValidator = FlutterValidator(
@@ -344,7 +344,7 @@ void main() {
     },
   );
 
-  testWithoutContext('FlutterValidator fails when channel is unknown', () async {
+  test('FlutterValidator fails when channel is unknown', () async {
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(branch: 'unknown', frameworkVersion: '1.0.0'),
@@ -377,7 +377,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator fails when framework version is unknown', () async {
+  test('FlutterValidator fails when framework version is unknown', () async {
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(frameworkVersion: '0.0.0-unknown', branch: 'beta'),
@@ -411,7 +411,7 @@ void main() {
   });
 
   group('FlutterValidator shows flutter upstream remote', () {
-    testWithoutContext('standard url', () async {
+    test('standard url', () async {
       final flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
@@ -436,7 +436,7 @@ void main() {
       );
     });
 
-    testWithoutContext('non-standard url', () async {
+    test('non-standard url', () async {
       final flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(
@@ -473,7 +473,7 @@ void main() {
       );
     });
 
-    testWithoutContext('as unknown if upstream is null', () async {
+    test('as unknown if upstream is null', () async {
       final flutterValidator = FlutterValidator(
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () =>
@@ -507,40 +507,37 @@ void main() {
     });
   });
 
-  testWithoutContext(
-    'Do not show the message for intentional errors if FlutterValidator passes',
-    () async {
-      final flutterValidator = FlutterValidator(
-        platform: FakePlatform(localeName: 'en_US.UTF-8'),
-        flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
-        devToolsVersion: () => '2.8.0',
-        artifacts: Artifacts.test(),
-        fileSystem: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
-        flutterRoot: () => '/sdk/flutter',
-        featureFlags: TestFeatureFlags(),
-      );
+  test('Do not show the message for intentional errors if FlutterValidator passes', () async {
+    final flutterValidator = FlutterValidator(
+      platform: FakePlatform(localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
+      devToolsVersion: () => '2.8.0',
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(name: 'Linux'),
+      flutterRoot: () => '/sdk/flutter',
+      featureFlags: TestFeatureFlags(),
+    );
 
-      expect(
-        await flutterValidator.validate(),
-        _matchDoctorValidation(
-          validationType: ValidationType.success,
-          statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
-          messages: isNot(
-            contains(
-              const ValidationMessage(
-                'If those were intentional, you can disregard the above warnings; however it is '
-                'recommended to use "git" directly to perform update checks and upgrades.',
-              ),
+    expect(
+      await flutterValidator.validate(),
+      _matchDoctorValidation(
+        validationType: ValidationType.success,
+        statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
+        messages: isNot(
+          contains(
+            const ValidationMessage(
+              'If those were intentional, you can disregard the above warnings; however it is '
+              'recommended to use "git" directly to perform update checks and upgrades.',
             ),
           ),
         ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
-  testWithoutContext('detects no flutter and dart on path', () async {
+  test('detects no flutter and dart on path', () async {
     const flutterRoot = 'sdk/flutter';
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
@@ -571,7 +568,7 @@ void main() {
     );
   });
 
-  testWithoutContext('allows case differences in paths on Windows', () async {
+  test('allows case differences in paths on Windows', () async {
     const flutterRoot = r'c:\path\to\flutter-sdk';
     const osName = 'Microsoft Windows';
     final fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
@@ -610,7 +607,7 @@ void main() {
     );
   });
 
-  testWithoutContext('allows different separator types in paths on Windows', () async {
+  test('allows different separator types in paths on Windows', () async {
     const flutterRoot = r'c:\path\to\flutter-sdk';
     const osName = 'Microsoft Windows';
     final fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
@@ -648,68 +645,65 @@ void main() {
     );
   });
 
-  testWithoutContext(
-    'allows flutter and dart binaries from a symlinked Flutter SDK on Windows',
-    () async {
-      const flutterRoot = r'C:\sdk\flutter_current';
-      const realFlutterRoot = r'C:\sdk\real_flutter';
-      const osName = 'Microsoft Windows';
-      final FileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      fs.directory(fs.path.join(realFlutterRoot, 'bin')).createSync(recursive: true);
-      fs.file(fs.path.join(realFlutterRoot, 'bin', 'flutter')).createSync();
-      fs.file(fs.path.join(realFlutterRoot, 'bin', 'dart')).createSync();
-      fs.link(flutterRoot).createSync(realFlutterRoot);
+  test('allows flutter and dart binaries from a symlinked Flutter SDK on Windows', () async {
+    const flutterRoot = r'C:\sdk\flutter_current';
+    const realFlutterRoot = r'C:\sdk\real_flutter';
+    const osName = 'Microsoft Windows';
+    final FileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    fs.directory(fs.path.join(realFlutterRoot, 'bin')).createSync(recursive: true);
+    fs.file(fs.path.join(realFlutterRoot, 'bin', 'flutter')).createSync();
+    fs.file(fs.path.join(realFlutterRoot, 'bin', 'dart')).createSync();
+    fs.link(flutterRoot).createSync(realFlutterRoot);
 
-      final flutterValidator = FlutterValidator(
-        platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
-        flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
-        devToolsVersion: () => '2.8.0',
-        artifacts: Artifacts.test(),
-        fileSystem: fs,
-        processManager: FakeProcessManager.empty(),
-        operatingSystemUtils: FakeOperatingSystemUtils(
-          name: osName,
-          fs: fs,
-          whichLookup: <String, File>{
-            'flutter': fs.file(fs.path.join(flutterRoot, 'bin', 'flutter')),
-            'dart': fs.file(fs.path.join(flutterRoot, 'bin', 'dart')),
-          },
-        ),
-        flutterRoot: () => flutterRoot,
-        featureFlags: TestFeatureFlags(),
-      );
+    final flutterValidator = FlutterValidator(
+      platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
+      flutterVersion: () => FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta'),
+      devToolsVersion: () => '2.8.0',
+      artifacts: Artifacts.test(),
+      fileSystem: fs,
+      processManager: FakeProcessManager.empty(),
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: osName,
+        fs: fs,
+        whichLookup: <String, File>{
+          'flutter': fs.file(fs.path.join(flutterRoot, 'bin', 'flutter')),
+          'dart': fs.file(fs.path.join(flutterRoot, 'bin', 'dart')),
+        },
+      ),
+      flutterRoot: () => flutterRoot,
+      featureFlags: TestFeatureFlags(),
+    );
 
-      final ValidationResult result = await flutterValidator.validate();
-      expect(
-        result,
-        _matchDoctorValidation(
-          validationType: ValidationType.success,
-          statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
-          messages: contains(
-            const ValidationMessage(
-              r'Flutter version 1.0.0 on channel beta at C:\sdk\flutter_current',
-            ),
+    final ValidationResult result = await flutterValidator.validate();
+    expect(
+      result,
+      _matchDoctorValidation(
+        validationType: ValidationType.success,
+        statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
+        messages: contains(
+          const ValidationMessage(
+            r'Flutter version 1.0.0 on channel beta at C:\sdk\flutter_current',
           ),
         ),
-      );
-      expect(
-        result.messages.where(
-          (ValidationMessage message) =>
-              message.message.contains('Warning: `flutter` on your path resolves to'),
-        ),
-        isEmpty,
-      );
-      expect(
-        result.messages.where(
-          (ValidationMessage message) =>
-              message.message.contains('Warning: `dart` on your path resolves to'),
-        ),
-        isEmpty,
-      );
-    },
-  );
+      ),
+    );
+    expect(
+      result.messages.where(
+        (ValidationMessage message) =>
+            message.message.contains('Warning: `flutter` on your path resolves to'),
+      ),
+      isEmpty,
+    );
+    expect(
+      result.messages.where(
+        (ValidationMessage message) =>
+            message.message.contains('Warning: `dart` on your path resolves to'),
+      ),
+      isEmpty,
+    );
+  });
 
-  testWithoutContext('detects flutter and dart from outside flutter sdk', () async {
+  test('detects flutter and dart from outside flutter sdk', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
@@ -745,7 +739,7 @@ void main() {
     );
   });
 
-  testWithoutContext('no warnings if flutter & dart binaries are inside the Flutter SDK', () async {
+  test('no warnings if flutter & dart binaries are inside the Flutter SDK', () async {
     final FileSystem fs = MemoryFileSystem.test();
     final flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
@@ -783,7 +777,7 @@ void main() {
     );
   });
 
-  testWithoutContext('FlutterValidator shows a warning message on Intel Macs', () async {
+  test('FlutterValidator shows a warning message on Intel Macs', () async {
     final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
     final fileSystem = MemoryFileSystem.test();
     final artifacts = Artifacts.test();

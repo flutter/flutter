@@ -9,7 +9,6 @@ import 'package:args/command_runner.dart';
 import 'package:collection/collection.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -212,72 +211,6 @@ void test(
     // configures all tests to have a 15 minute timeout which should
     // definitely be enough.
   );
-}
-
-/// Executes a test body in zone that does not allow context-based injection.
-///
-/// For classes which have been refactored to exclude context-based injection
-/// or globals like [globals.fs] or [globals.platform], prefer using
-/// this test method as it will prevent accidentally including these
-/// context getters in future code changes.
-///
-/// For more information, see https://github.com/flutter/flutter/issues/47161
-@isTest
-void testWithoutContext(
-  String description,
-  FutureOr<void> Function() body, {
-  String? testOn,
-  dynamic skip,
-  List<String>? tags,
-  Map<String, dynamic>? onPlatform,
-  int? retry,
-}) {
-  return test(
-    description,
-    () async {
-      return runZoned(body, zoneValues: <Object, Object>{contextKey: const _NoContext()});
-    },
-    skip: skip,
-    tags: tags,
-    onPlatform: onPlatform,
-    retry: retry,
-    testOn: testOn,
-    // We don't support "timeout"; see ../../dart_test.yaml which
-    // configures all tests to have a 15 minute timeout which should
-    // definitely be enough.
-  );
-}
-
-/// An implementation of [AppContext] that throws if context.get is called in the test.
-///
-/// The intention of the class is to ensure we do not accidentally regress when
-/// moving towards more explicit dependency injection by accidentally using
-/// a Zone value in place of a constructor parameter.
-class _NoContext implements AppContext {
-  const _NoContext();
-
-  @override
-  T get<T>() {
-    throw UnsupportedError(
-      'context.get<$T> is not supported in test methods. '
-      'Use Testbed or testUsingContext if accessing Zone injected '
-      'values.',
-    );
-  }
-
-  @override
-  String get name => 'No Context';
-
-  @override
-  Future<V> run<V>({
-    required FutureOr<V> Function() body,
-    String? name,
-    Map<Type, Generator>? overrides,
-    Map<Type, Generator>? fallbacks,
-    ZoneSpecification? zoneSpecification,
-  }) async {
-    return body();
-  }
 }
 
 /// Allows inserting file system exceptions into certain

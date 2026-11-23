@@ -24,7 +24,7 @@ import '../src/fake_devices.dart';
 
 void main() {
   group('DeviceManager', () {
-    testWithoutContext('getDevices', () async {
+    test('getDevices', () async {
       final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
@@ -35,7 +35,7 @@ void main() {
       expect(await deviceManager.getDevices(), devices);
     });
 
-    testWithoutContext('getDeviceById exact matcher', () async {
+    test('getDeviceById exact matcher', () async {
       final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
@@ -69,7 +69,7 @@ void main() {
       expect(logger.traceText, contains('Ignored error discovering 0553790d0a4e726f'));
     });
 
-    testWithoutContext('getDeviceById exact matcher with well known ID', () async {
+    test('getDeviceById exact matcher with well known ID', () async {
       final device1 = FakeDevice('Windows', 'windows');
       final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
@@ -96,7 +96,7 @@ void main() {
       expect(logger.traceText, isEmpty);
     });
 
-    testWithoutContext('getDeviceById prefix matcher', () async {
+    test('getDeviceById prefix matcher', () async {
       final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       final device3 = FakeDevice('iPod touch', '82564b38861a9a5');
@@ -125,7 +125,7 @@ void main() {
       expect(logger.traceText, contains('Ignored error discovering Nexus'));
     });
 
-    testWithoutContext('getDeviceById two exact matches, matches on first', () async {
+    test('getDeviceById two exact matches, matches on first', () async {
       final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final device2 = FakeDevice('Nexus 5', '01abfc49119c410e');
       final devices = <Device>[device1, device2];
@@ -140,7 +140,7 @@ void main() {
       await expectDevice('Nexus 5', <Device>[device1]);
     });
 
-    testWithoutContext('getAllDevices caches', () async {
+    test('getAllDevices caches', () async {
       final notSupportedDiscoverer = FakePollingDeviceDiscovery();
       final supportedDiscoverer = FakePollingDeviceDiscovery(
         requiresExtendedWirelessDeviceDiscovery: true,
@@ -176,7 +176,7 @@ void main() {
       expect(await deviceManager.getAllDevices(), <Device>[attachedDevice, wirelessDevice]);
     });
 
-    testWithoutContext('refreshAllDevices does not cache', () async {
+    test('refreshAllDevices does not cache', () async {
       final notSupportedDiscoverer = FakePollingDeviceDiscovery();
       final supportedDiscoverer = FakePollingDeviceDiscovery(
         requiresExtendedWirelessDeviceDiscovery: true,
@@ -217,7 +217,7 @@ void main() {
       ]);
     });
 
-    testWithoutContext('refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time', () async {
+    test('refreshExtendedWirelessDeviceDiscoverers only refreshes discoverers that require extended time', () async {
       final normalDiscoverer = FakePollingDeviceDiscovery();
       final extendedDiscoverer = FakePollingDeviceDiscovery(
         requiresExtendedWirelessDeviceDiscovery: true,
@@ -260,7 +260,7 @@ void main() {
     });
   });
 
-  testWithoutContext('PollingDeviceDiscovery startPolling', () {
+  test('PollingDeviceDiscovery startPolling', () {
     FakeAsync().run((FakeAsync time) {
       final pollingDeviceDiscovery = FakePollingDeviceDiscovery();
       pollingDeviceDiscovery.startPolling();
@@ -340,7 +340,7 @@ void main() {
       expect(ephemeralDevice, isNull);
     }, overrides: <Type, Generator>{FlutterProject: () => FakeFlutterProject()});
 
-    testWithoutContext('Unsupported devices listed in all devices', () async {
+    test('Unsupported devices listed in all devices', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
 
       final DeviceManager deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
@@ -445,7 +445,7 @@ void main() {
       expect(filtered, <Device>[]);
     });
 
-    testWithoutContext('uses DeviceDiscoverySupportFilter.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
+    test('uses DeviceDiscoverySupportFilter.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
       final devices = <Device>[unsupported, unsupportedForProject];
       final deviceManager = TestDeviceManager(devices, logger: BufferLogger.test());
       final supportFilter =
@@ -505,7 +505,7 @@ void main() {
   });
 
   group('Simultaneous device discovery', () {
-    testWithoutContext(
+    test(
       'Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing last',
       () async {
         FakeAsync().run((FakeAsync time) {
@@ -553,7 +553,7 @@ void main() {
       },
     );
 
-    testWithoutContext('Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing first', () async {
+    test('Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing first', () async {
       fakeAsync((FakeAsync async) {
         final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
         final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
@@ -598,7 +598,7 @@ void main() {
       });
     });
 
-    testWithoutContext('refreshAllDevices twice', () async {
+    test('refreshAllDevices twice', () async {
       fakeAsync((FakeAsync async) {
         final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
         final device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
@@ -645,7 +645,7 @@ void main() {
   });
 
   group('JSON encode devices', () {
-    testWithoutContext('Consistency of JSON representation', () async {
+    test('Consistency of JSON representation', () async {
       expect(
         // This tests that fakeDevices is a list of tuples where "second" is the
         // correct JSON representation of the "first". Actual values are irrelevant
@@ -656,7 +656,7 @@ void main() {
   });
 
   group('JSON encode DebuggingOptions', () {
-    testWithoutContext('can preserve the original options', () {
+    test('can preserve the original options', () {
       final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
@@ -722,7 +722,7 @@ void main() {
       expect(deserialized.webConfig.devServerConfig?.headers, <String, String>{'k': 'v'});
     });
 
-    testWithoutContext('WebDebugConfig defaults and useWasm defaulting', () {
+    test('WebDebugConfig defaults and useWasm defaulting', () {
       const defaultConfig = WebDebugConfig();
       expect(defaultConfig.enableExposeUrl, isFalse);
       expect(defaultConfig.useSseForDebugProxy, isTrue);
@@ -754,7 +754,7 @@ void main() {
   });
 
   group('Get iOS launch arguments from DebuggingOptions', () {
-    testWithoutContext(
+    test(
       'Get launch arguments for physical device with debugging enabled with all launch arguments',
       () {
         final original = DebuggingOptions.enabled(
@@ -821,7 +821,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'Get launch arguments for physical device with debugging enabled with no launch arguments',
       () {
         final original = DebuggingOptions.enabled(BuildInfo.debug);
@@ -843,7 +843,7 @@ void main() {
       },
     );
 
-    testWithoutContext('Get launch arguments for physical device with iPv4 network connection', () {
+    test('Get launch arguments for physical device with iPv4 network connection', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug);
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -864,7 +864,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments for physical device with iPv6 network connection', () {
+    test('Get launch arguments for physical device with iPv6 network connection', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug, ipv6: true);
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -885,7 +885,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments for physical device with debugging disabled with available launch arguments', () {
+    test('Get launch arguments for physical device with debugging disabled with available launch arguments', () {
       final original = DebuggingOptions.disabled(
         BuildInfo.debug,
         traceAllowlist: 'foo',
@@ -910,7 +910,7 @@ void main() {
       );
     });
 
-    testWithoutContext(
+    test(
       'Get launch arguments for simulator device with debugging enabled with all launch arguments',
       () {
         final original = DebuggingOptions.enabled(
@@ -975,7 +975,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    test(
       'Get launch arguments for simulator device with debugging enabled with no launch arguments',
       () {
         final original = DebuggingOptions.enabled(BuildInfo.debug);
@@ -997,7 +997,7 @@ void main() {
       },
     );
 
-    testWithoutContext('No --enable-dart-profiling flag when option is false', () {
+    test('No --enable-dart-profiling flag when option is false', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug, enableDartProfiling: false);
 
       final List<String> launchArguments = original.getIOSLaunchArguments(
@@ -1014,7 +1014,7 @@ void main() {
   });
 
   group('Get Android launch arguments from DebuggingOptions', () {
-    testWithoutContext(
+    test(
       'Get launch arguments for manifest injection with debugging enabled - top level flags',
       () {
         final original = DebuggingOptions.enabled(
@@ -1062,7 +1062,7 @@ void main() {
       },
     );
 
-    testWithoutContext('Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags', () {
+    test('Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags', () {
       final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
@@ -1092,7 +1092,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Get launch arguments for manifest injection - debugging disabled', () {
+    test('Get launch arguments for manifest injection - debugging disabled', () {
       final original = DebuggingOptions.disabled(BuildInfo.release);
 
       final Set<String> launchArguments = original.getAndroidLaunchArguments();
@@ -1110,7 +1110,7 @@ void main() {
       expect(launchArguments.contains('--enable-hcpp-and-surface-control=false'), isFalse);
     });
 
-    testWithoutContext('Get launch arguments for manifest injection with enableHcpp: false', () {
+    test('Get launch arguments for manifest injection with enableHcpp: false', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug, enableHcpp: false);
 
       final Set<String> launchArguments = original.getAndroidLaunchArguments();
@@ -1118,7 +1118,7 @@ void main() {
       expect(launchArguments, contains('--enable-hcpp-and-surface-control=false'));
     });
 
-    testWithoutContext('Get Intent launch arguments when debugging enabled - top level flags', () {
+    test('Get Intent launch arguments when debugging enabled - top level flags', () {
       final original = DebuggingOptions.enabled(
         BuildInfo.debug,
         profileStartup: true,
@@ -1195,7 +1195,7 @@ void main() {
       );
     });
 
-    testWithoutContext('Get Intent launch arguments with enableHcpp: false', () {
+    test('Get Intent launch arguments with enableHcpp: false', () {
       final original = DebuggingOptions.enabled(BuildInfo.debug, enableHcpp: false);
 
       final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
@@ -1206,55 +1206,52 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'Get Intent launch arguments when debugging enabled - debug-mode specific flags',
-      () {
-        final original = DebuggingOptions.enabled(
-          BuildInfo.debug,
-          startPaused: true,
-          disableServiceAuthCodes: true,
-          disableServiceOriginCheck: true,
-          dartFlags: 'baz',
-          useTestFonts: true,
-          verboseSystemLogs: true,
-          testFlag: true,
-        );
+    test('Get Intent launch arguments when debugging enabled - debug-mode specific flags', () {
+      final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
 
-        final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
 
-        expect(
-          launchArguments,
-          containsAll(<String>[
-            '--ez',
-            'enable-checked-mode',
-            'true',
-            '--ez',
-            'verify-entry-points',
-            'true',
-            '--ez',
-            'start-paused',
-            'true',
-            '--ez',
-            'disable-service-auth-codes',
-            'true',
-            '--ez',
-            'disable-service-origin-check',
-            'true',
-            '--es',
-            'dart-flags',
-            'baz',
-            '--ez',
-            'use-test-fonts',
-            'true',
-            '--ez',
-            'verbose-logging',
-            'true',
-          ]),
-        );
-      },
-    );
+      expect(
+        launchArguments,
+        containsAll(<String>[
+          '--ez',
+          'enable-checked-mode',
+          'true',
+          '--ez',
+          'verify-entry-points',
+          'true',
+          '--ez',
+          'start-paused',
+          'true',
+          '--ez',
+          'disable-service-auth-codes',
+          'true',
+          '--ez',
+          'disable-service-origin-check',
+          'true',
+          '--es',
+          'dart-flags',
+          'baz',
+          '--ez',
+          'use-test-fonts',
+          'true',
+          '--ez',
+          'verbose-logging',
+          'true',
+        ]),
+      );
+    });
 
-    testWithoutContext('Get Intent launch arguments - debugging disabled', () {
+    test('Get Intent launch arguments - debugging disabled', () {
       final original = DebuggingOptions.disabled(BuildInfo.release);
 
       final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
@@ -1271,72 +1268,68 @@ void main() {
       expect(launchArguments.contains('enable-hcpp-and-surface-control'), isFalse);
     });
 
-    testWithoutContext(
-      'all Android engine config keys are tracked in AndroidEngineCliFlags.allFlags',
-      () {
-        final original = DebuggingOptions.enabled(
-          BuildInfo.debug,
-          profileStartup: true,
-          enableSoftwareRendering: true,
-          skiaDeterministicRendering: true,
-          traceSkia: true,
-          traceAllowlist: 'foo',
-          traceSkiaAllowlist: 'bar',
-          traceSystrace: true,
-          traceToFile: 'path',
-          endlessTraceBuffer: true,
-          profileMicrotasks: true,
-          purgePersistentCache: true,
-          enableImpeller: ImpellerStatus.enabled,
-          enableFlutterGpu: true,
-          enableVulkanValidation: true,
-          enableHcpp: true,
-          startPaused: true,
-          disableServiceAuthCodes: true,
-          disableServiceOriginCheck: true,
-          dartFlags: 'baz',
-          useTestFonts: true,
-          verboseSystemLogs: true,
-          testFlag: true,
-        );
+    test('all Android engine config keys are tracked in AndroidEngineCliFlags.allFlags', () {
+      final original = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'bar',
+        traceSystrace: true,
+        traceToFile: 'path',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.enabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        enableHcpp: true,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        disableServiceOriginCheck: true,
+        dartFlags: 'baz',
+        useTestFonts: true,
+        verboseSystemLogs: true,
+        testFlag: true,
+      );
 
-        const knownExceptions = <String>{'enable-checked-mode', 'verify-entry-points'};
-        const switchAliases = <String, String>{
-          AndroidEngineCliFlags.enableHcppAndSurfaceControl: AndroidEngineCliFlags.enableHcpp,
-          AndroidEngineCliFlags.verboseLogging: AndroidEngineCliFlags.verboseSystemLogs,
-        };
+      const knownExceptions = <String>{'enable-checked-mode', 'verify-entry-points'};
+      const switchAliases = <String, String>{
+        AndroidEngineCliFlags.enableHcppAndSurfaceControl: AndroidEngineCliFlags.enableHcpp,
+        AndroidEngineCliFlags.verboseLogging: AndroidEngineCliFlags.verboseSystemLogs,
+      };
 
-        final Set<String> launchKeys = original
-            .getAndroidLaunchArguments()
-            .map((String arg) => arg.replaceFirst(RegExp(r'^--'), '').split('=').first)
-            .toSet();
+      final Set<String> launchKeys = original
+          .getAndroidLaunchArguments()
+          .map((String arg) => arg.replaceFirst(RegExp(r'^--'), '').split('=').first)
+          .toSet();
 
-        for (final key in launchKeys) {
-          if (knownExceptions.contains(key)) {
-            continue;
-          }
-          final String cliFlag = switchAliases[key] ?? key;
-          expect(
-            AndroidEngineCliFlags.allFlags,
-            contains(cliFlag),
-            reason:
-                'Flag "$key" in DebuggingOptions is missing from AndroidEngineCliFlags.allFlags',
-          );
+      for (final key in launchKeys) {
+        if (knownExceptions.contains(key)) {
+          continue;
         }
-
-        // Verify that flags passed directly to AndroidDevice.startApp are in AndroidEngineCliFlags.allFlags.
+        final String cliFlag = switchAliases[key] ?? key;
         expect(
           AndroidEngineCliFlags.allFlags,
-          containsAll(<String>[AndroidEngineCliFlags.route, AndroidEngineCliFlags.traceStartup]),
+          contains(cliFlag),
+          reason: 'Flag "$key" in DebuggingOptions is missing from AndroidEngineCliFlags.allFlags',
         );
-      },
-    );
+      }
+
+      // Verify that flags passed directly to AndroidDevice.startApp are in AndroidEngineCliFlags.allFlags.
+      expect(
+        AndroidEngineCliFlags.allFlags,
+        containsAll(<String>[AndroidEngineCliFlags.route, AndroidEngineCliFlags.traceStartup]),
+      );
+    });
   });
 
   group('PollingDeviceDiscovery', () {
     final device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
 
-    testWithoutContext('initial call to devices returns the correct list', () async {
+    test('initial call to devices returns the correct list', () async {
       final deviceList = <Device>[device1];
       final testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
 
@@ -1352,7 +1345,7 @@ void main() {
       expect(devices.first.id, device1.id);
     });
 
-    testWithoutContext('call to devices triggers onAdded', () async {
+    test('call to devices triggers onAdded', () async {
       final deviceList = <Device>[device1];
       final testDeviceDiscovery = TestPollingDeviceDiscovery(deviceList);
 

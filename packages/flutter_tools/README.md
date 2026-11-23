@@ -64,7 +64,7 @@ change needs an exception, say why in a comment at the site.
   `ProcessManager`, `Platform`, `Analytics`, and similar dependencies in
   through the constructor or as method parameters. New files must not
   import `globals.dart`.
-- Use `testWithoutContext` unless the code under test still reads from
+- Use `test` unless the code under test still reads from
   the `AppContext`. If a test for new code needs `overrides:`, inject the
   dependency instead.
 
@@ -186,7 +186,7 @@ Unit tests in `general.shard` and `commands.shard/hermetic` do not
 touch the host file system, clock, network, environment variables, or
 subprocesses. Use the fakes in `test/src/`:
 
-- `testWithoutContext(...)` unless the code under test still depends on
+- `test(...)` unless the code under test still depends on
   the `AppContext`.
 - One `MemoryFileSystem.test()` per test, created in `setUp` and passed
   to every object under test. With two file systems, the code writes to
@@ -214,7 +214,7 @@ subprocesses. Use the fakes in `test/src/`:
 
 Test file names end in `_test.dart`; the test runner skips other names.
 `dev/bots/analyze.dart` fails if a file in a `*.shard/` directory calls
-`test`, `testUsingContext`, or `testWithoutContext` and does not have
+`test` or `testUsingContext` and does not have
 that suffix.
 
 A test that needs the real file system, a real subprocess, or more than

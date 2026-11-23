@@ -15,7 +15,7 @@ import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
 void main() {
-  testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
+  test('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -33,7 +33,7 @@ void main() {
     expect(await const GenerateLocalizationsTarget().canSkip(environment), false);
   });
 
-  testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {
+  test('parseLocalizationsOptions handles valid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')
       ..writeAsStringSync('''
@@ -72,7 +72,7 @@ use-explicit-plural-values: true
     expect(options.useExplicitPluralValues, true);
   });
 
-  testWithoutContext('parseLocalizationsOptions refuses synthetic-package: true', () async {
+  test('parseLocalizationsOptions refuses synthetic-package: true', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')
       ..writeAsStringSync('''
@@ -101,7 +101,7 @@ nullable-getter: false
     );
   });
 
-  testWithoutContext('parseLocalizationsOptions warns on synthetic-package: false', () async {
+  test('parseLocalizationsOptions warns on synthetic-package: false', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')
       ..writeAsStringSync('''
@@ -133,48 +133,42 @@ nullable-getter: false
     expect(logger.warningText, contains('synthetic-package'));
   });
 
-  testWithoutContext(
-    'parseLocalizationsOptions handles preferredSupportedLocales as list',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final File configFile = fileSystem.file('l10n.yaml')
-        ..writeAsStringSync('''
+  test('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
 preferred-supported-locales: ['en_US', 'de']
 ''');
 
-      final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
+      file: configFile,
+      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
+    );
+
+    expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
+  });
+
+  test('parseLocalizationsOptions throws exception on invalid yaml configuration', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final File configFile = fileSystem.file('l10n.yaml')
+      ..writeAsStringSync('''
+use-deferred-loading: string
+''');
+
+    expect(
+      () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
         fileSystem: fileSystem,
         defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-      );
+      ),
+      throwsException,
+    );
+  });
 
-      expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
-    },
-  );
-
-  testWithoutContext(
-    'parseLocalizationsOptions throws exception on invalid yaml configuration',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final File configFile = fileSystem.file('l10n.yaml')
-        ..writeAsStringSync('''
-use-deferred-loading: string
-''');
-
-      expect(
-        () => parseLocalizationsOptionsFromYAML(
-          file: configFile,
-          logger: BufferLogger.test(),
-          fileSystem: fileSystem,
-          defaultArbDir: fileSystem.path.join('lib', 'l10n'),
-        ),
-        throwsException,
-      );
-    },
-  );
-
-  testWithoutContext('parseLocalizationsOptions tool exits on malformed Yaml', () async {
+  test('parseLocalizationsOptions tool exits on malformed Yaml', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')
       ..writeAsStringSync('''

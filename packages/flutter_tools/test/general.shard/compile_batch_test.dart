@@ -16,7 +16,7 @@ import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 
 void main() {
-  testWithoutContext('StdoutHandler can parse output for successful batch compilation', () async {
+  test('StdoutHandler can parse output for successful batch compilation', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
 
@@ -30,7 +30,7 @@ void main() {
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
   });
 
-  testWithoutContext('StdoutHandler can parse output for failed batch compilation', () async {
+  test('StdoutHandler can parse output for failed batch compilation', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
 
@@ -42,59 +42,56 @@ void main() {
     expect(output, equals(null));
   });
 
-  testWithoutContext(
-    'KernelCompiler passes correct configuration to frontend server process',
-    () async {
-      final logger = BufferLogger.test();
-      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
-      final completer = Completer<void>();
+  test('KernelCompiler passes correct configuration to frontend server process', () async {
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-      final kernelCompiler = KernelCompiler(
-        artifacts: Artifacts.test(),
-        fileSystem: MemoryFileSystem.test(),
-        fileSystemRoots: <String>[],
-        fileSystemScheme: '',
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              'Artifact.engineDartAotRuntime',
-              'Artifact.frontendServerSnapshotForEngineDartSdk',
-              '--sdk-root',
-              '/path/to/sdkroot/',
-              '--target=flutter',
-              '--no-print-incremental-dependencies',
-              '-Ddart.vm.profile=false',
-              '-Ddart.vm.product=false',
-              '--enable-asserts',
-              '--no-link-platform',
-              '--packages',
-              '.dart_tool/package_config.json',
-              '--verbosity=error',
-              'file:///path/to/main.dart',
-            ],
-            completer: completer,
-          ),
-        ]),
-        stdoutHandler: stdoutHandler,
-      );
-      final Future<CompilerOutput?> output = kernelCompiler.compile(
-        sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart',
-        buildMode: BuildMode.debug,
-        trackWidgetCreation: false,
-        dartDefines: const <String>[],
-        packageConfig: PackageConfig.empty,
-        packagesPath: '.dart_tool/package_config.json',
-      );
-      stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
-      completer.complete();
+    final kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartAotRuntime',
+            'Artifact.frontendServerSnapshotForEngineDartSdk',
+            '--sdk-root',
+            '/path/to/sdkroot/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--no-link-platform',
+            '--packages',
+            '.dart_tool/package_config.json',
+            '--verbosity=error',
+            'file:///path/to/main.dart',
+          ],
+          completer: completer,
+        ),
+      ]),
+      stdoutHandler: stdoutHandler,
+    );
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.dart_tool/package_config.json',
+    );
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
+    completer.complete();
 
-      expect((await output)?.outputFilename, '');
-    },
-  );
+    expect((await output)?.outputFilename, '');
+  });
 
-  testWithoutContext('KernelCompiler returns null if StdoutHandler returns null', () async {
+  test('KernelCompiler returns null if StdoutHandler returns null', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final completer = Completer<void>();
@@ -143,116 +140,110 @@ void main() {
     expect(await output, null);
   });
 
-  testWithoutContext(
-    'KernelCompiler returns null if frontend_server process exits with non-zero code',
-    () async {
-      final logger = BufferLogger.test();
-      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
-      final completer = Completer<void>();
+  test('KernelCompiler returns null if frontend_server process exits with non-zero code', () async {
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-      final kernelCompiler = KernelCompiler(
-        artifacts: Artifacts.test(),
-        fileSystem: MemoryFileSystem.test(),
-        fileSystemRoots: <String>[],
-        fileSystemScheme: '',
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              'Artifact.engineDartAotRuntime',
-              'Artifact.frontendServerSnapshotForEngineDartSdk',
-              '--sdk-root',
-              '/path/to/sdkroot/',
-              '--target=flutter',
-              '--no-print-incremental-dependencies',
-              '-Ddart.vm.profile=false',
-              '-Ddart.vm.product=false',
-              '--enable-asserts',
-              '--no-link-platform',
-              '--packages',
-              '.dart_tool/package_config.json',
-              '--verbosity=error',
-              'file:///path/to/main.dart',
-            ],
-            completer: completer,
-            exitCode: 127,
-          ),
-        ]),
-        stdoutHandler: stdoutHandler,
-      );
-      final Future<CompilerOutput?> output = kernelCompiler.compile(
-        sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart',
-        buildMode: BuildMode.debug,
-        trackWidgetCreation: false,
-        dartDefines: const <String>[],
-        packageConfig: PackageConfig.empty,
-        packagesPath: '.dart_tool/package_config.json',
-      );
-      stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
-      completer.complete();
+    final kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartAotRuntime',
+            'Artifact.frontendServerSnapshotForEngineDartSdk',
+            '--sdk-root',
+            '/path/to/sdkroot/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-Ddart.vm.profile=false',
+            '-Ddart.vm.product=false',
+            '--enable-asserts',
+            '--no-link-platform',
+            '--packages',
+            '.dart_tool/package_config.json',
+            '--verbosity=error',
+            'file:///path/to/main.dart',
+          ],
+          completer: completer,
+          exitCode: 127,
+        ),
+      ]),
+      stdoutHandler: stdoutHandler,
+    );
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.debug,
+      trackWidgetCreation: false,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.dart_tool/package_config.json',
+    );
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
+    completer.complete();
 
-      expect(await output, null);
-    },
-  );
+    expect(await output, null);
+  });
 
-  testWithoutContext(
-    'KernelCompiler passes correct AOT config to frontend_server in aot/profile mode',
-    () async {
-      final logger = BufferLogger.test();
-      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
-      final completer = Completer<void>();
+  test('KernelCompiler passes correct AOT config to frontend_server in aot/profile mode', () async {
+    final logger = BufferLogger.test();
+    final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final completer = Completer<void>();
 
-      final kernelCompiler = KernelCompiler(
-        artifacts: Artifacts.test(),
-        fileSystem: MemoryFileSystem.test(),
-        fileSystemRoots: <String>[],
-        fileSystemScheme: '',
-        logger: logger,
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              'Artifact.engineDartAotRuntime',
-              'Artifact.frontendServerSnapshotForEngineDartSdk',
-              '--sdk-root',
-              '/path/to/sdkroot/',
-              '--target=flutter',
-              '--no-print-incremental-dependencies',
-              '-Ddart.vm.profile=true',
-              '-Ddart.vm.product=false',
-              '--delete-tostring-package-uri=dart:ui',
-              '--delete-tostring-package-uri=package:flutter',
-              '--no-link-platform',
-              '--aot',
-              '--tfa',
-              '--packages',
-              '.dart_tool/package_config.json',
-              '--verbosity=error',
-              'file:///path/to/main.dart',
-            ],
-            completer: completer,
-          ),
-        ]),
-        stdoutHandler: stdoutHandler,
-      );
-      final Future<CompilerOutput?> output = kernelCompiler.compile(
-        sdkRoot: '/path/to/sdkroot',
-        mainPath: '/path/to/main.dart',
-        buildMode: BuildMode.profile,
-        trackWidgetCreation: false,
-        aot: true,
-        dartDefines: const <String>[],
-        packageConfig: PackageConfig.empty,
-        packagesPath: '.dart_tool/package_config.json',
-      );
-      stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
-      completer.complete();
+    final kernelCompiler = KernelCompiler(
+      artifacts: Artifacts.test(),
+      fileSystem: MemoryFileSystem.test(),
+      fileSystemRoots: <String>[],
+      fileSystemScheme: '',
+      logger: logger,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartAotRuntime',
+            'Artifact.frontendServerSnapshotForEngineDartSdk',
+            '--sdk-root',
+            '/path/to/sdkroot/',
+            '--target=flutter',
+            '--no-print-incremental-dependencies',
+            '-Ddart.vm.profile=true',
+            '-Ddart.vm.product=false',
+            '--delete-tostring-package-uri=dart:ui',
+            '--delete-tostring-package-uri=package:flutter',
+            '--no-link-platform',
+            '--aot',
+            '--tfa',
+            '--packages',
+            '.dart_tool/package_config.json',
+            '--verbosity=error',
+            'file:///path/to/main.dart',
+          ],
+          completer: completer,
+        ),
+      ]),
+      stdoutHandler: stdoutHandler,
+    );
+    final Future<CompilerOutput?> output = kernelCompiler.compile(
+      sdkRoot: '/path/to/sdkroot',
+      mainPath: '/path/to/main.dart',
+      buildMode: BuildMode.profile,
+      trackWidgetCreation: false,
+      aot: true,
+      dartDefines: const <String>[],
+      packageConfig: PackageConfig.empty,
+      packagesPath: '.dart_tool/package_config.json',
+    );
+    stdoutHandler.compilerOutput?.complete(const CompilerOutput('', 0, <Uri>[]));
+    completer.complete();
 
-      expect((await output)?.outputFilename, '');
-    },
-  );
+    expect((await output)?.outputFilename, '');
+  });
 
-  testWithoutContext('passes correct AOT config to kernel compiler in aot/release mode', () async {
+  test('passes correct AOT config to kernel compiler in aot/release mode', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final completer = Completer<void>();
@@ -305,7 +296,7 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
-  testWithoutContext('KernelCompiler passes dartDefines to the frontend_server', () async {
+  test('KernelCompiler passes dartDefines to the frontend_server', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final completer = Completer<void>();
@@ -358,7 +349,7 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
-  testWithoutContext('KernelCompiler maps a file to a multi-root scheme if provided', () async {
+  test('KernelCompiler maps a file to a multi-root scheme if provided', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final completer = Completer<void>();
@@ -409,7 +400,7 @@ void main() {
     expect((await output)?.outputFilename, '');
   });
 
-  testWithoutContext('KernelCompiler uses generated entrypoint', () async {
+  test('KernelCompiler uses generated entrypoint', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final completer = Completer<void>();
@@ -473,7 +464,7 @@ void main() {
     await output;
   });
 
-  testWithoutContext('KernelCompiler passes native assets', () async {
+  test('KernelCompiler passes native assets', () async {
     final logger = BufferLogger.test();
     final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final completer = Completer<void>();

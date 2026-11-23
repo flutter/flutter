@@ -616,7 +616,7 @@ void main() {
         },
       );
 
-      testWithoutContext('command release lock on kill signal', () async {
+      test('command release lock on kill signal', () async {
         clock.times = <int>[1000, 2000];
         final completer = Completer<void>();
         setExitFunctionForTests((int exitCode) {
@@ -1752,28 +1752,25 @@ flutter:
       );
     });
 
-    testWithoutContext(
-      "tool exits when $kAppFlavor is already set in user's environemnt",
-      () async {
-        final fs = MemoryFileSystem.test();
-        fs.file('lib/main.dart').createSync(recursive: true);
-        fs.file('pubspec.yaml').createSync();
-        final toolContext = FakeToolContext(
-          fs: fs,
-          platform: FakePlatform(environment: <String, String>{kAppFlavor: 'AlreadySet'}),
-          processManager: FakeProcessManager.empty(),
-        );
-        final CommandRunner<void> runner = _createValidationRunner(toolContext);
-        await expectLater(
-          runner.run(<String>['run', '--no-pub', '--no-hot']),
-          throwsToolExit(
-            message: '$kAppFlavor is used by the framework and cannot be set in the environment.',
-          ),
-        );
-      },
-    );
+    test("tool exits when $kAppFlavor is already set in user's environemnt", () async {
+      final fs = MemoryFileSystem.test();
+      fs.file('lib/main.dart').createSync(recursive: true);
+      fs.file('pubspec.yaml').createSync();
+      final toolContext = FakeToolContext(
+        fs: fs,
+        platform: FakePlatform(environment: <String, String>{kAppFlavor: 'AlreadySet'}),
+        processManager: FakeProcessManager.empty(),
+      );
+      final CommandRunner<void> runner = _createValidationRunner(toolContext);
+      await expectLater(
+        runner.run(<String>['run', '--no-pub', '--no-hot']),
+        throwsToolExit(
+          message: '$kAppFlavor is used by the framework and cannot be set in the environment.',
+        ),
+      );
+    });
 
-    testWithoutContext('tool exits when $kAppFlavor is set in --dart-define', () async {
+    test('tool exits when $kAppFlavor is set in --dart-define', () async {
       final fs = MemoryFileSystem.test();
       fs.file('lib/main.dart').createSync(recursive: true);
       fs.file('pubspec.yaml').createSync();
@@ -1787,7 +1784,7 @@ flutter:
       );
     });
 
-    testWithoutContext('tool exits when $kAppFlavor is set in --dart-define-from-file', () async {
+    test('tool exits when $kAppFlavor is set in --dart-define-from-file', () async {
       final fs = MemoryFileSystem.test();
       fs.file('lib/main.dart').createSync(recursive: true);
       fs.file('pubspec.yaml').createSync();
@@ -1861,29 +1858,26 @@ name: test
         },
       );
 
-      testWithoutContext(
-        "tool exits when $kAppBuildName is already set in user's environment",
-        () async {
-          final fs = MemoryFileSystem.test();
-          fs.file('lib/main.dart').createSync(recursive: true);
-          fs.file('pubspec.yaml').createSync();
-          final toolContext = FakeToolContext(
-            fs: fs,
-            platform: FakePlatform(environment: <String, String>{kAppBuildName: '1.0.0'}),
-            processManager: FakeProcessManager.empty(),
-          );
-          final CommandRunner<void> runner = _createValidationRunner(toolContext);
-          await expectLater(
-            runner.run(<String>['run', '--no-pub', '--no-hot']),
-            throwsToolExit(
-              message:
-                  '$kAppBuildName is used by the framework and cannot be set in the environment.',
-            ),
-          );
-        },
-      );
+      test("tool exits when $kAppBuildName is already set in user's environment", () async {
+        final fs = MemoryFileSystem.test();
+        fs.file('lib/main.dart').createSync(recursive: true);
+        fs.file('pubspec.yaml').createSync();
+        final toolContext = FakeToolContext(
+          fs: fs,
+          platform: FakePlatform(environment: <String, String>{kAppBuildName: '1.0.0'}),
+          processManager: FakeProcessManager.empty(),
+        );
+        final CommandRunner<void> runner = _createValidationRunner(toolContext);
+        await expectLater(
+          runner.run(<String>['run', '--no-pub', '--no-hot']),
+          throwsToolExit(
+            message:
+                '$kAppBuildName is used by the framework and cannot be set in the environment.',
+          ),
+        );
+      });
 
-      testWithoutContext('tool exits when $kAppBuildNumber is set in --dart-define', () async {
+      test('tool exits when $kAppBuildNumber is set in --dart-define', () async {
         final fs = MemoryFileSystem.test();
         fs.file('lib/main.dart').createSync(recursive: true);
         fs.file('pubspec.yaml').createSync();
@@ -1898,7 +1892,7 @@ name: test
         );
       });
 
-      testWithoutContext('user defines sharing a prefix with a reserved key are allowed', () async {
+      test('user defines sharing a prefix with a reserved key are allowed', () async {
         final fs = MemoryFileSystem.test();
         fs.file('lib/main.dart').createSync(recursive: true);
         fs.file('pubspec.yaml').createSync();
@@ -1917,78 +1911,70 @@ name: test
 
     group('Flutter version', () {
       for (final String dartDefine in FlutterCommand.flutterVersionDartDefines) {
-        testWithoutContext(
-          'tool exits when $dartDefine is set in --dart-define or --dart-define-from-file',
-          () async {
-            final fs = MemoryFileSystem.test();
-            fs.file('lib/main.dart').createSync(recursive: true);
-            fs.file('pubspec.yaml').createSync();
-            fs.file('.packages').createSync();
-            fs.file('config.json')
-              ..createSync()
-              ..writeAsStringSync('{"$dartDefine": "AlreadySet"}');
-            final toolContext = FakeToolContext(
-              flutterVersion: FakeFlutterVersion(),
-              fs: fs,
-              platform: FakePlatform(),
-              processManager: FakeProcessManager.any(),
-            );
-            final CommandRunner<void> runner = _createValidationRunner(toolContext);
-
-            await expectLater(
-              runner.run(<String>[
-                'run',
-                '--dart-define=$dartDefine=AlreadySet',
-                '--no-pub',
-                '--no-hot',
-              ]),
-              throwsToolExit(
-                message:
-                    '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file. '
-                    'Use FlutterVersion to access it in Flutter code',
-              ),
-            );
-
-            await expectLater(
-              runner.run(<String>[
-                'run',
-                '--dart-define-from-file=config.json',
-                '--no-pub',
-                '--no-hot',
-              ]),
-              throwsToolExit(
-                message:
-                    '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file. '
-                    'Use FlutterVersion to access it in Flutter code',
-              ),
-            );
-          },
-        );
-      }
-
-      // Regression test for https://github.com/flutter/flutter/issues/164093
-      testWithoutContext(
-        'tool does not throw when FLUTTER_GIT_URL exists in environment variables',
-        () async {
+        test('tool exits when $dartDefine is set in --dart-define or --dart-define-from-file', () async {
           final fs = MemoryFileSystem.test();
           fs.file('lib/main.dart').createSync(recursive: true);
           fs.file('pubspec.yaml').createSync();
           fs.file('.packages').createSync();
+          fs.file('config.json')
+            ..createSync()
+            ..writeAsStringSync('{"$dartDefine": "AlreadySet"}');
           final toolContext = FakeToolContext(
             flutterVersion: FakeFlutterVersion(),
             fs: fs,
-            platform: FakePlatform(
-              environment: <String, String>{
-                'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git',
-              },
-            ),
+            platform: FakePlatform(),
             processManager: FakeProcessManager.any(),
           );
           final CommandRunner<void> runner = _createValidationRunner(toolContext);
 
-          await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
-        },
-      );
+          await expectLater(
+            runner.run(<String>[
+              'run',
+              '--dart-define=$dartDefine=AlreadySet',
+              '--no-pub',
+              '--no-hot',
+            ]),
+            throwsToolExit(
+              message:
+                  '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file. '
+                  'Use FlutterVersion to access it in Flutter code',
+            ),
+          );
+
+          await expectLater(
+            runner.run(<String>[
+              'run',
+              '--dart-define-from-file=config.json',
+              '--no-pub',
+              '--no-hot',
+            ]),
+            throwsToolExit(
+              message:
+                  '$dartDefine is used by the framework and cannot be set using --dart-define or --dart-define-from-file. '
+                  'Use FlutterVersion to access it in Flutter code',
+            ),
+          );
+        });
+      }
+
+      // Regression test for https://github.com/flutter/flutter/issues/164093
+      test('tool does not throw when FLUTTER_GIT_URL exists in environment variables', () async {
+        final fs = MemoryFileSystem.test();
+        fs.file('lib/main.dart').createSync(recursive: true);
+        fs.file('pubspec.yaml').createSync();
+        fs.file('.packages').createSync();
+        final toolContext = FakeToolContext(
+          flutterVersion: FakeFlutterVersion(),
+          fs: fs,
+          platform: FakePlatform(
+            environment: <String, String>{'FLUTTER_GIT_URL': 'git@example.org:fork_of/flutter.git'},
+          ),
+          processManager: FakeProcessManager.any(),
+        );
+        final CommandRunner<void> runner = _createValidationRunner(toolContext);
+
+        await expectReturnsNormallyLater(runner.run(<String>['run', '--no-pub', '--no-hot']));
+      });
 
       testUsingContext(
         'FLUTTER_VERSION is set in dartDefines',
@@ -2090,7 +2076,7 @@ name: test
     });
 
     group('feature flags', () {
-      testWithoutContext('tool exits when FLUTTER_ENABLED_FEATURE_FLAGS is set in --dart-define or --dart-define-from-file', () async {
+      test('tool exits when FLUTTER_ENABLED_FEATURE_FLAGS is set in --dart-define or --dart-define-from-file', () async {
         final fs = MemoryFileSystem.test();
         fs
           ..file('lib/main.dart').createSync(recursive: true)

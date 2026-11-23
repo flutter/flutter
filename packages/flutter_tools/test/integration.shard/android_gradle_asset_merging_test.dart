@@ -120,7 +120,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext('Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK', () async {
+  test('Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK', () async {
     final Directory projectDir = await createApp(tempDir);
 
     // Every file this test packages is declared in one of the two tables below. To cover a new
@@ -224,7 +224,7 @@ void main() {
   // that produced a correct APK would also satisfy this test, and that is the
   // intended contract: the assertion is about stale output never surviving into
   // the artifact, which is the regression `FileSystemOperations.sync` prevents.
-  testWithoutContext('assets removed from pubspec are pruned from the APK on rebuild', () async {
+  test('assets removed from pubspec are pruned from the APK on rebuild', () async {
     final Directory projectDir = await createApp(tempDir);
 
     writeFlutterAsset(projectDir, 'assets/asset1.txt', 'asset_one_initial');
@@ -270,7 +270,7 @@ void main() {
   // `CopyFlutterAssetsTask` transforms AGP's merged assets (`SingleArtifact.ASSETS`)
   // by copying `flutter_assets/` over them. So on a path collision the Flutter
   // assets win over `src/main/assets`, and the build must not fail.
-  testWithoutContext('generated Flutter assets take precedence over static src/main/assets on path collision without build failure', () async {
+  test('generated Flutter assets take precedence over static src/main/assets on path collision without build failure', () async {
     final Directory projectDir = await createApp(tempDir);
 
     writeFlutterAsset(projectDir, 'assets/collision.txt', 'flutter_version');
@@ -301,7 +301,7 @@ void main() {
   // flavor (`src/<flavor>/assets`) and build type (`src/<buildType>/assets`).
   // Both are asserted against a single `freeDebug` build so this costs one
   // Gradle invocation rather than two.
-  testWithoutContext('flavor-specific and buildType-specific native assets are packaged into the matching variant APK', () async {
+  test('flavor-specific and buildType-specific native assets are packaged into the matching variant APK', () async {
     final Directory projectDir = await createApp(tempDir);
 
     // Add product flavors to build.gradle.kts.
