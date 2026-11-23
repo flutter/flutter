@@ -1518,6 +1518,17 @@ void Shell::OnAnimatorUpdateLatestFrameTargetTime(
 }
 
 // |Animator::Delegate|
+void Shell::OnAnimatorFrameBuilt(fml::TimePoint build_start,
+                                 fml::TimePoint build_end) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  if (settings_.frame_built_callback) {
+    settings_.frame_built_callback(build_start, build_end);
+  }
+}
+
+// |Animator::Delegate|
 void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
   FML_DCHECK(is_set_up_);
 
@@ -2385,8 +2396,15 @@ bool Shell::OnServiceProtocolReloadAssetFonts(
   if (!engine_) {
     return false;
   }
-  engine_->GetFontCollection().RegisterFonts(engine_->GetAssetManager());
-  engine_->GetFontCollection().GetFontCollection()->ClearFontFamilyCache();
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(), [engine = weak_engine_] {
+        if (engine) {
+          engine->GetFontCollection().RegisterFonts(engine->GetAssetManager());
+          engine->GetFontCollection()
+              .GetFontCollection()
+              ->ClearFontFamilyCache();
+        }
+      });
   SendFontChangeNotification();
 
   auto& allocator = response->GetAllocator();
@@ -2523,8 +2541,15 @@ bool Shell::ReloadSystemFonts() {
   if (!engine_) {
     return false;
   }
-  engine_->SetupDefaultFontManager();
-  engine_->GetFontCollection().GetFontCollection()->ClearFontFamilyCache();
+  fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
+                                    [engine = weak_engine_] {
+                                      if (engine) {
+                                        engine->SetupDefaultFontManager();
+                                        engine->GetFontCollection()
+                                            .GetFontCollection()
+                                            ->ClearFontFamilyCache();
+                                      }
+                                    });
   // After system fonts are reloaded, we send a system channel message
   // to notify flutter framework.
   SendFontChangeNotification();

@@ -502,7 +502,23 @@ class Engine final : public RuntimeDelegate {
   //----------------------------------------------------------------------------
   /// @brief      Setup default font manager according to specific platform.
   ///
+  /// @see        `DeferDefaultFontManager`
+  ///
   void SetupDefaultFontManager();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Defer resolving the default font manager until first font
+  ///             usage. Unlike `SetupDefaultFontManager`, which eagerly
+  ///             resolves the platform's default font manager immediately, this
+  ///             records `Settings::font_initialization_data` and delays
+  ///             resolving the font manager until fonts are first queried (used
+  ///             when `Settings::prefetched_default_font_manager` is enabled so
+  ///             engine launch does not block on an in-flight background
+  ///             prefetch).
+  ///
+  /// @see        `SetupDefaultFontManager`
+  ///
+  void DeferDefaultFontManager();
 
   //----------------------------------------------------------------------------
   /// @brief      Updates the asset manager referenced by the root isolate of a

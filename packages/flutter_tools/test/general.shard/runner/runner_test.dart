@@ -442,10 +442,13 @@ void main() {
         'thrown during shutdown', () async {
       // Regression test for https://github.com/flutter/flutter/issues/178318.
       var exceptionCount = 0;
+      final exitCompleter = Completer<void>();
+      final crashReportComplete = Completer<void>();
+      final crashReporter = WaitingCrashReporter(crashReportComplete.future);
       final ToolDependencies toolDependencies = await _bootstrapForTest(
         analytics: fakeAnalytics,
         artifacts: Artifacts.test(),
-        crashReporter: WaitingCrashReporter(Future<void>.value()),
+        crashReporter: crashReporter,
         deviceManager: FakeDeviceManager(),
         fs: fileSystem,
         platform: FakePlatform(
@@ -474,10 +477,17 @@ void main() {
             // Keep track of the number of exceptions thrown to ensure that
             // the count matches the number of exceptions we expect.
             exceptionCount++;
+            if (!exitCompleter.isCompleted) {
+              exitCompleter.complete();
+            }
           },
         ),
       );
       await command.doneThrowing;
+      crashReportComplete.complete();
+      await exitCompleter.future;
+      // Flush remaining microtask continuations from the shared crash-handling future.
+      await Future<void>(() {});
 
       // This is the main check of this test.
       //
@@ -486,6 +496,8 @@ void main() {
       // single process crash can't result in multiple crash events.
 
       // This test only makes sense if we've thrown more than one exception.
+      expect(firstExitCode, 1);
+      expect(crashReporter._details.error.toString(), 'Exception: ERROR: 1');
       expect(exceptionCount, greaterThan(1));
       expect(exceptionCount, command.exceptionCount);
 
@@ -1418,6 +1430,8 @@ class CrashingFlutterCommand extends FlutterCommand {
 class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
   MultipleExceptionCrashingFlutterCommand({required super.toolContext});
 
+  static const _targetExceptionCount = 5;
+
   final _completer = Completer<void>();
 
   @override
@@ -1432,15 +1446,17 @@ class MultipleExceptionCrashingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Timer.periodic(const Duration(milliseconds: 10), (timer) {
-      exceptionCount++;
-      if (exceptionCount < 5) {
+    void throwNext() {
+      if (exceptionCount < _targetExceptionCount) {
+        exceptionCount++;
+        Timer.run(throwNext);
         throw Exception('ERROR: $exceptionCount');
       }
-      timer.cancel();
       _completer.complete();
-    });
+    }
 
+    Timer.run(throwNext);
+    await _completer.future;
     return FlutterCommandResult.success();
   }
 }
