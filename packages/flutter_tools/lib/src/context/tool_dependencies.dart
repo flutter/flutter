@@ -79,7 +79,6 @@ import '../runner/local_engine.dart';
 import '../template.dart';
 import '../version.dart';
 import '../web/chrome.dart';
-import '../web/web_runner.dart';
 import '../web/workflow.dart';
 import '../windows/windows_workflow.dart';
 import 'android_context.dart';
@@ -132,7 +131,6 @@ class ToolDependencies {
     this.extensionCleanManager,
     this.extensionManager,
     this.flutterHookRunner,
-    this.webRunnerFactory,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -212,9 +210,6 @@ class ToolDependencies {
 
   /// Sub-context containing web platform services.
   final WebContext webContext;
-
-  /// Factory for creating web resident runners when supported by the embedder.
-  final WebRunnerFactory? webRunnerFactory;
 
   /// Evaluates host readiness and toolchain requirements for Windows workflows.
   final WindowsWorkflow windowsWorkflow;
@@ -297,7 +292,6 @@ class ToolDependencies {
     UserMessages? userMessages,
     WebContext? webContext,
     WebFlutterDeviceBuilder? webFlutterDeviceBuilder,
-    WebRunnerFactory? webRunnerFactory,
     WindowsWorkflow? windowsWorkflow,
     XCDevice? xcdevice,
     XCDevice? Function()? xcdeviceBuilder,
@@ -956,7 +950,6 @@ class ToolDependencies {
       templateRenderer: templateRenderer,
       toolContext: finalToolContext,
       webContext: finalWebContext,
-      webRunnerFactory: webRunnerFactory,
       windowsWorkflow: finalWindowsWorkflow,
     );
   }

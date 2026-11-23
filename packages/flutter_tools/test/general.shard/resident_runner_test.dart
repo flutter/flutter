@@ -14,17 +14,21 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/isolated/web_flutter_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
@@ -1324,10 +1328,15 @@ flutter:
   testUsingContext(
     'ResidentRunner printHelpDetails hides v on web in profile mode',
     () => testbed.run(() async {
-      final FlutterDevice flutterDevice = await WebServerDevice(logger: testLogger)
-          .createFlutterDevice(
-            toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+      final toolContext = DelegatingToolContext(artifacts: Artifacts.test());
+      final FlutterDevice flutterDevice =
+          await WebServerDevice(
+            logger: testLogger,
+            webFlutterDeviceBuilder: _buildWebFlutterDevice,
+          ).createFlutterDevice(
+            toolContext: toolContext,
             buildInfo: BuildInfo.profile,
+            flutterProject: FlutterProject.fromDirectoryTest(toolContext.fs.currentDirectory),
           );
 
       final ResidentRunner residentRunner = createHotRunner(
@@ -2066,10 +2075,15 @@ flutter:
   testUsingContext(
     'HotRunner evicts a changed .shaderbundle asset generically on web',
     () => testbed.run(() async {
+      final toolContext = DelegatingToolContext(artifacts: Artifacts.test());
       final FlutterDevice webFlutterDevice =
-          await WebServerDevice(logger: testLogger).createFlutterDevice(
-              toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+          await WebServerDevice(
+              logger: testLogger,
+              webFlutterDeviceBuilder: _buildWebFlutterDevice,
+            ).createFlutterDevice(
+              toolContext: toolContext,
               buildInfo: BuildInfo.debug,
+              flutterProject: FlutterProject.fromDirectoryTest(toolContext.fs.currentDirectory),
             )
             ..devFS = devFS;
       fakeVmServiceHost = FakeVmServiceHost(
@@ -2511,85 +2525,35 @@ flutter:
       );
       expect(vmServiceHost.hasRemainingExpectations, false);
     });
-
-    testWithoutContext(
-      'WebDevice.createFlutterDevice returns WebCapabilityFlutterDevice with web overrides',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final logger = BufferLogger.test();
-        final toolContext = FakeToolContext(
-          artifacts: Artifacts.test(),
-          cache: FakeCache(fileSystem: fs, flutterRoot: '/flutter'),
-          fs: fs,
-          logger: logger,
-        );
-        const debugBuildInfo = BuildInfo(
-          BuildMode.debug,
-          '',
-          treeShakeIcons: false,
-          packageConfigPath: '.dart_tool/package_config.json',
-        );
-        final webServer = WebServerDevice(logger: logger);
-
-        final FlutterDevice profileDevice = await webServer.createFlutterDevice(
-          buildInfo: BuildInfo.profile,
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-          toolContext: toolContext,
-        );
-        expect(profileDevice, isA<WebCapabilityFlutterDevice>());
-        expect(profileDevice.supportsProfileServiceProtocol, false);
-        expect(profileDevice.launchDevToolsInBrowser(), false);
-
-        final FlutterDevice wasmDevice = await webServer.createFlutterDevice(
-          buildInfo: debugBuildInfo,
-          debuggingOptions: DebuggingOptions.enabled(
-            debugBuildInfo,
-            platformOptions: const <PlatformDebuggingOptions>[WebDebugConfig(useWasm: true)],
-          ),
-          toolContext: toolContext,
-        );
-        expect(wasmDevice, isA<WebCapabilityFlutterDevice>());
-        expect(wasmDevice.supportsDebugRuntime, false);
-        expect(wasmDevice.launchDevToolsInBrowser(), false);
-
-        final jsDevice = WebCapabilityFlutterDevice(
-          webServer,
-          buildInfo: debugBuildInfo,
-          developmentShaderCompiler: const FakeShaderCompiler(),
-          generator: FakeResidentCompiler(),
-          targetPlatform: TargetPlatform.web_javascript,
-          toolContext: toolContext,
-        );
-        expect(jsDevice.supportsPerformanceOverlay, false);
-        expect(jsDevice.supportsVmServiceScreenshot, true);
-        expect(jsDevice.supportsDebugRuntime, true);
-        expect(jsDevice.supportsProfileServiceProtocol, false);
-        expect(jsDevice.usesSharedDartPluginRegistry, false);
-        expect(jsDevice.supportsShaderReload, false);
-        expect(jsDevice.launchDevToolsInBrowser(), true);
-        expect(
-          jsDevice.extraFrontEndOptionsForCache(debugBuildInfo),
-          ddcFrontEndOptions(debugBuildInfo),
-        );
-
-        final vmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            const FakeVmServiceRequest(
-              method: 'ext.flutter.connectedVmServiceUri',
-              args: <String, Object>{'value': 'ws://localhost:1234/ws'},
-            ),
-          ],
-        );
-        jsDevice.vmService = vmServiceHost.vmService;
-        await jsDevice.invokeExtensionRpcOnFirstView(
-          'ext.flutter.connectedVmServiceUri',
-          params: <String, Object?>{'value': 'ws://localhost:1234/ws'},
-        );
-        expect(vmServiceHost.hasRemainingExpectations, false);
-      },
-    );
   });
 }
+
+FlutterDevice _buildWebFlutterDevice(
+  Device device, {
+  required BuildInfo buildInfo,
+  required DevelopmentShaderCompiler developmentShaderCompiler,
+  required FlutterProject flutterProject,
+  required ResidentCompiler? generator,
+  required TargetPlatform targetPlatform,
+  required ToolContext toolContext,
+  Map<String, Object?> platformArgs = const <String, Object?>{},
+  UrlTunneller? urlTunneller,
+  String? userIdentifier,
+  WebDebugConfig webConfig = const WebDebugConfig(),
+}) => WebFlutterDevice(
+  device,
+  buildInfo: buildInfo,
+  developmentShaderCompiler: developmentShaderCompiler,
+  flutterProject: flutterProject,
+  generator: generator,
+  platformArgs: platformArgs,
+  targetPlatform: targetPlatform,
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: toolContext,
+  urlTunneller: urlTunneller,
+  userIdentifier: userIdentifier,
+  webConfig: webConfig,
+);
 
 class _LifecycleFakeFlutterDevice extends FakeFlutterDevice {
   _LifecycleFakeFlutterDevice(Device rawDevice, {this.onConfirmAssetDirectory, this.onExitApps}) {

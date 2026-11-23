@@ -19,9 +19,10 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/web_flutter_device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -1767,12 +1768,14 @@ TerminalHandler setUpTerminalHandler(
   );
   final fakeDevice = FakeDevice()..supportsScreenshot = supportsScreenshot;
   final FlutterDevice device = web
-      ? WebCapabilityFlutterDevice(
+      ? WebFlutterDevice(
           fakeDevice,
           buildInfo: buildInfo,
           developmentShaderCompiler: const FakeShaderCompiler(),
+          flutterProject: FlutterProject.fromDirectoryTest(localFileSystem.currentDirectory),
           generator: FakeResidentCompiler(),
           targetPlatform: TargetPlatform.web_javascript,
+          templateRenderer: FakeTemplateRenderer(),
           toolContext: toolContext,
         )
       : FlutterDevice(

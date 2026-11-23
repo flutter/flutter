@@ -28,9 +28,10 @@ import '../features.dart' show FeatureFlags;
 import '../hook_runner.dart' show FlutterHookRunner;
 import '../project.dart';
 import '../resident_runner.dart';
+import '../run_cold.dart';
+import '../run_hot.dart';
 import '../web/chrome_constants.dart';
 import '../web/web_debug_config.dart';
-import '../web/web_runner.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
@@ -45,7 +46,6 @@ class WebDriverService extends DriverService {
     required this._featureFlags,
     required super.toolContext,
     this._flutterHookRunner,
-    this._webRunnerFactory,
   });
 
   final Analytics _analytics;
@@ -56,7 +56,6 @@ class WebDriverService extends DriverService {
   final String _dartSdkPath;
   final FeatureFlags _featureFlags;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebRunnerFactory? _webRunnerFactory;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -84,46 +83,56 @@ class WebDriverService extends DriverService {
   }) async {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
-    final webConfig = WebDebugConfig(
-      devServerConfig: debuggingOptions.webConfig.devServerConfig,
-      renderer: debuggingOptions.webConfig.renderer,
-      useWasm: debuggingOptions.webConfig.useWasm,
-      webDefines: debuggingOptions.webConfig.webDefines,
-    );
-    final webDebuggingOptions = buildInfo.isRelease
+    final resolvedDebuggingOptions = buildInfo.isRelease
         ? DebuggingOptions.disabled(
             buildInfo,
-            platformOptions: <PlatformDebuggingOptions>[webConfig],
+            platformOptions: <PlatformDebuggingOptions>[debuggingOptions.webConfig],
           )
         : DebuggingOptions.enabled(
             buildInfo,
             disablePortPublication: debuggingOptions.disablePortPublication,
-            platformOptions: <PlatformDebuggingOptions>[webConfig],
+            platformOptions: <PlatformDebuggingOptions>[debuggingOptions.webConfig],
           );
     final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: buildInfo,
-      debuggingOptions: webDebuggingOptions,
+      debuggingOptions: resolvedDebuggingOptions,
       flutterProject: flutterProject,
       platformArgs: platformArgs,
       toolContext: toolContext,
       userIdentifier: userIdentifier,
     );
-    _residentRunner = _webRunnerFactory!.createWebRunner(
-      flutterDevice,
-      analytics: _analytics,
-      applicationPackageFactory: _applicationPackageFactory,
-      assetBundleFactory: _assetBundleFactory,
-      buildSystem: buildSystem,
-      buildTargets: buildTargets,
-      debuggingOptions: webDebuggingOptions,
-      featureFlags: _featureFlags,
-      flutterHookRunner: _flutterHookRunner,
-      flutterProject: flutterProject,
-      platformArgs: platformArgs,
-      stayResident: true,
-      target: mainPath,
-      toolContext: toolContext,
-    );
+    final String target = mainPath ?? fs.path.join('lib', 'main.dart');
+    if (flutterDevice.usesHotRunner(hotMode: true)) {
+      _residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: resolvedDebuggingOptions,
+        featureFlags: _featureFlags,
+        target: target,
+        toolContext: toolContext,
+        xcode: null,
+      );
+    } else {
+      _residentRunner = ColdRunner(
+        <FlutterDevice>[flutterDevice],
+        analytics: _analytics,
+        applicationPackageFactory: _applicationPackageFactory,
+        assetBundleFactory: _assetBundleFactory,
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
+        dartBuilder: _flutterHookRunner,
+        debuggingOptions: resolvedDebuggingOptions,
+        featureFlags: _featureFlags,
+        target: target,
+        toolContext: toolContext,
+        xcode: null,
+      );
+    }
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
       appStartedCompleter: appStartedCompleter,

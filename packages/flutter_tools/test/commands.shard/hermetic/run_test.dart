@@ -15,31 +15,36 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_application_package.dart';
-import 'package:flutter_tools/src/hook_runner.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/template.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_debug_config.dart';
-import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
@@ -760,15 +765,10 @@ void main() {
         );
 
         group('web', () {
-          late FakeWebRunnerFactory fakeWebRunnerFactory;
-
-          setUp(() {
-            fakeWebRunnerFactory = FakeWebRunnerFactory();
-          });
-
           testUsingContext(
             'can pass --web-define',
             () async {
+              _FakeRunWebFlutterDevice? lastDevice;
               final command = RunCommand(
                 appleContext: FakeAppleContext(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -776,26 +776,22 @@ void main() {
                 buildTargets: const BuildTargetsImpl(),
                 devtoolsLauncher: FakeDevtoolsLauncher(),
                 toolContext: const DelegatingToolContext(),
-                webRunnerFactory: fakeWebRunnerFactory,
               );
-              final device = FakeDevice(
-                platformType: PlatformType.web,
-                targetPlatform: TargetPlatform.web_javascript,
+              final _FakeRunWebDevice device = _createRunWebDevice(
+                logger: logger,
+                onCreated: (_FakeRunWebFlutterDevice created) => lastDevice = created,
               );
               testDeviceManager.devices = <Device>[device];
 
-              await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-                  'run',
-                  '--no-pub',
-                  '--machine',
-                  '-d',
-                  device.id,
-                  '--web-define=NAME=VAL',
-                ]),
-                throwsToolExit(),
-              );
-              expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'NAME': 'VAL'});
+              await createTestCommandRunner(command).run(<String>[
+                'run',
+                '--no-pub',
+                '--machine',
+                '-d',
+                device.id,
+                '--web-define=NAME=VAL',
+              ]);
+              expect(lastDevice!.webConfig.webDefines, <String, String>{'NAME': 'VAL'});
             },
             overrides: <Type, Generator>{
               Artifacts: () => artifacts,
@@ -1327,10 +1323,10 @@ void main() {
     });
 
     group('--web-header', () {
-      late FakeWebRunnerFactory fakeWebRunnerFactory;
+      _FakeRunWebFlutterDevice? lastDevice;
 
       setUp(() {
-        fakeWebRunnerFactory = FakeWebRunnerFactory();
+        lastDevice = null;
 
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
@@ -1342,10 +1338,9 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+        final _FakeRunWebDevice device = _createRunWebDevice(
+          logger: logger,
+          onCreated: (_FakeRunWebFlutterDevice created) => lastDevice = created,
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1360,17 +1355,15 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers,
-            <String, String>{'foo': 'bar'},
-          );
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.headers, <String, String>{
+            'foo': 'bar',
+          });
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1391,7 +1384,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () => createTestCommandRunner(
@@ -1423,7 +1415,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1457,7 +1448,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () =>
@@ -1485,7 +1475,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1516,7 +1505,6 @@ void main() {
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1526,12 +1514,11 @@ void main() {
             'hurray=flutter,flutter=hurray',
           ]);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers,
-            <String, String>{'hurray': 'flutter,flutter=hurray'},
-          );
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.headers, <String, String>{
+            'hurray': 'flutter,flutter=hurray',
+          });
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1544,10 +1531,10 @@ void main() {
     });
 
     group('CLI precedence over web_dev_config.yaml', () {
-      late FakeWebRunnerFactory fakeWebRunnerFactory;
+      _FakeRunWebFlutterDevice? lastDevice;
 
       setUp(() {
-        fakeWebRunnerFactory = FakeWebRunnerFactory();
+        lastDevice = null;
 
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
@@ -1559,10 +1546,9 @@ void main() {
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+        final _FakeRunWebDevice device = _createRunWebDevice(
+          logger: logger,
+          onCreated: (_FakeRunWebFlutterDevice created) => lastDevice = created,
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1582,14 +1568,13 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.port, 8080);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.port, 8080);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1615,14 +1600,13 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.host, 'clihost');
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.host, 'clihost');
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1653,7 +1637,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1663,10 +1646,10 @@ server:
             '--web-header=X-Cli-Header=cli-value',
           ]);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
           final Map<String, String> headers =
-              fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers;
+              lastDevice!.lastOptions!.webConfig.devServerConfig!.headers;
           // CLI headers override file config headers with same name
           expect(headers['X-Shared-Header'], 'from-cli');
           // CLI-only headers are included
@@ -1698,14 +1681,13 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.host, 'confighost');
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.port, 9000);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.host, 'confighost');
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.port, 9000);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1734,7 +1716,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1744,15 +1725,15 @@ server:
             '--web-tls-cert-key-path=/cli/key.pem',
           ]);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
+            lastDevice!.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
+            lastDevice!.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
         },
@@ -1783,22 +1764,21 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           // CLI cert path overrides file config
           expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
+            lastDevice!.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           // File config key path is used as fallback
           expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
+            lastDevice!.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/config/key.pem',
           );
         },
@@ -1822,7 +1802,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1832,15 +1811,15 @@ server:
             '--web-tls-cert-key-path=/cli/key.pem',
           ]);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
+            lastDevice!.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
+            lastDevice!.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
         },
@@ -1855,10 +1834,10 @@ server:
     });
 
     group('--base-href', () {
-      late FakeWebRunnerFactory fakeWebRunnerFactory;
+      _FakeRunWebFlutterDevice? lastDevice;
 
       setUp(() {
-        fakeWebRunnerFactory = FakeWebRunnerFactory();
+        lastDevice = null;
 
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.file('pubspec.yaml').createSync();
@@ -1870,10 +1849,9 @@ server:
   "configVersion": 2
 }
 ''');
-        final device = FakeDevice(
-          isLocalEmulator: true,
-          platformType: PlatformType.web,
-          targetPlatform: TargetPlatform.web_javascript,
+        final _FakeRunWebDevice device = _createRunWebDevice(
+          logger: logger,
+          onCreated: (_FakeRunWebFlutterDevice created) => lastDevice = created,
         );
         testDeviceManager.devices = <Device>[device];
       });
@@ -1888,17 +1866,13 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(
-            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.baseHref,
-            '/preview/',
-          );
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.baseHref, '/preview/');
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1919,7 +1893,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () =>
@@ -1947,7 +1920,6 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await expectLater(
             () =>
@@ -1975,13 +1947,12 @@ server:
             buildTargets: const BuildTargetsImpl(),
             devtoolsLauncher: FakeDevtoolsLauncher(),
             toolContext: const DelegatingToolContext(),
-            webRunnerFactory: fakeWebRunnerFactory,
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
-          expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.baseHref, isNull);
+          expect(lastDevice?.lastOptions, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(lastDevice!.lastOptions!.webConfig.devServerConfig!.baseHref, isNull);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -2898,36 +2869,6 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
   List<Feature> get allFeatures => const <Feature>[];
 }
 
-/// A Fake WebRunnerFactory that CAPTURES the debugging options passed to it.
-class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
-  DebuggingOptions? lastOptions;
-  Map<String, String>? lastWebDefines;
-
-  @override
-  ResidentRunner createWebRunner(
-    FlutterDevice device, {
-    required analytics.Analytics analytics,
-    required ApplicationPackageFactory applicationPackageFactory,
-    required AssetBundleFactory assetBundleFactory,
-    required BuildSystem buildSystem,
-    required BuildTargets buildTargets,
-    required DebuggingOptions debuggingOptions,
-    required FeatureFlags featureFlags,
-    required FlutterProject flutterProject,
-    required bool stayResident,
-    required ToolContext toolContext,
-    FlutterHookRunner? flutterHookRunner,
-    bool machine = false,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    String? target,
-    Future<String> Function(String)? urlTunneller,
-  }) {
-    lastOptions = debuggingOptions;
-    lastWebDefines = debuggingOptions.webConfig.webDefines;
-    return FakeResidentRunner();
-  }
-}
-
 class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
   @override
   AssetBundle createBundle() => AssetBundleFactory.defaultInstance(
@@ -2936,4 +2877,166 @@ class _FakeAssetBundleFactory extends Fake implements AssetBundleFactory {
     logger: BufferLogger.test(),
     platform: FakePlatform(),
   ).createBundle();
+}
+
+_FakeRunWebDevice _createRunWebDevice({
+  required Logger logger,
+  void Function(_FakeRunWebFlutterDevice device)? onCreated,
+}) {
+  return _FakeRunWebDevice(
+    logger: logger,
+    webFlutterDeviceBuilder:
+        (
+          Device device, {
+          required BuildInfo buildInfo,
+          required DevelopmentShaderCompiler developmentShaderCompiler,
+          required FlutterProject flutterProject,
+          required ResidentCompiler? generator,
+          required TargetPlatform targetPlatform,
+          required ToolContext toolContext,
+          Map<String, Object?> platformArgs = const <String, Object?>{},
+          UrlTunneller? urlTunneller,
+          String? userIdentifier,
+          WebDebugConfig webConfig = const WebDebugConfig(),
+        }) {
+          final created = _FakeRunWebFlutterDevice(
+            device,
+            buildInfo: buildInfo,
+            webConfig: webConfig,
+          );
+          onCreated?.call(created);
+          return created;
+        },
+  );
+}
+
+class _FakeRunWebDevice extends WebServerDevice {
+  _FakeRunWebDevice({required super.logger, super.webFlutterDeviceBuilder});
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
+}
+
+class _FakeRunWebDevFS extends Fake implements DevFS {
+  @override
+  DateTime? lastCompiled;
+
+  @override
+  PackageConfig? lastPackageConfig;
+
+  @override
+  List<Uri> sources = const <Uri>[];
+
+  @override
+  Uri get baseUri => Uri.parse('http://localhost:8080/');
+
+  @override
+  Future<void> destroy() async {}
+}
+
+class _FakeRunWebFlutterDevice extends Fake implements FlutterDevice {
+  _FakeRunWebFlutterDevice(
+    this.device, {
+    required this.buildInfo,
+    this.webConfig = const WebDebugConfig(),
+  }) : devFS = _FakeRunWebDevFS();
+
+  @override
+  final Device device;
+
+  @override
+  final BuildInfo buildInfo;
+
+  final WebDebugConfig webConfig;
+
+  DebuggingOptions? lastOptions;
+
+  @override
+  DevFS? devFS;
+
+  @override
+  ResidentCompiler? get generator => null;
+
+  @override
+  Future<Uri>? get vmServiceUri => null;
+
+  @override
+  FlutterVmService? get vmService => null;
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
+
+  @override
+  bool get alwaysReloadSources => false;
+
+  @override
+  bool get defersServiceProtocolConnection => true;
+
+  @override
+  bool get supportsColdRestart => true;
+
+  @override
+  bool get supportsDebugRuntime => !webConfig.useWasm;
+
+  @override
+  bool get supportsProfileServiceProtocol => false;
+
+  @override
+  bool get usesSharedDartPluginRegistry => false;
+
+  @override
+  bool usesHotRunner({required bool hotMode}) => buildInfo.isDebug && !webConfig.useWasm;
+
+  @override
+  Future<void> prepareHotLaunch({required HotRunner hotRunner}) async {}
+
+  @override
+  Future<UpdateFSReport> updateDevFS({
+    required Uri mainUri,
+    String? target,
+    AssetBundle? bundle,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
+    bool fullRestart = false,
+    required String pathToReload,
+    required String dillOutputPath,
+    required List<Uri> invalidatedFiles,
+    required PackageConfig packageConfig,
+  }) async => UpdateFSReport(success: true);
+
+  @override
+  void onInitialDevFSUpdate(UpdateFSReport report, {required analytics.Analytics analytics}) {}
+
+  @override
+  Future<int> runHot({required HotRunner hotRunner, String? route}) async {
+    lastOptions = hotRunner.debuggingOptions;
+    await hotRunner.exitApp();
+    return 0;
+  }
+
+  @override
+  void attachDeferredConnection({
+    required HotRunner hotRunner,
+    required void Function(DebugConnectionInfo) onConnected,
+    required void Function() onDisconnected,
+    ReloadSources? reloadSources,
+  }) {
+    onConnected(DebugConnectionInfo(wsUri: Uri.parse('ws://localhost:8080/ws')));
+  }
+
+  @override
+  Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
+    lastOptions = coldRunner.debuggingOptions;
+    await coldRunner.exitApp();
+    return 0;
+  }
+
+  @override
+  Future<void> exitApps({Duration timeoutDelay = const Duration(seconds: 10)}) async {}
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {}
 }

@@ -483,23 +483,23 @@ void main() {
   });
 
   group('WebDevice.createFlutterDevice', () {
-    // Uses testUsingContext because FlutterDevice.createCompilers reads the
-    // ambient residentCompilerFactory.
-    testUsingContext('falls back to default FlutterDevice when builder is null', () async {
+    testWithoutContext('throws StateError when webFlutterDeviceBuilder is null', () async {
       final toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
         processManager: FakeProcessManager.any(),
       );
       final device = WebServerDevice(logger: BufferLogger.test());
 
-      final FlutterDevice flutterDevice = await device.createFlutterDevice(
-        buildInfo: BuildInfo.debug,
-        toolContext: toolContext,
+      await expectLater(
+        () => device.createFlutterDevice(buildInfo: BuildInfo.debug, toolContext: toolContext),
+        throwsA(
+          isA<StateError>().having(
+            (StateError error) => error.message,
+            'message',
+            'webFlutterDeviceBuilder is required for web devices.',
+          ),
+        ),
       );
-
-      expect(flutterDevice.device, same(device));
-      expect(flutterDevice.targetPlatform, TargetPlatform.web_javascript);
-      expect(flutterDevice.generator, isNotNull);
     });
 
     testWithoutContext(

@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -23,7 +21,6 @@ import '../build_system/tools/shader_compiler.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../context/web_context.dart';
-import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
@@ -137,10 +134,13 @@ abstract class WebDevice extends Device {
     String? userIdentifier,
   }) async {
     final WebFlutterDeviceBuilder? webFlutterDeviceBuilder = _webFlutterDeviceBuilder;
-    final WebDebugConfig webConfig = debuggingOptions?.webConfig ?? const WebDebugConfig();
-    if (webFlutterDeviceBuilder != null && flutterProject == null) {
+    if (webFlutterDeviceBuilder == null) {
+      throw StateError('webFlutterDeviceBuilder is required for web devices.');
+    }
+    if (flutterProject == null) {
       throw StateError('flutterProject is required when webFlutterDeviceBuilder is provided.');
     }
+    final WebDebugConfig webConfig = debuggingOptions?.webConfig ?? const WebDebugConfig();
     final (
       :DevelopmentShaderCompiler developmentShaderCompiler,
       :ResidentCompiler? generator,
@@ -152,23 +152,11 @@ abstract class WebDevice extends Device {
       targetModelOverride: targetModelOverride,
       toolContext: toolContext,
     );
-    if (webFlutterDeviceBuilder == null) {
-      return WebCapabilityFlutterDevice(
-        this,
-        buildInfo: buildInfo,
-        developmentShaderCompiler: developmentShaderCompiler,
-        generator: generator,
-        targetPlatform: targetPlatform,
-        toolContext: toolContext,
-        userIdentifier: userIdentifier,
-        webConfig: webConfig,
-      );
-    }
     return webFlutterDeviceBuilder(
       this,
       buildInfo: buildInfo,
       developmentShaderCompiler: developmentShaderCompiler,
-      flutterProject: flutterProject!,
+      flutterProject: flutterProject,
       generator: generator,
       platformArgs: platformArgs,
       targetPlatform: targetPlatform,
@@ -183,68 +171,6 @@ abstract class WebDevice extends Device {
   Future<void> dispose() async {
     await Future.wait(<Future<void>>[?_logReader?.dispose(), ?portForwarder?.dispose()]);
   }
-}
-
-/// A [FlutterDevice] for web targets that overrides platform capability hooks
-/// before the web runner cutover.
-@internal
-class WebCapabilityFlutterDevice extends FlutterDevice {
-  WebCapabilityFlutterDevice(
-    super.device, {
-    required super.buildInfo,
-    required super.developmentShaderCompiler,
-    required super.generator,
-    required super.targetPlatform,
-    required super.toolContext,
-    super.userIdentifier,
-    this._webConfig = const WebDebugConfig(),
-  });
-
-  final WebDebugConfig _webConfig;
-
-  @override
-  bool get supportsPerformanceOverlay => false;
-
-  @override
-  bool get supportsVmServiceScreenshot => true;
-
-  @override
-  Future<Uint8List?> takeVmServiceScreenshot() async {
-    final vm_service.Response? response = await vmService!.callMethodWrapper('ext.dwds.screenshot');
-    if (response == null) {
-      return null;
-    }
-    return base64.decode(response.json!['data'] as String);
-  }
-
-  @override
-  bool get supportsDebugRuntime => !_webConfig.useWasm;
-
-  @override
-  bool get supportsProfileServiceProtocol => false;
-
-  @override
-  bool get usesSharedDartPluginRegistry => false;
-
-  @override
-  bool get supportsShaderReload => false;
-
-  @override
-  bool launchDevToolsInBrowser() => buildInfo.isDebug && !_webConfig.useWasm;
-
-  @override
-  List<String> extraFrontEndOptionsForCache(BuildInfo buildInfo) => ddcFrontEndOptions(buildInfo);
-
-  @override
-  Future<void> invokeExtensionRpcOnFirstView(
-    String method, {
-    required Map<String, Object?> params,
-  }) async {
-    await vmService!.callMethodWrapper(method, args: params);
-  }
-
-  @override
-  Future<void> confirmAssetDirectory(List<FlutterView> views) async {}
 }
 
 /// A web device that supports a chromium browser.
@@ -320,7 +246,7 @@ abstract class ChromiumDevice extends WebDevice {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
+    // See [WebFlutterDevice] in flutter_tools/lib/src/isolated/web_flutter_device.dart
     // for the web initialization and server logic.
     final WebDebugConfig(
       :String? launchUrl,

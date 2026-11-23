@@ -39,7 +39,6 @@ import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/web_debug_config.dart';
 import '../web/web_options.dart';
-import '../web/web_runner.dart';
 import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
@@ -351,7 +350,6 @@ class RunCommand extends RunCommandBase {
     super.applicationPackages,
     this.deviceManager,
     this._flutterHookRunner,
-    this._webRunnerFactory,
     super.verboseHelp = false,
   }) : super(deviceManager: deviceManager) {
     requiresPubspecYaml();
@@ -420,7 +418,6 @@ class RunCommand extends RunCommandBase {
   final DeviceManager? deviceManager;
   final DevtoolsLauncher _devtoolsLauncher;
   final FlutterHookRunner? _flutterHookRunner;
-  final WebRunnerFactory? _webRunnerFactory;
 
   @override
   final name = 'run';
@@ -675,12 +672,14 @@ class RunCommand extends RunCommandBase {
     final FileSystem fs = toolContext.fs;
 
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
-    final webMode = webDevServerConfig != null;
     final DebuggingOptions debuggingOptions = await createDebuggingOptions(
       webDevServerConfig: webDevServerConfig,
     );
 
-    if (hotMode && !webMode) {
+    final bool useHotRunner = flutterDevices.any(
+      (FlutterDevice device) => device.usesHotRunner(hotMode: hotMode),
+    );
+    if (useHotRunner) {
       return HotRunner(
         flutterDevices,
         target: targetFile,
@@ -690,6 +689,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
         dillOutputPath: getValue(BuildInfoOptions.outputDill),
         stayResident: stayResident,
+        hotMode: hotMode,
         analytics: this.analytics,
         applicationPackageFactory: applicationPackages,
         assetBundleFactory: assetBundleFactory,
@@ -701,22 +701,6 @@ class RunCommand extends RunCommandBase {
         toolContext: toolContext,
         xcode: appleContext.xcode,
       );
-    } else if (webMode) {
-      return _webRunnerFactory!.createWebRunner(
-        flutterDevices.single,
-        target: targetFile,
-        flutterProject: flutterProject,
-        debuggingOptions: debuggingOptions,
-        stayResident: stayResident,
-        analytics: this.analytics,
-        applicationPackageFactory: applicationPackages,
-        assetBundleFactory: assetBundleFactory,
-        buildSystem: buildSystem,
-        buildTargets: buildTargets,
-        featureFlags: _featureFlags,
-        flutterHookRunner: _flutterHookRunner,
-        toolContext: toolContext,
-      );
     }
     return ColdRunner(
       flutterDevices,
@@ -725,6 +709,7 @@ class RunCommand extends RunCommandBase {
       traceStartup: traceStartup,
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
+      projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
       stayResident: stayResident,
       dartBuilder: _flutterHookRunner,
       analytics: this.analytics,
@@ -750,7 +735,6 @@ class RunCommand extends RunCommandBase {
       featureFlags: _featureFlags,
       flutterHookRunner: _flutterHookRunner,
       toolContext: toolContext,
-      webRunnerFactory: _webRunnerFactory,
       xcode: appleContext.xcode,
       androidSdk: _androidContext?.androidSdk,
       androidWorkflow: _androidWorkflow,
@@ -836,10 +820,14 @@ class RunCommand extends RunCommandBase {
       }
     }
 
+    final DebuggingOptions debuggingOptions = await createDebuggingOptions(
+      webDevServerConfig: webDevServerConfig,
+    );
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await device.createFlutterDevice(
           buildInfo: buildInfo,
+          debuggingOptions: debuggingOptions,
           flutterProject: project,
           toolContext: toolContext,
           userIdentifier: userIdentifier,
