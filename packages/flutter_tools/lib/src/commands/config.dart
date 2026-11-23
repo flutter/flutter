@@ -47,7 +47,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   @override
   ToolContext get toolContext => _toolContext;
 
-  var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
+  List<ExtensionSettingsGroup>? _extensionSettingsGroups;
   final _acceptedExtensionFlags = <({String extensionName, FeatureFlag flag})>[];
   final _acceptedExtensionOptions = <({String extensionName, ConfigOption option})>[];
   final _acceptedExtensionActions = <({ConfigAction action, ExtensionSettingsGroup group})>[];
@@ -120,27 +120,30 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     return parser;
   }
 
-  Future<ExtensionConfiguration?> get _activeExtensionConfig async {
-    if (!featureFlags.isToolExtensionsEnabled) {
-      return null;
+  Future<List<ExtensionSettingsGroup>> _getExtensionSettingsGroups() async {
+    if (_extensionSettingsGroups case final cached?) {
+      return cached;
     }
-    if (_extensionManager case final extensionManager?) {
-      await extensionManager.ensureInitialized();
-      final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
-      if (extensions.isNotEmpty) {
-        return ExtensionConfiguration(extensions: extensions, logger: _toolContext.logger);
+    if (featureFlags.isToolExtensionsEnabled) {
+      if (_extensionManager case final extensionManager?) {
+        await extensionManager.ensureInitialized();
+        final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
+        if (extensions.isNotEmpty) {
+          final config = ExtensionConfiguration(
+            extensions: extensions,
+            logger: _toolContext.logger,
+          );
+          return _extensionSettingsGroups = await config.fetchExtensionSettings();
+        }
       }
     }
-    return null;
+    return _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
   }
 
   @override
   Future<void> initializeDynamicOptions() async {
-    if (await _activeExtensionConfig case final activeConfig?) {
-      _extensionSettingsGroups = await activeConfig.fetchExtensionSettings();
-      if (_extensionSettingsGroups.isNotEmpty) {
-        rebuildDynamicArgParser();
-      }
+    if ((await _getExtensionSettingsGroups()).isNotEmpty) {
+      rebuildDynamicArgParser();
     }
   }
 
@@ -179,7 +182,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     final optionOwners = <String, String?>{
       for (final String name in _builtInOptionNames(dynamicParser)) name: null,
     };
-    for (final ExtensionSettingsGroup group in _extensionSettingsGroups) {
+    for (final ExtensionSettingsGroup group
+        in _extensionSettingsGroups ?? const <ExtensionSettingsGroup>[]) {
       final ExtensionSettingsGroup(
         :String extensionName,
         :String displayTitle,
@@ -327,11 +331,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
           config.removeValue(configSetting);
         }
       }
-      final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-      final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
-          ? _extensionSettingsGroups
-          : await activeConfig?.fetchExtensionSettings() ?? const <ExtensionSettingsGroup>[];
-      for (final ExtensionSettingsGroup(:extensionName, :featureFlags) in groups) {
+      for (final ExtensionSettingsGroup(:extensionName, :featureFlags)
+          in await _getExtensionSettingsGroups()) {
         for (final FeatureFlag(:settingName) in featureFlags) {
           ExtensionConfiguration.removeSettingValue(
             config,
@@ -564,10 +565,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       buffer.writeln(settings.join('\n'));
     }
 
-    final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
-    final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
-        ? _extensionSettingsGroups
-        : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
+    final List<ExtensionSettingsGroup> groups = await _getExtensionSettingsGroups();
     if (groups.any((ExtensionSettingsGroup g) => g.hasDisplayableSettings)) {
       buffer.writeln('\nExtension Settings:');
       for (final group in groups) {
