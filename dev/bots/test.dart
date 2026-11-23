@@ -227,6 +227,11 @@ Future<void> _runIntegrationToolTests() async {
   }
   await runDartTest(_toolsPath, forceSingleCore: true, testPaths: testPaths, collectMetrics: true);
 
+  // Unlike the files above, every subshard would run all three of these.
+  // Run them in the first subshard only.
+  if (!(Platform.environment[kSubshardKey]?.startsWith('1_') ?? true)) {
+    return;
+  }
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'link_hook'));
   await runFlutterTest(
