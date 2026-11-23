@@ -20,7 +20,6 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../dart/package_map.dart';
-import '../../features.dart' show featureFlags;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../isolated/native_assets/native_assets.dart';
 import '../build_system.dart';
@@ -63,7 +62,7 @@ class BuildHooks extends Target {
       targetPlatform: targetPlatform,
       projectUri: projectUri,
       fileSystem: fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: environment.featureFlags,
       logger: environment.logger,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
@@ -143,8 +142,14 @@ class LinkHooks extends Target {
       const BuildHooks(platform: HookPlatform.web)
     else
       const BuildHooks(),
-    if (platform == HookPlatform.native && featureFlags.isRecordUseEnabled) const KernelSnapshot(),
     ...extraDependencies, // Dart2WasmTarget, Dart2JSTarget
+  ];
+
+  @override
+  List<Target> resolveDependencies(Environment environment) => <Target>[
+    ...dependencies,
+    if (platform == HookPlatform.native && environment.featureFlags.isRecordUseEnabled)
+      const KernelSnapshot(),
   ];
 
   static const String recordedUsesWasmFileName = 'recorded_uses_wasm.json';
@@ -160,12 +165,17 @@ class LinkHooks extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{BUILD_DIR}/${BuildHooks.resultFilename}'),
-    if (featureFlags.isRecordUseEnabled)
-      for (final String filename in _recordedUsesFileNames) Source.pattern('{BUILD_DIR}/$filename'),
+    Source.fromEnvironment(
+      (Environment environment) => <Source>[
+        if (environment.featureFlags.isRecordUseEnabled)
+          for (final String filename in _recordedUsesFileNames)
+            Source.pattern('{BUILD_DIR}/$filename'),
+      ],
+    ),
   ];
 
   File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
-    if (!featureFlags.isRecordUseEnabled) {
+    if (!environment.featureFlags.isRecordUseEnabled) {
       return null;
     }
     if (platform == HookPlatform.native && !buildMode.isPrecompiled) {
@@ -227,7 +237,7 @@ class LinkHooks extends Target {
         targetPlatform: targetPlatform,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        featureFlags: featureFlags,
+        featureFlags: environment.featureFlags,
         logger: environment.logger,
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
@@ -243,7 +253,7 @@ class LinkHooks extends Target {
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       fileSystem: fileSystem,
-      featureFlags: featureFlags,
+      featureFlags: environment.featureFlags,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,

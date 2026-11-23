@@ -53,8 +53,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
+    // Release the WebGL contexts held by the previous rasterizer.
+    _pictureToImageSurface.dispose();
+    rasterizer.dispose();
     rasterizer = _createRasterizer();
     _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
+    debugClear();
   }
 
   @override
@@ -97,8 +101,10 @@ class CanvasKitRenderer extends Renderer {
   );
 
   @override
-  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) =>
-      CkCanvas(recorder, cullRect);
+  ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
+    final ui.Rect rect = EngineCanvas.resolveCullRect(recorder, cullRect);
+    return (recorder as CkPictureRecorder).beginRecording(rect);
+  }
 
   @override
   BackendGradient createGradientLinear(

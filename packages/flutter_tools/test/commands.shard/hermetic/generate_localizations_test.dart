@@ -355,6 +355,7 @@ format: true
       final environment = Environment.test(
         fileSystem.currentDirectory,
         artifacts: artifacts,
+        featureFlags: TestFeatureFlags(),
         processManager: processManager,
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
@@ -392,6 +393,7 @@ format: false
     final environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: artifacts,
+      featureFlags: TestFeatureFlags(),
       processManager: processManager,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),

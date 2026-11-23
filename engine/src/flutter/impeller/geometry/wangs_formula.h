@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_WANGS_FORMULA_H_
 #define FLUTTER_IMPELLER_GEOMETRY_WANGS_FORMULA_H_
 
+#include "impeller/geometry/constants.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
 
@@ -22,6 +23,29 @@
 // Programming Approach to Curves and Surfaces for Geometric Modeling". Morgan
 // Kaufmann Publishers.)
 namespace impeller {
+
+/// The maximum number of line segments that any one curve will be subdivided
+/// into by the functions below.
+///
+/// Without a limit, a curve with very large (or non-finite) coordinates
+/// relative to the scale factor produces an enormous or infinite count, and
+/// the tessellators that loop over that count never finish. Very large
+/// coordinates are legitimate, for example geometry drawn in "world" units
+/// and positioned with a transform, so this clamps the count instead of
+/// rejecting the curve.
+///
+/// The limit matches the one used for circles and ovals, because ovals and
+/// round rect corners reach these functions as one conic per quarter turn.
+/// See |kMaxSegmentsPerQuarterTurn|.
+///
+/// All of the functions below return a value in the range
+/// [0, kMaxCurveSubdivisions]. A non-finite count is returned as
+/// kMaxCurveSubdivisions rather than 0 or 1, because an infinite or NaN
+/// count usually comes from float overflow on huge but finite coordinates
+/// (for example inf * 0 in the conic formula), and too few segments would
+/// render such a curve as a straight line.
+constexpr Scalar kMaxCurveSubdivisions =
+    static_cast<Scalar>(kMaxSegmentsPerQuarterTurn);
 
 /// Returns the minimum number of evenly spaced (in the parametric sense) line
 /// segments that the cubic must be chopped into in order to guarantee all lines
