@@ -144,12 +144,13 @@ command line turns it off for that command). Bazel's idle server drops an
 entry that no output base has used for two weeks. A `fetched_archive` is
 reproducible when the lock has its sha256, which it has for every package
 CIPD serves; a `fetched_tree` when it is a commit with nothing inside it
-but pinned commits and checked packages. Three trees are not, and are
-fetched for each output base as before: vulkan-deps, whose ten members are
-links into other repositories of its output base, and the two that run
-hooks, the Dart tree and the Emscripten SDK. What their hooks write is the
-same as in a synced checkout, but no build has been made yet from such a
-tree in a second output base; they are also the two largest. On a bot
+but pinned commits and checked packages, whether or not it runs hooks: the
+Dart tree fetched twice, a day apart, is the same file for file, what its
+hooks write included (83,475 files; `.git` and Python's bytecode aside), and
+the Emscripten SDK's installation is a synced checkout's file for file. One
+tree is not, and is fetched for each output base as before: vulkan-deps,
+whose ten members, which are in the cache, are links into other
+repositories of its output base. On a bot
 nothing can be counted on to collect the cache: Bazel's collector runs in
 a server that has been idle for five minutes, and a bot's server exits
 after five idle minutes or with its task. What the bots fetch this way
@@ -163,7 +164,13 @@ sysroot and three trees, 2.3 GB in the cache. In a synced checkout with
 `FLUTTER_BAZEL_FETCH_SOURCES=1` (below), `@zlib//:zlib`, whose BUILD file is
 converted from GN over the tree in the cache, built in a second output base
 in 7 s with nothing fetched; vulkan-deps was fetched there again, its ten
-members were not.
+members were not. The two largest trees, in the checkout without `gclient
+sync` again: the first output base fetched the Dart tree (with eleven
+package trees, for the engine's package configuration) and the Emscripten
+SDK; a second resolved the packages, ran a GN conversion and built zlib
+over the Dart tree in 12 s, and built the LTO libraries and a wasm module
+with the SDK in under a minute, each a link to the first one's directory,
+with nothing fetched.
 
 **A roll.** A tree whose pin changed is fetched again, into the same
 directory, by the next build that reads it. What was made from the old tree

@@ -206,16 +206,14 @@ def _fetched_tree_impl(rctx):
 
     # Whether another output base may take this directory as it stands
     # (Bazel's repo contents cache, the root .bazelrc). A commit by its id,
-    # the dependencies pinned inside it, packages checked against a sha256
-    # and what gclient writes are the same wherever they are fetched. Not so
-    # a tree with members linked in from other repositories: the links name
-    # this output base. And not yet a tree that ran hooks: what they wrote
-    # has been compared with a synced checkout's, but no build has been
-    # made from such a tree in a second output base.
+    # the dependencies pinned inside it, packages checked against a sha256,
+    # what gclient writes and what the tree's own hooks write are the same
+    # wherever they are fetched (the Dart tree, compared file by file between
+    # two fetches; the Emscripten SDK, with a synced checkout's). Not so a
+    # tree with members linked in from other repositories: the links name
+    # this output base.
     packages_checked = all([relative in rctx.attr.cipd_sha256 for relative in rctx.attr.cipd])
-    return rctx.repo_metadata(
-        reproducible = packages_checked and not rctx.attr.linked and not rctx.attr.hooks,
-    )
+    return rctx.repo_metadata(reproducible = packages_checked and not rctx.attr.linked)
 
 fetched_tree = repository_rule(
     implementation = _fetched_tree_impl,
