@@ -994,6 +994,66 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   DestroyShell(std::move(shell));
 }
 
+TEST_F(ShellTest, FrameBuiltCallbackIsCalled) {
+  auto settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+
+  int build_callback_count = 0;
+  fml::TimePoint build_start;
+  fml::TimePoint build_end;
+  bool called_on_ui_thread = false;
+  fml::AutoResetWaitableEvent build_latch;
+  settings.frame_built_callback =
+      [&build_callback_count, &build_start, &build_end, &called_on_ui_thread,
+       &build_latch, ui_task_runner = task_runners.GetUITaskRunner()](
+          fml::TimePoint start, fml::TimePoint end) {
+        ++build_callback_count;
+        build_start = start;
+        build_end = end;
+        called_on_ui_thread = ui_task_runner->RunsTasksOnCurrentThread();
+        build_latch.Signal();
+      };
+
+  FrameTiming rasterized_timing;
+  fml::AutoResetWaitableEvent raster_latch;
+  settings.frame_rasterized_callback = [&rasterized_timing,
+                                        &raster_latch](const FrameTiming& t) {
+    rasterized_timing = t;
+    raster_latch.Signal();
+  };
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+
+  // We MUST put |start| after |CreateShell()| because the clock source will be
+  // reset through |TimePoint::SetClockSource()| in
+  // |DartVMInitializer::Initialize()| within |CreateShell()|.
+  fml::TimePoint start = fml::TimePoint::Now();
+
+  // Create the surface needed by rasterizer.
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  PumpOneFrame(shell.get());
+
+  build_latch.Wait();
+  fml::TimePoint finish = fml::TimePoint::Now();
+  raster_latch.Wait();
+
+  EXPECT_EQ(build_callback_count, 1);
+  EXPECT_TRUE(called_on_ui_thread);
+  EXPECT_GE(build_start, start);
+  EXPECT_LE(build_start, build_end);
+  EXPECT_LE(build_end, finish);
+  EXPECT_EQ(build_start, rasterized_timing.Get(FrameTiming::kBuildStart));
+  EXPECT_EQ(build_end, rasterized_timing.Get(FrameTiming::kBuildFinish));
+
+  DestroyShell(std::move(shell), task_runners);
+}
+
 TEST_F(ShellTest, ExternalEmbedderNoThreadMerger) {
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -3834,6 +3894,43 @@ TEST_F(ShellTest, PrefetchDefaultFontManager) {
   // If the prefetched_default_font_manager flag is set, then the default font
   // manager will not be added until the engine starts running.
   ASSERT_EQ(get_font_manager_count(), initial_font_manager_count + 1);
+
+  DestroyShell(std::move(shell));
+}
+
+TEST_F(ShellTest, ReloadSystemFonts) {
+  auto settings = CreateSettingsForFixture();
+  settings.prefetched_default_font_manager = true;
+  auto shell = CreateShell(settings);
+
+  auto get_font_manager_count = [&] {
+    fml::AutoResetWaitableEvent latch;
+    size_t font_manager_count = 0;
+    fml::TaskRunner::RunNowOrPostTask(
+        shell->GetTaskRunners().GetUITaskRunner(),
+        [this, &shell, &latch, &font_manager_count]() {
+          font_manager_count =
+              GetFontCollection(shell.get())->GetFontManagersCount();
+          latch.Signal();
+        });
+    latch.Wait();
+    return font_manager_count;
+  };
+
+  const size_t initial_font_manager_count = get_font_manager_count();
+  EXPECT_GT(initial_font_manager_count, 0u);
+
+  fml::AutoResetWaitableEvent reload_latch;
+  bool reload_result = false;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [&shell, &reload_result, &reload_latch]() {
+        reload_result = shell->ReloadSystemFonts();
+        reload_latch.Signal();
+      });
+  reload_latch.Wait();
+  EXPECT_TRUE(reload_result);
+  EXPECT_EQ(get_font_manager_count(), initial_font_manager_count + 1);
 
   DestroyShell(std::move(shell));
 }

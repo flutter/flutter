@@ -50,7 +50,7 @@ FlutterProjectFactory _contextProjectFactory() =>
     context.get<FlutterProjectFactory>() ??
     FlutterProjectFactory(
       config: context.get<Config>()!,
-      featureFlagsBuilder: () => featureFlags,
+      featureFlagsBuilder: () => context.get<FeatureFlags>()!,
       fileSystem: _contextFileSystem(),
       logger: context.get<Logger>()!,
       plistParser:
@@ -91,6 +91,7 @@ final _testbedDefaults = <Type, Generator>{
   Cache: () => FlutterCache(
     flutterRoot: '',
     fileSystem: _contextFileSystem(),
+    isLocalEngineBuilder: () => context.get<Artifacts>()?.localEngineInfo != null,
     logger: context.get<Logger>()!,
     platform: _contextPlatform(),
     osUtils: context.get<OperatingSystemUtils>()!,
