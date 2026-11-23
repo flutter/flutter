@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
-import 'dart:isolate';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
 
@@ -187,24 +186,14 @@ void callMyTestMethod() {
   }
 }
 
-// Test helpers for DartMessageHandler pause-on-start resumption.
+// Test helpers for DartMessageHandler pause-on-start and pause-on-exit
+// resumption.
 
-@pragma('vm:external-name', 'SignalAllMessagesReceived')
-external void signalAllMessagesReceived(int sum);
-
-RawReceivePort? _pausedTestPort;
-final _receivedWhilePaused = <int>[];
 int _embedderCallbackCount = 0;
 
 @pragma('vm:entry-point')
 void pauseOnStartMain() {
   signalDone();
-}
-
-@pragma('vm:entry-point')
-void pauseOnStartThrowMain() {
-  signalDone();
-  throw StateError('Non-fatal uncaught error in main');
 }
 
 @pragma('vm:never-inline')
@@ -215,22 +204,4 @@ int embedderCallback() {
   // Call a non-inlined helper so AOT's CheckStackOverflowElimination retains
   // the prologue interrupt check that drains pending OOB messages.
   return _embedderCallbackBody();
-}
-
-@pragma('vm:entry-point')
-SendPort openPausedTestPort() {
-  _receivedWhilePaused.clear();
-  final port = RawReceivePort((Object? message) {
-    if (message is int) {
-      _receivedWhilePaused.add(message);
-      if (_receivedWhilePaused.length == 3) {
-        final int sum = _receivedWhilePaused.fold<int>(0, (int a, int b) => a + b);
-        _pausedTestPort?.close();
-        _pausedTestPort = null;
-        signalAllMessagesReceived(sum);
-      }
-    }
-  });
-  _pausedTestPort = port;
-  return port.sendPort;
 }

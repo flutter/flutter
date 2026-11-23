@@ -5,7 +5,6 @@
 #ifndef LIB_TONIC_DART_MESSAGE_HANDLER_H_
 #define LIB_TONIC_DART_MESSAGE_HANDLER_H_
 
-#include <cstddef>
 #include <functional>
 
 #include "third_party/dart/runtime/include/dart_api.h"
@@ -55,7 +54,6 @@ class DartMessageHandler {
   bool isolate_exited_;
   bool isolate_had_uncaught_exception_error_;
   bool isolate_had_fatal_error_;
-  size_t paused_on_start_unhandled_messages_;
   DartErrorHandleType isolate_last_error_;
   TaskDispatcher task_dispatcher_;
 

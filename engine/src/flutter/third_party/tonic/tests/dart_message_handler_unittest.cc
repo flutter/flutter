@@ -23,30 +23,39 @@ namespace testing {
 
 namespace {
 
-Settings CreateStartPausedVmServiceSettings(const Settings& base_settings) {
+Settings CreateVmServiceSettings(const Settings& base_settings,
+                                 bool start_paused,
+                                 bool pause_on_exit) {
   Settings settings = base_settings;
-  settings.start_paused = true;
+  settings.start_paused = start_paused;
   settings.enable_vm_service = true;
-  settings.vm_service_host = "127.0.0.1";
+  if (pause_on_exit) {
+    settings.root_isolate_create_callback = [](const auto&) {
+      Dart_SetShouldPauseOnExit(true);
+    };
+  }
   return settings;
 }
 
-void WaitUntilPausedOnStart(AutoIsolateShutdown* isolate,
-                            const fml::RefPtr<fml::TaskRunner>& ui_runner) {
-  while (true) {
-    bool is_paused = false;
+template <typename Predicate>
+void WaitUntilIsolateCondition(AutoIsolateShutdown* isolate,
+                               const fml::RefPtr<fml::TaskRunner>& ui_runner,
+                               Predicate predicate) {
+  for (int attempt = 0; attempt < 6000; ++attempt) {
+    bool satisfied = false;
     ASSERT_TRUE(isolate->RunInIsolateScope([&]() {
-      is_paused = Dart_IsPausedOnStart();
+      satisfied = predicate();
       return true;
     }));
-    if (is_paused) {
+    if (satisfied) {
       return;
     }
     fml::AutoResetWaitableEvent turn;
     ui_runner->PostDelayedTask([&]() { turn.Signal(); },
-                               fml::TimeDelta::FromMilliseconds(2));
+                               fml::TimeDelta::FromMilliseconds(5));
     turn.Wait();
   }
+  FAIL() << "Timed out waiting for isolate condition.";
 }
 
 std::string GetIsolateServiceId(AutoIsolateShutdown* isolate) {
@@ -59,13 +68,10 @@ std::string GetIsolateServiceId(AutoIsolateShutdown* isolate) {
   return "isolates/" + std::to_string(main_port);
 }
 
-// Sends a VM Service `resume` RPC directly to the in-process VM service
+// Invokes a VM Service JSON-RPC method directly on the in-process VM service
 // isolate via `Dart_InvokeVMServiceMethod` (avoiding TCP sockets so the test
 // works in sandboxed environments such as Fuchsia).
-bool InvokeVmServiceResume(const std::string& isolate_id) {
-  std::string request =
-      R"({"jsonrpc":"2.0","id":"1","method":"resume","params":{"isolateId":")" +
-      isolate_id + R"("}})";
+bool InvokeVmServiceMethod(std::string request) {
   for (int attempt = 0; attempt < 500; ++attempt) {
     uint8_t* response_json = nullptr;
     intptr_t response_json_length = 0;
@@ -85,15 +91,40 @@ bool InvokeVmServiceResume(const std::string& isolate_id) {
     if (ok && response.find(R"("type":"Success")") != std::string::npos) {
       return true;
     }
+    // Retry only while the service isolate has not yet finished initializing or
+    // registered the target isolate as runnable.
+    constexpr const char* kIsolateMustBeRunnableCode = R"("code":105)";
+    constexpr const char* kServiceDisappearedCode = R"("code":112)";
+    const bool transient_not_registered =
+        !ok || response.find(kIsolateMustBeRunnableCode) != std::string::npos ||
+        response.find(kServiceDisappearedCode) != std::string::npos;
+    if (!transient_not_registered) {
+      return false;
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   return false;
 }
 
-void ClearPausedOnStartForShutdown(AutoIsolateShutdown* isolate) {
+bool InvokeVmServiceResume(const std::string& isolate_id) {
+  return InvokeVmServiceMethod(
+      R"({"jsonrpc":"2.0","id":"1","method":"resume","params":{"isolateId":")" +
+      isolate_id + R"("}})");
+}
+
+bool InvokeVmServiceSetFlag(const std::string& name, const std::string& value) {
+  return InvokeVmServiceMethod(
+      R"({"jsonrpc":"2.0","id":"1","method":"setFlag","params":{"name":")" +
+      name + R"(","value":")" + value + R"("}})");
+}
+
+void ClearPausedStateForShutdown(AutoIsolateShutdown* isolate) {
   (void)isolate->RunInIsolateScope([&]() {
     if (Dart_IsPausedOnStart()) {
       Dart_SetPausedOnStart(false);
+    }
+    if (Dart_IsPausedOnExit()) {
+      Dart_SetPausedOnExit(false);
     }
     return true;
   });
@@ -111,8 +142,15 @@ class DartMessageHandlerTest : public FixtureTest {
 
     ~PausedIsolateSession() {
       if (paused_isolate) {
-        ClearPausedOnStartForShutdown(paused_isolate.get());
+        ClearPausedStateForShutdown(paused_isolate.get());
         paused_isolate->Shutdown();
+      }
+      // `Dart_SetVMFlags` mutates process-global Dart VM flags that persist
+      // across `DartVM` instances in the same test binary. Reset
+      // `pause_isolates_on_start` before shutting down the VM so subsequent
+      // tests (or `--gtest_shuffle` / `--gtest_repeat`) are unaffected.
+      if (vm_ref && settings.start_paused) {
+        EXPECT_TRUE(InvokeVmServiceSetFlag("pause_isolates_on_start", "false"));
       }
     }
 
@@ -124,10 +162,13 @@ class DartMessageHandlerTest : public FixtureTest {
     std::unique_ptr<AutoIsolateShutdown> paused_isolate;
   };
 
-  std::unique_ptr<PausedIsolateSession> StartPausedIsolateSession(
-      const std::string& entrypoint) {
+  std::unique_ptr<PausedIsolateSession> StartIsolateSession(
+      const std::string& entrypoint,
+      bool start_paused,
+      bool pause_on_exit) {
     auto session = std::make_unique<PausedIsolateSession>(
-        CreateStartPausedVmServiceSettings(CreateSettingsForFixture()),
+        CreateVmServiceSettings(CreateSettingsForFixture(), start_paused,
+                                pause_on_exit),
         CreateNewThread());
     if (!session->vm_ref) {
       return nullptr;
@@ -149,10 +190,111 @@ class DartMessageHandlerTest : public FixtureTest {
       return nullptr;
     }
 
-    WaitUntilPausedOnStart(session->paused_isolate.get(), session->ui_thread);
+    if (start_paused) {
+      WaitUntilIsolateCondition(session->paused_isolate.get(),
+                                session->ui_thread, Dart_IsPausedOnStart);
+    } else if (pause_on_exit) {
+      WaitUntilIsolateCondition(session->paused_isolate.get(),
+                                session->ui_thread, Dart_IsPausedOnExit);
+    }
     session->target_isolate_id =
         GetIsolateServiceId(session->paused_isolate.get());
     return session;
+  }
+
+  void RunResumeConsumedByInterruptTest(bool pause_on_start) {
+    ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+    auto session = StartIsolateSession("pauseOnStartMain",
+                                       /*start_paused=*/pause_on_start,
+                                       /*pause_on_exit=*/!pause_on_start);
+    ASSERT_TRUE(session);
+    if (pause_on_start) {
+      EXPECT_TRUE(session->main_ran.WaitWithTimeout(
+          fml::TimeDelta::FromMilliseconds(20)));
+    } else {
+      EXPECT_FALSE(
+          session->main_ran.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
+    }
+
+    // Pause `kDartEventLoop` tasks on the UI queue, mirroring
+    // `VsyncWaiter::PauseDartEventLoopTasks()`.
+    const fml::TaskQueueId ui_queue_id = session->ui_thread->GetTaskQueueId();
+    fml::AutoResetWaitableEvent paused_event_loop;
+    session->ui_thread->PostTask([&]() {
+      fml::MessageLoopTaskQueues::GetInstance()->PauseSecondarySource(
+          ui_queue_id);
+      paused_event_loop.Signal();
+    });
+    paused_event_loop.Wait();
+
+    bool secondary_source_resumed = false;
+    auto resume_secondary_source = [&]() {
+      if (secondary_source_resumed) {
+        return;
+      }
+      secondary_source_resumed = true;
+      fml::AutoResetWaitableEvent resumed;
+      session->ui_thread->PostTask([&]() {
+        fml::MessageLoopTaskQueues::GetInstance()->ResumeSecondarySource(
+            ui_queue_id);
+        resumed.Signal();
+      });
+      resumed.Wait();
+    };
+
+    bool resume_succeeded = false;
+    fml::ManualResetWaitableEvent resume_completed;
+    auto rpc_thread = CreateNewThread();
+    rpc_thread->PostTask([&]() {
+      resume_succeeded = InvokeVmServiceResume(session->target_isolate_id);
+      resume_completed.Signal();
+    });
+
+    fml::ScopedCleanupClosure cleanup([&]() {
+      resume_secondary_source();
+      resume_completed.Wait();
+    });
+
+    // Wait until the OOB `resume` message is queued on `paused_isolate` while
+    // `kDartEventLoop` tasks are still held back.
+    WaitUntilIsolateCondition(session->paused_isolate.get(), session->ui_thread,
+                              Dart_HasServiceMessages);
+
+    // Invoke a Dart callback directly on the primary UI queue before
+    // `DartMessageHandler::OnHandleMessage` can run. Its prologue hits
+    // `Thread::HandleInterrupts()`, draining the OOB `resume` message.
+    bool still_should_pause = true;
+    ASSERT_TRUE(session->paused_isolate->RunInIsolateScope([&]() {
+      Dart_Handle result =
+          tonic::DartInvokeField(Dart_RootLibrary(), "embedderCallback", {});
+      EXPECT_FALSE(Dart_IsError(result));
+      still_should_pause =
+          pause_on_start ? Dart_ShouldPauseOnStart() : Dart_ShouldPauseOnExit();
+      EXPECT_TRUE(pause_on_start ? Dart_IsPausedOnStart()
+                                 : Dart_IsPausedOnExit());
+      return true;
+    }));
+    // Abort early on failure so `cleanup` resumes `kDartEventLoop` before
+    // waiting on `resume_completed`, avoiding a deadlock if the interrupt did
+    // not drain the OOB `resume` message.
+    ASSERT_FALSE(still_should_pause);
+
+    resume_completed.Wait();
+    EXPECT_TRUE(resume_succeeded);
+
+    // Now unpause `kDartEventLoop` tasks (mirroring
+    // `VsyncWaiter::ResumeDartEventLoopTasks()`) so the scheduled
+    // `DartMessageHandler::OnHandleMessage` task runs.
+    resume_secondary_source();
+
+    if (pause_on_start) {
+      EXPECT_FALSE(
+          session->main_ran.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
+    } else {
+      WaitUntilIsolateCondition(session->paused_isolate.get(),
+                                session->ui_thread,
+                                []() { return !Dart_IsPausedOnExit(); });
+    }
   }
 };
 
@@ -169,159 +311,20 @@ TEST_F(DartMessageHandlerTest,
     (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE)
   GTEST_SKIP();
 #endif
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  auto session = StartPausedIsolateSession("pauseOnStartMain");
-  ASSERT_TRUE(session);
-  EXPECT_TRUE(
-      session->main_ran.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(20)));
-
-  // Pause `kDartEventLoop` tasks on the UI queue, mirroring
-  // `VsyncWaiter::PauseDartEventLoopTasks()`.
-  const fml::TaskQueueId ui_queue_id = session->ui_thread->GetTaskQueueId();
-  fml::AutoResetWaitableEvent paused_event_loop;
-  session->ui_thread->PostTask([&]() {
-    fml::MessageLoopTaskQueues::GetInstance()->PauseSecondarySource(
-        ui_queue_id);
-    paused_event_loop.Signal();
-  });
-  paused_event_loop.Wait();
-
-  bool secondary_source_resumed = false;
-  auto resume_secondary_source = [&]() {
-    if (secondary_source_resumed) {
-      return;
-    }
-    secondary_source_resumed = true;
-    fml::AutoResetWaitableEvent resumed;
-    session->ui_thread->PostTask([&]() {
-      fml::MessageLoopTaskQueues::GetInstance()->ResumeSecondarySource(
-          ui_queue_id);
-      resumed.Signal();
-    });
-    resumed.Wait();
-  };
-
-  bool resume_succeeded = false;
-  fml::ManualResetWaitableEvent resume_completed;
-  auto rpc_thread = CreateNewThread();
-  rpc_thread->PostTask([&]() {
-    resume_succeeded = InvokeVmServiceResume(session->target_isolate_id);
-    resume_completed.Signal();
-  });
-
-  fml::ScopedCleanupClosure cleanup([&]() {
-    resume_secondary_source();
-    resume_completed.Wait();
-  });
-
-  // Wait until the OOB `resume` message is queued on `paused_isolate` while
-  // `kDartEventLoop` tasks are still held back.
-  bool has_service_messages = false;
-  for (int attempt = 0; attempt < 6000 && !has_service_messages; ++attempt) {
-    ASSERT_TRUE(session->paused_isolate->RunInIsolateScope([&]() {
-      has_service_messages = Dart_HasServiceMessages();
-      return true;
-    }));
-    if (!has_service_messages) {
-      fml::AutoResetWaitableEvent poll;
-      session->ui_thread->PostDelayedTask([&]() { poll.Signal(); },
-                                          fml::TimeDelta::FromMilliseconds(5));
-      poll.Wait();
-    }
-  }
-  ASSERT_TRUE(has_service_messages);
-
-  // Invoke a Dart callback directly on the primary UI queue before
-  // `DartMessageHandler::OnHandleMessage` can run. Its prologue hits
-  // `Thread::HandleInterrupts()`, draining the OOB `resume` message.
-  bool should_pause_on_start = true;
-  ASSERT_TRUE(session->paused_isolate->RunInIsolateScope([&]() {
-    Dart_Handle result =
-        tonic::DartInvokeField(Dart_RootLibrary(), "embedderCallback", {});
-    EXPECT_FALSE(Dart_IsError(result));
-    should_pause_on_start = Dart_ShouldPauseOnStart();
-    EXPECT_TRUE(Dart_IsPausedOnStart());
-    return true;
-  }));
-  // Abort early on failure so `cleanup` resumes `kDartEventLoop` before
-  // waiting on `resume_completed`, avoiding a deadlock if the interrupt did
-  // not drain the OOB `resume` message.
-  ASSERT_FALSE(should_pause_on_start);
-
-  resume_completed.Wait();
-  EXPECT_TRUE(resume_succeeded);
-
-  // Now unpause `kDartEventLoop` tasks (mirroring
-  // `VsyncWaiter::ResumeDartEventLoopTasks()`) so the scheduled
-  // `DartMessageHandler::OnHandleMessage` task runs.
-  resume_secondary_source();
-
-  EXPECT_FALSE(
-      session->main_ran.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
+  RunResumeConsumedByInterruptTest(/*pause_on_start=*/true);
 }
 
-// Verifies that if multiple normal `SendPort` messages arrive while an isolate
-// is paused at `PauseStart` (consuming their per-message `OnHandleMessage`
-// tasks while paused), resuming from `PauseStart` delivers all queued messages
-// rather than stranding all but the first, even if `main()` throws a non-fatal
-// uncaught exception.
+// Symmetric regression test for `PauseExit`: if an embedder `Dart_Invoke`
+// drains the OOB `resume` service message via `Thread::HandleInterrupts()`
+// before `DartMessageHandler::OnHandleMessage` runs, `DartMessageHandler` must
+// still clear `Dart_IsPausedOnExit()`.
 TEST_F(DartMessageHandlerTest,
-       PauseOnStartDeliversAllQueuedNormalMessagesUponResume) {
+       PauseOnExitResumesWhenServiceResumeConsumedByInterrupt) {
 #if (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG) && \
     (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_PROFILE)
   GTEST_SKIP();
 #endif
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-
-  fml::AutoResetWaitableEvent all_messages_received;
-  int64_t received_sum = 0;
-  AddNativeCallback("SignalAllMessagesReceived",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      EXPECT_FALSE(Dart_IsError(Dart_GetNativeIntegerArgument(
-                          args, 0, &received_sum)));
-                      all_messages_received.Signal();
-                    }));
-
-  auto session = StartPausedIsolateSession("pauseOnStartThrowMain");
-  ASSERT_TRUE(session);
-
-  // Open a ReceivePort inside `paused_isolate` and post 3 normal messages to it
-  // while `Dart_IsPausedOnStart()` is true.
-  Dart_Port test_port_id = ILLEGAL_PORT;
-  ASSERT_TRUE(session->paused_isolate->RunInIsolateScope([&]() {
-    Dart_Handle send_port =
-        tonic::DartInvokeField(Dart_RootLibrary(), "openPausedTestPort", {});
-    EXPECT_FALSE(Dart_IsError(send_port));
-    EXPECT_FALSE(Dart_IsError(Dart_SendPortGetId(send_port, &test_port_id)));
-    EXPECT_NE(test_port_id, ILLEGAL_PORT);
-    return true;
-  }));
-
-  EXPECT_TRUE(Dart_PostInteger(test_port_id, 10));
-  EXPECT_TRUE(Dart_PostInteger(test_port_id, 20));
-  EXPECT_TRUE(Dart_PostInteger(test_port_id, 30));
-
-  // Flush the `OnHandleMessage` tasks scheduled for those 3 messages while the
-  // isolate is still paused on start.
-  fml::AutoResetWaitableEvent flushed_while_paused;
-  fml::MessageLoopTaskQueues::GetInstance()->RegisterTask(
-      session->ui_thread->GetTaskQueueId(),
-      [&]() { flushed_while_paused.Signal(); }, fml::TimePoint::Now(),
-      fml::TaskSourceGrade::kDartEventLoop);
-  flushed_while_paused.Wait();
-
-  ASSERT_TRUE(session->paused_isolate->RunInIsolateScope([&]() {
-    EXPECT_TRUE(Dart_IsPausedOnStart());
-    return true;
-  }));
-
-  EXPECT_TRUE(InvokeVmServiceResume(session->target_isolate_id));
-
-  EXPECT_FALSE(
-      session->main_ran.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
-  EXPECT_FALSE(
-      all_messages_received.WaitWithTimeout(fml::TimeDelta::FromSeconds(30)));
-  EXPECT_EQ(received_sum, 60);
+  RunResumeConsumedByInterruptTest(/*pause_on_start=*/false);
 }
 
 }  // namespace testing
