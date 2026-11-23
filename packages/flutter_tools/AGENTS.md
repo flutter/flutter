@@ -3,9 +3,10 @@
 Before editing Dart code in this directory, read the "Code conventions"
 and "Writing tests" sections of [README.md](README.md) and follow them.
 The rules that come up most: inject dependencies instead of using
-ambient `AppContext` lookups, use `testWithoutContext` with the fakes in
-`test/src/`, use the wrappers in `lib/src/base/` instead of `dart:io`,
-and report user-fixable failures with `throwToolExit`.
+ambient `AppContext` lookups, inject fakes from `test/src/` instead of
+`testUsingContext` overrides, use the wrappers in `lib/src/base/`
+instead of `dart:io`, and report user-fixable failures with
+`throwToolExit`.
 
 Run `flutter test test/general.shard/<file>_test.dart` for each file you
 changed, then `dart analyze --fatal-infos` and `dart format` on the

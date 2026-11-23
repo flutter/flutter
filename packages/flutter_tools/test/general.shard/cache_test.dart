@@ -1741,7 +1741,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Check current DevTools version', () {
+  test('Check current DevTools version', () {
     final fileSystem = LocalFileSystem.test(signals: FakeSignals());
     addTearDown(fileSystem.dispose);
     final cache = Cache.test(
@@ -1755,7 +1755,7 @@ void main() {
 
   // Check that the build number matches the format documented here:
   // https://dart.dev/get-dart#release-channels
-  testWithoutContext('Check current Dart SDK build number', () {
+  test('Check current Dart SDK build number', () {
     final cache = Cache.test(
       platform: const LocalPlatform(),
       processManager: FakeProcessManager.any(),
