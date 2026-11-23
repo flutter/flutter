@@ -309,7 +309,7 @@ void main() {
   });
 
   // TODO(bkonyi): Convert WebDriverService.start tests to testWithoutContext once
-  // FlutterDevice.create no longer reads ambient residentCompilerFactory,
+  // Device.createFlutterDevice no longer reads ambient residentCompilerFactory,
   // https://github.com/flutter/flutter/issues/47161.
   testUsingContext('WebDriverService starts and stops an app', () async {
     final WebDriverService service = setUpDriverService(webRunnerFactory: FakeWebRunnerFactory());
@@ -606,7 +606,7 @@ WebDriverService setUpDriverService({WebRunnerFactory? webRunnerFactory}) {
   );
 }
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake with DefaultCreateFlutterDevice implements Device {
   @override
   final PlatformType platformType = PlatformType.web;
 

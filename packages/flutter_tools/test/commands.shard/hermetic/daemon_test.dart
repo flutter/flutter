@@ -1807,7 +1807,7 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {
   final bool canListDevices;
 }
 
-class FakeAndroidDevice extends Fake implements AndroidDevice {
+class FakeAndroidDevice extends Fake with DefaultCreateFlutterDevice implements AndroidDevice {
   @override
   final id = 'device';
 

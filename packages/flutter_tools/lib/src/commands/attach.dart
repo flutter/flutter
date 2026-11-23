@@ -365,12 +365,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final BuildInfo buildInfo = await getBuildInfo();
 
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: buildInfo,
-      target: targetFile,
       targetModelOverride: TargetModel(getValue(DebuggingOptionDescriptors.fuchsiaTargetModel)),
+      toolContext: toolContext,
       userIdentifier: userIdentifier,
     );
     flutterDevice.vmServiceUri = vmServiceUri;

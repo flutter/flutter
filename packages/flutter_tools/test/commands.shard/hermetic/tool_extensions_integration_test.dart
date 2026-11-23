@@ -108,6 +108,7 @@ void main() {
               extensionManager: extensionManager,
               featureFlags: featureFlags,
               toolContext: toolContext,
+              webContext: FakeWebContext(),
               windowsWorkflow: WindowsWorkflow(
                 featureFlags: featureFlags,
                 platform: toolContext.platform,
@@ -202,6 +203,7 @@ void main() {
               extensionManager: extensionManager,
               featureFlags: featureFlags,
               toolContext: toolContext,
+              webContext: FakeWebContext(),
               windowsWorkflow: WindowsWorkflow(
                 featureFlags: featureFlags,
                 platform: toolContext.platform,

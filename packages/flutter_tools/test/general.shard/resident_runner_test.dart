@@ -1321,12 +1321,11 @@ flutter:
   testUsingContext(
     'ResidentRunner printHelpDetails hides v on web in profile mode',
     () => testbed.run(() async {
-      final FlutterDevice flutterDevice = await FlutterDevice.create(
-        FakeDevice(targetPlatform: TargetPlatform.web_javascript),
-        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
-        buildInfo: BuildInfo.profile,
-        target: 'lib/main.dart',
-      );
+      final FlutterDevice flutterDevice =
+          await FakeDevice(targetPlatform: TargetPlatform.web_javascript).createFlutterDevice(
+            toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+            buildInfo: BuildInfo.profile,
+          );
 
       final ResidentRunner residentRunner = createHotRunner(
         <FlutterDevice>[flutterDevice],
@@ -1697,8 +1696,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final device = FakeDevice(targetPlatform: TargetPlatform.web_javascript);
     final residentCompiler =
-        (await FlutterDevice.create(
-              device,
+        (await device.createFlutterDevice(
               toolContext: toolContext,
               buildInfo: const BuildInfo(
                 BuildMode.debug,
@@ -1706,7 +1704,6 @@ flutter:
                 treeShakeIcons: false,
                 packageConfigPath: '.dart_tool/package_config.json',
               ),
-              target: null,
             )).generator
             as DefaultResidentCompiler?;
 
@@ -1741,8 +1738,7 @@ flutter:
       final device = FakeDevice();
 
       final residentCompiler =
-          (await FlutterDevice.create(
-                device,
+          (await device.createFlutterDevice(
                 toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
@@ -1751,7 +1747,6 @@ flutter:
                   extraFrontEndOptions: <String>[],
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1774,8 +1769,7 @@ flutter:
       final device = FakeDevice();
 
       final residentCompiler =
-          (await FlutterDevice.create(
-                device,
+          (await device.createFlutterDevice(
                 toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
@@ -1785,7 +1779,6 @@ flutter:
                   initializeFromDill: '/foo/bar.dill',
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1806,8 +1799,7 @@ flutter:
       final device = FakeDevice();
 
       final residentCompiler =
-          (await FlutterDevice.create(
-                device,
+          (await device.createFlutterDevice(
                 toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
@@ -1817,7 +1809,6 @@ flutter:
                   assumeInitializeFromDillUpToDate: true,
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
               )).generator
               as DefaultResidentCompiler?;
 
@@ -1837,8 +1828,7 @@ flutter:
       final device = FakeDevice();
 
       final residentCompiler =
-          (await FlutterDevice.create(
-                device,
+          (await device.createFlutterDevice(
                 toolContext: const DelegatingToolContext(),
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
@@ -1847,7 +1837,6 @@ flutter:
                   frontendServerStarterPath: '/foo/bar/frontend_server_starter.dart',
                   packageConfigPath: '.dart_tool/package_config.json',
                 ),
-                target: null,
               )).generator
               as DefaultResidentCompiler?;
 

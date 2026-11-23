@@ -526,7 +526,7 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
   }
 }
 
-class FakeDevice extends Fake implements Device {
+class FakeDevice extends Fake with DefaultCreateFlutterDevice implements Device {
   FakeDevice({
     this._sdkNameAndVersion = 'Android',
     this._targetPlatform = TargetPlatform.android_arm,

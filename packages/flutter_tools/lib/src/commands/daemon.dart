@@ -928,11 +928,12 @@ class AppDomain extends Domain {
     fs.currentDirectory = fs.directory(projectDirectory);
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
 
-    final FlutterDevice flutterDevice = await FlutterDevice.create(
-      device,
-      toolContext: toolContext,
+    final FlutterDevice flutterDevice = await device.createFlutterDevice(
       buildInfo: options.buildInfo,
-      target: target,
+      debuggingOptions: options,
+      flutterProject: flutterProject,
+      toolContext: toolContext,
+      urlTunneller: daemon.daemonDomain.exposeUrl,
       userIdentifier: userIdentifier,
     );
 

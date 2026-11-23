@@ -838,10 +838,9 @@ class RunCommand extends RunCommandBase {
 
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
-        await FlutterDevice.create(
-          device,
+        await device.createFlutterDevice(
           buildInfo: buildInfo,
-          target: targetFile,
+          flutterProject: project,
           toolContext: toolContext,
           userIdentifier: userIdentifier,
         ),
