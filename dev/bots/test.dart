@@ -229,7 +229,8 @@ Future<void> _runIntegrationToolTests() async {
 
   // Unlike the files above, every subshard would run all three of these.
   // Run them in the first subshard only.
-  if (!(Platform.environment[kSubshardKey]?.startsWith('1_') ?? true)) {
+  final String? subshard = Platform.environment[kSubshardKey];
+  if (subshard != null && !subshard.startsWith('1_')) {
     return;
   }
   await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'hook_user_defines'));
