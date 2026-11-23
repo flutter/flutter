@@ -6,8 +6,6 @@
 library;
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -20,7 +18,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -38,7 +35,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 import '../src/package_config.dart';
-import '../src/throwing_pub.dart';
 
 void main() {
   // TODO(zanderso): remove once FlutterProject is fully refactored.
@@ -675,101 +671,62 @@ dependencies {
       // be placed in their own group to avoid test pollution. This is
       // especially important for filesystem.
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: Version(17, 0, 2));
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.20')]);
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'flamingo values are compatible',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: '8.0',
-              agpV: '7.4.2',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isTrue);
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand('1.9.20'),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('flamingo values are compatible', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: '8.0',
+            agpV: '7.4.2',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isTrue);
+        }, processManager: processManager);
       });
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.7.20')]);
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'java 8 era values are compatible',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: '6.7.1',
-              agpV: '4.2.0',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isTrue);
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final Java java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand('1.7.20'),
+        ]);
+        _testInMemory('java 8 era values are compatible', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: '6.7.1',
+            agpV: '4.2.0',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isTrue);
+        }, processManager: processManager);
       });
 
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.1')]);
-        java = FakeJava(version: Version(11, 0, 14));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'electric eel era values are compatible',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: '7.3.3',
-              agpV: '7.2.0',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isTrue);
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand('1.9.1'),
+        ]);
+        final Java java = FakeJava(version: Version(11, 0, 14));
+        _testInMemory('electric eel era values are compatible', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: '7.3.3',
+            agpV: '7.2.0',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isTrue);
+        }, processManager: processManager);
       });
       group('_', () {
         const javaV = '17.0.2';
@@ -777,58 +734,45 @@ dependencies {
         const agpV = '7.2.0';
         const kgpV = '2.1.0';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version.parse(javaV));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible everything',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and gradle and agp versions.
-            expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-            expect(value.description, contains(RegExp(gradleV)));
-            expect(value.description, contains(RegExp(agpV)));
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
-            expect(value.description, contains(RegExp(javaV)));
-            expect(value.description, contains(RegExp(gradleV)));
-            // On kgp/gradle eror print help url and kgp versions
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp('KGP/Gradle')));
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-            // On agp/kgp error print help url and agp and kgp versions
-            expect(value.description, contains(RegExp(agpV)));
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp('AGP/KGP')));
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version.parse(javaV));
+        _testInMemory('incompatible everything', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and gradle and agp versions.
+          expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(agpV)));
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
+          expect(value.description, contains(RegExp(javaV)));
+          expect(value.description, contains(RegExp(gradleV)));
+          // On kgp/gradle eror print help url and kgp versions
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp('KGP/Gradle')));
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+          // On agp/kgp error print help url and agp and kgp versions
+          expect(value.description, contains(RegExp(agpV)));
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp('AGP/KGP')));
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+        }, processManager: processManager);
       });
       group('_', () {
         const javaV = '17.0.2';
@@ -836,221 +780,152 @@ dependencies {
         const agpV = '4.2.0';
         const kgpV = '1.7.22';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version(17, 0, 2));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible java/gradle only',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
-            expect(value.description, contains(RegExp(javaV)));
-            expect(value.description, contains(RegExp(gradleV)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('incompatible java/gradle only', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
+          expect(value.description, contains(RegExp(javaV)));
+          expect(value.description, contains(RegExp(gradleV)));
+        }, processManager: processManager);
       });
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.any();
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible gradle/agp only',
-          (ToolContext toolContext, _) async {
-            const gradleV = '7.0.3';
-            const agpV = '7.1.0';
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and gradle and agp versions.
-            expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-            expect(value.description, contains(RegExp(gradleV)));
-            expect(value.description, contains(RegExp(agpV)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final Java java = FakeJava(version: Version(11, 0, 2));
+        final processManager = FakeProcessManager.any();
+        _testInMemory('incompatible gradle/agp only', (ToolContext toolContext, _) async {
+          const gradleV = '7.0.3';
+          const agpV = '7.1.0';
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and gradle and agp versions.
+          expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp(agpV)));
+        }, processManager: processManager);
       });
       group('_', () {
         const gradleV = '8.11';
         const agpV = '8.7.2';
         const kgpV = '2.1.10';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version(17, 0, 2));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible kgp/gradle only',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp(gradleV)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('incompatible kgp/gradle only', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp(gradleV)));
+        }, processManager: processManager);
       });
       group('_', () {
         const gradleV = '8.9';
         const agpV = '8.7.2';
         const kgpV = '2.0.20';
 
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
-        java = FakeJava(version: Version(17, 0, 2));
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'incompatible agp/kgp only',
-          (ToolContext toolContext, _) async {
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: agpV,
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url and java and gradle versions.
-            expect(value.description, contains(RegExp(kgpV)));
-            expect(value.description, contains(RegExp(agpV)));
-            expect(value.description, contains(RegExp('AGP/KGP')));
-            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          createKgpVersionCommand(kgpV),
+        ]);
+        final Java java = FakeJava(version: Version(17, 0, 2));
+        _testInMemory('incompatible agp/kgp only', (ToolContext toolContext, _) async {
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: agpV,
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url and java and gradle versions.
+          expect(value.description, contains(RegExp(kgpV)));
+          expect(value.description, contains(RegExp(agpV)));
+          expect(value.description, contains(RegExp('AGP/KGP')));
+          expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+        }, processManager: processManager);
       });
       group('_', () {
-        final FakeProcessManager processManager;
-        final Java java;
-        final AndroidStudio androidStudio;
-        final FakeAndroidSdkWithDir androidSdk;
-        final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.any();
-        androidStudio = FakeAndroidStudio();
-        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
-        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
-        _testInMemory(
-          'null agp only',
-          (ToolContext toolContext, _) async {
-            const gradleV = '7.0.3';
-            final FlutterProject? project = await configureGradleAgpForTest(
-              gradleV: gradleV,
-              agpV: '',
-              toolContext: toolContext,
-            );
-            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
-              java: java,
-              logger: logger,
-              processManager: processManager,
-            );
-            expect(value.success, isFalse);
-            // Should not have the valid string.
-            expect(
-              value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
-            );
-            // On gradle/agp error print help url null value for agp.
-            expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
-            expect(value.description, contains(RegExp(gradleV)));
-            expect(value.description, contains(RegExp('null')));
-          },
-          java: java,
-          androidStudio: androidStudio,
-          processManager: processManager,
-          androidSdk: androidSdk,
-        );
+        final Java java = FakeJava(version: Version(11, 0, 2));
+        final processManager = FakeProcessManager.any();
+        _testInMemory('null agp only', (ToolContext toolContext, _) async {
+          const gradleV = '7.0.3';
+          final FlutterProject? project = await configureGradleAgpForTest(
+            gradleV: gradleV,
+            agpV: '',
+            toolContext: toolContext,
+          );
+          final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+            java: java,
+            logger: logger,
+            processManager: processManager,
+          );
+          expect(value.success, isFalse);
+          // Should not have the valid string.
+          expect(
+            value.description,
+            isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+          );
+          // On gradle/agp error print help url null value for agp.
+          expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
+          expect(value.description, contains(RegExp(gradleV)));
+          expect(value.description, contains(RegExp('null')));
+        }, processManager: processManager);
       });
     });
 
@@ -2763,10 +2638,7 @@ void _testInMemory(
   String description,
   Future<void> Function(ToolContext toolContext, BufferLogger logger) testMethod, {
   FileSystem? fileSystem,
-  Java? java,
-  AndroidStudio? androidStudio,
   ProcessManager? processManager,
-  AndroidSdk? androidSdk,
 }) {
   final String flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
@@ -2819,23 +2691,9 @@ void _testInMemory(
     },
   );
 
-  testUsingContext(
-    description,
-    () async {
-      await testMethod(toolContext, testBufferLogger);
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-      ProcessManager: () => testProcessManager,
-      Java: () => java,
-      AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
-      // Intentionally null if not set. Some ios tests fail if this is a fake.
-      AndroidSdk: () => androidSdk,
-      Cache: () => cache,
-      Logger: () => testBufferLogger,
-      Pub: ThrowingPub.new,
-    },
-  );
+  test(description, () async {
+    await testMethod(toolContext, testBufferLogger);
+  });
 }
 
 /// Transfers files and folders from the local file system's Flutter
@@ -3040,13 +2898,4 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Version? version;
-}
-
-class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
-  FakeAndroidSdkWithDir(this._directory);
-
-  final Directory _directory;
-
-  @override
-  Directory get directory => _directory;
 }

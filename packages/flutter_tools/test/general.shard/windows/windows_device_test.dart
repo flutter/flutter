@@ -18,7 +18,7 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
@@ -128,113 +128,106 @@ void main() {
       fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     });
 
-    testUsingContext(
-      'sends timing events to analytics',
-      () async {
-        fileSystem.file('pubspec.yaml').createSync();
-        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-        fileSystem
-            .file(fileSystem.path.join('windows', 'CMakeLists.txt'))
-            .createSync(recursive: true);
-        const vsPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community';
-        const cmakePath =
-            '$vsPath'
-            r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
-        const vswherePath = r'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe';
-        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+    test('sends timing events to analytics', () async {
+      fileSystem.file('pubspec.yaml').createSync();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem
+          .file(fileSystem.path.join('windows', 'CMakeLists.txt'))
+          .createSync(recursive: true);
+      const vsPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community';
+      const cmakePath =
+          '$vsPath'
+          r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+      const vswherePath = r'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe';
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            vswherePath,
+            '-format',
+            'json',
+            '-products',
+            '*',
+            '-utf8',
+            '-latest',
+            '-version',
+            '16',
+            '-requires',
+            'Microsoft.VisualStudio.Workload.NativeDesktop',
+            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+            'Microsoft.VisualStudio.Component.VC.CMake.Project',
+          ],
+          stdout:
+              '[{"installationPath": ${jsonEncode(vsPath)}, "installationVersion": "16.11.0.0", "displayName": "Visual Studio Community 2019", "catalog": {"productDisplayVersion": "16.11.0"}}]',
+        ),
+        const FakeCommand(
+          command: <String>[
+            cmakePath,
+            '-S',
+            r'C:\windows',
+            '-B',
+            r'C:\build\windows\x64',
+            '-G',
+            'Visual Studio 16 2019',
+            '-A',
+            'x64',
+            '-DFLUTTER_TARGET_PLATFORM=windows-x64',
+          ],
+        ),
+        const FakeCommand(
+          command: <String>[
+            cmakePath,
+            '--build',
+            r'C:\build\windows\x64',
+            '--config',
+            'Debug',
+            '--target',
+            'INSTALL',
+          ],
+        ),
+      ]);
+      final device = WindowsDevice(
+        analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: r'C:\flutter'),
           fs: fileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              vswherePath,
-              '-format',
-              'json',
-              '-products',
-              '*',
-              '-utf8',
-              '-latest',
-              '-version',
-              '16',
-              '-requires',
-              'Microsoft.VisualStudio.Workload.NativeDesktop',
-              'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-              'Microsoft.VisualStudio.Component.VC.CMake.Project',
-            ],
-            stdout:
-                '[{"installationPath": ${jsonEncode(vsPath)}, "installationVersion": "16.11.0.0", "displayName": "Visual Studio Community 2019", "catalog": {"productDisplayVersion": "16.11.0"}}]',
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: FakePlatform(
+            operatingSystem: 'windows',
+            environment: <String, String>{
+              'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
+              'FLUTTER_ROOT': r'C:\flutter',
+            },
           ),
-          const FakeCommand(
-            command: <String>[
-              cmakePath,
-              '-S',
-              r'C:\windows',
-              '-B',
-              r'C:\build\windows\x64',
-              '-G',
-              'Visual Studio 16 2019',
-              '-A',
-              'x64',
-              '-DFLUTTER_TARGET_PLATFORM=windows-x64',
-            ],
-          ),
-          const FakeCommand(
-            command: <String>[
-              cmakePath,
-              '--build',
-              r'C:\build\windows\x64',
-              '--config',
-              'Debug',
-              '--target',
-              'INSTALL',
-            ],
-          ),
-        ]);
-        final device = WindowsDevice(
-          analytics: fakeAnalytics,
-          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-          toolContext: FakeToolContext(
-            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: r'C:\flutter'),
-            fs: fileSystem,
-            logger: BufferLogger.test(),
-            os: FakeOperatingSystemUtils(),
-            platform: FakePlatform(
-              operatingSystem: 'windows',
-              environment: <String, String>{
-                'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
-                'FLUTTER_ROOT': r'C:\flutter',
-              },
-            ),
-            processManager: processManager,
-          ),
-        );
+          processManager: processManager,
+        ),
+      );
 
-        await device.buildForDevice(buildInfo: BuildInfo.debug);
+      await device.buildForDevice(buildInfo: BuildInfo.debug);
 
-        expect(processManager.hasRemainingExpectations, isFalse);
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'windows-cmake-generation',
-          ),
-          true,
-        );
-        expect(
-          analyticsTimingEventExists(
-            sentEvents: fakeAnalytics.sentEvents,
-            workflow: 'build',
-            variableName: 'windows-cmake-build',
-          ),
-          true,
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.empty(),
-      },
-    );
+      expect(processManager.hasRemainingExpectations, isFalse);
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'windows-cmake-generation',
+        ),
+        true,
+      );
+      expect(
+        analyticsTimingEventExists(
+          sentEvents: fakeAnalytics.sentEvents,
+          workflow: 'build',
+          variableName: 'windows-cmake-build',
+        ),
+        true,
+      );
+    });
   });
 }
 
