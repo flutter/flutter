@@ -485,7 +485,7 @@ TEST(FlutterGpuPipelineStateTest, ComparesOnlyUsedAttachments) {
   EXPECT_EQ(a, b);
   EXPECT_EQ(a.GetHash(), b.GetHash());
 
-  // Beyond the used attachments, which a recording does not copy.
+  // Beyond the used attachments.
   b.colors[1].blending_enabled = true;
   EXPECT_EQ(a, b);
   EXPECT_EQ(a.GetHash(), b.GetHash());

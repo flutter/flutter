@@ -67,15 +67,7 @@ struct Op : OpHeader {
 // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
 
 struct SetPipelineStateOp : Op<RecordedOp::kSetPipelineState> {
-  /// The op's size when it holds [state], whose unused color attachments are
-  /// not recorded.
-  static size_t SizeFor(const PipelineState& state) {
-    return sizeof(SetPipelineStateOp) - sizeof(PipelineState) +
-           state.GetUsedSize();
-  }
-
   const RenderPipeline::Core* core;
-  /// Must stay last. See `SizeFor`.
   PipelineState state;
 };
 
@@ -205,13 +197,13 @@ class OpStream {
 
   ~OpStream();
 
-  /// Appends an op, and returns it for the caller to fill in. [size] is
-  /// smaller than the op when its trailing fields are unused.
+  /// Appends an op, and returns it for the caller to fill in.
   template <typename T>
-  T* Append(size_t size = sizeof(T)) {
+  T* Append() {
     static_assert(std::is_trivially_destructible_v<T>);
     static_assert(alignof(T) <= kAlignment);
-    const size_t aligned_size = (size + kAlignment - 1) & ~(kAlignment - 1);
+    constexpr size_t aligned_size =
+        (sizeof(T) + kAlignment - 1) & ~(kAlignment - 1);
     if (aligned_size > static_cast<size_t>(limit_ - cursor_)) [[unlikely]] {
       AddChunk();
     }

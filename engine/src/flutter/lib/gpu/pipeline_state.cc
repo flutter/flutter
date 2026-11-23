@@ -46,11 +46,6 @@ size_t PipelineState::GetHash() const {
   return hash;
 }
 
-size_t PipelineState::GetUsedSize() const {
-  return offsetof(PipelineState, colors) +
-         color_attachment_count * sizeof(impeller::ColorAttachmentDescriptor);
-}
-
 impeller::PipelineDescriptor PipelineState::ToDescriptor() const {
   impeller::PipelineDescriptor desc;
   desc.SetCullMode(cull_mode);

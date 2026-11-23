@@ -5,7 +5,6 @@
 #include "flutter/lib/gpu/render_pass.h"
 
 #include <algorithm>
-#include <cstring>
 #include <memory>
 
 #include "flutter/lib/gpu/formats.h"
@@ -301,11 +300,9 @@ void RenderPass::RecordPipelineState(PassRecording& recording) {
     return;
   }
   recording.Retain(core);
-  auto* op = recording.ops.Append<SetPipelineStateOp>(
-      SetPipelineStateOp::SizeFor(pipeline_state_));
+  auto* op = recording.ops.Append<SetPipelineStateOp>();
   op->core = core.get();
-  std::memcpy(static_cast<void*>(&op->state), &pipeline_state_,
-              pipeline_state_.GetUsedSize());
+  op->state = pipeline_state_;
 }
 
 bool RenderPass::Draw(size_t element_count,

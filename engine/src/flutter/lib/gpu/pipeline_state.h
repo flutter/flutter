@@ -44,9 +44,6 @@ struct PipelineState {
 
   size_t GetHash() const;
 
-  /// The leading bytes of this struct that hold meaningful state.
-  size_t GetUsedSize() const;
-
   /// The descriptor for this state, without shaders or a vertex layout.
   impeller::PipelineDescriptor ToDescriptor() const;
 

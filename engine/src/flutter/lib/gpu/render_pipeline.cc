@@ -126,12 +126,8 @@ RenderPipeline::Core::Resolve(impeller::Context& context,
     return found->second;
   }
 
-  // [state] may be truncated to its used size in a recording, so it has to be
-  // copied by hand.
-  PipelineState key;
-  std::memcpy(static_cast<void*>(&key), &state, state.GetUsedSize());
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>& pipeline =
-      resolved_[key];
+      resolved_[state];
 
   impeller::PipelineDescriptor descriptor = state.ToDescriptor();
   if (BindToPipelineDescriptor(*context.GetShaderLibrary(), descriptor)) {
