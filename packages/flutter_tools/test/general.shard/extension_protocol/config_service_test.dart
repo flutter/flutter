@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/experimental/config.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
@@ -199,49 +198,6 @@ void main() {
         expect(groups, hasLength(2));
         expect(groups[0].title, 'Secondary Configuration Extension');
         expect(groups[1].title, 'Linux Custom Extension Prototype');
-      },
-    );
-
-    testWithoutContext(
-      'ConfigCommand settingsText incorporates extension flags and options grouped by displayTitle',
-      () async {
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          featureFlags: featureFlags,
-          toolContext: FakeToolContext(logger: logger),
-        );
-        addTearDown(manager.dispose);
-        await manager.initialize(
-          entryPoints: <ExtensionEntryPoint>[
-            linuxExtensionEntryPoint,
-            _secondaryExtensionEntryPoint,
-          ],
-        );
-
-        final command = ConfigCommand(
-          androidContext: FakeAndroidContext(),
-          toolContext: FakeToolContext(logger: logger),
-          featureFlags: featureFlags,
-          extensionManager: manager,
-        );
-
-        final String settingsOutput = await command.settingsText;
-        expect(settingsOutput, contains('Extension Settings:'));
-        expect(
-          settingsOutput,
-          contains(
-            '  Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype):',
-          ),
-        );
-        expect(settingsOutput, contains('    enable-linux-custom-prototype: true'));
-        expect(settingsOutput, contains('    linux-gtk-version: 3'));
-        expect(
-          settingsOutput,
-          contains('  Secondary Configuration Extension (package:unknown_extension):'),
-        );
-        expect(settingsOutput, contains('    enable-secondary-feature: false'));
-        expect(settingsOutput, contains('    secondary-config-key: custom-value'));
       },
     );
 

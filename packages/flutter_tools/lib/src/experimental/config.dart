@@ -16,17 +16,21 @@ import 'extension_discovery.dart';
 class ExtensionSettingsGroup {
   const ExtensionSettingsGroup({
     required this.configOptions,
-    required this.displayTitle,
+    required this.extension,
     required this.extensionName,
     required this.featureFlags,
     required this.title,
   });
 
+  /// The configuration extension that owns these settings.
+  final ConfigurationExtension extension;
+
   /// The human-readable title of the extension.
   final String title;
 
   /// Section header attributing this group to its declaring extension package.
-  final String displayTitle;
+  String get displayTitle =>
+      extension is ConfigurationExtensionClient ? '$title (package:$extensionName)' : title;
 
   /// Identifier of the extension (package name when backed by an isolate
   /// connection, or extension title otherwise), used to namespace settings
@@ -281,17 +285,13 @@ class ExtensionConfiguration {
     final List<ExtensionSettingsGroup> groups = (await Future.wait(
       extensions.map((ConfigurationExtension ext) async {
         try {
-          final String title = ext is ConfigurationExtensionClient
-              ? await ext.fetchTitle()
-              : ext.title;
+          final String title = await ext.fetchTitle();
           final String extensionName = _extensionIdentifier(ext);
           final List<FeatureFlag> flags = await ext.getFeatureFlags();
           final List<ConfigOption> options = await ext.getConfigurations();
           return ExtensionSettingsGroup(
             configOptions: options,
-            displayTitle: ext is ConfigurationExtensionClient
-                ? '$title (package:$extensionName)'
-                : title,
+            extension: ext,
             extensionName: extensionName,
             featureFlags: flags,
             title: title,

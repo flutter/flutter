@@ -7,6 +7,22 @@ import 'package:meta/meta.dart';
 
 import 'json_utils.dart';
 
+List<T> _parseObjectList<T>(
+  List<Object?> jsonList,
+  T Function(Map<String, Object?>) fromJson,
+  String typeName,
+) {
+  return <T>[
+    for (final Object? element in jsonList)
+      switch (element) {
+        final Map<String, Object?> map => fromJson(map),
+        _ => throw FormatException(
+          'Invalid $typeName element: expected Map<String, Object?>, got ${element.runtimeType}.',
+        ),
+      },
+  ];
+}
+
 /// Representation of an experimental or platform-specific feature flag.
 @immutable
 class FeatureFlag {
@@ -32,17 +48,8 @@ class FeatureFlag {
   }
 
   /// Deserializes a list of [FeatureFlag]s from a JSON list.
-  static List<FeatureFlag> listFromJson(List<Object?> jsonList) {
-    return <FeatureFlag>[
-      for (final Object? element in jsonList)
-        switch (element) {
-          final Map<String, Object?> map => FeatureFlag.fromJson(map),
-          _ => throw FormatException(
-            'Invalid FeatureFlag element: expected Map<String, Object?>, got ${element.runtimeType}.',
-          ),
-        },
-    ];
-  }
+  static List<FeatureFlag> listFromJson(List<Object?> jsonList) =>
+      _parseObjectList(jsonList, FeatureFlag.fromJson, 'FeatureFlag');
 
   /// Map key for [enabledByDefault].
   static const String enabledByDefaultKey = 'enabledByDefault';
@@ -125,17 +132,8 @@ class ConfigOption {
   }
 
   /// Deserializes a list of [ConfigOption]s from a JSON list.
-  static List<ConfigOption> listFromJson(List<Object?> jsonList) {
-    return <ConfigOption>[
-      for (final Object? element in jsonList)
-        switch (element) {
-          final Map<String, Object?> map => ConfigOption.fromJson(map),
-          _ => throw FormatException(
-            'Invalid ConfigOption element: expected Map<String, Object?>, got ${element.runtimeType}.',
-          ),
-        },
-    ];
-  }
+  static List<ConfigOption> listFromJson(List<Object?> jsonList) =>
+      _parseObjectList(jsonList, ConfigOption.fromJson, 'ConfigOption');
 
   /// Map key for [aliases].
   static const String aliasesKey = 'aliases';
