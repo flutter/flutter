@@ -24,6 +24,10 @@ typedef _ExtensionRequestSender = Future<Object?> Function(String method, [Objec
 /// group related RPC endpoints under a specific [namespace] (e.g.
 /// `diagnostics`, `config`, `device`, `build`, `template`).
 abstract base class ToolExtensionService {
+  /// JSON-RPC method name invoked by extensions to query their resolved
+  /// configuration values from the host tool.
+  static const String getConfigurationValuesMethod = 'extension.getConfigurationValues';
+
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
   /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
@@ -84,6 +88,30 @@ abstract base class ToolExtensionService {
       }
       rethrow;
     }
+  }
+
+  /// Queries the host tool for the current persisted values of all configuration
+  /// keys owned by this extension.
+  ///
+  /// Only keys declared by this extension's `ConfigService` (`FeatureFlag.settingName`
+  /// mapped to `bool`, and `ConfigOption.name` mapped to `String`, omitting unset
+  /// keys) are returned. The host resolves `environmentOverride` ahead of
+  /// `"extensions"` settings in `flutter_settings` and falls back to any
+  /// `ConfigOption.aliases` and default values.
+  @nonVirtual
+  Future<Map<String, Object?>> getConfigurationValues() async {
+    final Object? rawResult = await sendHostRequest(
+      getConfigurationValuesMethod,
+      const <String, Object?>{},
+    );
+    if (rawResult case final Map<String, Object?> map) {
+      return map;
+    }
+    throw FormatException(
+      'Expected Map<String, Object?> from "$getConfigurationValuesMethod", got '
+      '${rawResult.runtimeType}.',
+      rawResult,
+    );
   }
 
   /// Cleans up resources held by the service when the extension is shut down.

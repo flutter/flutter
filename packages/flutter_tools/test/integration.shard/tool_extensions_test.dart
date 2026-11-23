@@ -77,7 +77,12 @@ void main() {
 
     if (isLinux) {
       expect(result.stdout, contains('Extension Settings:'));
-      expect(result.stdout, contains('  Linux Custom Extension Prototype:'));
+      expect(
+        result.stdout,
+        contains(
+          '  Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype):',
+        ),
+      );
       expect(result.stdout, contains('    enable-linux-custom-prototype:'));
     } else {
       expect(result.stdout, isNot(contains('Extension Settings:')));

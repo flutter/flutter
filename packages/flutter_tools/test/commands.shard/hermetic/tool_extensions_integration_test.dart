@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -41,8 +40,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -59,8 +57,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -85,8 +82,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -131,8 +127,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -151,8 +146,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -179,8 +173,7 @@ void main() {
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          toolContext: FakeToolContext(logger: testLogger),
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
@@ -263,13 +256,12 @@ void main() {
           ),
           platform: platform,
         );
+        final toolContext = FakeToolContext(logger: logger);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: toolContext,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final toolContext = FakeToolContext(logger: logger);
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
           toolContext: toolContext,
@@ -306,13 +298,12 @@ void main() {
           ),
           platform: platform,
         );
+        final toolContext = FakeToolContext(logger: logger);
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
+          toolContext: toolContext,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final toolContext = FakeToolContext(logger: logger);
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,

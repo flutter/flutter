@@ -443,11 +443,21 @@ class FlutterCommandRunner extends CommandRunner<void> {
               .command ??
           current;
     }
+    var initializedAny = false;
     while (current != null) {
       if (current case final FlutterCommand flutterCommand) {
         await flutterCommand.initializeDynamicOptions();
+        initializedAny = true;
       }
       current = current.parent;
+    }
+    if (initializedAny) {
+      // `initializeDynamicOptions()` rebuilds `command.argParser` via `ExtensionArgParserMixin`,
+      // so `_argParser` must re-register command parsers before `super.run(args)` parses CLI flags.
+      final OutputPreferences outputPreferences = toolContext.outputPreferences;
+      _updateArgParser(
+        wrapColumn: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+      );
     }
   }
 
