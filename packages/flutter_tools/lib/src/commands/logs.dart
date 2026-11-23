@@ -73,7 +73,7 @@ class LogsCommand extends FlutterCommand {
     final TargetPlatform targetPlatform = await cachedDevice.targetPlatform;
     final ApplicationPackage? app = targetPlatform == .unsupported
         ? null
-        : await applicationPackages?.getPackageForPlatform(targetPlatform);
+        : await applicationPackages.getPackageForPlatform(targetPlatform);
 
     final bool filtering =
         argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');
