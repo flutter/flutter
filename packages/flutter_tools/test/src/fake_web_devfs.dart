@@ -8,9 +8,7 @@ import 'dart:io' hide Directory, File;
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -25,10 +23,7 @@ import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'fakes.dart';
-import 'testbed.dart';
-
-/// Helper function to create a [WebDevFS] with sensible testbed defaults.
+/// Helper function to create a [WebDevFS] with sensible defaults.
 WebDevFS createWebDevFS({
   String packagesFilePath = '.dart_tool/package_config.json',
   UrlTunneller? urlTunneller,
@@ -49,22 +44,10 @@ WebDevFS createWebDevFS({
   Directory? rootDirectory,
   bool useDwdsWebSocketConnection = false,
   bool webCrossOriginIsolation = false,
-  Logger? logger,
-  Platform? platform,
   bool testMode = true,
+  required ToolContext toolContext,
   Map<String, String> webDefines = const <String, String>{},
 }) {
-  final ToolContext? testBedContext = TestBed.createToolContext();
-  final ToolContext toolContext = FakeToolContext(
-    artifacts: testBedContext?.artifacts,
-    cache: testBedContext?.cache,
-    config: testBedContext?.config,
-    fs: testBedContext?.fs,
-    flutterVersion: testBedContext?.flutterVersion,
-    logger: logger ?? testBedContext?.logger,
-    platform: platform ?? testBedContext?.platform,
-    processManager: testBedContext?.processManager,
-  );
   final FileSystem fs = toolContext.fs;
   return WebDevFS(
     packagesFilePath: packagesFilePath,
