@@ -81,7 +81,7 @@ bool PassBindingsCacheMTL::SetTexture(
     return true;
   }
   if (stage != ShaderStage::kVertex && stage != ShaderStage::kFragment) {
-    VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
+    VALIDATION_LOG << "Cannot bind texture to unknown shader stage.";
     return false;
   }
   const bool is_vertex = stage == ShaderStage::kVertex;
@@ -111,7 +111,7 @@ bool PassBindingsCacheMTL::SetSampler(
     return true;
   }
   if (stage != ShaderStage::kVertex && stage != ShaderStage::kFragment) {
-    VALIDATION_LOG << "Cannot bind buffer to unknown shader stage.";
+    VALIDATION_LOG << "Cannot bind sampler to unknown shader stage.";
     return false;
   }
   const bool is_vertex = stage == ShaderStage::kVertex;
