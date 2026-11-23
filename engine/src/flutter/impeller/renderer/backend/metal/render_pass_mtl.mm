@@ -231,6 +231,11 @@ static bool Bind(PassBindingsCacheMTL& pass,
 // |RenderPass|
 void RenderPassMTL::SetPipeline(PipelineRef pipeline) {
   CountPipelineUse(pipeline);
+  if (!pipeline) {
+    has_valid_pipeline_ = false;
+    bound_pipeline_ = nullptr;
+    return;
+  }
   has_valid_pipeline_ = true;
   if (pipeline.get() == bound_pipeline_) {
     return;
