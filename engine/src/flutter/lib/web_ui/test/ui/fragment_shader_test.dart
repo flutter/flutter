@@ -1573,6 +1573,34 @@ Future<void> testMain() async {
         },
       );
 
+      test(
+        'setImageSampler is atomic and releases clone when sampler index is out of bounds',
+        () async {
+          final ui.Image validImage = _createOvalGradientImage(imageDimension: 4);
+          final DomImageBitmap invalidBitmap = await createImageBitmap(
+            createBlankDomImageData(4, 4),
+          );
+          final invalidImage = renderer.createImageFromImageBitmap(invalidBitmap) as EngineImage;
+          final ImageSource invalidSource = invalidImage.imageSource!;
+
+          final ui.FragmentProgram program = await renderer.createFragmentProgram('texture_shader');
+          final shader = program.fragmentShader() as EngineFragmentShader;
+          shader.setImageSampler(0, validImage);
+
+          expect(() => shader.setImageSampler(1, invalidImage), throwsRangeError);
+          expect(shader.samplerImages, orderedEquals(<ui.Image>[validImage]));
+          expect(shader.debugImageSamplers.keys, orderedEquals(<int>[0]));
+
+          // Because setImageSampler failed atomically, disposing invalidImage must
+          // immediately close its ImageSource without waiting for shader.dispose().
+          invalidImage.dispose();
+          expect(invalidSource.debugIsClosed, isTrue);
+
+          shader.dispose();
+          validImage.dispose();
+        },
+      );
+
       test('slots for the same sampler and setImageSampler share one binding', () async {
         final images = <ui.Image>[
           for (var i = 0; i < 3; i++) _createOvalGradientImage(imageDimension: 16),

@@ -338,6 +338,9 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   /// sampler name to its index, live here so they are shared by all backends.
   final ShaderData _shaderData;
   final Map<int, BackendImageShader> _imageSamplers = <int, BackendImageShader>{};
+  // _samplerImages preserves the caller's original ui.Image handles for
+  // samplerImages identity, while _retainedSamplerImages holds the
+  // shader-owned clones that keep CountedRef and ImageSource alive.
   final Map<int, ui.Image> _samplerImages = <int, ui.Image>{};
   final Map<int, EngineImage> _retainedSamplerImages = <int, EngineImage>{};
 
@@ -367,7 +370,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
   }) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
     final EngineImage clonedImage = (image as EngineImage).clone();
-    final BackendImageShader sampler;
+    BackendImageShader? sampler;
     try {
       sampler = renderer.createImageShader(
         clonedImage,
@@ -376,8 +379,18 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
         null,
         filterQuality,
       );
+      _backendShader.setImageSampler(
+        index,
+        sampler,
+        image.width.toDouble(),
+        image.height.toDouble(),
+      );
     } catch (_) {
-      clonedImage.dispose();
+      try {
+        sampler?.dispose();
+      } finally {
+        clonedImage.dispose();
+      }
       rethrow;
     }
     final BackendImageShader? oldSampler = _imageSamplers[index];
@@ -390,7 +403,6 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
     _samplerImages[index] = image;
     _retainedSamplerImages[index] = clonedImage;
     _shaderFinalizer.attach(this, sampler, detach: sampler);
-    _backendShader.setImageSampler(index, sampler, image.width.toDouble(), image.height.toDouble());
   }
 
   @override

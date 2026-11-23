@@ -36,8 +36,8 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     _initStackTrace();
   }
 
-  /// Builds the [UniqueRef] disposal callback without capturing `this`, so
-  /// [DomFinalizationRegistry]'s strongly held [UniqueRef] does not retain
+  /// Builds the [CkCountedRef] disposal callback without capturing `this`, so
+  /// `DomFinalizationRegistry`'s strongly held `UniqueRef` does not retain
   /// [_ref] and prevent garbage collection.
   static void Function(SkPicture)? _createDisposer(PictureImageTracker? tracker) {
     if (tracker == null) {
