@@ -225,6 +225,66 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
+        ],
+        "//conditions:default": [],
+    }) + select({
         ":when_shell_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
     }) + select({
@@ -776,6 +836,66 @@ flutter_objc_library(
     }) + select({
         "//engine/src/flutter/impeller/tools:vulkan": [
             "-Wno-redundant-parens",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+            "-Wno-deprecated-copy",  # from //flutter/impeller
+            "-Wno-implicit-fallthrough",  # from //flutter/impeller
+            "-Wno-nullability-completeness",  # from //flutter/impeller
+            "-Wno-suggest-destructor-override",  # from //flutter/impeller
+            "-Wno-suggest-override",  # from //flutter/impeller
+            "-Wno-unused-private-field",  # from //flutter/impeller
+            "-Wno-unused-variable",  # from //flutter/impeller
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/shell:enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+            "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
         ],
         "//conditions:default": [],
     }) + select({
@@ -1382,6 +1502,44 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+            "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+            "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+            "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+            "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+            "-Wno-suggest-override",  # from :embedder_gpu_configuration
+            "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+            "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ] + select({
         ":when_shell_enable_software_and_is_mac_or_is_ios": [
             "-Wno-unguarded-availability",  # from :embedder_gpu_configuration
         ],
@@ -1794,6 +1952,44 @@ flutter_objc_library(
         ],
         "//conditions:default": [],
     }) + select({
+        ":when_shell_enable_gl_and_impeller_enable_opengles_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_vulkan_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":when_shell_enable_metal_and_impeller_enable_metal_and_impeller_enable_vulkan": [
+            "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+            "-Wno-deprecated-copy",  # from :embedder_unittests_library
+            "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+            "-Wno-nullability-completeness",  # from :embedder_unittests_library
+            "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+            "-Wno-suggest-override",  # from :embedder_unittests_library
+            "-Wno-unused-private-field",  # from :embedder_unittests_library
+            "-Wno-unused-variable",  # from :embedder_unittests_library
+        ],
+        "//conditions:default": [],
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
+    ] + select({
         ":when_test_enable_metal_and_is_mac": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
     }) + select({

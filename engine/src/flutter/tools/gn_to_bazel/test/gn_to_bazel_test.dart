@@ -3995,6 +3995,133 @@ source_set("x") {
       expect(output, contains('        ":x_objc",\n'));
     });
 
+    test("a target's cflags_cc reach its Objective-C library beside a C++ source", () async {
+      // GN's objcxx tool reads {{cflags}} {{cflags_cc}} {{cflags_objcc}}
+      // (build/toolchain/mac): the C++ flags, which the C++ rule holds as
+      // cxxopts, follow the Objective-C library's copts and precede its
+      // Objective-C flags. accessibility_unittests' .mm needs googletest's
+      // -Wno-inconsistent-missing-override, a cflags_cc.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc", "b.mm" ]
+  cflags = [ "-fobjc-weak" ]
+  cflags_cc = [ "-Wno-inconsistent-missing-override" ]
+  cflags_objcc = [ "-fobjc-arc" ]
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        output,
+        contains(
+          'flutter_objc_library(\n'
+          '    name = "x_objc",\n'
+          '    srcs = ["b.mm"],\n'
+          '    copts = ["-fobjc-weak"] + CHROMIUM_CODE_COPTS + [\n'
+          '        "-Wno-inconsistent-missing-override",\n'
+          '        "-fobjc-arc",\n'
+          '    ],\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          'cc_library(\n'
+          '    name = "x",\n'
+          '    srcs = ["a.cc"],\n'
+          '    copts = ["-fobjc-weak"] + CHROMIUM_CODE_COPTS,\n'
+          '    cxxopts = ["-Wno-inconsistent-missing-override"],\n',
+        ),
+      );
+    });
+
+    test("a target's cflags_cc stay out of its Objective-C library without a C++ source", () async {
+      // GN writes cflags_cc into a target's ninja file only when the target
+      // has a C++ source, so the .mm files of a target without one compile
+      // without them. Ninja's commands for the Mac host build (11-23):
+      // flutter_desktop_darwin_unittests, all .mm, has no
+      // -Wno-inconsistent-missing-override and no -stdlib=libc++;
+      // accessibility_unittests, with its .cc files, has both.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "b.h", "b.mm" ]
+  cflags_cc = [ "-Wno-inconsistent-missing-override" ]
+  cflags_objcc = [ "-fobjc-arc" ]
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      final int start = output.indexOf('flutter_objc_library(');
+      final int end = output.indexOf('cc_library(');
+      expect(start, isNonNegative);
+      expect(end, greaterThan(start));
+      final String library = output.substring(start, end);
+      expect(library, contains('    srcs = ["b.mm"],\n'));
+      expect(library, contains('"-fobjc-arc"'));
+      expect(library, isNot(contains('-Wno-inconsistent-missing-override')));
+    });
+
+    test("a target's cflags_cc reach its Objective-C library where its C++ source is", () async {
+      // A C++ source under a condition: GN's target has cflags_cc for its
+      // .mm compiles where the condition holds.
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "b.mm" ]
+  if (is_mac) {
+    sources += [ "a.cc" ]
+  }
+  cflags_cc = [ "-Wno-inconsistent-missing-override" ]
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      final int start = output.indexOf('flutter_objc_library(');
+      final int end = output.indexOf('cc_library(');
+      expect(start, isNonNegative);
+      expect(end, greaterThan(start));
+      expect(
+        output.substring(start, end),
+        contains(
+          'select({\n'
+          '        "@platforms//os:macos": ["-Wno-inconsistent-missing-override"],\n'
+          '        "//conditions:default": [],\n'
+          '    })',
+        ),
+      );
+    });
+
+    test("another target's output as the only other source of an Objective-C target with "
+        'C++ flags is an error', () {
+      // Whether such a target has a C++ source decides what its .mm files
+      // are compiled with, and the label of the producing target does not
+      // say what it produces.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/example/gen.py': '',
+        'flutter/example/b.mm': '',
+        'flutter/example/BUILD.gn': r'''
+action("gen") {
+  script = "gen.py"
+  outputs = [ "$target_gen_dir/a.cc" ]
+}
+
+source_set("x") {
+  sources = [ "b.mm" ]
+  sources += get_target_outputs(":gen")
+  cflags_cc = [ "-Wno-inconsistent-missing-override" ]
+  deps = [ ":gen" ]
+}
+''',
+      });
+      expect(
+        () => emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        ),
+        throwsA(
+          isA<GnError>().having(
+            (GnError e) => e.message,
+            'message',
+            contains('whether the target has a C++ source'),
+          ),
+        ),
+      );
+    });
+
     test('the Objective-C flags of a target without Objective-C sources go nowhere', () async {
       // GN applies cflags_objc to no compile of such a target; neither the
       // flags nor their constant's load reach the file.

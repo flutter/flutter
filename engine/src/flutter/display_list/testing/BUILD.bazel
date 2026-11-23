@@ -124,7 +124,9 @@ flutter_objc_library(
             "-Wno-redundant-parens",  # from //flutter/common/graphics
         ],
         "//conditions:default": [],
-    }) + select({
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ] + select({
         "@platforms//os:macos": [
             "-Wno-unguarded-availability",  # from //flutter/testing:testing_lib
         ],

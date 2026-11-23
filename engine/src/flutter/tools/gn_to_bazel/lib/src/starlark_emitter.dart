@@ -4434,6 +4434,30 @@ final class _Emitter {
         );
       }
     }
+    // GN's objcxx tool reads cflags_cc too, between the other two lists
+    // ({{cflags}} {{cflags_cc}} {{cflags_objcc}}: build/toolchain/mac), and
+    // GN writes a target's cflags_cc into its ninja file only when the
+    // target has a C++ source: in a target of .mm files alone the variable
+    // is empty. Ninja's own commands for the Mac host build show both
+    // (11-23): each of its 227 .mm compiles has the target's cflags_cc,
+    // -stdlib=libc++ among them, exactly when the target compiles a C++
+    // file as well. So the target's C++ flags (its cxxopts: its own
+    // cflags_cc and those its dependencies' public configs forward) follow
+    // the copts here and precede the Objective-C flags, where the target
+    // has a C++ source. Without them the Mac could not compile
+    // accessibility_unittests_objc, which needs googletest's
+    // -Wno-inconsistent-missing-override; with them in every such library,
+    // 76 .mm files of targets without a C++ source had warnings off that
+    // GN leaves on. GN's objc tool reads cflags_c in their place; this
+    // rule has one list of flags, so a .m file beside C++ sources gets the
+    // C++ flags too.
+    final _ListAttribute? cxxopts = rule.lists['cxxopts'];
+    if (cxxopts != null) {
+      final Condition withCxxSource = _whereCxxSource(srcs, target);
+      if (withCxxSource != Condition.never) {
+        _copyList(cxxopts, companion.list('copts'), unique: false, where: withCxxSource);
+      }
+    }
     // The Objective-C flags, once each under a condition: GN gives
     // cflags_objc to .m and cflags_objcc to .mm compiles, and the two
     // lists are one here (see _constant). A target's own unconditional
@@ -4658,8 +4682,52 @@ final class _Emitter {
     rules.add(companion);
   }
 
-  /// Copies [from]'s items into [to] under their conditions, in order.
-  static void _copyList(_ListAttribute from, _ListAttribute to, {required bool unique}) {
+  /// What GN counts as a C++ source (its SOURCE_CPP).
+  static const Set<String> _cxxSourceExtensions = <String>{'.cc', '.cpp', '.cxx', '.c++'};
+
+  /// The condition under which [srcs], a target's sources without the
+  /// Objective-C ones, has a C++ source: under it GN gives the target's
+  /// `cflags_cc` to its Objective-C++ compiles, and otherwise not
+  /// ([_splitObjcSources]).
+  static Condition _whereCxxSource(_ListAttribute srcs, GnTarget target) {
+    String extensionOf(_Item item) {
+      final int dot = item.text.lastIndexOf('.');
+      return dot < 0 ? '' : item.text.substring(dot);
+    }
+
+    bool isCxx(_Item item) => item.quoted && _cxxSourceExtensions.contains(extensionOf(item));
+    if (srcs.always.any(isCxx)) {
+      return Condition.always;
+    }
+    // With no C++ source outright, every other source has to say what it
+    // is: a list by name or another target's output may hold one.
+    for (final _Item item in srcs.items) {
+      final String extension = extensionOf(item);
+      if (!item.quoted ||
+          !(_sourceExtensions.contains(extension) || _headerExtensions.contains(extension))) {
+        throw GnError(
+          target.location,
+          '${target.name} lists ${item.text} beside Objective-C sources and no C++ source '
+          'outright: whether the target has a C++ source, which decides whether its '
+          'Objective-C++ compiles get cflags_cc, cannot be told from it',
+        );
+      }
+    }
+    final under = <Condition>[
+      for (final MapEntry<Condition, List<_Item>> entry in srcs.conditional.entries)
+        if (entry.value.any(isCxx)) entry.key,
+    ];
+    return under.isEmpty ? Condition.never : Condition.disjunction(under);
+  }
+
+  /// Copies [from]'s items into [to] under their conditions, in order; with
+  /// [where], under their conditions and it.
+  static void _copyList(
+    _ListAttribute from,
+    _ListAttribute to, {
+    required bool unique,
+    Condition where = Condition.always,
+  }) {
     final Iterable<(Condition, _Item)> entries = from.hasOrder
         ? from.sequence
         : <(Condition, _Item)>[
@@ -4668,10 +4736,14 @@ final class _Emitter {
               for (final _Item item in entry.value) (entry.key, item),
           ];
     for (final (Condition under, _Item item) in entries) {
+      final Condition when = where == Condition.always ? under : under.and(where);
+      if (when == Condition.never) {
+        continue;
+      }
       if (unique) {
-        to.addUnique(under, item);
+        to.addUnique(when, item);
       } else {
-        to.add(under, item);
+        to.add(when, item);
       }
     }
   }

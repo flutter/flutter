@@ -189,7 +189,9 @@ flutter_objc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + select({
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ] + select({
         "@platforms//os:macos": MACOS_CFLAGS_OBJC,
         "//conditions:default": [],
     }) + select({

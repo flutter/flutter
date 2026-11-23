@@ -90,7 +90,9 @@ flutter_objc_library(
             "-Wno-redundant-parens",  # from //flutter/testing:dart
         ],
         "//conditions:default": [],
-    }) + MACOS_CFLAGS_OBJC + [
+    }) + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ] + MACOS_CFLAGS_OBJC + [
         "-Wno-unguarded-availability",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
