@@ -14,9 +14,11 @@ as a fetched source tree (git_deps.bzl).
 A repository of its own, like a fetched tree and for the same reason:
 `synced_repository` is a local rule, run again at every server start, and a
 download made there would be made again each time (the Android SDK is
-3.9 GB). This one is fetched once per output base and again only when its
-pin changes; with its sha256 known, the download also comes from Bazel's
-repository cache.
+3.9 GB). This one is fetched only when its pin changes. With its sha256
+known (the lock has one for every CIPD package that exists) the download
+comes from Bazel's repository cache, and the unpacked directory is kept
+once, for every output base, in the repo contents cache (`reproducible`;
+git_deps.bzl says the same of a fetched tree).
 """
 
 load(":git_deps.bzl", "FETCHED_STAMP", "FETCHED_TREE_DIRECTORY", "fetch_stamp")
@@ -45,7 +47,10 @@ def _fetched_archive_impl(rctx):
     # For what reads the tool, as a fetched tree's (git_deps.bzl).
     rctx.file(FETCHED_STAMP, fetch_stamp(rctx, rctx.attr.url))
     if rctx.attr.sha256:
-        return None
+        # Checked against its hash, the archive is the same wherever it is
+        # fetched: another output base may take the unpacked directory as
+        # it stands (Bazel's repo contents cache, the root .bazelrc).
+        return rctx.repo_metadata(reproducible = True)
 
     # Tell Bazel how to make this fetch reproducible (printed with --verbose).
     attrs = {name: getattr(rctx.attr, name) for name in _ATTRS if getattr(rctx.attr, name)}

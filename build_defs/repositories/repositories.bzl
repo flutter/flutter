@@ -729,7 +729,11 @@ def _cipd_package_impl(rctx):
     _mark_repository_boundary(rctx)
 
     if rctx.attr.sha256:
-        return None
+        # Checked against its hash, the package is the same wherever it is
+        # fetched, and its BUILD file is a copy Bazel watches: another output
+        # base may take the directory as it stands (the repo contents cache,
+        # the root .bazelrc).
+        return rctx.repo_metadata(reproducible = True)
 
     # Tell Bazel how to make this fetch reproducible (printed with --verbose).
     attrs = {name: getattr(rctx.attr, name) for name in _CIPD_PACKAGE_ATTRS if getattr(rctx.attr, name)}

@@ -128,11 +128,42 @@ package then has the URI it has in a synced checkout.
 
 **What it needs.** `git` on `PATH`, and the network: `*.googlesource.com` for
 the trees, `chrome-infra-packages.appspot.com` for the packages. The fetches
-are anonymous. They are Bazel's: the trees live in the output base, are
-fetched once per output base, and again after `bazel clean --expunge` or a
-roll of their pin (a tree at a time; the Dart tree with everything nested in
-it). `--repository_cache` does not hold them, since git is not Bazel's
-downloader.
+are anonymous. They are Bazel's: made when a build first reads a dependency,
+and again when its pin rolls (a tree at a time; the Dart tree with
+everything nested in it).
+
+**Fetched once, for every output base.** Bazel keeps a fetched repository in
+its repo contents cache when the repository's rule says the fetch is
+reproducible, and every output base that needs a repository of the same
+definition gets a link to that one directory: a second checkout or
+worktree, a new output base, the build after `bazel clean --expunge` fetch
+nothing again. The root `.bazelrc` names the cache (`--repo_contents_cache`,
+beside the repository cache under `~/.cache/flutter_engine_bazel`; this
+Bazel leaves it off unless it is named, and `--repo_contents_cache=` on a
+command line turns it off for that command). Bazel's idle server drops an
+entry that no output base has used for two weeks. A `fetched_archive` is
+reproducible when the lock has its sha256, which it has for every package
+CIPD serves; a `fetched_tree` when it is a commit with nothing inside it
+but pinned commits and checked packages. Three trees are not, and are
+fetched for each output base as before: vulkan-deps, whose ten members are
+links into other repositories of its output base, and the two that run
+hooks, the Dart tree and the Emscripten SDK. What their hooks write is the
+same as in a synced checkout, but no build has been made yet from such a
+tree in a second output base; they are also the two largest. On a bot
+nothing can be counted on to collect the cache: Bazel's collector runs in
+a server that has been idle for five minutes, and a bot's server exits
+after five idle minutes or with its task. What the bots fetch this way
+today is a few tools that roll rarely; before they fetch source trees this
+way, which roll daily, something has to bound the directory.
+
+Measured on Linux x64. In a checkout that never ran `gclient sync`, a C++
+library (`@abseil-cpp//absl/strings`) built in a new output base in 22 s
+with nothing fetched; the output base before it had fetched clang, the
+sysroot and three trees, 2.3 GB in the cache. In a synced checkout with
+`FLUTTER_BAZEL_FETCH_SOURCES=1` (below), `@zlib//:zlib`, whose BUILD file is
+converted from GN over the tree in the cache, built in a second output base
+in 7 s with nothing fetched; vulkan-deps was fetched there again, its ten
+members were not.
 
 **A roll.** A tree whose pin changed is fetched again, into the same
 directory, by the next build that reads it. What was made from the old tree

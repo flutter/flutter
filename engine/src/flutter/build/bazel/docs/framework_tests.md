@@ -522,10 +522,13 @@ With the default on, the existing `.ci.yaml` targets are the CI targets
 which cocoon runs in postsubmit only). A flutter_drone bot is a bare
 checkout -- git, no `gclient sync` -- so the tools of DEPS the test rules
 still need there come down as the packages DEPS names: a tool's repository
-reads its CIPD package or tarball, downloaded once per output base, when
+reads its CIPD package or tarball, downloaded and checked against the lock's
+sha256, when
 the checkout has not got the directory (`fetched_archive`; cpython3 for
 the pub repositories and the package configurations, clang and the
-sysroots for the desktop shard),
+sysroots for the desktop shard; the unpacked package is kept in the repo
+contents cache, which like the repository cache lies under the home
+directory and outlasts a task's output root: `docs/dependencies.md`),
 which a bare worktree of this checkout verified end to end (the engine's
 artifacts.zip carries shader_lib's BUILD files, which must not make
 packages inside the cache repository; the tool shards see JAVA_HOME and

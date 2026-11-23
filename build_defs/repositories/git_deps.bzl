@@ -42,6 +42,13 @@ The rule is in a file of its own, which loads no other: a repository is
 fetched again when the file that defines its rule changes, or one that file
 loads, and these are the expensive ones (the Dart tree alone is well over
 a gigabyte).
+
+A tree that is the same wherever it is fetched says so (`reproducible`, at
+the end of the rule), and Bazel's repo contents cache, which the root
+.bazelrc names, then keeps it once: every output base that needs a tree of
+the same definition gets a link to the one directory, and fetches nothing.
+The cache knows a tree by its rule's file and its attributes, another
+reason for this file to load nothing that could differ between machines.
 """
 
 # The directory of a fetched_tree's repository that holds the tree.
@@ -196,6 +203,19 @@ def _fetched_tree_impl(rctx):
     rctx.file("BUILD.bazel", "# A tree of DEPS fetched by Bazel (build_defs/repositories/git_deps.bzl): %s/.\n" % FETCHED_TREE_DIRECTORY)
     rctx.file("REPO.bazel", "")
     rctx.file(FETCHED_STAMP, fetch_stamp(rctx, "%s@%s" % (rctx.attr.url, rctx.attr.revision)))
+
+    # Whether another output base may take this directory as it stands
+    # (Bazel's repo contents cache, the root .bazelrc). A commit by its id,
+    # the dependencies pinned inside it, packages checked against a sha256
+    # and what gclient writes are the same wherever they are fetched. Not so
+    # a tree with members linked in from other repositories: the links name
+    # this output base. And not yet a tree that ran hooks: what they wrote
+    # has been compared with a synced checkout's, but no build has been
+    # made from such a tree in a second output base.
+    packages_checked = all([relative in rctx.attr.cipd_sha256 for relative in rctx.attr.cipd])
+    return rctx.repo_metadata(
+        reproducible = packages_checked and not rctx.attr.linked and not rctx.attr.hooks,
+    )
 
 fetched_tree = repository_rule(
     implementation = _fetched_tree_impl,

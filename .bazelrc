@@ -86,6 +86,18 @@ build --experimental_disk_cache_gc_max_size=20G
 # no run that has the files.
 common --repository_cache=~/.cache/flutter_engine_bazel/repository_cache
 
+# The repo contents cache -- whole fetched repositories, kept once and
+# linked into every output base that asks for the same one: Bazel's own
+# module repositories, and what this build fetches where `gclient sync` has
+# not run (the trees and tools of DEPS: build_defs/repositories' fetched_tree
+# and fetched_archive say which of them are the same wherever they are
+# fetched). A second checkout, a new output base, the build after `bazel
+# clean --expunge` then fetch none of those again. This Bazel leaves the
+# cache off unless it is named. Beside the repository cache, for the same
+# reason; Bazel refuses one inside the checkout. Its idle server drops what
+# no output base has used for two weeks (--repo_contents_cache_gc_max_age).
+common --repo_contents_cache=~/.cache/flutter_engine_bazel/repo_contents_cache
+
 # The checkout's revision in the build (common:stamp). Unstamped, the
 # default, a build depends on the files it reads and not on git's HEAD: the
 # engine's revision and content hash are fixed words (@engine_version;
