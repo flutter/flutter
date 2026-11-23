@@ -32,6 +32,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/module_metadata.dart';
+import 'package:flutter_tools/src/web/web_debug_config.dart';
 import 'package:flutter_tools/src/web_template.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
@@ -1568,9 +1569,6 @@ void main() {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
       null,
-      true,
-      true,
-      true,
       const BuildInfo(
         BuildMode.debug,
         '',
@@ -1590,12 +1588,9 @@ void main() {
         logger: logger,
         platform: platform,
       ),
-      webRenderer: WebRendererMode.canvaskit,
-      isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
-      webDevServerConfig: webDevServerConfig,
-      crossOriginIsolation: false,
+      webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig),
     );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1611,9 +1606,6 @@ void main() {
     final WebAssetServer webAssetServer = await WebAssetServer.start(
       null,
       null,
-      true,
-      true,
-      true,
       const BuildInfo(
         BuildMode.debug,
         '',
@@ -1633,12 +1625,9 @@ void main() {
         logger: logger,
         platform: platform,
       ),
-      webRenderer: WebRendererMode.canvaskit,
-      isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
-      webDevServerConfig: webDevServerConfig,
-      crossOriginIsolation: false,
+      webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig),
     );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
