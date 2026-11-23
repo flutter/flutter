@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -14,10 +15,12 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -83,8 +86,43 @@ void main() {
       tryToDelete(tempDir);
     });
 
+    ToolContext createLocalToolContext() => FakeToolContext(
+      artifacts: localArtifacts,
+      botDetector: fakeBotDetector,
+      cache: localCache,
+      fs: localFs,
+      logger: logger,
+      os: OperatingSystemUtils(
+        fileSystem: localFs,
+        logger: logger,
+        platform: localPlatform,
+        processManager: localProcessManager,
+      ),
+      platform: localPlatform,
+      processManager: localProcessManager,
+      projectFactory: FlutterProjectFactory(
+        config: Config.test(name: Config.kFlutterSettings, logger: logger),
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        fileSystem: localFs,
+        logger: logger,
+        plistParser: FakePlistParser(),
+        xcode: FakeXcode(),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+      ),
+      stdio: mockStdio,
+    );
+
+    Future<String> createLocalProject({String name = 'flutter_project', List<String>? arguments}) {
+      return createProject(
+        tempDir,
+        name: name,
+        arguments: arguments,
+        toolContext: createLocalToolContext(),
+      );
+    }
+
     Future<String> createProjectWithPlugin(String plugin, {List<String>? arguments}) async {
-      final String projectPath = await createProject(tempDir, arguments: arguments);
+      final String projectPath = await createLocalProject(arguments: arguments);
       final File pubspec = localFs.file(localFs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       final List<String> contentLines = LineSplitter.split(content).toList();
@@ -102,33 +140,25 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
+      final ToolContext toolContext = createLocalToolContext();
       final command = PackagesCommand(
         buildSystem: FlutterBuildSystem(
           fileSystem: localFs,
           logger: logger,
           platform: localPlatform,
         ),
-        toolContext: FakeToolContext(
-          artifacts: localArtifacts,
-          botDetector: fakeBotDetector,
-          cache: localCache,
-          fs: localFs,
-          logger: logger,
-          platform: localPlatform,
-          processManager: localProcessManager,
-          projectFactory: FlutterProjectFactory(
-            config: Config.test(name: Config.kFlutterSettings, logger: logger),
-            featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-            fileSystem: localFs,
-            logger: logger,
-            plistParser: FakePlistParser(),
-            xcode: FakeXcode(),
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          ),
-          stdio: mockStdio,
-        ),
+        toolContext: toolContext,
       );
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final CommandRunner<void> runner = TestFlutterCommandRunner(
+        analytics: fakeAnalytics,
+        gradleUtils: GradleUtils(
+          cache: localCache,
+          logger: logger,
+          operatingSystemUtils: toolContext.os,
+          platform: localPlatform,
+        ),
+        toolContext: toolContext,
+      )..addCommand(command);
       await runner.run(<String>[
         ...?globalArgs,
         'packages',
@@ -283,9 +313,8 @@ void main() {
       }
     }
 
-    testUsingContext('get fetches packages and has output from pub', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('get fetches packages and has output from pub', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       removeGeneratedFiles(projectPath);
@@ -314,11 +343,10 @@ void main() {
         ),
         true,
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('get --offline fetches packages', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('get --offline fetches packages', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       removeGeneratedFiles(projectPath);
@@ -329,7 +357,7 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     });
 
-    testUsingContext('get fetches packages for a workspace', () async {
+    test('get fetches packages for a workspace', () async {
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
@@ -337,8 +365,7 @@ environment:
 workspace:
   - flutter_project
 ''');
-      final String projectPath = await createProject(
-        tempDir,
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
@@ -385,9 +412,9 @@ workspace:
         ),
         true,
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext('get creates plugin registrants for each app in workspace', () async {
+    test('get creates plugin registrants for each app in workspace', () async {
       tempDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: workspace
 environment:
@@ -395,12 +422,11 @@ environment:
 workspace:
   - flutter_project
 ''');
-      await createProject(
-        tempDir,
+      await createLocalProject(
         name: 'plugin',
         arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
       );
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+      final String projectPath = await createLocalProject(arguments: <String>['--no-pub']);
       final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
       final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
       final pubspec = <String, Object?>{
@@ -445,9 +471,9 @@ workspace:
         ),
         true,
       );
-    }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+    });
 
-    testUsingContext(
+    test(
       'get does not generate platform tooling for a non-Flutter workspace root',
       // Regression test for https://github.com/flutter/flutter/issues/189550.
       () async {
@@ -462,7 +488,7 @@ workspace:
         // be populated with Flutter project files.
         tempDir.childDirectory('ios').createSync();
         tempDir.childDirectory('android').createSync();
-        final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+        final String projectPath = await createLocalProject(arguments: <String>['--no-pub']);
         final File pubspecFile = fileSystem.file(fileSystem.path.join(projectPath, 'pubspec.yaml'));
         final pubspecYaml = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
         final pubspec = <String, Object?>{
@@ -479,12 +505,10 @@ workspace:
         // The Flutter app member of the workspace is still processed.
         expectExists(projectPath, 'ios/Flutter/Generated.xcconfig');
       },
-      overrides: <Type, Generator>{Analytics: () => fakeAnalytics},
     );
 
-    testUsingContext('get generates files into lib/l10n', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('get generates files into lib/l10n', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       final Directory projectDir = localFs.directory(projectPath);
@@ -509,9 +533,8 @@ flutter:
       );
     });
 
-    testUsingContext('set no plugins as usage value', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('set no plugins as usage value', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       removeGeneratedFiles(projectPath);
@@ -526,9 +549,8 @@ flutter:
       );
     });
 
-    testUsingContext('set the number of plugins as usage value', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('set the number of plugins as usage value', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>[
           '--template=plugin',
           '--no-pub',
@@ -548,8 +570,8 @@ flutter:
       );
     });
 
-    testUsingContext('indicate that the project is not a module in usage value', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+    test('indicate that the project is not a module in usage value', () async {
+      final String projectPath = await createLocalProject(arguments: <String>['--no-pub']);
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
@@ -562,9 +584,8 @@ flutter:
       );
     });
 
-    testUsingContext('indicate that the project is a module in usage value', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('indicate that the project is a module in usage value', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       removeGeneratedFiles(projectPath);
@@ -579,8 +600,8 @@ flutter:
       );
     });
 
-    testUsingContext('indicate that Android project reports v2 in usage value', () async {
-      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
+    test('indicate that Android project reports v2 in usage value', () async {
+      final String projectPath = await createLocalProject(arguments: <String>['--no-pub']);
       removeGeneratedFiles(projectPath);
 
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
@@ -593,9 +614,8 @@ flutter:
       );
     });
 
-    testUsingContext('upgrade fetches packages', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('upgrade fetches packages', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--no-pub', '--template=module'],
       );
       removeGeneratedFiles(projectPath);
@@ -606,7 +626,7 @@ flutter:
       expectZeroPluginsInjected(projectPath);
     });
 
-    testUsingContext('get fetches packages and injects plugin', () async {
+    test('get fetches packages and injects plugin', () async {
       final String projectPath = await createProjectWithPlugin(
         'path_provider',
         arguments: <String>['--no-pub', '--template=module'],
@@ -619,9 +639,8 @@ flutter:
       expectModulePluginInjected(projectPath, includeLegacyPluginsList: false);
     });
 
-    testUsingContext('get fetches packages and injects plugin in plugin project', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('get fetches packages and injects plugin in plugin project', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
       );
       final String exampleProjectPath = localFs.path.join(projectPath, 'example');
@@ -638,9 +657,8 @@ flutter:
       expectPluginInjected(exampleProjectPath, includeLegacyPluginsList: false);
     });
 
-    testUsingContext('get explicit-packages-resolution omits ".flutter-plugins"', () async {
-      final String projectPath = await createProject(
-        tempDir,
+    test('get explicit-packages-resolution omits ".flutter-plugins"', () async {
+      final String projectPath = await createLocalProject(
         arguments: <String>['--template=plugin', '--no-pub', '--platforms=ios,android'],
       );
       final String exampleProjectPath = localFs.path.join(projectPath, 'example');

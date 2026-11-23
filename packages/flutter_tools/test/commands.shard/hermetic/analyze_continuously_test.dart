@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -72,7 +71,7 @@ void main() {
   ''');
   }
 
-  testUsingContext('AnalysisServer success', () async {
+  test('AnalysisServer success', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
@@ -120,7 +119,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
+  test(
     'AnalysisServer handles server-initiated requests with same ID as outstanding request',
     () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
@@ -192,7 +191,7 @@ void main() {
     },
   );
 
-  testUsingContext(
+  test(
     'AnalysisServer does not throw when progress notifications arrive during or after dispose',
     () async {
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
@@ -246,7 +245,7 @@ void main() {
     },
   );
 
-  testUsingContext('AnalysisServer handles non-ASCII project path', () async {
+  test('AnalysisServer handles non-ASCII project path', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test_’_dir.',
     );
@@ -294,7 +293,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AnalysisServer errors', () async {
+  test('AnalysisServer errors', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
@@ -342,7 +341,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Returns no errors when source is error-free', () async {
+  test('Returns no errors when source is error-free', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
@@ -389,7 +388,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService without suppressing analytics', () async {
+  test('Can run AnalysisService without suppressing analytics', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -418,7 +417,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -426,7 +425,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location', () async {
+  test('Can run AnalysisService with customized cache location', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -456,7 +455,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -464,7 +463,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location --watch', () async {
+  test('Can run AnalysisService with customized cache location --watch', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -494,7 +493,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -515,7 +514,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AnalysisService --watch skips errors from non-files', () async {
+  test('AnalysisService --watch skips errors from non-files', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -545,7 +544,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
@@ -564,61 +563,58 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext(
-    'AnalysisService --watch does not crash when the VM service is enabled',
-    () async {
-      // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
-      // invoke json.decode(...) on the VM service message.
-      //
-      // Regression test for https://github.com/flutter/flutter/issues/58391.
-      final process = MockLspServerProcess();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'language-server',
-            '--dart-sdk',
-            'Artifact.engineDartSdkPath',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--suppress-analytics',
-          ],
-          process: process,
-        ),
-      ]);
+  test('AnalysisService --watch does not crash when the VM service is enabled', () async {
+    // Pretend the VM service was enabled by sending SIGQUIT (CTRL + \) to ensure we don't try to
+    // invoke json.decode(...) on the VM service message.
+    //
+    // Regression test for https://github.com/flutter/flutter/issues/58391.
+    final process = MockLspServerProcess();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartSdkPath/bin/dart',
+          'language-server',
+          '--dart-sdk',
+          'Artifact.engineDartSdkPath',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
+          '--suppress-analytics',
+        ],
+        process: process,
+      ),
+    ]);
 
-      final artifacts = Artifacts.test();
-      final command = AnalyzeCommand(
-        allProjectValidators: <ProjectValidator>[],
-        suppressAnalytics: true,
-        toolContext: FakeToolContext(
-          artifacts: artifacts,
-          fs: MemoryFileSystem.test(),
-          logger: logger,
-          platform: FakePlatform(),
-          processManager: processManager,
-        ),
-      );
+    final artifacts = Artifacts.test();
+    final command = AnalyzeCommand(
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
+    );
 
-      final commandRunner = TestFlutterCommandRunner();
-      commandRunner.addCommand(command);
-      unawaited(commandRunner.run(<String>['analyze', '--watch']));
-      await process.initializeRequest;
-      process
-        ..triggerVmServiceUriBanner()
-        ..triggerSimulatedAnalysis(diagnosticsFor: Uri.parse('file:///directoryA/foo'));
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await process.initializeRequest;
+    process
+      ..triggerVmServiceUriBanner()
+      ..triggerSimulatedAnalysis(diagnosticsFor: Uri.parse('file:///directoryA/foo'));
 
-      while (!logger.statusText.contains('analyzed 1 file')) {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-      }
+    while (!logger.statusText.contains('analyzed 1 file')) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
 
-      expect(logger.statusText, contains('No issues found!'));
-      expect(logger.errorText, isEmpty);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
+    expect(logger.statusText, contains('No issues found!'));
+    expect(logger.errorText, isEmpty);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 
-  testUsingContext('AnalysisService --watch handles errors coming and going', () async {
+  test('AnalysisService --watch handles errors coming and going', () async {
     final process = MockLspServerProcess();
     final processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -648,7 +644,7 @@ void main() {
       ),
     );
 
-    final commandRunner = TestFlutterCommandRunner();
+    final commandRunner = TestFlutterCommandRunner(toolContext: command.toolContext);
     commandRunner.addCommand(command);
     unawaited(commandRunner.run(<String>['analyze', '--watch']));
     await process.initializeRequest;
