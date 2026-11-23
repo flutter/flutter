@@ -35,6 +35,11 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   final Map<EngineFlutterView, OffscreenCanvasViewRasterizer> _viewRasterizers =
       <EngineFlutterView, OffscreenCanvasViewRasterizer>{};
 
+  /// Removes the [view] rasterizer from the registry.
+  void _removeViewRasterizer(EngineFlutterView view) {
+    _viewRasterizers.remove(view);
+  }
+
   @override
   void setResourceCacheMaxBytes(int bytes) {
     _surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
@@ -43,9 +48,10 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   @override
   void dispose() {
     _surfaceProvider.dispose();
-    for (final OffscreenCanvasViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final viewRasterizer in List<OffscreenCanvasViewRasterizer>.of(_viewRasterizers.values)) {
       viewRasterizer.dispose();
     }
+    _viewRasterizers.clear();
   }
 
   @override
@@ -98,5 +104,12 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
       });
     }
     recorder?.recordRasterFinish();
+  }
+
+  @override
+  void dispose() {
+    rasterizer._removeViewRasterizer(view);
+    displayFactory.dispose();
+    super.dispose();
   }
 }

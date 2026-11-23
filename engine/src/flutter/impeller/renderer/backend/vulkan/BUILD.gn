@@ -34,6 +34,7 @@ impeller_component("vulkan_unittests") {
     "fence_waiter_vk_unittests.cc",
     "formats_vk_unittests.cc",
     "pipeline_cache_data_vk_unittests.cc",
+    "pipeline_cache_vk_unittests.cc",
     "render_pass_builder_vk_unittests.cc",
     "render_pass_cache_unittests.cc",
     "render_pass_vk_unittests.cc",
