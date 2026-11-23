@@ -687,183 +687,169 @@ void main() {
       expect(logger.errorText, contains('Simulated unhandled async error'));
     });
 
-    test('serializes ToolExtensionException.data and strips json_rpc_2 request entry', () async {
-      final logger = BufferLogger.test();
-      final ExtensionConnection connection = await ExtensionConnection.spawn(
-        _protocolHardeningEntryPoint,
-        logger: logger,
-      );
-      addTearDown(connection.dispose);
+    group('protocol hardening and bidirectional RPC', () {
+      late ExtensionConnection connection;
 
-      await expectLater(
-        connection.sendRequest('hardening.throwUserError'),
-        throwsA(
-          isA<ToolExtensionException>()
-              .having(
-                (ToolExtensionException e) => e.message,
-                'message',
-                'Missing custom SDK at /opt/custom_sdk',
-              )
-              .having(
-                (ToolExtensionException e) => e.code,
-                'code',
-                ToolExtensionException.domainErrorCode,
-              )
-              .having((ToolExtensionException e) => e.data, 'data', const <String, Object?>{
-                'sdkPath': '/opt/custom_sdk',
-              }),
-        ),
-      );
-
-      await expectLater(
-        connection.sendRequest('hardening.throwUserErrorWithoutData'),
-        throwsA(
-          isA<ToolExtensionException>()
-              .having(
-                (ToolExtensionException e) => e.code,
-                'code',
-                ToolExtensionException.domainErrorCode,
-              )
-              .having((ToolExtensionException e) => e.data, 'data', isNull),
-        ),
-      );
-    });
-
-    test('maps UnsupportedError to -32002 and keeps UnimplementedError as -32000', () async {
-      final logger = BufferLogger.test();
-      final ExtensionConnection connection = await ExtensionConnection.spawn(
-        _protocolHardeningEntryPoint,
-        logger: logger,
-      );
-      addTearDown(connection.dispose);
-
-      await expectLater(
-        connection.sendRequest('hardening.throwUnsupportedCapability'),
-        throwsA(
-          isA<ToolExtensionException>()
-              .having(
-                (ToolExtensionException e) => e.message,
-                'message',
-                'Screen recording is not supported.',
-              )
-              .having(
-                (ToolExtensionException e) => e.code,
-                'code',
-                ToolExtensionException.unsupportedCapabilityErrorCode,
-              )
-              .having((ToolExtensionException e) => e.data, 'data', isNull),
-        ),
-      );
-
-      await expectLater(
-        connection.sendRequest('hardening.throwUnimplementedError'),
-        throwsA(
-          isA<json_rpc.RpcException>()
-              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
-              .having(
-                (json_rpc.RpcException e) => e.message,
-                'message',
-                contains('Not implemented yet'),
-              ),
-        ),
-      );
-    });
-
-    test('IOOverrides exit guard intercepts exit() inside RPC handler', () async {
-      final logger = BufferLogger.test();
-      final ExtensionConnection connection = await ExtensionConnection.spawn(
-        _protocolHardeningEntryPoint,
-        logger: logger,
-      );
-      addTearDown(connection.dispose);
-
-      await expectLater(
-        connection.sendRequest('hardening.callProcessExit'),
-        throwsA(
-          isA<json_rpc.RpcException>()
-              .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
-              .having(
-                (json_rpc.RpcException e) => e.message,
-                'message',
-                contains(
-                  'Bad state: Tool extensions must not call exit(42); '
-                  'throw ToolExtensionException instead.',
-                ),
-              ),
-        ),
-      );
-    });
-
-    test(
-      'bidirectional host RPC round-trips responses and propagates ToolExtensionException',
-      () async {
-        final logger = BufferLogger.test();
-        final ExtensionConnection connection = await ExtensionConnection.spawn(
+      setUp(() async {
+        connection = await ExtensionConnection.spawn(
           _protocolHardeningEntryPoint,
-          logger: logger,
+          logger: BufferLogger.test(),
         );
-        addTearDown(connection.dispose);
+      });
 
-        connection.registerRequestHandler('host.echo', (Map<String, Object?> params) {
-          return <String, Object?>{'echoed': params['value']};
-        });
-        connection.registerRequestHandler('host.fail', (Map<String, Object?> _) {
-          throw const ToolExtensionException(
-            'Interactive prompt unavailable in machine mode.',
-            code: ToolExtensionException.unsupportedCapabilityErrorCode,
-            data: <String, Object?>{'mode': 'machine'},
-          );
-        });
+      tearDown(() => connection.dispose());
 
-        final Object? response = await connection.sendRequest(
-          'hardening.invokeHostRpc',
-          params: const <String, Object?>{
-            'method': 'host.echo',
-            'params': <String, Object?>{'value': 'hello'},
-          },
-        );
-        expect(response, const <String, Object?>{'echoed': 'hello'});
-
-        final Object? caughtResult = await connection.sendRequest(
-          'hardening.invokeHostRpcCatching',
-          params: const <String, Object?>{'method': 'host.fail'},
-        );
-        expect(caughtResult, const <String, Object?>{
-          'caught': true,
-          'code': ToolExtensionException.unsupportedCapabilityErrorCode,
-          'message': 'Interactive prompt unavailable in machine mode.',
-          'data': <String, Object?>{'mode': 'machine'},
-        });
-
+      test('serializes ToolExtensionException.data and strips json_rpc_2 request entry', () async {
         await expectLater(
-          connection.sendRequest(
-            'hardening.invokeHostRpc',
-            params: const <String, Object?>{'method': 'host.fail'},
-          ),
+          connection.sendRequest('hardening.throwUserError'),
           throwsA(
             isA<ToolExtensionException>()
                 .having(
                   (ToolExtensionException e) => e.message,
                   'message',
-                  'Interactive prompt unavailable in machine mode.',
+                  'Missing custom SDK at /opt/custom_sdk',
+                )
+                .having(
+                  (ToolExtensionException e) => e.code,
+                  'code',
+                  ToolExtensionException.domainErrorCode,
+                )
+                .having((ToolExtensionException e) => e.data, 'data', const <String, Object?>{
+                  'sdkPath': '/opt/custom_sdk',
+                }),
+          ),
+        );
+
+        await expectLater(
+          connection.sendRequest('hardening.throwUserErrorWithoutData'),
+          throwsA(
+            isA<ToolExtensionException>()
+                .having(
+                  (ToolExtensionException e) => e.code,
+                  'code',
+                  ToolExtensionException.domainErrorCode,
+                )
+                .having((ToolExtensionException e) => e.data, 'data', isNull),
+          ),
+        );
+      });
+
+      test('maps UnsupportedError to -32002 and keeps UnimplementedError as -32000', () async {
+        await expectLater(
+          connection.sendRequest('hardening.throwUnsupportedCapability'),
+          throwsA(
+            isA<ToolExtensionException>()
+                .having(
+                  (ToolExtensionException e) => e.message,
+                  'message',
+                  'Screen recording is not supported.',
                 )
                 .having(
                   (ToolExtensionException e) => e.code,
                   'code',
                   ToolExtensionException.unsupportedCapabilityErrorCode,
                 )
-                .having((ToolExtensionException e) => e.data, 'data', const <String, Object?>{
-                  'mode': 'machine',
-                }),
+                .having((ToolExtensionException e) => e.data, 'data', isNull),
           ),
         );
-      },
-    );
+
+        await expectLater(
+          connection.sendRequest('hardening.throwUnimplementedError'),
+          throwsA(
+            isA<json_rpc.RpcException>()
+                .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+                .having(
+                  (json_rpc.RpcException e) => e.message,
+                  'message',
+                  contains('Not implemented yet'),
+                ),
+          ),
+        );
+      });
+
+      test('IOOverrides exit guard intercepts exit() inside RPC handler', () async {
+        await expectLater(
+          connection.sendRequest('hardening.callProcessExit'),
+          throwsA(
+            isA<json_rpc.RpcException>()
+                .having((json_rpc.RpcException e) => e.code, 'code', error_code.SERVER_ERROR)
+                .having(
+                  (json_rpc.RpcException e) => e.message,
+                  'message',
+                  contains(
+                    'Bad state: Tool extensions must not call exit(42); '
+                    'throw ToolExtensionException instead.',
+                  ),
+                ),
+          ),
+        );
+      });
+
+      test(
+        'bidirectional host RPC round-trips responses and propagates ToolExtensionException',
+        () async {
+          connection
+            ..registerRequestHandler('host.echo', (Map<String, Object?> params) {
+              return <String, Object?>{'echoed': params['value']};
+            })
+            ..registerRequestHandler('host.fail', (Map<String, Object?> _) {
+              throw const ToolExtensionException(
+                'Interactive prompt unavailable in machine mode.',
+                code: ToolExtensionException.unsupportedCapabilityErrorCode,
+                data: <String, Object?>{'mode': 'machine'},
+              );
+            });
+
+          final Object? response = await connection.sendRequest(
+            'hardening.invokeHostRpc',
+            params: const <String, Object?>{
+              'method': 'host.echo',
+              'params': <String, Object?>{'value': 'hello'},
+            },
+          );
+          expect(response, const <String, Object?>{'echoed': 'hello'});
+
+          final Object? caughtResult = await connection.sendRequest(
+            'hardening.invokeHostRpcCatching',
+            params: const <String, Object?>{'method': 'host.fail'},
+          );
+          expect(caughtResult, const <String, Object?>{
+            'caught': true,
+            'code': ToolExtensionException.unsupportedCapabilityErrorCode,
+            'message': 'Interactive prompt unavailable in machine mode.',
+            'data': <String, Object?>{'mode': 'machine'},
+          });
+
+          await expectLater(
+            connection.sendRequest(
+              'hardening.invokeHostRpc',
+              params: const <String, Object?>{'method': 'host.fail'},
+            ),
+            throwsA(
+              isA<ToolExtensionException>()
+                  .having(
+                    (ToolExtensionException e) => e.message,
+                    'message',
+                    'Interactive prompt unavailable in machine mode.',
+                  )
+                  .having(
+                    (ToolExtensionException e) => e.code,
+                    'code',
+                    ToolExtensionException.unsupportedCapabilityErrorCode,
+                  )
+                  .having((ToolExtensionException e) => e.data, 'data', const <String, Object?>{
+                    'mode': 'machine',
+                  }),
+            ),
+          );
+        },
+      );
+    });
 
     test('registerRequestHandler throws StateError after dispose', () async {
       final logger = BufferLogger.test();
       final ExtensionConnection connection = await ExtensionConnection.spawn(
-        _protocolHardeningEntryPoint,
+        _dummyExtensionEntryPoint,
         logger: logger,
       );
       await connection.dispose();
