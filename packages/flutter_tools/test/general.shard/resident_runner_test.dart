@@ -1862,133 +1862,137 @@ flutter:
 
   testUsingContext(
     'Uses existing DDS URI from exception field',
-    () => testbed.run(
-      () async {
-        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-        final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
-        ddsLauncherCallback =
-            ({
-              required Uri remoteVmServiceUri,
-              String? appName = 'Fake App',
-              Uri? serviceUri,
-              bool enableAuthCodes = true,
-              bool serveDevTools = false,
-              Uri? devToolsServerAddress,
-              bool enableServicePortFallback = false,
-              List<String> cachedUserTags = const <String>[],
-              String? dartExecutable,
-              String? google3WorkspaceRoot,
-            }) {
-              throw DartDevelopmentServiceException.existingDdsInstance(
-                'Existing DDS at http://localhost/existingDdsInMessage.',
-                ddsUri: Uri.parse('http://localhost/existingDdsInField'),
-              );
-            };
-        final flutterDevice = TestFlutterDevice(device, vmServiceUri: Future<Uri>.value(testUri));
-        final done = Completer<void>();
-        unawaited(
-          runZonedGuarded(
-            () => flutterDevice
-                .connect(
-                  vmServiceUri: testUri,
-                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-                )
-                .then((_) => done.complete()),
-            (_, _) => done.complete(),
-          ),
-        );
-        await done.future;
-        expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
-      },
-      overrides: <Type, Generator>{
-        VMServiceConnector: () =>
-            (
-              Uri httpUri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              FlutterVersion? flutterVersion,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              io.CompressionOptions? compression,
-              Device? device,
-              required Logger logger,
-            }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
-      },
-    ),
+    () => testbed.run(() async {
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
+      ddsLauncherCallback =
+          ({
+            required Uri remoteVmServiceUri,
+            String? appName = 'Fake App',
+            Uri? serviceUri,
+            bool enableAuthCodes = true,
+            bool serveDevTools = false,
+            Uri? devToolsServerAddress,
+            bool enableServicePortFallback = false,
+            List<String> cachedUserTags = const <String>[],
+            String? dartExecutable,
+            String? google3WorkspaceRoot,
+          }) {
+            throw DartDevelopmentServiceException.existingDdsInstance(
+              'Existing DDS at http://localhost/existingDdsInMessage.',
+              ddsUri: Uri.parse('http://localhost/existingDdsInField'),
+            );
+          };
+      final flutterDevice = FlutterDevice(
+        device,
+        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+        generator: FakeResidentCompiler(),
+        targetPlatform: .unsupported,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        vmServiceConnector: (
+          Uri httpUri, {
+          ReloadSources? reloadSources,
+          Restart? restart,
+          CompileExpression? compileExpression,
+          FlutterProject? flutterProject,
+          FlutterVersion? flutterVersion,
+          PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+          io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+          Device? device,
+          required Logger logger,
+        }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
+      )..vmServiceUri = Future<Uri>.value(testUri);
+      final done = Completer<void>();
+      unawaited(
+        runZonedGuarded(
+          () => flutterDevice
+              .connect(
+                vmServiceUri: testUri,
+                debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+              )
+              .then((_) => done.complete()),
+          (_, _) => done.complete(),
+        ),
+      );
+      await done.future;
+      expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
+    }),
   );
 
   testUsingContext(
     'Host VM service ipv6 defaults',
-    () => testbed.run(
-      () async {
-        fakeVmServiceHost = FakeVmServiceHost(
-          requests: <VmServiceExpectation>[
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Isolate'},
-            ),
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Isolate'},
-            ),
-            const FakeVmServiceRequest(
-              method: 'streamListen',
-              args: <String, Object>{'streamId': 'Isolate'},
-            ),
-          ],
-        );
-        final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
-        final done = Completer<void>();
-        ddsLauncherCallback =
-            ({
-              required Uri remoteVmServiceUri,
-              String? appName = 'Fake App',
-              Uri? serviceUri,
-              bool enableAuthCodes = true,
-              bool serveDevTools = false,
-              Uri? devToolsServerAddress,
-              bool enableServicePortFallback = false,
-              List<String> cachedUserTags = const <String>[],
-              String? dartExecutable,
-              String? google3WorkspaceRoot,
-            }) async {
-              expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
-              expect(appName, contains('Kind: Flutter'));
-              expect(appName, contains('Device: FakeDevice'));
-              expect(enableAuthCodes, isFalse);
-              expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
-              expect(cachedUserTags, isEmpty);
-              done.complete();
-              return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
-            };
-        final flutterDevice = TestFlutterDevice(device, vmServiceUri: Future<Uri>.value(testUri));
-        await flutterDevice.connect(
-          vmServiceUri: testUri,
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo.debug,
-            disableServiceAuthCodes: true,
-            ipv6: true,
+    () => testbed.run(() async {
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
           ),
-        );
-        await done.future;
-      },
-      overrides: <Type, Generator>{
-        VMServiceConnector: () =>
-            (
-              Uri httpUri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              FlutterVersion? flutterVersion,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              io.CompressionOptions? compression,
-              Device? device,
-              required Logger logger,
-            }) async => fakeVmServiceHost!.vmService,
-      },
-    ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Isolate'},
+          ),
+        ],
+      );
+      final device = FakeDevice()..dds = DartDevelopmentService(logger: testLogger);
+      final done = Completer<void>();
+      ddsLauncherCallback =
+          ({
+            required Uri remoteVmServiceUri,
+            String? appName = 'Fake App',
+            Uri? serviceUri,
+            bool enableAuthCodes = true,
+            bool serveDevTools = false,
+            Uri? devToolsServerAddress,
+            bool enableServicePortFallback = false,
+            List<String> cachedUserTags = const <String>[],
+            String? dartExecutable,
+            String? google3WorkspaceRoot,
+          }) async {
+            expect(remoteVmServiceUri, Uri(scheme: 'foo', host: 'bar'));
+            expect(appName, contains('Kind: Flutter'));
+            expect(appName, contains('Device: FakeDevice'));
+            expect(enableAuthCodes, isFalse);
+            expect(serviceUri, Uri(scheme: 'http', host: '::1', port: 0));
+            expect(cachedUserTags, isEmpty);
+            done.complete();
+            return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
+          };
+      final flutterDevice = FlutterDevice(
+        device,
+        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+        generator: FakeResidentCompiler(),
+        targetPlatform: .unsupported,
+        buildInfo: BuildInfo.debug,
+        developmentShaderCompiler: const FakeShaderCompiler(),
+        vmServiceConnector: (
+          Uri httpUri, {
+          ReloadSources? reloadSources,
+          Restart? restart,
+          CompileExpression? compileExpression,
+          FlutterProject? flutterProject,
+          FlutterVersion? flutterVersion,
+          PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+          io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+          Device? device,
+          required Logger logger,
+        }) async => fakeVmServiceHost!.vmService,
+      )..vmServiceUri = Future<Uri>.value(testUri);
+      await flutterDevice.connect(
+        vmServiceUri: testUri,
+        debuggingOptions: DebuggingOptions.enabled(
+          BuildInfo.debug,
+          disableServiceAuthCodes: true,
+          ipv6: true,
+        ),
+      );
+      await done.future;
+    }),
   );
 
   testUsingContext('nextPlatform moves through expected platforms', () {

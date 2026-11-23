@@ -10,7 +10,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/io.dart';
@@ -218,12 +217,6 @@ abstract class FlutterCommand extends Command<void> {
   Cache get _cache => toolContext.cache;
   FlutterVersion get _flutterVersion => toolContext.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext.fileSystemUtils;
-
-  /// The currently executing command (or sub-command).
-
-  ///
-  /// Will be `null` until the top-most command has begun execution.
-  static FlutterCommand? get current => context.get<FlutterCommand>();
 
   /// The option name for a custom VM Service port.
   static const vmServicePortOption = 'vm-service-port';
@@ -855,41 +848,35 @@ abstract class FlutterCommand extends Command<void> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<void> run() {
+  Future<void> run() async {
     final DateTime startTime = _clock.now();
 
-    return context.run<void>(
-      name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
-      body: () async {
-        if (hasOption(CommonOptions.fatalWarnings)) {
-          _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
-        }
-        _printDeprecationWarning();
-        final String? commandPath = await usagePath;
-        if (commandPath != null) {
-          _registerSignalHandlers(commandPath, startTime);
-        }
-        var commandResult = FlutterCommandResult.fail();
-        try {
-          commandResult = await verifyThenRunCommand(commandPath);
-        } finally {
-          final DateTime endTime = _clock.now();
-          _logger.printTrace(
-            _userMessages.flutterElapsedTime(
-              name,
-              getElapsedAsMilliseconds(endTime.difference(startTime)),
-            ),
-          );
-          if (commandPath != null) {
-            _sendPostUsage(commandPath, commandResult, startTime, endTime);
-          }
-          if (hasOption(CommonOptions.fatalWarnings)) {
-            _logger.checkForFatalLogs();
-          }
-        }
-      },
-    );
+    if (hasOption(CommonOptions.fatalWarnings)) {
+      _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
+    }
+    _printDeprecationWarning();
+    final String? commandPath = await usagePath;
+    if (commandPath != null) {
+      _registerSignalHandlers(commandPath, startTime);
+    }
+    var commandResult = FlutterCommandResult.fail();
+    try {
+      commandResult = await verifyThenRunCommand(commandPath);
+    } finally {
+      final DateTime endTime = _clock.now();
+      _logger.printTrace(
+        _userMessages.flutterElapsedTime(
+          name,
+          getElapsedAsMilliseconds(endTime.difference(startTime)),
+        ),
+      );
+      if (commandPath != null) {
+        _sendPostUsage(commandPath, commandResult, startTime, endTime);
+      }
+      if (hasOption(CommonOptions.fatalWarnings)) {
+        _logger.checkForFatalLogs();
+      }
+    }
   }
 
   @override
