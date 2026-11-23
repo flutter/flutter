@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -191,4 +192,100 @@ template-arb-file: {name}_en.arb
       throwsToolExit(),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/191072.
+  testWithoutContext(
+    'GenerateLocalizationsTarget rebuilds when pubspec.yaml dependencies change',
+    () async {
+      const flutterLocalizationsImport =
+          "import 'package:flutter_localizations/flutter_localizations.dart';";
+      const materialUiImport =
+          "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;";
+
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final platform = FakePlatform();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: FakeProcessManager.empty(),
+      );
+
+      environment.flutterRootDir
+          .childFile(
+            fileSystem.path.join(
+              'packages',
+              'flutter_tools',
+              'lib',
+              'src',
+              'build_system',
+              'targets',
+              'localizations.dart',
+            ),
+          )
+          .createSync(recursive: true);
+
+      environment.projectDir.childFile('l10n.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('format: false\n');
+      environment.projectDir.childFile(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "@@locale": "en",
+  "helloWorld": "Hello World"
+}
+''');
+      final File pubspecFile = environment.projectDir.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  generate: true
+''');
+
+      final buildSystem = FlutterBuildSystem(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+      );
+
+      final BuildResult firstResult = await buildSystem.build(
+        const GenerateLocalizationsTarget(),
+        environment,
+      );
+      expect(firstResult.hasException, false);
+
+      final File generatedFile = environment.projectDir.childFile(
+        fileSystem.path.join('lib', 'l10n', 'app_localizations.dart'),
+      );
+      expect(generatedFile.readAsStringSync(), contains(flutterLocalizationsImport));
+
+      pubspecFile.writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+
+      final BuildResult secondResult = await buildSystem.build(
+        const GenerateLocalizationsTarget(),
+        environment,
+      );
+      expect(secondResult.hasException, false);
+
+      final String regeneratedContent = generatedFile.readAsStringSync();
+      expect(regeneratedContent, contains(materialUiImport));
+      expect(regeneratedContent, isNot(contains(flutterLocalizationsImport)));
+    },
+  );
 }
