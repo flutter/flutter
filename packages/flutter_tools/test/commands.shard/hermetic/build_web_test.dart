@@ -320,8 +320,15 @@ void main() {
       ),
     );
     expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
-    expect(logger.statusText, contains('When "--no-web-resources-cdn" is used'));
-    expect(logger.statusText, contains('canvaskit/**'));
+    expect(
+      logger.statusText,
+      contains('Hashed files ("main.dart.<hash>.*" and everything under "assets/")'),
+    );
+    expect(
+      logger.statusText,
+      contains('Other files, including everything under "canvaskit/", are not content-hashed'),
+    );
+    expect(logger.statusText, contains('deployment/web#web-content-hashing'));
   });
 
   testWithoutContext('Builds successfully without --web-define', () async {
