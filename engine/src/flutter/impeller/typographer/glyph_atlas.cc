@@ -72,7 +72,41 @@ size_t GlyphAtlas::GetAtlasGeneration() const {
 }
 
 void GlyphAtlas::SetAtlasGeneration(size_t generation) {
+  if (generation_ != generation) {
+    cached_frames_.clear();
+  }
   generation_ = generation;
+}
+
+bool GlyphAtlas::HasCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                                const Matrix& transform,
+                                const GlyphProperties& properties) const {
+  auto found = cached_frames_.find(frame.get());
+  if (found == cached_frames_.end()) {
+    return false;
+  }
+  const CachedFrame& cached = found->second;
+  // The map lookup matched the address. A live weak reference rules out
+  // a new TextFrame allocated at the same address as a destroyed one.
+  return !cached.frame.expired() && cached.transform == transform &&
+         GlyphProperties::Equal{}(cached.properties, properties);
+}
+
+void GlyphAtlas::AddCachedFrame(const std::shared_ptr<TextFrame>& frame,
+                                const Matrix& transform,
+                                const GlyphProperties& properties) {
+  constexpr size_t kMaxCachedFrames = 256;
+  if (cached_frames_.size() >= kMaxCachedFrames &&
+      !cached_frames_.contains(frame.get())) {
+    absl::erase_if(cached_frames_, [](const auto& entry) {
+      return entry.second.frame.expired();
+    });
+    if (cached_frames_.size() >= kMaxCachedFrames) {
+      cached_frames_.clear();
+    }
+  }
+  cached_frames_.insert_or_assign(frame.get(),
+                                  CachedFrame{frame, transform, properties});
 }
 
 void GlyphAtlas::AddTypefaceGlyphPositionAndBounds(const FontGlyphPair& pair,

@@ -123,6 +123,105 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
                   .has_value());
 }
 
+TEST_P(TypographerTest, GlyphAtlasMembershipCacheKeepsActiveSubpixelAxis) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  sk_font.setSubpixel(true);
+  sk_font.setBaselineSnap(true);
+  auto frame =
+      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
+  ASSERT_TRUE(frame);
+
+  auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                                GlyphAtlas::Type::kAlphaBitmap, Matrix(),
+                                atlas_context, frame);
+  ASSERT_TRUE(atlas);
+  ASSERT_EQ(atlas->GetGlyphCount(), 1u);
+
+  // The first visit uploads the glyph. The second can confirm residency.
+  ASSERT_TRUE(CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                               GlyphAtlas::Type::kAlphaBitmap, Matrix(),
+                               atlas_context, frame));
+  ASSERT_TRUE(atlas->HasCachedFrame(frame, Matrix(), {}));
+
+  // The active X subpixel position must be part of the cache key.
+  atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                           GlyphAtlas::Type::kAlphaBitmap,
+                           Matrix::MakeTranslation({0.25f, 0.0f, 0.0f}),
+                           atlas_context, frame);
+  ASSERT_TRUE(atlas);
+  EXPECT_EQ(atlas->GetGlyphCount(), 2u);
+
+  // Y translation is unused by an X-aligned run.
+  atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                           GlyphAtlas::Type::kAlphaBitmap,
+                           Matrix::MakeTranslation({0.25f, 17.0f, 0.0f}),
+                           atlas_context, frame);
+  ASSERT_TRUE(atlas);
+  EXPECT_EQ(atlas->GetGlyphCount(), 2u);
+  EXPECT_TRUE(atlas->HasCachedFrame(
+      frame, Matrix::MakeTranslation({0.25f, 0.0f, 0.0f}), {}));
+}
+
+TEST_P(TypographerTest, GlyphAtlasMembershipCacheIncludesGlyphProperties) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto frame =
+      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
+  ASSERT_TRUE(frame);
+
+  auto atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                                GlyphAtlas::Type::kAlphaBitmap, Matrix(),
+                                atlas_context, frame);
+  ASSERT_TRUE(atlas);
+  ASSERT_EQ(atlas->GetGlyphCount(), 1u);
+
+  // The first visit uploads the glyph. The second can confirm residency.
+  ASSERT_TRUE(CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                               GlyphAtlas::Type::kAlphaBitmap, Matrix(),
+                               atlas_context, frame));
+  ASSERT_TRUE(atlas->HasCachedFrame(frame, Matrix(), {}));
+
+  GlyphProperties stroked;
+  stroked.stroke = StrokeParameters{.width = 1.0f};
+  RenderableText render_frame{
+      .text_frame = frame,
+      .origin_transform = Matrix(),
+      .properties = stroked,
+  };
+  atlas = context->CreateGlyphAtlas(
+      *GetContext(), GlyphAtlas::Type::kAlphaBitmap, *data_host_buffer,
+      atlas_context, {render_frame});
+  ASSERT_TRUE(atlas);
+  EXPECT_EQ(atlas->GetGlyphCount(), 2u);
+}
+
+TEST(GlyphAtlasMembershipTest, CacheBelongsToOneAtlasGeneration) {
+  GlyphAtlas atlas(GlyphAtlas::Type::kAlphaBitmap, 0);
+  GlyphAtlas other(GlyphAtlas::Type::kAlphaBitmap, 0);
+  auto frame = std::make_shared<TextFrame>();
+  atlas.AddCachedFrame(frame, Matrix(), {});
+  EXPECT_TRUE(atlas.HasCachedFrame(frame, Matrix(), {}));
+  EXPECT_FALSE(other.HasCachedFrame(frame, Matrix(), {}));
+  atlas.SetAtlasGeneration(1);
+  EXPECT_FALSE(atlas.HasCachedFrame(frame, Matrix(), {}));
+
+  atlas.AddCachedFrame(frame, Matrix(), {});
+  std::weak_ptr<TextFrame> weak = frame;
+  frame.reset();
+  EXPECT_TRUE(weak.expired());
+}
+
 TEST_P(TypographerTest, LazyAtlasTracksColor) {
   auto data_host_buffer = HostBuffer::Create(
       GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),

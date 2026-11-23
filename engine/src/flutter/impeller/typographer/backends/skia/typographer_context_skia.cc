@@ -485,6 +485,39 @@ static Rect ComputeGlyphSize(const SkFont& font,
                         scaled_bounds.fBottom);
 };
 
+// Only translation along an axis that no run uses can be omitted from the
+// membership key. Integer translation on an active axis is kept exact because
+// changing it can affect the floating-point subpixel bucket at a boundary.
+static Matrix NormalizeGlyphCacheTransform(const TextFrame& text_frame,
+                                           const Matrix& transform) {
+  bool uses_x = false;
+  bool uses_y = false;
+  for (const auto& run : text_frame.GetRuns()) {
+    switch (run.GetFont().GetAxisAlignment()) {
+      case AxisAlignment::kNone:
+        break;
+      case AxisAlignment::kX:
+        uses_x = true;
+        break;
+      case AxisAlignment::kY:
+        uses_y = true;
+        break;
+      case AxisAlignment::kAll:
+        uses_x = true;
+        uses_y = true;
+        break;
+    }
+  }
+  Matrix result = transform;
+  if (!uses_x) {
+    result.m[12] = 0;
+  }
+  if (!uses_y) {
+    result.m[13] = 0;
+  }
+  return result;
+}
+
 std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>
 TypographerContextSkia::CollectNewGlyphs(
     const std::shared_ptr<GlyphAtlas>& atlas,
@@ -492,6 +525,13 @@ TypographerContextSkia::CollectNewGlyphs(
   std::vector<FontGlyphPair> new_glyphs;
   std::vector<Rect> glyph_sizes;
   for (const auto& frame : renderable_texts) {
+    const Matrix cache_transform =
+        NormalizeGlyphCacheTransform(*frame.text_frame, frame.origin_transform);
+    if (atlas->HasCachedFrame(frame.text_frame, cache_transform,
+                              frame.properties)) {
+      continue;
+    }
+    bool frame_complete = true;
     Rational rounded_scale = TextFrame::RoundScaledFontSize(
         frame.origin_transform.GetMaxBasisLengthXY());
     for (const auto& run : frame.text_frame->GetRuns()) {
@@ -522,15 +562,15 @@ TypographerContextSkia::CollectNewGlyphs(
             frame.origin_transform);
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame.properties);
-        const auto& font_glyph_bounds =
+        const auto font_glyph_bounds =
             font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
 
         if (!font_glyph_bounds.has_value()) {
+          frame_complete = false;
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
           auto glyph_bounds = ComputeGlyphSize(
               sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
           glyph_sizes.push_back(glyph_bounds);
-
           auto frame_bounds = FrameBounds{
               Rect::MakeLTRB(0, 0, 0, 0),  //
               glyph_bounds,                //
@@ -538,8 +578,14 @@ TypographerContextSkia::CollectNewGlyphs(
           };
 
           font_glyph_atlas->AppendGlyph(subpixel_glyph, frame_bounds);
+        } else if (font_glyph_bounds->is_placeholder) {
+          frame_complete = false;
         }
       }
+    }
+    if (frame_complete) {
+      atlas->AddCachedFrame(frame.text_frame, cache_transform,
+                            frame.properties);
     }
   }
   return {std::move(new_glyphs), std::move(glyph_sizes)};
