@@ -6,6 +6,7 @@
 
 #include "flutter/fml/trace_event.h"
 #include "impeller/display_list/aiks_context.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_wrapper_vk.h"
@@ -28,7 +29,8 @@ std::unique_ptr<EmbedderRenderTarget> CreateVulkanImpellerRenderTarget(
           callback(user_data);
         }
       });
-  if (!aiks_context || !store.image || !store.image->image) {
+  if (!aiks_context || !aiks_context->GetContext() || !store.image ||
+      !store.image->image) {
     FML_LOG(ERROR) << "Embedder supplied null Vulkan backing image.";
     return nullptr;
   }
@@ -45,7 +47,7 @@ std::unique_ptr<EmbedderRenderTarget> CreateVulkanImpellerRenderTarget(
   descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;
   descriptor.usage = impeller::TextureUsage::kRenderTarget;
   auto source = impeller::WrapTextureSourceVK(
-      context, descriptor,
+      impeller::ContextVK::Cast(*context), descriptor,
       impeller::vk::Image(reinterpret_cast<VkImage>(store.image->image)));
   if (!source) {
     return nullptr;
