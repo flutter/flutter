@@ -61,7 +61,7 @@ abstract base class TemplateService extends ToolExtensionService {
   /// Set<String> supportedPlatforms(ExtensionTemplateType templateType) =>
   ///     switch (templateType) {
   ///       .app || .plugin => const <String>{'custom_linux'},
-  ///       .ffiPlugin => const <String>{},
+  ///       _ => const <String>{},
   ///     };
   /// ```
   Set<String> supportedPlatforms(ExtensionTemplateType templateType) => const <String>{};
@@ -142,7 +142,7 @@ abstract base class TemplateService extends ToolExtensionService {
       platform = params.requiredField<String>(platformParam);
       final String rawType = params.requiredField<String>(templateTypeParam);
       templateType =
-          ExtensionTemplateType.values.asNameMap()[rawType] ??
+          ExtensionTemplateType.tryFromName(rawType) ??
           (throw FormatException('Invalid "$templateTypeParam": "$rawType".'));
       toolParameters = params.requiredField<Map<String, Object?>>(toolParametersParam);
     } on FormatException catch (e) {

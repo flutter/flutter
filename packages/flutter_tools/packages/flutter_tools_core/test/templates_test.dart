@@ -6,6 +6,20 @@ import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('ExtensionTemplateType', () {
+    test('exposes canonical constants and resolves wire names via tryFromName', () {
+      expect(
+        ExtensionTemplateType.values,
+        equals(const <ExtensionTemplateType>[.app, .ffiPlugin, .plugin]),
+      );
+      for (final ExtensionTemplateType value in ExtensionTemplateType.values) {
+        expect(ExtensionTemplateType.tryFromName(value.name), same(value));
+        expect(value.toString(), equals('ExtensionTemplateType.${value.name}'));
+      }
+      expect(ExtensionTemplateType.tryFromName('unknown'), isNull);
+    });
+  });
+
   group('ExtensionPlatformTemplate', () {
     test('round-trips JSON serialization and equality', () {
       final Uri uri = Uri.parse('package:my_ext/templates/app');

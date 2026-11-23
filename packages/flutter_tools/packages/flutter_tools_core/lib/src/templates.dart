@@ -9,15 +9,41 @@ import 'json_utils.dart';
 const String _packageScheme = 'package';
 
 /// Project template archetype being scaffolded by `flutter create`.
-enum ExtensionTemplateType {
+///
+/// Switches over [ExtensionTemplateType] should include a fallback case for
+/// unrecognized archetypes.
+@immutable
+final class ExtensionTemplateType {
+  const ExtensionTemplateType._(this.name);
+
   /// A standard Flutter application (`flutter create -t app`).
-  app,
+  static const app = ExtensionTemplateType._('app');
 
   /// A Flutter FFI plugin (`flutter create -t plugin_ffi`).
-  ffiPlugin,
+  static const ffiPlugin = ExtensionTemplateType._('ffiPlugin');
 
   /// A Flutter platform channel plugin (`flutter create -t plugin`).
-  plugin,
+  static const plugin = ExtensionTemplateType._('plugin');
+
+  /// Standard project template archetypes supported by `flutter create`.
+  static const values = <ExtensionTemplateType>[.app, .ffiPlugin, .plugin];
+
+  /// Wire identifier for this template archetype.
+  final String name;
+
+  /// Looks up a known [ExtensionTemplateType] by its wire [name], or returns
+  /// `null` if [name] is unrecognized.
+  static ExtensionTemplateType? tryFromName(String name) {
+    for (final ExtensionTemplateType value in values) {
+      if (value.name == name) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  @override
+  String toString() => 'ExtensionTemplateType.$name';
 }
 
 /// Descriptor for a resolved platform template returned by

@@ -20,7 +20,7 @@ final class LinuxTemplateService extends TemplateService {
   @override
   Set<String> supportedPlatforms(ExtensionTemplateType templateType) => switch (templateType) {
     .app => const <String>{customLinuxPlatformName},
-    .ffiPlugin || .plugin => const <String>{},
+    _ => const <String>{},
   };
 
   @override

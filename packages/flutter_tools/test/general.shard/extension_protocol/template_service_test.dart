@@ -25,7 +25,7 @@ final class _DuplicateLinuxTemplateService extends TemplateService {
   @override
   Set<String> supportedPlatforms(ExtensionTemplateType templateType) => switch (templateType) {
     .app => const <String>{LinuxTemplateService.customLinuxPlatformName},
-    .ffiPlugin || .plugin => const <String>{},
+    _ => const <String>{},
   };
 }
 
@@ -42,7 +42,7 @@ final class _ConflictingPluginLinuxTemplateService extends TemplateService {
   @override
   Set<String> supportedPlatforms(ExtensionTemplateType templateType) => switch (templateType) {
     .plugin => const <String>{LinuxTemplateService.customLinuxPlatformName},
-    .app || .ffiPlugin => const <String>{},
+    _ => const <String>{},
   };
 
   @override
@@ -67,7 +67,7 @@ final class _BuiltInCollisionTemplateService extends TemplateService {
   @override
   Set<String> supportedPlatforms(ExtensionTemplateType templateType) => switch (templateType) {
     .app => const <String>{'linux', 'valid_custom'},
-    .ffiPlugin || .plugin => const <String>{},
+    _ => const <String>{},
   };
 
   @override
@@ -140,7 +140,7 @@ final class _FailingTemplateService extends TemplateService {
   @override
   Set<String> supportedPlatforms(ExtensionTemplateType templateType) => switch (templateType) {
     .app => const <String>{domainErrorPlatform, crashPlatform},
-    .ffiPlugin || .plugin => const <String>{},
+    _ => const <String>{},
   };
 
   @override
