@@ -3113,7 +3113,7 @@ void main() {
       WidgetTester tester,
     ) async {
       final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
-          _createRowScopeNodes(rowCount: 3, cardsPerRow: 4);
+          _createRowScopeNodes(cardsPerRow: <int>[4, 4, 4]);
       await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
       gridNodes[0][0].requestFocus();
       await tester.pump();
@@ -3136,7 +3136,7 @@ void main() {
       // The row scope's own rect extends above its focused card, so Up must
       // not pick the scope, which would hand focus back to the same card.
       final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
-          _createRowScopeNodes(rowCount: 2, cardsPerRow: 2);
+          _createRowScopeNodes(cardsPerRow: <int>[2, 2]);
       await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes, headerHeight: 200));
       gridNodes[0][0].requestFocus();
       await tester.pump();
@@ -3157,7 +3157,7 @@ void main() {
       // The header makes the scope of row 1 taller than its cards, so its
       // center is closer to the focused card than the card directly below.
       final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
-          _createRowScopeNodes(rowCount: 3, cardsPerRow: 4);
+          _createRowScopeNodes(cardsPerRow: <int>[4, 4, 4]);
       await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
       gridNodes[0][1].requestFocus();
       await tester.pump();
@@ -3175,7 +3175,7 @@ void main() {
       // center is closer to the focused card than the card directly above.
       // Picking the scope would restore its last focused card instead.
       final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
-          _createRowScopeNodes(rowCount: 2, cardsPerRow: 4);
+          _createRowScopeNodes(cardsPerRow: <int>[4, 4]);
       await tester.pumpWidget(
         _buildRowScopes(rowScopes, gridNodes, headerHeight: 0, footerHeight: 40),
       );
@@ -3196,7 +3196,7 @@ void main() {
       // Without scrollables, Up would otherwise pop the enclosing scope's
       // history and restore the last focused card of row 0.
       final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
-          _createRowScopeNodes(rowCount: 2, cardsPerRow: 2);
+          _createRowScopeNodes(cardsPerRow: <int>[2, 2]);
       await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes, scrollable: false));
       gridNodes[0][0].requestFocus();
       await tester.pump();
@@ -3209,6 +3209,120 @@ void main() {
       // Right moves within row 1, so the enclosing scope's history goes stale.
       // Arrow keys scroll on the web, so the move is requested directly.
       gridNodes[1][0].focusInDirection(TraversalDirection.right);
+      await tester.pump();
+      expect(gridNodes[1][1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Down skips a row scope without traversable cards', (WidgetTester tester) async {
+      // Row 1 has no cards, so its scope has nothing to hand focus to and must
+      // not hand it back to the card that is leaving.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(cardsPerRow: <int>[1, 0, 1]);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
+      gridNodes[0][0].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[2][0].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Down skips a card that opted out of traversal in the row below', (
+      WidgetTester tester,
+    ) async {
+      // Row 1 still remembers its card as the focused child, so the row scope
+      // must not lead focus to a card that no longer takes part in traversal.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(cardsPerRow: <int>[1, 1, 1]);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
+      gridNodes[1][0].requestFocus();
+      await tester.pump();
+      gridNodes[1][0].skipTraversal = true;
+      gridNodes[0][0].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+      expect(rowScopes[1].focusedChild, equals(gridNodes[1][0]));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[2][0].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Up retraces the path across rows when each row is a FocusScope', (
+      WidgetTester tester,
+    ) async {
+      // Each move back up must restore the card the path came from, so the
+      // history has to record the cards rather than their row scopes.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(cardsPerRow: <int>[2, 1, 1]);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes, scrollable: false));
+      gridNodes[0][1].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[2][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Up returns to the originating card across nested scrollables', (
+      WidgetTester tester,
+    ) async {
+      // The rows scroll horizontally inside the vertical list. Only the
+      // scrollables along the axis of the move decide whether the history
+      // still applies.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(cardsPerRow: <int>[2, 1]);
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes));
+      gridNodes[0][1].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(gridNodes[0][1].hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Wrapping within a row clears the directional history of the enclosing scope', (
+      WidgetTester tester,
+    ) async {
+      // Left wraps to the last card of row 1 through its edge behavior, which
+      // moves focus without recording a path, so the enclosing scope's history
+      // must still be cleared.
+      final (List<FocusScopeNode> rowScopes, List<List<FocusNode>> gridNodes) =
+          _createRowScopeNodes(cardsPerRow: <int>[2, 2]);
+      rowScopes[1].directionalTraversalEdgeBehavior = TraversalEdgeBehavior.closedLoop;
+      await tester.pumpWidget(_buildRowScopes(rowScopes, gridNodes, scrollable: false));
+      gridNodes[0][0].requestFocus();
+      await tester.pump();
+      expect(gridNodes[0][0].hasPrimaryFocus, isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(gridNodes[1][0].hasPrimaryFocus, isTrue);
+
+      gridNodes[1][0].focusInDirection(TraversalDirection.left);
       await tester.pump();
       expect(gridNodes[1][1].hasPrimaryFocus, isTrue);
 
@@ -4337,17 +4451,18 @@ List<bool?> _createFocusTracker(int length) => List<bool?>.generate(length, (int
 
 // A scope node per row and a focus node per card, all disposed at teardown.
 (List<FocusScopeNode>, List<List<FocusNode>>) _createRowScopeNodes({
-  required int rowCount,
-  required int cardsPerRow,
+  required List<int> cardsPerRow,
 }) {
   final rowScopes = List<FocusScopeNode>.generate(
-    rowCount,
+    cardsPerRow.length,
     (int row) => FocusScopeNode(debugLabel: 'Row scope $row'),
   );
   final gridNodes = List<List<FocusNode>>.generate(
-    rowCount,
-    (int row) =>
-        List<FocusNode>.generate(cardsPerRow, (int col) => FocusNode(debugLabel: 'Card $row-$col')),
+    cardsPerRow.length,
+    (int row) => List<FocusNode>.generate(
+      cardsPerRow[row],
+      (int col) => FocusNode(debugLabel: 'Card $row-$col'),
+    ),
   );
   addTearDown(() {
     for (final scope in rowScopes) {
