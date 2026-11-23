@@ -770,7 +770,7 @@ class _MenuItem<T> extends SingleChildRenderObjectWidget {
 }
 
 class _RenderMenuItem extends RenderProxyBox {
-  _RenderMenuItem(this.onLayout, [RenderBox? child]) : super(child);
+  _RenderMenuItem(this.onLayout);
 
   ValueChanged<Size> onLayout;
 

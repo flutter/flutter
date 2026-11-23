@@ -2452,7 +2452,7 @@ class _EnsureMinSemanticsSize extends SingleChildRenderObjectWidget {
 }
 
 class _RenderEnsureMinSemanticsSize extends RenderProxyBox {
-  _RenderEnsureMinSemanticsSize(this._semanticSize, [RenderBox? child]) : super(child);
+  _RenderEnsureMinSemanticsSize(this._semanticSize);
 
   Size get semanticSize => _semanticSize;
   Size _semanticSize;

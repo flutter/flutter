@@ -2180,11 +2180,11 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     required bool? value,
     this.ifTrue,
     this.ifFalse,
-    bool showName = false,
-    Object? defaultValue,
-    DiagnosticLevel level = DiagnosticLevel.info,
+    super.showName = false,
+    super.defaultValue = null,
+    super.level,
   }) : assert(ifTrue != null || ifFalse != null),
-       super(name, value, showName: showName, defaultValue: defaultValue, level: level);
+       super(name, value);
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

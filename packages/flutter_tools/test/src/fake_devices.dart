@@ -118,7 +118,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
 class FakeDevice extends Device {
   FakeDevice(
     this.name,
-    String id, {
+    super.id, {
     super.ephemeral = true,
     this._isSupported = true,
     this._isSupportedForProject = true,
@@ -129,7 +129,7 @@ class FakeDevice extends Device {
     this.deviceLogReader,
     this._supportsFlavors = false,
   }) : _launchResult = launchResult ?? LaunchResult.succeeded(),
-       super(id, platformType: type, category: Category.mobile, logger: FakeLogger());
+       super(platformType: type, category: Category.mobile, logger: FakeLogger());
 
   final bool _isSupported;
   final bool _isSupportedForProject;

@@ -1525,11 +1525,11 @@ enum _NestedBallisticScrollActivityMode { outer, inner, independent }
 class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   _NestedInnerBallisticScrollActivity(
     this.coordinator,
-    _NestedScrollPosition position,
-    Simulation simulation,
-    TickerProvider vsync,
-    bool shouldIgnorePointer,
-  ) : super(position, simulation, vsync, shouldIgnorePointer);
+    _NestedScrollPosition super.position,
+    super.simulation,
+    super.vsync,
+    super.shouldIgnorePointer,
+  );
 
   final _NestedScrollCoordinator coordinator;
 
@@ -1555,14 +1555,13 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
 class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   _NestedOuterBallisticScrollActivity(
     this.coordinator,
-    _NestedScrollPosition position,
+    _NestedScrollPosition super.position,
     this.metrics,
-    Simulation simulation,
-    TickerProvider vsync,
-    bool shouldIgnorePointer,
+    super.simulation,
+    super.vsync,
+    super.shouldIgnorePointer,
   ) : assert(metrics.minRange != metrics.maxRange),
-      assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync, shouldIgnorePointer);
+      assert(metrics.maxRange > metrics.minRange);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;

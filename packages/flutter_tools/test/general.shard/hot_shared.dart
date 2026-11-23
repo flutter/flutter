@@ -146,14 +146,13 @@ class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
     required Device device,
     required this.exception,
-    required ResidentCompiler generator,
+    required ResidentCompiler super.generator,
     Future<Uri>? vmServiceUri,
   }) : super(
          device,
          toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
          targetPlatform: .unsupported,
          buildInfo: BuildInfo.debug,
-         generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
        ) {
     this.vmServiceUri = vmServiceUri;

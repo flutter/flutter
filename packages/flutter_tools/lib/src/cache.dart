@@ -937,8 +937,7 @@ abstract class ArtifactSet {
 
 /// An artifact set managed by the cache.
 abstract class CachedArtifact extends ArtifactSet {
-  CachedArtifact(this.name, this.cache, DevelopmentArtifact developmentArtifact)
-    : super(developmentArtifact);
+  CachedArtifact(this.name, this.cache, super.developmentArtifact);
 
   final Cache cache;
 
