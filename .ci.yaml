@@ -6064,25 +6064,6 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac run_debug_test_macos
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: run_debug_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
-
   - name: Mac_arm64 run_debug_test_macos
     recipe: devicelab/devicelab_drone
     timeout: 60
