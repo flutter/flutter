@@ -206,6 +206,21 @@ TEST_F(FlEngineTest, PointerPanZoom) {
   EXPECT_TRUE(called);
 }
 
+// Checks the engine does not build semantics until an assistive technology
+// connects.
+TEST_F(FlEngineTest, StartDoesNotEnableSemantics) {
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->UpdateSemanticsEnabled = MOCK_ENGINE_PROC(
+      UpdateSemanticsEnabled, ([&called](auto engine, bool enabled) {
+        called = true;
+        return kSuccess;
+      }));
+
+  StartEngine();
+
+  EXPECT_FALSE(called);
+}
+
 // Checks dispatching a semantics action works.
 TEST_F(FlEngineTest, DispatchSemanticsAction) {
   bool called = false;

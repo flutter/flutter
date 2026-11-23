@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
+#include "flutter/shell/platform/linux/fl_at_spi_monitor.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -58,6 +59,9 @@ struct _FlEngine {
 
   // Implements the flutter/settings channel.
   FlSettingsHandler* settings_handler;
+
+  // Watches for accessibility clients.
+  FlAtSpiMonitor* at_spi_monitor;
 
   // Implements the flutter/platform channel.
   FlPlatformHandler* platform_handler;
@@ -615,6 +619,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
+  g_clear_object(&self->at_spi_monitor);
   g_clear_object(&self->platform_handler);
   g_clear_object(&self->accessibility_handler);
   g_clear_object(&self->keyboard_manager);
@@ -756,6 +761,11 @@ FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* self) {
 FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->display_monitor;
+}
+
+static void at_spi_enabled_cb(FlEngine* self) {
+  fl_engine_update_semantics_enabled(
+      self, fl_at_spi_monitor_get_enabled(self->at_spi_monitor));
 }
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
@@ -929,10 +939,11 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   setup_keyboard(self);
 
-  result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
-  if (result != kSuccess) {
-    g_warning("Failed to enable accessibility features on Flutter engine");
-  }
+  self->at_spi_monitor = fl_at_spi_monitor_new();
+  g_signal_connect_object(self->at_spi_monitor, "notify::enabled",
+                          G_CALLBACK(at_spi_enabled_cb), self,
+                          G_CONNECT_SWAPPED);
+  fl_at_spi_monitor_start(self->at_spi_monitor);
 
   fl_display_monitor_start(self->display_monitor);
 
@@ -1617,6 +1628,19 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
           self->engine, static_cast<FlutterAccessibilityFeature>(flags)) !=
       kSuccess) {
     g_warning("Failed to update accessibility features");
+  }
+}
+
+void fl_engine_update_semantics_enabled(FlEngine* self, gboolean enabled) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  if (self->embedder_api.UpdateSemanticsEnabled(self->engine, enabled) !=
+      kSuccess) {
+    g_warning("Failed to update semantics enabled");
   }
 }
 
