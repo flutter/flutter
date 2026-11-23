@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <array>
+
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
@@ -14,6 +17,38 @@
 
 namespace impeller {
 namespace testing {
+
+TEST(RenderPassVK, ReusingVertexBufferViewsPreservesOwnership) {
+  auto context = MockVulkanContextBuilder().Build();
+  ASSERT_TRUE(context);
+  auto allocator = context->GetResourceAllocator();
+  RenderTargetAllocator targets(allocator);
+  auto target = targets.CreateOffscreenMSAA(*context, {1, 1}, 1);
+  auto first = context->CreateCommandBuffer();
+  auto second = context->CreateCommandBuffer();
+  ASSERT_TRUE(first);
+  ASSERT_TRUE(second);
+
+  auto buffer = allocator->CreateBuffer(
+      {.storage_mode = StorageMode::kDevicePrivate, .size = 16u});
+  ASSERT_TRUE(buffer);
+  std::weak_ptr<const DeviceBuffer> backing_buffer = buffer;
+  {
+    std::array views = {DeviceBuffer::AsBufferView(std::move(buffer))};
+    for (const auto& command_buffer : {first, second}) {
+      auto pass = command_buffer->CreateRenderPass(target);
+      ASSERT_TRUE(pass);
+      ASSERT_TRUE(pass->SetVertexBuffer(views.data(), views.size()));
+      ASSERT_TRUE(views.front().GetSharedBuffer());
+    }
+  }
+
+  // Only the recorded command buffers can still own the vertex buffer.
+  first.reset();
+  EXPECT_FALSE(backing_buffer.expired());
+  second.reset();
+  EXPECT_TRUE(backing_buffer.expired());
+}
 
 TEST(RenderPassVK, DoesNotRedundantlySetStencil) {
   std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
