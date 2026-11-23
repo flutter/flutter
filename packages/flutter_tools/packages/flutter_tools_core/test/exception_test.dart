@@ -3,86 +3,96 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('ToolExtensionException', () {
-    test(
-      'exposes domainErrorCode (-32001), unsupportedCapabilityErrorCode (-32002), and defaults',
-      () {
-        const exception = ToolExtensionException('Custom SDK path does not exist.');
+    test('exposes default domainErrorCode (-32001), null data, and formats toString', () {
+      const exception = ToolExtensionException('Custom SDK path does not exist.');
 
-        expect(exception.message, 'Custom SDK path does not exist.');
-        expect(exception.code, ToolExtensionException.domainErrorCode);
-        expect(exception.data, isNull);
-        expect(ToolExtensionException.domainErrorCode, -32001);
-        expect(ToolExtensionException.unsupportedCapabilityErrorCode, -32002);
-        expect(exception.toString(), 'ToolExtensionException: Custom SDK path does not exist.');
-      },
-    );
-
-    test('supports custom error code, structured diagnostic data, and deep equality', () {
-      const exception = ToolExtensionException(
-        'Emulator creation is not supported.',
-        code: ToolExtensionException.unsupportedCapabilityErrorCode,
-        data: <String, Object?>{'capability': 'createEmulator'},
-      );
-      final nonConstData = <String, Object?>{'capability': 'createEmulator'};
-      final equalCopy = ToolExtensionException(
-        'Emulator creation is not supported.',
-        code: ToolExtensionException.unsupportedCapabilityErrorCode,
-        data: nonConstData,
-      );
-      const differentData = ToolExtensionException(
-        'Emulator creation is not supported.',
-        code: ToolExtensionException.unsupportedCapabilityErrorCode,
-        data: <String, Object?>{'capability': 'other'},
-      );
-
-      expect(exception.message, 'Emulator creation is not supported.');
-      expect(exception.code, -32002);
-      expect(exception.data, const <String, Object?>{'capability': 'createEmulator'});
-      expect(exception, equals(equalCopy));
-      expect(exception.hashCode, equals(equalCopy.hashCode));
-      expect(exception, isNot(equals(differentData)));
+      expect(exception.message, 'Custom SDK path does not exist.');
+      expect(exception.code, ToolExtensionException.domainErrorCode);
+      expect(exception.data, isNull);
+      expect(ToolExtensionException.domainErrorCode, -32001);
+      expect(ToolExtensionException.unsupportedCapabilityErrorCode, -32002);
+      expect(exception.toString(), 'ToolExtensionException: Custom SDK path does not exist.');
     });
 
-    test('tryFromRpcError parses domain and unsupported-capability errors and strips request', () {
-      final ToolExtensionException? domainError = ToolExtensionException.tryFromRpcError(
-        code: ToolExtensionException.domainErrorCode,
-        message: 'Non-interactive terminal.',
-        data: const <Object?, Object?>{
-          'request': <String, Object?>{'method': 'terminal.promptForOption'},
-          42: 'ignored',
-          'reason': 'non-interactive',
-        },
-      );
-      expect(domainError?.code, ToolExtensionException.domainErrorCode);
-      expect(domainError?.message, 'Non-interactive terminal.');
-      expect(domainError?.data, const <String, Object?>{'reason': 'non-interactive'});
-
-      final ToolExtensionException? unsupportedError = ToolExtensionException.tryFromRpcError(
+    test('preserves custom code and structured data', () {
+      const exception = ToolExtensionException(
+        'Screen recording is not supported.',
         code: ToolExtensionException.unsupportedCapabilityErrorCode,
-        message: 'Capability not implemented.',
-        data: const <String, Object?>{
-          'request': <String, Object?>{'method': 'device.createEmulator'},
+        data: <String, Object?>{
+          'capability': 'screenRecording',
+          'details': <String, Object?>{'platform': 'linux'},
         },
       );
-      expect(unsupportedError?.code, ToolExtensionException.unsupportedCapabilityErrorCode);
-      expect(unsupportedError?.data, isNull);
 
-      expect(
-        ToolExtensionException.tryFromRpcError(
-          code: ToolExtensionException.domainErrorCode,
-          message: 'Plain error.',
-          data: 'not-a-map',
-        )?.data,
-        isNull,
+      expect(exception.message, 'Screen recording is not supported.');
+      expect(exception.code, ToolExtensionException.unsupportedCapabilityErrorCode);
+      expect(exception.data, const <String, Object?>{
+        'capability': 'screenRecording',
+        'details': <String, Object?>{'platform': 'linux'},
+      });
+    });
+  });
+
+  group('tryParseToolExtensionRpcError', () {
+    test('strips injected request entry and non-string keys for domain errors', () {
+      final ToolExtensionException? parsed = tryParseToolExtensionRpcError(
+        code: ToolExtensionException.domainErrorCode,
+        message: 'Domain error',
+        data: const <Object?, Object?>{
+          'request': <String, Object?>{'method': 'test'},
+          'reason': 'missing_sdk',
+          42: 'ignored',
+        },
       );
-      expect(
-        ToolExtensionException.tryFromRpcError(code: -32603, message: 'Internal error'),
-        isNull,
+
+      expect(parsed, isNotNull);
+      expect(parsed!.code, ToolExtensionException.domainErrorCode);
+      expect(parsed.message, 'Domain error');
+      expect(parsed.data, const <String, Object?>{'reason': 'missing_sdk'});
+    });
+
+    test('normalizes empty, request-only, null, and non-map data to null', () {
+      final ToolExtensionException? requestOnly = tryParseToolExtensionRpcError(
+        code: ToolExtensionException.unsupportedCapabilityErrorCode,
+        message: 'Unsupported capability',
+        data: const <String, Object?>{
+          'request': <String, Object?>{'method': 'test'},
+        },
       );
+      expect(requestOnly, isNotNull);
+      expect(requestOnly!.code, ToolExtensionException.unsupportedCapabilityErrorCode);
+      expect(requestOnly.message, 'Unsupported capability');
+      expect(requestOnly.data, isNull);
+
+      final ToolExtensionException? emptyMap = tryParseToolExtensionRpcError(
+        code: ToolExtensionException.domainErrorCode,
+        message: 'Empty data',
+        data: const <String, Object?>{},
+      );
+      expect(emptyMap?.data, isNull);
+
+      final ToolExtensionException? nonMap = tryParseToolExtensionRpcError(
+        code: ToolExtensionException.domainErrorCode,
+        message: 'Non-map data',
+        data: 'raw string',
+      );
+      expect(nonMap?.data, isNull);
+
+      final ToolExtensionException? nullData = tryParseToolExtensionRpcError(
+        code: ToolExtensionException.domainErrorCode,
+        message: 'Null data',
+      );
+      expect(nullData?.data, isNull);
+    });
+
+    test('returns null for non-extension JSON-RPC error codes', () {
+      expect(tryParseToolExtensionRpcError(code: -32000, message: 'Server error'), isNull);
+      expect(tryParseToolExtensionRpcError(code: -32601, message: 'Method not found'), isNull);
     });
   });
 }

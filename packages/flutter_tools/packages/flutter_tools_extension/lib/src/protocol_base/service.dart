@@ -16,40 +16,45 @@ typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> pa
 /// service to the host tool.
 typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
 
+typedef _ExtensionRequestSender = Future<Object?> Function(String method, [Object? parameters]);
+
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
 /// Extension authors extend this class (via specific service base classes) to
 /// group related RPC endpoints under a specific [namespace] (e.g.
 /// `diagnostics`, `config`, `device`, `build`, `template`).
 abstract base class ToolExtensionService {
-  /// Host RPC method name for querying the extension's owned configuration values.
+  /// JSON-RPC method name invoked by extensions to query their resolved
+  /// configuration values from the host tool.
   static const String getConfigurationValuesMethod = 'extension.getConfigurationValues';
 
-  /// Host RPC method name for interactively prompting the user to select an option.
+  /// JSON-RPC method name invoked by extensions to prompt the user to select
+  /// an option via the host terminal.
   static const String promptForOptionMethod = 'terminal.promptForOption';
 
-  /// Host RPC method name for interactively prompting the user for text input.
+  /// JSON-RPC method name invoked by extensions to prompt the user for text
+  /// input via the host terminal.
   static const String promptForInputMethod = 'terminal.promptForInput';
 
-  /// Parameter key for the prompt message in [promptForOption] and [promptForInput].
+  /// JSON-RPC parameter key for the prompt message text.
   static const String promptMessageParam = 'message';
 
-  /// Parameter key for the options list in [promptForOption].
+  /// JSON-RPC parameter key for the list of selectable option labels.
   static const String promptOptionsParam = 'options';
 
-  /// Parameter key for the default 0-based choice index in [promptForOption].
+  /// JSON-RPC parameter key for the optional 0-based default option index.
   static const String promptDefaultChoiceIndexParam = 'defaultChoiceIndex';
 
-  /// Parameter key for the default input value in [promptForInput].
+  /// JSON-RPC parameter key for the optional default input value.
   static const String promptDefaultValueParam = 'defaultValue';
 
-  /// Parameter key for the echo flag in [promptForInput].
+  /// JSON-RPC parameter key controlling whether terminal input is echoed.
   static const String promptEchoParam = 'echo';
 
-  /// Response map key for the selected 0-based choice index from [promptForOption].
+  /// JSON-RPC response map key holding the 0-based selected option index (or `null`).
   static const String promptSelectedIndexKey = 'selectedIndex';
 
-  /// Response map key for the entered value from [promptForInput].
+  /// JSON-RPC response map key holding the entered input string (or `null`).
   static const String promptValueKey = 'value';
 
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
@@ -59,13 +64,12 @@ abstract base class ToolExtensionService {
   @internal
   ExtensionNotificationSender? notificationSender;
 
-  /// Internal JSON-RPC request sender callback used by host-bound RPC helpers
-  /// ([getConfigurationValues], [promptForOption], [promptForInput]).
+  /// Internal JSON-RPC request sender callback used by [sendHostRequest].
   ///
   /// Wired by `ToolExtensionEntryPoint.run` to `peer.sendRequest` before the
   /// extension peer begins listening for RPC requests.
   @internal
-  Future<Object?> Function(String method, [Object? parameters])? requestSender;
+  _ExtensionRequestSender? requestSender;
 
   /// The namespace string of the service (e.g. `'diagnostics'`).
   String get namespace;
@@ -98,7 +102,7 @@ abstract base class ToolExtensionService {
   @protected
   @nonVirtual
   Future<Object?> sendHostRequest(String method, Map<String, Object?> params) async {
-    final Future<Object?> Function(String method, [Object? parameters])? sender = requestSender;
+    final _ExtensionRequestSender? sender = requestSender;
     if (sender == null) {
       throw StateError(
         'Cannot send request "$method": service "$namespace" is not attached to an active peer.',
@@ -107,11 +111,7 @@ abstract base class ToolExtensionService {
     try {
       return await sender(method, params);
     } on json_rpc.RpcException catch (error) {
-      if (ToolExtensionException.tryFromRpcError(
-            code: error.code,
-            message: error.message,
-            data: error.data,
-          )
+      if (tryParseToolExtensionRpcError(code: error.code, message: error.message, data: error.data)
           case final ToolExtensionException translated) {
         throw translated;
       }

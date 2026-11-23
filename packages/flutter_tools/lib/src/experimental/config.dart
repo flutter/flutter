@@ -18,8 +18,9 @@ import 'extension_discovery.dart';
 
 /// Represents a group of configuration settings provided by a specific extension.
 class ExtensionSettingsGroup {
-  ExtensionSettingsGroup({
+  const ExtensionSettingsGroup({
     required this.configOptions,
+    required this.displayTitle,
     required this.extension,
     required this.extensionName,
     required this.featureFlags,
@@ -29,6 +30,9 @@ class ExtensionSettingsGroup {
 
   /// The human-readable title of the extension.
   final String title;
+
+  /// Section header attributing this group to its declaring extension package.
+  final String displayTitle;
 
   /// Identifier of the extension (package name when backed by an isolate
   /// connection, or extension title otherwise), used to namespace settings
@@ -47,13 +51,9 @@ class ExtensionSettingsGroup {
   /// Interactive or custom configuration actions registered by the extension.
   final List<ConfigAction> configActions;
 
-  /// Section header attributing this group to its declaring extension package.
-  String get displayTitle =>
-      extension is ConfigurationExtensionClient ? '$title (package:$extensionName)' : title;
-
   /// Settings keys declared by [configActions] that do not already correspond to
   /// a [FeatureFlag] or [ConfigOption] in this group.
-  late final List<String> actionOnlySettingsKeys = () {
+  List<String> get actionOnlySettingsKeys {
     final seen = <String>{
       for (final FeatureFlag(:settingName) in featureFlags) settingName,
       for (final ConfigOption(:name) in configOptions) name,
@@ -63,7 +63,7 @@ class ExtensionSettingsGroup {
         for (final String key in settingsKeys)
           if (seen.add(key)) key,
     ]);
-  }();
+  }
 
   /// Whether this group contains any settings that should be displayed in
   /// `flutter config --list` ([featureFlags], [configOptions], or
@@ -352,58 +352,6 @@ class ExtensionConfiguration {
     return values;
   }
 
-  /// Retrieves feature flags provided by all registered extensions.
-  Future<List<FeatureFlag>> fetchFeatureFlags() async {
-    _logger.printTrace(
-      'ExtensionConfiguration fetching feature flags across ${extensions.length} extension(s)...',
-    );
-    final List<List<FeatureFlag>> results = await Future.wait(
-      extensions.map((ConfigurationExtension ext) async {
-        try {
-          return await ext.getFeatureFlags();
-        } on ToolExtensionException catch (err) {
-          _logger.printWarning('Extension "${_extensionIdentifier(ext)}": ${err.message}');
-          return const <FeatureFlag>[];
-        } on Object catch (err, stack) {
-          _logger.printTrace(
-            'Failed to fetch feature flags from extension "${ext.title}": $err\n$stack',
-          );
-          return const <FeatureFlag>[];
-        }
-      }),
-    );
-    final flags = <FeatureFlag>[for (final list in results) ...list];
-    _logger.printTrace('ExtensionConfiguration retrieved ${flags.length} total feature flag(s).');
-    return flags;
-  }
-
-  /// Retrieves configuration options provided by all registered extensions.
-  Future<List<ConfigOption>> fetchConfigurations() async {
-    _logger.printTrace(
-      'ExtensionConfiguration fetching config options across ${extensions.length} extension(s)...',
-    );
-    final List<List<ConfigOption>> results = await Future.wait(
-      extensions.map((ConfigurationExtension ext) async {
-        try {
-          return await ext.getConfigurations();
-        } on ToolExtensionException catch (err) {
-          _logger.printWarning('Extension "${_extensionIdentifier(ext)}": ${err.message}');
-          return const <ConfigOption>[];
-        } on Object catch (err, stack) {
-          _logger.printTrace(
-            'Failed to fetch config options from extension "${ext.title}": $err\n$stack',
-          );
-          return const <ConfigOption>[];
-        }
-      }),
-    );
-    final options = <ConfigOption>[for (final list in results) ...list];
-    _logger.printTrace(
-      'ExtensionConfiguration retrieved ${options.length} total config option(s).',
-    );
-    return options;
-  }
-
   /// Executes [action] on [group]'s extension with [currentSettings] and
   /// validates that every returned setting key belongs to the extension's
   /// declared [ConfigOption] names or [ConfigAction.settingsKeys].
@@ -442,14 +390,18 @@ class ExtensionConfiguration {
           final String title = ext is ConfigurationExtensionClient
               ? await ext.fetchTitle()
               : ext.title;
+          final String extensionName = _extensionIdentifier(ext);
           final List<FeatureFlag> flags = await ext.getFeatureFlags();
           final List<ConfigOption> options = await ext.getConfigurations();
           final List<ConfigAction> actions = await ext.getConfigActions();
           return ExtensionSettingsGroup(
             configActions: actions,
             configOptions: options,
+            displayTitle: ext is ConfigurationExtensionClient
+                ? '$title (package:$extensionName)'
+                : title,
             extension: ext,
-            extensionName: _extensionIdentifier(ext),
+            extensionName: extensionName,
             featureFlags: flags,
             title: title,
           );
@@ -517,18 +469,9 @@ class ExtensionTerminalPrompter {
     final int? defaultChoiceIndex;
     try {
       message = params.requiredField<String>(ToolExtensionService.promptMessageParam);
-      options = <String>[
-        for (final Object? item in params.requiredField<List<Object?>>(
-          ToolExtensionService.promptOptionsParam,
-        ))
-          switch (item) {
-            final String option => option,
-            _ => throw FormatException(
-              'Invalid "${ToolExtensionService.promptOptionsParam}" element: '
-              'expected String, got ${item.runtimeType}.',
-            ),
-          },
-      ];
+      // Require `options` to be present (`stringIterable` defaults missing keys to `const []`).
+      params.requiredField<List<Object?>>(ToolExtensionService.promptOptionsParam);
+      options = params.stringIterable(ToolExtensionService.promptOptionsParam).toList();
       defaultChoiceIndex = params.nullableField<int>(
         ToolExtensionService.promptDefaultChoiceIndexParam,
       );
@@ -640,9 +583,6 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
   final String _defaultTitle;
   final Logger _logger;
   String? _titleCache;
-  List<FeatureFlag>? _featureFlagsCache;
-  List<ConfigOption>? _configurationsCache;
-  List<ConfigAction>? _configActionsCache;
 
   @override
   String get title => _titleCache ?? _defaultTitle;
@@ -672,7 +612,7 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
     return _titleCache ?? _defaultTitle;
   }
 
-  Future<List<T>?> _fetchList<T>(
+  Future<List<T>> _fetchList<T>(
     String method,
     String entityName,
     List<T> Function(List<Object?>) listFromJson,
@@ -700,47 +640,29 @@ final class ConfigurationExtensionClient extends ConfigurationExtension {
     } on Object catch (err, stack) {
       _logger.printTrace('ConfigurationExtensionClient failed to get $entityName: $err\n$stack');
     }
-    return null;
+    return <T>[];
   }
 
   @override
-  Future<List<FeatureFlag>> getFeatureFlags() async {
-    if (_featureFlagsCache case final cached?) {
-      return cached;
-    }
-    final List<FeatureFlag>? flags = await _fetchList(
-      ConfigurationExtension.getFeatureFlagsMethod,
-      'feature flag(s)',
-      FeatureFlag.listFromJson,
-    );
-    return flags != null ? (_featureFlagsCache = flags) : const <FeatureFlag>[];
-  }
+  Future<List<FeatureFlag>> getFeatureFlags() => _fetchList(
+    ConfigurationExtension.getFeatureFlagsMethod,
+    'feature flag(s)',
+    FeatureFlag.listFromJson,
+  );
 
   @override
-  Future<List<ConfigOption>> getConfigurations() async {
-    if (_configurationsCache case final cached?) {
-      return cached;
-    }
-    final List<ConfigOption>? options = await _fetchList(
-      ConfigurationExtension.getConfigurationsMethod,
-      'config option(s)',
-      ConfigOption.listFromJson,
-    );
-    return options != null ? (_configurationsCache = options) : const <ConfigOption>[];
-  }
+  Future<List<ConfigOption>> getConfigurations() => _fetchList(
+    ConfigurationExtension.getConfigurationsMethod,
+    'config option(s)',
+    ConfigOption.listFromJson,
+  );
 
   @override
-  Future<List<ConfigAction>> getConfigActions() async {
-    if (_configActionsCache case final cached?) {
-      return cached;
-    }
-    final List<ConfigAction>? actions = await _fetchList(
-      ConfigurationExtension.getConfigActionsMethod,
-      'config action(s)',
-      ConfigAction.listFromJson,
-    );
-    return actions != null ? (_configActionsCache = actions) : const <ConfigAction>[];
-  }
+  Future<List<ConfigAction>> getConfigActions() => _fetchList(
+    ConfigurationExtension.getConfigActionsMethod,
+    'config action(s)',
+    ConfigAction.listFromJson,
+  );
 
   @override
   Future<Map<String, String?>> runConfigAction(

@@ -251,6 +251,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     return dynamicParser;
   }
 
+  // Matches ArgParserException message prefix from package:args.
   static const _kUnknownOptionPrefix = 'Could not find an option ';
 
   @override
@@ -430,7 +431,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       }
     }
     for (final (:ConfigAction action, :ExtensionSettingsGroup group) in _acceptedExtensionActions) {
-      if (argResults!.wasParsed(action.name) && boolArg(action.name)) {
+      if (argResults!.wasParsed(action.name)) {
         final Map<String, String?> currentSettings = ExtensionConfiguration.collectActionSettings(
           config,
           configActions: <ConfigAction>[action],

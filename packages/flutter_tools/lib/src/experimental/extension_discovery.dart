@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
@@ -164,11 +165,7 @@ class ExtensionConnection {
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
     } on json_rpc.RpcException catch (error) {
-      if (ToolExtensionException.tryFromRpcError(
-            code: error.code,
-            message: error.message,
-            data: error.data,
-          )
+      if (tryParseToolExtensionRpcError(code: error.code, message: error.message, data: error.data)
           case final ToolExtensionException translated) {
         throw translated;
       }

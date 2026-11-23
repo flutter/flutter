@@ -53,8 +53,12 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
+    // Release the WebGL contexts held by the previous rasterizer.
+    _pictureToImageSurface.dispose();
+    rasterizer.dispose();
     rasterizer = _createRasterizer();
     _pictureToImageSurface = rasterizer.createPictureToImageSurface() as CkSurface;
+    debugClear();
   }
 
   @override

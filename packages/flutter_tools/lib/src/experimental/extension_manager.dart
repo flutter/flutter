@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
 import '../base/config.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
@@ -49,19 +49,17 @@ class ExtensionManager {
   final _configurationExtensions = <ConfigurationExtension>[];
   final _deviceExtensions = <DeviceService>[];
 
-  /// Marks the current CLI invocation as running in `--machine` mode so
-  /// interactive terminal prompt RPCs (`terminal.promptForOption` and
-  /// `terminal.promptForInput`) fail fast with
-  /// [ToolExtensionException.domainErrorCode].
-  void enableMachineMode() {
-    _prompter.enableMachineMode();
-  }
-
   /// Disables tool extension initialization for the current CLI invocation
   /// (for example, when `--no-extensions` is passed).
   void disable() {
     assert(_initFuture == null, 'disable() cannot be called after initialization has started.');
     _isDisabled = true;
+  }
+
+  /// Marks this CLI invocation as running in `--machine` mode so interactive
+  /// terminal prompt RPCs from extensions fail fast.
+  void enableMachineMode() {
+    _prompter.enableMachineMode();
   }
 
   /// Ensures entrypoints are initialized; idempotent.
@@ -146,17 +144,18 @@ class ExtensionManager {
       }
       ConfigurationExtensionClient? configClient;
       if (connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)) {
-        configClient = ConfigurationExtensionClient(connection, logger: _logger);
-        await configClient.fetchTitle();
+        final client = ConfigurationExtensionClient(connection, logger: _logger);
+        await client.fetchTitle();
         if (_isDisposed) {
           return;
         }
-        _configurationExtensions.add(configClient);
+        _configurationExtensions.add(client);
+        configClient = client;
       }
+      _registerHostRpcHandlers(connection, configClient: configClient);
       if (connection.capabilities.services.contains(DeviceService.serviceNamespace)) {
         _deviceExtensions.add(ExtensionDeviceClient(connection, logger: _logger));
       }
-      _registerHostRpcHandlers(connection, configClient: configClient);
     }
     _isInitialized = true;
   }
@@ -165,28 +164,29 @@ class ExtensionManager {
     ExtensionConnection connection, {
     ConfigurationExtensionClient? configClient,
   }) {
-    connection.registerRequestHandler(ToolExtensionService.getConfigurationValuesMethod, (
-      Map<String, Object?> _,
-    ) async {
-      if (configClient == null) {
-        return <String, Object?>{};
-      }
-      final ToolContext(:Config config, :Platform platform) = _toolContext;
-      return ExtensionConfiguration.resolveConfigurationValues(
-        config: config,
-        environment: platform.environment,
-        extension: configClient,
-        extensionName: connection.extensionName,
+    connection
+      ..registerRequestHandler(ToolExtensionService.getConfigurationValuesMethod, (
+        Map<String, Object?> _,
+      ) async {
+        if (configClient == null) {
+          return const <String, Object?>{};
+        }
+        final ToolContext(:Config config, :Platform platform) = _toolContext;
+        return ExtensionConfiguration.resolveConfigurationValues(
+          config: config,
+          environment: platform.environment,
+          extension: configClient,
+          extensionName: connection.extensionName,
+        );
+      })
+      ..registerRequestHandler(
+        ToolExtensionService.promptForOptionMethod,
+        _prompter.handlePromptForOption,
+      )
+      ..registerRequestHandler(
+        ToolExtensionService.promptForInputMethod,
+        _prompter.handlePromptForInput,
       );
-    });
-    connection.registerRequestHandler(
-      ToolExtensionService.promptForOptionMethod,
-      _prompter.handlePromptForOption,
-    );
-    connection.registerRequestHandler(
-      ToolExtensionService.promptForInputMethod,
-      _prompter.handlePromptForInput,
-    );
   }
 
   /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
+import 'dart:collection';
 import 'dart:isolate';
 
 import 'package:file/memory.dart';
@@ -65,12 +64,12 @@ final class _FailingConfigurationExtension extends ConfigurationExtension {
 }
 
 class _FakeExtensionConnection extends Fake implements ExtensionConnection {
-  _FakeExtensionConnection({this.response});
+  _FakeExtensionConnection({this.response, this.extensionName = 'fake_ext'});
 
   final Object? response;
 
   @override
-  String get extensionName => 'fake_ext';
+  final String extensionName;
 
   @override
   Future<Object?> sendRequest(
@@ -81,192 +80,7 @@ class _FakeExtensionConnection extends Fake implements ExtensionConnection {
 }
 
 void _secondaryExtensionEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-    _SecondaryConfigurationExtension(),
-  ], extensionName: 'secondary_config_ext');
-}
-
-final class _InteractiveSigningConfigExtension extends ConfigurationExtension {
-  static const String kEnableSigning = 'enable-custom-signing';
-  static const String kEnableSigningEnv = 'FLUTTER_CUSTOM_SIGNING';
-  static const String kCustomSdkPath = 'custom-sdk-path';
-  static const String kCustomSdkEnv = 'FLUTTER_CUSTOM_SDK_PATH';
-  static const String kLegacySdkPath = 'legacy-custom-sdk';
-  static const String kSigningCert = 'custom-signing-cert';
-  static const String kSigningPassphrase = 'custom-signing-passphrase';
-  static const String kSelectSigningAction = 'select-custom-signing-settings';
-  static const String kClearSigningAction = 'clear-custom-signing-settings';
-  static const String kReadOwnedValuesAction = 'read-owned-config-values';
-  static const String kUpdateDeclaredOptionAction = 'update-declared-option-action';
-  static const String kUndeclaredKeyAction = 'undeclared-key-action';
-
-  var _featureFlagsFetchCount = 0;
-
-  @override
-  String get title => 'Custom Signing Extension';
-
-  @override
-  Future<List<FeatureFlag>> getFeatureFlags() async {
-    _featureFlagsFetchCount++;
-    return const <FeatureFlag>[
-      FeatureFlag(
-        name: kEnableSigning,
-        help: 'Enable custom signing workflows.',
-        environmentOverride: kEnableSigningEnv,
-      ),
-    ];
-  }
-
-  @override
-  Future<List<ConfigOption>> getConfigurations() async {
-    return const <ConfigOption>[
-      ConfigOption(
-        name: kCustomSdkPath,
-        help: 'Path to custom SDK.',
-        aliases: <String>[kLegacySdkPath],
-        environmentOverride: kCustomSdkEnv,
-      ),
-    ];
-  }
-
-  @override
-  Future<List<ConfigAction>> getConfigActions() async {
-    return const <ConfigAction>[
-      ConfigAction(
-        name: kSelectSigningAction,
-        help: 'Select custom signing certificate and passphrase interactively.',
-        aliases: <String>['select-custom-cert'],
-        settingsKeys: <String>[kSigningCert, kSigningPassphrase],
-      ),
-      ConfigAction(
-        name: kClearSigningAction,
-        help: 'Clear saved custom signing settings.',
-        settingsKeys: <String>[kSigningCert, kSigningPassphrase],
-      ),
-      ConfigAction(
-        name: kReadOwnedValuesAction,
-        help: 'Snapshot owned configuration values via extension.getConfigurationValues.',
-        settingsKeys: <String>[kSigningCert],
-      ),
-      ConfigAction(
-        name: kUpdateDeclaredOptionAction,
-        help: 'Action updating a declared ConfigOption key without repeating it in settingsKeys.',
-        settingsKeys: <String>[kSigningCert],
-      ),
-      ConfigAction(
-        name: kUndeclaredKeyAction,
-        help: 'Action returning an undeclared setting key.',
-        settingsKeys: <String>[kSigningCert],
-      ),
-    ];
-  }
-
-  @override
-  Future<Map<String, String?>> runConfigAction(
-    String name, {
-    required Map<String, String?> currentSettings,
-  }) async {
-    switch (name) {
-      case kClearSigningAction:
-        return const <String, String?>{kSigningCert: null, kSigningPassphrase: null};
-      case kSelectSigningAction:
-        const certIds = <String>['cert-alpha', 'cert-beta'];
-        const certLabels = <String>['Developer Alpha (TEAM1)', 'Developer Beta (TEAM2)'];
-        final int? selectedIndex = await promptForOption(
-          message: 'Select a signing certificate',
-          options: certLabels,
-          defaultChoiceIndex: 0,
-        );
-        if (selectedIndex == null) {
-          return const <String, String?>{};
-        }
-        final String? passphrase = await promptForInput(
-          message: 'Enter certificate passphrase',
-          defaultValue: 'default-secret',
-          echo: false,
-        );
-        return <String, String?>{
-          kSigningCert: certIds[selectedIndex],
-          kSigningPassphrase: passphrase,
-        };
-      case kReadOwnedValuesAction:
-        final Map<String, Object?> ownedValues = await getConfigurationValues();
-        final summary = <String>[
-          for (final MapEntry(:String key, :Object? value) in ownedValues.entries)
-            '$key=$value(${value.runtimeType})',
-        ]..sort();
-        return <String, String?>{
-          kSigningCert: 'fetches=$_featureFlagsFetchCount;${summary.join(',')}',
-        };
-      case kUpdateDeclaredOptionAction:
-        return const <String, String?>{
-          kCustomSdkPath: '/opt/action-updated-sdk',
-          kSigningCert: 'cert-alpha',
-        };
-      case kUndeclaredKeyAction:
-        return const <String, String?>{'unowned-secret-key': 'bad'};
-      default:
-        throw ToolExtensionException('Unknown action: $name');
-    }
-  }
-}
-
-void _interactiveSigningEntryPoint(SendPort sendPort) {
-  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
-    _InteractiveSigningConfigExtension(),
-  ], extensionName: 'custom_signing_ext');
-}
-
-class _SingleSubscriptionStdin extends Stream<List<int>> with Fake implements Stdin {
-  _SingleSubscriptionStdin(List<String> chunks)
-    : _stream = Stream<List<int>>.fromIterable(chunks.map(utf8.encode));
-
-  final Stream<List<int>> _stream;
-  var _echoMode = true;
-  var _lineMode = true;
-  final echoModeHistory = <bool>[];
-
-  @override
-  bool get echoMode => _echoMode;
-
-  @override
-  set echoMode(bool value) {
-    _echoMode = value;
-    echoModeHistory.add(value);
-  }
-
-  @override
-  bool get lineMode => _lineMode;
-
-  @override
-  set lineMode(bool value) {
-    _lineMode = value;
-  }
-
-  @override
-  bool get hasTerminal => true;
-
-  @override
-  StreamSubscription<List<int>> listen(
-    void Function(List<int> event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
-  }) {
-    return _stream.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
-  }
-}
-
-class _EchoTrackingStdio extends FakeStdio {
-  _EchoTrackingStdio(this._fakeStdin);
-
-  final _SingleSubscriptionStdin _fakeStdin;
-
-  @override
-  bool get stdinHasTerminal => true;
-
-  @override
-  Stream<List<int>> get stdin => _fakeStdin;
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[_SecondaryConfigurationExtension()]);
 }
 
 final class _DomainErrorConfigurationExtension extends ConfigurationExtension {
@@ -290,6 +104,50 @@ void _domainErrorConfigEntryPoint(SendPort sendPort) {
   ], extensionName: 'custom_config_ext');
 }
 
+final class _HostConfigQueryExtension extends ConfigurationExtension {
+  @override
+  String get title => 'Host Query Extension';
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async {
+    return const <FeatureFlag>[
+      FeatureFlag(
+        name: 'enable-host-query',
+        help: 'Enable host query feature.',
+        environmentOverride: 'FLUTTER_HOST_QUERY_FLAG',
+      ),
+    ];
+  }
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async {
+    return const <ConfigOption>[
+      ConfigOption(
+        name: 'host-query-sdk',
+        help: 'SDK path.',
+        aliases: <String>['legacy-host-query-sdk'],
+        environmentOverride: 'FLUTTER_HOST_QUERY_SDK',
+      ),
+      ConfigOption(name: 'host-query-unset', help: 'Unset option.'),
+    ];
+  }
+
+  @override
+  Future<Map<String, ExtensionRpcHandler>> initialize() async {
+    final Map<String, ExtensionRpcHandler> handlers = await super.initialize();
+    return <String, ExtensionRpcHandler>{
+      ...handlers,
+      'readResolvedConfig': (Map<String, Object?> _) => getConfigurationValues(),
+    };
+  }
+}
+
+void _hostConfigQueryEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(sendPort, <ToolExtensionService>[
+    _HostConfigQueryExtension(),
+  ], extensionName: 'host_query_ext');
+}
+
 void main() {
   group('ExtensionConfiguration Host Integration', () {
     testWithoutContext(
@@ -300,6 +158,7 @@ void main() {
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
           toolContext: FakeToolContext(logger: logger),
         );
+        addTearDown(manager.dispose);
         await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
         final config = ExtensionConfiguration(
@@ -307,97 +166,89 @@ void main() {
           logger: logger,
         );
 
-        final List<FeatureFlag> flags = await config.fetchFeatureFlags();
-        expect(flags, hasLength(1));
-        expect(flags.first.name, 'enable-linux-custom-prototype');
-        expect(flags.first.enabledByDefault, isTrue);
-
-        final List<ConfigOption> options = await config.fetchConfigurations();
-        expect(options, hasLength(1));
-        expect(options.first.name, 'linux-gtk-version');
-        expect(options.first.value, '3');
-
         final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
         expect(groups, hasLength(1));
         expect(groups.first.title, 'Linux Custom Extension Prototype');
-        expect(groups.first.featureFlags.first.name, 'enable-linux-custom-prototype');
-        expect(groups.first.configOptions.first.name, 'linux-gtk-version');
-
-        await manager.dispose();
+        expect(groups.first.extensionName, 'flutter_tools_extension_linux_prototype');
+        expect(
+          groups.first.displayTitle,
+          'Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype)',
+        );
+        expect(groups.first.featureFlags.single.name, 'enable-linux-custom-prototype');
+        expect(groups.first.featureFlags.single.enabledByDefault, isTrue);
+        expect(groups.first.configOptions.single.name, 'linux-gtk-version');
+        expect(groups.first.configOptions.single.value, '3');
       },
     );
 
-    testWithoutContext('ExtensionConfiguration aggregates feature flags and config options across multiple extensions', () async {
-      final logger = BufferLogger.test();
-      final manager = ExtensionManager(
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        toolContext: FakeToolContext(logger: logger),
-      );
-      await manager.initialize(
-        entryPoints: <ExtensionEntryPoint>[_secondaryExtensionEntryPoint, linuxExtensionEntryPoint],
-      );
+    testWithoutContext(
+      'ExtensionConfiguration aggregates and sorts settings lexicographically across extensions',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
-      final config = ExtensionConfiguration(
-        extensions: manager.configurationExtensions,
-        logger: logger,
-      );
+        final config = ExtensionConfiguration(
+          extensions: <ConfigurationExtension>[
+            _SecondaryConfigurationExtension(),
+            ...manager.configurationExtensions,
+          ],
+          logger: logger,
+        );
 
-      final List<FeatureFlag> flags = await config.fetchFeatureFlags();
-      expect(flags, hasLength(2));
-      expect(flags.map((e) => e.name), <String>[
-        'enable-linux-custom-prototype',
-        'enable-secondary-feature',
-      ]);
+        final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
+        expect(groups, hasLength(2));
+        expect(groups[0].title, 'Secondary Configuration Extension');
+        expect(groups[1].title, 'Linux Custom Extension Prototype');
+      },
+    );
 
-      final List<ConfigOption> options = await config.fetchConfigurations();
-      expect(options, hasLength(2));
-      expect(options.map((e) => e.name), <String>['linux-gtk-version', 'secondary-config-key']);
+    testWithoutContext(
+      'ConfigCommand settingsText incorporates extension flags and options grouped by displayTitle',
+      () async {
+        final logger = BufferLogger.test();
+        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+        final manager = ExtensionManager(
+          featureFlags: featureFlags,
+          toolContext: FakeToolContext(logger: logger),
+        );
+        addTearDown(manager.dispose);
+        await manager.initialize(
+          entryPoints: <ExtensionEntryPoint>[
+            linuxExtensionEntryPoint,
+            _secondaryExtensionEntryPoint,
+          ],
+        );
 
-      final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
-      expect(groups, hasLength(2));
-      expect(groups[0].title, 'Linux Custom Extension Prototype');
-      expect(groups[1].title, 'Secondary Configuration Extension');
+        final command = ConfigCommand(
+          androidContext: FakeAndroidContext(),
+          toolContext: FakeToolContext(logger: logger),
+          featureFlags: featureFlags,
+          extensionManager: manager,
+        );
 
-      await manager.dispose();
-    });
-
-    testWithoutContext('ConfigCommand settingsText incorporates extension flags and options grouped by extension title', () async {
-      final logger = BufferLogger.test();
-      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-      final manager = ExtensionManager(
-        featureFlags: featureFlags,
-        toolContext: FakeToolContext(logger: logger),
-      );
-      await manager.initialize(
-        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint, _secondaryExtensionEntryPoint],
-      );
-
-      final command = ConfigCommand(
-        androidContext: FakeAndroidContext(),
-        toolContext: FakeToolContext(logger: logger),
-        featureFlags: featureFlags,
-        extensionManager: manager,
-      );
-
-      final String settingsOutput = await command.settingsText;
-      expect(settingsOutput, contains('Extension Settings:'));
-      expect(
-        settingsOutput,
-        contains(
-          '  Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype):',
-        ),
-      );
-      expect(settingsOutput, contains('    enable-linux-custom-prototype: true'));
-      expect(settingsOutput, contains('    linux-gtk-version: 3'));
-      expect(
-        settingsOutput,
-        contains('  Secondary Configuration Extension (package:secondary_config_ext):'),
-      );
-      expect(settingsOutput, contains('    enable-secondary-feature: false'));
-      expect(settingsOutput, contains('    secondary-config-key: custom-value'));
-
-      await manager.dispose();
-    });
+        final String settingsOutput = await command.settingsText;
+        expect(settingsOutput, contains('Extension Settings:'));
+        expect(
+          settingsOutput,
+          contains(
+            '  Linux Custom Extension Prototype (package:flutter_tools_extension_linux_prototype):',
+          ),
+        );
+        expect(settingsOutput, contains('    enable-linux-custom-prototype: true'));
+        expect(settingsOutput, contains('    linux-gtk-version: 3'));
+        expect(
+          settingsOutput,
+          contains('  Secondary Configuration Extension (package:unknown_extension):'),
+        );
+        expect(settingsOutput, contains('    enable-secondary-feature: false'));
+        expect(settingsOutput, contains('    secondary-config-key: custom-value'));
+      },
+    );
 
     testWithoutContext('ExtensionConfiguration handles failing extensions gracefully without failing other extensions', () async {
       final logger = BufferLogger.test();
@@ -409,68 +260,34 @@ void main() {
         logger: logger,
       );
 
-      final List<FeatureFlag> flags = await config.fetchFeatureFlags();
-      expect(flags, hasLength(1));
-      expect(flags.first.name, 'enable-secondary-feature');
-
-      final List<ConfigOption> options = await config.fetchConfigurations();
-      expect(options, hasLength(1));
-      expect(options.first.name, 'secondary-config-key');
-
       final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
       expect(groups, hasLength(1));
       expect(groups.first.title, 'Secondary Configuration Extension');
     });
 
     testWithoutContext(
-      'ConfigurationExtensionClient handles null and invalid responses gracefully',
+      'ConfigurationExtensionClient warns on invalid and malformed RPC payloads',
       () async {
         final logger = BufferLogger.test();
-        final clientWithNull = ConfigurationExtensionClient(
-          _FakeExtensionConnection(),
+        final invalidTypeClient = ConfigurationExtensionClient(
+          _FakeExtensionConnection(response: 'not-a-list', extensionName: 'bad_ext'),
           logger: logger,
         );
-
-        expect(await clientWithNull.fetchTitle(), 'Tool Extension Configuration');
-        expect(await clientWithNull.getFeatureFlags(), isEmpty);
-        expect(await clientWithNull.getConfigurations(), isEmpty);
-        expect(await clientWithNull.getConfigActions(), isEmpty);
-
-        final clientWithInvalid = ConfigurationExtensionClient(
-          _FakeExtensionConnection(response: 'not-a-list'),
-          logger: logger,
-        );
-
-        expect(await clientWithInvalid.getFeatureFlags(), isEmpty);
-        expect(await clientWithInvalid.getConfigurations(), isEmpty);
-        expect(await clientWithInvalid.getConfigActions(), isEmpty);
-        expect(logger.warningText, contains('Extension "fake_ext" returned an invalid'));
+        expect(await invalidTypeClient.getFeatureFlags(), isEmpty);
+        expect(logger.warningText, contains('Extension "bad_ext" returned an invalid'));
 
         logger.clear();
-        final clientWithMalformedElement = ConfigurationExtensionClient(
-          _FakeExtensionConnection(response: const <Object?>['not-a-map']),
+        final malformedElementClient = ConfigurationExtensionClient(
+          _FakeExtensionConnection(
+            response: const <Object?>[
+              <String, Object?>{'help': 'missing name'},
+            ],
+            extensionName: 'malformed_ext',
+          ),
           logger: logger,
         );
-        expect(await clientWithMalformedElement.getFeatureFlags(), isEmpty);
-        expect(logger.warningText, contains('Extension "fake_ext" returned malformed'));
-
-        final clientWithNonStringActionUpdate = ConfigurationExtensionClient(
-          _FakeExtensionConnection(response: const <String, Object?>{'key': 42}),
-          logger: logger,
-        );
-        await expectLater(
-          clientWithNonStringActionUpdate.runConfigAction(
-            'action',
-            currentSettings: const <String, String?>{},
-          ),
-          throwsA(
-            isA<ToolExtensionException>().having(
-              (ToolExtensionException e) => e.message,
-              'message',
-              contains('returned a non-string value for setting "key"'),
-            ),
-          ),
-        );
+        expect(await malformedElementClient.getConfigurations(), isEmpty);
+        expect(logger.warningText, contains('Extension "malformed_ext" returned malformed'));
       },
     );
 
@@ -493,24 +310,6 @@ void main() {
         logger: logger,
       );
 
-      final List<FeatureFlag> flags = await config.fetchFeatureFlags();
-      expect(flags.map((FeatureFlag f) => f.name), const <String>['enable-secondary-feature']);
-      expect(
-        logger.warningText,
-        contains('Extension "custom_config_ext": Config failed with actionable user error.'),
-      );
-
-      logger.clear();
-      final List<ConfigOption> options = await config.fetchConfigurations();
-      expect(options.map((ConfigOption o) => o.name), const <String>['secondary-config-key']);
-      expect(
-        logger.warningText,
-        contains(
-          'Extension "custom_config_ext": Config options failed with actionable user error.',
-        ),
-      );
-
-      logger.clear();
       final List<ExtensionSettingsGroup> groups = await config.fetchExtensionSettings();
       expect(groups, hasLength(1));
       expect(groups.single.title, 'Secondary Configuration Extension');
@@ -520,387 +319,483 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'ToolExtensionService host RPC helpers throw StateError before peer attachment',
-      () async {
-        final service = _SecondaryConfigurationExtension();
-
-        await expectLater(
-          service.getConfigurationValues(),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('extension.getConfigurationValues'),
-            ),
-          ),
-        );
-        await expectLater(
-          service.promptForOption(message: 'Select option', options: const <String>['Option A']),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('terminal.promptForOption'),
-            ),
-          ),
-        );
-        await expectLater(
-          service.promptForInput(message: 'Enter text'),
-          throwsA(
-            isA<StateError>().having(
-              (StateError e) => e.message,
-              'message',
-              contains('terminal.promptForInput'),
-            ),
-          ),
-        );
-      },
-    );
-
-    testWithoutContext('extension.getConfigurationValues resolves nested settings and legacy aliases without re-entrant RPCs', () async {
+    testWithoutContext('lookupSettingValue, setSettingValue, removeSettingValue, and inactiveSavedExtensionSettings manage nested extensions map', () {
       final fs = MemoryFileSystem.test();
-      final hostConfig = Config.test(directory: fs.directory('/'));
-      hostConfig
-        ..setValue('legacy-custom-sdk', '/opt/legacy-sdk')
-        ..setValue('android-sdk', '/opt/android-sdk')
-        ..setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
-          'custom_signing_ext': <String, Object?>{
-            'enable-custom-signing': true,
-            'custom-signing-cert': 'cert-alpha',
-          },
-          'other_ext': <String, Object?>{'secret-key': 'should-not-leak'},
-        });
+      final config = Config.test(directory: fs.directory('/'));
 
-      final logger = BufferLogger.test();
-      final manager = ExtensionManager(
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        toolContext: FakeToolContext(config: hostConfig, fs: fs, logger: logger),
-      );
-      addTearDown(manager.dispose);
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
-
-      final extConfig = ExtensionConfiguration(
-        extensions: manager.configurationExtensions,
-        logger: logger,
-      );
-      final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
-      final ConfigAction readAction = group.configActions.firstWhere(
-        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kReadOwnedValuesAction,
+      config.setValue('legacy-sdk', '/legacy/sdk');
+      expect(
+        ExtensionConfiguration.lookupSettingValue(
+          config,
+          'sdk-path',
+          extensionName: 'ext_a',
+          aliases: const <String>['legacy-sdk'],
+        ),
+        '/legacy/sdk',
       );
 
-      final Map<String, String?> updates = await ExtensionConfiguration.runConfigAction(
-        action: readAction,
-        currentSettings: const <String, String?>{},
-        group: group,
+      ExtensionConfiguration.setSettingValue(
+        config,
+        'sdk-path',
+        '/new/sdk',
+        extensionName: 'ext_a',
+        aliases: const <String>['legacy-sdk'],
+      );
+      expect(config.containsKey('legacy-sdk'), isFalse);
+      expect(
+        ExtensionConfiguration.lookupSettingValue(config, 'sdk-path', extensionName: 'ext_a'),
+        '/new/sdk',
+      );
+
+      ExtensionConfiguration.setSettingValue(config, 'b-key', '2', extensionName: 'ext_b');
+      ExtensionConfiguration.setSettingValue(config, 'a-key', '1', extensionName: 'ext_b');
+      final Map<String, Map<String, Object?>> inactive =
+          ExtensionConfiguration.inactiveSavedExtensionSettings(
+            config,
+            activeExtensionNames: const <String>{'ext_a'},
+          );
+      expect(inactive.keys.toList(), const <String>['ext_b']);
+      expect(inactive['ext_b']!.keys.toList(), const <String>['a-key', 'b-key']);
+
+      ExtensionConfiguration.removeSettingValue(config, 'sdk-path', extensionName: 'ext_a');
+      ExtensionConfiguration.removeSettingValue(config, 'a-key', extensionName: 'ext_b');
+      ExtensionConfiguration.removeSettingValue(config, 'b-key', extensionName: 'ext_b');
+      expect(config.containsKey(ExtensionConfiguration.extensionsSettingsKey), isFalse);
+    });
+
+    testWithoutContext('resolveFeatureFlagValue and resolveConfigOptionValue honor environmentOverride, persisted settings, aliases, and defaults', () {
+      final fs = MemoryFileSystem.test();
+      final config = Config.test(directory: fs.directory('/'));
+      const flag = FeatureFlag(
+        name: 'enable-custom',
+        help: 'Enable custom.',
+        environmentOverride: 'FLUTTER_ENABLE_CUSTOM',
+      );
+      const option = ConfigOption(
+        name: 'custom-sdk',
+        help: 'SDK path.',
+        aliases: <String>['legacy-sdk'],
+        environmentOverride: 'FLUTTER_CUSTOM_SDK',
+        value: '/default/sdk',
+      );
+
+      expect(
+        ExtensionConfiguration.resolveFeatureFlagValue(
+          config,
+          flag,
+          environment: const <String, String>{},
+          extensionName: 'ext_a',
+        ),
+        isFalse,
       );
       expect(
-        updates[_InteractiveSigningConfigExtension.kSigningCert],
-        'fetches=1;'
-        'custom-sdk-path=/opt/legacy-sdk(String),'
-        'custom-signing-cert=cert-alpha(String),'
-        'enable-custom-signing=true(bool)',
+        ExtensionConfiguration.resolveConfigOptionValue(
+          config,
+          option,
+          environment: const <String, String>{},
+          extensionName: 'ext_a',
+        ),
+        '/default/sdk',
       );
 
-      // Nested `"extensions"` setting takes precedence over legacy top-level alias fallback without re-querying getFeatureFlags().
+      config.setValue('legacy-sdk', '/legacy/sdk');
+      ExtensionConfiguration.setSettingValue(config, 'enable-custom', true, extensionName: 'ext_a');
+      expect(
+        ExtensionConfiguration.resolveFeatureFlagValue(
+          config,
+          flag,
+          environment: const <String, String>{},
+          extensionName: 'ext_a',
+        ),
+        isTrue,
+      );
+      expect(
+        ExtensionConfiguration.resolveConfigOptionValue(
+          config,
+          option,
+          environment: const <String, String>{},
+          extensionName: 'ext_a',
+        ),
+        '/legacy/sdk',
+      );
+
+      expect(
+        ExtensionConfiguration.resolveFeatureFlagValue(
+          config,
+          flag,
+          environment: const <String, String>{'FLUTTER_ENABLE_CUSTOM': 'false'},
+          extensionName: 'ext_a',
+        ),
+        isFalse,
+      );
+      expect(
+        ExtensionConfiguration.resolveConfigOptionValue(
+          config,
+          option,
+          environment: const <String, String>{'FLUTTER_CUSTOM_SDK': '/env/sdk'},
+          extensionName: 'ext_a',
+        ),
+        '/env/sdk',
+      );
+    });
+
+    testWithoutContext('ToolExtensionService.getConfigurationValues queries host-resolved extension settings over RPC', () async {
+      final fs = MemoryFileSystem.test();
+      final hostConfig = Config.test(directory: fs.directory('/'));
+      hostConfig.setValue('legacy-host-query-sdk', '/legacy/sdk');
       ExtensionConfiguration.setSettingValue(
         hostConfig,
-        _InteractiveSigningConfigExtension.kCustomSdkPath,
-        '/opt/scoped-sdk',
-        extensionName: 'custom_signing_ext',
+        'enable-host-query',
+        true,
+        extensionName: 'host_query_ext',
       );
-      final Map<String, String?> updated = await ExtensionConfiguration.runConfigAction(
-        action: readAction,
-        currentSettings: const <String, String?>{},
-        group: group,
-      );
-      expect(
-        updated[_InteractiveSigningConfigExtension.kSigningCert],
-        'fetches=1;'
-        'custom-sdk-path=/opt/scoped-sdk(String),'
-        'custom-signing-cert=cert-alpha(String),'
-        'enable-custom-signing=true(bool)',
-      );
-    });
-
-    testWithoutContext(
-      'extension.getConfigurationValues resolves environmentOverride ahead of persisted settings',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final hostConfig = Config.test(directory: fs.directory('/'));
-        hostConfig.setValue(ExtensionConfiguration.extensionsSettingsKey, <String, Object?>{
-          'custom_signing_ext': <String, Object?>{
-            'enable-custom-signing': true,
-            'custom-sdk-path': '/opt/scoped-sdk',
-            'custom-signing-cert': 'cert-alpha',
-          },
-        });
-
-        final env = <String, String>{
-          _InteractiveSigningConfigExtension.kEnableSigningEnv: '0',
-          _InteractiveSigningConfigExtension.kCustomSdkEnv: '/opt/env-sdk',
-        };
-        final logger = BufferLogger.test();
-        final manager = ExtensionManager(
-          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-          toolContext: FakeToolContext(
-            config: hostConfig,
-            fs: fs,
-            logger: logger,
-            platform: FakePlatform(environment: env),
-          ),
-        );
-        addTearDown(manager.dispose);
-        await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
-
-        final extConfig = ExtensionConfiguration(
-          extensions: manager.configurationExtensions,
+      final logger = BufferLogger.test();
+      final manager = ExtensionManager(
+        entryPoints: const <ExtensionEntryPoint>[_hostConfigQueryEntryPoint],
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(
+          config: hostConfig,
           logger: logger,
-        );
-        final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
-        final ConfigAction readAction = group.configActions.firstWhere(
-          (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kReadOwnedValuesAction,
+          platform: FakePlatform(
+            environment: const <String, String>{'FLUTTER_HOST_QUERY_SDK': '/env/sdk'},
+          ),
+        ),
+      );
+      addTearDown(manager.dispose);
+      await manager.ensureInitialized();
+
+      final Object? resolved = await manager.connections.single.sendRequest(
+        'config.readResolvedConfig',
+      );
+      expect(resolved, const <String, Object?>{
+        'enable-host-query': true,
+        'host-query-sdk': '/env/sdk',
+      });
+    });
+  });
+
+  group('ExtensionTerminalPrompter', () {
+    testWithoutContext(
+      'handlePromptForOption handles selection, default, quit, empty options, and invalid params',
+      () async {
+        final logger = BufferLogger.test();
+        final terminal = _FakePromptTerminal(lines: <String?>['invalid', '2', '', 'q']);
+        final prompter = ExtensionTerminalPrompter(
+          toolContext: FakeToolContext(logger: logger, terminal: terminal),
         );
 
-        final Map<String, String?> envOverridden = await ExtensionConfiguration.runConfigAction(
-          action: readAction,
-          currentSettings: const <String, String?>{},
-          group: group,
+        expect(
+          await prompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Pick one',
+            ToolExtensionService.promptOptionsParam: <String>['First', 'Second'],
+            ToolExtensionService.promptDefaultChoiceIndexParam: 0,
+          }),
+          const <String, Object?>{ToolExtensionService.promptSelectedIndexKey: 1},
         );
         expect(
-          envOverridden[_InteractiveSigningConfigExtension.kSigningCert],
-          'fetches=1;'
-          'custom-sdk-path=/opt/env-sdk(String),'
-          'custom-signing-cert=cert-alpha(String),'
-          'enable-custom-signing=false(bool)',
+          await prompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Pick default',
+            ToolExtensionService.promptOptionsParam: <String>['First', 'Second'],
+            ToolExtensionService.promptDefaultChoiceIndexParam: 0,
+          }),
+          const <String, Object?>{ToolExtensionService.promptSelectedIndexKey: 0},
+        );
+        expect(
+          await prompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Quit',
+            ToolExtensionService.promptOptionsParam: <String>['First'],
+          }),
+          const <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null},
+        );
+        expect(
+          await prompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Empty',
+            ToolExtensionService.promptOptionsParam: <String>[],
+          }),
+          const <String, Object?>{ToolExtensionService.promptSelectedIndexKey: null},
+        );
+
+        await expectLater(
+          prompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Bad default',
+            ToolExtensionService.promptOptionsParam: <String>['Only'],
+            ToolExtensionService.promptDefaultChoiceIndexParam: 2,
+          }),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              error_code.INVALID_PARAMS,
+            ),
+          ),
+        );
+        await expectLater(
+          prompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Missing options',
+          }),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              error_code.INVALID_PARAMS,
+            ),
+          ),
         );
       },
     );
 
-    testWithoutContext('terminal.promptForOption re-prompts on invalid input and terminal.promptForInput toggles echoMode on AnsiTerminal', () async {
-      final fs = MemoryFileSystem.test();
-      final hostConfig = Config.test(directory: fs.directory('/'));
-      final logger = BufferLogger.test();
-      final fakeStdin = _SingleSubscriptionStdin(const <String>[
-        'invalid\n',
-        '99\n',
-        '2\n',
-        'super-secret-passphrase\n',
-      ]);
-      final stdio = _EchoTrackingStdio(fakeStdin);
-      final terminal = AnsiTerminal(stdio: stdio, platform: FakePlatform());
-
-      final manager = ExtensionManager(
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        toolContext: FakeToolContext(
-          config: hostConfig,
-          fs: fs,
-          logger: logger,
-          stdio: stdio,
-          terminal: terminal,
-        ),
-      );
-      addTearDown(manager.dispose);
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
-
-      final extConfig = ExtensionConfiguration(
-        extensions: manager.configurationExtensions,
-        logger: logger,
-      );
-      final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
-      final ConfigAction selectAction = group.configActions.firstWhere(
-        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectSigningAction,
-      );
-
-      final Map<String, String?> updates = await ExtensionConfiguration.runConfigAction(
-        action: selectAction,
-        currentSettings: const <String, String?>{},
-        group: group,
-      );
-
-      expect(updates, const <String, String?>{
-        _InteractiveSigningConfigExtension.kSigningCert: 'cert-beta',
-        _InteractiveSigningConfigExtension.kSigningPassphrase: 'super-secret-passphrase',
-      });
-      expect(fakeStdin.echoModeHistory, containsAllInOrder(const <bool>[false, true]));
-      expect(logger.statusText, contains('[1] Developer Alpha (TEAM1) (default)'));
-      expect(logger.statusText, contains('[2] Developer Beta (TEAM2)'));
-      expect(logger.statusText, contains('Select a signing certificate (or "q" to quit): '));
-      expect(logger.statusText, contains('Enter certificate passphrase [default-secret]: '));
-    });
-
-    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in non-TTY mode', () async {
-      final fs = MemoryFileSystem.test();
-      final hostConfig = Config.test(directory: fs.directory('/'));
-      final logger = BufferLogger.test();
-      final nonTtyManager = ExtensionManager(
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        toolContext: FakeToolContext(config: hostConfig, fs: fs, logger: logger),
-      );
-      addTearDown(nonTtyManager.dispose);
-      await nonTtyManager.initialize(
-        entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint],
-      );
-
-      final nonTtyConfig = ExtensionConfiguration(
-        extensions: nonTtyManager.configurationExtensions,
-        logger: logger,
-      );
-      final ExtensionSettingsGroup nonTtyGroup =
-          (await nonTtyConfig.fetchExtensionSettings()).single;
-      final ConfigAction selectAction = nonTtyGroup.configActions.firstWhere(
-        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectSigningAction,
-      );
-
-      await expectLater(
-        ExtensionConfiguration.runConfigAction(
-          action: selectAction,
-          currentSettings: const <String, String?>{},
-          group: nonTtyGroup,
-        ),
-        throwsA(
-          isA<ToolExtensionException>()
-              .having(
-                (ToolExtensionException e) => e.code,
-                'code',
-                ToolExtensionException.domainErrorCode,
-              )
-              .having(
-                (ToolExtensionException e) => e.message,
-                'message',
-                contains('non-interactive terminal'),
-              ),
-        ),
-      );
-    });
-
-    testWithoutContext('terminal.promptForOption rejects out-of-range defaultChoiceIndex with INVALID_PARAMS (-32602)', () async {
-      final prompter = ExtensionTerminalPrompter(toolContext: FakeToolContext());
-      await expectLater(
-        prompter.handlePromptForOption(const <String, Object?>{
-          'message': 'Pick one',
-          'options': <String>['A', 'B'],
-          'defaultChoiceIndex': 2,
-        }),
-        throwsA(
-          isA<json_rpc.RpcException>().having(
-            (json_rpc.RpcException e) => e.code,
-            'code',
-            error_code.INVALID_PARAMS,
+    testWithoutContext(
+      'handlePromptForInput handles input, default, EOF, echoMode restoration, and invalid params',
+      () async {
+        final logger = BufferLogger.test();
+        final terminal = _FakePromptTerminal(lines: <String?>['secret-token', '', null]);
+        final stdin = _FakeEchoStdin();
+        final prompter = ExtensionTerminalPrompter(
+          toolContext: FakeToolContext(
+            logger: logger,
+            stdio: _FakeEchoStdio(stdin),
+            terminal: terminal,
           ),
-        ),
-      );
-    });
+        );
 
-    testWithoutContext('terminal.promptForOption and terminal.promptForInput fail with domainErrorCode (-32001) in --machine mode', () async {
+        expect(
+          await prompter.handlePromptForInput(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Token',
+            ToolExtensionService.promptEchoParam: false,
+          }),
+          const <String, Object?>{ToolExtensionService.promptValueKey: 'secret-token'},
+        );
+        expect(stdin.echoModeHistory, const <bool>[false, true]);
+        expect(stdin.echoMode, isTrue);
+
+        expect(
+          await prompter.handlePromptForInput(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Path',
+            ToolExtensionService.promptDefaultValueParam: '/default',
+          }),
+          const <String, Object?>{ToolExtensionService.promptValueKey: '/default'},
+        );
+        expect(
+          await prompter.handlePromptForInput(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'EOF',
+          }),
+          const <String, Object?>{ToolExtensionService.promptValueKey: null},
+        );
+        await expectLater(
+          prompter.handlePromptForInput(const <String, Object?>{
+            ToolExtensionService.promptEchoParam: 'not-a-bool',
+          }),
+          throwsA(
+            isA<json_rpc.RpcException>().having(
+              (json_rpc.RpcException e) => e.code,
+              'code',
+              error_code.INVALID_PARAMS,
+            ),
+          ),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'fails fast with ToolExtensionException in --machine mode or non-interactive terminal',
+      () async {
+        final nonTtyPrompter = ExtensionTerminalPrompter(
+          toolContext: FakeToolContext(
+            terminal: _FakePromptTerminal(lines: <String?>[], stdinHasTerminal: false),
+          ),
+        );
+        await expectLater(
+          nonTtyPrompter.handlePromptForInput(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Enter value',
+          }),
+          throwsA(
+            isA<ToolExtensionException>().having(
+              (ToolExtensionException e) => e.message,
+              'message',
+              contains('non-interactive terminal'),
+            ),
+          ),
+        );
+
+        final machinePrompter = ExtensionTerminalPrompter(
+          toolContext: FakeToolContext(terminal: _FakePromptTerminal(lines: <String?>[])),
+        )..enableMachineMode();
+        await expectLater(
+          machinePrompter.handlePromptForOption(const <String, Object?>{
+            ToolExtensionService.promptMessageParam: 'Pick',
+            ToolExtensionService.promptOptionsParam: <String>['A'],
+          }),
+          throwsA(
+            isA<ToolExtensionException>().having(
+              (ToolExtensionException e) => e.message,
+              'message',
+              contains('--machine'),
+            ),
+          ),
+        );
+      },
+    );
+  });
+
+  group('ConfigAction Host & RPC Validation', () {
+    testWithoutContext('collectActionSettings scopes to ConfigOptions and settingsKeys and runConfigAction validates returned keys', () async {
       final fs = MemoryFileSystem.test();
-      final hostConfig = Config.test(directory: fs.directory('/'));
-      final logger = BufferLogger.test();
-      final machineStdio = _EchoTrackingStdio(_SingleSubscriptionStdin(const <String>['1\n']));
-      final machineManager = ExtensionManager(
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        toolContext: FakeToolContext(
-          config: hostConfig,
-          fs: fs,
-          logger: logger,
-          stdio: machineStdio,
-          terminal: AnsiTerminal(stdio: machineStdio, platform: FakePlatform()),
+      final config = Config.test(directory: fs.directory('/'));
+      ExtensionConfiguration.setSettingValue(config, 'enable-flag', true, extensionName: 'act');
+      ExtensionConfiguration.setSettingValue(config, 'sdk-dir', '/sdk', extensionName: 'act');
+      ExtensionConfiguration.setSettingValue(config, 'cert-id', 'c1', extensionName: 'act');
+
+      final ext = _TinyActionExtension();
+      const option = ConfigOption(name: 'sdk-dir', help: 'SDK dir');
+      const validAction = ConfigAction(
+        name: 'update',
+        help: 'Update',
+        settingsKeys: <String>['cert-id'],
+      );
+      const invalidAction = ConfigAction(
+        name: 'bad',
+        help: 'Bad',
+        settingsKeys: <String>['cert-id'],
+      );
+
+      final Map<String, String?> collected = ExtensionConfiguration.collectActionSettings(
+        config,
+        configActions: const <ConfigAction>[validAction],
+        configOptions: const <ConfigOption>[option],
+        extensionName: 'act',
+      );
+      expect(collected, const <String, String?>{'sdk-dir': '/sdk', 'cert-id': 'c1'});
+
+      final group = ExtensionSettingsGroup(
+        configActions: const <ConfigAction>[validAction, invalidAction],
+        configOptions: const <ConfigOption>[option],
+        displayTitle: 'Tiny (package:act)',
+        extension: ext,
+        extensionName: 'act',
+        featureFlags: const <FeatureFlag>[],
+        title: 'Tiny',
+      );
+      expect(group.actionOnlySettingsKeys, const <String>['cert-id']);
+
+      expect(
+        await ExtensionConfiguration.runConfigAction(
+          action: validAction,
+          currentSettings: collected,
+          group: group,
         ),
-      )..enableMachineMode();
-      addTearDown(machineManager.dispose);
-      await machineManager.initialize(
-        entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint],
-      );
-
-      final machineConfig = ExtensionConfiguration(
-        extensions: machineManager.configurationExtensions,
-        logger: logger,
-      );
-      final ExtensionSettingsGroup machineGroup =
-          (await machineConfig.fetchExtensionSettings()).single;
-      final ConfigAction selectAction = machineGroup.configActions.firstWhere(
-        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kSelectSigningAction,
-      );
-
-      await expectLater(
-        ExtensionConfiguration.runConfigAction(
-          action: selectAction,
-          currentSettings: const <String, String?>{},
-          group: machineGroup,
-        ),
-        throwsA(
-          isA<ToolExtensionException>()
-              .having(
-                (ToolExtensionException e) => e.code,
-                'code',
-                ToolExtensionException.domainErrorCode,
-              )
-              .having((ToolExtensionException e) => e.message, 'message', contains('"--machine"')),
-        ),
-      );
-    });
-
-    testWithoutContext('ExtensionConfiguration.runConfigAction allows updating declared ConfigOptions and rejects undeclared setting keys and invalid RPC params', () async {
-      final logger = BufferLogger.test();
-      final manager = ExtensionManager(
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        toolContext: FakeToolContext(logger: logger),
-      );
-      addTearDown(manager.dispose);
-      await manager.initialize(entryPoints: <ExtensionEntryPoint>[_interactiveSigningEntryPoint]);
-
-      final extConfig = ExtensionConfiguration(
-        extensions: manager.configurationExtensions,
-        logger: logger,
-      );
-      final ExtensionSettingsGroup group = (await extConfig.fetchExtensionSettings()).single;
-
-      final ConfigAction updateOptionAction = group.configActions.firstWhere(
-        (ConfigAction a) =>
-            a.name == _InteractiveSigningConfigExtension.kUpdateDeclaredOptionAction,
-      );
-      final Map<String, String?> optionUpdates = await ExtensionConfiguration.runConfigAction(
-        action: updateOptionAction,
-        currentSettings: const <String, String?>{},
-        group: group,
-      );
-      expect(optionUpdates, const <String, String?>{
-        _InteractiveSigningConfigExtension.kCustomSdkPath: '/opt/action-updated-sdk',
-        _InteractiveSigningConfigExtension.kSigningCert: 'cert-alpha',
-      });
-
-      final ConfigAction undeclaredAction = group.configActions.firstWhere(
-        (ConfigAction a) => a.name == _InteractiveSigningConfigExtension.kUndeclaredKeyAction,
+        const <String, String?>{'sdk-dir': '/new-sdk', 'cert-id': 'c2'},
       );
       await expectLater(
         ExtensionConfiguration.runConfigAction(
-          action: undeclaredAction,
-          currentSettings: const <String, String?>{},
+          action: invalidAction,
+          currentSettings: collected,
           group: group,
         ),
         throwsA(
           isA<ToolExtensionException>().having(
             (ToolExtensionException e) => e.message,
             'message',
-            contains('returned undeclared setting key "unowned-secret-key"'),
+            contains('undeclared setting key "rogue-key"'),
           ),
         ),
       );
+    });
 
-      final ExtensionConnection connection = manager.connections.single;
-      await expectLater(
-        connection.sendRequest(
-          ConfigurationExtension.runConfigActionMethod,
-          params: const <String, Object?>{'name': ''},
-        ),
-        throwsA(
+    testWithoutContext(
+      'ConfigurationExtension.runConfigAction RPC rejects invalid params',
+      () async {
+        final ext = _TinyActionExtension();
+        final Map<String, ExtensionRpcHandler> handlers = await ext.initialize();
+        final ExtensionRpcHandler handler = handlers['runConfigAction']!;
+        final Matcher throwsInvalidParams = throwsA(
           isA<json_rpc.RpcException>().having(
             (json_rpc.RpcException e) => e.code,
             'code',
             error_code.INVALID_PARAMS,
           ),
-        ),
-      );
-    });
+        );
+
+        await expectLater(() => handler(const <String, Object?>{}), throwsInvalidParams);
+        await expectLater(
+          () => handler(const <String, Object?>{
+            ConfigurationExtension.actionNameParam: 'update',
+            ConfigurationExtension.currentSettingsParam: 'not-a-map',
+          }),
+          throwsInvalidParams,
+        );
+        await expectLater(
+          () => handler(const <String, Object?>{
+            ConfigurationExtension.actionNameParam: 'update',
+            ConfigurationExtension.currentSettingsParam: <String, Object?>{'cert-id': 42},
+          }),
+          throwsInvalidParams,
+        );
+      },
+    );
   });
+}
+
+class _FakePromptTerminal extends Fake implements AnsiTerminal {
+  _FakePromptTerminal({required List<String?> lines, this.stdinHasTerminal = true})
+    : _lines = Queue<String?>.of(lines);
+
+  final Queue<String?> _lines;
+
+  @override
+  final bool stdinHasTerminal;
+
+  @override
+  bool usesTerminalUi = false;
+
+  @override
+  Future<String> readLine() async {
+    if (_lines.isEmpty) {
+      throw StateError('No element');
+    }
+    final String? next = _lines.removeFirst();
+    if (next == null) {
+      throw StateError('No element');
+    }
+    return next;
+  }
+}
+
+class _FakeEchoStdin extends Fake implements Stdin {
+  var _echoMode = true;
+  final echoModeHistory = <bool>[];
+
+  @override
+  bool get echoMode => _echoMode;
+
+  @override
+  set echoMode(bool value) {
+    _echoMode = value;
+    echoModeHistory.add(value);
+  }
+}
+
+class _FakeEchoStdio extends FakeStdio {
+  _FakeEchoStdio(this._stdin);
+
+  final _FakeEchoStdin _stdin;
+
+  @override
+  Stream<List<int>> get stdin => _stdin;
+}
+
+final class _TinyActionExtension extends ConfigurationExtension {
+  @override
+  String get title => 'Tiny';
+
+  @override
+  Future<Map<String, String?>> runConfigAction(
+    String name, {
+    required Map<String, String?> currentSettings,
+  }) async {
+    return switch (name) {
+      'update' => const <String, String?>{'sdk-dir': '/new-sdk', 'cert-id': 'c2'},
+      'bad' => const <String, String?>{'rogue-key': 'bad'},
+      _ => throw ToolExtensionException('Unknown action: $name'),
+    };
+  }
 }

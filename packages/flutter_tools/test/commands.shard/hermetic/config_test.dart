@@ -588,9 +588,6 @@ class FakeExtensionManager extends Fake implements ExtensionManager {
 
   @override
   Future<void> ensureInitialized() async {}
-
-  @override
-  void enableMachineMode() {}
 }
 
 final class FakeConfigurationExtension extends ConfigurationExtension {
@@ -598,21 +595,16 @@ final class FakeConfigurationExtension extends ConfigurationExtension {
     required this.title,
     required this.featureFlags,
     required this.configOptions,
-    this.configActions = const <ConfigAction>[],
   });
 
   @override
   final String title;
   final List<FeatureFlag> featureFlags;
   final List<ConfigOption> configOptions;
-  final List<ConfigAction> configActions;
 
   @override
   Future<List<FeatureFlag>> getFeatureFlags() async => featureFlags;
 
   @override
   Future<List<ConfigOption>> getConfigurations() async => configOptions;
-
-  @override
-  Future<List<ConfigAction>> getConfigActions() async => configActions;
 }
