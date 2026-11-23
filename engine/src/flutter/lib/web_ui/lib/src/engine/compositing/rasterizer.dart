@@ -22,8 +22,71 @@ abstract class Rasterizer {
   /// Disposes this rasterizer and all [ViewRasterizer]s that it created.
   void dispose();
 
-  @visibleForTesting
+  /// Provides the surfaces used by this rasterizer.
   SurfaceProvider get surfaceProvider;
+}
+
+/// Owns the view rasterizers that share a [SurfaceProvider].
+abstract class SurfaceRasterizer<V extends ViewRasterizer> extends Rasterizer {
+  SurfaceRasterizer() {
+    assert(() {
+      registerHotRestartListener(dispose);
+      return true;
+    }());
+  }
+
+  final Map<EngineFlutterView, V> _views = <EngineFlutterView, V>{};
+
+  /// Includes disposed views whose frames are still using their canvases.
+  int _liveFactories = 0;
+  bool _disposed = false;
+
+  /// Builds the rasterizer for a newly registered view.
+  @protected
+  V buildViewRasterizer(EngineFlutterView view);
+
+  @override
+  V createViewRasterizer(EngineFlutterView view) {
+    assert(!_disposed);
+    return _views.putIfAbsent(view, () {
+      final V rasterizer = buildViewRasterizer(view);
+      rasterizer._owner = this;
+      _liveFactories++;
+      return rasterizer;
+    });
+  }
+
+  void _releaseFactory(ViewRasterizer rasterizer) {
+    try {
+      rasterizer.displayFactory.dispose();
+    } finally {
+      _liveFactories--;
+      if (_disposed && _liveFactories == 0) {
+        surfaceProvider.dispose();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    if (_liveFactories == 0) {
+      surfaceProvider.dispose();
+      return;
+    }
+    for (final V rasterizer in _views.values.toList()) {
+      rasterizer.dispose();
+    }
+  }
+
+  @override
+  Surface createPictureToImageSurface() => surfaceProvider.createSurface();
+
+  @override
+  void setResourceCacheMaxBytes(int bytes) => surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
 }
 
 /// Composites Flutter content into a [FlutterView]. Manages the creation of
@@ -39,9 +102,14 @@ abstract class ViewRasterizer {
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
 
+  SurfaceRasterizer<ViewRasterizer>? _owner;
+
+  /// Whether [PlatformViewEmbedder.submitFrame] is still using the display canvases. Their factory
+  /// and the shared surface provider must outlive that work, even on failure.
+  bool _submittingFrame = false;
+
   /// Whether this rasterizer has been disposed.
   bool get isDisposed => _isDisposed;
-  bool _isDisposed = false;
 
   /// The size of the current frame being rasterized.
   BitmapSize currentFrameSize = BitmapSize.zero;
@@ -64,9 +132,6 @@ abstract class ViewRasterizer {
   /// Draws the [layerTree] at [frameSize] (in physical pixels) to the screen
   /// for the view associated with this rasterizer.
   Future<void> draw(LayerTree layerTree, ui.Size frameSize, FrameTimingRecorder? recorder) async {
-    if (isDisposed) {
-      return;
-    }
     // The [frameSize] may be slightly imprecise if the `devicePixelRatio` isn't
     // an integer. For example, if you zoom to 110% in Chrome on a Macbook, the
     // `devicePixelRatio` is `2.200000047683716`, so when the physical size is
@@ -76,11 +141,11 @@ abstract class ViewRasterizer {
     final BitmapSize bitmapSize = frameSize.isEmpty
         ? BitmapSize.zero
         : BitmapSize.fromSize(frameSize);
-    if (bitmapSize.isEmpty) {
-      // Available drawing area is empty (or rounds to 0 physical pixels). Skip drawing.
+    if (_isDisposed || bitmapSize.isEmpty) {
+      // The view was disposed or the available drawing area is empty (or
+      // rounds to 0 physical pixels). Skip drawing.
       // Record all the draw steps as happening instantly so we don't crash
       // when submitting frame timings.
-      recorder?.recordBuildFinish();
       recorder?.recordRasterStart();
       recorder?.recordRasterFinish();
       return;
@@ -90,15 +155,29 @@ abstract class ViewRasterizer {
     viewEmbedder.frameSize = currentFrameSize;
     final Frame compositorFrame = context.acquireFrame(viewEmbedder);
 
-    compositorFrame.raster(layerTree, currentFrameSize, recorder);
+    // Raster time includes the engine's preroll, measure, composition
+    // optimization, and paint passes, as well as rasterizing the pictures.
+    recorder?.recordRasterStart();
+    compositorFrame.raster(layerTree, currentFrameSize);
     _lastRenderedLayerTree = layerTree;
 
     final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
-    if (isDisposed) {
+    if (_isDisposed) {
+      // The view was disposed while preparing to draw. Don't submit the frame,
+      // which would allocate new display canvases for the disposed view.
+      recorder?.recordRasterFinish();
       return;
     }
-    await viewEmbedder.submitFrame(recorder);
+    _submittingFrame = true;
+    try {
+      await viewEmbedder.submitFrame(recorder);
+    } finally {
+      _submittingFrame = false;
+      if (_isDisposed) {
+        _owner?._releaseFactory(this);
+      }
+    }
     if (presentationTimer != null) {
       presentationTimer.stop();
       Profiler.instance.benchmark(
@@ -109,9 +188,6 @@ abstract class ViewRasterizer {
   }
 
   /// Do some initialization to prepare to draw a frame.
-  ///
-  /// For example, in the [MultiSurfaceRasterizer], this ensures the base
-  /// canvas is the correct size to draw the frame.
   Future<void> prepareToDraw();
 
   /// Rasterizes the given [pictures] into the [displayCanvases].
@@ -144,13 +220,21 @@ abstract class ViewRasterizer {
     displayFactory.removeCanvasesFromDom();
   }
 
+  bool _isDisposed = false;
+
   /// Disposes this rasterizer.
+  ///
+  /// After this is called, [draw] does nothing.
   void dispose() {
     if (_isDisposed) {
       return;
     }
     _isDisposed = true;
+    _owner?._views.remove(view);
     viewEmbedder.dispose();
+    if (!_submittingFrame) {
+      _owner?._releaseFactory(this);
+    }
   }
 
   /// Clears the state. Used in tests.

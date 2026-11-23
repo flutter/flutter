@@ -22,7 +22,9 @@ void testMain() {
   for (final forceMultiSurface in <bool>[false, if (isCanvasKit) true]) {
     group('force CanvasKit multi-surface: $forceMultiSurface', () {
       late EngineFlutterView view;
+      late Rasterizer owner;
       late _PausedViewRasterizer rasterizer;
+      final reportedTimings = <ui.FrameTiming>[];
       late DomElement host;
 
       setUp(() {
@@ -37,7 +39,16 @@ void testMain() {
         view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
         view.debugPhysicalSizeOverride = const ui.Size(100, 100);
         view.debugForceResize();
-        rasterizer = _PausedViewRasterizer(view, renderer.rasterizer.createViewRasterizer(view));
+        owner = switch (renderer.rasterizer) {
+          final OffscreenCanvasRasterizer r => _PausedOffscreenRasterizer(
+            r.surfaceProvider.surfaceCreateFn,
+          ),
+          final MultiSurfaceRasterizer r => _PausedMultiSurfaceRasterizer(
+            r.surfaceProvider.surfaceCreateFn,
+          ),
+          _ => throw UnsupportedError('Unexpected rasterizer'),
+        };
+        rasterizer = owner.createViewRasterizer(view) as _PausedViewRasterizer;
         renderer.rasterizers[view.viewId] = rasterizer;
         PlatformViewManager.instance.registerFactory(
           'commit-test',
@@ -50,7 +61,9 @@ void testMain() {
         debugOverlayOptimizationBounds = false;
         EnginePlatformDispatcher.instance.onReportTimings = null;
         FrameTimingRecorder.debugResetFrameTimings();
+        reportedTimings.clear();
         rasterizer.dispose();
+        owner.dispose();
         view.dispose();
         host.remove();
         PlatformViewManager.instance.debugClear();
@@ -59,7 +72,12 @@ void testMain() {
         renderer.debugResetRasterizer();
       });
 
-      Future<void> draw({double width = 20, bool clipped = false, bool platformView = true}) async {
+      Future<void> draw({
+        double width = 20,
+        bool clipped = false,
+        bool platformView = true,
+        ui.Size? size,
+      }) async {
         final recorder = ui.PictureRecorder();
         ui.Canvas(recorder).drawRect(
           const ui.Rect.fromLTWH(0, 0, 100, 100),
@@ -79,7 +97,7 @@ void testMain() {
         }
         final scene = builder.build() as LayerScene;
         try {
-          await renderer.renderScene(scene, view, size: view.physicalSize);
+          await renderer.renderScene(scene, view, size: size ?? view.physicalSize);
         } finally {
           scene.dispose();
           picture.dispose();
@@ -89,10 +107,26 @@ void testMain() {
       Future<void> whilePaused(Future<void> pending, void Function() check) async {
         try {
           await Future.any(<Future<void>>[rasterizer.reached.future, pending]);
+          expect(rasterizer.reached.isCompleted, isTrue);
           check();
         } finally {
           rasterizer.release();
           await pending;
+        }
+      }
+
+      void enableTimings() {
+        EnginePlatformDispatcher.instance.onReportTimings = reportedTimings.addAll;
+      }
+
+      void expectTimings(int count) {
+        final timings = <ui.FrameTiming>[
+          ...reportedTimings,
+          ...FrameTimingRecorder.debugFrameTimings,
+        ];
+        expect(timings, hasLength(count));
+        for (final timing in timings) {
+          expect(timing.rasterDuration, greaterThanOrEqualTo(Duration.zero));
         }
       }
 
@@ -134,21 +168,34 @@ void testMain() {
 
       test('disposal during preparation does not submit a cleared frame', () async {
         await draw();
-        EnginePlatformDispatcher.instance.onReportTimings = (List<ui.FrameTiming> timings) {
-          fail('A canceled frame must not report timings.');
-        };
+        enableTimings();
         rasterizer.hold(preparation: true);
         final Future<void> pending = draw(width: 40);
-        await whilePaused(pending, rasterizer.dispose);
-        expect(FrameTimingRecorder.debugFrameTimings, isEmpty);
+        await whilePaused(pending, () {
+          final List<LayerPictureRecorder> recorders =
+              rasterizer.viewEmbedder.debugContext.optimizedCanvasRecorders!;
+          expect(recorders, isNotEmpty);
+          rasterizer.dispose();
+          expect(recorders.every((recorder) => !recorder.isRecording), isTrue);
+        });
+        expectTimings(1);
         expect(rasterizer.sceneElement.children, isEmpty);
       });
 
       test('drawing a disposed view does not prepare or commit a frame', () async {
         rasterizer.dispose();
+        enableTimings();
         await draw();
+        expectTimings(1);
         expect(rasterizer.preparations, 0);
         expect(rasterizer.sceneElement.children, isEmpty);
+      });
+
+      test('an empty frame reports timings without preparing a surface', () async {
+        enableTimings();
+        await draw(size: ui.Size.zero);
+        expectTimings(1);
+        expect(rasterizer.preparations, 0);
       });
 
       test('a rasterization failure preserves the DOM and permits the next frame', () async {
@@ -185,16 +232,14 @@ void testMain() {
           'disposal while rasterization is pending (after drawing: $afterRasterization)',
           () async {
             await draw();
-            EnginePlatformDispatcher.instance.onReportTimings = (List<ui.FrameTiming> timings) {
-              fail('A canceled frame must not report timings.');
-            };
+            enableTimings();
             rasterizer.hold(afterRasterization: afterRasterization);
             final Future<void> pending = draw(width: 40);
             await whilePaused(pending, () {
               rasterizer.dispose();
               expect(rasterizer.sceneElement.children, isEmpty);
             });
-            expect(FrameTimingRecorder.debugFrameTimings, isEmpty);
+            expectTimings(1);
             expect(rasterizer.viewEmbedder.debugActiveComposition.entities, isEmpty);
             if (isCanvasKit && forceMultiSurface) {
               for (final CkOnscreenSurface canvas
@@ -214,13 +259,52 @@ void testMain() {
         expect(rasterizer.viewEmbedder.debugActiveComposition.entities, isEmpty);
       });
 
+      test('renderer disposal waits for a view already disposed during rasterization', () async {
+        await draw();
+        final Rasterizer original = renderer.rasterizer;
+        renderer.debugOverrideRasterizer(owner);
+        try {
+          final Surface surface = switch (owner) {
+            final OffscreenCanvasRasterizer r => r.offscreenSurface,
+            _ => rasterizer.lastCanvases.first as OnscreenSurface,
+          };
+          rasterizer.hold();
+          enableTimings();
+          final Future<void> pending = draw(width: 40);
+          final Future<void> queued = draw();
+          await whilePaused(pending, () {
+            rasterizer.dispose();
+            renderer.dispose();
+            expect(surface.isDisposed, isFalse);
+            expect(rasterizer.sceneElement.children, isEmpty);
+          });
+          await queued;
+          expect(surface.isDisposed, isTrue);
+          expect(rasterizer.displayFactory.debugSurfaceCount, 0);
+          expectTimings(2);
+        } finally {
+          renderer.debugOverrideRasterizer(original);
+        }
+      });
+
+      test('disposing the rasterizer releases canvases even if the pending frame fails', () async {
+        rasterizer.hold();
+        rasterizer.failNextFrame = true;
+        final Future<void> pending = draw();
+        await expectLater(whilePaused(pending, owner.dispose), throwsStateError);
+        expect(rasterizer.allocatedCanvases, hasLength(2));
+        expect(rasterizer.displayFactory.debugSurfaceCount, 0);
+        expect(rasterizer.sceneElement.children, isEmpty);
+      });
+
       test('disposal during the first frame releases temporary canvases', () async {
         rasterizer.hold();
         final Future<void> pending = draw();
         await whilePaused(pending, rasterizer.dispose);
         expect(rasterizer.allocatedCanvases, hasLength(2));
+        expect(rasterizer.displayFactory.debugSurfaceCount, 0);
+        expect(rasterizer.displayFactory.debugCacheSize, 0);
         for (final DisplayCanvas canvas in rasterizer.allocatedCanvases) {
-          expect(rasterizer.displayFactory.isLive(canvas), isFalse);
           if (canvas is CkOnscreenSurface) {
             expect(canvas.skSurface, isNull);
           }
@@ -241,7 +325,15 @@ void testMain() {
         await draw();
         rasterizer.hold();
         final Future<void> pending = draw(width: 40);
-        await whilePaused(pending, () => PlatformViewManager.instance.clearPlatformView(1));
+        final warnings = <String>[];
+        final void Function(String) previousPrintWarning = printWarning;
+        printWarning = warnings.add;
+        try {
+          await whilePaused(pending, () => PlatformViewManager.instance.clearPlatformView(1));
+        } finally {
+          printWarning = previousPrintWarning;
+        }
+        expect(warnings, contains(contains('Cannot render platform views: 1')));
         expect(
           rasterizer.viewEmbedder.debugActiveComposition.entities
               .whereType<CompositionPlatformView>(),
@@ -257,9 +349,31 @@ void testMain() {
   }
 }
 
-class _PausedViewRasterizer extends ViewRasterizer {
-  _PausedViewRasterizer(super.view, this.delegate);
-  final ViewRasterizer delegate;
+class _PausedOffscreenRasterizer extends OffscreenCanvasRasterizer {
+  _PausedOffscreenRasterizer(super.offscreenSurfaceCreateFn);
+
+  @override
+  OffscreenCanvasViewRasterizer buildViewRasterizer(EngineFlutterView view) =>
+      _PausedOffscreenView(view, this);
+}
+
+class _PausedOffscreenView extends OffscreenCanvasViewRasterizer with _PausedViewRasterizer {
+  _PausedOffscreenView(super.view, super.rasterizer);
+}
+
+class _PausedMultiSurfaceRasterizer extends MultiSurfaceRasterizer {
+  _PausedMultiSurfaceRasterizer(super.onscreenSurfaceCreateFn);
+
+  @override
+  MultiSurfaceViewRasterizer buildViewRasterizer(EngineFlutterView view) =>
+      _PausedMultiSurfaceView(view, surfaceProvider);
+}
+
+class _PausedMultiSurfaceView extends MultiSurfaceViewRasterizer with _PausedViewRasterizer {
+  _PausedMultiSurfaceView(super.view, super.surfaceProvider);
+}
+
+mixin _PausedViewRasterizer on ViewRasterizer {
   Completer<void>? _release;
   late Completer<void> reached;
   bool failNextFrame = false;
@@ -286,9 +400,6 @@ class _PausedViewRasterizer extends ViewRasterizer {
   }
 
   @override
-  DisplayCanvasFactory<DisplayCanvas> get displayFactory => delegate.displayFactory;
-
-  @override
   DisplayCanvas getOverlay() {
     if (failOverlayAfter == 0) {
       failOverlayAfter = null;
@@ -305,8 +416,7 @@ class _PausedViewRasterizer extends ViewRasterizer {
   @override
   Future<void> prepareToDraw() async {
     preparations++;
-    delegate.currentFrameSize = currentFrameSize;
-    await delegate.prepareToDraw();
+    await super.prepareToDraw();
     final Completer<void>? release = _release;
     if (_holdPreparation && release != null) {
       reached.complete();
@@ -323,7 +433,7 @@ class _PausedViewRasterizer extends ViewRasterizer {
     lastCanvases = canvases;
     if (_rasterizationsToSkip > 0) {
       _rasterizationsToSkip--;
-      await delegate.rasterize(canvases, pictures, recorder);
+      await super.rasterize(canvases, pictures, recorder);
       return;
     }
     final Completer<void>? release = _release;
@@ -335,7 +445,7 @@ class _PausedViewRasterizer extends ViewRasterizer {
       failNextFrame = false;
       throw StateError('Simulated rasterization failure.');
     }
-    final Future<void> pending = delegate.rasterize(canvases, pictures, recorder);
+    final Future<void> pending = super.rasterize(canvases, pictures, recorder);
     if (disposeAfterRasterizeStarts) {
       disposeAfterRasterizeStarts = false;
       dispose();
@@ -345,11 +455,5 @@ class _PausedViewRasterizer extends ViewRasterizer {
       reached.complete();
       await release.future;
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    delegate.dispose();
   }
 }

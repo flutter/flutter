@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/experimental/extension_arg_parser.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -243,29 +242,31 @@ void main() {
 
       // TODO(bkonyi): remove when ready to serve DevTools from DDS.
       group('${FlutterGlobalOptions.kPrintDtd} flag', () {
-        testUsingContext(
-          'sets DevtoolsLauncher.printDtdUri to false when not present',
-          () async {
-            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            await runner.run(<String>[]);
-            expect(DevtoolsLauncher.instance!.printDtdUri, false);
-          },
-          overrides: <Type, Generator>{
-            DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
-          },
-        );
+        testWithoutContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
+          final toolContext = FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+          );
+          final devtoolsLauncher = FakeDevtoolsLauncher()..dtdUri = Uri();
+          final runner = TestFlutterCommandRunner(
+            devtoolsLauncher: devtoolsLauncher,
+            toolContext: toolContext,
+          )..addCommand(DummyFlutterCommand(toolContext: toolContext));
+          await runner.run(<String>[]);
+          expect(devtoolsLauncher.printDtdUri, false);
+        });
 
-        testUsingContext(
-          'sets DevtoolsLauncher.printDtdUri to true when present',
-          () async {
-            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-            await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
-            expect(DevtoolsLauncher.instance!.printDtdUri, true);
-          },
-          overrides: <Type, Generator>{
-            DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
-          },
-        );
+        testWithoutContext('sets DevtoolsLauncher.printDtdUri to true when present', () async {
+          final toolContext = FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+          );
+          final devtoolsLauncher = FakeDevtoolsLauncher()..dtdUri = Uri();
+          final runner = TestFlutterCommandRunner(
+            devtoolsLauncher: devtoolsLauncher,
+            toolContext: toolContext,
+          )..addCommand(DummyFlutterCommand(toolContext: toolContext));
+          await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
+          expect(devtoolsLauncher.printDtdUri, true);
+        });
       });
 
       testUsingContext(
@@ -461,16 +462,103 @@ void main() {
       group('toolContext', () {
         test('is preserved when provided to constructor', () {
           final fakeToolContext = FakeToolContext();
-          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          final runner = TestFlutterCommandRunner(toolContext: fakeToolContext);
           expect(runner.toolContext, same(fakeToolContext));
         });
 
         test('command preserves provided toolContext', () {
           final fakeToolContext = FakeToolContext();
-          final runner = FlutterCommandRunner(toolContext: fakeToolContext);
+          final runner = TestFlutterCommandRunner(toolContext: fakeToolContext);
           final command = FakeFlutterCommand(toolContext: fakeToolContext);
           runner.addCommand(command);
           expect(command.toolContext, same(fakeToolContext));
+        });
+      });
+
+      group('findCommandName', () {
+        testWithoutContext('finds a command given on its own', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['doctor']), 'doctor');
+          expect(FlutterCommandRunner.findCommandName(<String>['help']), 'help');
+        });
+
+        testWithoutContext('finds a command followed by its own arguments', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['doctor', '-v']), 'doctor');
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['doctor', '--android-licenses']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['test', 'test/widget_test.dart']),
+            'test',
+          );
+        });
+
+        testWithoutContext('finds a command preceded by global options', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['-v', 'doctor']), 'doctor');
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--no-version-check', 'doctor', '-v']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--no-version-check', 'help', '-v']),
+            'help',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>[
+              '--suppress-analytics',
+              '--no-color',
+              'doctor',
+              '-v',
+            ]),
+            'doctor',
+          );
+        });
+
+        testWithoutContext('does not mistake the value of a global option for the command', () {
+          expect(
+            FlutterCommandRunner.findCommandName(<String>[
+              '--local-engine',
+              'host_debug',
+              'doctor',
+            ]),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--local-engine=host_debug', 'doctor']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--wrap-column', '100', 'doctor']),
+            'doctor',
+          );
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['-d', 'emulator-5554', 'doctor']),
+            'doctor',
+          );
+        });
+
+        testWithoutContext('does not mistake an argument of the command for the command', () {
+          expect(FlutterCommandRunner.findCommandName(<String>['create', 'doctor']), 'create');
+          expect(FlutterCommandRunner.findCommandName(<String>['create', 'daemon']), 'create');
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['create', 'widget-preview']),
+            'create',
+          );
+          expect(FlutterCommandRunner.findCommandName(<String>['help', 'doctor']), 'help');
+        });
+
+        testWithoutContext('returns null when no command is given', () {
+          expect(FlutterCommandRunner.findCommandName(<String>[]), isNull);
+          expect(FlutterCommandRunner.findCommandName(<String>['-v']), isNull);
+          expect(FlutterCommandRunner.findCommandName(<String>['-h']), isNull);
+          expect(FlutterCommandRunner.findCommandName(<String>['--version', '-v']), isNull);
+        });
+
+        testWithoutContext('returns null when the global options cannot be parsed', () {
+          expect(
+            FlutterCommandRunner.findCommandName(<String>['--not-a-real-flag', 'doctor']),
+            isNull,
+          );
         });
       });
 
@@ -731,7 +819,7 @@ void main() {
           () async {
             final toolContext = FakeToolContext();
             final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
-            final runner = FlutterCommandRunner(
+            final runner = TestFlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(dynamicCommand);
@@ -747,7 +835,7 @@ void main() {
           () async {
             final toolContext = FakeToolContext();
             final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
-            final runner = FlutterCommandRunner(
+            final runner = TestFlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(dynamicCommand);
@@ -768,7 +856,7 @@ void main() {
             subcommand: dynamicSubcommand,
             toolContext: toolContext,
           );
-          final runner = FlutterCommandRunner(
+          final runner = TestFlutterCommandRunner(
             toolContext: toolContext,
             featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
           )..addCommand(parentCommand);
@@ -784,7 +872,7 @@ void main() {
           () async {
             final toolContext = FakeToolContext();
             final dynamicCommand = _FakeDynamicFlutterCommand(toolContext: toolContext);
-            final runner = FlutterCommandRunner(
+            final runner = TestFlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(dynamicCommand);
@@ -807,7 +895,7 @@ void main() {
               subcommand: dynamicSubcommand,
               toolContext: toolContext,
             );
-            final runner = FlutterCommandRunner(
+            final runner = TestFlutterCommandRunner(
               toolContext: toolContext,
               featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
             )..addCommand(parentCommand);

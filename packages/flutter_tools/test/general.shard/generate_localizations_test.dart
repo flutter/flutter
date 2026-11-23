@@ -7,8 +7,8 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:flutter_tools/src/localizations/gen_l10n.dart';
 import 'package:flutter_tools/src/localizations/gen_l10n_types.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
@@ -683,9 +683,10 @@ void main() {
     );
   });
 
-  testUsingContext('generates normalized input & output file paths', () {
+  testWithoutContext('generates normalized input & output file paths', () {
+    const Platform platform = LocalPlatform();
     final FileSystem fs = MemoryFileSystem.test(
-      style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
     setupLocalizations(
       <String, String>{'en': singleMessageArbFileString, 'es': singleEsMessageArbFileString},
@@ -697,11 +698,11 @@ void main() {
     );
     expect(inputsAndOutputsList.existsSync(), isTrue);
 
-    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, dynamic>;
-    final oppositeSeparator = globals.platform.isWindows ? '/' : r'\';
-    final inputList = jsonResult['inputs'] as List<dynamic>;
+    final jsonResult = json.decode(inputsAndOutputsList.readAsStringSync()) as Map<String, Object?>;
+    final oppositeSeparator = platform.isWindows ? '/' : r'\';
+    final inputList = jsonResult['inputs']! as List<Object?>;
     expect(inputList, everyElement(isNot(contains(oppositeSeparator))));
-    final outputList = jsonResult['outputs'] as List<dynamic>;
+    final outputList = jsonResult['outputs']! as List<Object?>;
     expect(outputList, everyElement(isNot(contains(oppositeSeparator))));
   });
 
@@ -3788,5 +3789,137 @@ String helloNameAndAge({required String name, required int age}) {
         ),
       ),
     );
+  });
+
+  // Regression tests for https://github.com/flutter/flutter/issues/191072.
+  group('standalone UI packages', () {
+    testWithoutContext(
+      'defaults to flutter_localizations and GlobalMaterialLocalizations.delegates',
+      () {
+        setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+        final String localizationsFile = getGeneratedFileContent();
+        expect(
+          localizationsFile,
+          contains("import 'package:flutter_localizations/flutter_localizations.dart';"),
+        );
+        expect(
+          localizationsFile,
+          containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+        );
+      },
+    );
+
+    testWithoutContext(
+      'uses package:material_ui/material_ui.dart when material_ui is in dependencies',
+      () {
+        fs.file('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+        setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+        final String localizationsFile = getGeneratedFileContent();
+        expect(
+          localizationsFile,
+          contains(
+            "import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;",
+          ),
+        );
+        expect(
+          localizationsFile,
+          isNot(contains("import 'package:flutter_localizations/flutter_localizations.dart';")),
+        );
+        expect(
+          localizationsFile,
+          containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+        );
+      },
+    );
+
+    testWithoutContext('uses package:cupertino_ui/cupertino_ui.dart and GlobalCupertinoLocalizations.delegates when only cupertino_ui is in dependencies', () {
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains(
+          "import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;",
+        ),
+      );
+      expect(
+        localizationsFile,
+        isNot(contains("import 'package:flutter_localizations/flutter_localizations.dart';")),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalCupertinoLocalizations.delegates,
+  ];
+'''),
+      );
+    });
+
+    testWithoutContext('uses package:material_ui/material_ui.dart when both material_ui and cupertino_ui are in dependencies', () {
+      fs.file('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: test_app
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.0.0
+  cupertino_ui: ^1.0.0
+flutter:
+  generate: true
+''');
+      setupLocalizations(<String, String>{'en': singleMessageArbFileString});
+
+      final String localizationsFile = getGeneratedFileContent();
+      expect(
+        localizationsFile,
+        contains("import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;"),
+      );
+      expect(localizationsFile, isNot(contains('package:cupertino_ui/cupertino_ui.dart')));
+      expect(
+        localizationsFile,
+        isNot(contains('package:flutter_localizations/flutter_localizations.dart')),
+      );
+      expect(
+        localizationsFile,
+        containsIgnoringWhitespace('''
+    delegate,
+    ...GlobalMaterialLocalizations.delegates,
+  ];
+'''),
+      );
+    });
   });
 }

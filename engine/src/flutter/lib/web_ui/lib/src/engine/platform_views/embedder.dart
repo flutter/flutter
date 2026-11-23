@@ -52,9 +52,6 @@ class PlatformViewEmbedder {
   /// The most recent composition.
   Composition _activeComposition = Composition();
 
-  bool _rasterizing = false;
-  final List<DisplayCanvas> _canvasesPendingDisposal = <DisplayCanvas>[];
-
   /// Returns the most recent composition. Only used in tests.
   Composition get debugActiveComposition => _activeComposition;
 
@@ -308,20 +305,12 @@ class PlatformViewEmbedder {
     final Composition composition = frameContext.optimizedComposition!;
     // Lease new canvases without removing or reordering the visible composition.
     // Its DOM stays in place while asynchronous rasterization runs.
-    final List<int> indexMap = composition.equalsForCompositing(_activeComposition)
-        ? List<int>.generate(composition.entities.length, (int index) => index)
+    List<int>? indexMap = composition.equalsForCompositing(_activeComposition)
+        ? null
         : _getIndexMapFromPreviousComposition(_activeComposition, composition);
-    final allocatedCanvases = <DisplayCanvas>[];
+    final displayCanvases = <DisplayCanvas>[];
+    List<DisplayCanvas>? allocatedCanvases;
     final picturesToRasterize = <ui.Picture>[];
-
-    void releaseAllocatedCanvases() {
-      for (final canvas in allocatedCanvases) {
-        rasterizer.releaseOverlay(canvas);
-        if (rasterizer.isDisposed) {
-          canvas.dispose();
-        }
-      }
-    }
 
     try {
       for (var i = 0; i < composition.entities.length; i++) {
@@ -329,23 +318,24 @@ class PlatformViewEmbedder {
         if (entity is! CompositionCanvas) {
           continue;
         }
-        if (indexMap[i] == -1) {
+        final int previousIndex = indexMap == null ? i : indexMap[i];
+        if (previousIndex == -1) {
           entity.displayCanvas = rasterizer.getOverlay();
-          allocatedCanvases.add(entity.displayCanvas!);
+          (allocatedCanvases ??= <DisplayCanvas>[]).add(entity.displayCanvas!);
         } else {
           entity.displayCanvas =
-              (_activeComposition.entities[indexMap[i]] as CompositionCanvas).displayCanvas;
+              (_activeComposition.entities[previousIndex] as CompositionCanvas).displayCanvas;
         }
+        displayCanvases.add(entity.displayCanvas!);
       }
-      final List<DisplayCanvas> displayCanvases = composition.canvases
-          .map((CompositionCanvas canvas) => canvas.displayCanvas!)
-          .toList();
       for (final ui.PictureRecorder recorder in frameContext.optimizedCanvasRecorders!) {
         picturesToRasterize.add(recorder.endRecording());
       }
-      await _rasterize(displayCanvases, picturesToRasterize, recorder);
+      await rasterizer.rasterize(displayCanvases, picturesToRasterize, recorder);
     } catch (_) {
-      releaseAllocatedCanvases();
+      if (!rasterizer.isDisposed) {
+        allocatedCanvases?.forEach(rasterizer.releaseOverlay);
+      }
       _context = EmbedderFrameContext();
       _compositionOrder.clear();
       rethrow;
@@ -353,26 +343,18 @@ class PlatformViewEmbedder {
       for (final picture in picturesToRasterize) {
         picture.dispose();
       }
-      // Allocation or recording can fail before every recorder has been ended.
-      for (final ui.PictureRecorder recorder in frameContext.optimizedCanvasRecorders!) {
-        if (recorder.isRecording) {
-          recorder.endRecording().dispose();
-        }
-      }
-      for (final LayerPictureRecorder recorder in frameContext.measuringPictureRecorders.values) {
-        if (recorder.isRecording) {
-          recorder.endRecording().dispose();
-        }
-      }
+      frameContext.disposeRecorders();
     }
     if (rasterizer.isDisposed) {
-      releaseAllocatedCanvases();
+      // The factory still owns both the active and newly allocated canvases.
       return;
     }
 
     // Publish platform-view parameters and DOM order after rasterization.
+    Set<int>? invalidViewIds;
     for (final int viewId in _compositionOrder) {
       if (!PlatformViewManager.instance.knowsViewId(viewId)) {
+        (invalidViewIds ??= <int>{}).add(viewId);
         disposeView(viewId);
         continue;
       }
@@ -381,18 +363,43 @@ class PlatformViewEmbedder {
         _compositeWithParams(viewId, _currentCompositionParams[viewId]!);
       }
     }
-    // Prune views removed during rasterization even when the composition order
-    // is unchanged. Keep the canvas mapping computed before rasterization.
-    for (int i = composition.entities.length - 1; i >= 0; i--) {
-      final CompositionEntity entity = composition.entities[i];
-      if (entity is CompositionPlatformView &&
-          !PlatformViewManager.instance.knowsViewId(entity.viewId)) {
-        composition.entities.removeAt(i);
-        indexMap.removeAt(i);
+    if (invalidViewIds != null) {
+      _compositionOrder.removeWhere(invalidViewIds.contains);
+      // Keep the indices of canvases leased before rasterization, even if a
+      // platform view disappeared between two reused canvases.
+      for (int i = composition.entities.length - 1; i >= 0; i--) {
+        final CompositionEntity entity = composition.entities[i];
+        if (entity is CompositionPlatformView && invalidViewIds.contains(entity.viewId)) {
+          indexMap ??= List<int>.generate(composition.entities.length, (int index) => index);
+          indexMap.removeAt(i);
+          composition.entities.removeAt(i);
+        }
       }
+      printWarning(
+        'Cannot render platform views: ${invalidViewIds.join(', ')}. '
+        'These views have not been created, or they have been deleted.',
+      );
     }
-    _updateDomForNewComposition(composition, indexMap);
+    if (indexMap == null) {
+      // The new composition now owns the same canvases in the same DOM order.
+      for (final CompositionEntity entity in _activeComposition.entities) {
+        if (entity is CompositionCanvas) {
+          entity.displayCanvas = null;
+        }
+      }
+    } else {
+      _updateDomForNewComposition(composition, indexMap);
+    }
     _activeComposition = composition;
+    if (!listEquals(_compositionOrder, _activeCompositionOrder)) {
+      final unusedViews = Set<int>.of(_activeCompositionOrder)..removeAll(_compositionOrder);
+      unusedViews.forEach(disposeView);
+      _activeCompositionOrder
+        ..clear()
+        ..addAll(_compositionOrder);
+    }
+    _compositionOrder.clear();
+    _context = EmbedderFrameContext();
 
     // Draw the computed bounds for pictures and platform views if overlay
     // optimization debugging is enabled.
@@ -415,7 +422,11 @@ class PlatformViewEmbedder {
       }
       final ui.Picture boundsPicture = boundsRecorder.endRecording();
       try {
-        await _rasterize(<DisplayCanvas>[debugBoundsCanvas!], <ui.Picture>[boundsPicture], null);
+        await rasterizer.rasterize(
+          <DisplayCanvas>[debugBoundsCanvas!],
+          <ui.Picture>[boundsPicture],
+          null,
+        );
       } finally {
         boundsPicture.dispose();
       }
@@ -423,43 +434,6 @@ class PlatformViewEmbedder {
         return;
       }
       sceneHost.append(debugBoundsCanvas!.hostElement);
-    }
-
-    // Reset the context.
-    _context = EmbedderFrameContext();
-    if (listEquals(_compositionOrder, _activeCompositionOrder)) {
-      _compositionOrder.clear();
-      return;
-    }
-
-    final unusedViews = Set<int>.from(_activeCompositionOrder);
-    _activeCompositionOrder.clear();
-
-    List<int>? debugInvalidViewIds;
-
-    for (var i = 0; i < _compositionOrder.length; i++) {
-      final int viewId = _compositionOrder[i];
-
-      final bool isViewInvalid = !PlatformViewManager.instance.knowsViewId(viewId);
-      if (isViewInvalid) {
-        debugInvalidViewIds ??= <int>[];
-        debugInvalidViewIds.add(viewId);
-        continue;
-      }
-
-      _activeCompositionOrder.add(viewId);
-      unusedViews.remove(viewId);
-    }
-
-    _compositionOrder.clear();
-
-    unusedViews.forEach(disposeView);
-
-    if (debugInvalidViewIds != null && debugInvalidViewIds.isNotEmpty) {
-      printWarning(
-        'Cannot render platform views: ${debugInvalidViewIds.join(', ')}. '
-        'These views have not been created, or they have been deleted.',
-      );
     }
   }
 
@@ -518,13 +492,6 @@ class PlatformViewEmbedder {
   }
 
   void _updateDomForNewComposition(Composition composition, List<int> indexMap) {
-    if (composition.equalsForCompositing(_activeComposition)) {
-      // The DOM is unchanged, but canvas ownership still moves to the new frame.
-      for (final CompositionCanvas canvas in _activeComposition.canvases) {
-        canvas.displayCanvas = null;
-      }
-      return;
-    }
     // A canvas needs to be stacked as an overlay (and thus styled with
     // `position: absolute`) whenever it shares the composition with a
     // platform view, since the platform view's DOM element sits between
@@ -721,36 +688,11 @@ class PlatformViewEmbedder {
     element.remove();
   }
 
-  Future<void> _rasterize(
-    List<DisplayCanvas> canvases,
-    List<ui.Picture> pictures,
-    FrameTimingRecorder? recorder,
-  ) async {
-    _rasterizing = true;
-    try {
-      await rasterizer.rasterize(canvases, pictures, recorder);
-    } finally {
-      _rasterizing = false;
-      for (final DisplayCanvas canvas in _canvasesPendingDisposal) {
-        canvas.dispose();
-      }
-      _canvasesPendingDisposal.clear();
-    }
-  }
-
-  void _disposeCanvas(DisplayCanvas canvas) {
-    canvas.hostElement.remove();
-    if (_rasterizing) {
-      // Detach immediately, but let in-flight work finish using the surface.
-      _canvasesPendingDisposal.add(canvas);
-    } else {
-      canvas.dispose();
-    }
-  }
-
-  /// Disposes the state of this view embedder.
+  /// Detaches the current composition immediately. The rasterizer owns the
+  /// display canvases and releases them once the pending frame completes.
   void dispose() {
     _viewClipChains.keys.toList().forEach(disposeView);
+    _context.disposeRecorders();
     _context = EmbedderFrameContext();
     _currentCompositionParams.clear();
     _viewClipChains.clear();
@@ -758,14 +700,10 @@ class PlatformViewEmbedder {
     _activeCompositionOrder.clear();
     _compositionOrder.clear();
     for (final CompositionCanvas canvas in _activeComposition.canvases) {
-      if (canvas.displayCanvas != null) {
-        _disposeCanvas(canvas.displayCanvas!);
-      }
+      canvas.displayCanvas?.hostElement.remove();
     }
     _activeComposition = Composition();
-    if (debugBoundsCanvas != null) {
-      _disposeCanvas(debugBoundsCanvas!);
-    }
+    debugBoundsCanvas?.hostElement.remove();
     debugBoundsCanvas = null;
   }
 
@@ -773,6 +711,7 @@ class PlatformViewEmbedder {
   void debugClear() {
     dispose();
     rasterizer.removeOverlaysFromDom();
+    rasterizer.releaseOverlays();
   }
 }
 
@@ -949,6 +888,18 @@ class PlatformViewSceneElement extends SceneElement {
 
 /// The state for the current frame.
 class EmbedderFrameContext {
+  /// Ends recordings left open when preparation or canvas allocation is interrupted.
+  void disposeRecorders() {
+    optimizedCanvasRecorders?.forEach(_disposeRecording);
+    measuringPictureRecorders.values.forEach(_disposeRecording);
+  }
+
+  static void _disposeRecording(ui.PictureRecorder recorder) {
+    if (recorder.isRecording) {
+      recorder.endRecording().dispose();
+    }
+  }
+
   /// Picture recorders which were created to measure the final bounds of the
   /// picture in the scene.
   final Map<PictureLayer, LayerPictureRecorder> measuringPictureRecorders =
