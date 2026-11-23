@@ -114,8 +114,7 @@ SnapshotContext MakeSnapshotContextCurrent(
   // Some backends have a producer object but cannot create an offscreen
   // surface. Backends without a thread-local rendering context, such as
   // Vulkan, can construct the headless AiksContext directly.
-  result.aiks_context = delegate.GetAiksContext(
-      SnapshotController::Delegate::SnapshotSurfaceMode::kUseExisting);
+  result.aiks_context = delegate.CreateHeadlessAiksContext();
   return result;
 }
 

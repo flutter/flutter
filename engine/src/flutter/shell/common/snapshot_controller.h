@@ -28,14 +28,15 @@ class SnapshotController {
     virtual ~Delegate() = default;
     virtual const std::unique_ptr<Surface>& GetSurface() const = 0;
     virtual bool IsAiksContextInitialized() const = 0;
-    enum class SnapshotSurfaceMode { kCreateIfNeeded, kUseExisting };
 
-    /// Returns the surface's AiksContext, or creates a headless context on
-    /// backends that support one. A caller that already tried the snapshot
-    /// surface producer passes kUseExisting to avoid trying it again.
-    virtual std::shared_ptr<impeller::AiksContext> GetAiksContext(
-        SnapshotSurfaceMode mode =
-            SnapshotSurfaceMode::kCreateIfNeeded) const = 0;
+    /// Gets an AiksContext, creating a snapshot surface if necessary.
+    virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
+
+    /// Creates an AiksContext without a surface. Returns nullptr when the
+    /// Impeller context is missing or the backend needs a current context.
+    virtual std::shared_ptr<impeller::AiksContext> CreateHeadlessAiksContext()
+        const = 0;
+
     virtual const std::unique_ptr<SnapshotSurfaceProducer>&
     GetSnapshotSurfaceProducer() const = 0;
     virtual std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch()

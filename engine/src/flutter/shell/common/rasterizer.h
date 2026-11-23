@@ -716,27 +716,28 @@ class Rasterizer final : public SnapshotDelegate,
 #endif
   }
 
-  // |SnapshotDelegate|
+  // |SnapshotDelegate| and |SnapshotController::Delegate|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
-    return GetAiksContext(SnapshotSurfaceMode::kCreateIfNeeded);
-  }
-
-  // |SnapshotController::Delegate|
-  std::shared_ptr<impeller::AiksContext> GetAiksContext(
-      SnapshotSurfaceMode mode) const override {
 #if IMPELLER_SUPPORTS_RENDERING
     if (surface_) {
       return surface_->GetAiksContext();
     }
     // On OpenGL ES the producer makes an offscreen context current before
     // constructing the surface's AiksContext.
-    if (mode == SnapshotSurfaceMode::kCreateIfNeeded &&
-        snapshot_surface_producer_) {
+    if (snapshot_surface_producer_) {
       if (std::unique_ptr<Surface> snapshot_surface =
               snapshot_surface_producer_->CreateSnapshotSurface()) {
         return snapshot_surface->GetAiksContext();
       }
     }
+#endif
+    return CreateHeadlessAiksContext();
+  }
+
+  // |SnapshotController::Delegate|
+  std::shared_ptr<impeller::AiksContext> CreateHeadlessAiksContext()
+      const override {
+#if IMPELLER_SUPPORTS_RENDERING
     auto context =
         impeller_context_ ? impeller_context_->GetContext() : nullptr;
     if (!context || context->GetBackendType() ==

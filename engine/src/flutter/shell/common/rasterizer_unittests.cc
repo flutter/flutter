@@ -184,6 +184,7 @@ TEST(RasterizerTest, GetAiksContextWithoutImpellerContextReturnsNull) {
   auto& snapshot_delegate =
       static_cast<SnapshotController::Delegate&>(rasterizer);
   EXPECT_EQ(snapshot_delegate.GetAiksContext(), nullptr);
+  EXPECT_EQ(snapshot_delegate.CreateHeadlessAiksContext(), nullptr);
 }
 
 TEST(RasterizerTest, NotifyLowMemoryWarningClearsImpellerCache) {
