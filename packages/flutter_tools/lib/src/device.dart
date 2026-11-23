@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
 import 'package:meta/meta.dart';
 
@@ -1125,14 +1126,8 @@ class DebuggingOptions {
   final List<PlatformDebuggingOptions> platformOptions;
 
   /// Returns the first entry in [platformOptions] of type [T], or `null` if none is present.
-  T? platformOption<T extends PlatformDebuggingOptions>() {
-    for (final PlatformDebuggingOptions options in platformOptions) {
-      if (options is T) {
-        return options;
-      }
-    }
-    return null;
-  }
+  T? platformOption<T extends PlatformDebuggingOptions>() =>
+      platformOptions.whereType<T>().firstOrNull;
 
   final ImpellerStatus enableImpeller;
   final bool enableFlutterGpu;

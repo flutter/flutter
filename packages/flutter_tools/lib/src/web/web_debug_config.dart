@@ -44,9 +44,7 @@ class WebDebugConfig implements PlatformDebuggingOptions {
     enableExpressionEvaluation: json[_kWebEnableExpressionEvaluationKey] as bool? ?? false,
     launchUrl: json[_kWebLaunchUrlKey] as String?,
     crossOriginIsolation: json[_kWebCrossOriginIsolationKey] as bool?,
-    renderer: json[_kWebRendererKey] is String
-        ? WebRendererMode.values.byName(json[_kWebRendererKey]! as String)
-        : null,
+    renderer: WebRendererMode.values.asNameMap()[json[_kWebRendererKey]],
     useWasm: json[_kWebUseWasmKey] as bool? ?? false,
     nativeNullAssertions: json[_kNativeNullAssertionsKey] as bool? ?? false,
     webDefines:
@@ -85,11 +83,7 @@ class WebDebugConfig implements PlatformDebuggingOptions {
   static const _kNativeNullAssertionsKey = 'nativeNullAssertions';
   static const _kWebDefinesKey = 'webDefines';
 
-  static const _kJsonKeys = <String>{
-    _kPortKey,
-    _kHostnameKey,
-    _kTlsCertPathKey,
-    _kTlsCertKeyPathKey,
+  static const _kWebJsonKeys = <String>{
     _kWebEnableExposeUrlKey,
     _kWebUseSseForDebugProxyKey,
     _kWebUseSseForDebugBackendKey,
@@ -110,7 +104,7 @@ class WebDebugConfig implements PlatformDebuggingOptions {
   /// Parses a [WebDebugConfig] from a serialized [DebuggingOptions] JSON map,
   /// returning `null` when no web configuration keys are present.
   static WebDebugConfig? tryFromJson(Map<String, Object?> json) {
-    if (!_kJsonKeys.any(json.containsKey)) {
+    if (!_kWebJsonKeys.any(json.containsKey)) {
       return null;
     }
     return WebDebugConfig.fromJson(json);
