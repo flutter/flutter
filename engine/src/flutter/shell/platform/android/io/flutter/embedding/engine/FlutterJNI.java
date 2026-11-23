@@ -352,6 +352,11 @@ public class FlutterJNI {
    * Queues {@code runnable} behind the messages already pending on the main looper when called on
    * the main thread. Otherwise, or if it cannot be queued, runs it immediately, so that it always
    * runs exactly once.
+   *
+   * <p>The message must be a regular synchronous one. While a view traversal is pending, {@code
+   * ViewRootImpl} holds synchronous messages back behind a sync barrier, which is what lets the
+   * traversal run before {@code runnable}. An asynchronous handler would bypass that barrier, so do
+   * not use one here.
    */
   @VisibleForTesting
   static void postToMainLooperOrRun(@NonNull Runnable runnable) {

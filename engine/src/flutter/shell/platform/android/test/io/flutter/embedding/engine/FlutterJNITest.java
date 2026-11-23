@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.os.Looper;
+import android.os.MessageQueue;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
@@ -34,6 +35,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.util.HandlerCompat;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +47,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
+import org.robolectric.util.ReflectionHelpers.ClassParameter;
 
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
@@ -421,6 +424,30 @@ public class FlutterJNITest {
 
     // The runnable ran on the calling thread, without waiting for the main looper.
     assertEquals(thread, ranOnThread.get());
+  }
+
+  @Test
+  public void postToMainLooperOrRun_isHeldBehindSyncBarrier() {
+    List<String> order = new ArrayList<>();
+    MessageQueue queue = Looper.getMainLooper().getQueue();
+    // ViewRootImpl posts a sync barrier like this one while a view traversal is pending.
+    int barrierToken = ReflectionHelpers.callInstanceMethod(queue, "postSyncBarrier");
+    try {
+      // An asynchronous message is not held back by the barrier.
+      HandlerCompat.createAsyncHandler(Looper.getMainLooper()).post(() -> order.add("async"));
+      FlutterJNI.postToMainLooperOrRun(() -> order.add("deferred"));
+
+      shadowMainLooper().idle();
+
+      assertEquals(Arrays.asList("async"), order);
+    } finally {
+      ReflectionHelpers.callInstanceMethod(
+          queue, "removeSyncBarrier", ClassParameter.from(int.class, barrierToken));
+    }
+
+    shadowMainLooper().idle();
+
+    assertEquals(Arrays.asList("async", "deferred"), order);
   }
 
   static class FlutterJNITester extends FlutterJNI {
