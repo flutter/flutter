@@ -106,9 +106,6 @@ import java.util.List;
         public void onFlutterUiDisplayed() {
           isFlutterUiDisplayed = true;
           isFirstFrameRendered = true;
-          if (flutterView != null && activePreDrawListener != null) {
-            flutterView.invalidate();
-          }
           host.onFlutterUiDisplayed();
         }
 

@@ -150,6 +150,13 @@ class PlatformViewAndroid final : public PlatformView {
   // outlive this object.
   const std::shared_ptr<std::atomic<uint64_t>> surface_generation_ =
       std::make_shared<std::atomic<uint64_t>>(0);
+  // Set on the platform thread each time the first frame has been rendered into
+  // a new surface, and cleared by this engine's vsync waiter when its next
+  // vsync callback arrives or when the surface is destroyed. Shared with the
+  // waiter because the shell, not this object, owns it. See
+  // |VsyncWaiterAndroid|.
+  const std::shared_ptr<std::atomic<bool>> yield_next_vsync_ =
+      std::make_shared<std::atomic<bool>>(false);
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|

@@ -345,11 +345,23 @@ public class FlutterJNI {
   // Called by native to yield one vsync to Android's ViewRootImpl traversal after the first frame.
   @SuppressWarnings("unused")
   private static void postVsyncToMainLooper(final long callbackPtr) {
-    if (Looper.myLooper() == Looper.getMainLooper()) {
-      new Handler(Looper.getMainLooper()).post(() -> nativeRunDeferredVsync(callbackPtr));
-    } else {
-      nativeRunDeferredVsync(callbackPtr);
+    postToMainLooperOrRun(() -> nativeRunDeferredVsync(callbackPtr));
+  }
+
+  /**
+   * Queues {@code runnable} behind the messages already pending on the main looper when called on
+   * the main thread. Otherwise, or if it cannot be queued, runs it immediately, so that it always
+   * runs exactly once.
+   */
+  @VisibleForTesting
+  static void postToMainLooperOrRun(@NonNull Runnable runnable) {
+    final Looper mainLooper = Looper.getMainLooper();
+    if (mainLooper != null
+        && Looper.myLooper() == mainLooper
+        && new Handler(mainLooper).post(runnable)) {
+      return;
     }
+    runnable.run();
   }
 
   /**

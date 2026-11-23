@@ -21,7 +21,8 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 static jmethodID g_post_vsync_to_main_looper_method_ = nullptr;
 static std::atomic_uint g_refresh_rate_ = 60;
-static std::atomic<bool> g_yield_after_first_frame_{false};
+
+namespace {
 
 struct DeferredVsyncCallback {
   std::weak_ptr<VsyncWaiter>* weak_this;
@@ -29,8 +30,15 @@ struct DeferredVsyncCallback {
   fml::TimePoint frame_target_time;
 };
 
-VsyncWaiterAndroid::VsyncWaiterAndroid(const flutter::TaskRunners& task_runners)
-    : VsyncWaiter(task_runners) {}
+}  // namespace
+
+VsyncWaiterAndroid::VsyncWaiterAndroid(
+    const flutter::TaskRunners& task_runners,
+    std::shared_ptr<std::atomic<bool>> yield_next_vsync)
+    : VsyncWaiter(task_runners),
+      yield_next_vsync_(std::move(yield_next_vsync)) {
+  FML_DCHECK(yield_next_vsync_);
+}
 
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
@@ -70,11 +78,6 @@ void VsyncWaiterAndroid::AwaitVSync() {
 }
 
 // static
-void VsyncWaiterAndroid::YieldNextVsyncForFirstWindowDraw() {
-  g_yield_after_first_frame_.store(true, std::memory_order_release);
-}
-
-// static
 void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
   auto frame_time = fml::TimePoint::FromEpochDelta(
       fml::TimeDelta::FromNanoseconds(frame_nanos));
@@ -91,17 +94,43 @@ void VsyncWaiterAndroid::OnVsyncFromNDK(int64_t frame_nanos, void* data) {
                    target_time.ToEpochDelta().ToMicroseconds());
 
   auto* weak_this = reinterpret_cast<std::weak_ptr<VsyncWaiter>*>(data);
-  if (g_yield_after_first_frame_.exchange(false, std::memory_order_acq_rel) &&
-      g_post_vsync_to_main_looper_method_ != nullptr) {
+  if (ShouldYieldVsync(*weak_this)) {
+    // Hand the callback to Java to post as a main-looper message. A task
+    // posted to the platform task runner would not work here: it is delivered
+    // from a native looper callback, which is not held back by the sync barrier
+    // that ViewRootImpl sets while a traversal is pending, so it would still
+    // run ahead of that traversal.
     auto* deferred =
         new DeferredVsyncCallback{weak_this, frame_time, target_time};
     JNIEnv* env = fml::jni::AttachCurrentThread();
     env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),
                               g_post_vsync_to_main_looper_method_,
                               reinterpret_cast<jlong>(deferred));
+    FML_CHECK(fml::jni::CheckException(env));
     return;
   }
   ConsumePendingCallback(weak_this, frame_time, target_time);
+}
+
+// static
+bool VsyncWaiterAndroid::ShouldYieldVsync(
+    const std::weak_ptr<VsyncWaiter>& weak_waiter) {
+  if (g_post_vsync_to_main_looper_method_ == nullptr) {
+    return false;
+  }
+  auto waiter = weak_waiter.lock();
+  if (!waiter) {
+    return false;
+  }
+  // Only VsyncWaiterAndroid::AwaitVSync creates these weak pointers.
+  auto* android_waiter = static_cast<VsyncWaiterAndroid*>(waiter.get());
+  const bool yield_requested = android_waiter->yield_next_vsync_->exchange(
+      false, std::memory_order_acq_rel);
+  // Yielding only helps when this callback runs on the platform thread, where
+  // it would otherwise delay the Android view traversal.
+  return yield_requested &&
+         android_waiter->task_runners_.GetPlatformTaskRunner()
+             ->RunsTasksOnCurrentThread();
 }
 
 // static

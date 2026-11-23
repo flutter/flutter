@@ -7,6 +7,7 @@
 
 #include <jni.h>
 
+#include <atomic>
 #include <memory>
 
 #include "flutter/fml/macros.h"
@@ -20,12 +21,15 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
  public:
   static bool Register(JNIEnv* env);
 
-  // Defers the next NDK AChoreographer vsync callback via a synchronous
-  // main-looper Handler message so Android's ViewRootImpl first-frame traversal
-  // can run ahead of Frame 2.
-  static void YieldNextVsyncForFirstWindowDraw();
-
-  explicit VsyncWaiterAndroid(const flutter::TaskRunners& task_runners);
+  // |yield_next_vsync| is shared with the PlatformViewAndroid of the same
+  // engine, which sets it each time that engine renders the first frame into a
+  // new surface. When this waiter's next NDK AChoreographer vsync callback
+  // arrives it clears the flag and, if the callback is running on the platform
+  // thread, delivers it through a main-looper message instead of directly, so
+  // that a pending Android ViewRootImpl traversal (such as the first window
+  // draw) can run ahead of Flutter's next frame.
+  VsyncWaiterAndroid(const flutter::TaskRunners& task_runners,
+                     std::shared_ptr<std::atomic<bool>> yield_next_vsync);
 
   ~VsyncWaiterAndroid() override;
 
@@ -34,6 +38,12 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
   void AwaitVSync() override;
 
   static void OnVsyncFromNDK(int64_t frame_nanos, void* data);
+
+  // Returns whether the vsync callback of |weak_waiter| should be delivered
+  // through a main-looper message rather than directly. Always clears the
+  // waiter's yield flag, so this returns true at most once each time the flag
+  // is set.
+  static bool ShouldYieldVsync(const std::weak_ptr<VsyncWaiter>& weak_waiter);
 
   static void OnVsyncFromJava(JNIEnv* env,
                               jclass jcaller,
@@ -50,6 +60,8 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
                                   jfloat refresh_rate);
 
   static void RunDeferredVsync(JNIEnv* env, jclass jcaller, jlong callback_ptr);
+
+  const std::shared_ptr<std::atomic<bool>> yield_next_vsync_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterAndroid);
 };

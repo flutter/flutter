@@ -4,8 +4,6 @@
 
 #include "flutter/shell/platform/android/platform_view_android.h"
 
-#include "flutter/shell/platform/android/vsync_waiter_android.h"
-
 #include <android/api-level.h>
 #include <sys/system_properties.h>
 #include <memory>
@@ -245,6 +243,8 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
 
 void PlatformViewAndroid::NotifyDestroyed() {
   ++*surface_generation_;
+  // There is no longer a first window draw to yield a vsync to.
+  yield_next_vsync_->store(false, std::memory_order_release);
   PlatformView::NotifyDestroyed();
 
   if (android_surface_) {
@@ -454,7 +454,7 @@ void PlatformViewAndroid::RegisterImageTexture(
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {
-  return std::make_unique<VsyncWaiterAndroid>(task_runners_);
+  return std::make_unique<VsyncWaiterAndroid>(task_runners_, yield_next_vsync_);
 }
 
 // |PlatformView|
@@ -596,7 +596,7 @@ void PlatformViewAndroid::InstallFirstFrameCallback() {
 }
 
 void PlatformViewAndroid::FireFirstFrameCallback() {
-  VsyncWaiterAndroid::YieldNextVsyncForFirstWindowDraw();
+  yield_next_vsync_->store(true, std::memory_order_release);
   jni_facade_->FlutterViewOnFirstFrame();
 }
 

@@ -21,7 +21,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +33,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.view.View;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.window.BackEvent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -1537,19 +1537,22 @@ public class FlutterActivityAndFragmentDelegateTest {
   }
 
   @Test
-  public void itMarksFlutterUiDisplayedBeforeNotifyingHostAndInvalidatesDelayedView() {
+  public void itMarksFlutterUiDisplayedBeforeNotifyingHost() {
     FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
     delegate.onAttach(ctx);
     delegate.onCreateView(null, null, null, 0, /*shouldDelayFirstAndroidViewDraw=*/ true);
 
-    assertNotNull(delegate.activePreDrawListener);
-    FlutterView spyFlutterView = spy(delegate.flutterView);
-    delegate.flutterView = spyFlutterView;
+    final OnPreDrawListener preDrawListener = delegate.activePreDrawListener;
+    assertNotNull(preDrawListener);
+    // The first Android view draw is held back until Flutter has displayed a frame.
+    assertFalse(preDrawListener.onPreDraw());
 
+    // A host that triggers a draw pass from its callback must already see the first draw as
+    // allowed.
     final boolean[] preDrawAllowedDuringHostCallback = {false};
     doAnswer(
             invocation -> {
-              preDrawAllowedDuringHostCallback[0] = delegate.activePreDrawListener.onPreDraw();
+              preDrawAllowedDuringHostCallback[0] = preDrawListener.onPreDraw();
               return null;
             })
         .when(mockHost)
@@ -1562,29 +1565,9 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     listenerCaptor.getValue().onFlutterUiDisplayed();
 
-    assertTrue(preDrawAllowedDuringHostCallback[0]);
-    verify(spyFlutterView, times(1)).invalidate();
-  }
-
-  @Test
-  public void itDoesNotInvalidateWhenFirstDrawIsNotDelayed() {
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
-    delegate.onAttach(ctx);
-    delegate.onCreateView(null, null, null, 0, /*shouldDelayFirstAndroidViewDraw=*/ false);
-
-    assertNull(delegate.activePreDrawListener);
-    FlutterView spyFlutterView = spy(delegate.flutterView);
-    delegate.flutterView = spyFlutterView;
-
-    ArgumentCaptor<FlutterUiDisplayListener> listenerCaptor =
-        ArgumentCaptor.forClass(FlutterUiDisplayListener.class);
-    verify(mockFlutterEngine.getRenderer(), times(1))
-        .addIsDisplayingFlutterUiListener(listenerCaptor.capture());
-
-    listenerCaptor.getValue().onFlutterUiDisplayed();
-
     verify(mockHost, times(1)).onFlutterUiDisplayed();
-    verify(spyFlutterView, never()).invalidate();
+    assertTrue(preDrawAllowedDuringHostCallback[0]);
+    assertNull(delegate.activePreDrawListener);
   }
 
   @Test
