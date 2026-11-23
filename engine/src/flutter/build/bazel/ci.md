@@ -152,13 +152,17 @@ Steps 2 and 4 are scripts of this repository; step 3 runs whatever
   the recipe's process cleanup does not know the detached JVM, which would
   otherwise idle for hours into the bot's next task. A bot's sandboxes go
   to `/dev/shm` when it has 16 GB or more there (`--sandbox_base`): a bot's
-  disk is a network one with a low metadata rate, and the symlink forests
-  the sandboxes lay -- and the stash Bazel keeps of them -- made removing
-  an output root a matter of 20 minutes and more (the recipe's clobber of
-  the checkout on the first presubmit runs, swarming's cleanup of the task
-  directory since; the 85-minute `ci/wasm_release` build then overran its
-  orchestrator, which cocoon gives master's 120-minute timeout, not the
-  PR's 240).
+  disk is a network one with a low metadata rate. With the sandboxes on it
+  `ci/wasm_release`, whose 12,374 actions all ran on the 32-core bot, took
+  85 minutes; with them in `/dev/shm` the same build took 12.0 and 12.6
+  (GN's takes 8 to 10 there). And the symlink forests the sandboxes lay --
+  and the stash Bazel keeps of them -- made removing an output root a
+  matter of 20 minutes and more: 80 for the recipe's clobber of the builder
+  cache in the second presubmit run, when Bazel's files still lived there
+  (the web engine's orchestrator, which cocoon gives master's 120-minute
+  timeout, not the PR's 240, ran out during the build that followed), and
+  22 between the recipe's last step and the task's end after the 85-minute
+  build, where the next run, its sandboxes in `/dev/shm`, had 9 seconds.
 - **The install runs once per build.** The edge has no inputs ninja could
   compare, so `tools/gn --bazel` removes the previous run's
   `bazel_install.stamp` when it writes the directory; a second `ninja` in the
@@ -459,8 +463,9 @@ the test for real, and so does the command from `engine/src`.
   builds say 240. The first presubmit run (PR #195825, 8-core try bots,
   cold): `ci/host_release` 5 minutes, the desktop and Android builds 24–27,
   `ci/host_debug` 40, `ci/wasm_release` past 60 (36,000 of 39,000 actions
-  on a 32-core bot when the default timeout cut it). Disk: an output root
-  of a test build is tens of gigabytes.
+  on a 32-core bot when the default timeout cut it; its sandboxes were on
+  the bot's disk then, and the build takes 12 minutes since they are not:
+  above). Disk: an output root of a test build is tens of gigabytes.
 - A Mac bot's compiles on the same workers (519, 520; Q40 option B). The
   Mac engine builders on Bazel compiled on the bots themselves
   (mac_host_engine 44–67 minutes against GN+reclient's 34; mac_ios_engine
