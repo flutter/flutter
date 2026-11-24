@@ -30,6 +30,9 @@ struct wl_egl_window {
 
 static MockWayland* mock = nullptr;
 
+// The most recently created wl_callback, so tests can send its done event.
+static MockProxy* last_callback = nullptr;
+
 // Registries that have been created and are waiting to be sent the globals.
 static std::vector<MockProxy*>* pending_registries = nullptr;
 
@@ -88,6 +91,22 @@ void flutter::testing::fl_mock_wayland_free_surface(
   delete reinterpret_cast<MockProxy*>(surface);
 }
 
+struct wl_callback* flutter::testing::fl_mock_wayland_get_last_callback() {
+  return reinterpret_cast<struct wl_callback*>(last_callback);
+}
+
+void flutter::testing::fl_mock_wayland_send_callback_done(
+    struct wl_callback* callback,
+    uint32_t callback_data) {
+  MockProxy* proxy = reinterpret_cast<MockProxy*>(callback);
+  if (proxy == nullptr || proxy->listener == nullptr) {
+    return;
+  }
+  const struct wl_callback_listener* listener =
+      reinterpret_cast<const struct wl_callback_listener*>(proxy->listener);
+  listener->done(proxy->listener_data, callback, callback_data);
+}
+
 extern "C" {
 
 // Creates the object a request that has a "new_id" argument returns.
@@ -103,6 +122,9 @@ static struct wl_proxy* marshal_constructor(
   }
 
   MockProxy* new_proxy = proxy_new(interface, version);
+  if (interface == &wl_callback_interface) {
+    last_callback = new_proxy;
+  }
   if (mock != nullptr) {
     mock->CreateObject(interface->name);
   }

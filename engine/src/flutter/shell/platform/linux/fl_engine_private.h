@@ -259,6 +259,34 @@ void fl_engine_set_platform_message_handler(
 void fl_engine_schedule_frame(FlEngine* engine);
 
 /**
+ * fl_engine_add_presentation_sample:
+ * @engine: an #FlEngine.
+ * @latency_us: time from commit to the compositor's next repaint, in
+ * microseconds.
+ *
+ * Reports frame timing for a committed frame. The engine uses it to adjust the
+ * phase of the frame grid. Must be called on the GTK thread.
+ */
+void fl_engine_add_presentation_sample(FlEngine* engine, gint64 latency_us);
+
+/**
+ * fl_engine_reset_presentation_phase:
+ * @engine: an #FlEngine.
+ *
+ * Forgets the learned presentation phase. Used when the surface is hidden or
+ * recreated, or when the display refresh rate changes.
+ */
+void fl_engine_reset_presentation_phase(FlEngine* engine);
+
+/**
+ * fl_engine_get_presentation_phase:
+ * @engine: an #FlEngine.
+ *
+ * Gets the current frame grid phase in microseconds. Intended for tests.
+ */
+gint64 fl_engine_get_presentation_phase(FlEngine* engine);
+
+/**
  * fl_engine_send_window_metrics_event:
  * @engine: an #FlEngine.
  * @display_id: the display this view is rendering on.

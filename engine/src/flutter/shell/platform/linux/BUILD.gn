@@ -4,6 +4,7 @@
 
 assert(is_linux)
 
+import("//build/config/sysroot.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/symbols/check_forbidden_native_symbols.gni")
@@ -98,6 +99,8 @@ source_set("flutter_linux_sources") {
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
              "fl_pointer_manager.h",
+             "fl_presentation_phase.h",
+             "fl_presentation_tracker.h",
              "fl_task_runner.h",
              "fl_view_monitor.h",
              "fl_view_private.h",
@@ -158,6 +161,8 @@ source_set("flutter_linux_sources") {
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_pointer_manager.cc",
+    "fl_presentation_phase.cc",
+    "fl_presentation_tracker.cc",
     "fl_renderable.cc",
     "fl_scrolling_manager.cc",
     "fl_settings.cc",
@@ -272,6 +277,8 @@ executable("flutter_linux_unittests") {
     "fl_platform_handler_test.cc",
     "fl_plugin_registrar_test.cc",
     "fl_pointer_manager_test.cc",
+    "fl_presentation_phase_test.cc",
+    "fl_presentation_tracker_test.cc",
     "fl_scrolling_manager_test.cc",
     "fl_settings_handler_test.cc",
     "fl_settings_portal_test.cc",

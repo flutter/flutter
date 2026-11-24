@@ -10,6 +10,7 @@
 
 #include "flutter/shell/platform/linux/fl_gl_fence.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
+#include "flutter/shell/platform/linux/fl_presentation_tracker.h"
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 
 G_BEGIN_DECLS
@@ -63,6 +64,17 @@ FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
 void fl_subsurface_egl_resize(FlSubsurfaceEGL* egl,
                               size_t width,
                               size_t height);
+
+/**
+ * fl_subsurface_egl_set_presentation_tracker:
+ * @egl: an #FlSubsurfaceEGL.
+ * @tracker: (allow-none): an #FlPresentationTracker or %NULL.
+ *
+ * Sets the tracker used to request presentation feedback for the commit made
+ * when a frame is presented.
+ */
+void fl_subsurface_egl_set_presentation_tracker(FlSubsurfaceEGL* egl,
+                                                FlPresentationTracker* tracker);
 
 /**
  * fl_subsurface_egl_present:
