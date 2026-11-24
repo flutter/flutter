@@ -272,6 +272,33 @@ extern bool InternalFlutterGpu_Context_GetSupportsTextureArrays(
   return wrapper->GetContext().GetCapabilities()->SupportsTextureArrays();
 }
 
+extern uint32_t InternalFlutterGpu_Context_GetMaximumTextureSize(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  const impeller::ISize size =
+      context.GetResourceAllocator()->GetMaxTextureSizeSupported();
+  switch (dimension) {
+    case 0:
+      return static_cast<uint32_t>(size.width);
+    case 1:
+      return static_cast<uint32_t>(size.height);
+    default:
+      return 0u;
+  }
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumTextureArrayLayers(
+    flutter::gpu::Context* wrapper) {
+  // Report no layers where Flutter GPU cannot create array textures (see
+  // InternalFlutterGpu_Context_GetSupportsTextureArrays).
+  if (!InternalFlutterGpu_Context_GetSupportsTextureArrays(wrapper)) {
+    return 0u;
+  }
+  const impeller::Context& context = wrapper->GetContext();
+  return context.GetCapabilities()->GetMaximumTextureArrayLayers();
+}
+
 extern int InternalFlutterGpu_Context_GetMaxSamplerAnisotropy(
     flutter::gpu::Context* wrapper) {
   return wrapper->GetContext().GetCapabilities()->GetMaxSamplerAnisotropy();

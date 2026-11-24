@@ -180,6 +180,11 @@ class Capabilities {
   ///        are clamped to it.
   virtual uint32_t GetMaxSamplerAnisotropy() const = 0;
 
+  /// @brief The largest `array_layer_count` of a 2D array texture, or 0 when
+  ///        `SupportsTextureArrays` is false. Vulkan and OpenGL ES 3.0 only
+  ///        guarantee 256 layers; Metal supports 2048.
+  virtual uint32_t GetMaximumTextureArrayLayers() const = 0;
+
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
 

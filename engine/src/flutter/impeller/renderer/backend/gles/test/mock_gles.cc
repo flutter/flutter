@@ -112,6 +112,10 @@ void mockGetIntegerv(GLenum name, int* value) {
     case GL_MAX_TEXTURE_SIZE:
       *value = 4096;
       break;
+    case GL_MAX_ARRAY_TEXTURE_LAYERS:
+      // The OpenGL ES 3.0 minimum.
+      *value = 256;
+      break;
     default:
       CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
       break;

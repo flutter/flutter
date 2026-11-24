@@ -562,6 +562,10 @@ bool CapabilitiesVK::SupportsTextureArrays() const {
   return true;
 }
 
+uint32_t CapabilitiesVK::GetMaximumTextureArrayLayers() const {
+  return device_properties_.limits.maxImageArrayLayers;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
