@@ -304,8 +304,20 @@ extern bool InternalFlutterGpu_Context_SupportsTextureFormat(
     return wrapper->GetContext().GetCapabilities()->SupportsTextureCompression(
         impeller::CompressedTextureFamilyForFormat(impeller_format));
   }
-  // For uncompressed formats, today's Impeller capability surface does not
-  // expose a per-format usage query, so this returns true. As that surface
-  // grows it should be wired in here.
+  // The 16-bit per channel formats are sample-only too, and each family is
+  // gated by its own capability.
+  if (impeller::IsNorm16(impeller_format) ||
+      impeller::IsSampleOnlyFloat16(impeller_format)) {
+    if (render_target || shader_write || !shader_read) {
+      return false;
+    }
+    const auto& capabilities = wrapper->GetContext().GetCapabilities();
+    return impeller::IsNorm16(impeller_format)
+               ? capabilities->SupportsNorm16Formats()
+               : capabilities->SupportsFloat16Formats();
+  }
+  // For the remaining uncompressed formats, today's Impeller capability
+  // surface does not expose a per-format usage query, so this returns true.
+  // As that surface grows it should be wired in here.
   return true;
 }

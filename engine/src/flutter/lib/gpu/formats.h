@@ -131,6 +131,14 @@ enum class FlutterGPUPixelFormat {
   // ASTC HDR has no sRGB variant; the data is already linear floating point.
   kASTC4x4HDR,
   kASTC8x8HDR,
+  // 16-bit per channel formats. Sample-only; support is per-family.
+  kR16Float,
+  kR16G16Float,
+  kR16UNormInt,
+  kR16SNormInt,
+  kR16G16UNormInt,
+  kR16G16SNormInt,
+  kR16G16B16A16UNormInt,
 };
 
 enum class FlutterGPUTextureCompressionFamily {
@@ -225,6 +233,20 @@ constexpr impeller::PixelFormat ToImpellerPixelFormat(
       return impeller::PixelFormat::kASTC4x4HDR;
     case FlutterGPUPixelFormat::kASTC8x8HDR:
       return impeller::PixelFormat::kASTC8x8HDR;
+    case FlutterGPUPixelFormat::kR16Float:
+      return impeller::PixelFormat::kR16Float;
+    case FlutterGPUPixelFormat::kR16G16Float:
+      return impeller::PixelFormat::kR16G16Float;
+    case FlutterGPUPixelFormat::kR16UNormInt:
+      return impeller::PixelFormat::kR16UNormInt;
+    case FlutterGPUPixelFormat::kR16SNormInt:
+      return impeller::PixelFormat::kR16SNormInt;
+    case FlutterGPUPixelFormat::kR16G16UNormInt:
+      return impeller::PixelFormat::kR16G16UNormInt;
+    case FlutterGPUPixelFormat::kR16G16SNormInt:
+      return impeller::PixelFormat::kR16G16SNormInt;
+    case FlutterGPUPixelFormat::kR16G16B16A16UNormInt:
+      return impeller::PixelFormat::kR16G16B16A16UNormInt;
   }
 }
 
@@ -302,15 +324,20 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
       return FlutterGPUPixelFormat::kASTC4x4HDR;
     case impeller::PixelFormat::kASTC8x8HDR:
       return FlutterGPUPixelFormat::kASTC8x8HDR;
-    // 16-bit per channel formats are not yet exposed by the Flutter GPU API.
     case impeller::PixelFormat::kR16Float:
+      return FlutterGPUPixelFormat::kR16Float;
     case impeller::PixelFormat::kR16G16Float:
+      return FlutterGPUPixelFormat::kR16G16Float;
     case impeller::PixelFormat::kR16UNormInt:
+      return FlutterGPUPixelFormat::kR16UNormInt;
     case impeller::PixelFormat::kR16SNormInt:
+      return FlutterGPUPixelFormat::kR16SNormInt;
     case impeller::PixelFormat::kR16G16UNormInt:
+      return FlutterGPUPixelFormat::kR16G16UNormInt;
     case impeller::PixelFormat::kR16G16SNormInt:
+      return FlutterGPUPixelFormat::kR16G16SNormInt;
     case impeller::PixelFormat::kR16G16B16A16UNormInt:
-      return FlutterGPUPixelFormat::kUnknown;
+      return FlutterGPUPixelFormat::kR16G16B16A16UNormInt;
   }
 }
 
