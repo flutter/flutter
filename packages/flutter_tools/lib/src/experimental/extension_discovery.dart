@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/json.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
@@ -129,6 +130,25 @@ class ExtensionConnection {
     return controller.stream;
   }
 
+  /// Registers a host-side JSON-RPC 2.0 request handler for [method] invoked by
+  /// the extension isolate.
+  void registerRequestHandler(String method, ExtensionRpcHandler handler) {
+    if (isDisposed) {
+      throw StateError('ExtensionConnection has been disposed.');
+    }
+    _peer.registerMethod(method, (json_rpc.Parameters params) async {
+      final Object? rawValue = params.value;
+      final Map<String, Object?> paramMap = rawValue is Map<String, Object?>
+          ? rawValue
+          : const <String, Object?>{};
+      try {
+        return await handler(paramMap);
+      } on ToolExtensionException catch (error) {
+        throw json_rpc.RpcException(error.code, error.message, data: error.data);
+      }
+    });
+  }
+
   /// Sends an RPC request to the extension isolate.
   Future<Object?> sendRequest(
     String method, {
@@ -145,8 +165,9 @@ class ExtensionConnection {
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
     } on json_rpc.RpcException catch (error) {
-      if (error.code == ToolExtensionException.domainErrorCode) {
-        throw ToolExtensionException(error.message);
+      if (tryParseToolExtensionRpcError(code: error.code, message: error.message, data: error.data)
+          case final ToolExtensionException translated) {
+        throw translated;
       }
       _logger.printTrace('ExtensionConnection RPC request "$method" failed with error: $error');
       rethrow;

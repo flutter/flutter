@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/experimental/config.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -456,18 +457,53 @@ void main() {
 
         await commandRunner.run(<String>['config', '--my-ext-feature', '--my-ext-option=my-value']);
 
-        expect(defaultConfig.getValue('my-ext-feature'), true);
-        expect(defaultConfig.getValue('my-ext-option'), 'my-value');
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-feature',
+            extensionName: 'My Extension',
+          ),
+          true,
+        );
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-option',
+            extensionName: 'My Extension',
+          ),
+          'my-value',
+        );
 
         // Test disabling flag
         await commandRunner.run(<String>['config', '--no-my-ext-feature']);
-        expect(defaultConfig.getValue('my-ext-feature'), false);
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-feature',
+            extensionName: 'My Extension',
+          ),
+          false,
+        );
 
         await commandRunner.run(<String>['config', '--clear-features']);
-        expect(defaultConfig.getValue('my-ext-feature'), null);
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-feature',
+            extensionName: 'My Extension',
+          ),
+          null,
+        );
 
         await commandRunner.run(<String>['config', '--my-ext-option=']);
-        expect(defaultConfig.getValue('my-ext-option'), null);
+        expect(
+          ExtensionConfiguration.lookupSettingValue(
+            defaultConfig,
+            'my-ext-option',
+            extensionName: 'My Extension',
+          ),
+          null,
+        );
       },
     );
 

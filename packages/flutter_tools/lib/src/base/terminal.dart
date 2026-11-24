@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import '../convert.dart';
 import '../features.dart';
 import 'io.dart' as io;
@@ -370,7 +372,10 @@ class AnsiTerminal implements Terminal {
   Future<String> readLine() {
     return (_broadcastStdInLines ??= _stdio.stdin
             .transform<String>(utf8AllowMalformedLineDecoder)
-            .asBroadcastStream())
+            .asBroadcastStream(
+              onListen: (StreamSubscription<String> subscription) => subscription.resume(),
+              onCancel: (StreamSubscription<String> subscription) => subscription.pause(),
+            ))
         .first;
   }
 

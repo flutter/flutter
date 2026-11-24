@@ -7,8 +7,11 @@ import 'dart:async';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:meta/meta.dart';
 
+import '../base/config.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
 import 'config.dart';
 import 'diagnostics.dart';
@@ -17,22 +20,25 @@ import 'extension_discovery.dart';
 
 /// Manages active tool extension isolate connections and exposes capability proxies.
 class ExtensionManager {
-  /// Creates an [ExtensionManager] targeting the active [hostPlatform].
+  /// Creates an [ExtensionManager] backed by [_toolContext].
   ExtensionManager({
     required this._featureFlags,
-    required this.hostPlatform,
-    required Logger logger,
-    this._entryPoints = const <ExtensionEntryPoint>[],
+    required this._toolContext,
     ExtensionDiscovery? discovery,
-  }) : _logger = logger,
-       _discovery = discovery ?? ExtensionDiscovery(logger: logger);
+    this._entryPoints = const <ExtensionEntryPoint>[],
+  }) : _discovery = discovery ?? ExtensionDiscovery(logger: _toolContext.logger),
+       _prompter = ExtensionTerminalPrompter(toolContext: _toolContext);
 
-  /// The active [HostPlatform].
-  final HostPlatform hostPlatform;
-  final Logger _logger;
+  final ToolContext _toolContext;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
+  final ExtensionTerminalPrompter _prompter;
+
+  /// The active [HostPlatform].
+  HostPlatform get hostPlatform => _toolContext.os.hostPlatform;
+
+  Logger get _logger => _toolContext.logger;
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;
   bool _isDisabled = false;
@@ -48,6 +54,12 @@ class ExtensionManager {
   void disable() {
     assert(_initFuture == null, 'disable() cannot be called after initialization has started.');
     _isDisabled = true;
+  }
+
+  /// Marks this CLI invocation as running in `--machine` mode so interactive
+  /// terminal prompt RPCs from extensions fail fast.
+  void enableMachineMode() {
+    _prompter.enableMachineMode();
   }
 
   /// Ensures entrypoints are initialized; idempotent.
@@ -130,6 +142,7 @@ class ExtensionManager {
         }
         _diagnosticsExtensions.add(client);
       }
+      ConfigurationExtensionClient? configClient;
       if (connection.capabilities.services.contains(ConfigurationExtension.serviceNamespace)) {
         final client = ConfigurationExtensionClient(connection, logger: _logger);
         await client.fetchTitle();
@@ -137,12 +150,43 @@ class ExtensionManager {
           return;
         }
         _configurationExtensions.add(client);
+        configClient = client;
       }
+      _registerHostRpcHandlers(connection, configClient: configClient);
       if (connection.capabilities.services.contains(DeviceService.serviceNamespace)) {
         _deviceExtensions.add(ExtensionDeviceClient(connection, logger: _logger));
       }
     }
     _isInitialized = true;
+  }
+
+  void _registerHostRpcHandlers(
+    ExtensionConnection connection, {
+    ConfigurationExtensionClient? configClient,
+  }) {
+    connection
+      ..registerRequestHandler(ToolExtensionService.getConfigurationValuesMethod, (
+        Map<String, Object?> _,
+      ) async {
+        if (configClient == null) {
+          return const <String, Object?>{};
+        }
+        final ToolContext(:Config config, :Platform platform) = _toolContext;
+        return ExtensionConfiguration.resolveConfigurationValues(
+          config: config,
+          environment: platform.environment,
+          extension: configClient,
+          extensionName: connection.extensionName,
+        );
+      })
+      ..registerRequestHandler(
+        ToolExtensionService.promptForOptionMethod,
+        _prompter.handlePromptForOption,
+      )
+      ..registerRequestHandler(
+        ToolExtensionService.promptForInputMethod,
+        _prompter.handlePromptForInput,
+      );
   }
 
   /// Active [DiagnosticsExtension] proxies for extensions supporting `'diagnostics'`.

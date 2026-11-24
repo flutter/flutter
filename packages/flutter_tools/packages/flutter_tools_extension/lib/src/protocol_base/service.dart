@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_core/json.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:meta/meta.dart';
 
 /// Typedef for an extension RPC handler function.
@@ -14,18 +16,60 @@ typedef ExtensionRpcHandler = FutureOr<Object?> Function(Map<String, Object?> pa
 /// service to the host tool.
 typedef ExtensionNotificationSender = void Function(String method, Map<String, Object?> params);
 
+typedef _ExtensionRequestSender = Future<Object?> Function(String method, [Object? parameters]);
+
 /// Represents a logical service exposed by a Flutter Tool Extension.
 ///
 /// Extension authors extend this class (via specific service base classes) to
 /// group related RPC endpoints under a specific [namespace] (e.g.
 /// `diagnostics`, `config`, `device`, `build`, `template`).
 abstract base class ToolExtensionService {
+  /// JSON-RPC method name invoked by extensions to query their resolved
+  /// configuration values from the host tool.
+  static const String getConfigurationValuesMethod = 'extension.getConfigurationValues';
+
+  /// JSON-RPC method name invoked by extensions to prompt the user to select
+  /// an option via the host terminal.
+  static const String promptForOptionMethod = 'terminal.promptForOption';
+
+  /// JSON-RPC method name invoked by extensions to prompt the user for text
+  /// input via the host terminal.
+  static const String promptForInputMethod = 'terminal.promptForInput';
+
+  /// JSON-RPC parameter key for the prompt message text.
+  static const String promptMessageParam = 'message';
+
+  /// JSON-RPC parameter key for the list of selectable option labels.
+  static const String promptOptionsParam = 'options';
+
+  /// JSON-RPC parameter key for the optional 0-based default option index.
+  static const String promptDefaultChoiceIndexParam = 'defaultChoiceIndex';
+
+  /// JSON-RPC parameter key for the optional default input value.
+  static const String promptDefaultValueParam = 'defaultValue';
+
+  /// JSON-RPC parameter key controlling whether terminal input is echoed.
+  static const String promptEchoParam = 'echo';
+
+  /// JSON-RPC response map key holding the 0-based selected option index (or `null`).
+  static const String promptSelectedIndexKey = 'selectedIndex';
+
+  /// JSON-RPC response map key holding the entered input string (or `null`).
+  static const String promptValueKey = 'value';
+
   /// Internal JSON-RPC notification sender callback used by [sendNotification].
   ///
   /// Wired by `ToolExtensionEntryPoint.run` before the extension peer begins
   /// listening for RPC requests.
   @internal
   ExtensionNotificationSender? notificationSender;
+
+  /// Internal JSON-RPC request sender callback used by [sendHostRequest].
+  ///
+  /// Wired by `ToolExtensionEntryPoint.run` to `peer.sendRequest` before the
+  /// extension peer begins listening for RPC requests.
+  @internal
+  _ExtensionRequestSender? requestSender;
 
   /// The namespace string of the service (e.g. `'diagnostics'`).
   String get namespace;
@@ -48,6 +92,113 @@ abstract base class ToolExtensionService {
       );
     }
     sender(method, params);
+  }
+
+  /// Sends a JSON-RPC 2.0 request to the host tool over the bidirectional
+  /// `Peer` and returns the decoded result payload.
+  ///
+  /// Throws a [StateError] if called before this service has been attached to
+  /// an active extension peer by `ToolExtensionEntryPoint.run`.
+  @protected
+  @nonVirtual
+  Future<Object?> sendHostRequest(String method, Map<String, Object?> params) async {
+    final _ExtensionRequestSender? sender = requestSender;
+    if (sender == null) {
+      throw StateError(
+        'Cannot send request "$method": service "$namespace" is not attached to an active peer.',
+      );
+    }
+    try {
+      return await sender(method, params);
+    } on json_rpc.RpcException catch (error) {
+      if (tryParseToolExtensionRpcError(code: error.code, message: error.message, data: error.data)
+          case final ToolExtensionException translated) {
+        throw translated;
+      }
+      rethrow;
+    }
+  }
+
+  /// Queries the host tool for the current persisted values of all configuration
+  /// keys owned by this extension.
+  ///
+  /// Only keys declared by this extension's `ConfigService` (`FeatureFlag.settingName`
+  /// mapped to `bool`, and `ConfigOption.name` and `ConfigAction.settingsKeys`
+  /// mapped to `String`, omitting unset keys) are returned. The host resolves
+  /// `environmentOverride` ahead of `"extensions"` settings in `flutter_settings`
+  /// and falls back to any `ConfigOption.aliases` and default values.
+  @nonVirtual
+  Future<Map<String, Object?>> getConfigurationValues() async {
+    final Object? rawResult = await sendHostRequest(
+      getConfigurationValuesMethod,
+      const <String, Object?>{},
+    );
+    if (rawResult case final Map<String, Object?> map) {
+      return map;
+    }
+    throw FormatException(
+      'Expected Map<String, Object?> from "$getConfigurationValuesMethod", got '
+      '${rawResult.runtimeType}.',
+      rawResult,
+    );
+  }
+
+  /// Prompts the user via the host tool's interactive terminal to choose one of
+  /// [options].
+  ///
+  /// Returns the selected 0-based index in [options], or `null` if the user
+  /// cancels the prompt.
+  ///
+  /// Throws a [ToolExtensionException] when the host tool is running without an
+  /// interactive terminal or in `--machine` mode.
+  @nonVirtual
+  Future<int?> promptForOption({
+    required String message,
+    required List<String> options,
+    int? defaultChoiceIndex,
+  }) async {
+    final Object? rawResult = await sendHostRequest(promptForOptionMethod, <String, Object?>{
+      promptMessageParam: message,
+      promptOptionsParam: options,
+      promptDefaultChoiceIndexParam: ?defaultChoiceIndex,
+    });
+    if (rawResult case {promptSelectedIndexKey: final int? selectedIndex}) {
+      return selectedIndex;
+    }
+    throw FormatException(
+      'Expected {"$promptSelectedIndexKey": int?} from "$promptForOptionMethod", got '
+      '${rawResult.runtimeType}.',
+      rawResult,
+    );
+  }
+
+  /// Prompts the user via the host tool's interactive terminal for free-form
+  /// text input.
+  ///
+  /// When [echo] is `false`, terminal character echoing is disabled while
+  /// reading the line (for example, when prompting for a passphrase or token).
+  ///
+  /// Throws a [ToolExtensionException] when the host tool is running without an
+  /// interactive terminal or in `--machine` mode.
+  @nonVirtual
+  Future<String?> promptForInput({
+    required String message,
+    String? defaultValue,
+    bool echo = true,
+  }) async {
+    final Object? rawResult = await sendHostRequest(promptForInputMethod, <String, Object?>{
+      promptMessageParam: message,
+      promptDefaultValueParam: ?defaultValue,
+      promptEchoParam: echo,
+    });
+    if (rawResult case {promptValueKey: final String? value}) {
+      return value;
+    }
+    throw FormatException(
+      'Expected {"$promptValueKey": String?} from "$promptForInputMethod", got '
+      '${rawResult.runtimeType}.',
+      rawResult,
+    );
   }
 
   /// Cleans up resources held by the service when the extension is shut down.

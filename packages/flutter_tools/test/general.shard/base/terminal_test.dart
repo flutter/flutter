@@ -241,6 +241,22 @@ void main() {
       expect(await terminalUnderTest.readLine(), '11');
     });
 
+    testWithoutContext(
+      'readLine pauses stdin between calls so buffered lines are not dropped',
+      () async {
+        final stdio = FakeStdio()
+          .._stdin = Stream<List<int>>.fromIterable(<List<int>>[
+            'first\nsecond\n'.codeUnits,
+            'third\n'.codeUnits,
+          ]);
+        terminalUnderTest = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());
+
+        expect(await terminalUnderTest.readLine(), 'first');
+        expect(await terminalUnderTest.readLine(), 'second');
+        expect(await terminalUnderTest.readLine(), 'third');
+      },
+    );
+
     testWithoutContext('Does not set single char mode when a terminal is not attached', () {
       final Stdio stdio = FakeStdio()..stdinHasTerminal = false;
       final ansiTerminal = AnsiTerminal(stdio: stdio, platform: const LocalPlatform());

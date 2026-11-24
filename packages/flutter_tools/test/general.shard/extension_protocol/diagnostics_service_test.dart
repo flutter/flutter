@@ -140,9 +140,8 @@ void main() {
     test('ExtensionDoctorValidator delegates to single extension in ExtensionManager', () async {
       final logger = BufferLogger.test();
       final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        toolContext: FakeToolContext(logger: logger),
       );
       await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
@@ -167,9 +166,8 @@ void main() {
       () async {
         final logger = BufferLogger.test();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
         );
         await manager.initialize(entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint]);
 
@@ -531,9 +529,8 @@ void main() {
       () async {
         final logger = BufferLogger.test();
         final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          toolContext: FakeToolContext(logger: logger),
         );
         addTearDown(manager.dispose);
         await manager.initialize(
