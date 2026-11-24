@@ -363,7 +363,8 @@ class ExtensionAssembleTarget {
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
   /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
-  /// files into their build directory and [Depfile.parse] to read them back.
+  /// files into their build directory. The host deletes any existing declared
+  /// depfiles from the build directory before invoking the target.
   ///
   /// Each entry must match [isValidDepfileName]. Because all targets write
   /// depfiles directly into the shared build directory, depfile names must be

@@ -147,8 +147,9 @@ abstract base class AssembleTarget {
   /// Names of `.d` dependency files written by this target into the build directory.
   ///
   /// Extensions that declare [depfiles] can use [Depfile.format] to write `.d`
-  /// files into [ExtensionAssembleContext.buildDir] and [Depfile.parse] to read
-  /// them back.
+  /// files into [ExtensionAssembleContext.buildDir]. The host deletes any
+  /// existing declared depfiles from [ExtensionAssembleContext.buildDir]
+  /// before invoking [build].
   ///
   /// Each entry must match [ExtensionAssembleTarget.isValidDepfileName].
   /// Because all targets write depfiles directly into the shared

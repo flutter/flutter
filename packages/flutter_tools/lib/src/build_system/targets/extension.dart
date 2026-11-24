@@ -141,6 +141,10 @@ class ExtensionTarget extends Target {
       target: assembleTarget,
     );
 
+    // Unlike built-in targets, extensions may not rewrite every declared
+    // depfile on a rebuild. Delete stale ones so the existence check below
+    // catches a missing depfile instead of reusing dependencies from a prior
+    // build.
     for (final String depfileName in depfiles) {
       ErrorHandlingFileSystem.deleteIfExists(buildDir.childFile(depfileName));
     }
