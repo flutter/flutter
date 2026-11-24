@@ -552,13 +552,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (isBorder) {
       return Paint()
         ..color = trackBorderColor.withValues(
-          alpha: trackBorderColor.opacity * fadeoutOpacityAnimation.value,
+          alpha: trackBorderColor.a * fadeoutOpacityAnimation.value,
         )
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
     }
     return Paint()
-      ..color = trackColor.withValues(alpha: trackColor.opacity * fadeoutOpacityAnimation.value);
+      ..color = trackColor.withValues(alpha: trackColor.a * fadeoutOpacityAnimation.value);
   }
 
   void _paintScrollbar(Canvas canvas, Size size) {
