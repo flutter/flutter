@@ -476,9 +476,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ByteData? data,
     ui.PlatformMessageResponseCallback? callback,
   ) {
-    // In widget tests (ignorePlatformMessages), outgoing platform messages are
-    // not processed by engine handlers and instead receive an asynchronous null
-    // reply.
     var ignorePlatformMessages = false;
     assert(() {
       ignorePlatformMessages = ui_web.TestEnvironment.instance.ignorePlatformMessages;
